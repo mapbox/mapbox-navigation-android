@@ -5,11 +5,6 @@ import com.mapbox.api.directions.v5.models.MapboxShield
 /**
  * Object that holds road components
  * @property text contains the current road name user is on, based on the [language] available.
- * In certain situations there can be [RoadComponent] that contain [text] as `/` separator.
- * The purpose of these separators is to separate the current road name in cases they have a primary
- * and secondary name. If you are using [MapboxRoadNameView], then these separators are used to
- * separate these names. However if you don't want to use them, you are can directly get access to
- * [RoadComponent] from [LocationMatcherResult] and filter the names without `/` separators.
  * @property language 2 letters language code or "Unspecified" or empty string
  * @property shield mapbox designed shield if available otherwise null
  * @property imageBaseUrl url for the route shield if available otherwise null
@@ -18,7 +13,7 @@ class RoadComponent internal constructor(
     val text: String,
     val language: String,
     val shield: MapboxShield? = null,
-    val imageBaseUrl: String? = null
+    val imageBaseUrl: String? = null,
 ) {
     /**
      * Indicates whether some other object is "equal to" this one.

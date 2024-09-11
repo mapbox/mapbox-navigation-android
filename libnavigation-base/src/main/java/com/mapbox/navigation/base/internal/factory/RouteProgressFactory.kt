@@ -74,7 +74,7 @@ object RouteProgressFactory {
         alternativeRouteId: String?,
         currentRouteGeometryIndex: Int,
         inParkingAisle: Boolean,
-        alternativeRoutesIndices: Map<String, RouteIndices>
+        alternativeRoutesIndices: Map<String, RouteIndices>,
     ): RouteProgress {
         return RouteProgress(
             navigationRoute = route,

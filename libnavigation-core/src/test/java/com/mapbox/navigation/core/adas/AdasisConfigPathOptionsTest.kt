@@ -4,7 +4,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.testing.BuilderTest
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class AdasisConfigPathOptionsTest :
+internal class AdasisConfigPathOptionsTest :
     BuilderTest<AdasisConfigPathOptions, AdasisConfigPathOptions.Builder>() {
 
     override fun getImplementationClass() = AdasisConfigPathOptions::class
@@ -17,16 +17,16 @@ class AdasisConfigPathOptionsTest :
 
         return AdasisConfigPathOptions.Builder()
             .stubOptions(
-                AdasisStubOptions.Builder().options(messageOptions).build()
+                AdasisStubOptions.Builder().options(messageOptions).build(),
             )
             .segmentOptions(
-                AdasisSegmentOptions.Builder().options(messageOptions).build()
+                AdasisSegmentOptions.Builder().options(messageOptions).build(),
             )
             .profileShortOptions(
-                AdasisProfileShortOptions.Builder().options(messageOptions).build()
+                AdasisProfileShortOptions.Builder().options(messageOptions).build(),
             )
             .profileLongOptions(
-                AdasisProfileLongOptions.Builder().options(messageOptions).build()
+                AdasisProfileLongOptions.Builder().options(messageOptions).build(),
             )
     }
 

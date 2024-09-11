@@ -39,7 +39,7 @@ object TimeFormatter {
         time: Calendar,
         routeDuration: Double,
         @TimeFormat.Type type: Int,
-        isDeviceTwentyFourHourFormat: Boolean
+        isDeviceTwentyFourHourFormat: Boolean,
     ): String {
         time.add(Calendar.SECOND, routeDuration.toInt())
         return formatTime(time, type, isDeviceTwentyFourHourFormat)
@@ -57,7 +57,7 @@ object TimeFormatter {
     fun formatTime(
         time: Calendar,
         @TimeFormat.Type type: Int,
-        isDeviceTwentyFourHourFormat: Boolean
+        isDeviceTwentyFourHourFormat: Boolean,
     ): String {
         val chain = TimeFormattingChain()
         return chain.setup(isDeviceTwentyFourHourFormat).obtainTimeFormatted(type, time)
@@ -74,7 +74,7 @@ object TimeFormatter {
     fun formatTimeRemaining(
         context: Context,
         routeDuration: Double,
-        locale: Locale?
+        locale: Locale?,
     ): SpannableStringBuilder {
         var seconds = routeDuration.toLong()
 
@@ -110,7 +110,7 @@ object TimeFormatter {
     private fun formatHours(
         resources: Resources,
         hours: Long,
-        textSpanItems: MutableList<SpanItem>
+        textSpanItems: MutableList<SpanItem>,
     ) {
         if (hours != 0L) {
             val hourString =
@@ -123,7 +123,7 @@ object TimeFormatter {
     private fun formatMinutes(
         resources: Resources,
         minutes: Long,
-        textSpanItems: MutableList<SpanItem>
+        textSpanItems: MutableList<SpanItem>,
     ) {
         if (minutes != 0L) {
             val minuteString =
@@ -138,7 +138,7 @@ object TimeFormatter {
         days: Long,
         hours: Long,
         minutes: Long,
-        textSpanItems: MutableList<SpanItem>
+        textSpanItems: MutableList<SpanItem>,
     ) {
         if (days == 0L && hours == 0L && minutes == 0L) {
             val minuteString =
@@ -167,7 +167,7 @@ object TimeFormatter {
         } else {
             Pair(
                 initialHoursValue,
-                minutes
+                minutes,
             )
         }
     }

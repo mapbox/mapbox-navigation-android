@@ -16,7 +16,6 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
  * @param infoFromFork information about the alternative route from the fork with the primary route, until the destination
  * @param infoFromStartOfPrimary summed up information about the alternative route by joining
  * the primary route's data until the deviation point with the alternative route's data from the deviation point
- * @param alternativeId is an id of alternative route. New alternative routes which matches tracking alternatives have the same alternativeId.
  */
 class AlternativeRouteMetadata internal constructor(
     val navigationRoute: NavigationRoute,
@@ -24,10 +23,6 @@ class AlternativeRouteMetadata internal constructor(
     val forkIntersectionOfPrimaryRoute: AlternativeRouteIntersection,
     val infoFromFork: AlternativeRouteInfo,
     val infoFromStartOfPrimary: AlternativeRouteInfo,
-    @Deprecated(
-        message = "This value can change on each route reset and shouldn't be used."
-    )
-    val alternativeId: Int,
 ) {
     /**
      * Indicates whether some other object is "equal to" this one.
@@ -45,7 +40,6 @@ class AlternativeRouteMetadata internal constructor(
         if (forkIntersectionOfPrimaryRoute != other.forkIntersectionOfPrimaryRoute) return false
         if (infoFromFork != other.infoFromFork) return false
         if (infoFromStartOfPrimary != other.infoFromStartOfPrimary) return false
-        if (alternativeId != other.alternativeId) return false
 
         return true
     }
@@ -59,7 +53,6 @@ class AlternativeRouteMetadata internal constructor(
         result = 31 * result + forkIntersectionOfPrimaryRoute.hashCode()
         result = 31 * result + infoFromFork.hashCode()
         result = 31 * result + infoFromStartOfPrimary.hashCode()
-        result = 31 * result + alternativeId.hashCode()
         return result
     }
 
@@ -72,8 +65,7 @@ class AlternativeRouteMetadata internal constructor(
             "forkIntersectionOfAlternativeRoute=$forkIntersectionOfAlternativeRoute, " +
             "forkIntersectionOfPrimaryRoute=$forkIntersectionOfPrimaryRoute, " +
             "infoFromFork=$infoFromFork, " +
-            "infoFromStartOfPrimary=$infoFromStartOfPrimary, " +
-            "alternativeId=$alternativeId" +
+            "infoFromStartOfPrimary=$infoFromStartOfPrimary" +
             ")"
     }
 }

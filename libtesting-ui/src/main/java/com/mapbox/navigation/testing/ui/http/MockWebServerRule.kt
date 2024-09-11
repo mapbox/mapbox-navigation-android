@@ -98,7 +98,7 @@ class MockWebServerRule : TestWatcher() {
     }
 
     private suspend fun retryStarting(port: Int): Boolean {
-        return withTimeoutOrNull(30_000) {
+        return withTimeoutOrNull(5_000) {
             while (true) {
                 try {
                     webServer = MockWebServer()

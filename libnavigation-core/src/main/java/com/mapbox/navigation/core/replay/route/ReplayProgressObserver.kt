@@ -23,7 +23,7 @@ class ReplayProgressObserver @JvmOverloads constructor(
      * replay history player to be played.
      */
     private val mapboxReplayer: MapboxReplayer,
-    private val replayRouteMapper: ReplayRouteMapper = ReplayRouteMapper()
+    private val replayRouteMapper: ReplayRouteMapper = ReplayRouteMapper(),
 ) : RouteProgressObserver {
 
     private var currentLegIdentifier: RouteLegIdentifier? = null
@@ -83,7 +83,7 @@ class ReplayProgressObserver @JvmOverloads constructor(
                     currentDistance += TurfMeasurement.distance(
                         point,
                         currentPoint,
-                        TurfConstants.UNIT_METERS
+                        TurfConstants.UNIT_METERS,
                     )
                 }
                 lastPoint = currentPoint
@@ -99,7 +99,7 @@ class ReplayProgressObserver @JvmOverloads constructor(
 
 private data class RouteLegIdentifier(
     val routeId: String,
-    val legIndex: Int
+    val legIndex: Int,
 )
 
 private fun RouteProgress.getCurrentRouteLegIdentifier(): RouteLegIdentifier? {

@@ -4,15 +4,18 @@ import android.graphics.Bitmap
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.common.MapboxServices
 import com.mapbox.common.ResourceLoadError
 import com.mapbox.common.ResourceLoadResult
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory
+import com.mapbox.navigation.base.internal.utils.MapboxOptionsUtil
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStop
 import com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStopType
 import com.mapbox.navigation.base.trip.model.roadobject.tollcollection.TollCollection
 import com.mapbox.navigation.base.trip.model.roadobject.tollcollection.TollCollectionType
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.testing.toDataRef
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.guidance.restarea.RestAreaAction
 import com.mapbox.navigation.ui.maps.guidance.restarea.RestAreaProcessor
@@ -24,11 +27,14 @@ import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadCallback
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoader
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoaderFactory
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkObject
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
@@ -44,7 +50,7 @@ import org.robolectric.RobolectricTestRunner
 class MapboxRestAreaApiTest {
 
     @get:Rule
-    var coroutineRule = MainCoroutineRule()
+    val coroutineRule = MainCoroutineRule()
 
     private val consumer:
         MapboxNavigationConsumer<Expected<RestAreaGuideMapError, RestAreaGuideMapValue>> =
@@ -70,24 +76,27 @@ class MapboxRestAreaApiTest {
     fun setUp() {
         mockkObject(RestAreaProcessor)
         mockkObject(ResourceLoaderFactory)
+        mockkStatic(MapboxOptionsUtil::class)
+        every { MapboxOptionsUtil.getTokenForService(MapboxServices.DIRECTIONS) } returns "pk.1234"
 
         mockResourceLoader = mockk(relaxed = true)
         every { ResourceLoaderFactory.getInstance() } returns mockResourceLoader
 
-        sapaApi = MapboxRestAreaApi("pk.1234")
+        sapaApi = MapboxRestAreaApi()
     }
 
     @After
     fun tearDown() {
         unmockkObject(RestAreaProcessor)
         unmockkObject(ResourceLoaderFactory)
+        unmockkStatic(MapboxOptionsUtil::class)
     }
 
     @Test
     fun `process banner instruction guide map unavailable`() {
         every {
             RestAreaProcessor.process(
-                RestAreaAction.CheckRestAreaMapAvailability(bannerInstructions)
+                RestAreaAction.CheckRestAreaMapAvailability(bannerInstructions),
             )
         } returns RestAreaResult.RestAreaMapUnavailable
         val messageSlot = slot<Expected<RestAreaGuideMapError, RestAreaGuideMapValue>>()
@@ -97,7 +106,7 @@ class MapboxRestAreaApiTest {
         verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
         assertEquals(
             "No service/parking area guide map available.",
-            messageSlot.captured.error!!.message
+            messageSlot.captured.error!!.message,
         )
     }
 
@@ -105,14 +114,14 @@ class MapboxRestAreaApiTest {
     fun `process rest stop guide map unavailable`() {
         every {
             RestAreaProcessor.process(
-                RestAreaAction.CheckUpcomingRestStop(routeProgress)
+                RestAreaAction.CheckUpcomingRestStop(routeProgress),
             )
         } returns RestAreaResult.RestAreaMapUnavailable
         every { routeProgress.upcomingRoadObjects } returns listOf(
             RoadObjectFactory.buildUpcomingRoadObject(
                 roadObject = tollBooth,
                 distanceToStart = null,
-                distanceInfo = null
+                distanceInfo = null,
             ),
         )
         val messageSlot = slot<Expected<RestAreaGuideMapError, RestAreaGuideMapValue>>()
@@ -122,7 +131,7 @@ class MapboxRestAreaApiTest {
         verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
         assertEquals(
             "No service/parking area guide map available.",
-            messageSlot.captured.error!!.message
+            messageSlot.captured.error!!.message,
         )
     }
 
@@ -130,14 +139,14 @@ class MapboxRestAreaApiTest {
     fun `process rest stop guide map unavailable when distanceToStart is null`() {
         every {
             RestAreaProcessor.process(
-                RestAreaAction.CheckUpcomingRestStop(routeProgress)
+                RestAreaAction.CheckUpcomingRestStop(routeProgress),
             )
         } returns RestAreaResult.RestAreaMapUnavailable
         every { routeProgress.upcomingRoadObjects } returns listOf(
             RoadObjectFactory.buildUpcomingRoadObject(
                 roadObject = restStop1,
                 distanceToStart = null,
-                distanceInfo = null
+                distanceInfo = null,
             ),
         )
         val messageSlot = slot<Expected<RestAreaGuideMapError, RestAreaGuideMapValue>>()
@@ -147,7 +156,7 @@ class MapboxRestAreaApiTest {
         verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
         assertEquals(
             "No service/parking area guide map available.",
-            messageSlot.captured.error!!.message
+            messageSlot.captured.error!!.message,
         )
     }
 
@@ -155,14 +164,14 @@ class MapboxRestAreaApiTest {
     fun `process rest stop guide map unavailable when distanceToStart is less than zero`() {
         every {
             RestAreaProcessor.process(
-                RestAreaAction.CheckUpcomingRestStop(routeProgress)
+                RestAreaAction.CheckUpcomingRestStop(routeProgress),
             )
         } returns RestAreaResult.RestAreaMapUnavailable
         every { routeProgress.upcomingRoadObjects } returns listOf(
             RoadObjectFactory.buildUpcomingRoadObject(
                 roadObject = restStop1,
                 distanceToStart = -1.0,
-                distanceInfo = null
+                distanceInfo = null,
             ),
         )
         val messageSlot = slot<Expected<RestAreaGuideMapError, RestAreaGuideMapValue>>()
@@ -172,7 +181,7 @@ class MapboxRestAreaApiTest {
         verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
         assertEquals(
             "No service/parking area guide map available.",
-            messageSlot.captured.error!!.message
+            messageSlot.captured.error!!.message,
         )
     }
 
@@ -188,7 +197,7 @@ class MapboxRestAreaApiTest {
         verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
         assertEquals(
             "Inappropriate $mockResult emitted for $mockAction.",
-            messageSlot.captured.error!!.message
+            messageSlot.captured.error!!.message,
         )
     }
 
@@ -204,7 +213,7 @@ class MapboxRestAreaApiTest {
         verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
         assertEquals(
             "Inappropriate $mockResult emitted for $mockAction.",
-            messageSlot.captured.error!!.message
+            messageSlot.captured.error!!.message,
         )
     }
 
@@ -217,12 +226,12 @@ class MapboxRestAreaApiTest {
 
         givenResourceLoaderResponse(
             request = loadRequest,
-            response = loadResponse
+            response = loadResponse,
         )
         givenProcessorResults(
             checkSapaAvailability = RestAreaResult.RestAreaMapAvailable(url),
             prepareSapaMapRequest = RestAreaResult.RestAreaMapRequest(loadRequest),
-            processSapaMapResponse = RestAreaResult.RestAreaMapSvg.Empty
+            processSapaMapResponse = RestAreaResult.RestAreaMapSvg.Empty,
         )
 
         sapaApi.generateRestAreaGuideMap(bannerInstructions, consumer)
@@ -239,7 +248,7 @@ class MapboxRestAreaApiTest {
             RoadObjectFactory.buildUpcomingRoadObject(
                 roadObject = restStop1,
                 distanceToStart = 1.0,
-                distanceInfo = null
+                distanceInfo = null,
             ),
         )
         val expectedError = "No service/parking area guide map available."
@@ -249,12 +258,12 @@ class MapboxRestAreaApiTest {
 
         givenResourceLoaderResponse(
             request = loadRequest,
-            response = loadResponse
+            response = loadResponse,
         )
         givenProcessorResults(
             checkSapaAvailability = RestAreaResult.RestAreaMapAvailable(url),
             prepareSapaMapRequest = RestAreaResult.RestAreaMapRequest(loadRequest),
-            processSapaMapResponse = RestAreaResult.RestAreaMapSvg.Empty
+            processSapaMapResponse = RestAreaResult.RestAreaMapSvg.Empty,
         )
 
         sapaApi.generateUpcomingRestAreaGuideMap(routeProgress, consumer)
@@ -276,12 +285,12 @@ class MapboxRestAreaApiTest {
 
         givenResourceLoaderResponse(
             request = loadRequest,
-            response = loadResponse
+            response = loadResponse,
         )
         givenProcessorResults(
             checkSapaAvailability = RestAreaResult.RestAreaMapAvailable(url),
             prepareSapaMapRequest = RestAreaResult.RestAreaMapRequest(loadRequest),
-            processSapaMapResponse = svgResult
+            processSapaMapResponse = svgResult,
         )
 
         sapaApi.generateRestAreaGuideMap(bannerInstructions, consumer)
@@ -298,7 +307,7 @@ class MapboxRestAreaApiTest {
             RoadObjectFactory.buildUpcomingRoadObject(
                 roadObject = restStop1,
                 distanceToStart = 1.0,
-                distanceInfo = null
+                distanceInfo = null,
             ),
         )
         val expectedError = "Resource is missing"
@@ -311,12 +320,12 @@ class MapboxRestAreaApiTest {
 
         givenResourceLoaderResponse(
             request = loadRequest,
-            response = loadResponse
+            response = loadResponse,
         )
         givenProcessorResults(
             checkSapaAvailability = RestAreaResult.RestAreaMapAvailable(url),
             prepareSapaMapRequest = RestAreaResult.RestAreaMapRequest(loadRequest),
-            processSapaMapResponse = svgResult
+            processSapaMapResponse = svgResult,
         )
 
         sapaApi.generateRestAreaGuideMap(bannerInstructions, consumer)
@@ -332,18 +341,18 @@ class MapboxRestAreaApiTest {
         val url = "https//abc.mapbox.com"
         val loadRequest = mockk<ResourceLoadRequest>()
         val loadResponse = mockk<Expected<ResourceLoadError, ResourceLoadResult>>()
-        val svgData = byteArrayOf()
+        val svgData = byteArrayOf().toDataRef()
         val parserFailure = ExpectedFactory.createError<String, Bitmap>(expectedError)
 
         givenResourceLoaderResponse(
             request = loadRequest,
-            response = loadResponse
+            response = loadResponse,
         )
         givenProcessorResults(
             checkSapaAvailability = RestAreaResult.RestAreaMapAvailable(url),
             prepareSapaMapRequest = RestAreaResult.RestAreaMapRequest(loadRequest),
             processSapaMapResponse = RestAreaResult.RestAreaMapSvg.Success(svgData),
-            parseSvgToBitmap = RestAreaResult.RestAreaBitmap.Failure(parserFailure.error!!, null)
+            parseSvgToBitmap = RestAreaResult.RestAreaBitmap.Failure(parserFailure.error!!, null),
         )
 
         sapaApi.generateRestAreaGuideMap(bannerInstructions, consumer)
@@ -351,6 +360,24 @@ class MapboxRestAreaApiTest {
         val messageSlot = slot<Expected<RestAreaGuideMapError, RestAreaGuideMapValue>>()
         verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
         assertEquals(expectedError, messageSlot.captured.error!!.message)
+        clearAllMocks(answers = false)
+
+        // use new token
+        val newToken = "new.token"
+        givenProcessorResults(
+            checkSapaAvailability = RestAreaResult.RestAreaMapAvailable(url),
+            prepareSapaMapRequest = RestAreaResult.RestAreaMapRequest(loadRequest),
+            processSapaMapResponse = RestAreaResult.RestAreaMapSvg.Success(svgData),
+            parseSvgToBitmap = RestAreaResult.RestAreaBitmap.Failure(parserFailure.error!!, null),
+            token = newToken,
+        )
+
+        every { MapboxOptionsUtil.getTokenForService(MapboxServices.DIRECTIONS) } returns newToken
+        sapaApi.generateRestAreaGuideMap(bannerInstructions, consumer)
+
+        val messageSlot2 = slot<Expected<RestAreaGuideMapError, RestAreaGuideMapValue>>()
+        verify(exactly = 1) { consumer.accept(capture(messageSlot2)) }
+        assertEquals(expectedError, messageSlot2.captured.error!!.message)
     }
 
     @Test
@@ -360,25 +387,25 @@ class MapboxRestAreaApiTest {
             RoadObjectFactory.buildUpcomingRoadObject(
                 roadObject = restStop1,
                 distanceToStart = 1.0,
-                distanceInfo = null
+                distanceInfo = null,
             ),
         )
         val expectedError = "This is an error"
         val url = "https//abc.mapbox.com"
         val loadRequest = mockk<ResourceLoadRequest>()
         val loadResponse = mockk<Expected<ResourceLoadError, ResourceLoadResult>>()
-        val svgData = byteArrayOf()
+        val svgData = byteArrayOf().toDataRef()
         val parserFailure = ExpectedFactory.createError<String, Bitmap>(expectedError)
 
         givenResourceLoaderResponse(
             request = loadRequest,
-            response = loadResponse
+            response = loadResponse,
         )
         givenProcessorResults(
             checkSapaAvailability = RestAreaResult.RestAreaMapAvailable(url),
             prepareSapaMapRequest = RestAreaResult.RestAreaMapRequest(loadRequest),
             processSapaMapResponse = RestAreaResult.RestAreaMapSvg.Success(svgData),
-            parseSvgToBitmap = RestAreaResult.RestAreaBitmap.Failure(parserFailure.error!!, null)
+            parseSvgToBitmap = RestAreaResult.RestAreaBitmap.Failure(parserFailure.error!!, null),
         )
 
         sapaApi.generateUpcomingRestAreaGuideMap(routeProgress, consumer)
@@ -395,18 +422,18 @@ class MapboxRestAreaApiTest {
         val url = "https//abc.mapbox.com"
         val loadRequest = mockk<ResourceLoadRequest>()
         val loadResponse = mockk<Expected<ResourceLoadError, ResourceLoadResult>>()
-        val svgData = byteArrayOf(-12, 12, 34, 55, -45)
+        val svgData = byteArrayOf(-12, 12, 34, 55, -45).toDataRef()
         val parserSuccess = ExpectedFactory.createValue<String, Bitmap>(expectedBitmap)
 
         givenResourceLoaderResponse(
             request = loadRequest,
-            response = loadResponse
+            response = loadResponse,
         )
         givenProcessorResults(
             checkSapaAvailability = RestAreaResult.RestAreaMapAvailable(url),
             prepareSapaMapRequest = RestAreaResult.RestAreaMapRequest(loadRequest),
             processSapaMapResponse = RestAreaResult.RestAreaMapSvg.Success(svgData),
-            parseSvgToBitmap = RestAreaResult.RestAreaBitmap.Success(parserSuccess.value!!)
+            parseSvgToBitmap = RestAreaResult.RestAreaBitmap.Success(parserSuccess.value!!),
         )
         every { SvgUtil.renderAsBitmapWithWidth(any(), any(), any()) } returns parserSuccess.value!!
 
@@ -425,7 +452,7 @@ class MapboxRestAreaApiTest {
             RoadObjectFactory.buildUpcomingRoadObject(
                 roadObject = restStop1,
                 distanceToStart = 1.0,
-                distanceInfo = null
+                distanceInfo = null,
             ),
         )
         mockkObject(SvgUtil)
@@ -433,18 +460,18 @@ class MapboxRestAreaApiTest {
         val url = "https//abc.mapbox.com"
         val loadRequest = mockk<ResourceLoadRequest>()
         val loadResponse = mockk<Expected<ResourceLoadError, ResourceLoadResult>>()
-        val svgData = byteArrayOf(-12, 12, 34, 55, -45)
+        val svgData = byteArrayOf(-12, 12, 34, 55, -45).toDataRef()
         val parserSuccess = ExpectedFactory.createValue<String, Bitmap>(expectedBitmap)
 
         givenResourceLoaderResponse(
             request = loadRequest,
-            response = loadResponse
+            response = loadResponse,
         )
         givenProcessorResults(
             checkSapaAvailability = RestAreaResult.RestAreaMapAvailable(url),
             prepareSapaMapRequest = RestAreaResult.RestAreaMapRequest(loadRequest),
             processSapaMapResponse = RestAreaResult.RestAreaMapSvg.Success(svgData),
-            parseSvgToBitmap = RestAreaResult.RestAreaBitmap.Success(parserSuccess.value!!)
+            parseSvgToBitmap = RestAreaResult.RestAreaBitmap.Success(parserSuccess.value!!),
         )
         every { SvgUtil.renderAsBitmapWithWidth(any(), any(), any()) } returns parserSuccess.value!!
 
@@ -458,7 +485,7 @@ class MapboxRestAreaApiTest {
 
     private fun givenResourceLoaderResponse(
         request: ResourceLoadRequest,
-        response: Expected<ResourceLoadError, ResourceLoadResult>
+        response: Expected<ResourceLoadError, ResourceLoadResult>,
     ) {
         val loadCallbackSlot = slot<ResourceLoadCallback>()
         every { mockResourceLoader.load(request, capture(loadCallbackSlot)) } answers {
@@ -471,23 +498,29 @@ class MapboxRestAreaApiTest {
         checkSapaAvailability: RestAreaResult,
         prepareSapaMapRequest: RestAreaResult? = null,
         processSapaMapResponse: RestAreaResult? = null,
-        parseSvgToBitmap: RestAreaResult? = null
+        parseSvgToBitmap: RestAreaResult? = null,
+        token: String = "pk.1234",
     ) {
         every {
             RestAreaProcessor.process(
-                RestAreaAction.CheckRestAreaMapAvailability(bannerInstructions)
+                RestAreaAction.CheckRestAreaMapAvailability(bannerInstructions),
             )
         } returns checkSapaAvailability
 
         every {
             RestAreaProcessor.process(
-                RestAreaAction.CheckUpcomingRestStop(routeProgress)
+                RestAreaAction.CheckUpcomingRestStop(routeProgress),
             )
         } returns checkSapaAvailability
 
         if (prepareSapaMapRequest != null) {
             every {
-                RestAreaProcessor.process(ofType(RestAreaAction.PrepareRestAreaMapRequest::class))
+                RestAreaProcessor.process(
+                    match {
+                        it is RestAreaAction.PrepareRestAreaMapRequest &&
+                            it.sapaMapUrl.contains("access_token=$token")
+                    },
+                )
             } returns prepareSapaMapRequest
         }
 

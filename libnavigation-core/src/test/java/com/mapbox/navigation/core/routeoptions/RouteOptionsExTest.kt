@@ -27,7 +27,7 @@ class RouteOptionsExTest {
     @Test
     fun `RouteOptions isEVRoute no engine`() {
         val options = createRouteOptions(
-            unrecognizedProperties = mapOf("aaa" to JsonPrimitive("bbb"))
+            unrecognizedProperties = mapOf("aaa" to JsonPrimitive("bbb")),
         )
 
         assertFalse(options.isEVRoute())
@@ -36,7 +36,7 @@ class RouteOptionsExTest {
     @Test
     fun `RouteOptions isEVRoute non-string engine`() {
         val options = createRouteOptions(
-            unrecognizedProperties = mapOf("engine" to JsonObject())
+            unrecognizedProperties = mapOf("engine" to JsonObject()),
         )
 
         assertFalse(options.isEVRoute())
@@ -45,7 +45,7 @@ class RouteOptionsExTest {
     @Test
     fun `RouteOptions isEVRoute non-electric engine`() {
         val options = createRouteOptions(
-            unrecognizedProperties = mapOf("engine" to JsonPrimitive("non-electric"))
+            unrecognizedProperties = mapOf("engine" to JsonPrimitive("non-electric")),
         )
 
         assertFalse(options.isEVRoute())
@@ -54,7 +54,7 @@ class RouteOptionsExTest {
     @Test
     fun `RouteOptions isEVRoute electric engine`() {
         val options = createRouteOptions(
-            unrecognizedProperties = mapOf("engine" to JsonPrimitive("electric"))
+            unrecognizedProperties = mapOf("engine" to JsonPrimitive("electric")),
         )
 
         assertTrue(options.isEVRoute())

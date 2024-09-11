@@ -5,7 +5,8 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.MapboxMap
-import com.mapbox.maps.QueriedFeature
+import com.mapbox.maps.QueriedRenderedFeature
+import com.mapbox.maps.RenderedQueryGeometry
 import com.mapbox.maps.RenderedQueryOptions
 import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.ScreenCoordinate
@@ -15,7 +16,7 @@ import kotlin.coroutines.suspendCoroutine
 internal object CompositeClosestRouteHandlerProvider {
 
     fun createHandler(
-        handlers: List<ClosestRouteHandler>
+        handlers: List<ClosestRouteHandler>,
     ): CompositeClosestRouteHandler {
         return CompositeClosestRouteHandler(handlers)
     }
@@ -26,18 +27,18 @@ internal interface ClosestRouteHandler {
     suspend fun handle(
         map: MapboxMap,
         clickPoint: ScreenCoordinate,
-        features: List<FeatureCollection>
+        features: List<FeatureCollection>,
     ): Expected<Unit, Int>
 }
 
 internal class CompositeClosestRouteHandler(
-    private val handlers: List<ClosestRouteHandler>
+    private val handlers: List<ClosestRouteHandler>,
 ) : ClosestRouteHandler {
 
     override suspend fun handle(
         map: MapboxMap,
         clickPoint: ScreenCoordinate,
-        features: List<FeatureCollection>
+        features: List<FeatureCollection>,
     ): Expected<Unit, Int> {
         for (handler in handlers) {
             val handlerResult = handler.handle(map, clickPoint, features)
@@ -51,18 +52,18 @@ internal class CompositeClosestRouteHandler(
 
 internal class SinglePointClosestRouteHandler(
     @get:VisibleForTesting
-    internal val layerIds: List<String>
+    internal val layerIds: List<String>,
 ) : ClosestRouteHandler {
 
     override suspend fun handle(
         map: MapboxMap,
         clickPoint: ScreenCoordinate,
-        features: List<FeatureCollection>
+        features: List<FeatureCollection>,
     ): Expected<Unit, Int> {
         return suspendCoroutine { continuation ->
             map.queryRenderedFeatures(
-                clickPoint,
-                RenderedQueryOptions(layerIds, null)
+                RenderedQueryGeometry(clickPoint),
+                RenderedQueryOptions(layerIds, null),
             ) {
                 val result = ClosestRouteUtils.getIndexOfFirstFeature(it.value.orEmpty(), features)
                 continuation.resume(result)
@@ -81,7 +82,7 @@ internal class RectClosestRouteHandler(
     override suspend fun handle(
         map: MapboxMap,
         clickPoint: ScreenCoordinate,
-        features: List<FeatureCollection>
+        features: List<FeatureCollection>,
     ): Expected<Unit, Int> {
         val leftFloat = (clickPoint.x - padding)
         val rightFloat = (clickPoint.x + padding)
@@ -89,12 +90,12 @@ internal class RectClosestRouteHandler(
         val bottomFloat = (clickPoint.y + padding)
         val clickRect = ScreenBox(
             ScreenCoordinate(leftFloat, topFloat),
-            ScreenCoordinate(rightFloat, bottomFloat)
+            ScreenCoordinate(rightFloat, bottomFloat),
         )
         return suspendCoroutine { continuation ->
             map.queryRenderedFeatures(
-                clickRect,
-                RenderedQueryOptions(layerIds, null)
+                RenderedQueryGeometry(clickRect),
+                RenderedQueryOptions(layerIds, null),
             ) {
                 val result = ClosestRouteUtils.getIndexOfFirstFeature(it.value.orEmpty(), features)
                 continuation.resume(result)
@@ -106,10 +107,10 @@ internal class RectClosestRouteHandler(
 internal object ClosestRouteUtils {
 
     fun getIndexOfFirstFeature(
-        features: List<QueriedFeature>,
-        routeFeatures: List<FeatureCollection>
+        features: List<QueriedRenderedFeature>,
+        routeFeatures: List<FeatureCollection>,
     ): Expected<Unit, Int> {
-        val firstFeatureId = features.firstOrNull()?.feature?.id()
+        val firstFeatureId = features.firstOrNull()?.queriedFeature?.feature?.id()
         if (firstFeatureId == null) {
             return ExpectedFactory.createError(Unit)
         }

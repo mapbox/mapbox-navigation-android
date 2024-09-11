@@ -5,13 +5,15 @@ import android.content.Context
 import androidx.annotation.UiThread
 import com.mapbox.android.gestures.AndroidGesturesManager
 import com.mapbox.android.gestures.MoveGestureDetector
+import com.mapbox.android.gestures.RotateGestureDetector
+import com.mapbox.common.Cancelable
 import com.mapbox.geojson.Point
+import com.mapbox.maps.CameraChangedCallback
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.plugin.animation.CameraAnimationsLifecycleListener
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.CameraAnimatorType
 import com.mapbox.maps.plugin.animation.MapAnimationOwnerRegistry
-import com.mapbox.maps.plugin.delegates.listeners.OnCameraChangeListener
 import com.mapbox.maps.plugin.gestures.GesturesPlugin
 import com.mapbox.maps.plugin.gestures.OnMoveListener
 import com.mapbox.maps.plugin.gestures.generated.GesturesSettings
@@ -83,7 +85,7 @@ class NavigationScaleGestureHandler(
     private val locationPlugin: LocationComponentPlugin,
     private val scaleActionListener: NavigationScaleGestureActionListener? = null,
     private val options: NavigationScaleGestureHandlerOptions =
-        NavigationScaleGestureHandlerOptions.Builder(context).build()
+        NavigationScaleGestureHandlerOptions.Builder(context).build(),
 ) : CameraAnimationsLifecycleListener {
 
     /**
@@ -96,12 +98,12 @@ class NavigationScaleGestureHandler(
         private set
 
     /**
-     * Called when animator is about to start.
+     * Called when animator is about to cancel.
      */
     override fun onAnimatorCancelling(
         type: CameraAnimatorType,
         animator: ValueAnimator,
-        owner: String?
+        owner: String?,
     ) {
         // no impl
     }
@@ -112,7 +114,7 @@ class NavigationScaleGestureHandler(
     override fun onAnimatorEnding(
         type: CameraAnimatorType,
         animator: ValueAnimator,
-        owner: String?
+        owner: String?,
     ) {
         // no impl
     }
@@ -125,18 +127,18 @@ class NavigationScaleGestureHandler(
         runningAnimator: ValueAnimator,
         runningAnimatorOwner: String?,
         newAnimator: ValueAnimator,
-        newAnimatorOwner: String?
+        newAnimatorOwner: String?,
     ) {
         // no impl
     }
 
     /**
-     * Called when [ValueAnimator] is about to cancel.
+     * Called when [ValueAnimator] is about to start.
      */
     override fun onAnimatorStarting(
         type: CameraAnimatorType,
         animator: ValueAnimator,
-        owner: String?
+        owner: String?,
     ) {
         if (!isInitialized) {
             return
@@ -149,10 +151,13 @@ class NavigationScaleGestureHandler(
                 when (type) {
                     CameraAnimatorType.ZOOM ->
                         scaleActionListener?.onNavigationScaleGestureAction()
+
                     CameraAnimatorType.ANCHOR -> {
                         // do nothing
                     } // todo why is anchor called?
-                    else -> navigationCamera.requestNavigationCameraToIdle()
+                    else -> {
+                        navigationCamera.requestNavigationCameraToIdle()
+                    }
                 }
             }
         }
@@ -168,10 +173,17 @@ class NavigationScaleGestureHandler(
      */
     val customGesturesManager: AndroidGesturesManager =
         NavigationCameraLifecycleProvider.getCustomGesturesManager(
-            context
+            context,
         ) { gesturesManager ->
-            adjustGesturesThresholds(gesturesManager.moveGestureDetector)
+            adjustGesturesThresholds(
+                gesturesManager.moveGestureDetector,
+                gesturesManager.rotateGestureDetector,
+            )
         }
+
+    // reused when camera is not in following state
+    private val notFollowingRotationAngleThreshold =
+        initialGesturesManager.rotateGestureDetector.angleThreshold
 
     private var puckScreenPosition: Point? = null
 
@@ -243,26 +255,34 @@ class NavigationScaleGestureHandler(
     }
 
     private val onIndicatorPositionChangedListener =
-        OnIndicatorPositionChangedListener {
-                point ->
+        OnIndicatorPositionChangedListener { point ->
             puckScreenPosition = point.also { adjustFocalPoint(it) }
         }
 
-    private val onCameraChangedListener = OnCameraChangeListener {
+    private val onCameraChangedCallback = CameraChangedCallback {
         puckScreenPosition?.let { adjustFocalPoint(it) }
     }
+    private var cameraChangedSubscription: Cancelable? = null
 
-    private val navigationCameraStateChangedObserver =
-        NavigationCameraStateChangedObserver {
-            adjustGesturesThresholds(customGesturesManager.moveGestureDetector)
-        }
+    private val navigationCameraStateChangedObserver = NavigationCameraStateChangedObserver {
+        adjustGesturesThresholds(
+            customGesturesManager.moveGestureDetector,
+            customGesturesManager.rotateGestureDetector,
+        )
+    }
 
-    private fun adjustGesturesThresholds(moveGestureDetector: MoveGestureDetector) {
+    private fun adjustGesturesThresholds(
+        moveGestureDetector: MoveGestureDetector,
+        rotateGestureDetector: RotateGestureDetector,
+    ) {
         if (navigationCamera.state == NavigationCameraState.FOLLOWING) {
             moveGestureDetector.moveThreshold = options.followingInitialMoveThreshold
+            rotateGestureDetector.angleThreshold = options.followingRotationAngleThreshold
         } else {
             moveGestureDetector.moveThreshold = 0f
             moveGestureDetector.moveThresholdRect = null
+            rotateGestureDetector.angleThreshold =
+                notFollowingRotationAngleThreshold
         }
     }
 
@@ -287,17 +307,17 @@ class NavigationScaleGestureHandler(
         gesturesPlugin.setGesturesManager(
             customGesturesManager,
             attachDefaultListeners = true,
-            setDefaultMutuallyExclusives = true
+            setDefaultMutuallyExclusives = true,
         )
         gesturesPlugin.addOnMoveListener(onMoveListener)
         gesturesPlugin.addProtectedAnimationOwner(NAVIGATION_CAMERA_OWNER)
 
         locationPlugin.addOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener)
 
-        mapboxMap.addOnCameraChangeListener(onCameraChangedListener)
+        cameraChangedSubscription = mapboxMap.subscribeCameraChanged(onCameraChangedCallback)
 
         navigationCamera.registerNavigationCameraStateChangeObserver(
-            navigationCameraStateChangedObserver
+            navigationCameraStateChangedObserver,
         )
 
         isInitialized = true
@@ -313,17 +333,17 @@ class NavigationScaleGestureHandler(
         gesturesPlugin.setGesturesManager(
             initialGesturesManager,
             attachDefaultListeners = true,
-            setDefaultMutuallyExclusives = true
+            setDefaultMutuallyExclusives = true,
         )
         gesturesPlugin.removeOnMoveListener(onMoveListener)
         gesturesPlugin.removeProtectedAnimationOwner(NAVIGATION_CAMERA_OWNER)
 
         locationPlugin.removeOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener)
 
-        mapboxMap.removeOnCameraChangeListener(onCameraChangedListener)
+        cameraChangedSubscription?.cancel()
 
         navigationCamera.unregisterNavigationCameraStateChangeObserver(
-            navigationCameraStateChangedObserver
+            navigationCameraStateChangedObserver,
         )
 
         isInitialized = false

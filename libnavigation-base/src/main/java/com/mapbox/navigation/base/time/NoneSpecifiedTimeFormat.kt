@@ -4,7 +4,7 @@ import java.util.Calendar
 import java.util.Locale
 
 internal class NoneSpecifiedTimeFormat(
-    private val isDeviceTwentyFourHourFormat: Boolean
+    private val isDeviceTwentyFourHourFormat: Boolean,
 ) : TimeFormatResolver {
 
     override fun obtainTimeFormatted(type: Int, time: Calendar): String {
@@ -13,7 +13,7 @@ internal class NoneSpecifiedTimeFormat(
                 Locale.getDefault(),
                 TwentyFourHoursTimeFormat.TWENTY_FOUR_HOURS_FORMAT,
                 time,
-                time
+                time,
             )
         } else {
             String.format(
@@ -21,7 +21,7 @@ internal class NoneSpecifiedTimeFormat(
                 TwelveHoursTimeFormat.TWELVE_HOURS_FORMAT,
                 time,
                 time,
-                time
+                time,
             )
         }
     }

@@ -3,6 +3,7 @@
 package com.mapbox.navigation.core.lifecycle
 
 import androidx.core.app.ComponentActivity
+import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleRegistry
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -11,7 +12,6 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.internal.lifecycle.CarAppLifecycleOwnerTest
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
-import com.mapbox.navigation.utils.internal.DefaultLifecycleObserver
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -39,9 +39,7 @@ class MapboxNavigationAppDelegateTest {
     val loggerRule = LoggingFrontendTestRule()
 
     private val mapboxNavigation: MapboxNavigation = mockk()
-    private val navigationOptions: NavigationOptions = mockk {
-        every { accessToken } returns "test_access_token"
-    }
+    private val navigationOptions: NavigationOptions = mockk()
 
     private val mapboxNavigationApp = MapboxNavigationAppDelegate()
 
@@ -176,7 +174,7 @@ class MapboxNavigationAppDelegateTest {
         val (activity, lifecycle) = mockActivityLifecycle()
         mapboxNavigationApp.attach(activity)
 
-        val observer = spyk(object : DefaultLifecycleObserver() {})
+        val observer = spyk(object : DefaultLifecycleObserver {})
         mapboxNavigationApp.lifecycleOwner.lifecycle.addObserver(observer)
         lifecycle.currentState = Lifecycle.State.RESUMED
 
@@ -191,7 +189,7 @@ class MapboxNavigationAppDelegateTest {
     // Specifically the CarAppLifecycleOwner.foregroundedChangingConfiguration counter
     @Test
     fun `verify lifecycleOwner handles orientation changes`() {
-        val observer = spyk(object : DefaultLifecycleObserver() {})
+        val observer = spyk(object : DefaultLifecycleObserver {})
         mapboxNavigationApp.lifecycleOwner.lifecycle.addObserver(observer)
 
         // An activity is created and resumed.

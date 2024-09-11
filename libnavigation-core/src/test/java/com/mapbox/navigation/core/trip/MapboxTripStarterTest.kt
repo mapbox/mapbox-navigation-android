@@ -15,6 +15,7 @@ import com.mapbox.navigation.utils.internal.LoggerFrontend
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.runs
 import io.mockk.slot
@@ -57,12 +58,13 @@ class MapboxTripStarterTest {
         mockk {
             every { getReplayRouteSession() } returns replayRouteSession
             every { getReplayHistorySession() } returns replayHistorySession
-        }
+        },
     )
 
     @Before
     fun setup() {
         mockkStatic(PermissionsManager::class)
+        mockkObject(PermissionsManager)
         every { PermissionsManager.areLocationPermissionsGranted(any()) } returns true
     }
 
@@ -317,7 +319,7 @@ class MapboxTripStarterTest {
         }
         every { mapboxNavigation.registerRoutesObserver(any()) } answers {
             firstArg<RoutesObserver>().onRoutesChanged(
-                mockk { every { navigationRoutes } returns emptyList() }
+                mockk { every { navigationRoutes } returns emptyList() },
             )
         }
         return mapboxNavigation

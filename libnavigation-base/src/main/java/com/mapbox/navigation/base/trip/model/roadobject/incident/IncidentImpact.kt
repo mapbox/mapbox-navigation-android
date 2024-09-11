@@ -41,7 +41,7 @@ object IncidentImpact {
         CRITICAL,
         MAJOR,
         MINOR,
-        LOW
+        LOW,
     )
     annotation class Impact
 }

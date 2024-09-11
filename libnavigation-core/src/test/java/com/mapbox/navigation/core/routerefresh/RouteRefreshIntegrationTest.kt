@@ -6,23 +6,24 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.base.internal.NavigationRouterV2
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.internal.extensions.internalAlternativeRouteIndices
 import com.mapbox.navigation.base.internal.route.update
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshOptions
-import com.mapbox.navigation.base.route.RouterFactory
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.NavigationComponentProvider
 import com.mapbox.navigation.core.RoutesProgressDataProvider
 import com.mapbox.navigation.core.ev.EVDynamicDataHolder
+import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshCallback
+import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshError
+import com.mapbox.navigation.core.internal.router.Router
 import com.mapbox.navigation.core.internal.utils.CoroutineUtils
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.NativeRouteParserRule
+import com.mapbox.navigation.testing.factories.createNavigationRoutes
 import com.mapbox.navigation.utils.internal.Time
 import io.mockk.every
 import io.mockk.mockk
@@ -49,7 +50,7 @@ internal open class RouteRefreshIntegrationTest {
     @get:Rule
     val coroutineRule = MainCoroutineRule()
 
-    val router = mockk<NavigationRouterV2>(relaxed = true)
+    val router = mockk<Router>(relaxed = true)
     private val routesProgressDataProvider = RoutesProgressDataProvider()
     private val directionsSession = NavigationComponentProvider.createDirectionsSession(router)
     lateinit var routeRefreshController: RouteRefreshController
@@ -93,7 +94,7 @@ internal open class RouteRefreshIntegrationTest {
                 }
                 every { currentRouteGeometryIndex } returns 0
                 every { internalAlternativeRouteIndices() } returns emptyMap()
-            }
+            },
         )
     }
 
@@ -119,7 +120,7 @@ internal open class RouteRefreshIntegrationTest {
                 override fun millis() = testDispatcher.currentTime
 
                 override fun seconds() = millis() / 1000
-            }
+            },
         )
     }
 
@@ -127,22 +128,22 @@ internal open class RouteRefreshIntegrationTest {
         fileName: String,
         enableRefresh: Boolean = true,
         successfulAttemptNumber: Int = 0,
-        responseDelay: Long = 0
+        responseDelay: Long = 0,
     ): List<NavigationRoute> {
         setUpRouteRefresh(fileName, successfulAttemptNumber, responseDelay)
-        return NavigationRoute.create(
+        return createNavigationRoutes(
             DirectionsResponse.fromJson(FileUtils.loadJsonFixture(fileName)),
             RouteOptions.builder()
                 .coordinatesList(
                     listOf(
                         Point.fromLngLat(-121.496066, 38.577764),
-                        Point.fromLngLat(-121.480256, 38.576795)
-                    )
+                        Point.fromLngLat(-121.480256, 38.576795),
+                    ),
                 )
                 .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
                 .enableRefresh(enableRefresh)
                 .build(),
-            RouterOrigin.Custom()
+            RouterOrigin.ONLINE,
         )
     }
 
@@ -158,21 +159,21 @@ internal open class RouteRefreshIntegrationTest {
     fun setUpRouteRefresh(
         fileName: String,
         successfulAttemptNumber: Int = 0,
-        responseDelay: Long = 0
+        responseDelay: Long = 0,
     ) {
-        val refreshedRoutes = NavigationRoute.create(
+        val refreshedRoutes = createNavigationRoutes(
             DirectionsResponse.fromJson(FileUtils.loadJsonFixture(fileName)),
             RouteOptions.builder()
                 .coordinatesList(
                     listOf(
                         Point.fromLngLat(-121.496066, 38.577764),
-                        Point.fromLngLat(-121.480256, 38.576795)
-                    )
+                        Point.fromLngLat(-121.480256, 38.576795),
+                    ),
                 )
                 .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
                 .enableRefresh(true)
                 .build(),
-            RouterOrigin.Custom()
+            RouterOrigin.ONLINE,
         )
         var invocationNumber = 0
         every { router.getRouteRefresh(any(), any<RouteRefreshRequestData>(), any()) } answers {
@@ -190,23 +191,23 @@ internal open class RouteRefreshIntegrationTest {
                                             .duration(
                                                 leg.annotation()!!.duration()!!.map {
                                                     it + (invocationNumber + 1) * 0.1
-                                                }
+                                                },
                                             )
-                                            .build()
+                                            .build(),
                                     )
                                     .build()
-                            }
+                            },
                         )
                         .build()
                 },
-                { this }
+                { this },
             )
             routeRefreshAnswerScope.launch {
                 delay(responseDelay)
                 if (invocationNumber >= successfulAttemptNumber) {
                     callback.onRefreshReady(refreshedRoute)
                 } else {
-                    callback.onFailure(RouterFactory.buildNavigationRouterRefreshError())
+                    callback.onFailure(NavigationRouterRefreshError())
                 }
             }
             invocationNumber++
@@ -223,7 +224,7 @@ internal open class RouteRefreshIntegrationTest {
                 }
                 every { currentRouteGeometryIndex } returns index
                 every { internalAlternativeRouteIndices() } returns emptyMap()
-            }
+            },
         )
     }
 }

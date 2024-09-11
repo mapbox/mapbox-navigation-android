@@ -46,7 +46,7 @@ class RoutesRefresherResultAnySuccessTest(
     fun anySuccess() {
         val result = RoutesRefresherResult(
             mockk { every { isSuccess() } returns primarySuccess },
-            alternativesSuccess.map { mockk { every { isSuccess() } returns it } }
+            alternativesSuccess.map { mockk { every { isSuccess() } returns it } },
         )
 
         assertEquals(expected, result.anySuccess())

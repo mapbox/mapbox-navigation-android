@@ -1,5 +1,8 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply from: file("../gradle/testing-module-settings.gradle")
+
+group = project.ext.mapboxArtifactGroupId
 
 android {
     compileSdkVersion androidVersions.compileSdkVersion
@@ -21,6 +24,7 @@ dependencies {
     api project(':libtesting-thirdparty')
     // testing modules should not transitively bring in project dependencies
     compileOnly(project(':libnavigation-base'))
+    compileOnly(project(':libnavigation-util'))
     implementation dependenciesList.junit
     implementation dependenciesList.mockk
 }

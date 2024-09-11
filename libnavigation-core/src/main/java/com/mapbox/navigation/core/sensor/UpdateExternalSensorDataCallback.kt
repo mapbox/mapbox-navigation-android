@@ -7,7 +7,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * [com.mapbox.navigation.core.MapboxNavigation.updateExternalSensorData] result
  */
 @ExperimentalPreviewMapboxNavigationAPI
-fun interface UpdateExternalSensorDataCallback {
+internal fun interface UpdateExternalSensorDataCallback {
 
     /**
      * Called when [com.mapbox.navigation.core.MapboxNavigation.updateExternalSensorData]

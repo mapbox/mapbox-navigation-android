@@ -1,20 +1,22 @@
 package com.mapbox.navigation.ui.maps.camera.data
 
-import android.location.Location
 import androidx.annotation.UiThread
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
+import com.mapbox.common.Cancelable
+import com.mapbox.common.location.Location
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.CameraState
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
+import com.mapbox.maps.MapboxMapException
+import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.toCameraOptions
+import com.mapbox.maps.util.isEmpty
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.utils.isSameRoute
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
@@ -29,6 +31,7 @@ import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.pro
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.simplifyCompleteRoutePoints
 import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger
 import com.mapbox.navigation.ui.maps.camera.utils.normalizeBearing
+import com.mapbox.navigation.ui.maps.util.MapSizeReadyCallbackHelper
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logW
@@ -197,7 +200,7 @@ import kotlin.math.min
  */
 @UiThread
 class MapboxNavigationViewportDataSource(
-    private val mapboxMap: MapboxMap
+    private val mapboxMap: MapboxMap,
 ) : ViewportDataSource {
 
     internal companion object {
@@ -242,7 +245,7 @@ class MapboxNavigationViewportDataSource(
     private val followingBearingProperty = ViewportProperty.BearingProperty(null, BEARING_NORTH)
     private val followingPitchProperty = ViewportProperty.PitchProperty(
         null,
-        options.followingFrameOptions.defaultPitch
+        options.followingFrameOptions.defaultPitch,
     )
     private val overviewCenterProperty = ViewportProperty.CenterProperty(null, NULL_ISLAND_POINT)
     private val overviewZoomProperty =
@@ -269,7 +272,7 @@ class MapboxNavigationViewportDataSource(
      * to control the camera in scenarios like free drive where the maneuver points are not available.
      */
     var followingPadding: EdgeInsets = EMPTY_EDGE_INSETS
-    private var appliedFollowingPadding = followingPadding
+    private var appliedFollowingPadding: EdgeInsets? = followingPadding
 
     /**
      * Holds a padding (in pixels, in reference to the [MapView]'s size) used for generating an overview frame.
@@ -296,7 +299,7 @@ class MapboxNavigationViewportDataSource(
             .bearing(overviewBearingProperty.get())
             .pitch(overviewPitchProperty.get())
             .padding(overviewPadding)
-            .build()
+            .build(),
     )
         set(value) {
             if (value != field) {
@@ -309,17 +312,20 @@ class MapboxNavigationViewportDataSource(
     private val viewportDataSourceUpdateObservers =
         CopyOnWriteArraySet<ViewportDataSourceUpdateObserver>()
 
+    private val mapSizeReadyCallbackHelper = MapSizeReadyCallbackHelper(mapboxMap)
+    private var mapsSizeReadyCancellable: Cancelable? = null
+
     override fun getViewportData(): ViewportData = viewportData
 
     override fun registerUpdateObserver(
-        viewportDataSourceUpdateObserver: ViewportDataSourceUpdateObserver
+        viewportDataSourceUpdateObserver: ViewportDataSourceUpdateObserver,
     ) {
         viewportDataSourceUpdateObservers.add(viewportDataSourceUpdateObserver)
         viewportDataSourceUpdateObserver.viewportDataSourceUpdated(viewportData)
     }
 
     override fun unregisterUpdateObserver(
-        viewportDataSourceUpdateObserver: ViewportDataSourceUpdateObserver
+        viewportDataSourceUpdateObserver: ViewportDataSourceUpdateObserver,
     ) {
         viewportDataSourceUpdateObservers.remove(viewportDataSourceUpdateObserver)
     }
@@ -332,6 +338,13 @@ class MapboxNavigationViewportDataSource(
      * @see [getViewportData]
      */
     fun evaluate() {
+        mapsSizeReadyCancellable?.cancel()
+        mapsSizeReadyCancellable = mapSizeReadyCallbackHelper.onMapSizeReady {
+            evaluateImpl()
+        }
+    }
+
+    private fun evaluateImpl() {
         val cameraState = mapboxMap.cameraState
         updateFollowingData(cameraState)
         updateOverviewData(cameraState)
@@ -380,27 +393,8 @@ class MapboxNavigationViewportDataSource(
 
         viewportData = ViewportData(
             cameraForFollowing = followingCameraOptions,
-            cameraForOverview = overviewCameraOptions
+            cameraForOverview = overviewCameraOptions,
         )
-    }
-
-    /**
-     * Call whenever the primary route changes.
-     * This produces and stores geometries that need to be framed for overview.
-     *
-     * @see [MapboxNavigation.registerRoutesObserver]
-     * @see [clearRouteData]
-     * @see [evaluate]
-     */
-    @Deprecated(
-        "use #onRouteChanged(NavigationRoute) instead",
-        ReplaceWith(
-            "onRouteChanged(route.toNavigationRoute())",
-            "com.mapbox.navigation.base.route.toNavigationRoute"
-        )
-    )
-    fun onRouteChanged(route: DirectionsRoute) {
-        onRouteChanged(route.toNavigationRoute())
     }
 
     /**
@@ -419,7 +413,7 @@ class MapboxNavigationViewportDataSource(
             simplifiedCompleteRoutePoints = simplifyCompleteRoutePoints(
                 options.overviewFrameOptions.geometrySimplification.enabled,
                 options.overviewFrameOptions.geometrySimplification.simplificationFactor,
-                completeRoutePoints
+                completeRoutePoints,
             )
             simplifiedRemainingPointsOnRoute = simplifiedCompleteRoutePoints.flatten().flatten()
 
@@ -428,7 +422,7 @@ class MapboxNavigationViewportDataSource(
                     enabled,
                     minimumDistanceBetweenIntersections,
                     route.directionsRoute,
-                    completeRoutePoints
+                    completeRoutePoints,
                 )
             }
 
@@ -438,7 +432,7 @@ class MapboxNavigationViewportDataSource(
                     distanceToCoalesceCompoundManeuvers,
                     distanceToFrameAfterManeuver,
                     route.directionsRoute,
-                    completeRoutePoints
+                    completeRoutePoints,
                 )
             }
         }
@@ -462,7 +456,7 @@ class MapboxNavigationViewportDataSource(
         if (currentRoute == null) {
             logW(
                 "You're calling #onRouteProgressChanged but you didn't call #onRouteChanged.",
-                LOG_CATEGORY
+                LOG_CATEGORY,
             )
             clearProgressData()
             return
@@ -471,7 +465,7 @@ class MapboxNavigationViewportDataSource(
                 "Provided route (#onRouteChanged) and navigated route " +
                     "(#onRouteProgressChanged) are not the same. " +
                     "Aborting framed geometry updates based on route progress.",
-                LOG_CATEGORY
+                LOG_CATEGORY,
             )
             clearProgressData()
             return
@@ -479,37 +473,37 @@ class MapboxNavigationViewportDataSource(
 
         ifNonNull(
             routeProgress.currentLegProgress,
-            routeProgress.currentLegProgress?.currentStepProgress
+            routeProgress.currentLegProgress?.currentStepProgress,
         ) { currentLegProgress, currentStepProgress ->
             followingPitchProperty.fallback = getPitchFallbackFromRouteProgress(
                 routeProgress,
-                options.followingFrameOptions
+                options.followingFrameOptions,
             )
 
             pointsToFrameOnCurrentStep = options.followingFrameOptions.framingStrategy
                 .getPointsToFrameOnCurrentStep(
                     routeProgress,
                     options.followingFrameOptions,
-                    averageIntersectionDistancesOnRoute
+                    averageIntersectionDistancesOnRoute,
                 )
 
             pointsToFrameAfterCurrentStep = options.followingFrameOptions.framingStrategy
                 .getPointsToFrameAfterCurrentManeuver(
                     routeProgress,
                     options.followingFrameOptions,
-                    postManeuverFramingPoints
+                    postManeuverFramingPoints,
                 )
 
             simplifiedRemainingPointsOnRoute = getRemainingPointsOnRoute(
                 simplifiedCompleteRoutePoints,
                 pointsToFrameOnCurrentStep,
                 currentLegProgress,
-                currentStepProgress
+                currentStepProgress,
             )
         } ?: run {
             logE(
                 "You're calling #onRouteProgressChanged with empty leg or step progress.",
-                LOG_CATEGORY
+                LOG_CATEGORY,
             )
             clearProgressData()
         }
@@ -534,6 +528,9 @@ class MapboxNavigationViewportDataSource(
      * @see [evaluate]
      */
     fun clearRouteData() {
+        mapsSizeReadyCancellable?.cancel()
+        mapsSizeReadyCancellable = null
+
         navigationRoute = null
         completeRoutePoints = emptyList()
         postManeuverFramingPoints = emptyList()
@@ -706,14 +703,14 @@ class MapboxNavigationViewportDataSource(
         }
 
         options.followingFrameOptions.bearingSmoothing.run {
-            val locationBearing = localTargetLocation?.bearing?.toDouble() ?: BEARING_NORTH
+            val locationBearing = localTargetLocation?.bearing ?: BEARING_NORTH
             followingBearingProperty.fallback =
                 getSmootherBearingForMap(
                     enabled,
                     maxBearingAngleDiff,
                     cameraState.bearing,
                     locationBearing,
-                    pointsForFollowing
+                    pointsForFollowing,
                 )
         }
 
@@ -730,9 +727,14 @@ class MapboxNavigationViewportDataSource(
             ) {
                 mapboxMap.cameraForCoordinates(
                     pointsForFollowing,
-                    followingPadding,
-                    followingBearingProperty.get(),
-                    followingPitchProperty.get()
+                    CameraOptions.Builder()
+                        .padding(followingPadding)
+                        .bearing(followingBearingProperty.get())
+                        .pitch(followingPitchProperty.get())
+                        .build(),
+                    null,
+                    null,
+                    null,
                 )
             } else {
                 val mapSize = mapboxMap.getSize()
@@ -740,11 +742,11 @@ class MapboxNavigationViewportDataSource(
                 val padding = getMapAnchoredPaddingFromUserPadding(
                     mapSize,
                     followingPadding,
-                    options.followingFrameOptions.focalPoint
+                    options.followingFrameOptions.focalPoint,
                 )
                 val fallbackCameraOptions = CameraOptions.Builder()
                     .center(
-                        pointsForFollowing.firstOrNull() ?: cameraState.center
+                        pointsForFollowing.firstOrNull() ?: cameraState.center,
                     )
                     .padding(padding)
                     .bearing(followingBearingProperty.get())
@@ -752,21 +754,26 @@ class MapboxNavigationViewportDataSource(
                     .zoom(cameraState.zoom)
                     .build()
                 if (pointsForFollowing.size > 1) {
-                    mapboxMap.cameraForCoordinates(
+                    mapboxMap.safeCameraForCoordinates(
                         pointsForFollowing,
                         fallbackCameraOptions,
-                        screenBox
+                        screenBox,
                     )
                 } else {
                     fallbackCameraOptions
                 }
             }
 
+        if (cameraFrame.isEmpty) {
+            logW { "CameraOptions is empty" }
+            return
+        }
+
         followingCenterProperty.fallback = cameraFrame.center!!
         options.followingFrameOptions.run {
             followingZoomProperty.fallback = max(min(cameraFrame.zoom!!, maxZoom), minZoom)
         }
-        appliedFollowingPadding = cameraFrame.padding!!
+        appliedFollowingPadding = cameraFrame.padding
 
         updateDebuggerForFollowing(pointsForFollowing)
     }
@@ -794,24 +801,35 @@ class MapboxNavigationViewportDataSource(
 
         overviewBearingProperty.fallback = normalizeBearing(
             cameraState.bearing,
-            BEARING_NORTH
+            BEARING_NORTH,
         )
 
         val cameraFrame = if (pointsForOverview.isNotEmpty()) {
             mapboxMap.cameraForCoordinates(
                 pointsForOverview,
-                overviewPadding,
-                overviewBearingProperty.get(),
-                overviewPitchProperty.get()
+                CameraOptions.Builder()
+                    .padding(overviewPadding)
+                    .bearing(overviewBearingProperty.get())
+                    .pitch(overviewPitchProperty.get())
+                    .build(),
+                null,
+                null,
+                null,
             )
         } else {
             cameraState.toCameraOptions()
         }
 
+        if (cameraFrame.isEmpty) {
+            logW { "CameraOptions is empty" }
+            return
+        }
+
+        // TODO should be non-null (reproducible with Camera test)
         overviewCenterProperty.fallback = cameraFrame.center!!
         overviewZoomProperty.fallback = min(
             cameraFrame.zoom!!,
-            options.overviewFrameOptions.maxZoom
+            options.overviewFrameOptions.maxZoom,
         )
 
         updateDebuggerForOverview(pointsForOverview)
@@ -827,5 +845,17 @@ class MapboxNavigationViewportDataSource(
     private fun updateDebuggerForOverview(pointsForOverview: List<Point>) {
         debugger?.overviewPoints = pointsForOverview
         debugger?.overviewUserPadding = overviewPadding
+    }
+
+    private fun MapboxMap.safeCameraForCoordinates(
+        coordinates: List<Point>,
+        camera: CameraOptions,
+        box: ScreenBox,
+    ): CameraOptions {
+        return try {
+            cameraForCoordinates(coordinates, camera, box)
+        } catch (ex: MapboxMapException) {
+            cameraState.toCameraOptions()
+        }
     }
 }

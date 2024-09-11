@@ -10,6 +10,11 @@
     <!-- Minute -->
     <string name="mapbox_unit_min" tools:ignore="MissingTranslation">min</string>
 
+    <!-- Route callout strings -->
+    <string name="mapbox_callout_similar_eta" tools:ignore="MissingTranslation">Similar ETA</string>
+    <string name="mapbox_callout_faster" tools:ignore="MissingTranslation">-%s</string>
+    <string name="mapbox_callout_slower" tools:ignore="MissingTranslation">+%s</string>
+
     <!-- Notification Strings -->
     <string name="mapbox_end_navigation">End Navigation</string>
     <string name="mapbox_navigation_is_starting" tools:ignore="MissingTranslation">Navigation is starting…</string>

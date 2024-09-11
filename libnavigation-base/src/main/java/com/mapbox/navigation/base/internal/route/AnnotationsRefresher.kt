@@ -13,15 +13,20 @@ internal object AnnotationsRefresher {
     fun getRefreshedAnnotations(
         oldAnnotation: LegAnnotation?,
         newAnnotation: LegAnnotation?,
-        startingLegGeometryIndex: Int
+        startingLegGeometryIndex: Int,
+        startFakeCongestionIndex: Int?,
+        fakeCongestionLength: Int? = 0,
     ): LegAnnotation? {
         if (oldAnnotation == null) {
             return null
         }
+
         val congestionNumeric = mergeAnnotationProperty(
             oldAnnotation,
             newAnnotation,
             startingLegGeometryIndex,
+            startOverrideIndex = startFakeCongestionIndex ?: 0,
+            overrideLength = fakeCongestionLength ?: 0,
         ) { congestionNumeric() }
         val congestion = mergeAnnotationProperty(
             oldAnnotation,
@@ -74,7 +79,9 @@ internal object AnnotationsRefresher {
                         oldAnnotation,
                         newAnnotation,
                         startingLegGeometryIndex,
-                        extractor
+                        overrideLength = 0,
+                        startOverrideIndex = 0,
+                        extractor,
                     )?.toJsonArray()
                 }
             }.ifEmpty { null }
@@ -95,20 +102,23 @@ internal object AnnotationsRefresher {
         oldAnnotation: LegAnnotation,
         newAnnotation: LegAnnotation?,
         startingLegGeometryIndex: Int,
+        overrideLength: Int = 0,
+        startOverrideIndex: Int = 0,
         propertyExtractor: LegAnnotation.() -> List<T>?,
     ): List<T>? {
         val oldProperty = oldAnnotation.propertyExtractor() ?: return null
-        val newProperty = newAnnotation?.propertyExtractor() ?: emptyList()
+        val newProperty = newAnnotation?.propertyExtractor().orEmpty()
         val expectedSize = oldProperty.size
         if (expectedSize < startingLegGeometryIndex) {
             logE(
                 "Annotations sizes mismatch: " +
                     "index=$startingLegGeometryIndex, expected_size=$expectedSize",
-                LOG_CATEGORY
+                LOG_CATEGORY,
             )
             return null
         }
         val result = mutableListOf<T>()
+
         repeat(startingLegGeometryIndex) { result.add(oldProperty[it]) }
         repeat(min(expectedSize - startingLegGeometryIndex, newProperty.size)) {
             result.add(newProperty[it])
@@ -116,22 +126,27 @@ internal object AnnotationsRefresher {
         val filledSize = result.size
         repeat(expectedSize - filledSize) { result.add(oldProperty[it + filledSize]) }
 
+        if (overrideLength > 0) {
+            val endOverrideIndex = (startOverrideIndex + overrideLength - 1)
+                .coerceAtMost(expectedSize)
+            (startOverrideIndex..endOverrideIndex).forEach {
+                result[it] = oldProperty[it]
+            }
+        }
+
         return result
     }
 
     private fun List<JsonElement>.toJsonArray(): JsonArray {
         return JsonArray(this.size).also { array ->
-            forEach { array.add(it) }
+            for (item in this) { array.add(item) }
         }
     }
 
     private fun <T, R> Iterable<T>.associateNonNullValuesWith(block: (T) -> R?): Map<T, R> {
         val map = hashMapOf<T, R>()
-        forEach { key ->
-            val value = block(key)
-            if (value != null) {
-                map[key] = value
-            }
+        this.forEach { key ->
+            block(key)?.also { value -> map[key] = value }
         }
         return map
     }

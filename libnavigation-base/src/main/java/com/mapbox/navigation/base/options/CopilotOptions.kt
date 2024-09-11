@@ -10,6 +10,8 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * @param maxHistoryFilesPerSession if there are more history files for a session than this value, only the last [maxHistoryFilesPerSession] files will be uploaded
  * @param maxTotalHistoryFilesSizePerSession if the total size of history files exceeds this value, some of the first files will not be uploaded
  * @param shouldRecordFreeDriveHistories true if Copilot should record history files in Free Drive state. Default is true
+ * @param shouldRecordRouteLineEvents true if Copilot should record route line related events that can be used for debugging purposes. Default is false
+ * @param userId User ID relevant for history recording context. If not provided, [NavigationOptions.eventsAppMetadata.userId] will be used
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class CopilotOptions private constructor(
@@ -18,6 +20,9 @@ class CopilotOptions private constructor(
     val maxHistoryFilesPerSession: Int,
     val maxTotalHistoryFilesSizePerSession: Long,
     val shouldRecordFreeDriveHistories: Boolean,
+    val shouldRecordRouteLineEvents: Boolean,
+    val userId: String?,
+    internal val ownerName: String?,
 ) {
 
     /**
@@ -29,6 +34,9 @@ class CopilotOptions private constructor(
         .maxHistoryFilesPerSession(maxHistoryFilesPerSession)
         .maxTotalHistoryFilesSizePerSession(maxTotalHistoryFilesSizePerSession)
         .shouldRecordFreeDriveHistories(shouldRecordFreeDriveHistories)
+        .shouldRecordRouteLineEvents(shouldRecordRouteLineEvents)
+        .userId(userId)
+        .ownerName(ownerName)
 
     /**
      * Regenerate whenever a change is made
@@ -54,6 +62,15 @@ class CopilotOptions private constructor(
         if (shouldRecordFreeDriveHistories != other.shouldRecordFreeDriveHistories) {
             return false
         }
+        if (shouldRecordRouteLineEvents != other.shouldRecordRouteLineEvents) {
+            return false
+        }
+        if (userId != other.userId) {
+            return false
+        }
+        if (ownerName != other.ownerName) {
+            return false
+        }
 
         return true
     }
@@ -67,6 +84,9 @@ class CopilotOptions private constructor(
         result = 31 * result + maxHistoryFilesPerSession
         result = 31 * result + maxTotalHistoryFilesSizePerSession.hashCode()
         result = 31 * result + shouldRecordFreeDriveHistories.hashCode()
+        result = 31 * result + shouldRecordRouteLineEvents.hashCode()
+        result = 31 * result + userId.hashCode()
+        result = 31 * result + ownerName.hashCode()
         return result
     }
 
@@ -79,7 +99,9 @@ class CopilotOptions private constructor(
             "maxHistoryFileLengthMillis=$maxHistoryFileLengthMillis, " +
             "maxHistoryFilesPerSession=$maxHistoryFilesPerSession, " +
             "maxTotalHistoryFilesSizePerSession=$maxTotalHistoryFilesSizePerSession, " +
-            "shouldRecordFreeDriveHistories=$shouldRecordFreeDriveHistories" +
+            "shouldRecordFreeDriveHistories=$shouldRecordFreeDriveHistories, " +
+            "shouldRecordRouteLineEvents=$shouldRecordRouteLineEvents, " +
+            "userId=$userId" +
             ")"
     }
 
@@ -93,6 +115,13 @@ class CopilotOptions private constructor(
         private var maxHistoryFilesPerSession: Int = Int.MAX_VALUE
         private var maxTotalHistoryFilesSizePerSession: Long = Long.MAX_VALUE
         private var shouldRecordFreeDriveHistories: Boolean = true
+        private var shouldRecordRouteLineEvents: Boolean = false
+        private var userId: String? = null
+        private var ownerName: String? = null
+
+        internal fun ownerName(ownerName: String?): Builder = apply {
+            this.ownerName = ownerName
+        }
 
         /**
          * Defines if Copilot History files should be sent only when they include Feedback events. Default is false
@@ -142,6 +171,21 @@ class CopilotOptions private constructor(
         }
 
         /**
+         * Defines if Copilot should record route line related events that can be used for debugging purposes. Default is false
+         */
+        fun shouldRecordRouteLineEvents(flag: Boolean): Builder = apply {
+            shouldRecordRouteLineEvents = flag
+        }
+
+        /**
+         * User ID relevant for history recording context.
+         * If not provided, [NavigationOptions.eventsAppMetadata.userId] will be used
+         */
+        fun userId(id: String?): Builder = apply {
+            userId = id
+        }
+
+        /**
          * Build the [CopilotOptions]
          */
         fun build(): CopilotOptions {
@@ -151,6 +195,9 @@ class CopilotOptions private constructor(
                 maxHistoryFilesPerSession = maxHistoryFilesPerSession,
                 maxTotalHistoryFilesSizePerSession = maxTotalHistoryFilesSizePerSession,
                 shouldRecordFreeDriveHistories = shouldRecordFreeDriveHistories,
+                shouldRecordRouteLineEvents = shouldRecordRouteLineEvents,
+                userId = userId,
+                ownerName = ownerName,
             )
         }
     }

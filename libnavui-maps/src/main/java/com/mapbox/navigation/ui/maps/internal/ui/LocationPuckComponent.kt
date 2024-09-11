@@ -9,7 +9,7 @@ import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 class LocationPuckComponent(
     private val locationComponentPlugin: LocationComponentPlugin,
     private val locationPuck: LocationPuck,
-    private val locationProvider: NavigationLocationProvider
+    private val locationProvider: NavigationLocationProvider,
 ) : UIComponent() {
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
@@ -20,6 +20,7 @@ class LocationPuckComponent(
                 setLocationProvider(locationProvider)
             }
             locationPuck = this@LocationPuckComponent.locationPuck
+            puckBearingEnabled = true
             enabled = true
         }
     }

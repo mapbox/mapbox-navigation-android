@@ -49,13 +49,13 @@ sealed class HistoryRecordingSessionState {
      * Free Drive state
      */
     data class FreeDrive internal constructor(
-        override val sessionId: String
+        override val sessionId: String,
     ) : HistoryRecordingSessionState()
 
     /**
      * Active Guidance state
      */
     data class ActiveGuidance internal constructor(
-        override val sessionId: String
+        override val sessionId: String,
     ) : HistoryRecordingSessionState()
 }

@@ -27,7 +27,7 @@ fun interface RoutesInvalidatedObserver {
  * @param invalidatedRoutes list of routes that became invalidated
  */
 class RoutesInvalidatedParams internal constructor(
-    val invalidatedRoutes: List<NavigationRoute>
+    val invalidatedRoutes: List<NavigationRoute>,
 ) {
 
     /**

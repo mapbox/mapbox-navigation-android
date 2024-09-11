@@ -9,12 +9,12 @@ internal object CacheHandleWrapper {
 
     fun requestRoadGraphDataUpdate(
         cache: CacheHandleInterface,
-        callback: RoadGraphDataUpdateCallback
+        callback: RoadGraphDataUpdateCallback,
     ) {
         cache.isRoadGraphDataUpdateAvailable { isUpdateAvailable, newVersionInfo ->
             callback.onRoadGraphDataUpdateInfoAvailable(
                 isUpdateAvailable,
-                newVersionInfo?.let { SDKRoadGraphVersionInfo(it.dataset, it.version) }
+                newVersionInfo?.let { SDKRoadGraphVersionInfo(it.dataset, it.version) },
             )
         }
     }

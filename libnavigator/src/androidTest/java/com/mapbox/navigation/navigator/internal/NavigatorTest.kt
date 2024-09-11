@@ -7,9 +7,12 @@ import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.route.nativeRoute
+import com.mapbox.navigation.base.internal.route.testing.createNavigationRouteForTest
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.navigator.internal.util.readRawFileText
 import com.mapbox.navigation.navigator.internal.util.runOnMainSync
+import com.mapbox.navigator.BillingProductType
 import com.mapbox.navigator.CacheFactory
 import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ConfigFactory
@@ -46,7 +49,7 @@ class NavigatorTest {
                     0,
                     routes.map { it.nativeRoute() }.drop(1),
                 ),
-                SetRoutesReason.NEW_ROUTE
+                SetRoutesReason.NEW_ROUTE,
             ) { expected ->
                 assertTrue(expected.isValue)
                 cdl.countDown()
@@ -56,12 +59,12 @@ class NavigatorTest {
     }
 
     private fun provideDirectionsRouteAndRouteOptions(): List<NavigationRoute> =
-        NavigationRoute.create(
+        createNavigationRouteForTest(
             DirectionsResponse.fromJson(
                 readRawFileText(
                     InstrumentationRegistry.getInstrumentation().targetContext,
                     DIRECTIONS_RESPONSE,
-                )
+                ),
             ),
             RouteOptions.builder()
                 .profile(DirectionsCriteria.PROFILE_DRIVING)
@@ -70,25 +73,25 @@ class NavigatorTest {
                         Point.fromLngLat(-77.063888, 38.798979),
                         Point.fromLngLat(-77.078234, 38.894377),
                         Point.fromLngLat(-77.028263, 38.962309),
-                    )
+                    ),
                 )
                 .waypointNamesList(
                     listOf(
                         "",
                         "North Quinn Street",
-                        ""
-                    )
+                        "",
+                    ),
                 )
-                .build()
+                .build(),
+            RouterOrigin.ONLINE,
         )
 
     private fun provideNavigator(
-        config: ConfigHandle = providesConfigHandle()
+        config: ConfigHandle = providesConfigHandle(),
     ): Navigator {
         return Navigator(
             config,
             provideCacheHandle(configHandle = config),
-            null,
             null,
         )
     }
@@ -103,16 +106,15 @@ class NavigatorTest {
                 null,
                 null,
                 null,
-                null
             ),
-            ""
+            "",
         )
 
     private fun provideCacheHandle(
         tilesConfig: TilesConfig = provideTilesConfig(),
         configHandle: ConfigHandle,
     ): CacheHandle =
-        CacheFactory.build(tilesConfig, configHandle, null)
+        CacheFactory.build(tilesConfig, configHandle, null, BillingProductType.CF)
 
     private fun provideTilesConfig(): TilesConfig = TilesConfig(
         InstrumentationRegistry.getInstrumentation()

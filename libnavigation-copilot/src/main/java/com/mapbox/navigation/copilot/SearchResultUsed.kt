@@ -15,11 +15,56 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  */
 @Keep
 @ExperimentalPreviewMapboxNavigationAPI
-data class SearchResultUsed(
+class SearchResultUsed(
     val provider: String,
     val id: String,
     val name: String,
     val address: String,
     val coordinates: HistoryPoint,
     val routablePoint: List<HistoryRoutablePoint>?,
-) : EventDTO
+) : EventDTO {
+
+    /**
+     * Indicates whether some other object is "equal to" this one.
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as SearchResultUsed
+
+        if (provider != other.provider) return false
+        if (id != other.id) return false
+        if (name != other.name) return false
+        if (address != other.address) return false
+        if (coordinates != other.coordinates) return false
+        return routablePoint == other.routablePoint
+    }
+
+    /**
+     * Returns a hash code value for the object.
+     */
+    override fun hashCode(): Int {
+        var result = provider.hashCode()
+        result = 31 * result + id.hashCode()
+        result = 31 * result + name.hashCode()
+        result = 31 * result + address.hashCode()
+        result = 31 * result + coordinates.hashCode()
+        result = 31 * result + (routablePoint?.hashCode() ?: 0)
+        return result
+    }
+
+    /**
+     * Returns a string representation of the object.
+     */
+    override fun toString(): String {
+        return "SearchResultUsed(" +
+            "provider='$provider', " +
+            "id='$id', " +
+            "name='$name', " +
+            "address='$address', " +
+            "coordinates=$coordinates, " +
+            "routablePoint=$routablePoint" +
+            ")"
+    }
+}

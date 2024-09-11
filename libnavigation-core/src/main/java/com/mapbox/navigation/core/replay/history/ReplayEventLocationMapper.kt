@@ -1,8 +1,8 @@
 package com.mapbox.navigation.core.replay.history
 
-import android.location.Location
 import android.os.SystemClock
 import androidx.annotation.VisibleForTesting
+import com.mapbox.common.location.Location
 import java.util.Date
 
 private const val MILLIS_PER_SECOND = 1000.0
@@ -13,16 +13,17 @@ private fun Double.secToNanos(): Long = (this * NANOS_PER_SECOND).toLong()
 internal fun ReplayEventLocation.mapToLocation(
     eventTimeOffset: Double = time ?: 0.0,
     @VisibleForTesting currentTimeMilliseconds: Long = Date().time,
-    @VisibleForTesting elapsedTimeNano: Long = SystemClock.elapsedRealtimeNanos()
+    @VisibleForTesting elapsedTimeNano: Long = SystemClock.elapsedRealtimeNanos(),
 ): Location {
-    val location = Location(provider)
-    location.longitude = lon
-    location.latitude = lat
-    location.time = currentTimeMilliseconds + eventTimeOffset.secToMillis()
-    location.elapsedRealtimeNanos = elapsedTimeNano + eventTimeOffset.secToNanos()
-    accuracyHorizontal?.toFloat()?.let { location.accuracy = it }
-    bearing?.toFloat()?.let { location.bearing = it }
-    altitude?.let { location.altitude = it }
-    speed?.toFloat()?.let { location.speed = it }
-    return location
+    return Location.Builder()
+        .source(provider)
+        .longitude(lon)
+        .latitude(lat)
+        .timestamp(currentTimeMilliseconds + eventTimeOffset.secToMillis())
+        .monotonicTimestamp(elapsedTimeNano + eventTimeOffset.secToNanos())
+        .horizontalAccuracy(accuracyHorizontal)
+        .bearing(bearing)
+        .altitude(altitude)
+        .speed(speed)
+        .build()
 }

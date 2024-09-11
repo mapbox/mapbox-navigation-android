@@ -1,6 +1,5 @@
 package com.mapbox.navigation.core.replay.route
 
-import android.location.Location
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.core.replay.MapboxReplayer
 
@@ -12,19 +11,19 @@ internal data class ReplayRouteSegment(
     val speedUpDistance: Double,
     val cruiseDistance: Double,
     val slowDownDistance: Double,
-    val steps: List<ReplayRouteStep>
+    val steps: List<ReplayRouteStep>,
 )
 
 internal data class ReplayRouteStep(
     val timeSeconds: Double,
     val acceleration: Double,
     val speedMps: Double,
-    val positionMeters: Double
+    val positionMeters: Double,
 )
 
 internal class ReplayRouteLocation(
     val routeIndex: Int?,
-    val point: Point
+    val point: Point,
 ) {
 
     /**

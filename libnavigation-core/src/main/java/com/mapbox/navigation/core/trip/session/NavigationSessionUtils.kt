@@ -1,7 +1,7 @@
 package com.mapbox.navigation.core.trip.session
 
+import com.mapbox.common.TelemetrySystemUtils
 import com.mapbox.navigation.core.internal.HistoryRecordingSessionState
-import com.mapbox.navigation.core.telemetry.navObtainUniversalSessionId
 
 internal object NavigationSessionUtils {
 
@@ -12,7 +12,7 @@ internal object NavigationSessionUtils {
 
     fun getNewNavigationSessionState(
         isDriving: Boolean,
-        hasRoutes: Boolean
+        hasRoutes: Boolean,
     ): NavigationSessionState = getNewState(
         isDriving,
         hasRoutes,
@@ -23,7 +23,7 @@ internal object NavigationSessionUtils {
 
     fun getNewHistoryRecordingSessionState(
         isDriving: Boolean,
-        hasRoutes: Boolean
+        hasRoutes: Boolean,
     ): HistoryRecordingSessionState = getNewState(
         isDriving,
         hasRoutes,
@@ -40,13 +40,17 @@ internal object NavigationSessionUtils {
         activeGuidanceProvider: (String) -> T,
     ): T = when {
         hasRoutes && isDriving -> {
-            activeGuidanceProvider(navObtainUniversalSessionId())
+            activeGuidanceProvider(telemetryUuid())
         }
         isDriving -> {
-            freeDriveProvider(navObtainUniversalSessionId())
+            freeDriveProvider(telemetryUuid())
         }
         else -> {
             idleProvider()
         }
+    }
+
+    private fun telemetryUuid(): String {
+        return TelemetrySystemUtils.obtainUniversalUniqueIdentifier()
     }
 }

@@ -15,7 +15,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * and fractional part is a position on the segment
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class AdasEdgeAttributes private constructor(
+internal class AdasEdgeAttributes private constructor(
     val speedLimit: List<AdasSpeedLimitInfo>,
     val slopes: List<AdasValueOnEdge>,
     val curvatures: List<AdasValueOnEdge>,

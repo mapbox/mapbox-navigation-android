@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="max_speed" tools:ignore="MissingTranslation">MAX\n%1$d</string>
+    <string name="max_speed_no_value" tools:ignore="MissingTranslation,TypographyDashes">MAX\n--</string>
+</resources>

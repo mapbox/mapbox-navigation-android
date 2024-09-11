@@ -40,13 +40,13 @@ class MapboxTripNotificationViewTest {
         every {
             RemoteViewsProvider.createRemoteViews(
                 any(),
-                R.layout.mapbox_notification_navigation_collapsed
+                R.layout.mapbox_notification_navigation_collapsed,
             )
         } returns collapsedViews
         every {
             RemoteViewsProvider.createRemoteViews(
                 any(),
-                R.layout.mapbox_notification_navigation_expanded
+                R.layout.mapbox_notification_navigation_expanded,
             )
         } returns expandedViews
     }
@@ -192,7 +192,7 @@ class MapboxTripNotificationViewTest {
         verify {
             view.collapsedView!!.setImageViewResource(
                 R.id.maneuverImage,
-                R.drawable.mapbox_ic_navigation
+                R.drawable.mapbox_ic_navigation,
             )
         }
         verify { view.expandedView!!.setViewVisibility(R.id.etaContent, View.GONE) }
@@ -203,7 +203,7 @@ class MapboxTripNotificationViewTest {
         verify {
             view.expandedView!!.setImageViewResource(
                 R.id.maneuverImage,
-                R.drawable.mapbox_ic_navigation
+                R.drawable.mapbox_ic_navigation,
             )
         }
         verify { view.expandedView!!.setTextViewText(R.id.endNavigationBtn, STOP_SESSION) }

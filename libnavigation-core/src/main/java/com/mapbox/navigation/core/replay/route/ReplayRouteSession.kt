@@ -1,12 +1,9 @@
 package com.mapbox.navigation.core.replay.route
 
 import android.annotation.SuppressLint
-import android.content.Context
-import com.mapbox.android.core.location.LocationEngineCallback
-import com.mapbox.android.core.location.LocationEngineProvider
-import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.mapbox.common.location.LocationServiceFactory
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
@@ -103,7 +100,7 @@ class ReplayRouteSession : MapboxNavigationObserver {
      * events, the end behavior will depend on the values you have used. If you want to guarantee
      * the effect of the options, you need to set options before [MapboxNavigation] is attached.
      */
-    fun setOptions(options: ReplayRouteSessionOptions) = apply {
+    fun setOptions(options: ReplayRouteSessionOptions): ReplayRouteSession = apply {
         this.options = options
         if (::replayRouteMapper.isInitialized) {
             replayRouteMapper.options = this.options.replayRouteOptions
@@ -127,7 +124,7 @@ class ReplayRouteSession : MapboxNavigationObserver {
             if (options.locationResetEnabled) {
                 val context = navigationOptions.applicationContext
                 if (PermissionsManager.areLocationPermissionsGranted(context)) {
-                    pushRealLocation(context)
+                    pushRealLocation()
                 } else {
                     logW(LOG_CATEGORY) {
                         "Location permissions have not been accepted. If this is intentional, " +
@@ -195,27 +192,17 @@ class ReplayRouteSession : MapboxNavigationObserver {
      * condition between setting routes and requesting a location.
      */
     @SuppressLint("MissingPermission")
-    private fun pushRealLocation(context: Context) {
-        LocationEngineProvider.getBestLocationEngine(context.applicationContext)
-            .getLastLocation(
-                object : LocationEngineCallback<LocationEngineResult> {
-                    override fun onSuccess(result: LocationEngineResult?) {
-                        if (mapboxNavigation?.getNavigationRoutes()?.isNotEmpty() == true) {
-                            return
-                        }
-                        result?.lastLocation?.let {
-                            val event = ReplayRouteMapper.mapToUpdateLocation(0.0, it)
-                            mapboxNavigation?.mapboxReplayer?.pushEvents(
-                                Collections.singletonList(event)
-                            )
-                        }
-                    }
-
-                    override fun onFailure(exception: Exception) {
-                        // Intentionally empty
-                    }
+    private fun pushRealLocation() {
+        LocationServiceFactory.getOrCreate().getDeviceLocationProvider(null).onValue { provider ->
+            provider.getLastLocation { location ->
+                if (location != null && mapboxNavigation?.getNavigationRoutes().isNullOrEmpty()) {
+                    val event = ReplayRouteMapper.mapToUpdateLocation(0.0, location)
+                    mapboxNavigation?.mapboxReplayer?.pushEvents(
+                        Collections.singletonList(event),
+                    )
                 }
-            )
+            }
+        }
     }
 
     private companion object {

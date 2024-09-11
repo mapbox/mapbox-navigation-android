@@ -38,7 +38,7 @@ class NavigationCameraTest {
         every { childAnimations } returns arrayListOf<Animator>(
             mockk<ValueAnimator>(),
             mockk<ValueAnimator>(),
-            mockk<ValueAnimator>()
+            mockk<ValueAnimator>(),
         )
         every { addListener(capture(internalTransitionListenerSlot)) } just Runs
         every { setDuration(any()) } returns this
@@ -47,26 +47,26 @@ class NavigationCameraTest {
         every { childAnimations } returns arrayListOf<Animator>(
             mockk<ValueAnimator>(),
             mockk<ValueAnimator>(),
-            mockk<ValueAnimator>()
+            mockk<ValueAnimator>(),
         )
         every { addListener(capture(internalFrameListenerSlot)) } just Runs
         every { setDuration(any()) } returns this
     }
     private val followingAnimatorSet: AnimatorSet = mockk(
         relaxUnitFun = true,
-        block = transitionBlock
+        block = transitionBlock,
     )
     private val overviewAnimatorSet: AnimatorSet = mockk(
         relaxUnitFun = true,
-        block = transitionBlock
+        block = transitionBlock,
     )
     private val followingFrameAnimatorSet: AnimatorSet = mockk(
         relaxUnitFun = true,
-        block = frameBlock
+        block = frameBlock,
     )
     private val overviewFrameAnimatorSet: AnimatorSet = mockk(
         relaxUnitFun = true,
-        block = frameBlock
+        block = frameBlock,
     )
     private val stateTransition: NavigationCameraStateTransition = mockk(relaxUnitFun = true) {
         every { transitionToFollowing(any(), any()) } returns followingAnimatorSet
@@ -97,7 +97,7 @@ class NavigationCameraTest {
             mapboxMap,
             cameraPlugin,
             viewportDataSource,
-            stateTransition
+            stateTransition,
         )
     }
 
@@ -119,7 +119,7 @@ class NavigationCameraTest {
             NavigationCameraStateTransition::transitionToFollowing,
             followingCameraOptions,
             DEFAULT_STATE_TRANSITION_OPT,
-            followingAnimatorSet
+            followingAnimatorSet,
         )
     }
 
@@ -131,7 +131,7 @@ class NavigationCameraTest {
             NavigationCameraStateTransition::transitionToOverview,
             overviewCameraOptions,
             DEFAULT_STATE_TRANSITION_OPT,
-            overviewAnimatorSet
+            overviewAnimatorSet,
         )
     }
 
@@ -166,7 +166,7 @@ class NavigationCameraTest {
             followingCameraOptions,
             DEFAULT_STATE_TRANSITION_OPT,
             followingAnimatorSet,
-            times = 1
+            times = 1,
         )
     }
 
@@ -181,7 +181,7 @@ class NavigationCameraTest {
             overviewCameraOptions,
             DEFAULT_STATE_TRANSITION_OPT,
             overviewAnimatorSet,
-            times = 1
+            times = 1,
         )
     }
 
@@ -354,7 +354,7 @@ class NavigationCameraTest {
             NavigationCameraStateTransition::updateFrameForFollowing,
             followingCameraOptions,
             DEFAULT_FRAME_TRANSITION_OPT,
-            followingFrameAnimatorSet
+            followingFrameAnimatorSet,
         )
     }
 
@@ -381,7 +381,7 @@ class NavigationCameraTest {
             NavigationCameraStateTransition::updateFrameForOverview,
             overviewCameraOptions,
             DEFAULT_FRAME_TRANSITION_OPT,
-            overviewFrameAnimatorSet
+            overviewFrameAnimatorSet,
         )
     }
 
@@ -394,28 +394,28 @@ class NavigationCameraTest {
             followingCameraOptions,
             DEFAULT_STATE_TRANSITION_OPT,
             followingAnimatorSet,
-            times = 0
+            times = 0,
         )
         verifyTransitionExecuted(
             NavigationCameraStateTransition::transitionToOverview,
             overviewCameraOptions,
             DEFAULT_STATE_TRANSITION_OPT,
             overviewAnimatorSet,
-            times = 0
+            times = 0,
         )
         verifyTransitionExecuted(
             NavigationCameraStateTransition::updateFrameForFollowing,
             followingCameraOptions,
             DEFAULT_FRAME_TRANSITION_OPT,
             followingFrameAnimatorSet,
-            times = 0
+            times = 0,
         )
         verifyTransitionExecuted(
             NavigationCameraStateTransition::updateFrameForOverview,
             overviewCameraOptions,
             DEFAULT_FRAME_TRANSITION_OPT,
             overviewFrameAnimatorSet,
-            times = 0
+            times = 0,
         )
     }
 
@@ -427,7 +427,7 @@ class NavigationCameraTest {
         internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
 
         val frameTransition = mockFrameTransitionForFollowing(
-            DEFAULT_FRAME_TRANSITION_OPT
+            DEFAULT_FRAME_TRANSITION_OPT,
         )
         internalDataSourceObserverSlot.captured.viewportDataSourceUpdated(viewportData)
 
@@ -435,7 +435,7 @@ class NavigationCameraTest {
             NavigationCameraStateTransition::updateFrameForFollowing,
             frameTransition.frameCamera,
             DEFAULT_FRAME_TRANSITION_OPT,
-            frameTransition.frameAnimatorSet
+            frameTransition.frameAnimatorSet,
         )
     }
 
@@ -447,7 +447,7 @@ class NavigationCameraTest {
         internalTransitionListenerSlot.captured.onAnimationEnd(overviewAnimatorSet)
 
         val frameTransition = mockFrameTransitionForOverview(
-            DEFAULT_FRAME_TRANSITION_OPT
+            DEFAULT_FRAME_TRANSITION_OPT,
         )
         internalDataSourceObserverSlot.captured.viewportDataSourceUpdated(viewportData)
 
@@ -455,7 +455,7 @@ class NavigationCameraTest {
             NavigationCameraStateTransition::updateFrameForOverview,
             frameTransition.frameCamera,
             DEFAULT_FRAME_TRANSITION_OPT,
-            frameTransition.frameAnimatorSet
+            frameTransition.frameAnimatorSet,
         )
     }
 
@@ -470,21 +470,21 @@ class NavigationCameraTest {
 
         navigationCamera.requestNavigationCameraToFollowing(
             stateOpt,
-            frameOpt
+            frameOpt,
         )
 
         verifyTransitionExecuted(
             NavigationCameraStateTransition::transitionToFollowing,
             followingCameraOptions,
             stateOpt,
-            followingAnimatorSet
+            followingAnimatorSet,
         )
 
         internalTransitionListenerSlot.captured.onAnimationStart(followingAnimatorSet)
         internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
 
         val frameTransition = mockFrameTransitionForFollowing(
-            frameOpt
+            frameOpt,
         )
         internalDataSourceObserverSlot.captured.viewportDataSourceUpdated(viewportData)
 
@@ -492,7 +492,7 @@ class NavigationCameraTest {
             NavigationCameraStateTransition::updateFrameForFollowing,
             frameTransition.frameCamera,
             frameOpt,
-            frameTransition.frameAnimatorSet
+            frameTransition.frameAnimatorSet,
         )
     }
 
@@ -507,21 +507,21 @@ class NavigationCameraTest {
 
         navigationCamera.requestNavigationCameraToOverview(
             stateOpt,
-            frameOpt
+            frameOpt,
         )
 
         verifyTransitionExecuted(
             NavigationCameraStateTransition::transitionToOverview,
             overviewCameraOptions,
             stateOpt,
-            overviewAnimatorSet
+            overviewAnimatorSet,
         )
 
         internalTransitionListenerSlot.captured.onAnimationStart(overviewAnimatorSet)
         internalTransitionListenerSlot.captured.onAnimationEnd(overviewAnimatorSet)
 
         val frameTransition = mockFrameTransitionForOverview(
-            frameOpt
+            frameOpt,
         )
         internalDataSourceObserverSlot.captured.viewportDataSourceUpdated(viewportData)
 
@@ -529,7 +529,7 @@ class NavigationCameraTest {
             NavigationCameraStateTransition::updateFrameForOverview,
             frameTransition.frameCamera,
             frameOpt,
-            frameTransition.frameAnimatorSet
+            frameTransition.frameAnimatorSet,
         )
     }
 
@@ -544,7 +544,7 @@ class NavigationCameraTest {
 
         navigationCamera.requestNavigationCameraToFollowing(
             stateOpt,
-            frameOpt
+            frameOpt,
         )
         internalTransitionListenerSlot.captured.onAnimationStart(followingAnimatorSet)
         internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
@@ -554,7 +554,7 @@ class NavigationCameraTest {
         internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
 
         val frameTransition = mockFrameTransitionForFollowing(
-            DEFAULT_FRAME_TRANSITION_OPT
+            DEFAULT_FRAME_TRANSITION_OPT,
         )
         internalDataSourceObserverSlot.captured.viewportDataSourceUpdated(viewportData)
 
@@ -562,7 +562,7 @@ class NavigationCameraTest {
             NavigationCameraStateTransition::updateFrameForFollowing,
             frameTransition.frameCamera,
             DEFAULT_FRAME_TRANSITION_OPT,
-            frameTransition.frameAnimatorSet
+            frameTransition.frameAnimatorSet,
         )
     }
 
@@ -577,7 +577,7 @@ class NavigationCameraTest {
 
         navigationCamera.requestNavigationCameraToOverview(
             stateOpt,
-            frameOpt
+            frameOpt,
         )
         internalTransitionListenerSlot.captured.onAnimationStart(overviewAnimatorSet)
         internalTransitionListenerSlot.captured.onAnimationEnd(overviewAnimatorSet)
@@ -587,7 +587,7 @@ class NavigationCameraTest {
         internalTransitionListenerSlot.captured.onAnimationEnd(overviewAnimatorSet)
 
         val frameTransition = mockFrameTransitionForOverview(
-            DEFAULT_FRAME_TRANSITION_OPT
+            DEFAULT_FRAME_TRANSITION_OPT,
         )
         internalDataSourceObserverSlot.captured.viewportDataSourceUpdated(viewportData)
 
@@ -595,7 +595,7 @@ class NavigationCameraTest {
             NavigationCameraStateTransition::updateFrameForOverview,
             frameTransition.frameCamera,
             DEFAULT_FRAME_TRANSITION_OPT,
-            frameTransition.frameAnimatorSet
+            frameTransition.frameAnimatorSet,
         )
     }
 
@@ -607,7 +607,7 @@ class NavigationCameraTest {
         internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
 
         val frameTransition = mockFrameTransitionForFollowing(
-            DEFAULT_FRAME_TRANSITION_OPT
+            DEFAULT_FRAME_TRANSITION_OPT,
         )
         internalDataSourceObserverSlot.captured.viewportDataSourceUpdated(viewportData)
         internalFrameListenerSlot.captured.onAnimationStart(frameTransition.frameAnimatorSet)
@@ -626,7 +626,7 @@ class NavigationCameraTest {
         internalTransitionListenerSlot.captured.onAnimationEnd(overviewAnimatorSet)
 
         val frameTransition = mockFrameTransitionForOverview(
-            DEFAULT_FRAME_TRANSITION_OPT
+            DEFAULT_FRAME_TRANSITION_OPT,
         )
         internalDataSourceObserverSlot.captured.viewportDataSourceUpdated(viewportData)
         internalFrameListenerSlot.captured.onAnimationStart(frameTransition.frameAnimatorSet)
@@ -645,7 +645,7 @@ class NavigationCameraTest {
         internalTransitionListenerSlot.captured.onAnimationEnd(overviewAnimatorSet)
 
         val frameTransition = mockFrameTransitionForOverview(
-            DEFAULT_FRAME_TRANSITION_OPT
+            DEFAULT_FRAME_TRANSITION_OPT,
         )
         navigationCamera.resetFrame()
 
@@ -654,7 +654,7 @@ class NavigationCameraTest {
             frameTransition.frameCamera,
             DEFAULT_FRAME_TRANSITION_OPT,
             frameTransition.frameAnimatorSet,
-            instant = true
+            instant = true,
         )
     }
 
@@ -666,7 +666,7 @@ class NavigationCameraTest {
         internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
 
         val frameTransition = mockFrameTransitionForFollowing(
-            DEFAULT_FRAME_TRANSITION_OPT
+            DEFAULT_FRAME_TRANSITION_OPT,
         )
         navigationCamera.resetFrame()
 
@@ -675,7 +675,7 @@ class NavigationCameraTest {
             frameTransition.frameCamera,
             DEFAULT_FRAME_TRANSITION_OPT,
             frameTransition.frameAnimatorSet,
-            instant = true
+            instant = true,
         )
     }
 
@@ -790,7 +790,7 @@ class NavigationCameraTest {
         internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
 
         val frameTransition = mockFrameTransitionForFollowing(
-            DEFAULT_FRAME_TRANSITION_OPT
+            DEFAULT_FRAME_TRANSITION_OPT,
         )
         internalDataSourceObserverSlot.captured.viewportDataSourceUpdated(viewportData)
 
@@ -809,7 +809,7 @@ class NavigationCameraTest {
         internalTransitionListenerSlot.captured.onAnimationEnd(overviewAnimatorSet)
 
         val frameTransition = mockFrameTransitionForOverview(
-            DEFAULT_FRAME_TRANSITION_OPT
+            DEFAULT_FRAME_TRANSITION_OPT,
         )
         internalDataSourceObserverSlot.captured.viewportDataSourceUpdated(viewportData)
 
@@ -824,13 +824,13 @@ class NavigationCameraTest {
     private fun verifyTransitionExecuted(
         transitionFun: NavigationCameraStateTransition.(
             CameraOptions,
-            NavigationCameraTransitionOptions
+            NavigationCameraTransitionOptions,
         ) -> AnimatorSet,
         transitionCameraOptions: CameraOptions,
         transitionOptions: NavigationCameraTransitionOptions,
         returnTransitionSet: AnimatorSet,
         instant: Boolean = false,
-        times: Int = 1
+        times: Int = 1,
     ) {
         verify(exactly = times) {
             stateTransition.transitionFun(transitionCameraOptions, transitionOptions)
@@ -843,12 +843,12 @@ class NavigationCameraTest {
     }
 
     private fun mockFrameTransitionForFollowing(
-        transitionOptions: NavigationCameraTransitionOptions
+        transitionOptions: NavigationCameraTransitionOptions,
     ): MockFrameTransition {
         val frameCamera = mockk<CameraOptions>()
         val frameAnimatorSet = mockk(
             relaxUnitFun = true,
-            block = frameBlock
+            block = frameBlock,
         )
         every { viewportData.cameraForFollowing } returns frameCamera
         every {
@@ -859,12 +859,12 @@ class NavigationCameraTest {
     }
 
     private fun mockFrameTransitionForOverview(
-        transitionOptions: NavigationCameraTransitionOptions
+        transitionOptions: NavigationCameraTransitionOptions,
     ): MockFrameTransition {
         val frameCamera = mockk<CameraOptions>()
         val frameAnimatorSet = mockk(
             relaxUnitFun = true,
-            block = frameBlock
+            block = frameBlock,
         )
         every { viewportData.cameraForOverview } returns frameCamera
         every {
@@ -876,6 +876,6 @@ class NavigationCameraTest {
 
     private data class MockFrameTransition(
         val frameCamera: CameraOptions,
-        val frameAnimatorSet: AnimatorSet
+        val frameAnimatorSet: AnimatorSet,
     )
 }

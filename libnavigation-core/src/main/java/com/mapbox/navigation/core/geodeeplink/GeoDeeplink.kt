@@ -8,7 +8,7 @@ import com.mapbox.geojson.Point
  */
 class GeoDeeplink internal constructor(
     val point: Point?,
-    val placeQuery: String?
+    val placeQuery: String?,
 ) {
 
     /**

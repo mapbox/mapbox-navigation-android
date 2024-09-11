@@ -25,7 +25,8 @@ object LocaleEx {
         when (this.country.uppercase(this)) {
             "US", // US
             "LR", // Liberia
-            "MM" -> // Burma
+            "MM",
+            -> // Burma
                 UnitType.IMPERIAL
             else ->
                 UnitType.METRIC
@@ -37,10 +38,8 @@ object LocaleEx {
      */
     @JvmStatic
     fun getLocaleDirectionsRoute(directionsRoute: DirectionsRoute, context: Context): Locale {
-        return if (directionsRoute.voiceLanguage() != null) {
-            Locale(directionsRoute.voiceLanguage())
-        } else {
-            context.inferDeviceLocale()
-        }
+        return directionsRoute.voiceLanguage()
+            ?.let { Locale.forLanguageTag(it) }
+            ?: context.inferDeviceLocale()
     }
 }

@@ -5,18 +5,12 @@ package com.mapbox.navigation.instrumentation_tests.core
 import android.location.Location
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
-import com.mapbox.navigation.base.options.LongRoutesOptimisationOptions
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.internal.extensions.flowRouteProgress
 import com.mapbox.navigation.instrumentation_tests.R
-import com.mapbox.navigation.instrumentation_tests.utils.DelayedResponseModifier
-import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
-import com.mapbox.navigation.instrumentation_tests.utils.location.stayOnPosition
-import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
-import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
-import com.mapbox.navigation.instrumentation_tests.utils.withMapboxNavigation
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
@@ -25,6 +19,12 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.routesPreviewUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
+import com.mapbox.navigation.testing.utils.DelayedResponseModifier
+import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
+import com.mapbox.navigation.testing.utils.location.stayOnPosition
+import com.mapbox.navigation.testing.utils.readRawFileText
+import com.mapbox.navigation.testing.utils.routes.RoutesProvider
+import com.mapbox.navigation.testing.utils.withMapboxNavigation
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -34,6 +34,7 @@ import org.junit.Test
 // old devices parse long routes very slowly
 private const val EXTENDED_TIMEOUT_FOR_SLOW_PARSING = 200_000L
 
+@OptIn(ExperimentalMapboxNavigationAPI::class)
 class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
 
     override fun setupMockLocation(): Location {
@@ -49,7 +50,7 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
         val handler = MockDirectionsRequestHandler(
             profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
             lazyJsonResponse = { readRawFileText(context, R.raw.long_route_7k) },
-            expectedCoordinates = routeOptions.coordinatesList()
+            expectedCoordinates = routeOptions.coordinatesList(),
         ).apply {
             // It takes time for Direction API to calculate a long route
             jsonResponseModifier = DelayedResponseModifier(12_000)
@@ -67,17 +68,12 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
     fun requestNewRoutesWhileLongRoutesAreSet() = sdkTest(EXTENDED_TIMEOUT_FOR_SLOW_PARSING) {
         val longRoutesOptions = setupLongRoutes()
         val shortRoutesOptions = setupShortRoutes()
-        withMapboxNavigation(
-            longRoutesOptimisationOptions =
-            LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes(
-                responseToParseSizeBytes = 5.megabytesInBytes()
-            )
-        ) { navigation ->
+        withMapboxNavigation { navigation ->
             navigation.setNavigationRoutesAsync(
                 navigation
                     .requestRoutes(longRoutesOptions)
                     .getSuccessfulResultOrThrowException().routes,
-                1
+                1,
             )
             assertEquals(2, navigation.getNavigationRoutes().size)
 
@@ -88,7 +84,7 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
             stayOnPosition(
                 longitude = secondWaypoint.longitude(),
                 latitude = secondWaypoint.latitude(),
-                bearing = 190.0f
+                bearing = 190.0f,
             ) {
                 navigation.startTripSession()
                 navigation.routeProgressUpdates().first()
@@ -105,16 +101,11 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
     fun requestNewRoutesWhileLongRoutesArePreviewed() = sdkTest(EXTENDED_TIMEOUT_FOR_SLOW_PARSING) {
         val longRoutesOptions = setupLongRoutes()
         val shortRoutesOptions = setupShortRoutes()
-        withMapboxNavigation(
-            longRoutesOptimisationOptions =
-            LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes(
-                responseToParseSizeBytes = 5.megabytesInBytes()
-            )
-        ) { navigation ->
+        withMapboxNavigation { navigation ->
             navigation.setRoutesPreview(
                 navigation
                     .requestRoutes(longRoutesOptions)
-                    .getSuccessfulResultOrThrowException().routes
+                    .getSuccessfulResultOrThrowException().routes,
             )
 
             assertEquals(
@@ -123,7 +114,7 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
                     .map { it.routesPreview }
                     .filterNotNull()
                     .first()
-                    .routesList.size
+                    .routesList.size,
             )
 
             val shortRoutes = navigation.requestRoutes(shortRoutesOptions)
@@ -139,16 +130,11 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
     fun rerouteOnLongRoute() = sdkTest(EXTENDED_TIMEOUT_FOR_SLOW_PARSING) {
         val longRoutesOptions = setupLongRoutes()
         val longRoutesRerouteOptions = setupLongRoutesReroute()
-        withMapboxNavigation(
-            longRoutesOptimisationOptions =
-            LongRoutesOptimisationOptions.OptimiseNavigationForLongRoutes(
-                responseToParseSizeBytes = 5.megabytesInBytes()
-            )
-        ) { navigation ->
+        withMapboxNavigation { navigation ->
             navigation.setNavigationRoutesAsync(
                 navigation
                     .requestRoutes(longRoutesOptions)
-                    .getSuccessfulResultOrThrowException().routes
+                    .getSuccessfulResultOrThrowException().routes,
             )
             assertEquals(2, navigation.getNavigationRoutes().size)
 
@@ -156,7 +142,7 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
             stayOnPosition(
                 latitude = rerouteOrigin.latitude(),
                 longitude = rerouteOrigin.longitude(),
-                bearing = 190.0f
+                bearing = 190.0f,
             ) {
                 navigation.startTripSession()
                 navigation.flowRouteProgress().first()
@@ -177,7 +163,7 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
         val handler = MockDirectionsRequestHandler(
             profile = routeOptions.profile(),
             lazyJsonResponse = { readRawFileText(context, R.raw.long_route_7k) },
-            expectedCoordinates = routeOptions.coordinatesList()
+            expectedCoordinates = routeOptions.coordinatesList(),
         )
         mockWebServerRule.requestHandlers.add(handler)
         return routeOptions
@@ -193,7 +179,7 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
                     ";11.571179644010442,48.145540095763664" +
                     ";13.394784408007155,52.51274942160785" +
                     ";-9.143239539655042,38.70880224984026" +
-                    ";9.21595128801522,45.4694220491258"
+                    ";9.21595128801522,45.4694220491258",
             )
             .alternatives(true)
             .enableRefresh(true)
@@ -206,7 +192,7 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
         val handler = MockDirectionsRequestHandler(
             profile = routeOptions.profile(),
             lazyJsonResponse = { readRawFileText(context, R.raw.long_route_7k_reroute) },
-            expectedCoordinates = routeOptions.coordinatesList()
+            expectedCoordinates = routeOptions.coordinatesList(),
         )
         mockWebServerRule.requestHandlers.add(handler)
         return routeOptions
@@ -222,7 +208,7 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
                     ";11.571179644010442,48.145540095763664" +
                     ";13.394784408007155,52.51274942160785" +
                     ";-9.143239539655042,38.70880224984026" +
-                    ";9.21595128801522,45.4694220491258"
+                    ";9.21595128801522,45.4694220491258",
             )
             .alternatives(true)
             .enableRefresh(true)

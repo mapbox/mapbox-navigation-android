@@ -1,31 +1,26 @@
+@file:OptIn(ExperimentalMapboxNavigationAPI::class)
+
 package com.mapbox.navigation.base.route
 
+import com.google.gson.JsonPrimitive
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
-import com.mapbox.navigation.base.internal.route.RouteCompatibilityCache
-import com.mapbox.navigation.base.internal.route.toTestNavigationRoute
-import com.mapbox.navigation.base.internal.route.toTestNavigationRoutes
 import com.mapbox.navigation.base.internal.route.updateExpirationTime
-import com.mapbox.navigation.base.internal.utils.DirectionsRouteMissingConditionsCheck
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
-import com.mapbox.navigation.testing.MapboxJavaObjectsFactory
 import com.mapbox.navigation.testing.NativeRouteParserRule
 import com.mapbox.navigation.testing.factories.createClosure
+import com.mapbox.navigation.testing.factories.createDirectionsRoute
+import com.mapbox.navigation.testing.factories.createNavigationRoute
+import com.mapbox.navigation.testing.factories.createRouteOptions
 import com.mapbox.navigation.testing.factories.toDataRef
-import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
-import io.mockk.spyk
-import io.mockk.unmockkObject
-import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -40,209 +35,6 @@ class NavigationRouteTest {
     val loggerFrontendTestRule = LoggingFrontendTestRule()
 
     @Test
-    fun `toNavigationRoute - waypoints back filled from route legs`() {
-        val directionsRoute = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("multileg_route.json")
-        )
-
-        val navigationRoute = directionsRoute.toTestNavigationRoute(RouterOrigin.Custom())
-
-        assertEquals(3, navigationRoute.directionsResponse.waypoints()!!.size)
-        assertEquals(
-            DirectionsWaypoint.builder()
-                .name("")
-                .rawLocation(doubleArrayOf(-77.157347, 38.783004))
-                .build(),
-            navigationRoute.directionsResponse.waypoints()!![0]
-        )
-        assertEquals(
-            DirectionsWaypoint.builder()
-                .name("")
-                .rawLocation(doubleArrayOf(-77.167276, 38.775717))
-                .build(),
-            navigationRoute.directionsResponse.waypoints()!![1]
-        )
-        assertEquals(
-            DirectionsWaypoint.builder()
-                .name("")
-                .rawLocation(doubleArrayOf(-77.153468, 38.77091))
-                .build(),
-            navigationRoute.directionsResponse.waypoints()!![2]
-        )
-    }
-
-    @Test
-    fun `toNavigationRoute - waypoints back filled from route options`() {
-        val directionsRoute = spyk(MapboxJavaObjectsFactory.directionsRoute()) {
-            every { requestUuid() } returns "asdf"
-            every { routeIndex() } returns "0"
-            every { routeOptions() } returns RouteOptions.builder()
-                .profile("driving")
-                .coordinatesList(
-                    listOf(
-                        Point.fromLngLat(1.1, 1.1),
-                        Point.fromLngLat(2.2, 2.2),
-                    )
-                )
-                .build()
-            every { legs() } returns null
-        }
-
-        val navigationRoute = directionsRoute.toTestNavigationRoute(RouterOrigin.Custom())
-
-        assertEquals(2, navigationRoute.directionsResponse.waypoints()!!.size)
-        assertEquals(
-            DirectionsWaypoint.builder()
-                .name("")
-                .rawLocation(doubleArrayOf(1.1, 1.1))
-                .build(),
-            navigationRoute.directionsResponse.waypoints()!![0]
-        )
-        assertEquals(
-            DirectionsWaypoint.builder()
-                .name("")
-                .rawLocation(doubleArrayOf(2.2, 2.2))
-                .build(),
-            navigationRoute.directionsResponse.waypoints()!![1]
-        )
-    }
-
-    @Test
-    fun `toNavigationRoute - uuid from route used`() {
-        val directionsRoute = MapboxJavaObjectsFactory.directionsRoute().toBuilder()
-            .requestUuid("asdf")
-            .routeIndex("0")
-            .legs(null)
-            .routeOptions(
-                RouteOptions.builder()
-                    .profile("driving")
-                    .coordinatesList(
-                        listOf(
-                            Point.fromLngLat(1.1, 1.1),
-                            Point.fromLngLat(2.2, 2.2),
-                        )
-                    )
-                    .build()
-            )
-            .build()
-
-        val navigationRoute = directionsRoute.toTestNavigationRoute(RouterOrigin.Offboard)
-
-        assertEquals("asdf#0", navigationRoute.id)
-    }
-
-    @Test
-    fun `toNavigationRoute - waypoints back filled from route options ignoring silent`() {
-        val directionsRoute = MapboxJavaObjectsFactory.directionsRoute()
-            .toBuilder()
-            .requestUuid("asdf")
-            .routeIndex("0")
-            .routeOptions(
-                RouteOptions.builder()
-                    .profile("driving")
-                    .coordinatesList(
-                        listOf(
-                            Point.fromLngLat(1.1, 1.1),
-                            Point.fromLngLat(2.2, 2.2),
-                            Point.fromLngLat(3.3, 3.3),
-                            Point.fromLngLat(4.4, 4.4),
-                        )
-                    )
-                    .waypointIndicesList(listOf(0, 2, 3))
-                    .build()
-            )
-            .legs(null)
-            .build()
-
-        val navigationRoute = directionsRoute.toTestNavigationRoute(RouterOrigin.Custom())
-
-        assertEquals(3, navigationRoute.directionsResponse.waypoints()!!.size)
-        assertEquals(
-            DirectionsWaypoint.builder()
-                .name("")
-                .rawLocation(doubleArrayOf(1.1, 1.1))
-                .build(),
-            navigationRoute.directionsResponse.waypoints()!![0]
-        )
-        assertEquals(
-            DirectionsWaypoint.builder()
-                .name("")
-                .rawLocation(doubleArrayOf(3.3, 3.3))
-                .build(),
-            navigationRoute.directionsResponse.waypoints()!![1]
-        )
-        assertEquals(
-            DirectionsWaypoint.builder()
-                .name("")
-                .rawLocation(doubleArrayOf(4.4, 4.4))
-                .build(),
-            navigationRoute.directionsResponse.waypoints()!![2]
-        )
-    }
-
-    @Test
-    fun `when route created, compatibility cache notified`() {
-        mockkObject(RouteCompatibilityCache)
-
-        val requestUrl = FileUtils.loadJsonFixture("test_directions_request_url.txt")
-        val responseJson = FileUtils.loadJsonFixture("test_directions_response.json")
-        val routes = NavigationRoute.create(
-            routeRequestUrl = requestUrl,
-            directionsResponseJson = responseJson
-        )
-
-        verify(exactly = 1) {
-            RouteCompatibilityCache.cacheCreationResult(routes)
-        }
-
-        unmockkObject(RouteCompatibilityCache)
-    }
-
-    @Test
-    fun `when route created from objects, compatibility cache notified`() {
-        mockkObject(RouteCompatibilityCache)
-
-        val requestUrl = FileUtils.loadJsonFixture("test_directions_request_url.txt")
-        val routeOptions = RouteOptions.fromUrl(URL(requestUrl))
-        val responseJson = FileUtils.loadJsonFixture("test_directions_response.json")
-        val response = DirectionsResponse.fromJson(responseJson)
-        val routes = NavigationRoute.create(
-            routeOptions = routeOptions,
-            directionsResponse = response
-        )
-
-        verify(exactly = 1) {
-            RouteCompatibilityCache.cacheCreationResult(routes)
-        }
-
-        unmockkObject(RouteCompatibilityCache)
-    }
-
-    @Test
-    fun `when route copied, compatibility cache notified`() {
-        mockkObject(RouteCompatibilityCache)
-
-        val requestUrl = FileUtils.loadJsonFixture("test_directions_request_url.txt")
-        val responseJson = FileUtils.loadJsonFixture("test_directions_response.json")
-        val routes = NavigationRoute.create(
-            routeRequestUrl = requestUrl,
-            directionsResponseJson = responseJson
-        )
-
-        val originalRoute = routes.first()
-        val copiedRoute = originalRoute.copy(
-            directionsResponse = originalRoute.directionsResponse.toBuilder().uuid("diff").build(),
-            directionsRoute = originalRoute.directionsRoute.toBuilder().requestUuid("diff").build()
-        )
-
-        verify(exactly = 1) {
-            RouteCompatibilityCache.cacheCreationResult(listOf(copiedRoute))
-        }
-
-        unmockkObject(RouteCompatibilityCache)
-    }
-
-    @Test
     fun `origin access`() {
         val requestUrl = FileUtils.loadJsonFixture("test_directions_request_url.txt")
         val responseJson = FileUtils.loadJsonFixture("test_directions_response.json")
@@ -250,10 +42,10 @@ class NavigationRouteTest {
         val navigationRoute = NavigationRoute.create(
             directionsResponseJson = responseJson,
             routeRequestUrl = requestUrl,
-            routerOrigin = RouterOrigin.Onboard
+            routerOrigin = RouterOrigin.OFFLINE,
         )
 
-        assertTrue(navigationRoute.all { it.origin == RouterOrigin.Onboard })
+        assertTrue(navigationRoute.all { it.origin == RouterOrigin.OFFLINE })
     }
 
     @Test
@@ -264,46 +56,15 @@ class NavigationRouteTest {
         val navigationRoute = NavigationRoute.create(
             directionsResponseJson = responseJson,
             routeRequestUrl = requestUrl,
-            routerOrigin = RouterOrigin.Onboard
+            routerOrigin = RouterOrigin.OFFLINE,
         )
 
         assertEquals(
             listOf(
-                "FYenNs6nfVvkDQgvLWnYcZvn2nvekWStF7nM0JV0X_IBAlsXWvomuA==#0"
+                "FYenNs6nfVvkDQgvLWnYcZvn2nvekWStF7nM0JV0X_IBAlsXWvomuA==#0",
             ),
-            navigationRoute.map { it.id }
+            navigationRoute.map { it.id },
         )
-    }
-
-    @Test
-    fun `map from NavigationRoute to DirectionsRoute produce exception if not pass check`() {
-        mockkObject(DirectionsRouteMissingConditionsCheck) {
-            val mockDirectionsRoute = mockk<DirectionsRoute>()
-            val mockNavigationRoute = mockk<NavigationRoute> {
-                every { directionsRoute } returns mockDirectionsRoute
-            }
-            every {
-                DirectionsRouteMissingConditionsCheck.checkDirectionsRoute(mockDirectionsRoute)
-            } throws IllegalStateException()
-
-            assertThrows(IllegalStateException::class.java) {
-                listOf(mockNavigationRoute).toDirectionsRoutes()
-            }
-        }
-    }
-
-    @Test
-    fun `map from DirectionsRoute to NavigationRoute produce exception if not pass check`() {
-        mockkObject(DirectionsRouteMissingConditionsCheck, NavigationRoute) {
-            val mockDirectionsRoute = mockk<DirectionsRoute>()
-            every {
-                DirectionsRouteMissingConditionsCheck.checkDirectionsRoute(mockDirectionsRoute)
-            } throws IllegalStateException()
-
-            assertThrows(IllegalStateException::class.java) {
-                listOf(mockDirectionsRoute).toTestNavigationRoutes(RouterOrigin.Offboard)
-            }
-        }
     }
 
     @Test
@@ -311,7 +72,7 @@ class NavigationRouteTest {
         runBlocking<Unit> {
             val responseString = FileUtils.loadJsonFixture("test_directions_response.json")
             val responseModel = DirectionsResponse.fromJson(
-                FileUtils.loadJsonFixture("test_directions_response.json")
+                FileUtils.loadJsonFixture("test_directions_response.json"),
             )
             val responseDataRef = responseString.toDataRef()
             val requestUrl = FileUtils.loadJsonFixture("test_directions_request_url.txt")
@@ -320,75 +81,66 @@ class NavigationRouteTest {
             val serialisedFromModel = NavigationRoute.create(
                 responseModel,
                 testRouteOptions,
-                RouterOrigin.Offboard
+                RouterOrigin.ONLINE,
             )
             val serialisedFromString = NavigationRoute.create(
                 responseString,
                 requestUrl,
-                RouterOrigin.Offboard
+                RouterOrigin.ONLINE,
             )
             val serialisedFromDataRef = NavigationRoute.createAsync(
                 responseDataRef,
                 requestUrl,
-                RouterOrigin.Offboard,
-                null
+                RouterOrigin.ONLINE,
+                0L,
             )
 
             assertEquals(serialisedFromModel, serialisedFromString)
-            assertEquals(serialisedFromModel, serialisedFromDataRef)
+            assertEquals(serialisedFromModel, serialisedFromDataRef.routes)
         }
 
     @Test
     fun `fill expected closures on original route creation`() {
         val routeJson = FileUtils.loadJsonFixture("route_closure_second_waypoint.json")
+        val route = DirectionsRoute.fromJson(routeJson)
         val actual = NavigationRoute(
-            DirectionsResponse.builder()
-                .routes(listOf(DirectionsRoute.fromJson(routeJson)))
-                .uuid("uuid")
-                .code("Ok")
-                .build(),
-            0,
+            route,
+            route.waypoints(),
             RouteOptions.builder()
                 .applyDefaultNavigationOptions()
                 .coordinates("0.0,0.0;1.1,1.1")
                 .build(),
-            DirectionsRoute.fromJson(routeJson),
             mockk(relaxed = true),
-            null
+            null,
+            ResponseOriginAPI.DIRECTIONS_API,
         )
 
         assertEquals(
             listOf(listOf(createClosure(5, 8)), listOf(createClosure(0, 8))),
-            actual.unavoidableClosures
+            actual.unavoidableClosures,
         )
     }
 
     @Test
     fun `copy expected closures form original route`() {
         val routeJson = FileUtils.loadJsonFixture("route_closure_second_waypoint.json")
+        val route = DirectionsRoute.fromJson(routeJson)
         val original = NavigationRoute(
-            DirectionsResponse.builder()
-                .routes(listOf(DirectionsRoute.fromJson(routeJson)))
-                .uuid("uuid")
-                .code("Ok")
-                .build(),
-            0,
+            route,
+            route.waypoints(),
             RouteOptions.builder()
                 .applyDefaultNavigationOptions()
                 .coordinates("0.0,0.0;1.1,1.1")
                 .build(),
-            DirectionsRoute.fromJson(routeJson),
             mockk(relaxed = true),
-            null
+            null,
+            ResponseOriginAPI.DIRECTIONS_API,
         )
 
         val newRouteJson = FileUtils.loadJsonFixture("route_closure_second_silent_waypoint.json")
         val copied = original.copy(
-            directionsResponse = DirectionsResponse.builder()
-                .routes(listOf(DirectionsRoute.fromJson(newRouteJson)))
-                .uuid("uuid")
-                .code("Ok")
-                .build()
+            directionsRoute = DirectionsRoute.fromJson(newRouteJson),
+            overriddenTraffic = null,
         )
 
         assertEquals(original.unavoidableClosures, copied.unavoidableClosures)
@@ -397,61 +149,57 @@ class NavigationRouteTest {
     @Test
     fun updateExpirationTime() {
         val routeJson = FileUtils.loadJsonFixture("route_closure_second_waypoint.json")
-        val route = NavigationRoute(
-            DirectionsResponse.builder()
-                .routes(listOf(DirectionsRoute.fromJson(routeJson)))
-                .uuid("uuid")
-                .code("Ok")
-                .build(),
-            0,
+        val route = DirectionsRoute.fromJson(routeJson)
+        val navigationRoute = NavigationRoute(
+            route,
+            route.waypoints(),
             RouteOptions.builder()
                 .applyDefaultNavigationOptions()
                 .coordinates("0.0,0.0;1.1,1.1")
                 .build(),
-            DirectionsRoute.fromJson(routeJson),
             mockk(relaxed = true),
-            null
+            null,
+            ResponseOriginAPI.DIRECTIONS_API,
         )
 
-        route.updateExpirationTime(45)
-        assertEquals(45L, route.expirationTimeElapsedSeconds)
+        navigationRoute.updateExpirationTime(45)
+        assertEquals(45L, navigationRoute.expirationTimeElapsedSeconds)
     }
 
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
     @Test
-    fun `optimised navigation route`() = runBlocking<Unit> {
-        val responseString = FileUtils.loadJsonFixture("route_with_alternatives_response.json")
-        val responseDataRef = responseString.toDataRef()
-        val requestUrl = FileUtils.loadJsonFixture("route_with_alternatives_request.txt")
-
-        val navigationRoutes = NavigationRoute.createAsync(
-            responseDataRef,
-            requestUrl,
-            RouterOrigin.Offboard,
-            null,
-            optimiseMemory = true
+    fun `access ev max charge from route`() {
+        val testMaxChargeValue = 3892
+        val route = createNavigationRoute(
+            directionsRoute = createDirectionsRoute(
+                routeOptions = createRouteOptions(
+                    unrecognizedProperties = mapOf(
+                        "ev_max_charge" to JsonPrimitive(testMaxChargeValue.toString()),
+                    ),
+                ),
+            ),
         )
 
-        assertEquals(3, navigationRoutes.size)
-        assertEquals(emptyList<DirectionsRoute>(), navigationRoutes[0].directionsResponse.routes())
-        assertEquals(emptyList<DirectionsRoute>(), navigationRoutes[1].directionsResponse.routes())
-        assertEquals(emptyList<DirectionsRoute>(), navigationRoutes[2].directionsResponse.routes())
+        val value = route.evMaxCharge
+
+        assertEquals(testMaxChargeValue, value)
     }
 
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
     @Test
-    fun `not optimised navigation route`() = runBlocking<Unit> {
-        val responseString = FileUtils.loadJsonFixture("route_with_alternatives_response.json")
-        val responseDataRef = responseString.toDataRef()
-        val requestUrl = FileUtils.loadJsonFixture("route_with_alternatives_request.txt")
-
-        val navigationRoutes = NavigationRoute.createAsync(
-            responseDataRef,
-            requestUrl,
-            RouterOrigin.Offboard,
-            null,
-            optimiseMemory = false
+    fun `access ev max charge from route with invalid request`() {
+        val route = createNavigationRoute(
+            directionsRoute = createDirectionsRoute(
+                routeOptions = createRouteOptions(
+                    unrecognizedProperties = mapOf(
+                        "ev_max_charge" to JsonPrimitive("wrong value"),
+                    ),
+                ),
+            ),
         )
 
-        assertEquals(3, navigationRoutes.size)
-        assertEquals(listOf(3, 3, 3), navigationRoutes.map { it.directionsResponse.routes().size })
+        val value = route.evMaxCharge
+
+        assertNull(value)
     }
 }

@@ -1,7 +1,6 @@
 package com.mapbox.navigation.core.history.model
 
 import com.mapbox.api.directions.v5.DirectionsCriteria
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 
 /**
@@ -14,6 +13,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
  * @param profile the routing profile to use
  * @param geometries the geometry polyline encoding
  * @param waypoints the coordinates for this route
+ * @param allRoutes list of all routes that were set, empty if they were cleared
  */
 class HistoryEventSetRoute internal constructor(
     override val eventTimestamp: Double,
@@ -22,19 +22,9 @@ class HistoryEventSetRoute internal constructor(
     val legIndex: Int,
     @DirectionsCriteria.ProfileCriteria val profile: String,
     @DirectionsCriteria.GeometriesCriteria val geometries: String,
-    val waypoints: List<HistoryWaypoint>
+    val waypoints: List<HistoryWaypoint>,
+    val allRoutes: List<NavigationRoute>,
 ) : HistoryEvent {
-
-    /**
-     * The route that was set, `null` when it cleared.
-     */
-    @Deprecated(
-        "use #navigationRoute instead",
-        ReplaceWith(
-            "navigationRoute?.directionsRoute"
-        )
-    )
-    val directionsRoute: DirectionsRoute? = navigationRoute?.directionsRoute
 
     /**
      * Regenerate whenever a change is made

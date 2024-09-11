@@ -10,17 +10,16 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.replay.route.ReplayRouteSession
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
-import com.mapbox.navigation.instrumentation_tests.utils.assertions.waitUntilHasSize
-import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
-import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
-import com.mapbox.navigation.instrumentation_tests.utils.location.stayOnPosition
-import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
-import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider.toNavigationRoutes
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
-import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
+import com.mapbox.navigation.testing.utils.assertions.waitUntilHasSize
+import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
+import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
+import com.mapbox.navigation.testing.utils.location.stayOnPosition
+import com.mapbox.navigation.testing.utils.routes.RoutesProvider
+import com.mapbox.navigation.testing.utils.routes.requestMockRoutes
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Before
@@ -62,13 +61,17 @@ class VoiceInstructionsTest : BaseCoreNoCleanUpTest() {
             voiceInstructions.add(it)
         }
         val mapboxNavigation = createMapboxNavigation()
+        val routes = mapboxNavigation.requestMockRoutes(
+            mockWebServerRule,
+            mockRoute,
+        )
         mapboxNavigation.registerVoiceInstructionsObserver(voiceInstructionsObserver)
         stayOnPosition(
             mockRoute.routeWaypoints.first(),
             0f,
         ) {
             mapboxNavigation.startTripSession()
-            mapboxNavigation.setNavigationRoutesAsync(mockRoute.toNavigationRoutes())
+            mapboxNavigation.setNavigationRoutesAsync(routes)
             voiceInstructions.waitUntilHasSize(1)
         }
         val relayRouteSession = ReplayRouteSession()
@@ -83,11 +86,10 @@ class VoiceInstructionsTest : BaseCoreNoCleanUpTest() {
 
     private fun createMapboxNavigation(): MapboxNavigation {
         val navigationOptions = NavigationOptions.Builder(context)
-            .accessToken(getMapboxAccessTokenFromResources(context))
             .routingTilesOptions(
                 RoutingTilesOptions.Builder()
                     .tilesBaseUri(URI(mockWebServerRule.baseUrl))
-                    .build()
+                    .build(),
             )
             .build()
         return MapboxNavigationProvider.create(navigationOptions).also {

@@ -45,7 +45,7 @@ object GeoDeeplinkParser {
             } else {
                 GeoDeeplink(
                     point = point,
-                    placeQuery = placeQuery
+                    placeQuery = placeQuery,
                 )
             }
         } else {

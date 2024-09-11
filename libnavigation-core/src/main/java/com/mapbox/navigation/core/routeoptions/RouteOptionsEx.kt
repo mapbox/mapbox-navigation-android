@@ -11,7 +11,7 @@ internal fun RouteOptions.isEVRoute(): Boolean =
 
 internal fun Map<String, JsonElement>?.isEVRoute(): Boolean =
     this?.get(
-        ROUTE_OPTIONS_KEY_ENGINE
+        ROUTE_OPTIONS_KEY_ENGINE,
     )?.asStringOrNull() == ROUTE_OPTIONS_VALUE_ELECTRIC
 
 private fun JsonElement.asStringOrNull(): String? = try {

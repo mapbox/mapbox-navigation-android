@@ -31,7 +31,7 @@ object TollCollectionType {
     @IntDef(
         UNKNOWN,
         TOLL_BOOTH,
-        TOLL_GANTRY
+        TOLL_GANTRY,
     )
     annotation class Type
 }

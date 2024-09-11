@@ -9,16 +9,15 @@ import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.replay.route.ReplayRouteSession
 import com.mapbox.navigation.core.replay.route.ReplayRouteSessionOptions
-import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
-import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider.toNavigationRoutes
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForUpdate
-import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
+import com.mapbox.navigation.testing.utils.routes.RoutesProvider
+import com.mapbox.navigation.testing.utils.routes.requestMockRoutes
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
@@ -50,7 +49,7 @@ class ReplayRouteSessionTest : BaseCoreNoCleanUpTest() {
         runOnMainSync {
             replayRouteSession = ReplayRouteSession()
             replayRouteSession.setOptions(
-                ReplayRouteSessionOptions.Builder().locationResetEnabled(false).build()
+                ReplayRouteSessionOptions.Builder().locationResetEnabled(false).build(),
             )
         }
     }
@@ -66,19 +65,21 @@ class ReplayRouteSessionTest : BaseCoreNoCleanUpTest() {
     fun routeIsPlayedIfNoLocationUpdatesHappenedBefore() = sdkTest {
         mapboxNavigation = MapboxNavigationProvider.create(
             NavigationOptions.Builder(context)
-                .accessToken(getMapboxAccessTokenFromResources(context))
-                .build()
+                .build(),
         )
-        val routes = RoutesProvider.dc_very_short(context)
+        val routes = mapboxNavigation.requestMockRoutes(
+            mockWebServerRule,
+            RoutesProvider.dc_very_short(context),
+        )
 
         replayRouteSession.onAttached(mapboxNavigation)
-        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes.toNavigationRoutes())
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
 
         val routeProgressUpdates = mapboxNavigation.routeProgressUpdates().take(5).toList()
         val lastUpdate = routeProgressUpdates.last()
         val firstUpdate = routeProgressUpdates.first()
         assertTrue(
-            lastUpdate.distanceTraveled > firstUpdate.distanceTraveled
+            lastUpdate.distanceTraveled > firstUpdate.distanceTraveled,
         )
     }
 
@@ -86,11 +87,13 @@ class ReplayRouteSessionTest : BaseCoreNoCleanUpTest() {
     fun routeIsPlayedFromCurrentPositionAfterRefresh() = sdkTest {
         mapboxNavigation = MapboxNavigationProvider.create(
             NavigationOptions.Builder(context)
-                .accessToken(getMapboxAccessTokenFromResources(context))
                 .routeRefreshOptions(routeRefreshOptions(3000))
-                .build()
+                .build(),
         )
-        val routes = RoutesProvider.dc_short_with_alternative_reroute(context).toNavigationRoutes()
+        val routes = mapboxNavigation.requestMockRoutes(
+            mockWebServerRule,
+            RoutesProvider.dc_short_with_alternative_reroute(context),
+        )
 
         replayRouteSession.onAttached(mapboxNavigation)
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)

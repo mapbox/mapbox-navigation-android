@@ -9,7 +9,6 @@ import com.mapbox.navigation.core.history.model.HistoryEventSetRoute
 import com.mapbox.navigation.core.history.model.HistoryEventUpdateLocation
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
-import com.mapbox.navigation.utils.internal.logW
 
 /**
  * Mapper that can be used with [ReplayHistoryMapper].
@@ -33,13 +32,13 @@ class ReplayHistoryMapper private constructor(
     private val locationMapper: ReplayHistoryEventMapper<HistoryEventUpdateLocation>?,
     private val setRouteMapper: ReplayHistoryEventMapper<HistoryEventSetRoute>?,
     private val statusMapper: ReplayHistoryEventMapper<HistoryEventGetStatus>?,
-    private val pushEventMappers: List<ReplayHistoryEventMapper<HistoryEventPushHistoryRecord>>
+    private val pushEventMappers: List<ReplayHistoryEventMapper<HistoryEventPushHistoryRecord>>,
 ) {
 
     /**
      * @return the builder that created the [ReplayHistoryMapper]
      */
-    fun toBuilder() = Builder().apply {
+    fun toBuilder(): Builder = Builder().apply {
         locationMapper(locationMapper)
         setRouteMapper(setRouteMapper)
         statusMapper(statusMapper)
@@ -130,19 +129,11 @@ class ReplayHistoryMapper private constructor(
          * @return [ReplayHistoryMapper]
          */
         fun build(): ReplayHistoryMapper {
-            if (setRouteMapper === DefaultSetRouteMapper) {
-                logW(
-                    "Mapper uses a deprecated default `setRouteMapper` based on " +
-                        "`ReplaySetRoute` type. Consider switching to a mapper based on " +
-                        "`ReplayNavigationSetRoute`.",
-                    "ReplayHistoryMapper"
-                )
-            }
             return ReplayHistoryMapper(
                 locationMapper = locationMapper,
                 setRouteMapper = setRouteMapper,
                 statusMapper = statusMapper,
-                pushEventMappers = pushEventMappers
+                pushEventMappers = pushEventMappers,
             )
         }
 
@@ -151,7 +142,7 @@ class ReplayHistoryMapper private constructor(
          * Set to `null` to disable the HistoryEventUpdateLocation.
          */
         fun locationMapper(
-            locationMapper: ReplayHistoryEventMapper<HistoryEventUpdateLocation>?
+            locationMapper: ReplayHistoryEventMapper<HistoryEventUpdateLocation>?,
         ): Builder = apply {
             this.locationMapper = locationMapper
         }
@@ -161,7 +152,7 @@ class ReplayHistoryMapper private constructor(
          * Set to `null` to disable the HistoryEventSetRoute.
          */
         fun setRouteMapper(
-            setRouteMapper: ReplayHistoryEventMapper<HistoryEventSetRoute>?
+            setRouteMapper: ReplayHistoryEventMapper<HistoryEventSetRoute>?,
         ): Builder = apply {
             this.setRouteMapper = setRouteMapper
         }
@@ -171,7 +162,7 @@ class ReplayHistoryMapper private constructor(
          * Set to `null` to disable the HistoryEventGetStatus.
          */
         fun statusMapper(
-            statusMapper: ReplayHistoryEventMapper<HistoryEventGetStatus>?
+            statusMapper: ReplayHistoryEventMapper<HistoryEventGetStatus>?,
         ): Builder = apply {
             this.statusMapper = statusMapper
         }
@@ -180,7 +171,7 @@ class ReplayHistoryMapper private constructor(
          * Add custom push event mappers. This is empty by default.
          */
         fun pushEventMappers(
-            pushEventMappers: List<ReplayHistoryEventMapper<HistoryEventPushHistoryRecord>>
+            pushEventMappers: List<ReplayHistoryEventMapper<HistoryEventPushHistoryRecord>>,
         ): Builder = apply {
             this.pushEventMappers = pushEventMappers
         }
@@ -193,10 +184,9 @@ class ReplayHistoryMapper private constructor(
 
             private val DefaultSetRouteMapper =
                 ReplayHistoryEventMapper<HistoryEventSetRoute> {
-                    ReplaySetRoute(
-                        eventTimestamp = it.eventTimestamp,
-                        route = it.directionsRoute
-                    )
+                    ReplaySetNavigationRoute.Builder(it.eventTimestamp)
+                        .route(it.navigationRoute)
+                        .build()
                 }
 
             private val DefaultStatusMapper =

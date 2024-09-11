@@ -36,7 +36,7 @@ object OpenLRSideOfRoad {
         ON_ROAD_OR_UNKNOWN,
         RIGHT,
         LEFT,
-        BOTH
+        BOTH,
     )
     annotation class Type
 }

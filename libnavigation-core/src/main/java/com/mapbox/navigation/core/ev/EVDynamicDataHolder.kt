@@ -21,16 +21,16 @@ internal class EVDynamicDataHolder {
     @Synchronized
     fun currentData(initialData: Map<String, JsonElement>): Map<String, String> = mergeEvData(
         initialData,
-        HashMap(currentData)
+        HashMap(currentData),
     )
 
     private fun mergeEvData(
         initialData: Map<String, JsonElement>,
-        latestUpdate: Map<String, String>
+        latestUpdate: Map<String, String>,
     ): Map<String, String> {
         val result = HashMap(latestUpdate)
         val fallbackData = extractEvRefreshData(initialData)
-        fallbackData.forEach { (key, value) ->
+        fallbackData.entries.forEach { (key, value) ->
             if (key !in result.keys) {
                 result[key] = value
             }
@@ -39,7 +39,7 @@ internal class EVDynamicDataHolder {
     }
 
     private fun extractEvRefreshData(
-        unrecognizedProperties: Map<String, JsonElement>
+        unrecognizedProperties: Map<String, JsonElement>,
     ): Map<String, String> {
         val result = mutableMapOf<String, String>()
         evRefreshKeys.forEach { key ->

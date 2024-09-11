@@ -38,7 +38,7 @@ internal class TripServiceActivity : AppCompatActivity() {
 
         tripNotification = MapboxModuleProvider.createModule(
             MapboxModuleType.NavigationTripNotification,
-            ::paramsProvider
+            ::paramsProvider,
         )
 
         mapboxTripService =
@@ -66,12 +66,12 @@ internal class TripServiceActivity : AppCompatActivity() {
                     ModuleProviderArgument(NavigationOptions::class.java, options),
                     ModuleProviderArgument(
                         TripNotificationInterceptorOwner::class.java,
-                        TripNotificationInterceptorOwner()
+                        TripNotificationInterceptorOwner(),
                     ),
                     ModuleProviderArgument(
                         DistanceFormatter::class.java,
-                        MapboxDistanceFormatter(options.distanceFormatterOptions)
-                    )
+                        MapboxDistanceFormatter(options.distanceFormatterOptions),
+                    ),
                 )
             }
             else -> throw IllegalArgumentException("not supported: $type")

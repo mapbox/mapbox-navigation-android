@@ -32,7 +32,7 @@ internal class MapboxNavigationSetNavigationRoutesHistoryRecordingTest :
         coEvery {
             tripSession.setRoutes(
                 routes,
-                SetRoutes.NewRoutes(initialLegIndex)
+                SetRoutes.NewRoutes(initialLegIndex),
             )
         } returns NativeSetRouteValue(routes, emptyList())
 
@@ -49,7 +49,7 @@ internal class MapboxNavigationSetNavigationRoutesHistoryRecordingTest :
         coEvery {
             tripSession.setRoutes(
                 routes,
-                SetRoutes.NewRoutes(initialLegIndex)
+                SetRoutes.NewRoutes(initialLegIndex),
             )
         } returns NativeSetRouteError("error")
 
@@ -66,7 +66,7 @@ internal class MapboxNavigationSetNavigationRoutesHistoryRecordingTest :
         coEvery {
             tripSession.setRoutes(
                 routes,
-                SetRoutes.NewRoutes(initialLegIndex)
+                SetRoutes.NewRoutes(initialLegIndex),
             )
         } returns NativeSetRouteValue(routes, emptyList())
 

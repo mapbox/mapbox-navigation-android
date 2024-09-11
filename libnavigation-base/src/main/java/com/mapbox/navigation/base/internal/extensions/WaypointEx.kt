@@ -12,7 +12,8 @@ fun Waypoint.isRequestedWaypoint(): Boolean =
     when (this.internalType) {
         Waypoint.InternalType.Regular,
         Waypoint.InternalType.Silent,
-        Waypoint.InternalType.EvChargingUser -> true
+        Waypoint.InternalType.EvChargingUser,
+        -> true
         Waypoint.InternalType.EvChargingServer -> false
     }
 
@@ -24,7 +25,8 @@ fun Waypoint.isLegWaypoint(): Boolean =
     when (this.internalType) {
         Waypoint.InternalType.Regular,
         Waypoint.InternalType.EvChargingServer,
-        Waypoint.InternalType.EvChargingUser -> true
+        Waypoint.InternalType.EvChargingUser,
+        -> true
         Waypoint.InternalType.Silent -> false
     }
 

@@ -39,7 +39,7 @@ class MapboxSignboardView : AppCompatImageView {
     constructor(
         context: Context,
         attrs: AttributeSet?,
-        defStyleAttr: Int
+        defStyleAttr: Int,
     ) : super(context, attrs, defStyleAttr)
 
     /**
@@ -54,7 +54,7 @@ class MapboxSignboardView : AppCompatImageView {
             },
             { value ->
                 setImageBitmap(value.bitmap)
-            }
+            },
         )
     }
 }

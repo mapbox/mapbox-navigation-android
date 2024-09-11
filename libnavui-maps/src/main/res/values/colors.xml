@@ -1,5 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="mapbox_recenter_drawable_color">@color/colorOnSurface</color>
-    <color name="mapbox_route_overview_drawable_color">@color/colorOnSurface</color>
+    <!-- The primary brand color of your app, used most predominantly in theming -->
+    <color name="colorPrimary">#212121</color>
+    <!-- The secondary brand color of your app, used mostly as an accent for certain widgets
+   that need to stand out -->
+    <color name="colorSecondary">#37516F</color>
+    <!-- The color used for elements displayed on top of your secondary colors -->
+    <color name="colorOnSecondary">#FFFFFF</color>
+    <!-- The color used for surfaces (e.g. “Bottom sheets”) -->
+    <color name="colorSurface">#FFFFFF</color>
+    <!-- The color used for elements displayed on top of your surface color -->
+    <color name="colorOnSurface">#3C3E3E</color>
+    <color name="mapbox_route_callout_background">@color/colorSurface</color>
+    <color name="mapbox_selected_route_callout_background">#3072F5</color>
+    <color name="mapbox_route_callout_text">@color/colorOnSurface</color>
+    <color name="mapbox_selected_route_callout_text">@color/colorOnSecondary</color>
+    <color name="mapbox_slower_route_callout_text">#EB252A</color>
+    <color name="mapbox_faster_route_callout_text">#09AA74</color>
 </resources>

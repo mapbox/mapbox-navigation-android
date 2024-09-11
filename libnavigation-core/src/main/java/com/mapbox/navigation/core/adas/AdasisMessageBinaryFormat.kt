@@ -10,7 +10,7 @@ import com.mapbox.navigator.MessageBinaryFormat
  * @see [MapboxNavigation.setAdasisMessageObserver]
  */
 @ExperimentalPreviewMapboxNavigationAPI
-abstract class AdasisMessageBinaryFormat {
+internal abstract class AdasisMessageBinaryFormat {
 
     /**
      * ADASISv2 standard 8 byte payload, CAN compatible. Big endian

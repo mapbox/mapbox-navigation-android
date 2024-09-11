@@ -48,7 +48,7 @@ class ThreadControllerTest {
             monitorChannelWithException(
                 channel,
                 {},
-                { flag = true }
+                { flag = true },
             )
 
             channel.send("foobar")
@@ -75,7 +75,7 @@ class ThreadControllerTest {
                 {
                     msg = it
                 },
-                {}
+                {},
             )
 
             channel.send("success")
@@ -115,7 +115,7 @@ class ThreadControllerTest {
         assertEquals(ioRootJob.children.first(), ioJobController.job)
         assertEquals(
             CoroutineScope(ioJobController.job + ThreadController.IODispatcher).toString(),
-            ioJobController.scope.toString()
+            ioJobController.scope.toString(),
         )
     }
 
@@ -129,7 +129,7 @@ class ThreadControllerTest {
         assertEquals(mainRootJob.children.first(), mainJobController.job)
         assertEquals(
             CoroutineScope(mainJobController.job + Dispatchers.Main).toString(),
-            mainJobController.scope.toString()
+            mainJobController.scope.toString(),
         )
     }
 }

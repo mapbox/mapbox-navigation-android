@@ -3,7 +3,7 @@ package com.mapbox.navigation.core.directions.session
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
+import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshCallback
 
 internal interface RouteRefresh {
     /**
@@ -16,7 +16,7 @@ internal interface RouteRefresh {
     fun requestRouteRefresh(
         route: NavigationRoute,
         routeRefreshRequestData: RouteRefreshRequestData,
-        callback: NavigationRouterRefreshCallback
+        callback: NavigationRouterRefreshCallback,
     ): Long
 
     /**

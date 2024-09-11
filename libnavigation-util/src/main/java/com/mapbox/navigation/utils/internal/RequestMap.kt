@@ -13,7 +13,7 @@ class RequestMap<T> {
     fun put(requestId: Long, value: T) {
         requests.put(requestId, value)?.let {
             throw IllegalArgumentException(
-                "The request with ID '$requestId' is already in progress."
+                "The request with ID '$requestId' is already in progress.",
             )
         }
     }
@@ -39,7 +39,7 @@ private class RequestIdGenerator {
 fun <T> RequestMap<T>.cancelRequest(
     requestId: Long,
     tag: String,
-    cancellationFn: (T) -> Unit
+    cancellationFn: (T) -> Unit,
 ) {
     val request = this.remove(requestId)
     if (request != null) {
@@ -47,7 +47,7 @@ fun <T> RequestMap<T>.cancelRequest(
     } else {
         logW(
             "Trying to cancel non-existing route request with id '$requestId'",
-            tag
+            tag,
         )
     }
 }

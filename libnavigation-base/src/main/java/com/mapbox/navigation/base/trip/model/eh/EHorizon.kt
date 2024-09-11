@@ -34,7 +34,7 @@ import java.util.LinkedList
  * @param start [EHorizonEdge]
  */
 class EHorizon internal constructor(
-    val start: EHorizonEdge
+    val start: EHorizonEdge,
 ) {
 
     /**

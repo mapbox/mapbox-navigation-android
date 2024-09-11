@@ -24,10 +24,11 @@ class RoadObjectsStore internal constructor(
      */
     fun getRoadObjectsOnTheEdge(edgeId: Long): Map<String, RoadObjectEdgeLocation> {
         val roadObjects = mutableMapOf<String, RoadObjectEdgeLocation>()
-        navigator.roadObjectsStore.get(edgeId).forEach { (objectId, objectEdgeLocation) ->
-            roadObjects[objectId] =
-                EHorizonFactory.buildRoadObjectEdgeLocation(objectEdgeLocation)
-        }
+        navigator.roadObjectsStore.get(edgeId).entries
+            .forEach { (objectId, objectEdgeLocation) ->
+                roadObjects[objectId] =
+                    EHorizonFactory.buildRoadObjectEdgeLocation(objectEdgeLocation)
+            }
 
         return roadObjects
     }
@@ -82,7 +83,7 @@ class RoadObjectsStore internal constructor(
      * @param distances a list of [RoadObjectDistanceInfo]
      */
     fun getUpcomingRoadObjects(
-        distances: List<RoadObjectDistanceInfo>
+        distances: List<RoadObjectDistanceInfo>,
     ): List<UpcomingRoadObject> {
         val upcomingObjects = mutableListOf<UpcomingRoadObject>()
         distances.forEach {
@@ -91,8 +92,8 @@ class RoadObjectsStore internal constructor(
                     RoadObjectFactory.buildUpcomingRoadObject(
                         roadObject,
                         it.distanceToStart,
-                        it
-                    )
+                        it,
+                    ),
                 )
             }
         }

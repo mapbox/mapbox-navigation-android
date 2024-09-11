@@ -1,12 +1,12 @@
 package com.mapbox.navigation.core.lifecycle
 
+import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
-import com.mapbox.navigation.utils.internal.DefaultLifecycleObserver
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -32,7 +32,7 @@ class RequireMapboxNavigationTest {
         onCreatedObserver: MapboxNavigationObserver? = null,
         onStartedObserver: MapboxNavigationObserver? = null,
         onResumedObserver: MapboxNavigationObserver? = null,
-        onInitialize: (() -> Unit)? = null
+        onInitialize: (() -> Unit)? = null,
     ) : LifecycleOwner {
         private val lifecycleRegistry = LifecycleRegistry(this)
             .also { it.currentState = Lifecycle.State.INITIALIZED }
@@ -47,7 +47,7 @@ class RequireMapboxNavigationTest {
             onCreatedObserver = onCreatedObserver,
             onStartedObserver = onStartedObserver,
             onResumedObserver = onResumedObserver,
-            onInitialize = onInitialize
+            onInitialize = onInitialize,
         )
     }
 
@@ -307,30 +307,32 @@ class RequireMapboxNavigationTest {
         }
         every { MapboxNavigationApp.attach(any()) } answers {
             attachedLifecycleOwner.add(firstArg())
-            firstArg<LifecycleOwner>().lifecycle.addObserver(object : DefaultLifecycleObserver() {
-                override fun onCreate(owner: LifecycleOwner) {
-                    if (isSetup) {
-                        mockMapboxNavigation = mockk()
-                        registeredMapboxNavigationObservers.forEach { observer ->
-                            observer.onAttached(mockMapboxNavigation!!)
+            firstArg<LifecycleOwner>().lifecycle.addObserver(
+                object : DefaultLifecycleObserver {
+                    override fun onCreate(owner: LifecycleOwner) {
+                        if (isSetup) {
+                            mockMapboxNavigation = mockk()
+                            registeredMapboxNavigationObservers.forEach { observer ->
+                                observer.onAttached(mockMapboxNavigation!!)
+                            }
                         }
                     }
-                }
 
-                override fun onDestroy(owner: LifecycleOwner) {
-                    super.onDestroy(owner)
-                    attachedLifecycleOwner.remove(firstArg())
-                    val isCreated = attachedLifecycleOwner.any {
-                        it.lifecycle.currentState.isAtLeast(Lifecycle.State.CREATED)
-                    }
-                    if (!isCreated) {
-                        registeredMapboxNavigationObservers.forEach { observer ->
-                            observer.onDetached(mockMapboxNavigation!!)
+                    override fun onDestroy(owner: LifecycleOwner) {
+                        super.onDestroy(owner)
+                        attachedLifecycleOwner.remove(firstArg())
+                        val isCreated = attachedLifecycleOwner.any {
+                            it.lifecycle.currentState.isAtLeast(Lifecycle.State.CREATED)
                         }
-                        mockMapboxNavigation = null
+                        if (!isCreated) {
+                            registeredMapboxNavigationObservers.forEach { observer ->
+                                observer.onDetached(mockMapboxNavigation!!)
+                            }
+                            mockMapboxNavigation = null
+                        }
                     }
-                }
-            })
+                },
+            )
             MapboxNavigationApp
         }
         every { MapboxNavigationApp.setup(any<NavigationOptions>()) } answers {

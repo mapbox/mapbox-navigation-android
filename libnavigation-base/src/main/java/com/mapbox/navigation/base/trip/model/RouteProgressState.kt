@@ -28,5 +28,5 @@ enum class RouteProgressState {
     /**
      * We are probably about to go off-route: all [RouteProgress] fields are valid.
      */
-    UNCERTAIN
+    UNCERTAIN,
 }

@@ -13,47 +13,47 @@ class MapboxNavigationCameraStateTransition(
     private val mapboxMap: MapboxMap,
     cameraPlugin: CameraAnimationsPlugin,
     private val navigationCameraTransition: NavigationCameraTransition =
-        MapboxNavigationCameraTransition(mapboxMap, cameraPlugin)
+        MapboxNavigationCameraTransition(mapboxMap, cameraPlugin),
 ) : NavigationCameraStateTransition {
 
     override fun transitionToFollowing(
         cameraOptions: CameraOptions,
-        transitionOptions: NavigationCameraTransitionOptions
+        transitionOptions: NavigationCameraTransitionOptions,
     ): AnimatorSet {
         return navigationCameraTransition.transitionFromLowZoomToHighZoom(
             cameraOptions,
-            transitionOptions
+            transitionOptions,
         )
     }
 
     override fun transitionToOverview(
         cameraOptions: CameraOptions,
-        transitionOptions: NavigationCameraTransitionOptions
+        transitionOptions: NavigationCameraTransitionOptions,
     ): AnimatorSet {
         val currentZoom = mapboxMap.cameraState.zoom
         return if (currentZoom < cameraOptions.zoom ?: currentZoom) {
             navigationCameraTransition.transitionFromLowZoomToHighZoom(
                 cameraOptions,
-                transitionOptions
+                transitionOptions,
             )
         } else {
             navigationCameraTransition.transitionFromHighZoomToLowZoom(
                 cameraOptions,
-                transitionOptions
+                transitionOptions,
             )
         }
     }
 
     override fun updateFrameForFollowing(
         cameraOptions: CameraOptions,
-        transitionOptions: NavigationCameraTransitionOptions
+        transitionOptions: NavigationCameraTransitionOptions,
     ): AnimatorSet {
         return navigationCameraTransition.transitionLinear(cameraOptions, transitionOptions)
     }
 
     override fun updateFrameForOverview(
         cameraOptions: CameraOptions,
-        transitionOptions: NavigationCameraTransitionOptions
+        transitionOptions: NavigationCameraTransitionOptions,
     ): AnimatorSet {
         return navigationCameraTransition.transitionLinear(cameraOptions, transitionOptions)
     }

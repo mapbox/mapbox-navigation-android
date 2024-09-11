@@ -29,7 +29,7 @@ class LoggerProviderLazyMessagesTest(val parameter: LogData) {
     data class LogData(
         val frontendLogLevel: LoggingLevel,
         val messageLogLevel: LoggingLevel,
-        val logDispatched: Boolean
+        val logDispatched: Boolean,
     )
 
     companion object {
@@ -39,82 +39,82 @@ class LoggerProviderLazyMessagesTest(val parameter: LogData) {
             LogData(
                 frontendLogLevel = LoggingLevel.DEBUG,
                 messageLogLevel = LoggingLevel.DEBUG,
-                logDispatched = true
+                logDispatched = true,
             ),
             LogData(
                 frontendLogLevel = LoggingLevel.DEBUG,
                 messageLogLevel = LoggingLevel.INFO,
-                logDispatched = true
+                logDispatched = true,
             ),
             LogData(
                 frontendLogLevel = LoggingLevel.DEBUG,
                 messageLogLevel = LoggingLevel.WARNING,
-                logDispatched = true
+                logDispatched = true,
             ),
             LogData(
                 frontendLogLevel = LoggingLevel.DEBUG,
                 messageLogLevel = LoggingLevel.ERROR,
-                logDispatched = true
+                logDispatched = true,
             ),
             LogData(
                 frontendLogLevel = LoggingLevel.INFO,
                 messageLogLevel = LoggingLevel.DEBUG,
-                logDispatched = false
+                logDispatched = false,
             ),
             LogData(
                 frontendLogLevel = LoggingLevel.INFO,
                 messageLogLevel = LoggingLevel.INFO,
-                logDispatched = true
+                logDispatched = true,
             ),
             LogData(
                 frontendLogLevel = LoggingLevel.INFO,
                 messageLogLevel = LoggingLevel.WARNING,
-                logDispatched = true
+                logDispatched = true,
             ),
             LogData(
                 frontendLogLevel = LoggingLevel.INFO,
                 messageLogLevel = LoggingLevel.ERROR,
-                logDispatched = true
+                logDispatched = true,
             ),
             LogData(
                 frontendLogLevel = LoggingLevel.WARNING,
                 messageLogLevel = LoggingLevel.DEBUG,
-                logDispatched = false
+                logDispatched = false,
             ),
             LogData(
                 frontendLogLevel = LoggingLevel.WARNING,
                 messageLogLevel = LoggingLevel.INFO,
-                logDispatched = false
+                logDispatched = false,
             ),
             LogData(
                 frontendLogLevel = LoggingLevel.WARNING,
                 messageLogLevel = LoggingLevel.WARNING,
-                logDispatched = true
+                logDispatched = true,
             ),
             LogData(
                 frontendLogLevel = LoggingLevel.WARNING,
                 messageLogLevel = LoggingLevel.ERROR,
-                logDispatched = true
+                logDispatched = true,
             ),
             LogData(
                 frontendLogLevel = LoggingLevel.ERROR,
                 messageLogLevel = LoggingLevel.DEBUG,
-                logDispatched = false
+                logDispatched = false,
             ),
             LogData(
                 frontendLogLevel = LoggingLevel.ERROR,
                 messageLogLevel = LoggingLevel.INFO,
-                logDispatched = false
+                logDispatched = false,
             ),
             LogData(
                 frontendLogLevel = LoggingLevel.ERROR,
                 messageLogLevel = LoggingLevel.WARNING,
-                logDispatched = false
+                logDispatched = false,
             ),
             LogData(
                 frontendLogLevel = LoggingLevel.ERROR,
                 messageLogLevel = LoggingLevel.ERROR,
-                logDispatched = true
+                logDispatched = true,
             ),
         )
     }

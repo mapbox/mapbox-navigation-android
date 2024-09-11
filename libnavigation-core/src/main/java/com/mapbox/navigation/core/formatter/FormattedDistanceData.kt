@@ -14,7 +14,7 @@ class FormattedDistanceData internal constructor(
     val distance: Double,
     val distanceAsString: String,
     val distanceSuffix: String,
-    val unitType: UnitType
+    val unitType: UnitType,
 ) {
 
     /**

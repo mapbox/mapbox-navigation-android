@@ -14,7 +14,6 @@ import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshOptions
-import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
@@ -24,29 +23,27 @@ import com.mapbox.navigation.core.routerefresh.RouteRefreshStateResult
 import com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
-import com.mapbox.navigation.instrumentation_tests.utils.assertions.compareIdWithIncidentId
-import com.mapbox.navigation.instrumentation_tests.utils.http.FailByRequestMockRequestHandler
-import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRefreshHandler
-import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
-import com.mapbox.navigation.instrumentation_tests.utils.http.MockRoutingTileEndpointErrorRequestHandler
-import com.mapbox.navigation.instrumentation_tests.utils.idling.IdlingPolicyTimeoutRule
-import com.mapbox.navigation.instrumentation_tests.utils.location.MockLocationReplayerRule
-import com.mapbox.navigation.instrumentation_tests.utils.readRawFileText
-import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoute
-import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider.toNavigationRoutes
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.clearNavigationRoutesAndWaitForUpdate
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
-import com.mapbox.navigation.testing.ui.utils.coroutines.roadObjectsOnRoute
 import com.mapbox.navigation.testing.ui.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForAlternativesUpdate
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForUpdate
-import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
+import com.mapbox.navigation.testing.utils.assertions.compareIdWithIncidentId
+import com.mapbox.navigation.testing.utils.http.FailByRequestMockRequestHandler
+import com.mapbox.navigation.testing.utils.http.MockDirectionsRefreshHandler
+import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
+import com.mapbox.navigation.testing.utils.http.MockRoutingTileEndpointErrorRequestHandler
+import com.mapbox.navigation.testing.utils.idling.IdlingPolicyTimeoutRule
+import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
+import com.mapbox.navigation.testing.utils.readRawFileText
+import com.mapbox.navigation.testing.utils.routes.MockRoute
+import com.mapbox.navigation.testing.utils.routes.requestMockRoutes
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -56,6 +53,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -77,22 +75,22 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
     private lateinit var mapboxNavigation: MapboxNavigation
     private val twoCoordinates = listOf(
         Point.fromLngLat(-121.496066, 38.577764),
-        Point.fromLngLat(-121.480279, 38.57674)
+        Point.fromLngLat(-121.480279, 38.57674),
     )
     private val threeCoordinates = listOf(
         Point.fromLngLat(-121.496066, 38.577764),
         Point.fromLngLat(-121.480279, 38.57674),
-        Point.fromLngLat(-121.468434, 38.58225)
+        Point.fromLngLat(-121.468434, 38.58225),
     )
     private val threeCoordinatesWithIncidents = listOf(
         Point.fromLngLat(-75.474061, 38.546280),
         Point.fromLngLat(-75.525486, 38.772959),
-        Point.fromLngLat(-74.698765, 39.822911)
+        Point.fromLngLat(-74.698765, 39.822911),
     )
     private val multilegCoordinates = listOf(
         Point.fromLngLat(38.577764, -121.496066),
         Point.fromLngLat(38.576795, -121.480256),
-        Point.fromLngLat(38.582195, -121.468458)
+        Point.fromLngLat(38.582195, -121.468458),
     )
 
     private lateinit var failByRequestRouteRefreshResponse: FailByRequestMockRequestHandler
@@ -109,7 +107,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             twoCoordinates,
             R.raw.route_response_route_refresh,
             R.raw.route_response_route_refresh_annotations,
-            "route_response_route_refresh"
+            "route_response_route_refresh",
         )
 
         runOnMainSync {
@@ -122,10 +120,9 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             }
             mapboxNavigation = MapboxNavigationProvider.create(
                 NavigationOptions.Builder(activity)
-                    .accessToken(getMapboxAccessTokenFromResources(activity))
                     .routeRefreshOptions(routeRefreshOptions)
                     .navigatorPredictionMillis(0L)
-                    .build()
+                    .build(),
             )
         }
     }
@@ -156,10 +153,8 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             val initialRoutes = routeUpdates[0]
             val refreshedRoutes = routeUpdates[1]
 
-            val routeProgress = mapboxNavigation.routeProgressUpdates()
-                .filter { routeProgress -> isRefreshedRouteDistance(routeProgress) }
-                .first()
-            val roadObjectsFromObserver = mapboxNavigation.roadObjectsOnRoute()
+            val roadObjectsFromProgressAfterRefresh = mapboxNavigation.routeProgressUpdates()
+                .map { it.upcomingRoadObjects }
                 .filter { upcomingRoadObjects ->
                     upcomingRoadObjects.size == 2 &&
                         listOf("11589180127444257", "14158569638505033").all { incidentId ->
@@ -170,32 +165,39 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 }
                 .first()
 
-            assertEquals(roadObjectsFromObserver, refreshedRoutes.first().upcomingRoadObjects)
+            val roadObjectsFromRefreshedPrimaryRoute = refreshedRoutes.first().upcomingRoadObjects
             assertEquals(
-                routeProgress.navigationRoute.upcomingRoadObjects,
-                refreshedRoutes.first().upcomingRoadObjects
+                roadObjectsFromProgressAfterRefresh.map { it.roadObject },
+                roadObjectsFromRefreshedPrimaryRoute.map { it.roadObject },
             )
+            roadObjectsFromProgressAfterRefresh.forEachIndexed { index, upcomingRoadObject ->
+                assertEquals(
+                    upcomingRoadObject.distanceToStart!!,
+                    roadObjectsFromRefreshedPrimaryRoute[index].distanceToStart!!,
+                    0.1,
+                )
+            }
             assertEquals(
                 "the test works only with 2 routes",
                 2,
-                requestedRoutes.size
+                requestedRoutes.size,
             )
             // incidents
             assertEquals(
                 listOf("11589180127444257"),
-                initialRoutes[0].getIncidentsIdFromTheRoute(0)
+                initialRoutes[0].getIncidentsIdFromTheRoute(0),
             )
             assertEquals(
                 listOf("11589180127444257", "14158569638505033").sorted(),
-                refreshedRoutes[0].getIncidentsIdFromTheRoute(0)?.sorted()
+                refreshedRoutes[0].getIncidentsIdFromTheRoute(0)?.sorted(),
             )
             assertEquals(
                 listOf("11589180127444257"),
-                initialRoutes[1].getIncidentsIdFromTheRoute(0)
+                initialRoutes[1].getIncidentsIdFromTheRoute(0),
             )
             assertEquals(
                 listOf("11589180127444257", "14158569638505033").sorted(),
-                refreshedRoutes[1].getIncidentsIdFromTheRoute(0)?.sorted()
+                refreshedRoutes[1].getIncidentsIdFromTheRoute(0)?.sorted(),
             )
             // closures
             assertEquals(
@@ -203,87 +205,87 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                     Closure.builder()
                         .geometryIndexStart(5)
                         .geometryIndexEnd(6)
-                        .build()
+                        .build(),
                 ),
-                initialRoutes[0].directionsRoute.legs()!![0].closures()
+                initialRoutes[0].directionsRoute.legs()!![0].closures(),
             )
             assertEquals(
                 null,
-                initialRoutes[1].directionsRoute.legs()!![0].closures()
+                initialRoutes[1].directionsRoute.legs()!![0].closures(),
             )
             assertEquals(
                 listOf(
                     Closure.builder()
                         .geometryIndexStart(1)
                         .geometryIndexEnd(3)
-                        .build()
+                        .build(),
                 ),
-                refreshedRoutes[0].directionsRoute.legs()!![0].closures()
+                refreshedRoutes[0].directionsRoute.legs()!![0].closures(),
             )
             assertEquals(
                 listOf(
                     Closure.builder()
                         .geometryIndexStart(1)
                         .geometryIndexEnd(3)
-                        .build()
+                        .build(),
                 ),
-                refreshedRoutes[1].directionsRoute.legs()!![0].closures()
+                refreshedRoutes[1].directionsRoute.legs()!![0].closures(),
             )
 
             assertEquals(
                 "initial should be the same as requested",
                 requestedRoutes[0].getDurationAnnotationsFromLeg(0),
-                initialRoutes[0].getDurationAnnotationsFromLeg(0)
+                initialRoutes[0].getDurationAnnotationsFromLeg(0),
             )
             assertEquals(
                 227.918,
                 initialRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
-                0.0001
+                0.0001,
             )
             assertEquals(
                 287.063,
                 refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
-                0.0001
+                0.0001,
             )
             assertEquals(
                 287.063,
                 refreshedRoutes[0].directionsRoute.duration(),
-                0.0001
+                0.0001,
             )
             assertEquals(
                 287.063,
                 refreshedRoutes[0].directionsRoute.legs()!!.first().duration()!!,
-                0.0001
+                0.0001,
             )
 
             assertEquals(
                 requestedRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
                 initialRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
-                0.0
+                0.0,
             )
             assertEquals(
                 224.2239,
                 initialRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
-                0.0001
+                0.0001,
             )
             assertEquals(
                 258.767,
                 refreshedRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
-                0.0001
+                0.0001,
             )
             assertEquals(258.767, refreshedRoutes[1].directionsRoute.duration(), 0.0001)
             assertEquals(
                 258.767,
                 refreshedRoutes[1].directionsRoute.legs()!!.first().duration()!!,
-                0.0001
+                0.0001,
             )
             assertEquals(
-                requestedRoutes[0].directionsResponse.waypoints(),
-                refreshedRoutes[0].directionsResponse.waypoints()
+                requestedRoutes[0].waypoints,
+                refreshedRoutes[0].waypoints,
             )
             assertEquals(
-                requestedRoutes[1].directionsResponse.waypoints(),
-                refreshedRoutes[1].directionsResponse.waypoints()
+                requestedRoutes[1].waypoints,
+                refreshedRoutes[1].waypoints,
             )
         }
 
@@ -330,7 +332,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             ?.congestion()
         assertTrue(
             "expected unknown congestions, but they were $refreshedRouteCongestions",
-            refreshedRouteCongestions?.all { it == "unknown" } ?: false
+            refreshedRouteCongestions?.all { it == "unknown" } ?: false,
         )
         failByRequestRouteRefreshResponse.failResponse = false
         waitForRouteToSuccessfullyRefresh()
@@ -340,9 +342,9 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
                 RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED,
                 RouteRefreshExtra.REFRESH_STATE_STARTED,
-                RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS
+                RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS,
             ),
-            observer.getStatesSnapshot()
+            observer.getStatesSnapshot(),
         )
     }
 
@@ -356,9 +358,9 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                     "route_response_route_refresh",
                     readRawFileText(activity, R.raw.route_response_route_refresh_annotations),
                     // it will fail for alternative refresh since index will be 1
-                    routeIndex = 0
-                )
-            )
+                    routeIndex = 0,
+                ),
+            ),
         )
         val routes = mapboxNavigation.requestRoutes(routeOptions)
             .getSuccessfulResultOrThrowException()
@@ -371,14 +373,14 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             .first { it.reason == ROUTES_UPDATE_REASON_REFRESH }
 
         val alternativesMetadata = mapboxNavigation.getAlternativeMetadataFor(
-            mapboxNavigation.getNavigationRoutes()
+            mapboxNavigation.getNavigationRoutes(),
         ).first()
 
         assertNotNull(alternativesMetadataLegacy)
         assertNotNull(alternativesMetadata)
         assertEquals(
             alternativesMetadataLegacy.navigationRoute.id,
-            alternativesMetadata.navigationRoute.id
+            alternativesMetadata.navigationRoute.id,
         )
         assertNotEquals(alternativesMetadataLegacy, alternativesMetadata)
         assertEquals(227.918, alternativesMetadataLegacy.infoFromStartOfPrimary.duration, 0.001)
@@ -402,14 +404,14 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             .first { it.reason == ROUTES_UPDATE_REASON_REFRESH }
 
         val alternativesMetadata = mapboxNavigation.getAlternativeMetadataFor(
-            mapboxNavigation.getNavigationRoutes()
+            mapboxNavigation.getNavigationRoutes(),
         ).first()
 
         assertNotNull(alternativesMetadataLegacy)
         assertNotNull(alternativesMetadata)
         assertEquals(
             alternativesMetadataLegacy.navigationRoute.id,
-            alternativesMetadata.navigationRoute.id
+            alternativesMetadata.navigationRoute.id,
         )
         assertNotEquals(alternativesMetadataLegacy, alternativesMetadata)
         assertEquals(227.918, alternativesMetadataLegacy.infoFromStartOfPrimary.duration, 0.001)
@@ -437,19 +439,19 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
 
         assertNotEquals(
             oldInfo,
-            mapboxNavigation.getAlternativeMetadataFor(newAlternative)!!.infoFromFork
+            mapboxNavigation.getAlternativeMetadataFor(newAlternative)!!.infoFromFork,
         )
     }
 
     @Test
-    fun expect_route_refresh_to_update_annotations_for_truncated_current_leg() =
+    fun route_refresh_updates_annotations_incidents_and_closures_for_truncated_current_leg() =
         sdkTest {
             setupMockRequestHandlers(
                 twoCoordinates,
-                R.raw.route_response_route_refresh,
+                R.raw.route_response_route_refresh_with_objects_ahead,
                 R.raw.route_response_route_refresh_truncated_first_leg,
-                "route_response_route_refresh",
-                acceptedGeometryIndex = 3
+                "route_response_route_refresh_with_objects_ahead",
+                acceptedGeometryIndex = 3,
             )
             val routeOptions = generateRouteOptions(twoCoordinates)
             val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
@@ -475,6 +477,94 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
 
             assertEquals(227.918, requestedRoutes[1].getSumOfDurationAnnotationsFromLeg(0), 0.0001)
             assertEquals(235.641, refreshedRoutes[1].getSumOfDurationAnnotationsFromLeg(0), 0.0001)
+
+            assertEquals(
+                listOf(
+                    listOf("11589180127444256", 1, 1),
+                    listOf("11589180127444257", 3, 8),
+                    listOf("11589180127444258", 43, 48),
+                ),
+                requestedRoutes[0].directionsRoute.legs()!![0].incidents()!!
+                    .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() }),
+            )
+            assertEquals(
+                listOf(
+                    listOf("11589180127444256", 1, 1),
+                    listOf("11589180127444257", 3, 8),
+                    listOf("11589180127444258", 43, 48),
+                ),
+                requestedRoutes[1].directionsRoute.legs()!![0].incidents()!!
+                    .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() }),
+            )
+
+            assertEquals(
+                listOf(
+                    listOf("11589180127444256", 1, 1),
+                    listOf("14158569638505033", 13, 18),
+                    listOf("11589180127444257", 33, 41),
+                    listOf("11589180127444258", 43, 48),
+                ),
+                refreshedRoutes[0].directionsRoute.legs()!![0].incidents()!!
+                    .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() }),
+            )
+            assertEquals(
+                listOf(
+                    listOf("11589180127444256", 1, 1),
+                    listOf("14158569638505033", 13, 18),
+                    listOf("11589180127444257", 33, 41),
+                    listOf("11589180127444258", 43, 48),
+                ),
+                refreshedRoutes[1].directionsRoute.legs()!![0].incidents()!!
+                    .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() }),
+            )
+
+            assertNull(
+                requestedRoutes[0].directionsRoute.legs()!![0].closures(),
+            )
+            assertEquals(
+                listOf(
+                    Closure.builder()
+                        .geometryIndexStart(2)
+                        .geometryIndexEnd(2)
+                        .build(),
+                    Closure.builder()
+                        .geometryIndexStart(5)
+                        .geometryIndexEnd(6)
+                        .build(),
+                    Closure.builder()
+                        .geometryIndexStart(45)
+                        .geometryIndexEnd(50)
+                        .build(),
+                ),
+                requestedRoutes[1].directionsRoute.legs()!![0].closures(),
+            )
+
+            assertEquals(
+                listOf(
+                    Closure.builder()
+                        .geometryIndexStart(10)
+                        .geometryIndexEnd(11)
+                        .build(),
+                ),
+                refreshedRoutes[0].directionsRoute.legs()!![0].closures(),
+            )
+            assertEquals(
+                listOf(
+                    Closure.builder()
+                        .geometryIndexStart(2)
+                        .geometryIndexEnd(2)
+                        .build(),
+                    Closure.builder()
+                        .geometryIndexStart(10)
+                        .geometryIndexEnd(11)
+                        .build(),
+                    Closure.builder()
+                        .geometryIndexStart(45)
+                        .geometryIndexEnd(50)
+                        .build(),
+                ),
+                refreshedRoutes[1].directionsRoute.legs()!![0].closures(),
+            )
         }
 
     @Test
@@ -485,7 +575,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 R.raw.route_response_single_route_multileg,
                 R.raw.route_response_single_route_multileg_refreshed,
                 "route_response_single_route_multileg",
-                acceptedGeometryIndex = 70
+                acceptedGeometryIndex = 70,
             )
             mockWebServerRule.requestHandlers.add(
                 FailByRequestMockRequestHandler(
@@ -493,11 +583,11 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                         "route_response_single_route_multileg_alternative",
                         readRawFileText(
                             activity,
-                            R.raw.route_response_single_route_multileg_alternative_refreshed
+                            R.raw.route_response_single_route_multileg_alternative_refreshed,
                         ),
-                        acceptedGeometryIndex = 11
-                    )
-                )
+                        acceptedGeometryIndex = 11,
+                    ),
+                ),
             )
             val routeOptions = generateRouteOptions(multilegCoordinates)
             val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
@@ -505,10 +595,10 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 .routes
             // alternative which was requested on the second leg of the original route,
             // so the alternative has only one leg while the original route has two
-            val alternativeRoute = alternativeForMultileg(activity)
-                .toNavigationRoutes(RouterOrigin.Offboard) {
-                    baseUrl(mockWebServerRule.baseUrl)
-                }.first()
+            val alternativeRoute = mapboxNavigation.requestMockRoutes(
+                mockWebServerRule,
+                alternativeForMultileg(activity),
+            ).first()
 
             mapboxNavigation.setNavigationRoutes(requestedRoutes, initialLegIndex = 1)
             mapboxNavigation.startTripSession()
@@ -523,7 +613,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
 
             mapboxNavigation.setNavigationRoutesAndWaitForAlternativesUpdate(
                 requestedRoutes + alternativeRoute,
-                initialLegIndex = 1
+                initialLegIndex = 1,
             )
 
             val refreshedRoutes = mapboxNavigation.routesUpdates()
@@ -536,7 +626,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             assertEquals(
                 requestedRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
                 refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
-                0.0001
+                0.0001,
             )
 
             assertEquals(201.673, requestedRoutes[0].getSumOfDurationAnnotationsFromLeg(1), 0.0001)
@@ -547,84 +637,6 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         }
 
     @Test
-    fun route_refresh_updates_annotations_for_new_alternative_with_more_legs() =
-        sdkTest {
-            setupMockRequestHandlers(
-                multilegCoordinates,
-                R.raw.route_response_single_route_multileg,
-                R.raw.route_response_single_route_multileg_refreshed,
-                "route_response_single_route_multileg",
-                acceptedGeometryIndex = 70
-            )
-            mockWebServerRule.requestHandlers.add(
-                FailByRequestMockRequestHandler(
-                    MockDirectionsRefreshHandler(
-                        "route_response_single_route_multileg_alternative",
-                        readRawFileText(
-                            activity,
-                            R.raw.route_response_single_route_multileg_alternative_refreshed
-                        ),
-                        acceptedGeometryIndex = 11
-                    )
-                )
-            )
-            val routeOptions = generateRouteOptions(multilegCoordinates)
-            val alternativeRoutes = mapboxNavigation.requestRoutes(routeOptions)
-                .getSuccessfulResultOrThrowException()
-                .routes
-            // In this test setup we are considering a case where user was driving along the route,
-            // started the second leg and received an alternative, and selected it before the fork.
-            // This means that the primary route is shorter than the alternative route (former primary route).
-            val primaryRoute = alternativeForMultileg(activity)
-                .toNavigationRoutes(RouterOrigin.Offboard) {
-                    baseUrl(mockWebServerRule.baseUrl)
-                }.first()
-
-            // corresponds to currentRouteGeometryIndex = 70 for alternative route and 11 for the primary route
-            mockLocationUpdatesRule.pushLocationUpdate(
-                mockLocationUpdatesRule.generateLocationUpdate {
-                    latitude = 38.581798
-                    longitude = -121.476146
-                }
-            )
-
-            mapboxNavigation.setNavigationRoutes(
-                listOf(primaryRoute) + alternativeRoutes,
-                initialLegIndex = 0
-            )
-            mapboxNavigation.startTripSession()
-
-            mapboxNavigation.routeProgressUpdates()
-                .filter {
-                    it.currentRouteGeometryIndex == 11
-                }
-                .first()
-
-            val refreshedRoutes = mapboxNavigation.routesUpdates()
-                .filter {
-                    it.reason == ROUTES_UPDATE_REASON_REFRESH
-                }
-                .first()
-                .navigationRoutes
-
-            assertEquals(
-                alternativeRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
-                refreshedRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
-                0.0001
-            )
-
-            assertEquals(
-                201.673,
-                alternativeRoutes[0].getSumOfDurationAnnotationsFromLeg(1),
-                0.0001
-            )
-            assertEquals(202.881, refreshedRoutes[1].getSumOfDurationAnnotationsFromLeg(1), 0.0001)
-
-            assertEquals(194.3, primaryRoute.getSumOfDurationAnnotationsFromLeg(0), 0.0001)
-            assertEquals(187.126, refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(0), 0.0001)
-        }
-
-    @Test
     fun expect_route_refresh_to_update_annotations_incidents_and_closures_for_truncated_next_leg() =
         sdkTest {
             setupMockRequestHandlers(
@@ -632,13 +644,13 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 R.raw.route_response_route_refresh_multileg,
                 R.raw.route_response_route_refresh_truncated_next_leg,
                 "route_response_route_refresh_multileg",
-                acceptedGeometryIndex = 5
+                acceptedGeometryIndex = 5,
             )
             val routeOptions = generateRouteOptions(threeCoordinates)
             val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
                 .getSuccessfulResultOrThrowException()
                 .routes
-
+            mapboxNavigation.setContinuousAlternativesEnabled(false)
             mapboxNavigation.setNavigationRoutes(requestedRoutes)
             mapboxNavigation.startTripSession()
             // corresponds to currentRouteGeometryIndex = 5
@@ -659,44 +671,60 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
 
             // incidents
             assertEquals(
-                listOf(listOf("9457146989091490", 400, 405)),
+                listOf(
+                    listOf("9457146989091489", 1, 2),
+                    listOf("9457146989091490", 5, 8),
+                    listOf("9457146989091491", 56, 58),
+                ),
                 requestedRoutes[0].directionsRoute.legs()!![1].incidents()!!
-                    .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() })
+                    .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() }),
             )
             assertEquals(
-                listOf(listOf("9457146989091490", 396, 401)),
+                listOf(listOf("9457146989091490", 3, 7), listOf("9457146989091491", 56, 58)),
                 refreshedRoutes[0].directionsRoute.legs()!![1].incidents()!!
-                    .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() })
+                    .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() }),
             )
 
             // closures
             assertEquals(
                 listOf(
                     Closure.builder()
-                        .geometryIndexStart(312)
-                        .geometryIndexEnd(313)
-                        .build()
+                        .geometryIndexStart(3)
+                        .geometryIndexEnd(3)
+                        .build(),
+                    Closure.builder()
+                        .geometryIndexStart(4)
+                        .geometryIndexEnd(5)
+                        .build(),
+                    Closure.builder()
+                        .geometryIndexStart(60)
+                        .geometryIndexEnd(62)
+                        .build(),
                 ),
-                requestedRoutes[0].directionsRoute.legs()!![1].closures()
+                requestedRoutes[0].directionsRoute.legs()!![1].closures(),
             )
             assertEquals(
                 listOf(
                     Closure.builder()
-                        .geometryIndexStart(313)
-                        .geometryIndexEnd(314)
-                        .build()
+                        .geometryIndexStart(3)
+                        .geometryIndexEnd(5)
+                        .build(),
+                    Closure.builder()
+                        .geometryIndexStart(60)
+                        .geometryIndexEnd(62)
+                        .build(),
                 ),
-                refreshedRoutes[0].directionsRoute.legs()!![1].closures()
+                refreshedRoutes[0].directionsRoute.legs()!![1].closures(),
             )
 
             // waypoints
             assertEquals(
-                requestedRoutes[0].directionsResponse.waypoints(),
-                refreshedRoutes[0].directionsResponse.waypoints()
+                requestedRoutes[0].waypoints,
+                refreshedRoutes[0].waypoints,
             )
             assertEquals(
-                requestedRoutes[1].directionsResponse.waypoints(),
-                refreshedRoutes[1].directionsResponse.waypoints()
+                requestedRoutes[1].waypoints,
+                refreshedRoutes[1].waypoints,
             )
         }
 
@@ -710,7 +738,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 R.raw.route_response_multileg_with_incidents,
                 R.raw.route_response_route_refresh_multileg_with_incidents,
                 "route_response_multileg_with_incidents",
-                acceptedGeometryIndex = currentRouteGeometryIndex
+                acceptedGeometryIndex = currentRouteGeometryIndex,
             )
             val routeOptions = generateRouteOptions(threeCoordinatesWithIncidents)
             val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
@@ -741,18 +769,18 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             assertEquals(
                 listOf(
                     listOf("9457146989091490", 2019, 2024),
-                    listOf("5945491930714919", 2044, 2126)
+                    listOf("5945491930714919", 2044, 2126),
                 ),
                 requestedRoutes[0].directionsRoute.legs()!![1].incidents()!!
-                    .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() })
+                    .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() }),
             )
             assertEquals(
                 listOf(
                     listOf("9457146989091490", 2019, 2024),
-                    listOf("5945491930714919", 2048, 2130)
+                    listOf("5945491930714919", 2048, 2130),
                 ),
                 refreshedRoutes[0].directionsRoute.legs()!![1].incidents()!!
-                    .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() })
+                    .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() }),
             )
 
             // closures
@@ -761,24 +789,24 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                     Closure.builder()
                         .geometryIndexStart(2001)
                         .geometryIndexEnd(2020)
-                        .build()
+                        .build(),
                 ),
-                requestedRoutes[0].directionsRoute.legs()!![1].closures()
+                requestedRoutes[0].directionsRoute.legs()!![1].closures(),
             )
             assertEquals(
                 listOf(
                     Closure.builder()
                         .geometryIndexStart(2054)
                         .geometryIndexEnd(2061)
-                        .build()
+                        .build(),
                 ),
-                refreshedRoutes[0].directionsRoute.legs()!![1].closures()
+                refreshedRoutes[0].directionsRoute.legs()!![1].closures(),
             )
 
             // waypoints
             assertEquals(
-                requestedRoutes[0].directionsResponse.waypoints(),
-                refreshedRoutes[0].directionsResponse.waypoints()
+                requestedRoutes[0].waypoints,
+                refreshedRoutes[0].waypoints,
             )
         }
 
@@ -789,7 +817,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             R.raw.route_response_single_route_multileg,
             R.raw.route_response_single_route_multileg_refreshed,
             "route_response_single_route_multileg",
-            acceptedGeometryIndex = 70
+            acceptedGeometryIndex = 70,
         )
         mockWebServerRule.requestHandlers.add(
             FailByRequestMockRequestHandler(
@@ -797,11 +825,11 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                     "route_response_single_route_multileg_alternative",
                     readRawFileText(
                         activity,
-                        R.raw.route_response_single_route_multileg_alternative_refreshed
+                        R.raw.route_response_single_route_multileg_alternative_refreshed,
                     ),
-                    acceptedGeometryIndex = 11
-                )
-            )
+                    acceptedGeometryIndex = 11,
+                ),
+            ),
         )
         val routeOptions = generateRouteOptions(multilegCoordinates)
         val alternativeRoutes = mapboxNavigation.requestRoutes(routeOptions)
@@ -810,22 +838,22 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         // In this test setup we are considering a case where user was driving along the route,
         // started the second leg and received an alternative, and selected it before the fork.
         // This means that the primary route is shorter than the alternative route (former primary route).
-        val primaryRoute = alternativeForMultileg(activity)
-            .toNavigationRoutes(RouterOrigin.Offboard) {
-                baseUrl(mockWebServerRule.baseUrl)
-            }.first()
+        val primaryRoute = mapboxNavigation.requestMockRoutes(
+            mockWebServerRule,
+            alternativeForMultileg(activity),
+        ).first()
 
         // corresponds to currentRouteGeometryIndex = 70 for alternative route and 11 for the primary route
         mockLocationUpdatesRule.pushLocationUpdate(
             mockLocationUpdatesRule.generateLocationUpdate {
                 latitude = 38.581798
                 longitude = -121.476146
-            }
+            },
         )
 
         mapboxNavigation.setNavigationRoutes(
             listOf(primaryRoute) + alternativeRoutes,
-            initialLegIndex = 0
+            initialLegIndex = 0,
         )
         mapboxNavigation.startTripSession()
 
@@ -853,7 +881,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             R.raw.route_response_single_route_multileg,
             R.raw.route_response_single_route_multileg_refreshed,
             "route_response_single_route_multileg",
-            acceptedGeometryIndex = 70
+            acceptedGeometryIndex = 70,
         )
         mockWebServerRule.requestHandlers.add(
             FailByRequestMockRequestHandler(
@@ -861,11 +889,11 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                     "route_response_single_route_multileg_alternative",
                     readRawFileText(
                         activity,
-                        R.raw.route_response_single_route_multileg_alternative_refreshed
+                        R.raw.route_response_single_route_multileg_alternative_refreshed,
                     ),
-                    acceptedGeometryIndex = 11
-                )
-            )
+                    acceptedGeometryIndex = 11,
+                ),
+            ),
         )
         val routeOptions = generateRouteOptions(multilegCoordinates)
         val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
@@ -873,10 +901,10 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             .routes
         // alternative which was requested on the second leg of the original route,
         // so the alternative has only one leg while the original route has two
-        val alternativeRoute = alternativeForMultileg(activity)
-            .toNavigationRoutes(RouterOrigin.Offboard) {
-                baseUrl(mockWebServerRule.baseUrl)
-            }.first()
+        val alternativeRoute = mapboxNavigation.requestMockRoutes(
+            mockWebServerRule,
+            alternativeForMultileg(activity),
+        ).first()
 
         mapboxNavigation.setNavigationRoutes(requestedRoutes, initialLegIndex = 1)
         mapboxNavigation.startTripSession()
@@ -891,7 +919,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
 
         mapboxNavigation.setNavigationRoutesAndWaitForAlternativesUpdate(
             requestedRoutes + alternativeRoute,
-            initialLegIndex = 1
+            initialLegIndex = 1,
         )
 
         mapboxNavigation.routesUpdates()
@@ -920,7 +948,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 longitude = twoCoordinates[0].longitude()
                 bearing = 280f
             },
-            times = 120
+            times = 120,
         )
     }
 
@@ -931,7 +959,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 this.longitude = longitude
                 this.bearing = bearing
             },
-            times = 120
+            times = 120,
         )
     }
 
@@ -960,19 +988,19 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             MockDirectionsRequestHandler(
                 "driving-traffic",
                 readRawFileText(activity, routesResponse),
-                coordinates
-            )
+                coordinates,
+            ),
         )
         failByRequestRouteRefreshResponse = FailByRequestMockRequestHandler(
             MockDirectionsRefreshHandler(
                 responseTestUuid,
                 readRawFileText(activity, refreshResponse),
-                acceptedGeometryIndex
-            )
+                acceptedGeometryIndex,
+            ),
         )
         mockWebServerRule.requestHandlers.add(failByRequestRouteRefreshResponse)
         mockWebServerRule.requestHandlers.add(
-            MockRoutingTileEndpointErrorRequestHandler()
+            MockRoutingTileEndpointErrorRequestHandler(),
         )
     }
 
@@ -992,9 +1020,9 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 MockDirectionsRefreshHandler(
                     "route_response_route_refresh",
                     readRawFileText(activity, R.raw.route_response_route_refresh_annotations),
-                    routeIndex = 0
-                )
-            )
+                    routeIndex = 0,
+                ),
+            ),
         )
         mockWebServerRule.requestHandlers.add(
             FailByRequestMockRequestHandler(
@@ -1002,22 +1030,22 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                     "route_response_route_refresh",
                     readRawFileText(
                         activity,
-                        R.raw.route_response_route_refresh_alternative_annotations
+                        R.raw.route_response_route_refresh_alternative_annotations,
                     ),
-                    routeIndex = 1
-                )
-            )
+                    routeIndex = 1,
+                ),
+            ),
         )
     }
 
     private fun alternativeForMultileg(context: Context): MockRoute {
         val jsonResponse = readRawFileText(
             context,
-            R.raw.route_response_single_route_multileg_alternative
+            R.raw.route_response_single_route_multileg_alternative,
         )
         val coordinates = listOf(
             Point.fromLngLat(38.577427, -121.478077),
-            Point.fromLngLat(38.582195, -121.468458)
+            Point.fromLngLat(38.582195, -121.468458),
         )
         return MockRoute(
             jsonResponse,
@@ -1026,11 +1054,10 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 MockDirectionsRequestHandler(
                     profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
                     jsonResponse = jsonResponse,
-                    expectedCoordinates = coordinates
-                )
+                    expectedCoordinates = coordinates,
+                ),
             ),
             coordinates,
-            emptyList()
         )
     }
 }

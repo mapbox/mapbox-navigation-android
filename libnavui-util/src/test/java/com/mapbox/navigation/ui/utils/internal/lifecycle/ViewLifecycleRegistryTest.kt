@@ -7,6 +7,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewTreeLifecycleOwner
 import androidx.lifecycle.testing.TestLifecycleOwner
+import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -16,15 +17,20 @@ import io.mockk.slot
 import io.mockk.unmockkStatic
 import io.mockk.verify
 import io.mockk.verifyOrder
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class ViewLifecycleRegistryTest {
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
+
+    @get:Rule
+    val mainCoroutineRule = MainCoroutineRule()
 
     @Before
     fun setup() {
@@ -154,7 +160,7 @@ class ViewLifecycleRegistryTest {
         val hostingLifecycleOwner = generateHostingLifecycleOwner()
         val localLifecycleOwner = generateLocalLifecycleOwner(
             hostingLifecycleOwner,
-            initializeAttached = true
+            initializeAttached = true,
         )
         val lifecycleObserver = mockk<LifecycleEventObserver>(relaxUnitFun = true)
 
@@ -178,7 +184,7 @@ class ViewLifecycleRegistryTest {
     }
 
     private fun generateHostingLifecycleOwner() = TestLifecycleOwner(
-        initialState = Lifecycle.State.INITIALIZED
+        initialState = Lifecycle.State.INITIALIZED,
     )
 
     private fun generateLocalLifecycleOwner(
@@ -207,7 +213,7 @@ private class DummyLifecycleOwner(
         every { ViewTreeLifecycleOwner.get(view) } returns hostingLifecycleOwner
         viewLifecycleRegistry = ViewLifecycleRegistry(
             localLifecycleOwner = this,
-            view = view
+            view = view,
         )
     }
 

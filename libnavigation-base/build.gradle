@@ -3,7 +3,11 @@ apply plugin: 'kotlin-android'
 apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'com.jaredsburrows.license'
 apply from: "../gradle/ktlint.gradle"
+apply from: file("../gradle/artifact-settings.gradle")
 apply from: "../gradle/kdoc-settings.gradle"
+
+version = project.ext.versionName
+group = project.ext.mapboxArtifactGroupId
 
 android {
     compileSdkVersion androidVersions.compileSdkVersion
@@ -18,6 +22,8 @@ android {
         targetSdkVersion androidVersions.targetSdkVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'proguard-rules.pro', "../proguard/proguard-project.pro"
+
+        buildConfigField 'String', "MAPBOX_NAVIGATION_VERSION_NAME", String.format("\"%s\"", project.ext.versionName)
     }
 
     testOptions {
@@ -30,6 +36,7 @@ dependencies {
     api dependenciesList.mapboxCommonNative
     api dependenciesList.mapboxSdkDirectionsModels
     api dependenciesList.mapboxSdkServicesCore
+    implementation dependenciesList.mapboxSdkServices
     // Navigator
     implementation dependenciesList.mapboxNavigator
 

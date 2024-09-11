@@ -2,12 +2,14 @@ package com.mapbox.navigation.ui.maps.building.api
 
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.common.Cancelable
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxMap
-import com.mapbox.maps.QueriedFeature
-import com.mapbox.maps.QueryFeaturesCallback
-import com.mapbox.maps.ScreenCoordinate
+import com.mapbox.maps.QueriedRenderedFeature
+import com.mapbox.maps.QueryRenderedFeaturesCallback
+import com.mapbox.maps.RenderedQueryGeometry
+import com.mapbox.maps.RenderedQueryOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.MainCoroutineRule
@@ -39,10 +41,10 @@ import org.junit.Test
 class MapboxBuildingsApiTest {
 
     @get:Rule
-    var coroutineRule = MainCoroutineRule()
+    val coroutineRule = MainCoroutineRule()
 
-    private val consumer:
-        MapboxNavigationConsumer<Expected<BuildingError, BuildingValue>> = mockk(relaxed = true)
+    private val consumer =
+        mockk<MapboxNavigationConsumer<Expected<BuildingError, BuildingValue>>>(relaxed = true)
 
     @Before
     fun setUp() {
@@ -56,19 +58,26 @@ class MapboxBuildingsApiTest {
 
     @Test
     fun `map query rendered feature fails no op`() = coroutineRule.runBlockingTest {
-        val queriedFeaturesExpected: Expected<String, List<QueriedFeature>> = mockk {
+        val queriedFeaturesExpected = mockk<Expected<String, List<QueriedRenderedFeature>>> {
             every { value } returns null
             every { error } returns "whatever"
         }
-        val mapboxMap: MapboxMap = mockk {
-            every { queryRenderedFeatures(any<ScreenCoordinate>(), any(), any()) } answers {
-                thirdArg<QueryFeaturesCallback>().run(queriedFeaturesExpected)
+        val mapboxMap = mockk<MapboxMap> {
+            every {
+                queryRenderedFeatures(
+                    any<RenderedQueryGeometry>(),
+                    any<RenderedQueryOptions>(),
+                    any(),
+                )
+            } answers {
+                thirdArg<QueryRenderedFeaturesCallback>().run(queriedFeaturesExpected)
+                Cancelable {}
             }
         }
         val mockPoint = Point.fromLngLat(123.3434, -37.4567)
         val mockAction = BuildingAction.QueryBuilding(mockPoint, mapboxMap)
         val mockResult = BuildingResult.QueriedBuildings(
-            ExpectedFactory.createError(BuildingError(queriedFeaturesExpected.error))
+            ExpectedFactory.createError(BuildingError(queriedFeaturesExpected.error)),
         )
         val messageSlot = slot<Expected<BuildingError, BuildingValue>>()
         coEvery { BuildingProcessor.queryBuilding(mockAction) } returns mockResult
@@ -84,17 +93,24 @@ class MapboxBuildingsApiTest {
     fun `map query rendered feature returns list of queried features`() =
         coroutineRule.runBlockingTest {
             val queriedFeaturesExpected = mockSuccessQueriedFeature()
-            val mapboxMap: MapboxMap = mockk {
-                every { queryRenderedFeatures(any<ScreenCoordinate>(), any(), any()) } answers {
-                    thirdArg<QueryFeaturesCallback>().run(queriedFeaturesExpected)
+            val mapboxMap = mockk<MapboxMap> {
+                every {
+                    queryRenderedFeatures(
+                        any<RenderedQueryGeometry>(),
+                        any<RenderedQueryOptions>(),
+                        any(),
+                    )
+                } answers {
+                    thirdArg<QueryRenderedFeaturesCallback>().run(queriedFeaturesExpected)
+                    Cancelable {}
                 }
             }
             val mockPoint = Point.fromLngLat(123.3434, -37.4567)
             val mockAction = BuildingAction.QueryBuilding(mockPoint, mapboxMap)
             val mockResult = BuildingResult.QueriedBuildings(
                 ExpectedFactory.createValue(
-                    BuildingValue(queriedFeaturesExpected.value ?: emptyList())
-                )
+                    BuildingValue(queriedFeaturesExpected.value ?: emptyList()),
+                ),
             )
             val messageSlot = slot<Expected<BuildingError, BuildingValue>>()
             coEvery { BuildingProcessor.queryBuilding(mockAction) } returns mockResult
@@ -131,16 +147,23 @@ class MapboxBuildingsApiTest {
         val mockAction = BuildingAction.QueryBuildingOnWaypoint(mockRouteProgress)
         val mockResult = BuildingResult.GetDestination(mockPoint)
         coEvery { BuildingProcessor.queryBuildingOnWaypoint(mockAction) } returns mockResult
-        val mapboxMap: MapboxMap = mockk {
-            every { queryRenderedFeatures(any<ScreenCoordinate>(), any(), any()) } answers {
-                thirdArg<QueryFeaturesCallback>().run(queriedFeaturesExpected)
+        val mapboxMap = mockk<MapboxMap> {
+            every {
+                queryRenderedFeatures(
+                    any<RenderedQueryGeometry>(),
+                    any<RenderedQueryOptions>(),
+                    any(),
+                )
+            } answers {
+                thirdArg<QueryRenderedFeaturesCallback>().run(queriedFeaturesExpected)
+                Cancelable { }
             }
         }
         val mockPointAction = BuildingAction.QueryBuilding(mockPoint, mapboxMap)
         val mockPointResult = BuildingResult.QueriedBuildings(
             ExpectedFactory.createValue(
-                BuildingValue(queriedFeaturesExpected.value ?: emptyList())
-            )
+                BuildingValue(queriedFeaturesExpected.value ?: emptyList()),
+            ),
         )
         coEvery { BuildingProcessor.queryBuilding(mockPointAction) } returns mockPointResult
         val messageSlot = slot<Expected<BuildingError, BuildingValue>>()
@@ -177,16 +200,23 @@ class MapboxBuildingsApiTest {
         val mockAction = BuildingAction.QueryBuildingOnFinalDestination(mockRouteProgress)
         val mockResult = BuildingResult.GetDestination(mockPoint)
         coEvery { BuildingProcessor.queryBuildingOnFinalDestination(mockAction) } returns mockResult
-        val mapboxMap: MapboxMap = mockk {
-            every { queryRenderedFeatures(any<ScreenCoordinate>(), any(), any()) } answers {
-                thirdArg<QueryFeaturesCallback>().run(queriedFeaturesExpected)
+        val mapboxMap = mockk<MapboxMap> {
+            every {
+                queryRenderedFeatures(
+                    any<RenderedQueryGeometry>(),
+                    any<RenderedQueryOptions>(),
+                    any(),
+                )
+            } answers {
+                thirdArg<QueryRenderedFeaturesCallback>().run(queriedFeaturesExpected)
+                Cancelable {}
             }
         }
         val mockPointAction = BuildingAction.QueryBuilding(mockPoint, mapboxMap)
         val mockPointResult = BuildingResult.QueriedBuildings(
             ExpectedFactory.createValue(
-                BuildingValue(queriedFeaturesExpected.value ?: emptyList())
-            )
+                BuildingValue(queriedFeaturesExpected.value ?: emptyList()),
+            ),
         )
         coEvery { BuildingProcessor.queryBuilding(mockPointAction) } returns mockPointResult
         val messageSlot = slot<Expected<BuildingError, BuildingValue>>()
@@ -213,20 +243,23 @@ class MapboxBuildingsApiTest {
         }
     }
 
-    private fun mockSuccessQueriedFeature() = mockk<Expected<String, List<QueriedFeature>>> {
-        mockk {
-            every { value } returns listOf(
-                mockk {
-                    every { source } returns "composite"
-                    every { sourceLayer } returns "building"
-                    every { feature } returns loadFeature()
-                }
-            )
-            every { error } returns null
+    private fun mockSuccessQueriedFeature() =
+        mockk<Expected<String, List<QueriedRenderedFeature>>> {
+            mockk {
+                every { value } returns listOf(
+                    mockk {
+                        every { queriedFeature } returns mockk {
+                            every { source } returns "composite"
+                            every { sourceLayer } returns "building"
+                            every { feature } returns loadFeature()
+                        }
+                    },
+                )
+                every { error } returns null
+            }
         }
-    }
 
     private fun loadFeature() = Feature.fromJson(
-        FileUtils.loadJsonFixture("arrival-highlight-building-feature.json")
+        FileUtils.loadJsonFixture("arrival-highlight-building-feature.json"),
     )
 }

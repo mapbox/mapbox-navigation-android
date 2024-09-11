@@ -24,7 +24,7 @@ class RailwayCrossing internal constructor(
     length,
     provider,
     isUrban,
-    nativeRoadObject
+    nativeRoadObject,
 ) {
 
     /**

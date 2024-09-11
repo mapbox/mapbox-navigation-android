@@ -1,6 +1,9 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-parcelize'
+apply from: file("../gradle/testing-module-settings.gradle")
+
+group = project.ext.mapboxArtifactGroupId
 
 android {
     compileSdkVersion androidVersions.compileSdkVersion
@@ -25,5 +28,7 @@ dependencies {
     implementation dependenciesList.kotlinReflect
     implementation dependenciesList.mapboxCommonNative
     implementation dependenciesList.mockk
+    api dependenciesList.equalsVerifier
+    api dependenciesList.toStringVerifier
     implementation 'org.json:json:20210307'
 }

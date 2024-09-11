@@ -23,7 +23,7 @@ class MapboxLifecycleExtensionsKtTest {
 
         lifecycleOwner.attachCreated(
             mapboxNavigation,
-            testObserver
+            testObserver,
         )
 
         lifecycleOwner.moveToState(Lifecycle.State.CREATED)
@@ -41,7 +41,7 @@ class MapboxLifecycleExtensionsKtTest {
         lifecycleOwner.moveToState(Lifecycle.State.CREATED)
         lifecycleOwner.attachStarted(
             mapboxNavigation,
-            testObserver
+            testObserver,
         )
 
         lifecycleOwner.moveToState(Lifecycle.State.STARTED)
@@ -59,7 +59,7 @@ class MapboxLifecycleExtensionsKtTest {
         lifecycleOwner.moveToState(Lifecycle.State.STARTED)
         lifecycleOwner.attachResumed(
             mapboxNavigation,
-            testObserver
+            testObserver,
         )
 
         lifecycleOwner.moveToState(Lifecycle.State.RESUMED)
@@ -79,7 +79,7 @@ class MapboxLifecycleExtensionsKtTest {
             Lifecycle.Event.ON_RESUME,
             Lifecycle.Event.ON_PAUSE,
             mapboxNavigation,
-            testObserver
+            testObserver,
         )
 
         lifecycleOwner.moveToState(Lifecycle.State.RESUMED)

@@ -6,13 +6,10 @@ import com.google.gson.JsonPrimitive
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.testing.factories.TestSDKRouteParser
 import com.mapbox.navigation.testing.factories.createDirectionsResponse
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createRouteOptions
-import com.mapbox.navigator.RouteInfo
-import com.mapbox.navigator.RouterOrigin
-import io.mockk.every
-import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -24,11 +21,9 @@ class NavigationRouteEqualsTest(
     private val description: String,
     private val directionsResponse1: DirectionsResponse,
     private val routeOptions1: RouteOptions,
-    private val id1: String,
     private val expirationTime1: Long?,
     private val directionsResponse2: DirectionsResponse,
     private val routeOptions2: RouteOptions,
-    private val id2: String,
     private val expirationTime2: Long?,
     private val expected: Boolean,
 ) {
@@ -52,11 +47,11 @@ class NavigationRouteEqualsTest(
                                 JsonArray().apply {
                                     add(1.5)
                                     add(2.5)
-                                }
+                                },
                             )
-                        }
+                        },
                     )
-                }
+                },
             )
             val waypoint2 = DirectionsWaypoint.builder()
                 .name("name2")
@@ -72,15 +67,15 @@ class NavigationRouteEqualsTest(
                                 JsonArray().apply {
                                     add(3.5)
                                     add(4.5)
-                                }
+                                },
                             )
-                        }
+                        },
                     )
-                }
+                },
             )
             val route1WithWaypoints1FromRoute = createDirectionsRoute(
                 distance = 1.0,
-                waypoints = listOf(waypoint1)
+                waypoints = listOf(waypoint1),
             )
             val route1WithWaypoints2FromRoute = createDirectionsRoute(
                 distance = 1.0,
@@ -96,93 +91,85 @@ class NavigationRouteEqualsTest(
             return listOf(
                 arrayOf(
                     "different ids",
-                    createDirectionsResponse(routes = listOf(route1WithWaypoints1FromRoute)),
+                    createDirectionsResponse(
+                        routes = listOf(route1WithWaypoints1FromRoute),
+                        uuid = "test1",
+                    ),
                     createRouteOptions(waypointsPerRoute = true),
-                    "id#0",
                     null,
-                    createDirectionsResponse(routes = listOf(route1WithWaypoints1FromRoute)),
+                    createDirectionsResponse(
+                        routes = listOf(route1WithWaypoints1FromRoute),
+                        uuid = "test2",
+                    ),
                     createRouteOptions(waypointsPerRoute = true),
-                    "id#1",
                     null,
-                    false
+                    false,
                 ),
                 arrayOf(
                     "different routes",
                     createDirectionsResponse(routes = listOf(route1WithWaypoints1FromRoute)),
                     createRouteOptions(waypointsPerRoute = true),
-                    "id#0",
                     null,
                     createDirectionsResponse(routes = listOf(route2WithWaypoints1FromRoute)),
                     createRouteOptions(waypointsPerRoute = true),
-                    "id#0",
                     null,
-                    false
+                    false,
                 ),
                 arrayOf(
                     "different waypoints from the same source",
                     createDirectionsResponse(routes = listOf(route1WithWaypoints1FromRoute)),
                     createRouteOptions(waypointsPerRoute = true),
-                    "id#0",
                     null,
                     createDirectionsResponse(routes = listOf(route1WithWaypoints2FromRoute)),
                     createRouteOptions(waypointsPerRoute = true),
-                    "id#0",
                     null,
-                    false
+                    false,
                 ),
                 arrayOf(
                     "different waypoints from different sources",
                     createDirectionsResponse(routes = listOf(route1WithWaypoints1FromRoute)),
                     createRouteOptions(waypointsPerRoute = true),
-                    "id#0",
                     null,
                     createDirectionsResponse(
                         routes = listOf(route1WithWaypoints1FromResponse),
-                        unrecognizedProperties = unrecognizedWaypoints2
+                        unrecognizedProperties = unrecognizedWaypoints2,
                     ),
                     createRouteOptions(waypointsPerRoute = false),
-                    "id#0",
                     null,
-                    false
+                    false,
                 ),
                 arrayOf(
                     "same waypoints from the same source",
                     createDirectionsResponse(routes = listOf(route1WithWaypoints1FromRoute)),
                     createRouteOptions(waypointsPerRoute = true),
-                    "id#0",
                     null,
                     createDirectionsResponse(routes = listOf(route1WithWaypoints1FromRoute)),
                     createRouteOptions(waypointsPerRoute = true),
-                    "id#0",
                     null,
-                    true
+                    true,
                 ),
                 arrayOf(
                     "same waypoints from different source",
                     createDirectionsResponse(routes = listOf(route1WithWaypoints1FromRoute)),
                     createRouteOptions(waypointsPerRoute = true),
-                    "id#0",
                     null,
                     createDirectionsResponse(
                         routes = listOf(route1WithWaypoints1FromResponse),
-                        unrecognizedProperties = unrecognizedWaypoints1
+                        unrecognizedProperties = unrecognizedWaypoints1,
                     ),
                     createRouteOptions(waypointsPerRoute = false),
-                    "id#0",
                     null,
-                    false
+                    false,
                 ),
                 arrayOf(
                     "different expiration times",
                     createDirectionsResponse(routes = listOf(route1WithWaypoints1FromRoute)),
                     createRouteOptions(waypointsPerRoute = true),
-                    "id#0",
                     1L,
                     createDirectionsResponse(routes = listOf(route1WithWaypoints1FromRoute)),
                     createRouteOptions(waypointsPerRoute = true),
-                    "id#0",
                     2L,
-                    true
+                    true,
                 ),
             )
         }
@@ -193,36 +180,20 @@ class NavigationRouteEqualsTest(
 
     @Before
     fun setUp() {
-        route1 = NavigationRoute(
+        route1 = NavigationRoute.create(
             directionsResponse1,
-            0,
             routeOptions1,
-            directionsResponse1.routes().first(),
-            mockk(relaxUnitFun = true) {
-                every { routeId } returns id1
-                every { responseUuid } returns "uuid#0"
-                every { routerOrigin } returns RouterOrigin.ONBOARD
-                every { routeInfo } returns RouteInfo(listOf(mockk(relaxed = true)))
-                every { waypoints } returns emptyList()
-            },
-            expirationTimeElapsedSeconds = expirationTime1
-        )
-        route2 = NavigationRoute(
+            TestSDKRouteParser(),
+            routerOrigin = RouterOrigin.ONLINE,
+            expirationTime1,
+        ).first()
+        route2 = NavigationRoute.create(
             directionsResponse2,
-            0,
             routeOptions2,
-            directionsResponse2.routes().first(),
-            mockk(relaxUnitFun = true) {
-                every { routeId } returns id2
-                every { responseUuid } returns "uuid#1"
-                every { routerOrigin } returns RouterOrigin.ONLINE
-                every {
-                    routeInfo
-                } returns RouteInfo(listOf(mockk(relaxed = true), mockk(relaxed = true)))
-                every { waypoints } returns emptyList()
-            },
-            expirationTimeElapsedSeconds = expirationTime2
-        )
+            TestSDKRouteParser(),
+            RouterOrigin.ONLINE,
+            expirationTime2,
+        ).first()
     }
 
     @Test

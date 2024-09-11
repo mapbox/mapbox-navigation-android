@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.maps.guidance.signboard.api
 import android.graphics.Bitmap
 import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions
+import java.nio.ByteBuffer
 
 /**
  * An interface that exposes a function to allow the conversion of svg in a raw [ByteArray]
@@ -20,7 +21,7 @@ fun interface SvgToBitmapParser {
      * @return [Expected] contains [Bitmap] if successful or error otherwise.
      */
     fun parse(
-        svg: ByteArray,
-        options: MapboxSignboardOptions
+        svg: ByteBuffer,
+        options: MapboxSignboardOptions,
     ): Expected<String, Bitmap>
 }

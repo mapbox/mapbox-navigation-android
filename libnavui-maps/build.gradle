@@ -27,28 +27,29 @@ android {
         consumerProguardFiles 'proguard-rules.pro', "../proguard/proguard-project.pro"
     }
 
-    buildFeatures {
-        viewBinding true
+    buildTypes {
+        release {
+            crunchPngs false
+        }
     }
 
     testOptions {
         unitTests.returnDefaultValues = true
         unitTests.includeAndroidResources = true
     }
+
+    buildFeatures {
+        viewBinding true
+    }
 }
 
 dependencies {
     api project(":libnavui-base")
-    api project(":libnavui-shield")
-    implementation project(":libnavui-resources")
 
-    api dependenciesList.mapboxMapSdk
+    api (dependenciesList.mapboxMapSdk)
     api dependenciesList.mapboxSdkTurf
 
     implementation dependenciesList.androidXAppCompat
-    implementation dependenciesList.androidXCardView
-    implementation dependenciesList.androidXConstraintLayout
-    implementation dependenciesList.materialDesign
     implementation dependenciesList.kotlinStdLib
 
     implementation dependenciesList.coroutinesAndroid
@@ -58,6 +59,7 @@ dependencies {
     testImplementation project(':libtesting-navigation-util')
     testImplementation project(':libtesting-navigation-base')
     testImplementation(dependenciesList.mapboxNavigator)
+    testImplementation(dependenciesList.androidXAsyncInflater)
 }
 
 dokkaHtmlPartial {

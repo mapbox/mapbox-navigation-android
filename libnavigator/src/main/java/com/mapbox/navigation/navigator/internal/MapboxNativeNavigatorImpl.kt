@@ -1,5 +1,6 @@
 package com.mapbox.navigation.navigator.internal
 
+import androidx.annotation.RestrictTo
 import com.google.gson.JsonArray
 import com.google.gson.JsonParser
 import com.mapbox.api.directionsrefresh.v1.models.DirectionsRefreshResponse
@@ -20,20 +21,20 @@ import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigator.ADASISv2MessageCallback
 import com.mapbox.navigator.AdasisConfig
-import com.mapbox.navigator.CacheDataDomain
 import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.ElectronicHorizonObserver
+import com.mapbox.navigator.EventsMetadataInterface
 import com.mapbox.navigator.Experimental
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.GraphAccessor
 import com.mapbox.navigator.HistoryRecorderHandle
+import com.mapbox.navigator.InputsServiceHandle
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorObserver
 import com.mapbox.navigator.PredictiveCacheController
-import com.mapbox.navigator.PredictiveCacheControllerOptions
 import com.mapbox.navigator.PredictiveLocationTrackerOptions
 import com.mapbox.navigator.RefreshRouteResult
 import com.mapbox.navigator.RoadObjectMatcher
@@ -46,6 +47,7 @@ import com.mapbox.navigator.SensorData
 import com.mapbox.navigator.SetRoutesParams
 import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.SetRoutesResult
+import com.mapbox.navigator.Telemetry
 import com.mapbox.navigator.UpdateExternalSensorDataCallback
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -56,12 +58,13 @@ import kotlin.coroutines.resume
 /**
  * Default implementation of [MapboxNativeNavigator] interface.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 class MapboxNativeNavigatorImpl(
     cacheHandle: CacheHandle,
     config: ConfigHandle,
     historyRecorderComposite: HistoryRecorderHandle?,
-    accessToken: String,
-    router: RouterInterface?,
+    private val offlineCacheHandle: CacheHandle?,
+    eventsMetadataProvider: EventsMetadataInterface,
 ) : MapboxNativeNavigator {
 
     private lateinit var navigator: Navigator
@@ -71,30 +74,34 @@ class MapboxNativeNavigatorImpl(
     override lateinit var experimental: Experimental
     override lateinit var cache: CacheHandle
     override lateinit var routeAlternativesController: RouteAlternativesControllerInterface
+    override lateinit var inputsService: InputsServiceHandle
+    override lateinit var telemetry: Telemetry
     private val nativeNavigatorRecreationObservers =
         CopyOnWriteArraySet<NativeNavigatorRecreationObserver>()
-    private lateinit var accessToken: String
 
     init {
-        init(cacheHandle, config, historyRecorderComposite, accessToken, router)
+        init(
+            cacheHandle,
+            config,
+            historyRecorderComposite,
+            offlineCacheHandle,
+            eventsMetadataProvider,
+        )
     }
 
-    /**
-     * Create or reset resources. This must be called before calling any
-     * functions within [MapboxNativeNavigatorImpl]
-     */
     private fun init(
         cacheHandle: CacheHandle,
         config: ConfigHandle,
         historyRecorderComposite: HistoryRecorderHandle?,
-        accessToken: String,
-        router: RouterInterface?,
+        offlineCacheHandle: CacheHandle?,
+        eventsMetadataProvider: EventsMetadataInterface,
     ) {
         val nativeComponents = NavigatorLoader.createNavigator(
             cacheHandle,
             config,
             historyRecorderComposite,
-            router,
+            offlineCacheHandle,
+            eventsMetadataProvider,
         )
         navigator = nativeComponents.navigator
         graphAccessor = nativeComponents.graphAccessor
@@ -103,7 +110,8 @@ class MapboxNativeNavigatorImpl(
         experimental = nativeComponents.navigator.experimental
         cache = nativeComponents.cache
         routeAlternativesController = nativeComponents.routeAlternativesController
-        this.accessToken = accessToken
+        inputsService = nativeComponents.inputsService
+        telemetry = nativeComponents.telemetry
     }
 
     /**
@@ -113,18 +121,30 @@ class MapboxNativeNavigatorImpl(
         cacheHandle: CacheHandle,
         config: ConfigHandle,
         historyRecorderComposite: HistoryRecorderHandle?,
-        accessToken: String,
-        router: RouterInterface
+        eventsMetadataProvider: EventsMetadataInterface,
     ) {
         val storeNavSessionState = navigator.storeNavigationSession()
 
         navigator.shutdown()
 
-        init(cacheHandle, config, historyRecorderComposite, accessToken, router)
+        init(
+            cacheHandle,
+            config,
+            historyRecorderComposite,
+            offlineCacheHandle,
+            eventsMetadataProvider,
+        )
         navigator.restoreNavigationSession(storeNavSessionState)
         nativeNavigatorRecreationObservers.forEach {
             it.onNativeNavigatorRecreated()
         }
+    }
+
+    /**
+     * Get router
+     */
+    override fun getRouter(): RouterInterface {
+        return navigator.router
     }
 
     override suspend fun resetRideSession() = suspendCancellableCoroutine<Unit> {
@@ -174,7 +194,7 @@ class MapboxNativeNavigatorImpl(
                 SetRoutesParams(
                     route.nativeRoute(),
                     startingLeg,
-                    alternatives.map { it.nativeRoute() }
+                    alternatives.map { it.nativeRoute() },
                 )
             },
             reason,
@@ -183,7 +203,7 @@ class MapboxNativeNavigatorImpl(
                 logE(
                     "Failed to set the primary route with alternatives, " +
                         "active guidance session will not function correctly. Reason: $it",
-                    LOG_CATEGORY
+                    LOG_CATEGORY,
                 )
             }
             continuation.resume(result)
@@ -191,16 +211,16 @@ class MapboxNativeNavigatorImpl(
     }
 
     override suspend fun setAlternativeRoutes(
-        routes: List<NavigationRoute>
+        routes: List<NavigationRoute>,
     ): List<RouteAlternative> = suspendCancellableCoroutine { continuation ->
         navigator.setAlternativeRoutes(
-            routes.map { it.nativeRoute() }
+            routes.map { it.nativeRoute() },
         ) { result ->
             result.onError {
                 logE(
                     "Failed to set alternative routes, " +
                         "alternatives will be ignored. Reason: $it",
-                    LOG_CATEGORY
+                    LOG_CATEGORY,
                 )
             }
             continuation.resume(result.value ?: emptyList())
@@ -216,7 +236,7 @@ class MapboxNativeNavigatorImpl(
      * to [Navigator.refreshRoute], not only the annotations/incidents collections.
      */
     override suspend fun refreshRoute(
-        route: NavigationRoute
+        route: NavigationRoute,
     ): Expected<String, List<RouteAlternative>> {
         val refreshedLegs = route.directionsRoute.legs()?.map { routeLeg ->
             RouteLegRefresh.builder()
@@ -234,9 +254,9 @@ class MapboxNativeNavigatorImpl(
                             waypoints.forEach { waypoint ->
                                 add(JsonParser.parseString(waypoint.toJson()))
                             }
-                        }
+                        },
                     )
-                }
+                },
             )
             .build()
         val refreshResponse = DirectionsRefreshResponse.builder()
@@ -250,13 +270,13 @@ class MapboxNativeNavigatorImpl(
 
         val callback = {
                 continuation: Continuation<Expected<String, List<RouteAlternative>>>,
-                expected: Expected<String, RefreshRouteResult> ->
+                expected: Expected<String, RefreshRouteResult>, ->
             expected.fold(
                 { error ->
                     logE(
                         "Annotations update failed for route with ID '${route.id}'. " +
                             "Reason: $error",
-                        LOG_CATEGORY
+                        LOG_CATEGORY,
                     )
                     continuation.resume(ExpectedFactory.createError(error))
                 },
@@ -268,23 +288,23 @@ class MapboxNativeNavigatorImpl(
                             refreshRouteResult.alternatives
                                 .joinToString { it.id.toString() }
                                 .ifBlank { "[no alternatives]" },
-                        LOG_CATEGORY
+                        LOG_CATEGORY,
                     )
                     continuation.resume(
-                        ExpectedFactory.createValue(refreshRouteResult.alternatives)
+                        ExpectedFactory.createValue(refreshRouteResult.alternatives),
                     )
-                }
+                },
             )
         }
         return suspendCancellableCoroutine { continuation ->
             logD(
                 "Refreshing native route ${route.nativeRoute().routeId} " +
                     "with generated refresh response: $refreshResponseJson",
-                LOG_CATEGORY
+                LOG_CATEGORY,
             )
             navigator.refreshRoute(
                 refreshResponseJson,
-                route.nativeRoute().routeId
+                route.nativeRoute().routeId,
             ) { callback(continuation, it) }
         }
     }
@@ -321,7 +341,7 @@ class MapboxNativeNavigatorImpl(
     }
 
     override fun removeRoadObjectsStoreObserver(
-        roadObjectsStoreObserver: RoadObjectsStoreObserver
+        roadObjectsStoreObserver: RoadObjectsStoreObserver,
     ) {
         roadObjectsStore.removeObserver(roadObjectsStoreObserver)
     }
@@ -331,7 +351,7 @@ class MapboxNativeNavigatorImpl(
     }
 
     override fun setNativeNavigatorRecreationObserver(
-        nativeNavigatorRecreationObserver: NativeNavigatorRecreationObserver
+        nativeNavigatorRecreationObserver: NativeNavigatorRecreationObserver,
     ) {
         nativeNavigatorRecreationObservers.add(nativeNavigatorRecreationObserver)
     }
@@ -343,36 +363,15 @@ class MapboxNativeNavigatorImpl(
         nativeNavigatorRecreationObservers.clear()
     }
 
-    /**
-     * Creates a Maps [PredictiveCacheController].
-     *
-     * @param tileStore Maps [TileStore]
-     * @param tileVariant Maps tileset
-     * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions]
-     *
-     * @return [PredictiveCacheController]
-     */
-    @Deprecated(
-        "Use createMapsController(" +
-            "mapboxMap, tileStore, tilesetDescriptor, predictiveCacheLocationOptions" +
-            ") instead."
-    )
-    override fun createMapsPredictiveCacheControllerTileVariant(
-        tileStore: TileStore,
-        tileVariant: String,
-        predictiveCacheLocationOptions: PredictiveCacheLocationOptions
-    ): PredictiveCacheController =
-        navigator.createPredictiveCacheController(
-            tileStore,
-            createDefaultMapsPredictiveCacheControllerOptions(tileVariant),
-            predictiveCacheLocationOptions.toPredictiveLocationTrackerOptions()
-        )
+    override fun shutdown() {
+        navigator.shutdown()
+    }
 
     /**
      * Creates a Maps [PredictiveCacheController].
      *
      * @param tileStore Maps [TileStore]
-     * @param tilesetDescriptor Maps tilesetDescriptor
+     * @param tilesetDescriptor Maps tilesetDescriptor [TilesetDescriptor]
      * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions]
      *
      * @return [PredictiveCacheController]
@@ -380,12 +379,32 @@ class MapboxNativeNavigatorImpl(
     override fun createMapsPredictiveCacheController(
         tileStore: TileStore,
         tilesetDescriptor: TilesetDescriptor,
-        predictiveCacheLocationOptions: PredictiveCacheLocationOptions
+        predictiveCacheLocationOptions: PredictiveCacheLocationOptions,
     ): PredictiveCacheController =
         navigator.createPredictiveCacheController(
             tileStore,
             listOf(tilesetDescriptor),
-            predictiveCacheLocationOptions.toPredictiveLocationTrackerOptions()
+            predictiveCacheLocationOptions.toPredictiveLocationTrackerOptions(),
+        )
+
+    /**
+     * Creates a search [PredictiveCacheController].
+     *
+     * @param tileStore Maps [TileStore]
+     * @param searchTilesetDescriptor Search tilesetDescriptor [TilesetDescriptor]
+     * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions]
+     *
+     * @return [PredictiveCacheController]
+     */
+    override fun createSearchPredictiveCacheController(
+        tileStore: TileStore,
+        searchTilesetDescriptor: TilesetDescriptor,
+        predictiveCacheLocationOptions: PredictiveCacheLocationOptions,
+    ): PredictiveCacheController =
+        navigator.createPredictiveCacheController(
+            tileStore,
+            listOf(searchTilesetDescriptor),
+            predictiveCacheLocationOptions.toPredictiveLocationTrackerOptions(),
         )
 
     /**
@@ -397,26 +416,17 @@ class MapboxNativeNavigatorImpl(
      * @return [PredictiveCacheController]
      */
     override fun createNavigationPredictiveCacheController(
-        predictiveCacheLocationOptions: PredictiveCacheLocationOptions
+        predictiveCacheLocationOptions: PredictiveCacheLocationOptions,
     ): PredictiveCacheController =
         navigator.createPredictiveCacheController(
-            predictiveCacheLocationOptions.toPredictiveLocationTrackerOptions()
+            predictiveCacheLocationOptions.toPredictiveLocationTrackerOptions(),
         )
 
     private fun PredictiveCacheLocationOptions.toPredictiveLocationTrackerOptions() =
         PredictiveLocationTrackerOptions(
             currentLocationRadiusInMeters,
             routeBufferRadiusInMeters,
-            destinationLocationRadiusInMeters
-        )
-
-    private fun createDefaultMapsPredictiveCacheControllerOptions(tileVariant: String) =
-        PredictiveCacheControllerOptions(
-            "",
-            tileVariant,
-            CacheDataDomain.MAPS,
-            MAX_NUMBER_TILES_LOAD_PARALLEL_REQUESTS,
-            0
+            destinationLocationRadiusInMeters,
         )
 
     override fun updateExternalSensorData(
@@ -437,10 +447,11 @@ class MapboxNativeNavigatorImpl(
         navigator.resetAdasisMessageCallback()
     }
 
+    override fun setUserLanguages(languages: List<String>) {
+        navigator.config().mutableSettings().setUserLanguages(languages)
+    }
+
     private companion object {
         const val LOG_CATEGORY = "MapboxNativeNavigatorImpl"
-
-        // TODO: What should be the default value? Should we expose it publicly?
-        const val MAX_NUMBER_TILES_LOAD_PARALLEL_REQUESTS = 2
     }
 }

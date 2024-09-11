@@ -34,13 +34,13 @@ object MapboxDistanceUtil {
         roundingIncrement: Int,
         unitType: UnitType,
         context: Context,
-        locale: Locale
+        locale: Locale,
     ): FormattedDistanceData {
         val formattingData = getFormattingData(
             distanceInMeters,
             roundingIncrement,
             unitType,
-            locale
+            locale,
         )
         val resources = context.applicationContext.resourcesWithLocale(locale)
         val unitStringSuffix = getUnitString(resources, formattingData.turfDistanceUnit)
@@ -48,7 +48,7 @@ object MapboxDistanceUtil {
             formattingData.distance,
             formattingData.distanceAsString,
             unitStringSuffix,
-            formattingData.unitType
+            formattingData.unitType,
         )
     }
 
@@ -56,7 +56,7 @@ object MapboxDistanceUtil {
         distanceInMeters: Double,
         roundingIncrement: Int,
         unitType: UnitType,
-        locale: Locale
+        locale: Locale,
     ): FormattingData {
         return when (unitType) {
             UnitType.METRIC -> getMetricDistance(distanceInMeters, roundingIncrement, locale)
@@ -64,7 +64,7 @@ object MapboxDistanceUtil {
                 val distanceInMiles = TurfConversion.convertLength(
                     distanceInMeters,
                     TurfConstants.UNIT_METERS,
-                    TurfConstants.UNIT_MILES
+                    TurfConstants.UNIT_MILES,
                 )
                 if (locale.language == enLanguage && locale.country == "GB") {
                     getUKDistance(distanceInMiles, roundingIncrement, locale)
@@ -78,26 +78,26 @@ object MapboxDistanceUtil {
     private fun getMetricDistance(
         distanceInMeters: Double,
         roundingIncrement: Int,
-        locale: Locale
+        locale: Locale,
     ): FormattingData {
         return when {
             distanceInMeters !in 0.0..Double.MAX_VALUE -> smallValue(
                 0.0,
                 roundingIncrement,
                 TurfConstants.UNIT_METERS,
-                UnitType.METRIC
+                UnitType.METRIC,
             )
             distanceInMeters < 1000.0 -> smallValue(
                 distanceInMeters,
                 roundingIncrement,
                 TurfConstants.UNIT_METERS,
-                UnitType.METRIC
+                UnitType.METRIC,
             )
             else -> {
                 val distanceInKm = TurfConversion.convertLength(
                     distanceInMeters,
                     TurfConstants.UNIT_METERS,
-                    TurfConstants.UNIT_KILOMETERS
+                    TurfConstants.UNIT_KILOMETERS,
                 )
                 when {
                     distanceInMeters < 3000.0 -> largeValue(
@@ -105,14 +105,14 @@ object MapboxDistanceUtil {
                         1,
                         TurfConstants.UNIT_KILOMETERS,
                         UnitType.METRIC,
-                        locale
+                        locale,
                     )
                     else -> largeValue(
                         distanceInKm,
                         0,
                         TurfConstants.UNIT_KILOMETERS,
                         UnitType.METRIC,
-                        locale
+                        locale,
                     )
                 }
             }
@@ -122,26 +122,26 @@ object MapboxDistanceUtil {
     private fun getUKDistance(
         distanceInMiles: Double,
         roundingIncrement: Int,
-        locale: Locale
+        locale: Locale,
     ): FormattingData {
         return when {
             distanceInMiles !in 0.0..Double.MAX_VALUE -> smallValue(
                 0.0,
                 roundingIncrement,
                 TurfConstants.UNIT_YARDS,
-                UnitType.IMPERIAL
+                UnitType.IMPERIAL,
             )
             distanceInMiles < 0.1 -> {
                 val distanceInYards = TurfConversion.convertLength(
                     distanceInMiles,
                     TurfConstants.UNIT_MILES,
-                    TurfConstants.UNIT_YARDS
+                    TurfConstants.UNIT_YARDS,
                 )
                 smallValue(
                     distanceInYards,
                     roundingIncrement,
                     TurfConstants.UNIT_YARDS,
-                    UnitType.IMPERIAL
+                    UnitType.IMPERIAL,
                 )
             }
             distanceInMiles < 3.0 -> largeValue(
@@ -149,14 +149,14 @@ object MapboxDistanceUtil {
                 1,
                 TurfConstants.UNIT_MILES,
                 UnitType.IMPERIAL,
-                locale
+                locale,
             )
             else -> largeValue(
                 distanceInMiles,
                 0,
                 TurfConstants.UNIT_MILES,
                 UnitType.IMPERIAL,
-                locale
+                locale,
             )
         }
     }
@@ -171,19 +171,19 @@ object MapboxDistanceUtil {
                 0.0,
                 roundingIncrement,
                 TurfConstants.UNIT_FEET,
-                UnitType.IMPERIAL
+                UnitType.IMPERIAL,
             )
             distanceInMiles < 0.1 -> {
                 val distanceInFeet = TurfConversion.convertLength(
                     distanceInMiles,
                     TurfConstants.UNIT_MILES,
-                    TurfConstants.UNIT_FEET
+                    TurfConstants.UNIT_FEET,
                 )
                 smallValue(
                     distanceInFeet,
                     roundingIncrement,
                     TurfConstants.UNIT_FEET,
-                    UnitType.IMPERIAL
+                    UnitType.IMPERIAL,
                 )
             }
             distanceInMiles < 3.0 -> largeValue(
@@ -191,14 +191,14 @@ object MapboxDistanceUtil {
                 1,
                 TurfConstants.UNIT_MILES,
                 UnitType.IMPERIAL,
-                locale
+                locale,
             )
             else -> largeValue(
                 distanceInMiles,
                 0,
                 TurfConstants.UNIT_MILES,
                 UnitType.IMPERIAL,
-                locale
+                locale,
             )
         }
     }
@@ -207,7 +207,7 @@ object MapboxDistanceUtil {
         distance: Double,
         roundingIncrement: Int,
         unitTypeString: String,
-        unitType: UnitType
+        unitType: UnitType,
     ): FormattingData {
         val roundedValue = roundSmallDistance(
             distance,
@@ -217,7 +217,7 @@ object MapboxDistanceUtil {
             roundedValue.toDouble(),
             roundedValue.toString(),
             unitTypeString,
-            unitType
+            unitType,
         )
     }
 
@@ -226,7 +226,7 @@ object MapboxDistanceUtil {
         maxFractionDigits: Int,
         unitTypeString: String,
         unitType: UnitType,
-        locale: Locale
+        locale: Locale,
     ): FormattingData {
         val roundedValue = NumberFormat.getNumberInstance(locale).also {
             it.maximumFractionDigits = maxFractionDigits
@@ -248,14 +248,14 @@ object MapboxDistanceUtil {
         distanceInMeters: Double,
         roundingIncrement: Int,
         unitType: UnitType,
-        context: Context
+        context: Context,
     ): FormattedDistanceData {
         return formatDistance(
             distanceInMeters,
             roundingIncrement,
             unitType,
             context,
-            Locale.getDefault()
+            Locale.getDefault(),
         )
     }
 
@@ -273,7 +273,7 @@ object MapboxDistanceUtil {
         distanceInMeters: Double,
         roundingIncrement: Int,
         unitType: UnitType,
-        locale: Locale
+        locale: Locale,
     ): Double {
         return getFormattingData(distanceInMeters, roundingIncrement, unitType, locale).distance
     }

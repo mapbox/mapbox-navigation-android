@@ -17,5 +17,5 @@ enum class SpeedUnit {
     /**
      * Current speed in meters per second
      */
-    METERS_PER_SECOND
+    METERS_PER_SECOND,
 }

@@ -1,7 +1,7 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
 import com.mapbox.geojson.FeatureCollection
-import com.mapbox.maps.QueriedFeature
+import com.mapbox.maps.QueriedRenderedFeature
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -17,9 +17,9 @@ class ClosestRouteUtilsTest {
                 every { features() } returns listOf(
                     mockk {
                         every { id() } returns null
-                    }
+                    },
                 )
-            }
+            },
         )
 
         val result = ClosestRouteUtils.getIndexOfFirstFeature(emptyList(), routeFeatures)
@@ -29,12 +29,14 @@ class ClosestRouteUtilsTest {
 
     @Test
     fun getIndexOfFirstFeature_emptyRouteFeatures() {
-        val features = listOf<QueriedFeature>(
+        val features = listOf<QueriedRenderedFeature>(
             mockk {
-                every { feature } returns mockk {
-                    every { id() } returns "id#0"
+                every { queriedFeature } returns mockk {
+                    every { feature } returns mockk {
+                        every { id() } returns "id#0"
+                    }
                 }
-            }
+            },
         )
 
         val result = ClosestRouteUtils.getIndexOfFirstFeature(features, emptyList())
@@ -51,15 +53,19 @@ class ClosestRouteUtilsTest {
 
     @Test
     fun getIndexOfFirstFeature_noMatchFound() {
-        val features = listOf<QueriedFeature>(
+        val features = listOf<QueriedRenderedFeature>(
             mockk {
-                every { feature } returns mockk {
-                    every { id() } returns "id#0"
+                every { queriedFeature } returns mockk {
+                    every { feature } returns mockk {
+                        every { id() } returns "id#0"
+                    }
                 }
             },
             mockk {
-                every { feature } returns mockk {
-                    every { id() } returns "id#1"
+                every { queriedFeature } returns mockk {
+                    every { feature } returns mockk {
+                        every { id() } returns "id#1"
+                    }
                 }
             },
         )
@@ -93,15 +99,19 @@ class ClosestRouteUtilsTest {
 
     @Test
     fun getIndexOfFirstFeature_matchFoundButNotFirstFeature() {
-        val features = listOf<QueriedFeature>(
+        val features = listOf<QueriedRenderedFeature>(
             mockk {
-                every { feature } returns mockk {
-                    every { id() } returns "id#0"
+                every { queriedFeature } returns mockk {
+                    every { feature } returns mockk {
+                        every { id() } returns "id#0"
+                    }
                 }
             },
             mockk {
-                every { feature } returns mockk {
-                    every { id() } returns "id#2"
+                every { queriedFeature } returns mockk {
+                    every { feature } returns mockk {
+                        every { id() } returns "id#2"
+                    }
                 }
             },
         )
@@ -135,15 +145,19 @@ class ClosestRouteUtilsTest {
 
     @Test
     fun getIndexOfFirstFeature_matchFoundButNotFirstFeatureInRouteFeature() {
-        val features = listOf<QueriedFeature>(
+        val features = listOf<QueriedRenderedFeature>(
             mockk {
-                every { feature } returns mockk {
-                    every { id() } returns "id#0"
+                every { queriedFeature } returns mockk {
+                    every { feature } returns mockk {
+                        every { id() } returns "id#0"
+                    }
                 }
             },
             mockk {
-                every { feature } returns mockk {
-                    every { id() } returns "id#1"
+                every { queriedFeature } returns mockk {
+                    every { feature } returns mockk {
+                        every { id() } returns "id#1"
+                    }
                 }
             },
         )
@@ -177,15 +191,19 @@ class ClosestRouteUtilsTest {
 
     @Test
     fun getIndexOfFirstFeature_matchFoundFirstRouteFeature() {
-        val features = listOf<QueriedFeature>(
+        val features = listOf<QueriedRenderedFeature>(
             mockk {
-                every { feature } returns mockk {
-                    every { id() } returns "id#0"
+                every { queriedFeature } returns mockk {
+                    every { feature } returns mockk {
+                        every { id() } returns "id#0"
+                    }
                 }
             },
             mockk {
-                every { feature } returns mockk {
-                    every { id() } returns "id#1"
+                every { queriedFeature } returns mockk {
+                    every { feature } returns mockk {
+                        every { id() } returns "id#1"
+                    }
                 }
             },
         )
@@ -219,15 +237,19 @@ class ClosestRouteUtilsTest {
 
     @Test
     fun getIndexOfFirstFeature_matchFoundSecondRouteFeature() {
-        val features = listOf<QueriedFeature>(
+        val features = listOf<QueriedRenderedFeature>(
             mockk {
-                every { feature } returns mockk {
-                    every { id() } returns "id#0"
+                every { queriedFeature } returns mockk {
+                    every { feature } returns mockk {
+                        every { id() } returns "id#0"
+                    }
                 }
             },
             mockk {
-                every { feature } returns mockk {
-                    every { id() } returns "id#1"
+                every { queriedFeature } returns mockk {
+                    every { feature } returns mockk {
+                        every { id() } returns "id#1"
+                    }
                 }
             },
         )

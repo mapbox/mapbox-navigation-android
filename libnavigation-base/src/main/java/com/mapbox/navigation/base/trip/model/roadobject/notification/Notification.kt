@@ -22,7 +22,7 @@ internal class Notification internal constructor(
     length,
     provider,
     isUrban,
-    nativeRoadObject
+    nativeRoadObject,
 ) {
 
     /**

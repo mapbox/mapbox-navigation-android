@@ -71,7 +71,7 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
      */
     fun renderManeuverUpdate(
         style: Style,
-        expectedValue: Expected<InvalidPointError, UpdateManeuverArrowValue>
+        expectedValue: Expected<InvalidPointError, UpdateManeuverArrowValue>,
     ) {
         rebuildSourcesAndLayersIfNeeded(style)
 
@@ -103,12 +103,12 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
         updateSource(
             style,
             RouteLayerConstants.ARROW_SHAFT_SOURCE_ID,
-            arrowAdded.arrowShaftFeatureCollection
+            arrowAdded.arrowShaftFeatureCollection,
         )
         updateSource(
             style,
             RouteLayerConstants.ARROW_HEAD_SOURCE_ID,
-            arrowAdded.arrowHeadFeatureCollection
+            arrowAdded.arrowHeadFeatureCollection,
         )
     }
 
@@ -125,7 +125,7 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
             },
             { value ->
                 render(style, value)
-            }
+            },
         )
     }
 
@@ -141,12 +141,12 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
         updateSource(
             style,
             RouteLayerConstants.ARROW_SHAFT_SOURCE_ID,
-            state.arrowShaftFeatureCollection
+            state.arrowShaftFeatureCollection,
         )
         updateSource(
             style,
             RouteLayerConstants.ARROW_HEAD_SOURCE_ID,
-            state.arrowHeadFeatureCollection
+            state.arrowHeadFeatureCollection,
         )
     }
 
@@ -162,12 +162,12 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
         updateSource(
             style,
             RouteLayerConstants.ARROW_SHAFT_SOURCE_ID,
-            state.arrowShaftFeatureCollection
+            state.arrowShaftFeatureCollection,
         )
         updateSource(
             style,
             RouteLayerConstants.ARROW_HEAD_SOURCE_ID,
-            state.arrowHeadFeatureCollection
+            state.arrowHeadFeatureCollection,
         )
     }
 
@@ -181,7 +181,7 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
     fun getVisibility(style: Style): Visibility? {
         return MapboxRouteLineUtils.getLayerVisibility(
             style,
-            RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID
+            RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID,
         )
     }
 

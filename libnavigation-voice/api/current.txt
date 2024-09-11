@@ -1,0 +1,211 @@
+// Signature format: 3.0
+package com.mapbox.navigation.voice.api {
+
+  public interface AsyncAudioFocusDelegate {
+    method public void abandonFocus(com.mapbox.navigation.voice.api.AudioFocusRequestCallback callback);
+    method public void requestFocus(com.mapbox.navigation.voice.model.AudioFocusOwner owner, com.mapbox.navigation.voice.api.AudioFocusRequestCallback callback);
+  }
+
+  public interface AudioFocusDelegate {
+    method public boolean abandonFocus();
+    method public boolean requestFocus();
+  }
+
+  public final class AudioFocusDelegateProvider {
+    method public com.mapbox.navigation.voice.api.AsyncAudioFocusDelegate defaultAudioFocusDelegate(android.content.Context context, com.mapbox.navigation.voice.options.VoiceInstructionsPlayerOptions options);
+    method public com.mapbox.navigation.voice.api.AsyncAudioFocusDelegate defaultAudioFocusDelegate(android.media.AudioManager audioManager, com.mapbox.navigation.voice.api.VoiceInstructionsPlayerAttributes playerAttributes);
+    field public static final com.mapbox.navigation.voice.api.AudioFocusDelegateProvider INSTANCE;
+  }
+
+  public fun interface AudioFocusRequestCallback {
+    method public operator void invoke(boolean result);
+  }
+
+  public final class MapboxAudioGuidance implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+    method public static com.mapbox.navigation.voice.api.MapboxAudioGuidance create(com.mapbox.navigation.voice.options.MapboxSpeechApiOptions options = MapboxSpeechApiOptions.<init>().build());
+    method public static com.mapbox.navigation.voice.api.MapboxAudioGuidance create();
+    method public com.mapbox.navigation.voice.api.MapboxVoiceInstructionsPlayer? getCurrentVoiceInstructionsPlayer();
+    method public static com.mapbox.navigation.voice.api.MapboxAudioGuidance getRegisteredInstance();
+    method public void mute();
+    method public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.voice.api.MapboxAudioGuidanceState> stateFlow();
+    method public void toggle();
+    method public void unmute();
+    method public void updateSpeechApiOptions(com.mapbox.navigation.voice.options.MapboxSpeechApiOptions options);
+    field public static final com.mapbox.navigation.voice.api.MapboxAudioGuidance.Companion Companion;
+  }
+
+  public static final class MapboxAudioGuidance.Companion {
+    method public com.mapbox.navigation.voice.api.MapboxAudioGuidance create(com.mapbox.navigation.voice.options.MapboxSpeechApiOptions options = MapboxSpeechApiOptions.<init>().build());
+    method public com.mapbox.navigation.voice.api.MapboxAudioGuidance create();
+    method public com.mapbox.navigation.voice.api.MapboxAudioGuidance getRegisteredInstance();
+  }
+
+  public final class MapboxAudioGuidanceState {
+    method public com.mapbox.navigation.voice.model.SpeechAnnouncement? getSpeechAnnouncement();
+    method public com.mapbox.api.directions.v5.models.VoiceInstructions? getVoiceInstructions();
+    method public boolean isFirst();
+    method public boolean isMuted();
+    method public boolean isPlayable();
+    property public final boolean isFirst;
+    property public final boolean isMuted;
+    property public final boolean isPlayable;
+    property public final com.mapbox.navigation.voice.model.SpeechAnnouncement? speechAnnouncement;
+    property public final com.mapbox.api.directions.v5.models.VoiceInstructions? voiceInstructions;
+  }
+
+  public final class MapboxSpeechApi {
+    ctor public MapboxSpeechApi(android.content.Context context, String language, com.mapbox.navigation.voice.options.MapboxSpeechApiOptions options = MapboxSpeechApiOptions.<init>().build());
+    ctor public MapboxSpeechApi(android.content.Context context, String language);
+    method public void cancel();
+    method public void clean(com.mapbox.navigation.voice.model.SpeechAnnouncement announcement);
+    method public void generate(com.mapbox.api.directions.v5.models.VoiceInstructions voiceInstruction, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.voice.model.SpeechError,com.mapbox.navigation.voice.model.SpeechValue>> consumer);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void generatePredownloaded(com.mapbox.api.directions.v5.models.VoiceInstructions voiceInstruction, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.voice.model.SpeechError,com.mapbox.navigation.voice.model.SpeechValue>> consumer);
+  }
+
+  @UiThread public final class MapboxVoiceInstructionsPlayer {
+    ctor public MapboxVoiceInstructionsPlayer(android.content.Context context, String language, com.mapbox.navigation.voice.options.VoiceInstructionsPlayerOptions options = defaultOptions(), com.mapbox.navigation.voice.api.AsyncAudioFocusDelegate audioFocusDelegate = defaultAudioFocusDelegate(context, options), com.mapbox.navigation.ui.utils.internal.Provider<java.util.Timer> timerFactory = defaultTimerFactory());
+    ctor public MapboxVoiceInstructionsPlayer(android.content.Context context, String language, com.mapbox.navigation.voice.options.VoiceInstructionsPlayerOptions options = defaultOptions(), com.mapbox.navigation.voice.api.AsyncAudioFocusDelegate audioFocusDelegate = defaultAudioFocusDelegate(context, options));
+    ctor public MapboxVoiceInstructionsPlayer(android.content.Context context, String language, com.mapbox.navigation.voice.options.VoiceInstructionsPlayerOptions options = defaultOptions());
+    ctor public MapboxVoiceInstructionsPlayer(android.content.Context context, String language);
+    ctor public MapboxVoiceInstructionsPlayer(android.content.Context context, String language, com.mapbox.navigation.voice.options.VoiceInstructionsPlayerOptions options = defaultOptions(), com.mapbox.navigation.voice.api.AudioFocusDelegate audioFocusDelegate);
+    method public void clear();
+    method public void play(com.mapbox.navigation.voice.model.SpeechAnnouncement announcement, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.navigation.voice.model.SpeechAnnouncement> consumer);
+    method public void shutdown();
+    method public void updateLanguage(String language);
+    method @kotlin.jvm.Throws(exceptionClasses=IllegalArgumentException::class) public void volume(com.mapbox.navigation.voice.model.SpeechVolume state) throws java.lang.IllegalArgumentException;
+  }
+
+  public abstract sealed class VoiceInstructionsPlayerAttributes {
+    method protected abstract kotlin.jvm.functions.Function1<android.media.AudioFocusRequest.Builder,kotlin.Unit> configureAudioFocusRequestBuilder(com.mapbox.navigation.voice.model.AudioFocusOwner owner);
+    method protected abstract kotlin.jvm.functions.Function1<android.media.MediaPlayer,kotlin.Unit> configureMediaPlayer();
+    method protected abstract kotlin.jvm.functions.Function2<android.speech.tts.TextToSpeech,android.os.Bundle,kotlin.Unit> configureTextToSpeech();
+    method public abstract com.mapbox.navigation.voice.options.VoiceInstructionsPlayerOptions getOptions();
+    property public abstract com.mapbox.navigation.voice.options.VoiceInstructionsPlayerOptions options;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class VoiceInstructionsPrefetcher implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+    ctor public VoiceInstructionsPrefetcher(com.mapbox.navigation.voice.api.MapboxSpeechApi speechApi);
+    method public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    field public static final com.mapbox.navigation.voice.api.VoiceInstructionsPrefetcher.Companion Companion;
+    field public static final int DEFAULT_OBSERVABLE_TIME_SECONDS = 180; // 0xb4
+    field public static final double DEFAULT_TIME_PERCENTAGE_TO_TRIGGER_AFTER = 0.5;
+  }
+
+  public static final class VoiceInstructionsPrefetcher.Companion {
+  }
+
+}
+
+package com.mapbox.navigation.voice.model {
+
+  public enum AudioFocusOwner {
+    enum_constant public static final com.mapbox.navigation.voice.model.AudioFocusOwner MediaPlayer;
+    enum_constant public static final com.mapbox.navigation.voice.model.AudioFocusOwner TextToSpeech;
+  }
+
+  public final class SpeechAnnouncement {
+    method public String getAnnouncement();
+    method public java.io.File? getFile();
+    method public String? getSsmlAnnouncement();
+    method public com.mapbox.navigation.voice.model.SpeechAnnouncement.Builder toBuilder();
+    property public final String announcement;
+    property public final java.io.File? file;
+    property public final String? ssmlAnnouncement;
+  }
+
+  public static final class SpeechAnnouncement.Builder {
+    ctor public SpeechAnnouncement.Builder(String announcement);
+    method public com.mapbox.navigation.voice.model.SpeechAnnouncement build();
+    method public com.mapbox.navigation.voice.model.SpeechAnnouncement.Builder file(java.io.File? file);
+    method public com.mapbox.navigation.voice.model.SpeechAnnouncement.Builder ssmlAnnouncement(String? ssmlAnnouncement);
+  }
+
+  public final class SpeechError {
+    method public String getErrorMessage();
+    method public com.mapbox.navigation.voice.model.SpeechAnnouncement getFallback();
+    method public Throwable? getThrowable();
+    property public final String errorMessage;
+    property public final com.mapbox.navigation.voice.model.SpeechAnnouncement fallback;
+    property public final Throwable? throwable;
+  }
+
+  public final class SpeechValue {
+    method public com.mapbox.navigation.voice.model.SpeechAnnouncement getAnnouncement();
+    property public final com.mapbox.navigation.voice.model.SpeechAnnouncement announcement;
+  }
+
+  public final class SpeechVolume {
+    ctor public SpeechVolume(@FloatRange(from=com.mapbox.navigation.voice.model.SpeechVolumeKt.MINIMUM_VOLUME_LEVEL, to=com.mapbox.navigation.voice.model.SpeechVolumeKt.MAXIMUM_VOLUME_LEVEL) float level);
+    method public float getLevel();
+    property public final float level;
+  }
+
+  public final class SpeechVolumeKt {
+  }
+
+}
+
+package com.mapbox.navigation.voice.options {
+
+  public final class MapboxSpeechApiOptions {
+    method public String getBaseUri();
+    method public String? getGender();
+    method public com.mapbox.navigation.voice.options.MapboxSpeechApiOptions.Builder toBuilder();
+    property public final String baseUri;
+    property public final String? gender;
+  }
+
+  public static final class MapboxSpeechApiOptions.Builder {
+    ctor public MapboxSpeechApiOptions.Builder();
+    method public com.mapbox.navigation.voice.options.MapboxSpeechApiOptions.Builder baseUri(String baseUri);
+    method public com.mapbox.navigation.voice.options.MapboxSpeechApiOptions build();
+    method public com.mapbox.navigation.voice.options.MapboxSpeechApiOptions.Builder gender(@com.mapbox.navigation.voice.options.VoiceGender.Type String? gender);
+  }
+
+  public final class VoiceGender {
+    field public static final String FEMALE = "female";
+    field public static final com.mapbox.navigation.voice.options.VoiceGender INSTANCE;
+    field public static final String MALE = "male";
+  }
+
+  @StringDef({com.mapbox.navigation.voice.options.VoiceGender.MALE, com.mapbox.navigation.voice.options.VoiceGender.FEMALE}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface VoiceGender.Type {
+  }
+
+  public final class VoiceInstructionsPlayerOptions {
+    method public long getAbandonFocusDelay();
+    method public boolean getCheckIsLanguageAvailable();
+    method public int getContentType();
+    method public int getFocusGain();
+    method public int getStreamType();
+    method public int getTtsStreamType();
+    method public int getUsage();
+    method public boolean getUseLegacyApi();
+    method public com.mapbox.navigation.voice.options.VoiceInstructionsPlayerOptions.Builder toBuilder();
+    property public final long abandonFocusDelay;
+    property public final boolean checkIsLanguageAvailable;
+    property public final int contentType;
+    property public final int focusGain;
+    property public final int streamType;
+    property public final int ttsStreamType;
+    property public final int usage;
+    property public final boolean useLegacyApi;
+  }
+
+  public static final class VoiceInstructionsPlayerOptions.Builder {
+    ctor public VoiceInstructionsPlayerOptions.Builder();
+    method public com.mapbox.navigation.voice.options.VoiceInstructionsPlayerOptions.Builder abandonFocusDelay(long milliseconds);
+    method public com.mapbox.navigation.voice.options.VoiceInstructionsPlayerOptions build();
+    method public com.mapbox.navigation.voice.options.VoiceInstructionsPlayerOptions.Builder checkIsLanguageAvailable(boolean checkIsLanguageAvailable);
+    method public com.mapbox.navigation.voice.options.VoiceInstructionsPlayerOptions.Builder contentType(int contentType);
+    method public com.mapbox.navigation.voice.options.VoiceInstructionsPlayerOptions.Builder focusGain(int focusGain);
+    method public com.mapbox.navigation.voice.options.VoiceInstructionsPlayerOptions.Builder streamType(int streamType);
+    method public com.mapbox.navigation.voice.options.VoiceInstructionsPlayerOptions.Builder ttsStreamType(int streamType);
+    method public com.mapbox.navigation.voice.options.VoiceInstructionsPlayerOptions.Builder usage(int usage);
+    method public com.mapbox.navigation.voice.options.VoiceInstructionsPlayerOptions.Builder useLegacyApi(boolean useLegacyApi);
+  }
+
+}
+

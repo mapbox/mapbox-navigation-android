@@ -2,56 +2,55 @@
 
 package com.mapbox.navigation.instrumentation_tests.core
 
+import android.content.Context
 import android.location.Location
 import android.util.Log
 import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.mapbox.api.directions.v5.models.DirectionsResponse
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.route.routeOptions
+import com.mapbox.navigation.base.options.DeviceType
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesExtra
-import com.mapbox.navigation.core.routealternatives.NavigationRouteAlternativesObserver
-import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
 import com.mapbox.navigation.core.routerefresh.RouteRefreshExtra
-import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
-import com.mapbox.navigation.instrumentation_tests.utils.http.MockDirectionsRequestHandler
-import com.mapbox.navigation.instrumentation_tests.utils.location.stayOnPosition
-import com.mapbox.navigation.instrumentation_tests.utils.routes.EvRoutesProvider
-import com.mapbox.navigation.instrumentation_tests.utils.routes.MockedEvRouteWithSingleUserProvidedChargingStation
-import com.mapbox.navigation.instrumentation_tests.utils.routes.MockedEvRoutes
-import com.mapbox.navigation.instrumentation_tests.utils.tiles.OfflineRegions
-import com.mapbox.navigation.instrumentation_tests.utils.tiles.TIME_TO_LOAD_TILES
-import com.mapbox.navigation.instrumentation_tests.utils.tiles.withMapboxNavigationAndOfflineTilesForRegion
-import com.mapbox.navigation.instrumentation_tests.utils.withMapboxNavigation
-import com.mapbox.navigation.instrumentation_tests.utils.withoutInternet
+import com.mapbox.navigation.instrumentation_tests.utils.ZipUtils
+import com.mapbox.navigation.instrumentation_tests.utils.tiles.OfflineRegion
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
-import com.mapbox.navigation.testing.ui.utils.coroutines.DEFAULT_TIMEOUT_FOR_SDK_TEST
-import com.mapbox.navigation.testing.ui.utils.coroutines.NavigationRouteAlternativesResult
 import com.mapbox.navigation.testing.ui.utils.coroutines.RouteRequestResult
-import com.mapbox.navigation.testing.ui.utils.coroutines.alternativesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
 import com.mapbox.navigation.testing.ui.utils.coroutines.refreshStates
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
+import com.mapbox.navigation.testing.ui.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
-import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.filterIsInstance
+import com.mapbox.navigation.testing.utils.createTileStore
+import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
+import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
+import com.mapbox.navigation.testing.utils.location.stayOnPosition
+import com.mapbox.navigation.testing.utils.routes.EvRoutesProvider
+import com.mapbox.navigation.testing.utils.routes.MockedEvRouteWithSingleUserProvidedChargingStation
+import com.mapbox.navigation.testing.utils.routes.MockedEvRoutes
+import com.mapbox.navigation.testing.utils.setTestRouteRefreshInterval
+import com.mapbox.navigation.testing.utils.withMapboxNavigation
+import com.mapbox.navigation.testing.utils.withoutInternet
 import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
-import org.junit.Ignore
+import org.junit.Assume.assumeTrue
 import org.junit.Rule
 import org.junit.Test
+import java.io.File
 import java.util.concurrent.TimeUnit
 
-// TODO: remove in the scope of NAVAND-1351
-const val INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE = DEFAULT_TIMEOUT_FOR_SDK_TEST +
-    TIME_TO_LOAD_TILES
+const val TEST_TIMEOUT = 60_000L
 
+@OptIn(ExperimentalMapboxNavigationAPI::class)
 class EvOfflineTest : BaseCoreNoCleanUpTest() {
 
     @get:Rule
@@ -65,11 +64,9 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
-    fun requestRouteWithoutInternetAndTiles() = sdkTest {
+    fun requestRouteWithoutInternetAndTiles() = sdkTest(TEST_TIMEOUT) {
         val testRoute = setupBerlinEvRoute()
-        withMapboxNavigation(
-            historyRecorderRule = mapboxHistoryTestRule
-        ) { navigation ->
+        withMapboxNavigation { navigation ->
             withoutInternet {
                 val routes = navigation.requestRoutes(testRoute.routeOptions)
                 assertTrue(routes is RouteRequestResult.Failure)
@@ -77,19 +74,13 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         }
     }
 
-    @Ignore("https://mapbox.atlassian.net/browse/NAVAND-2557")
     @Test
-    fun startNavigationOfflineThenSwitchToOnlineRouteWhenInternetAppears() = sdkTest(
-        timeout = INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE
-    ) {
+    fun startNavigationOfflineThenSwitchToOnlineRouteWhenInternetAppears() = sdkTest(TEST_TIMEOUT) {
         val originalTestRoute = setupBerlinEvRoute()
-        withMapboxNavigationAndOfflineTilesForRegion(
-            OfflineRegions.Berlin,
-            historyRecorderRule = mapboxHistoryTestRule
+
+        withMapboxNavigation(
+            offlineRegion = OfflineRegion.Berlin,
         ) { navigation ->
-            navigation.registerRouteAlternativesObserver(
-                AdvancedAlternativesObserverFromDocumentation(navigation)
-            )
             navigation.startTripSession()
             stayOnPosition(
                 originalTestRoute.origin.latitude(),
@@ -99,45 +90,40 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                 withoutInternet {
                     val requestResult = navigation.requestRoutes(originalTestRoute.routeOptions)
                         .getSuccessfulResultOrThrowException()
-                    assertEquals(RouterOrigin.Onboard, requestResult.routerOrigin)
+                    assertEquals(RouterOrigin.OFFLINE, requestResult.routerOrigin)
                     navigation.setNavigationRoutesAsync(requestResult.routes)
 
                     assertEquals(
                         "onboard router doesn't add charging waypoints",
                         listOf(2, 2),
-                        requestResult.routes.map { it.waypoints?.size }
+                        requestResult.routes.map { it.waypoints?.size },
                     )
                 }
+
                 val onlineRoutes = navigation.routesUpdates().first {
                     it.reason == RoutesExtra.ROUTES_UPDATE_REASON_NEW &&
-                        it.navigationRoutes.first().origin == RouterOrigin.Offboard
+                        it.navigationRoutes.first().origin == RouterOrigin.ONLINE
                 }
+
                 assertEquals(2, onlineRoutes.navigationRoutes.size)
                 assertEquals(
                     "online result should have charging station waypoint",
                     listOf(3, 3),
-                    onlineRoutes.navigationRoutes.map { it.waypoints?.size }
+                    onlineRoutes.navigationRoutes.map { it.waypoints?.size },
                 )
             }
         }
     }
 
-    @Ignore("https://mapbox.atlassian.net/browse/NAVAND-2557")
     @Test
-    fun offlineOnlineSwitchWhenOnlineRouteIsTheSameAsCurrentOffline() = sdkTest(
-        timeout = INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE
-    ) {
+    fun offlineOnlineSwitchWhenOnlineRouteIsTheSameAsCurrentOffline() = sdkTest(TEST_TIMEOUT) {
         val evBerlinTestRoute = EvRoutesProvider.getBerlinEvRoute(
             context,
-            mockWebServerRule.baseUrl
+            mockWebServerRule.baseUrl,
         )
-        withMapboxNavigationAndOfflineTilesForRegion(
-            OfflineRegions.Berlin,
-            historyRecorderRule = mapboxHistoryTestRule
+        withMapboxNavigation(
+            offlineRegion = OfflineRegion.Berlin,
         ) { navigation ->
-            navigation.registerRouteAlternativesObserver(
-                AdvancedAlternativesObserverFromDocumentation(navigation)
-            )
             navigation.startTripSession()
             stayOnPosition(
                 evBerlinTestRoute.origin.latitude(),
@@ -147,40 +133,34 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                 withoutInternet {
                     val requestResult = navigation.requestRoutes(evBerlinTestRoute.routeOptions)
                         .getSuccessfulResultOrThrowException()
-                    assertEquals(RouterOrigin.Onboard, requestResult.routerOrigin)
+                    assertEquals(RouterOrigin.OFFLINE, requestResult.routerOrigin)
                     navigation.setNavigationRoutesAsync(requestResult.routes)
 
                     assertEquals(
                         "onboard router doesn't add charging waypoints",
                         listOf(2, 2),
-                        requestResult.routes.map { it.waypoints?.size }
+                        requestResult.routes.map { it.waypoints?.size },
                     )
                     val offlineRoutes = requestResult.routes
                     setupTheSameOnlineRoute(offlineRoutes)
                 }
                 val onlineRoutes = navigation.routesUpdates().first {
                     it.reason == RoutesExtra.ROUTES_UPDATE_REASON_NEW &&
-                        it.navigationRoutes.first().origin == RouterOrigin.Offboard
+                        it.navigationRoutes.first().origin == RouterOrigin.ONLINE
                 }
                 assertEquals(2, onlineRoutes.navigationRoutes.size)
             }
         }
     }
 
-    @Ignore("https://mapbox.atlassian.net/browse/NAVAND-2557")
     @Test
     fun startOfflineWithUserProvidedChargingStationsThenSwitchToOnlineRouteWhenInternetAppears() =
-        sdkTest(
-            timeout = INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE
-        ) {
+        sdkTest(TEST_TIMEOUT) {
             val testRoute = setupBerlinEvRouteWithCustomProvidedChargingStation()
-            withMapboxNavigationAndOfflineTilesForRegion(
-                OfflineRegions.Berlin,
-                historyRecorderRule = mapboxHistoryTestRule
+
+            withMapboxNavigation(
+                offlineRegion = OfflineRegion.Berlin,
             ) { navigation ->
-                navigation.registerRouteAlternativesObserver(
-                    AdvancedAlternativesObserverFromDocumentation(navigation)
-                )
                 navigation.startTripSession()
                 stayOnPosition(
                     testRoute.origin.latitude(),
@@ -190,14 +170,16 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                     withoutInternet {
                         val requestResult = navigation.requestRoutes(testRoute.routeOptions)
                             .getSuccessfulResultOrThrowException()
-                        assertEquals(RouterOrigin.Onboard, requestResult.routerOrigin)
+                        assertEquals(RouterOrigin.OFFLINE, requestResult.routerOrigin)
                         navigation.setNavigationRoutesAsync(requestResult.routes)
+
                         val offlinePrimaryRoute = requestResult.routes.first()
                         verifyUserProvidedChargingStationMetadata(offlinePrimaryRoute, testRoute)
                     }
+
                     val onlineRoutes = navigation.routesUpdates().first {
                         it.reason == RoutesExtra.ROUTES_UPDATE_REASON_NEW &&
-                            it.navigationRoutes.first().origin == RouterOrigin.Offboard
+                            it.navigationRoutes.first().origin == RouterOrigin.ONLINE
                     }
                     val onlinePrimaryRoute = onlineRoutes.navigationRoutes.first()
 
@@ -206,112 +188,48 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
             }
         }
 
-    @Ignore("https://mapbox.atlassian.net/browse/NAVAND-2557")
     @Test
-    fun offlineOnlineSwitchWhenOnlineRouteIsTheSameAsCurrentOfflineWithSimpleObserver() =
-        sdkTest(
-            timeout = INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE
-        ) {
-            val evBerlinTestRoute = EvRoutesProvider.getBerlinEvRoute(
-                context,
-                mockWebServerRule.baseUrl
-            )
-            withMapboxNavigationAndOfflineTilesForRegion(
-                OfflineRegions.Berlin,
-                historyRecorderRule = mapboxHistoryTestRule
-            ) { navigation ->
-                val firstAlternativesUpdatedCallbackWithOnlineRoutesDeferred = async {
-                    navigation.alternativesUpdates()
-                        .filterIsInstance<NavigationRouteAlternativesResult.OnRouteAlternatives>()
-                        .first {
-                            it.routerOrigin == RouterOrigin.Offboard
-                        }
-                }
-                navigation.registerRouteAlternativesObserver(
-                    SimpleAlternativesObserverFromDocumentation(navigation)
-                )
-
-                navigation.startTripSession()
-                stayOnPosition(
-                    evBerlinTestRoute.origin.latitude(),
-                    evBerlinTestRoute.origin.longitude(),
-                    0.0f,
-                ) {
-                    withoutInternet {
-                        val requestResult = navigation.requestRoutes(evBerlinTestRoute.routeOptions)
-                            .getSuccessfulResultOrThrowException()
-                        assertEquals(RouterOrigin.Onboard, requestResult.routerOrigin)
-                        navigation.setNavigationRoutesAsync(requestResult.routes)
-
-                        assertEquals(
-                            "onboard router doesn't add charging waypoints",
-                            listOf(2, 2),
-                            requestResult.routes.map { it.waypoints?.size }
-                        )
-                        val offlineRoutes = requestResult.routes
-                        setupTheSameOnlineRoute(offlineRoutes)
-                    }
-
-                    val firstCallback = firstAlternativesUpdatedCallbackWithOnlineRoutesDeferred
-                        .await()
-                    val firstRoute = firstCallback.alternatives.first()
-                    assertNull(
-                        "First alternatives in this case doesn't have " +
-                            "deviation point from primary route",
-                        navigation.getAlternativeMetadataFor(firstRoute)
-                    )
-
-                    val onlineRoutes = navigation.routesUpdates().first {
-                        it.reason == RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE &&
-                            it.navigationRoutes.any { it.origin == RouterOrigin.Offboard }
-                    }
-                    assertEquals(2, onlineRoutes.navigationRoutes.size)
-                    assertEquals(
-                        "online alternative that is the same as current primary " +
-                            "route is ignored with simple alternatives observer implementation",
-                        1,
-                        onlineRoutes.ignoredRoutes.size
-                    )
-                }
-            }
-        }
-
-    @Test
-    fun deviateFromOnlinePrimaryRouteWithoutInternet() = sdkTest(
-        timeout = INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE
-    ) {
+    fun deviateFromOnlinePrimaryRouteWithoutInternet() = sdkTest(TEST_TIMEOUT) {
         val originalTestRoute = setupBerlinEvRoute()
         val testRouteAfterReroute = setupBerlinEvRouteAfterReroute()
 
-        withMapboxNavigationAndOfflineTilesForRegion(
-            OfflineRegions.Berlin,
-            historyRecorderRule = mapboxHistoryTestRule
+        withMapboxNavigation(
+            offlineRegion = OfflineRegion.Berlin,
         ) { navigation ->
             navigation.startTripSession()
             val requestResult = navigation.requestRoutes(originalTestRoute.routeOptions)
                 .getSuccessfulResultOrThrowException()
-            assertEquals(RouterOrigin.Offboard, requestResult.routerOrigin)
+            assertEquals(RouterOrigin.ONLINE, requestResult.routerOrigin)
             assertEquals(
                 "online route for this case is expected to add charging station",
                 listOf(3, 3),
-                requestResult.routes.map { it.waypoints?.size }
+                requestResult.routes.map { it.waypoints?.size },
             )
-            navigation.setNavigationRoutesAsync(requestResult.routes)
+            stayOnPosition(
+                latitude = originalTestRoute.routeOptions.coordinatesList().first().latitude(),
+                longitude = originalTestRoute.routeOptions.coordinatesList().first().longitude(),
+                bearing = 270f,
+            ) {
+                navigation.setNavigationRoutesAsync(requestResult.routes)
+                navigation.routeProgressUpdates().first {
+                    it.currentState == RouteProgressState.TRACKING
+                }
+            }
 
             withoutInternet {
                 stayOnPosition(
                     // off route position
                     latitude = testRouteAfterReroute.origin.latitude(),
                     longitude = testRouteAfterReroute.origin.longitude(),
-                    bearing = 280.0f
+                    bearing = 280.0f,
                 ) {
                     val newRoutes = navigation.routesUpdates()
                         .first { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE }
-                    assertEquals(RouterOrigin.Onboard, newRoutes.navigationRoutes.first().origin)
+                    assertEquals(RouterOrigin.OFFLINE, newRoutes.navigationRoutes.first().origin)
                     assertEquals(
                         "onboard router doesn't add waypoints",
                         newRoutes.navigationRoutes.map { 2 },
-                        newRoutes.navigationRoutes.map { it.waypoints?.size }
+                        newRoutes.navigationRoutes.map { it.waypoints?.size },
                     )
                 }
             }
@@ -319,37 +237,31 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
-    fun refresh_online_ev_route_offline() = sdkTest(
-        timeout = INCREASED_TIMEOUT_BECAUSE_OF_REAL_ROUTING_TILES_USAGE
-    ) {
+    fun refresh_online_ev_route_offline() = sdkTest(TEST_TIMEOUT) {
         val originalTestRoute = setupBerlinEvRoute()
 
         val routeRefreshOptions = RouteRefreshOptions.Builder()
             .intervalMillis(TimeUnit.SECONDS.toMillis(30))
             .build()
-        RouteRefreshOptions::class.java.getDeclaredField("intervalMillis").apply {
-            isAccessible = true
-            set(routeRefreshOptions, 1_500L)
-        }
+        routeRefreshOptions.setTestRouteRefreshInterval(1_500L)
 
-        withMapboxNavigationAndOfflineTilesForRegion(
-            OfflineRegions.Berlin,
-            historyRecorderRule = mapboxHistoryTestRule,
-            routeRefreshOptions = routeRefreshOptions
+        withMapboxNavigation(
+            offlineRegion = OfflineRegion.Berlin,
+            routeRefreshOptions = routeRefreshOptions,
         ) { navigation ->
             stayOnPosition(
                 latitude = originalTestRoute.origin.latitude(),
                 longitude = originalTestRoute.origin.longitude(),
-                bearing = 280.0f
+                bearing = 280.0f,
             ) {
                 navigation.startTripSession()
                 val onlineResult = navigation.requestRoutes(originalTestRoute.routeOptions)
                     .getSuccessfulResultOrThrowException()
-                assertEquals(RouterOrigin.Offboard, onlineResult.routerOrigin)
+                assertEquals(RouterOrigin.ONLINE, onlineResult.routerOrigin)
                 assertEquals(
                     "online route for this case is expected to add charging station",
                     listOf(3, 3),
-                    onlineResult.routes.map { it.waypoints?.size }
+                    onlineResult.routes.map { it.waypoints?.size },
                 )
                 navigation.setNavigationRoutesAsync(onlineResult.routes)
 
@@ -360,13 +272,13 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                     val refreshedInOfflineResult = navigation.routesUpdates()
                         .first { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
                     assertEquals(
-                        RouterOrigin.Offboard,
-                        refreshedInOfflineResult.navigationRoutes.first().origin
+                        RouterOrigin.ONLINE,
+                        refreshedInOfflineResult.navigationRoutes.first().origin,
                     )
                     assertEquals(
                         "waypoints have been updated after failed refresh",
                         onlineResult.routes.map { it.waypoints },
-                        refreshedInOfflineResult.navigationRoutes.map { it.waypoints }
+                        refreshedInOfflineResult.navigationRoutes.map { it.waypoints },
                     )
                     assertEquals(
                         "SOC annotations have been changed during failed route refresh",
@@ -381,7 +293,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                                 it.annotation()
                                     ?.getUnrecognizedProperty("state_of_charge")
                             }
-                        }
+                        },
                     )
                 }
             }
@@ -391,7 +303,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
     private fun setupBerlinEvRouteAfterReroute(): MockedEvRoutes {
         val testRouteAfterReroute = EvRoutesProvider.getBerlinEvRouteReroute(
             context,
-            mockWebServerRule.baseUrl
+            mockWebServerRule.baseUrl,
         )
         mockWebServerRule.requestHandlers.add(testRouteAfterReroute.mockWebServerHandler)
         return testRouteAfterReroute
@@ -400,7 +312,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
     private fun setupBerlinEvRoute(): MockedEvRoutes {
         val originalTestRoute = EvRoutesProvider.getBerlinEvRoute(
             context,
-            mockWebServerRule.baseUrl
+            mockWebServerRule.baseUrl,
         )
         mockWebServerRule.requestHandlers.add(originalTestRoute.mockWebServerHandler)
         return originalTestRoute
@@ -410,17 +322,17 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         val primaryRoute = offlineRoutes.first()
         val primaryRouteResponseUUID = primaryRoute.id.substring(
             0,
-            primaryRoute.id.indexOf("#") - 1
+            primaryRoute.id.indexOf("#") - 1,
         )
         val evRouteRequestHandler = MockDirectionsRequestHandler(
             profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
-            jsonResponse = offlineRoutes.first().directionsResponse
-                .toBuilder()
+            jsonResponse = DirectionsResponse.builder()
                 .routes(offlineRoutes.map { it.directionsRoute })
                 .uuid("route-similar-to-$primaryRouteResponseUUID")
+                .code("Ok")
                 .build()
                 .toJson(),
-            expectedCoordinates = offlineRoutes.first().routeOptions.coordinatesList(),
+            expectedCoordinates = primaryRoute.routeOptions.coordinatesList(),
         )
         mockWebServerRule.requestHandlers.add(evRouteRequestHandler)
     }
@@ -430,81 +342,58 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         val testRoute = EvRoutesProvider.getBerlinEvRouteWithUserProvidedChargingStation(
             context,
             // Pass null to use a real server
-            mockWebServerRule.baseUrl
+            mockWebServerRule.baseUrl,
         )
         mockWebServerRule.requestHandlers.add(testRoute.mockWebServerHandler)
         return testRoute
     }
-}
 
-/**
- * Alternatives route observer that is implemented according to our documentation.
- * It's an advanced one because it supports offline-online switching
- */
-class AdvancedAlternativesObserverFromDocumentation(
-    private val mapboxNavigation: MapboxNavigation
-) : NavigationRouteAlternativesObserver {
-    override fun onRouteAlternatives(
-        routeProgress: RouteProgress,
-        alternatives: List<NavigationRoute>,
-        routerOrigin: RouterOrigin
+    private suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigation(
+        offlineRegion: OfflineRegion? = null,
+        routeRefreshOptions: RouteRefreshOptions? = null,
+        block: (MapboxNavigation) -> Unit,
     ) {
-        val primaryRoute = routeProgress.navigationRoute
-        val isPrimaryRouteOffboard = primaryRoute.origin == RouterOrigin.Offboard
-        val offboardAlternatives = alternatives.filter { it.origin == RouterOrigin.Offboard }
-
-        when {
-            isPrimaryRouteOffboard -> {
-                // if the current route is offboard, keep it
-                // but consider accepting additional offboard alternatives only and ignore onboard ones
-                val updatedRoutes = mutableListOf<NavigationRoute>()
-                updatedRoutes.add(primaryRoute)
-                updatedRoutes.addAll(offboardAlternatives)
-                mapboxNavigation.setNavigationRoutes(updatedRoutes)
-            }
-            isPrimaryRouteOffboard.not() && offboardAlternatives.isNotEmpty() -> {
-                // if the current route is onboard, and there's an offboard route available
-                // consider notifying the user that a more accurate route is available and whether they'd want to switch
-                // or force the switch like presented
-                mapboxNavigation.setNavigationRoutes(offboardAlternatives)
-            }
-            else -> {
-                // in other cases, when current route is onboard and there are no offboard alternatives,
-                // just append the new alternatives
-                val updatedRoutes = mutableListOf<NavigationRoute>()
-                updatedRoutes.add(primaryRoute)
-                updatedRoutes.addAll(alternatives)
-                mapboxNavigation.setNavigationRoutes(updatedRoutes)
-            }
-        }
+        val tilesVersion = offlineRegion?.let { context.unpackOfflineTiles(it) }
+        withMapboxNavigation(
+            tileStore = createTileStore(),
+            tilesVersion = tilesVersion,
+            deviceType = DeviceType.AUTOMOBILE,
+            historyRecorderRule = mapboxHistoryTestRule,
+            routeRefreshOptions = routeRefreshOptions,
+            block = block,
+        )
     }
 
-    override fun onRouteAlternativesError(error: RouteAlternativesError) {
-        Log.e("AdvancedAlternativesObserverFromDocumentation", "error: $error", error.throwable)
-    }
-}
+    /**
+     * Unpacks offline tiles for the given region and returns the version of the unpacked tileset.
+     * Returns null if the tileset can't be found/unpacked.
+     */
+    private fun Context.unpackOfflineTiles(region: OfflineRegion): String {
+        val tilesetResName = "tileset_${region.id}"
+        val tilesetResId = resources.getIdentifier(tilesetResName, "raw", packageName)
 
-/**
- * Simple alternatives route observer that is implemented according to our documentation
- */
-class SimpleAlternativesObserverFromDocumentation(
-    private val mapboxNavigation: MapboxNavigation
-) : NavigationRouteAlternativesObserver {
-    override fun onRouteAlternatives(
-        routeProgress: RouteProgress,
-        alternatives: List<NavigationRoute>,
-        routerOrigin: RouterOrigin
-    ) {
-        val newRoutes = mutableListOf<NavigationRoute>().apply {
-            add(mapboxNavigation.getNavigationRoutes().first())
-            addAll(alternatives)
+        val tilesVersion = if (tilesetResId == 0) {
+            Log.e("unpackTileset", "Can't find raw resource with name `$tilesetResName`")
+            null
+        } else {
+            val tilesetStream = resources.openRawResource(tilesetResId)
+            val mapboxDir = File(filesDir, ".mapbox").apply {
+                deleteRecursively()
+                mkdir()
+            }
+            ZipUtils.unzip(tilesetStream, mapboxDir)
+
+            @Suppress("SpellCheckingInspection")
+            val tilesDir = File(mapboxDir, "tile_store/navigation/dmapbox%2fdriving-traffic")
+            tilesDir.listFiles()?.firstOrNull()?.name
         }
 
-        mapboxNavigation.setNavigationRoutes(newRoutes)
-    }
+        assumeTrue(
+            "Wasn't able to prepare offline routing tiles",
+            tilesVersion != null,
+        )
 
-    override fun onRouteAlternativesError(error: RouteAlternativesError) {
-        Log.e("SimpleAlternativesObserverFromDocumentation", "error: $error", error.throwable)
+        return tilesVersion!!.drop(1)
     }
 }
 
@@ -521,22 +410,22 @@ private fun NavigationRoute.getWaypointMetadata(name: String): List<String?> {
 
 private fun verifyUserProvidedChargingStationMetadata(
     route: NavigationRoute,
-    testRoute: MockedEvRouteWithSingleUserProvidedChargingStation
+    testRoute: MockedEvRouteWithSingleUserProvidedChargingStation,
 ) {
     assertEquals(
         listOf(null, "user-provided-charging-station", null),
-        route.getChargingStationsType()
+        route.getChargingStationsType(),
     )
     assertEquals(
         listOf(null, "${testRoute.chargingStationPowerKw}", null),
-        route.getChargingStationsPowerKw()
+        route.getChargingStationsPowerKw(),
     )
     assertEquals(
         listOf(null, testRoute.chargingStationId, null),
-        route.getChargingStationsId()
+        route.getChargingStationsId(),
     )
     assertEquals(
         listOf(null, testRoute.currentType, null),
-        route.getChargingStationsCurrentType()
+        route.getChargingStationsCurrentType(),
     )
 }

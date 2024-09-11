@@ -2,9 +2,11 @@ package com.mapbox.navigation.ui.maps.building
 
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
+import com.mapbox.maps.RenderedQueryGeometry
 import com.mapbox.maps.RenderedQueryOptions
 import com.mapbox.navigation.base.internal.extensions.isLegWaypoint
 import com.mapbox.navigation.base.internal.extensions.isRequestedWaypoint
+import com.mapbox.navigation.base.internal.route.routeOptions
 import com.mapbox.navigation.base.internal.utils.internalWaypoints
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.ui.maps.building.model.BuildingError
@@ -21,35 +23,38 @@ internal object BuildingProcessor {
     private const val BUILDING_EXTRUSION_LAYER_ID = "building-extrusion"
 
     suspend fun queryBuilding(
-        action: BuildingAction.QueryBuilding
+        action: BuildingAction.QueryBuilding,
     ): BuildingResult.QueriedBuildings = suspendCoroutine { continuation ->
         val screenCoordinate = action.mapboxMap.pixelForCoordinate(action.point)
         val queryOptions = RenderedQueryOptions(
             listOf(BUILDING_LAYER_ID, BUILDING_EXTRUSION_LAYER_ID),
-            null
+            null,
         )
-        action.mapboxMap.queryRenderedFeatures(screenCoordinate, queryOptions) { expected ->
+        action.mapboxMap.queryRenderedFeatures(
+            RenderedQueryGeometry(screenCoordinate),
+            queryOptions,
+        ) { expected ->
             expected.fold(
                 { error ->
                     continuation.resume(
                         BuildingResult.QueriedBuildings(
-                            ExpectedFactory.createError(BuildingError(error))
-                        )
+                            ExpectedFactory.createError(BuildingError(error)),
+                        ),
                     )
                 },
                 { value ->
                     continuation.resume(
                         BuildingResult.QueriedBuildings(
-                            ExpectedFactory.createValue(BuildingValue(value))
-                        )
+                            ExpectedFactory.createValue(BuildingValue(value)),
+                        ),
                     )
-                }
+                },
             )
         }
     }
 
     fun queryBuildingOnWaypoint(
-        action: BuildingAction.QueryBuildingOnWaypoint
+        action: BuildingAction.QueryBuildingOnWaypoint,
     ): BuildingResult.GetDestination {
         val waypointIndex = action.progress.currentLegProgress?.legIndex!! + 1
         val buildingLocation = getBuildingLocation(waypointIndex, action.progress)
@@ -57,7 +62,7 @@ internal object BuildingProcessor {
     }
 
     fun queryBuildingOnFinalDestination(
-        action: BuildingAction.QueryBuildingOnFinalDestination
+        action: BuildingAction.QueryBuildingOnFinalDestination,
     ): BuildingResult.GetDestination {
         val waypointIndex = action.progress.navigationRoute.internalWaypoints()
             .indexOfLast { it.isLegWaypoint() }

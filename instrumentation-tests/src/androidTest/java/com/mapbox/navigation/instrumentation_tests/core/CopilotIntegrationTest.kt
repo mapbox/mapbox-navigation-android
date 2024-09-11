@@ -7,7 +7,6 @@ import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.DeveloperMetadata
 import com.mapbox.navigation.core.DeveloperMetadataObserver
 import com.mapbox.navigation.core.MapboxNavigation
@@ -17,17 +16,18 @@ import com.mapbox.navigation.core.internal.HistoryRecordingSessionState
 import com.mapbox.navigation.core.internal.HistoryRecordingStateChangeObserver
 import com.mapbox.navigation.core.internal.extensions.registerHistoryRecordingStateChangeObserver
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
-import com.mapbox.navigation.instrumentation_tests.utils.history.MapboxHistoryTestRule
-import com.mapbox.navigation.instrumentation_tests.utils.routes.MockRoute
-import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.clearNavigationRoutesAndWaitForUpdate
+import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
+import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndAwaitError
-import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
+import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
+import com.mapbox.navigation.testing.utils.routes.MockRoute
+import com.mapbox.navigation.testing.utils.routes.RoutesProvider
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
@@ -50,15 +50,6 @@ class CopilotIntegrationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cl
 
     override fun setupMockLocation(): Location {
         mockRoute = RoutesProvider.dc_very_short(context)
-        routes = NavigationRoute.create(
-            mockRoute.routeResponse,
-            RouteOptions.builder()
-                .applyDefaultNavigationOptions()
-                .applyLanguageAndVoiceUnitOptions(context)
-                .baseUrl(mockWebServerRule.baseUrl)
-                .coordinatesList(mockRoute.routeWaypoints).build(),
-            RouterOrigin.Offboard
-        )
         return mockLocationUpdatesRule.generateLocationUpdate {
             latitude = mockRoute.routeWaypoints.first().latitude()
             longitude = mockRoute.routeWaypoints.first().longitude()
@@ -70,8 +61,7 @@ class CopilotIntegrationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cl
         runOnMainSync {
             mapboxNavigation = MapboxNavigationProvider.create(
                 NavigationOptions.Builder(activity)
-                    .accessToken(getMapboxAccessTokenFromResources(activity))
-                    .build()
+                    .build(),
             )
             mapboxHistoryTestRule.historyRecorder = mapboxNavigation.historyRecorder
         }
@@ -88,6 +78,7 @@ class CopilotIntegrationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cl
             override fun onShouldStartRecording(state: HistoryRecordingSessionState) {
                 startedSessionObserverIds.add(state.sessionId)
             }
+
             override fun onShouldStopRecording(state: HistoryRecordingSessionState) {
             }
 
@@ -98,6 +89,14 @@ class CopilotIntegrationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::cl
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
         mapboxNavigation.historyRecorder.startRecording()
         mapboxNavigation.registerHistoryRecordingStateChangeObserver(historyRecordingStateObserver)
+        routes = mapboxNavigation.requestRoutes(
+            RouteOptions.builder()
+                .applyDefaultNavigationOptions()
+                .applyLanguageAndVoiceUnitOptions(context)
+                .baseUrl(mockWebServerRule.baseUrl)
+                .coordinatesList(mockRoute.routeWaypoints)
+                .build(),
+        ).getSuccessfulResultOrThrowException().routes
 
         transitionFromIdleToFreeDrive()
         transitionFromFreeDriveToActiveGuidance()

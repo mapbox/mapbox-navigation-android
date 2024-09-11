@@ -40,8 +40,8 @@ internal fun List<ReplayEventBase>.measureSpeedDistances(): List<LocationSpeedDi
                 toSpeed = currentLocation.speed!!,
                 fromTime = previousLocation.time!!,
                 toTime = currentLocation.time!!,
-                distance = distance
-            )
+                distance = distance,
+            ),
         )
     }
     return speedDistances
@@ -52,7 +52,7 @@ internal fun measureSpeedDistance(
     toSpeed: Double,
     fromTime: Double,
     toTime: Double,
-    distance: Double
+    distance: Double,
 ) = LocationSpeedDistance(
     locationSpeed = (fromSpeed + toSpeed) / 2.0,
     distanceSpeed = distance / (toTime - fromTime),
@@ -79,7 +79,7 @@ class MeasureSpeedDistanceTest {
             1.1969,
             3.5880,
             5.9847,
-            8.3695
+            8.3695,
         ).forEachIndexed { index, expected ->
             assertEquals(expected, speedDistances[index].locationSpeed, 0.01)
             assertEquals(expected, speedDistances[index].distanceSpeed, 0.01)

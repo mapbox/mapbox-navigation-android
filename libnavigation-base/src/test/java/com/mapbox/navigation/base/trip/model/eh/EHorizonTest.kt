@@ -84,7 +84,7 @@ class EHorizonTest {
             listOf(start, one, six),
             listOf(start, three, eight, eleven),
             listOf(start, three, eight, twelve),
-            listOf(start, three, nine)
+            listOf(start, three, nine),
         )
 
         assertEquals(expectedMpp, mpp)
@@ -101,7 +101,7 @@ class EHorizonTest {
             listOf(one, four),
             listOf(one, five, ten, thirteen),
             listOf(one, five, ten, fourteen),
-            listOf(one, six)
+            listOf(one, six),
         )
 
         assertEquals(expectedMpp, mpp)

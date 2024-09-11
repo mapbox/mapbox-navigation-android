@@ -8,21 +8,21 @@ internal sealed class ViewportProperty<T>(var override: T?, var fallback: T) {
 
     class CenterProperty(override: Point?, fallback: Point) : ViewportProperty<Point>(
         override,
-        fallback
+        fallback,
     )
 
     class ZoomProperty(override: Double?, fallback: Double) : ViewportProperty<Double>(
         override,
-        fallback
+        fallback,
     )
 
     class BearingProperty(override: Double?, fallback: Double) : ViewportProperty<Double>(
         override,
-        fallback
+        fallback,
     )
 
     class PitchProperty(override: Double?, fallback: Double) : ViewportProperty<Double>(
         override,
-        fallback
+        fallback,
     )
 }

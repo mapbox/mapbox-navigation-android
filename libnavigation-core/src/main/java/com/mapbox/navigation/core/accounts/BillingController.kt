@@ -7,9 +7,10 @@ package com.mapbox.navigation.core.accounts
 import com.mapbox.common.BillingServiceError
 import com.mapbox.common.BillingServiceErrorCode
 import com.mapbox.common.BillingSessionStatus
+import com.mapbox.common.SdkInformation
 import com.mapbox.common.SessionSKUIdentifier
-import com.mapbox.common.UserSKUIdentifier
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.internal.accounts.SkuIdProvider
 import com.mapbox.navigation.base.internal.extensions.isLegWaypoint
 import com.mapbox.navigation.base.internal.extensions.isServerAddedWaypoint
 import com.mapbox.navigation.base.internal.route.Waypoint
@@ -188,8 +189,9 @@ import java.util.concurrent.TimeUnit
 internal class BillingController(
     private val navigationSession: NavigationSession,
     private val arrivalProgressObserver: ArrivalProgressObserver,
-    private val accessToken: String,
     private val tripSession: TripSession,
+    private val skuIdProvider: SkuIdProvider,
+    private val sdkInformation: SdkInformation,
 ) {
 
     private companion object {
@@ -205,9 +207,8 @@ internal class BillingController(
             if (navigationSessionState != NavigationSessionState.Idle) {
                 // always trigger an MAU event if a session starts
                 billingService.triggerUserBillingEvent(
-                    accessToken,
-                    "", // empty string results in default user agent
-                    UserSKUIdentifier.NAV2_SES_MAU
+                    sdkInformation,
+                    skuIdProvider.getUserSkuId(),
                 ) {
                     handlerError(it)
                 }
@@ -224,16 +225,16 @@ internal class BillingController(
                 }
                 is NavigationSessionState.FreeDrive -> {
                     resumeOrBeginBillingSession(
-                        SessionSKUIdentifier.NAV2_SES_FDTRIP,
+                        skuIdProvider.getFreeDriveSku(),
                         validity = TimeUnit.HOURS.toMillis(1), // validity of 1hr
-                        "Nav SDK is in free drive state"
+                        "Nav SDK is in free drive state",
                     )
                 }
                 is NavigationSessionState.ActiveGuidance -> {
                     resumeOrBeginBillingSession(
-                        SessionSKUIdentifier.NAV2_SES_TRIP,
+                        skuIdProvider.getActiveGuidanceSku(),
                         validity = 0, // default validity, 12hrs
-                        "Nav SDK is in Active Guidance state"
+                        "Nav SDK is in Active Guidance state",
                     )
                 }
             }
@@ -246,16 +247,16 @@ internal class BillingController(
 
         override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) {
             val runningSessionSkuId = getRunningOrPausedSessionSkuId()
-            check(runningSessionSkuId == SessionSKUIdentifier.NAV2_SES_TRIP) {
+            check(runningSessionSkuId == skuIdProvider.getActiveGuidanceSku()) {
                 """
                     |Next route leg started while an active guidance session is not running.
                     |Actual active SKU: $runningSessionSkuId
                 """.trimMargin()
             }
             beginBillingSession(
-                SessionSKUIdentifier.NAV2_SES_TRIP,
+                skuIdProvider.getActiveGuidanceSku(),
                 validity = 0, // default validity, 12hrs
-                "Nav SDK switched to the next route leg"
+                "Nav SDK switched to the next route leg",
             )
         }
 
@@ -286,9 +287,9 @@ internal class BillingController(
      */
     fun onExternalRouteSet(navigationRoute: NavigationRoute, initialLegIndex: Int) {
         val runningSessionSkuId = getRunningOrPausedSessionSkuId()
-        if (runningSessionSkuId == SessionSKUIdentifier.NAV2_SES_TRIP) {
+        if (runningSessionSkuId == skuIdProvider.getActiveGuidanceSku()) {
             val currentRemainingWaypoints = getRemainingNonEVWaypointsOnRoute(
-                tripSession.getRouteProgress()
+                tripSession.getRouteProgress(),
             )
             val newWaypoints = getNonServerAddedWaypointsOnRoute(navigationRoute) {
                 countWaypointsUpToLegIndex(this, initialLegIndex)
@@ -296,17 +297,17 @@ internal class BillingController(
 
             if (!waypointsWithinRange(currentRemainingWaypoints, newWaypoints)) {
                 val wasSessionPaused = billingService.getSessionStatus(
-                    SessionSKUIdentifier.NAV2_SES_TRIP
+                    skuIdProvider.getActiveGuidanceSku(),
                 ) == BillingSessionStatus.SESSION_PAUSED
                 beginBillingSession(
-                    SessionSKUIdentifier.NAV2_SES_TRIP,
+                    skuIdProvider.getActiveGuidanceSku(),
                     validity = 0, // default validity, 12hrs
                     "destination has been changed. " +
                         "Old waypoints: $currentRemainingWaypoints," +
-                        "new waypoints: $newWaypoints"
+                        "new waypoints: $newWaypoints",
                 )
                 if (wasSessionPaused) {
-                    billingService.pauseBillingSession(SessionSKUIdentifier.NAV2_SES_TRIP)
+                    billingService.pauseBillingSession(skuIdProvider.getActiveGuidanceSku())
                     logI(BILLING_EXPLANATION_CATEGORY) {
                         "${runningSessionSkuId.publicName} has been paused because " +
                             "it used to be paused before destinations update"
@@ -344,7 +345,7 @@ internal class BillingController(
     private fun resumeOrBeginBillingSession(
         skuId: SessionSKUIdentifier,
         validity: Long,
-        reason: String
+        reason: String,
     ) {
         val runningSessionSkuId = getRunningOrPausedSessionSkuId()
         if (runningSessionSkuId == skuId) {
@@ -353,7 +354,7 @@ internal class BillingController(
                 if (it.code == BillingServiceErrorCode.RESUME_FAILED) {
                     logW(
                         "Session resumption failed, starting a new one instead.",
-                        logCategory
+                        logCategory,
                     )
                     logI(BILLING_EXPLANATION_CATEGORY) {
                         "Failed to resume ${skuId.publicName}(${it.message})."
@@ -376,7 +377,7 @@ internal class BillingController(
     private fun beginBillingSession(
         skuId: SessionSKUIdentifier,
         validity: Long,
-        reason: String
+        reason: String,
     ) {
         val runningSessionSkuId = getRunningOrPausedSessionSkuId()
         if (runningSessionSkuId != null) {
@@ -386,13 +387,12 @@ internal class BillingController(
             }
         }
         billingService.beginBillingSession(
-            accessToken,
-            "", // empty string result in default user agent
+            sdkInformation,
             skuId,
             {
                 handlerError(it)
             },
-            validity
+            validity,
         )
         logI(BILLING_EXPLANATION_CATEGORY) {
             "${skuId.publicName} has been started because $reason"
@@ -401,13 +401,13 @@ internal class BillingController(
 
     private fun getRunningOrPausedSessionSkuId(): SessionSKUIdentifier? {
         val possibleSessionIds = listOf(
-            SessionSKUIdentifier.NAV2_SES_TRIP,
-            SessionSKUIdentifier.NAV2_SES_FDTRIP
+            skuIdProvider.getActiveGuidanceSku(),
+            skuIdProvider.getFreeDriveSku(),
         )
 
         data class SkuSessionStatus(
             val skuId: SessionSKUIdentifier,
-            val status: BillingSessionStatus
+            val status: BillingSessionStatus,
         )
 
         val sessionStatuses = possibleSessionIds.map { skuId ->
@@ -419,7 +419,7 @@ internal class BillingController(
         }
 
         check(
-            activeOrPausedSessions.size <= 1
+            activeOrPausedSessions.size <= 1,
         ) {
             "More than one session is active or paused: $sessionStatuses"
         }
@@ -444,7 +444,7 @@ internal class BillingController(
      */
     private fun getNonServerAddedWaypointsOnRoute(
         navigationRoute: NavigationRoute,
-        dropCountProvider: List<Waypoint>.() -> Int
+        dropCountProvider: List<Waypoint>.() -> Int,
     ): List<Point> {
         val waypoints = navigationRoute.internalWaypoints()
         return waypoints
@@ -455,7 +455,7 @@ internal class BillingController(
 
     private fun waypointsWithinRange(
         first: List<Point>?,
-        second: List<Point>?
+        second: List<Point>?,
     ): Boolean {
         if (first.isNullOrEmpty() || second.isNullOrEmpty() || first.size != second.size) {
             return false
@@ -478,10 +478,11 @@ internal class BillingController(
                 throw IllegalArgumentException(error.toString())
             }
             BillingServiceErrorCode.RESUME_FAILED,
-            BillingServiceErrorCode.TOKEN_VALIDATION_FAILED -> {
+            BillingServiceErrorCode.TOKEN_VALIDATION_FAILED,
+            -> {
                 logW(
                     error.toString(),
-                    logCategory
+                    logCategory,
                 )
             }
         }
@@ -489,6 +490,12 @@ internal class BillingController(
 }
 
 private val SessionSKUIdentifier.publicName get() = when (this) {
-    SessionSKUIdentifier.NAV2_SES_TRIP -> "Active Guidance Trip Session"
-    SessionSKUIdentifier.NAV2_SES_FDTRIP -> "Free Drive Trip Session"
+    SessionSKUIdentifier.NAV3_SES_CORE_AGTRIP -> "Core Active Guidance Trip Session"
+    SessionSKUIdentifier.NAV3_SES_CORE_FDTRIP -> "Core Free Drive Trip Session"
+    SessionSKUIdentifier.NAV3_SES_UX_AGTRIP -> "UX Active Guidance Trip Session"
+    SessionSKUIdentifier.NAV3_SES_UX_FDTRIP -> "UX Free Drive Trip Session"
+    // should never be called
+    SessionSKUIdentifier.NAV2_SES_TRIP -> "v2 Active Guidance Trip Session"
+    // should never be called
+    SessionSKUIdentifier.NAV2_SES_FDTRIP -> "v2 Free Drive Trip Session"
 }

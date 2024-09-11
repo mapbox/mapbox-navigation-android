@@ -29,7 +29,7 @@ class ExtendableButtonHelper(
         { text ->
             (buttonText.measureTextWidth(text) + shrunkWidth)
                 .coerceAtLeast(minExtendedWidth).toInt()
-        }
+        },
     )
 
     fun showTextAndExtend(text: String, duration: Long) {

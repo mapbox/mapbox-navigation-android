@@ -11,43 +11,43 @@ class ReplayEventLocationMapperTest {
     fun `map fields as they are`() {
         val eventsLocation = createTestEventLocation()
 
-        val androidLocation = eventsLocation.mapToLocation(eventsLocation.time!!)
+        val commonLocation = eventsLocation.mapToLocation(eventsLocation.time!!)
 
-        assertEquals(eventsLocation.lon, androidLocation.longitude)
-        assertEquals(eventsLocation.lat, androidLocation.latitude)
-        assertEquals(eventsLocation.provider, androidLocation.provider)
-        assertEquals(eventsLocation.altitude, androidLocation.altitude)
+        assertEquals(eventsLocation.lon, commonLocation.longitude)
+        assertEquals(eventsLocation.lat, commonLocation.latitude)
+        assertEquals(eventsLocation.provider, commonLocation.source)
+        assertEquals(eventsLocation.altitude, commonLocation.altitude)
         assertEquals(
-            eventsLocation.accuracyHorizontal!!.toFloat(),
-            androidLocation.accuracy,
-            0.0001f
+            eventsLocation.accuracyHorizontal!!,
+            commonLocation.horizontalAccuracy!!,
+            0.0001,
         )
         assertEquals(
-            eventsLocation.bearing!!.toFloat(),
-            androidLocation.bearing,
-            0.0001f
+            eventsLocation.bearing!!,
+            commonLocation.bearing!!,
+            0.0001,
         )
         assertEquals(
-            eventsLocation.speed!!.toFloat(),
-            androidLocation.speed,
-            0.0001f
+            eventsLocation.speed!!,
+            commonLocation.speed!!,
+            0.0001,
         )
     }
 
     @Test
     fun `add timestamp to current time`() {
         val eventsLocation = createTestEventLocation(
-            locationOffsetInSeconds = 2.0
+            locationOffsetInSeconds = 2.0,
         )
 
         val androidLocation = eventsLocation.mapToLocation(
             eventsLocation.time!!,
             currentTimeMilliseconds = 1_000,
-            elapsedTimeNano = 1_000_000_000
+            elapsedTimeNano = 1_000_000_000,
         )
 
-        assertEquals(3000, androidLocation.time)
-        assertEquals(3000000000, androidLocation.elapsedRealtimeNanos)
+        assertEquals(3000, androidLocation.timestamp)
+        assertEquals(3000000000, androidLocation.monotonicTimestamp)
     }
 }
 
@@ -61,5 +61,5 @@ private fun createTestEventLocation(
     altitude = 212.4732666015625,
     accuracyHorizontal = 4.288000106811523,
     bearing = 243.31265258789063,
-    speed = 0.5585000514984131
+    speed = 0.5585000514984131,
 )

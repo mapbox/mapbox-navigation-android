@@ -6,7 +6,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 
 class ConnectivityHandler(
-    private val networkStatusChannel: Channel<Boolean>
+    private val networkStatusChannel: Channel<Boolean>,
 ) : ReachabilityChanged {
 
     fun getNetworkStatusChannel(): ReceiveChannel<Boolean> = networkStatusChannel
@@ -19,7 +19,8 @@ class ConnectivityHandler(
             }
             NetworkStatus.REACHABLE_VIA_WI_FI,
             NetworkStatus.REACHABLE_VIA_ETHERNET,
-            NetworkStatus.REACHABLE_VIA_WWAN -> {
+            NetworkStatus.REACHABLE_VIA_WWAN,
+            -> {
                 logD("NetworkStatus=$status", LOG_CATEGORY)
                 networkStatusChannel.trySend(true).isSuccess
             }

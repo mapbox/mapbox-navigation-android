@@ -13,11 +13,11 @@ import com.mapbox.navigation.core.sensor.SensorData
  * @param lanes Lane numbers where the speed limit is valid. Empty array means all lanes
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class AdasSpeedLimitRestriction private constructor(
+internal class AdasSpeedLimitRestriction private constructor(
     val weatherConditionTypes: List<Int>,
     val dateTimeCondition: String,
     val vehicleTypes: List<Int>,
-    val lanes: List<Byte>
+    val lanes: List<Byte>,
 ) {
 
     /**
@@ -97,7 +97,7 @@ class AdasSpeedLimitRestriction private constructor(
             TRUCK,
             BUS,
             TRAILER,
-            MOTORCYCLE
+            MOTORCYCLE,
         )
         annotation class Type
 

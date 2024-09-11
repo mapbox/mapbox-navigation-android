@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The color used for surfaces (e.g. “Bottom sheets”) -->
+    <color name="colorSurface">#FFFFFF</color>
+    <!-- The color used for elements displayed on top of your surface color -->
+    <color name="colorOnSurface">#212121</color>
+</resources>

@@ -1,7 +1,8 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
-import com.mapbox.maps.extension.observable.model.SourceDataType
-import com.mapbox.maps.plugin.delegates.listeners.OnSourceDataLoadedListener
+import com.mapbox.common.Cancelable
+import com.mapbox.maps.SourceDataLoadedCallback
+import com.mapbox.maps.SourceDataLoadedType
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -57,23 +58,24 @@ internal class RoutesExpector {
                     renderedRouteIdsToNotify,
                     emptySet(),
                     clearedRouteIdsToNotify,
-                    emptySet()
-                )
+                    emptySet(),
+                ),
             )
         } else {
             val map = callbackWrapper.map
-            val listener = OnSourceDataLoadedListener { eventData ->
+            val callback = SourceDataLoadedCallback { eventData ->
                 val dataId = eventData.dataId?.toIntOrNull()
-                if (eventData.type == SourceDataType.METADATA && dataId != null) {
-                    routeRendered(SourceIdAndDataId(eventData.id, dataId))
+                if (eventData.type == SourceDataLoadedType.METADATA && dataId != null) {
+                    routeRendered(SourceIdAndDataId(eventData.sourceId, dataId))
                 }
-            }.also { map.addOnSourceDataLoadedListener(it) }
+            }
+            val subscription = map.subscribeSourceDataLoaded(callback)
             val routeRenderCallbackHolder = RouteRenderCallbackHolder(
-                callbackWrapper,
+                callbackWrapper.callback,
                 renderedRouteIdsToNotify,
                 clearedRouteIdsToNotify,
                 expectedRoutesToRender,
-                listener
+                subscription,
             )
             expectedRoutesToRender.getSourceAndDataIds().forEach {
                 val key = SourceIdAndDataId(it.first, it.second)
@@ -112,11 +114,11 @@ internal class RoutesExpector {
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 private class RouteRenderCallbackHolder(
-    val callbackWrapper: RoutesRenderedCallbackWrapper,
+    val callback: RoutesRenderedCallback,
     val renderedRouteIdsToNotify: Set<String>,
     val clearedRouteIdsToNotify: Set<String>,
     val expectedRoutes: ExpectedRoutesToRenderData,
-    val listener: OnSourceDataLoadedListener,
+    val subscription: Cancelable,
 ) {
 
     private val allRouteIds = expectedRoutes.allRenderedRouteIds + expectedRoutes.allClearedRouteIds
@@ -172,14 +174,14 @@ private class RouteRenderCallbackHolder(
     }
 
     fun notifyAndCleanUp() {
-        callbackWrapper.map.removeOnSourceDataLoadedListener(listener)
+        subscription.cancel()
         val result = RoutesRenderedResult(
             successfullyRenderedRouteIds = renderedRouteIdsToNotify - renderingCancelledRouteIds,
             renderingCancelledRouteIds = renderingCancelledRouteIds,
             successfullyClearedRouteIds = clearedRouteIdsToNotify - clearingCancelledRouteIds,
-            clearingCancelledRouteIds = clearingCancelledRouteIds
+            clearingCancelledRouteIds = clearingCancelledRouteIds,
         )
-        callbackWrapper.callback.onRoutesRendered(result)
+        callback.onRoutesRendered(result)
     }
 }
 

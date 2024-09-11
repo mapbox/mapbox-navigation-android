@@ -48,7 +48,7 @@ class EVDynamicDataHolderTest {
     fun `currentData() after one update`() {
         val data = mapOf(
             "energy_consumption_curve" to "3,300",
-            "auxiliary_consumption" to "80"
+            "auxiliary_consumption" to "80",
         )
         val expected = mapOf(
             "energy_consumption_curve" to "3,300",
@@ -77,12 +77,12 @@ class EVDynamicDataHolderTest {
         val data1 = mapOf(
             "energy_consumption_curve" to "3,300",
             "ev_initial_charge" to "78",
-            "eee" to "fff"
+            "eee" to "fff",
         )
         val data2 = mapOf(
             "energy_consumption_curve" to "4,400",
             "auxiliary_consumption" to "80",
-            "aaa" to "bbb"
+            "aaa" to "bbb",
         )
         val expected = mapOf(
             "aaa" to "bbb",

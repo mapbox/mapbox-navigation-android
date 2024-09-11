@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="MapboxStyleRecenter">
+        <item name="recenterButtonDrawable">@drawable/mapbox_ic_recenter</item>
+    </style>
+    <style name="MapboxStyleRouteOverview">
+        <item name="overviewButtonDrawable">@drawable/mapbox_ic_route_overview</item>
+    </style>
+
+    <!-- Camera mode button -->
+    <style name="MapboxCameraModeButtonTextAppearance">
+        <item name="android:textColor">@color/colorOnSurface</item>
+        <item name="android:textSize">@dimen/mapbox_button_text_regular</item>
+    </style>
+
+    <style name="MapboxStyleCameraModeButton">
+        <item name="android:elevation">0dp</item>
+        <item name="android:minHeight">@dimen/mapbox_extendableButton_minHeight</item>
+        <item name="android:paddingStart">@dimen/mapbox_extendableButton_paddingStart</item>
+        <item name="android:paddingEnd">@dimen/mapbox_extendableButton_paddingStart</item>
+        <item name="cameraModeButtonBackground">@drawable/mapbox_bg_button</item>
+        <item name="cameraModeButtonIconTint">@color/colorOnSurface</item>
+        <item name="cameraModeButtonFollowIcon">@drawable/mapbox_ic_camera_follow</item>
+        <item name="cameraModeButtonOverviewIcon">@drawable/mapbox_ic_camera_overview</item>
+        <item name="cameraModeButtonTextAppearance">
+            @style/MapboxCameraModeButtonTextAppearance
+        </item>
+        <item name="cameraModeButtonFollowText">@string/mapbox_route_follow</item>
+        <item name="cameraModeButtonOverviewText">@string/mapbox_route_overview</item>
+    </style>
+
+    <style name="MapboxStyleCameraModeButton.Oval" parent="MapboxStyleCameraModeButton">
+        <item name="cameraModeButtonBackground">@drawable/mapbox_bg_circle_outline</item>
+    </style>
+
+    <style name="MapboxStyleCameraModeButton.Square" parent="MapboxStyleCameraModeButton">
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+        <item name="android:minHeight">0dp</item>
+    </style>
+
+    <style name="MapboxStyleCameraModeButton.Circle" parent="MapboxStyleCameraModeButton.Square">
+        <item name="cameraModeButtonBackground">@drawable/mapbox_bg_circle_outline</item>
+    </style>
+
+    <!-- Camera recenter button -->
+    <style name="MapboxStyleRecenterButton" parent="MapboxStyleExtendableButton">
+        <item name="extendableButtonIcon">@drawable/mapbox_ic_camera_recenter</item>
+    </style>
+
+    <style name="MapboxStyleRecenterButton.Oval" parent="MapboxStyleRecenterButton">
+        <item name="extendableButtonBackground">@drawable/mapbox_bg_circle_outline</item>
+    </style>
+
+    <style name="MapboxStyleRecenterButton.Square" parent="MapboxStyleRecenterButton">
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+        <item name="android:minHeight">0dp</item>
+    </style>
+
+    <style name="MapboxStyleRecenterButton.Circle" parent="MapboxStyleRecenterButton.Square">
+        <item name="extendableButtonBackground">@drawable/mapbox_bg_circle_outline</item>
+    </style>
+
+    <!-- Road name -->
+    <style name="MapboxRoadNameViewTextAppearance" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/colorOnSurface</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="MapboxStyleRoadNameView">
+        <item name="android:textAppearance">@style/MapboxRoadNameViewTextAppearance</item>
+        <item name="android:background">@drawable/mapbox_road_name_view_background</item>
+    </style>
+
+</resources>

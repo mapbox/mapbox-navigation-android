@@ -1,7 +1,7 @@
 package com.mapbox.navigation.copilot
 
 import android.util.Base64
-import com.mapbox.navigation.copilot.internal.CopilotMetadata
+import com.mapbox.navigation.copilot.internal.CopilotSession
 import com.mapbox.navigation.core.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -12,38 +12,36 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
+@Suppress("MaxLineLength")
 internal object HistoryAttachmentsUtils {
 
-    private const val HISTORY_FILENAME_SEPARATOR = "__"
-    private const val SDK_PLATFORM = "android"
-    private const val PBF = "pbf"
-    private const val GZ = "gz"
-    private const val PBF_GZ_FORMAT = ".$PBF.$GZ"
+    private const val PBF_GZ_FORMAT = "pbf.gz"
     private const val COPILOT = "co-pilot"
-    private const val PATH_SEPARATOR = "/"
-    private const val HYPHEN = "-"
-    private const val UNDERSCORE = "_"
 
-    fun generateFilename(copilotMetadata: CopilotMetadata): String =
-        "${copilotMetadata.startedAt}$HISTORY_FILENAME_SEPARATOR${copilotMetadata.endedAt}" +
-            "$HISTORY_FILENAME_SEPARATOR$SDK_PLATFORM$HISTORY_FILENAME_SEPARATOR" +
-            "${copilotMetadata.navSdkVersion}$HISTORY_FILENAME_SEPARATOR" +
-            "${copilotMetadata.navNativeSdkVersion}$HISTORY_FILENAME_SEPARATOR" +
-            "$UNDERSCORE$HISTORY_FILENAME_SEPARATOR" +
-            "${copilotMetadata.appVersion}$HISTORY_FILENAME_SEPARATOR" +
-            "${copilotMetadata.appUserId}$HISTORY_FILENAME_SEPARATOR" +
-            "${copilotMetadata.appSessionId}$PBF_GZ_FORMAT"
+    /* ktlint-disable max-line-length */
+    // Eg. output
+    //   2022-05-12T17:47:42.353Z__2022-05-12T17:48:12.504Z__android__2.7.0-beta.1__108.0.1_____v0.108.0-9-g0527ee4__wBzYwfK0oCYMTNYPIFHhYuYOLLs1__3e48fd7b-ac82-42a8-9abe-aaeb724f92ce.pbf.gz
+    fun attachmentFilename(copilotSession: CopilotSession, extension: String = PBF_GZ_FORMAT): String = with(
+        copilotSession,
+    ) {
+        "${startedAt}__${endedAt}__android__${navSdkVersion}__${navNativeSdkVersion}_____${appVersion}__${appUserId}__$appSessionId.$extension"
+    }
+    /* ktlint-enable max-line-length */
 
     fun retrieveOwnerFrom(accessToken: String): String =
         decode(
-            accessToken.splitToSequence(".").drop(1).first().replace('-', '+').replace('_', '/'),
+            accessToken.splitToSequence(".")
+                .drop(1)
+                .first()
+                .replace('-', '+')
+                .replace('_', '/'),
         ).getString("u")
 
-    fun generateSessionId(copilotMetadata: CopilotMetadata, owner: String): String =
-        "$COPILOT$PATH_SEPARATOR$owner$PATH_SEPARATOR${retrieveSpecVersion()}$PATH_SEPARATOR" +
-            "${copilotMetadata.appMode}$PATH_SEPARATOR$HYPHEN$PATH_SEPARATOR$HYPHEN" +
-            "$PATH_SEPARATOR${copilotMetadata.driveMode}$PATH_SEPARATOR$HYPHEN" +
-            "$PATH_SEPARATOR${copilotMetadata.driveId}"
+    fun generateSessionId(copilotSession: CopilotSession, owner: String): String =
+        "$COPILOT/$owner/${retrieveSpecVersion()}/" +
+            "${copilotSession.appMode}/-/-" +
+            "/${copilotSession.driveMode}/-" +
+            "/${copilotSession.driveId}"
 
     fun retrieveSpecVersion(): String = "1.2"
 
@@ -51,8 +49,6 @@ internal object HistoryAttachmentsUtils {
 
     fun retrieveNavNativeSdkVersion(): String =
         BuildConfig.NAV_NATIVE_SDK_VERSION
-
-    fun retrieveIsDebug(): Boolean = BuildConfig.DEBUG
 
     fun utcTimeNow(format: String, locale: Locale): String {
         val formatter = SimpleDateFormat(format, locale)
@@ -64,7 +60,7 @@ internal object HistoryAttachmentsUtils {
 
     fun size(file: File): Long = file.length()
 
-    suspend fun copyToAndRemove(from: File, filename: String): File =
+    suspend fun rename(from: File, filename: String): File =
         withContext(Dispatchers.IO) {
             File(from.parent, filename).also { from.renameTo(it) }
         }
@@ -75,9 +71,9 @@ internal object HistoryAttachmentsUtils {
             String(
                 Base64.decode(
                     str.padEnd(requiredLength, '='),
-                    Base64.DEFAULT
-                )
-            )
+                    Base64.DEFAULT,
+                ),
+            ),
         )
     }
 }

@@ -10,7 +10,7 @@ import com.mapbox.navigator.SensorType
  * Data obtained from sensors
  */
 @ExperimentalPreviewMapboxNavigationAPI
-abstract class SensorData internal constructor() {
+internal abstract class SensorData internal constructor() {
 
     /**
      * Weather condition obtained from sensors
@@ -78,7 +78,7 @@ abstract class SensorData internal constructor() {
                 RAIN,
                 SNOW,
                 FOG,
-                WET_ROAD
+                WET_ROAD,
             )
             annotation class Type
 

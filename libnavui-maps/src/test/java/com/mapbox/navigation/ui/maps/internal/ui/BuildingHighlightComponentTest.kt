@@ -6,9 +6,10 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxMap
-import com.mapbox.maps.QueriedFeature
+import com.mapbox.maps.QueriedRenderedFeature
 import com.mapbox.maps.Style
 import com.mapbox.navigation.base.extensions.coordinates
+import com.mapbox.navigation.base.internal.route.routeOptions
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -69,10 +70,10 @@ class BuildingHighlightComponentTest {
         val routeProgress = routeProgressWith(
             routeOptions(
                 origin = Point.fromLngLat(0.0, 0.0),
-                destination = destination
-            )
+                destination = destination,
+            ),
         )
-        val buildings = listOf<QueriedFeature>(mockk())
+        val buildings = listOf<QueriedRenderedFeature>(mockk())
         givenArrivalObserverAnswer {
             onFinalDestinationArrival(routeProgress)
         }
@@ -105,7 +106,7 @@ class BuildingHighlightComponentTest {
                 onRoutesChanged(
                     mockk {
                         every { navigationRoutes } returns emptyList()
-                    }
+                    },
                 )
             }
 
@@ -157,13 +158,13 @@ class BuildingHighlightComponentTest {
 
     private fun givenBuildingsApiAnswer(
         givenDestination: Point,
-        block: MapboxNavigationConsumer<Expected<BuildingError, BuildingValue>>.() -> Unit
+        block: MapboxNavigationConsumer<Expected<BuildingError, BuildingValue>>.() -> Unit,
     ) {
         val callback = slot<MapboxNavigationConsumer<Expected<BuildingError, BuildingValue>>>()
         every {
             buildingsApi.queryBuildingToHighlight(
                 givenDestination,
-                capture(callback)
+                capture(callback),
             )
         } answers {
             callback.captured.apply(block)
@@ -181,7 +182,7 @@ class BuildingHighlightComponentTest {
             .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
             .coordinates(
                 origin = origin,
-                destination = destination
+                destination = destination,
             )
             .build()
 }

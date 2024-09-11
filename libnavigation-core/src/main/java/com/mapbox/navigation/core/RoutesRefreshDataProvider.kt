@@ -6,7 +6,7 @@ import com.mapbox.navigation.core.internal.RouteProgressData
 internal data class RoutesRefreshData(
     val primaryRoute: NavigationRoute,
     val primaryRouteProgressData: RouteProgressData,
-    val alternativeRoutesProgressData: List<Pair<NavigationRoute, RouteProgressData?>>
+    val alternativeRoutesProgressData: List<Pair<NavigationRoute, RouteProgressData?>>,
 ) {
     val allRoutesRefreshData = listOf(primaryRoute to primaryRouteProgressData) +
         alternativeRoutesProgressData
@@ -23,7 +23,7 @@ internal class RoutesRefreshDataProvider(
      */
     @Throws(IllegalArgumentException::class)
     suspend fun getRoutesRefreshData(
-        routes: List<NavigationRoute>
+        routes: List<NavigationRoute>,
     ): RoutesRefreshData {
         if (routes.isEmpty()) {
             throw IllegalArgumentException("Routes must not be empty")

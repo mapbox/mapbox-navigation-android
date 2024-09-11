@@ -12,5 +12,5 @@ enum class TripSessionState {
     /**
      * State when the session is inactive.
      */
-    STOPPED
+    STOPPED,
 }

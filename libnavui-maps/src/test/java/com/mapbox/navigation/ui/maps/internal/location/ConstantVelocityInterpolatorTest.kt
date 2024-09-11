@@ -53,11 +53,11 @@ class ConstantVelocityInterpolatorTest {
 
         assertEquals(
             0.7f,
-            ConstantVelocityInterpolator(p0, emptyArray()).getInterpolation(0.7f)
+            ConstantVelocityInterpolator(p0, emptyArray()).getInterpolation(0.7f),
         )
         assertEquals(
             0.3f,
-            ConstantVelocityInterpolator(p0, arrayOf(p0)).getInterpolation(0.3f)
+            ConstantVelocityInterpolator(p0, arrayOf(p0)).getInterpolation(0.3f),
         )
     }
 
@@ -68,7 +68,7 @@ class ConstantVelocityInterpolatorTest {
 
         assertEquals(
             0.3f,
-            ConstantVelocityInterpolator(p0, arrayOf(p1)).getInterpolation(0.3f)
+            ConstantVelocityInterpolator(p0, arrayOf(p1)).getInterpolation(0.3f),
         )
     }
 
@@ -129,6 +129,6 @@ class ConstantVelocityInterpolatorTest {
     private fun distance(a: Point, b: Point) =
         sqrt(
             (b.latitude() - a.latitude()).pow(2.0) +
-                (b.longitude() - a.longitude()).pow(2.0)
+                (b.longitude() - a.longitude()).pow(2.0),
         )
 }

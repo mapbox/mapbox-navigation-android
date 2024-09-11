@@ -12,7 +12,7 @@ private typealias NativeTilesetDescriptorFactory = com.mapbox.navigator.TilesetD
 class TilesetDescriptorFactory internal constructor(
     private val routingTilesOptions: RoutingTilesOptions,
     private val cache: CacheHandle,
-    private val nativeFactoryWrapper: NativeFactoryWrapper = NativeFactoryWrapperImpl()
+    private val nativeFactoryWrapper: NativeFactoryWrapper = NativeFactoryWrapperImpl(),
 ) {
 
     /**
@@ -31,11 +31,11 @@ class TilesetDescriptorFactory internal constructor(
     fun build(
         tilesDataset: String? = null,
         tilesProfile: String? = null,
-        tilesVersion: String? = null
+        tilesVersion: String? = null,
     ): TilesetDescriptor =
         nativeFactoryWrapper.build(
             combineDatasetWithProfile(tilesDataset, tilesProfile),
-            tilesVersion ?: routingTilesOptions.tilesVersion
+            tilesVersion ?: routingTilesOptions.tilesVersion,
         )
 
     /**
@@ -72,7 +72,7 @@ class TilesetDescriptorFactory internal constructor(
     internal class NativeFactoryWrapperImpl : NativeFactoryWrapper {
         override fun getSpecificVersion(
             cache: CacheHandle,
-            tilesVersion: String
+            tilesVersion: String,
         ): TilesetDescriptor {
             return NativeTilesetDescriptorFactory.getSpecificVersion(cache, tilesVersion)
         }
@@ -83,7 +83,7 @@ class TilesetDescriptorFactory internal constructor(
 
         override fun build(
             tilesDatasetAndProfile: String,
-            tilesVersion: String
+            tilesVersion: String,
         ): TilesetDescriptor {
             return NativeTilesetDescriptorFactory.build(tilesDatasetAndProfile, tilesVersion)
         }

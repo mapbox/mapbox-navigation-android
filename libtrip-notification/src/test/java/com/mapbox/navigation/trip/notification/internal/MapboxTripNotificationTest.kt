@@ -94,7 +94,7 @@ class MapboxTripNotificationTest {
         notification = MapboxTripNotification(
             navigationOptions,
             interceptorOwner,
-            distanceFormatter
+            distanceFormatter,
         )
     }
 
@@ -110,13 +110,13 @@ class MapboxTripNotificationTest {
         every {
             RemoteViewsProvider.createRemoteViews(
                 any(),
-                R.layout.mapbox_notification_navigation_collapsed
+                R.layout.mapbox_notification_navigation_collapsed,
             )
         } returns collapsedViews
         every {
             RemoteViewsProvider.createRemoteViews(
                 any(),
-                R.layout.mapbox_notification_navigation_expanded
+                R.layout.mapbox_notification_navigation_expanded,
             )
         } returns expandedViews
     }
@@ -155,7 +155,7 @@ class MapboxTripNotificationTest {
                 mockedContext,
                 any(),
                 any(),
-                any()
+                any(),
             )
         } returns (mockPendingIntentForActivity)
         every {
@@ -163,20 +163,20 @@ class MapboxTripNotificationTest {
                 mockedContext,
                 any(),
                 any(),
-                any()
+                any(),
             )
         } returns (mockPendingIntentForBroadcast)
         every {
             mockedContext.registerReceiver(
                 any(),
-                any()
+                any(),
             )
         } returns (mockedBroadcastReceiverIntent)
         every {
             mockedContext.registerReceiver(
                 any(),
                 any(),
-                any()
+                any(),
             )
         } returns (mockedBroadcastReceiverIntent)
         every { mockedContext.unregisterReceiver(any()) } just Runs
@@ -191,7 +191,7 @@ class MapboxTripNotificationTest {
         verify(exactly = 2) {
             mockedContext.registerReceiver(
                 capture(receivers),
-                capture(filters)
+                capture(filters),
             )
         }
 
@@ -214,7 +214,7 @@ class MapboxTripNotificationTest {
         verify(exactly = 1) { notificationManager.cancel(NOTIFICATION_ID) }
         assertEquals(
             true,
-            MapboxTripNotification.notificationActionButtonChannel.isClosedForReceive
+            MapboxTripNotification.notificationActionButtonChannel.isClosedForReceive,
         )
         assertEquals(true, MapboxTripNotification.notificationActionButtonChannel.isClosedForSend)
     }
@@ -232,7 +232,7 @@ class MapboxTripNotificationTest {
         verify(exactly = 1) { notificationManager.cancel(NOTIFICATION_ID) }
         assertEquals(
             true,
-            MapboxTripNotification.notificationActionButtonChannel.isClosedForReceive
+            MapboxTripNotification.notificationActionButtonChannel.isClosedForReceive,
         )
         assertEquals(true, MapboxTripNotification.notificationActionButtonChannel.isClosedForSend)
     }
@@ -371,13 +371,13 @@ class MapboxTripNotificationTest {
         verify(exactly = 1) {
             collapsedViews.setTextViewText(
                 R.id.notificationDistanceText,
-                distanceText
+                distanceText,
             )
         }
         verify(exactly = 1) {
             expandedViews.setTextViewText(
                 R.id.notificationDistanceText,
-                distanceText
+                distanceText,
             )
         }
     }
@@ -394,7 +394,7 @@ class MapboxTripNotificationTest {
             null,
             distance,
             duration,
-            null
+            null,
         )
         notification.onTripSessionStarted()
 
@@ -606,7 +606,7 @@ class MapboxTripNotificationTest {
             null,
             10.0,
             10.0,
-            null
+            null,
         )
         notification.updateNotification(state)
 
@@ -629,7 +629,7 @@ class MapboxTripNotificationTest {
             null,
             10.0,
             10.0,
-            null
+            null,
         )
         notification.updateNotification(state)
 
@@ -646,7 +646,7 @@ class MapboxTripNotificationTest {
         state: TripNotificationState.TripNotificationData,
         primaryText: () -> String,
         primaryType: () -> String = { MANEUVER_TYPE },
-        primaryModifier: () -> String = { MANEUVER_MODIFIER }
+        primaryModifier: () -> String = { MANEUVER_MODIFIER },
     ): BannerText {
         val bannerText = mockk<BannerText>()
         val bannerInstructions = mockk<BannerInstructions>()
@@ -687,7 +687,7 @@ class MapboxTripNotificationTest {
         verify {
             mockedContext.registerReceiver(
                 capture(receivers),
-                capture(filters)
+                capture(filters),
             )
         }
         return receivers[filters.indexOfFirst { it.hasAction(DISMISS_NOTIFICATION_ACTION) }]

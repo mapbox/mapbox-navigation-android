@@ -4,7 +4,7 @@ import java.util.Calendar
 import java.util.Locale
 
 internal class TwentyFourHoursTimeFormat(
-    private val chain: TimeFormatResolver
+    private val chain: TimeFormatResolver,
 ) : TimeFormatResolver {
 
     companion object {

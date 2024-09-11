@@ -23,7 +23,7 @@ internal object RouteRefreshControllerProvider {
         directionsSession: DirectionsSession,
         routesProgressDataProvider: RoutesProgressDataProvider,
         evDynamicDataHolder: EVDynamicDataHolder,
-        timeProvider: Time
+        timeProvider: Time,
     ): RouteRefreshController {
         val routeRefresher = RouteRefresher(
             RoutesRefreshDataProvider(routesProgressDataProvider),
@@ -44,10 +44,10 @@ internal object RouteRefreshControllerProvider {
             refreshObserversManager,
             ExpiringDataRemover { Date() },
             timeProvider,
-            routeRefreshOptions.intervalMillis * 3
+            routeRefreshOptions.intervalMillis * 3,
         )
         val routeRefreshResultAttemptProcessor = RoutesRefreshAttemptProcessor(
-            refreshObserversManager
+            refreshObserversManager,
         )
 
         val plannedRouteRefreshController = PlannedRouteRefreshController(
@@ -72,7 +72,7 @@ internal object RouteRefreshControllerProvider {
             immediateRouteRefreshController,
             stateHolder,
             refreshObserversManager,
-            routeRefresherResultProcessor
+            routeRefresherResultProcessor,
         )
     }
 }

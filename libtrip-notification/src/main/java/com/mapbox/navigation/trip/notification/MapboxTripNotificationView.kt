@@ -12,7 +12,7 @@ import androidx.core.content.ContextCompat
 import com.mapbox.navigation.utils.internal.SET_BACKGROUND_COLOR
 
 internal class MapboxTripNotificationView(
-    private val context: Context
+    private val context: Context,
 ) {
     var collapsedView: RemoteViews? = null
         private set
@@ -29,13 +29,13 @@ internal class MapboxTripNotificationView(
         collapsedView = createRemoteView(
             backgroundColor,
             R.layout.mapbox_notification_navigation_collapsed,
-            R.id.navigationCollapsedNotificationLayout
+            R.id.navigationCollapsedNotificationLayout,
         )
 
         expandedView = createRemoteView(
             backgroundColor,
             R.layout.mapbox_notification_navigation_expanded,
-            R.id.navigationExpandedNotificationLayout
+            R.id.navigationExpandedNotificationLayout,
         ).also {
             it.setOnClickPendingIntent(R.id.endNavigationBtn, pendingCloseIntent)
         }
@@ -50,12 +50,12 @@ internal class MapboxTripNotificationView(
         updateViewVisibility(
             collapsedView,
             R.id.navigationIsStarting,
-            visibility
+            visibility,
         )
         updateViewVisibility(
             expandedView,
             R.id.navigationIsStarting,
-            visibility
+            visibility,
         )
     }
 
@@ -67,7 +67,7 @@ internal class MapboxTripNotificationView(
     fun setEndNavigationButtonText(textResource: Int) {
         expandedView?.setTextViewText(
             R.id.endNavigationBtn,
-            context.getString(textResource)
+            context.getString(textResource),
         )
     }
 
@@ -79,11 +79,11 @@ internal class MapboxTripNotificationView(
     fun updateInstructionText(primaryText: String) {
         collapsedView?.setTextViewText(
             R.id.notificationInstructionText,
-            primaryText
+            primaryText,
         )
         expandedView?.setTextViewText(
             R.id.notificationInstructionText,
-            primaryText
+            primaryText,
         )
     }
 
@@ -95,11 +95,11 @@ internal class MapboxTripNotificationView(
     fun updateDistanceText(currentDistanceText: SpannableString?) {
         collapsedView?.setTextViewText(
             R.id.notificationDistanceText,
-            currentDistanceText.toString()
+            currentDistanceText.toString(),
         )
         expandedView?.setTextViewText(
             R.id.notificationDistanceText,
-            currentDistanceText.toString()
+            currentDistanceText.toString(),
         )
     }
 
@@ -165,22 +165,22 @@ internal class MapboxTripNotificationView(
                 updateViewVisibility(
                     collapsedView,
                     R.id.notificationInstructionText,
-                    View.GONE
+                    View.GONE,
                 )
                 updateViewVisibility(
                     expandedView,
                     R.id.notificationInstructionText,
-                    View.GONE
+                    View.GONE,
                 )
                 updateViewVisibility(
                     collapsedView,
                     R.id.freeDriveText,
-                    View.VISIBLE
+                    View.VISIBLE,
                 )
                 updateViewVisibility(
                     expandedView,
                     R.id.freeDriveText,
-                    View.VISIBLE
+                    View.VISIBLE,
                 )
                 setImageViewResource(collapsedView)
                 setImageViewResource(expandedView)
@@ -190,28 +190,28 @@ internal class MapboxTripNotificationView(
                 updateViewVisibility(
                     collapsedView,
                     R.id.etaContent,
-                    View.VISIBLE
+                    View.VISIBLE,
                 )
                 updateViewVisibility(expandedView, R.id.etaContent, View.VISIBLE)
                 updateViewVisibility(
                     collapsedView,
                     R.id.notificationInstructionText,
-                    View.VISIBLE
+                    View.VISIBLE,
                 )
                 updateViewVisibility(
                     expandedView,
                     R.id.notificationInstructionText,
-                    View.VISIBLE
+                    View.VISIBLE,
                 )
                 updateViewVisibility(
                     collapsedView,
                     R.id.freeDriveText,
-                    View.GONE
+                    View.GONE,
                 )
                 updateViewVisibility(
                     expandedView,
                     R.id.freeDriveText,
-                    View.GONE
+                    View.GONE,
                 )
                 setEndNavigationButtonText(R.string.mapbox_end_navigation)
             }
@@ -225,7 +225,7 @@ internal class MapboxTripNotificationView(
     private fun createRemoteView(
         backgroundColor: Int,
         layoutResource: Int,
-        layoutId: Int
+        layoutId: Int,
     ): RemoteViews {
         return RemoteViewsProvider.createRemoteViews(context.packageName, layoutResource)
             .also { remoteViews ->
@@ -236,7 +236,7 @@ internal class MapboxTripNotificationView(
     private fun setImageViewResource(remoteView: RemoteViews?) {
         remoteView?.setImageViewResource(
             R.id.maneuverImage,
-            R.drawable.mapbox_ic_navigation
+            R.drawable.mapbox_ic_navigation,
         )
     }
 }

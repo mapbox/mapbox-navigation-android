@@ -8,7 +8,7 @@ import kotlin.reflect.KClass
 
 @RunWith(RobolectricTestRunner::class)
 class MapboxSignboardOptionsTest : BuilderTest<MapboxSignboardOptions,
-    MapboxSignboardOptions.Builder>() {
+    MapboxSignboardOptions.Builder,>() {
 
     override fun getImplementationClass(): KClass<MapboxSignboardOptions> =
         MapboxSignboardOptions::class

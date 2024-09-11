@@ -4,7 +4,7 @@ configurations {
 
 dependencies {
     // Metalava isn't released yet. Check in its jar and explicitly track its transitive deps.
-    metalava files('../metalava/metalava.jar')
+    metalava files("$rootDir/metalava/metalava.jar")
 
     metalava "com.android.tools.external.org-jetbrains:uast:30.3.0-alpha08"
     metalava "com.android.tools.external.com-intellij:kotlin-compiler:30.3.0-alpha08"

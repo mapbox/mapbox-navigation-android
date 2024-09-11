@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.RoutesInvalidatedObserver
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
@@ -19,7 +20,7 @@ class RouteRefreshController internal constructor(
     private val stateHolder: RouteRefreshStateHolder,
     private val refreshObserversManager: RefreshObserversManager,
     private val routeRefresherResultProcessor: RouteRefresherResultProcessor,
-) : RoutesObserver {
+) {
 
     /**
      * Register a [RouteRefreshStatesObserver] to be notified of Route refresh state changes.
@@ -27,7 +28,7 @@ class RouteRefreshController internal constructor(
      * @param routeRefreshStatesObserver RouteRefreshStatesObserver
      */
     fun registerRouteRefreshStateObserver(
-        routeRefreshStatesObserver: RouteRefreshStatesObserver
+        routeRefreshStatesObserver: RouteRefreshStatesObserver,
     ) {
         stateHolder.registerRouteRefreshStateObserver(routeRefreshStatesObserver)
     }
@@ -38,7 +39,7 @@ class RouteRefreshController internal constructor(
      * @param routeRefreshStatesObserver RouteRefreshStatesObserver
      */
     fun unregisterRouteRefreshStateObserver(
-        routeRefreshStatesObserver: RouteRefreshStatesObserver
+        routeRefreshStatesObserver: RouteRefreshStatesObserver,
     ) {
         stateHolder.unregisterRouteRefreshStateObserver(routeRefreshStatesObserver)
     }
@@ -110,7 +111,13 @@ class RouteRefreshController internal constructor(
         routeRefreshParentJob.cancel()
     }
 
-    override fun onRoutesChanged(result: RoutesUpdatedResult) {
+    internal fun onRoutesRefreshedManually(routes: List<NavigationRoute>) {
+        plannedRouteRefreshController.pause()
+        plannedRouteRefreshController.routesToRefresh = routes
+        plannedRouteRefreshController.resume(shouldResumeDelay = true)
+    }
+
+    internal fun onRoutesChanged(result: RoutesUpdatedResult) {
         if (result.reason != RoutesExtra.ROUTES_UPDATE_REASON_REFRESH) {
             routeRefresherResultProcessor.reset()
             immediateRouteRefreshController.cancel()

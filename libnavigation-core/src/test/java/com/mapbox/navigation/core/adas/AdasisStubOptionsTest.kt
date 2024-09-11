@@ -4,7 +4,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.testing.BuilderTest
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class AdasisStubOptionsTest : BuilderTest<AdasisStubOptions, AdasisStubOptions.Builder>() {
+internal class AdasisStubOptionsTest : BuilderTest<AdasisStubOptions, AdasisStubOptions.Builder>() {
 
     override fun getImplementationClass() = AdasisStubOptions::class
 

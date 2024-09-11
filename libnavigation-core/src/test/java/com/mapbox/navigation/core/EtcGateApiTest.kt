@@ -15,7 +15,12 @@ class EtcGateApiTest {
 
     @Test
     fun updateEtcGateInfo() {
-        api.updateEtcGateInfo(EtcGateInfo(13, 8723468273648))
+        api.updateEtcGateInfo(
+            EtcGateApi.EtcGateInfo(
+                13,
+                8723468273648,
+            ),
+        )
         verify(exactly = 1) {
             experimental.updateETCGateInfo(ETCGateInfo(13, 8723468273648))
         }
@@ -26,7 +31,12 @@ class EtcGateApiTest {
         val experimental2 = mockk<com.mapbox.navigator.Experimental>(relaxed = true)
         api.experimental = experimental2
 
-        api.updateEtcGateInfo(EtcGateInfo(13, 8723468273648))
+        api.updateEtcGateInfo(
+            EtcGateApi.EtcGateInfo(
+                13,
+                8723468273648,
+            ),
+        )
 
         verify(exactly = 0) { experimental.updateETCGateInfo(any()) }
         verify(exactly = 1) {

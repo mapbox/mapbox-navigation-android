@@ -232,7 +232,7 @@ class ExpectedRoutesToRenderDataTest {
 
         assertEquals(
             listOf("source1" to 1, "source3" to 2, "source2" to 1),
-            sut.getSourceAndDataIds()
+            sut.getSourceAndDataIds(),
         )
     }
 }

@@ -9,12 +9,12 @@ package com.mapbox.navigation.ui.maps.camera.transition
  * @param maxDuration maximum duration of the generated transitions set, including delays between animators and their respective durations.
  */
 class NavigationCameraTransitionOptions private constructor(
-    val maxDuration: Long
+    val maxDuration: Long,
 ) {
     /**
      * @return the builder that created the [NavigationCameraTransitionOptions]
      */
-    fun toBuilder() = Builder()
+    fun toBuilder(): Builder = Builder()
         .maxDuration(maxDuration)
 
     /**
@@ -56,7 +56,7 @@ class NavigationCameraTransitionOptions private constructor(
          *
          * Defaults to 1000 milliseconds.
          */
-        fun maxDuration(maxDuration: Long) = apply {
+        fun maxDuration(maxDuration: Long): Builder = apply {
             this.maxDuration = maxDuration
         }
 

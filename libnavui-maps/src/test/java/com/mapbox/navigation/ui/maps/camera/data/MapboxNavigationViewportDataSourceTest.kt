@@ -1,7 +1,7 @@
 package com.mapbox.navigation.ui.maps.camera.data
 
-import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.common.location.Location
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.CameraState
@@ -10,8 +10,9 @@ import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.Size
+import com.mapbox.navigation.base.internal.route.routeOptions
 import com.mapbox.navigation.base.internal.utils.isSameRoute
-import com.mapbox.navigation.base.route.toNavigationRoute
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
@@ -35,11 +36,13 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
+import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import io.mockk.verify
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Rule
@@ -50,25 +53,33 @@ class MapboxNavigationViewportDataSourceTest {
     @get:Rule
     val loggerRule = LoggingFrontendTestRule()
 
-    private val mapboxMap: MapboxMap = mockk(relaxUnitFun = true)
+    private val mapboxMap: MapboxMap = mockk(relaxed = true)
     private val emptyCameraState = CameraState(
         NULL_ISLAND_POINT,
         EMPTY_EDGE_INSETS,
         0.0,
         BEARING_NORTH,
-        ZERO_PITCH
+        ZERO_PITCH,
     )
     private val mapSize = Size(1000f, 1000f)
     private val singlePixelEdgeInsets = EdgeInsets(1.0, 2.0, 3.0, 4.0)
     private val followingScreenBox = ScreenBox(
         ScreenCoordinate(1.0, 2.0),
-        ScreenCoordinate(3.0, 4.0)
+        ScreenCoordinate(3.0, 4.0),
     )
     private val smoothedBearing = 333.0
     private val pitchFromProgress = 45.0
+
     private val route: DirectionsRoute = mockk(relaxed = true) {
         every { routeIndex() } returns "0"
+        every { routeOptions() } returns mockk()
     }
+
+    private val navigationRoute: NavigationRoute = mockk(relaxed = true) {
+        every { routeOptions } returns route.routeOptions()!!
+        every { directionsRoute } returns route
+    }
+
     private val routeProgress: RouteProgress = mockk()
     private val completeRoutePoints: List<List<List<Point>>> =
         // legs
@@ -78,12 +89,12 @@ class MapboxNavigationViewportDataSourceTest {
                 // points
                 listOf(Point.fromLngLat(1.0, 2.0)),
                 listOf(Point.fromLngLat(3.0, 4.0)),
-                listOf(Point.fromLngLat(5.0, 6.0))
+                listOf(Point.fromLngLat(5.0, 6.0)),
             ),
             listOf(
                 // points
                 listOf(Point.fromLngLat(7.0, 8.0)),
-                listOf(Point.fromLngLat(9.0, 10.0))
+                listOf(Point.fromLngLat(9.0, 10.0)),
             ),
         )
     private val completeRoutePointsFlat: List<Point> = completeRoutePoints.flatten().flatten()
@@ -92,7 +103,7 @@ class MapboxNavigationViewportDataSourceTest {
         listOf(
             // steps
             listOf(1.0, 2.0, 3.0),
-            listOf(4.0, 5.0)
+            listOf(4.0, 5.0),
         )
 
     private val postManeuverFramingPoints: List<List<List<Point>>> =
@@ -103,12 +114,12 @@ class MapboxNavigationViewportDataSourceTest {
                 // points
                 listOf(Point.fromLngLat(11.0, 12.0)),
                 listOf(Point.fromLngLat(13.0, 14.0)),
-                listOf(Point.fromLngLat(15.0, 16.0))
+                listOf(Point.fromLngLat(15.0, 16.0)),
             ),
             listOf(
                 // points
                 listOf(Point.fromLngLat(17.0, 18.0)),
-                listOf(Point.fromLngLat(19.0, 20.0))
+                listOf(Point.fromLngLat(19.0, 20.0)),
             ),
         )
     private val pointsToFrameOnCurrentStep: List<Point> = listOf(
@@ -128,13 +139,21 @@ class MapboxNavigationViewportDataSourceTest {
 
     @Before
     fun setup() {
-        mockkStatic("com.mapbox.navigation.base.route.NavigationRouteEx")
-        every { route.toNavigationRoute() } returns mockk {
-            every { routeOptions } returns route.routeOptions()!!
-            every { directionsRoute } returns route
-        }
         every { mapboxMap.cameraState } returns emptyCameraState
         every { mapboxMap.getSize() } returns mapSize
+        val cameraForCoordinatesCallbackSlot = slot<(CameraOptions) -> Unit>()
+        every {
+            mapboxMap.cameraForCoordinates(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                capture(cameraForCoordinatesCallbackSlot),
+            )
+        } answers {
+            cameraForCoordinatesCallbackSlot.captured(mockk())
+        }
 
         viewportDataSource = MapboxNavigationViewportDataSource(mapboxMap)
 
@@ -151,7 +170,7 @@ class MapboxNavigationViewportDataSourceTest {
                     .maxBearingAngleDiff,
                 any(),
                 any(),
-                any()
+                any(),
             )
         } returns smoothedBearing
         every { processRoutePoints(route) } returns completeRoutePoints
@@ -162,7 +181,7 @@ class MapboxNavigationViewportDataSourceTest {
                 viewportDataSource.options.followingFrameOptions.intersectionDensityCalculation
                     .minimumDistanceBetweenIntersections,
                 route,
-                completeRoutePoints
+                completeRoutePoints,
             )
         } returns averageIntersectionDistancesOnRoute
         every {
@@ -173,13 +192,13 @@ class MapboxNavigationViewportDataSourceTest {
                 viewportDataSource.options.followingFrameOptions.frameGeometryAfterManeuver
                     .distanceToFrameAfterManeuver,
                 route,
-                completeRoutePoints
+                completeRoutePoints,
             )
         } returns postManeuverFramingPoints
         every {
             getPitchFallbackFromRouteProgress(
                 any(),
-                any()
+                any(),
             )
         } returns pitchFromProgress
         every {
@@ -201,11 +220,9 @@ class MapboxNavigationViewportDataSourceTest {
                 completeRoutePoints,
                 pointsToFrameOnCurrentStep,
                 any(),
-                any()
+                any(),
             )
         } returns remainingPointsOnRoute
-
-        every { route.routeOptions() } returns mockk()
     }
 
     @Test
@@ -225,7 +242,7 @@ class MapboxNavigationViewportDataSourceTest {
                 zoom(viewportDataSource.options.followingFrameOptions.maxZoom)
                 padding(EMPTY_EDGE_INSETS)
             },
-            data.cameraForFollowing
+            data.cameraForFollowing,
         )
 
         assertEquals(
@@ -236,7 +253,7 @@ class MapboxNavigationViewportDataSourceTest {
                 zoom(viewportDataSource.options.overviewFrameOptions.maxZoom)
                 padding(EMPTY_EDGE_INSETS)
             },
-            data.cameraForOverview
+            data.cameraForOverview,
         )
     }
 
@@ -264,9 +281,14 @@ class MapboxNavigationViewportDataSourceTest {
         every {
             mapboxMap.cameraForCoordinates(
                 expectedPoints,
-                EMPTY_EDGE_INSETS,
-                BEARING_NORTH,
-                ZERO_PITCH
+                match<CameraOptions> {
+                    it.pitch == ZERO_PITCH &&
+                        it.bearing == BEARING_NORTH &&
+                        it.padding == EMPTY_EDGE_INSETS
+                },
+                null,
+                null,
+                null,
             )
         } returns overviewCameraOptions
 
@@ -278,11 +300,11 @@ class MapboxNavigationViewportDataSourceTest {
         // verify
         assertEquals(
             followingCameraOptions,
-            data.cameraForFollowing
+            data.cameraForFollowing,
         )
         assertEquals(
             overviewCameraOptions,
-            data.cameraForOverview
+            data.cameraForOverview,
         )
     }
 
@@ -311,9 +333,14 @@ class MapboxNavigationViewportDataSourceTest {
         every {
             mapboxMap.cameraForCoordinates(
                 expectedPoints,
-                EMPTY_EDGE_INSETS,
-                BEARING_NORTH,
-                ZERO_PITCH
+                match<CameraOptions> {
+                    it.pitch == ZERO_PITCH &&
+                        it.bearing == BEARING_NORTH &&
+                        it.padding == EMPTY_EDGE_INSETS
+                },
+                null,
+                null,
+                null,
             )
         } returns overviewCameraOptions
 
@@ -326,11 +353,11 @@ class MapboxNavigationViewportDataSourceTest {
         // verify
         assertEquals(
             followingCameraOptions,
-            data.cameraForFollowing
+            data.cameraForFollowing,
         )
         assertEquals(
             overviewCameraOptions,
-            data.cameraForOverview
+            data.cameraForOverview,
         )
     }
 
@@ -349,7 +376,7 @@ class MapboxNavigationViewportDataSourceTest {
                 padding(EMPTY_EDGE_INSETS)
                 anchor(null)
             },
-            data.cameraForFollowing
+            data.cameraForFollowing,
         )
 
         assertEquals(
@@ -361,7 +388,7 @@ class MapboxNavigationViewportDataSourceTest {
                 padding(EMPTY_EDGE_INSETS)
                 anchor(null)
             },
-            data.cameraForOverview
+            data.cameraForOverview,
         )
     }
 
@@ -379,13 +406,18 @@ class MapboxNavigationViewportDataSourceTest {
         every {
             mapboxMap.cameraForCoordinates(
                 completeRoutePointsFlat,
-                EMPTY_EDGE_INSETS,
-                BEARING_NORTH,
-                ZERO_PITCH
+                match<CameraOptions> {
+                    it.pitch == ZERO_PITCH &&
+                        it.bearing == BEARING_NORTH &&
+                        it.padding == EMPTY_EDGE_INSETS
+                },
+                null,
+                null,
+                null,
             )
         } returns overviewCameraOptions
 
-        viewportDataSource.onRouteChanged(route)
+        viewportDataSource.onRouteChanged(navigationRoute)
         viewportDataSource.evaluate()
         val data = viewportDataSource.getViewportData()
 
@@ -398,12 +430,12 @@ class MapboxNavigationViewportDataSourceTest {
                 padding(EMPTY_EDGE_INSETS)
                 anchor(null)
             },
-            data.cameraForFollowing
+            data.cameraForFollowing,
         )
 
         assertEquals(
             overviewCameraOptions,
-            data.cameraForOverview
+            data.cameraForOverview,
         )
     }
 
@@ -429,7 +461,7 @@ class MapboxNavigationViewportDataSourceTest {
             mapboxMap.cameraForCoordinates(
                 expectedPoints,
                 fallbackOptions,
-                followingScreenBox
+                followingScreenBox,
             )
         } returns followingCameraOptions
 
@@ -445,9 +477,14 @@ class MapboxNavigationViewportDataSourceTest {
         every {
             mapboxMap.cameraForCoordinates(
                 expectedPoints,
-                EMPTY_EDGE_INSETS,
-                BEARING_NORTH,
-                ZERO_PITCH
+                match<CameraOptions> {
+                    it.pitch == ZERO_PITCH &&
+                        it.bearing == BEARING_NORTH &&
+                        it.padding == EMPTY_EDGE_INSETS
+                },
+                null,
+                null,
+                null,
             )
         } returns overviewCameraOptions
 
@@ -461,11 +498,11 @@ class MapboxNavigationViewportDataSourceTest {
         // verify
         assertEquals(
             followingCameraOptions,
-            data.cameraForFollowing
+            data.cameraForFollowing,
         )
         assertEquals(
             overviewCameraOptions,
-            data.cameraForOverview
+            data.cameraForOverview,
         )
     }
 
@@ -501,7 +538,7 @@ class MapboxNavigationViewportDataSourceTest {
             mapboxMap.cameraForCoordinates(
                 expectedFollowingPoints,
                 fallbackOptions,
-                followingScreenBox
+                followingScreenBox,
             )
         } returns followingCameraOptions
 
@@ -520,15 +557,20 @@ class MapboxNavigationViewportDataSourceTest {
         every {
             mapboxMap.cameraForCoordinates(
                 expectedOverviewPoints,
-                EMPTY_EDGE_INSETS,
-                BEARING_NORTH,
-                ZERO_PITCH
+                match<CameraOptions> {
+                    it.pitch == ZERO_PITCH &&
+                        it.bearing == BEARING_NORTH &&
+                        it.padding == EMPTY_EDGE_INSETS
+                },
+                null,
+                null,
+                null,
             )
         } returns overviewCameraOptions
 
         // run
         viewportDataSource.onLocationChanged(location)
-        viewportDataSource.onRouteChanged(route)
+        viewportDataSource.onRouteChanged(navigationRoute)
         viewportDataSource.onRouteProgressChanged(routeProgress)
         viewportDataSource.evaluate()
         val data = viewportDataSource.getViewportData()
@@ -536,11 +578,11 @@ class MapboxNavigationViewportDataSourceTest {
         // verify
         assertEquals(
             followingCameraOptions,
-            data.cameraForFollowing
+            data.cameraForFollowing,
         )
         assertEquals(
             overviewCameraOptions,
-            data.cameraForOverview
+            data.cameraForOverview,
         )
     }
 
@@ -576,7 +618,7 @@ class MapboxNavigationViewportDataSourceTest {
             mapboxMap.cameraForCoordinates(
                 expectedFollowingPoints,
                 fallbackOptions,
-                followingScreenBox
+                followingScreenBox,
             )
         } returns followingCameraOptions
 
@@ -595,29 +637,34 @@ class MapboxNavigationViewportDataSourceTest {
         every {
             mapboxMap.cameraForCoordinates(
                 expectedOverviewPoints,
-                EMPTY_EDGE_INSETS,
-                BEARING_NORTH,
-                ZERO_PITCH
+                match<CameraOptions> {
+                    it.pitch == ZERO_PITCH &&
+                        it.bearing == BEARING_NORTH &&
+                        it.padding == EMPTY_EDGE_INSETS
+                },
+                null,
+                null,
+                null,
             )
         } returns overviewCameraOptions
 
         // run
         viewportDataSource.onLocationChanged(location)
-        viewportDataSource.onRouteChanged(route)
+        viewportDataSource.onRouteChanged(navigationRoute)
         viewportDataSource.onRouteProgressChanged(routeProgress)
         viewportDataSource.evaluate()
-        viewportDataSource.onRouteChanged(route)
+        viewportDataSource.onRouteChanged(navigationRoute)
         viewportDataSource.evaluate()
         val data = viewportDataSource.getViewportData()
 
         // verify
         assertEquals(
             followingCameraOptions,
-            data.cameraForFollowing
+            data.cameraForFollowing,
         )
         assertEquals(
             overviewCameraOptions,
-            data.cameraForOverview
+            data.cameraForOverview,
         )
     }
 
@@ -650,9 +697,14 @@ class MapboxNavigationViewportDataSourceTest {
         every {
             mapboxMap.cameraForCoordinates(
                 expectedFollowingPoints,
-                EMPTY_EDGE_INSETS,
-                smoothedBearing,
-                ZERO_PITCH
+                match<CameraOptions> {
+                    it.pitch == ZERO_PITCH &&
+                        it.bearing == smoothedBearing &&
+                        it.padding == EMPTY_EDGE_INSETS
+                },
+                null,
+                null,
+                null,
             )
         } returns followingCameraOptions
 
@@ -671,15 +723,20 @@ class MapboxNavigationViewportDataSourceTest {
         every {
             mapboxMap.cameraForCoordinates(
                 expectedOverviewPoints,
-                EMPTY_EDGE_INSETS,
-                BEARING_NORTH,
-                ZERO_PITCH
+                match<CameraOptions> {
+                    it.pitch == ZERO_PITCH &&
+                        it.bearing == BEARING_NORTH &&
+                        it.padding == EMPTY_EDGE_INSETS
+                },
+                null,
+                null,
+                null,
             )
         } returns overviewCameraOptions
 
         // run
         viewportDataSource.onLocationChanged(location)
-        viewportDataSource.onRouteChanged(route)
+        viewportDataSource.onRouteChanged(navigationRoute)
         viewportDataSource.onRouteProgressChanged(routeProgress)
         viewportDataSource.followingPitchPropertyOverride(ZERO_PITCH)
         viewportDataSource.evaluate()
@@ -688,11 +745,11 @@ class MapboxNavigationViewportDataSourceTest {
         // verify
         assertEquals(
             followingCameraOptions,
-            data.cameraForFollowing
+            data.cameraForFollowing,
         )
         assertEquals(
             overviewCameraOptions,
-            data.cameraForOverview
+            data.cameraForOverview,
         )
     }
 
@@ -729,7 +786,7 @@ class MapboxNavigationViewportDataSourceTest {
             mapboxMap.cameraForCoordinates(
                 expectedFollowingPoints,
                 fallbackOptions,
-                followingScreenBox
+                followingScreenBox,
             )
         } returns followingCameraOptions
 
@@ -748,9 +805,14 @@ class MapboxNavigationViewportDataSourceTest {
         every {
             mapboxMap.cameraForCoordinates(
                 expectedOverviewPoints,
-                EMPTY_EDGE_INSETS,
-                BEARING_NORTH,
-                ZERO_PITCH
+                match<CameraOptions> {
+                    it.pitch == ZERO_PITCH &&
+                        it.bearing == BEARING_NORTH &&
+                        it.padding == EMPTY_EDGE_INSETS
+                },
+                null,
+                null,
+                null,
             )
         } returns overviewCameraOptions
 
@@ -758,7 +820,7 @@ class MapboxNavigationViewportDataSourceTest {
         viewportDataSource.options.followingFrameOptions
             .maximizeViewableGeometryWhenPitchZero = false
         viewportDataSource.onLocationChanged(location)
-        viewportDataSource.onRouteChanged(route)
+        viewportDataSource.onRouteChanged(navigationRoute)
         viewportDataSource.onRouteProgressChanged(routeProgress)
         viewportDataSource.followingPitchPropertyOverride(ZERO_PITCH)
         viewportDataSource.evaluate()
@@ -767,11 +829,11 @@ class MapboxNavigationViewportDataSourceTest {
         // verify
         assertEquals(
             followingCameraOptions,
-            data.cameraForFollowing
+            data.cameraForFollowing,
         )
         assertEquals(
             overviewCameraOptions,
-            data.cameraForOverview
+            data.cameraForOverview,
         )
     }
 
@@ -804,7 +866,7 @@ class MapboxNavigationViewportDataSourceTest {
             mapboxMap.cameraForCoordinates(
                 pointsForInitialFollowingFrame,
                 any<CameraOptions>(),
-                any()
+                any(),
             )
         } returns mockk(relaxed = true)
 
@@ -817,8 +879,9 @@ class MapboxNavigationViewportDataSourceTest {
             mapboxMap.cameraForCoordinates(
                 pointsForInitialOverviewFrame,
                 any(),
-                any(),
-                any()
+                null,
+                null,
+                null,
             )
         } returns mockk(relaxed = true)
         val expectedPoints = listOf(location.toPoint())
@@ -831,15 +894,20 @@ class MapboxNavigationViewportDataSourceTest {
         every {
             mapboxMap.cameraForCoordinates(
                 expectedPoints,
-                EMPTY_EDGE_INSETS,
-                BEARING_NORTH,
-                ZERO_PITCH
+                match<CameraOptions> {
+                    it.pitch == ZERO_PITCH &&
+                        it.bearing == BEARING_NORTH &&
+                        it.padding == EMPTY_EDGE_INSETS
+                },
+                null,
+                null,
+                null,
             )
         } returns overviewCameraOptions
 
         // run
         viewportDataSource.onLocationChanged(location)
-        viewportDataSource.onRouteChanged(route)
+        viewportDataSource.onRouteChanged(navigationRoute)
         viewportDataSource.onRouteProgressChanged(routeProgress)
         viewportDataSource.evaluate()
         viewportDataSource.clearRouteData()
@@ -849,11 +917,11 @@ class MapboxNavigationViewportDataSourceTest {
         // verify
         assertEquals(
             followingCameraOptions,
-            data.cameraForFollowing
+            data.cameraForFollowing,
         )
         assertEquals(
             overviewCameraOptions,
-            data.cameraForOverview
+            data.cameraForOverview,
         )
     }
 
@@ -880,8 +948,9 @@ class MapboxNavigationViewportDataSourceTest {
             mapboxMap.cameraForCoordinates(
                 pointsForInitialFollowingFrame,
                 any(),
-                any(),
-                any()
+                null,
+                null,
+                null,
             )
         } returns mockk(relaxed = true)
         val followingCameraOptions = createCameraOptions {
@@ -901,8 +970,9 @@ class MapboxNavigationViewportDataSourceTest {
             mapboxMap.cameraForCoordinates(
                 pointsForInitialOverviewFrame,
                 any(),
-                any(),
-                any()
+                null,
+                null,
+                null,
             )
         } returns mockk(relaxed = true)
         val expectedPoints = listOf(location.toPoint())
@@ -915,15 +985,20 @@ class MapboxNavigationViewportDataSourceTest {
         every {
             mapboxMap.cameraForCoordinates(
                 expectedPoints,
-                EMPTY_EDGE_INSETS,
-                BEARING_NORTH,
-                ZERO_PITCH
+                match<CameraOptions> {
+                    it.pitch == ZERO_PITCH &&
+                        it.bearing == BEARING_NORTH &&
+                        it.padding == EMPTY_EDGE_INSETS
+                },
+                null,
+                null,
+                null,
             )
         } returns overviewCameraOptions
 
         // run
         viewportDataSource.onLocationChanged(location)
-        viewportDataSource.onRouteChanged(route)
+        viewportDataSource.onRouteChanged(navigationRoute)
         viewportDataSource.onRouteProgressChanged(routeProgress)
         viewportDataSource.followingPitchPropertyOverride(ZERO_PITCH)
         viewportDataSource.evaluate()
@@ -934,11 +1009,11 @@ class MapboxNavigationViewportDataSourceTest {
         // verify
         assertEquals(
             followingCameraOptions,
-            data.cameraForFollowing
+            data.cameraForFollowing,
         )
         assertEquals(
             overviewCameraOptions,
-            data.cameraForOverview
+            data.cameraForOverview,
         )
     }
 
@@ -976,7 +1051,7 @@ class MapboxNavigationViewportDataSourceTest {
             mapboxMap.cameraForCoordinates(
                 expectedFollowingPoints,
                 fallbackOptions,
-                followingScreenBox
+                followingScreenBox,
             )
         } returns followingCameraOptions
 
@@ -996,9 +1071,14 @@ class MapboxNavigationViewportDataSourceTest {
         every {
             mapboxMap.cameraForCoordinates(
                 expectedOverviewPoints,
-                overviewPadding,
-                BEARING_NORTH,
-                ZERO_PITCH
+                match<CameraOptions> {
+                    it.pitch == ZERO_PITCH &&
+                        it.bearing == BEARING_NORTH &&
+                        it.padding == overviewPadding
+                },
+                null,
+                null,
+                null,
             )
         } returns overviewCameraOptions
 
@@ -1006,7 +1086,7 @@ class MapboxNavigationViewportDataSourceTest {
         viewportDataSource.followingPadding = followingPadding
         viewportDataSource.overviewPadding = overviewPadding
         viewportDataSource.onLocationChanged(location)
-        viewportDataSource.onRouteChanged(route)
+        viewportDataSource.onRouteChanged(navigationRoute)
         viewportDataSource.onRouteProgressChanged(routeProgress)
         viewportDataSource.evaluate()
         val data = viewportDataSource.getViewportData()
@@ -1014,11 +1094,11 @@ class MapboxNavigationViewportDataSourceTest {
         // verify
         assertEquals(
             followingCameraOptions,
-            data.cameraForFollowing
+            data.cameraForFollowing,
         )
         assertEquals(
             overviewCameraOptions,
-            data.cameraForOverview
+            data.cameraForOverview,
         )
         verify { getScreenBoxForFraming(mapSize, followingPadding) }
     }
@@ -1064,19 +1144,24 @@ class MapboxNavigationViewportDataSourceTest {
         every {
             mapboxMap.cameraForCoordinates(
                 expectedOverviewFramingPoints,
-                EMPTY_EDGE_INSETS,
-                BEARING_NORTH,
-                ZERO_PITCH
+                match<CameraOptions> {
+                    it.pitch == ZERO_PITCH &&
+                        it.bearing == BEARING_NORTH &&
+                        it.padding == EMPTY_EDGE_INSETS
+                },
+                null,
+                null,
+                null,
             )
         } returns overviewCameraOptions
 
         // run
         viewportDataSource.onLocationChanged(location)
-        viewportDataSource.onRouteChanged(route)
+        viewportDataSource.onRouteChanged(navigationRoute)
         viewportDataSource.onRouteProgressChanged(routeProgress)
         mockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
         every { route.isSameRoute(any()) } returns false
-        viewportDataSource.onRouteChanged(route)
+        viewportDataSource.onRouteChanged(navigationRoute)
         unmockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
         viewportDataSource.evaluate()
         val data = viewportDataSource.getViewportData()
@@ -1084,11 +1169,11 @@ class MapboxNavigationViewportDataSourceTest {
         // verify
         assertEquals(
             followingCameraOptions,
-            data.cameraForFollowing
+            data.cameraForFollowing,
         )
         assertEquals(
             overviewCameraOptions,
-            data.cameraForOverview
+            data.cameraForOverview,
         )
     }
 
@@ -1133,15 +1218,20 @@ class MapboxNavigationViewportDataSourceTest {
         every {
             mapboxMap.cameraForCoordinates(
                 expectedOverviewFramingPoints,
-                EMPTY_EDGE_INSETS,
-                BEARING_NORTH,
-                ZERO_PITCH
+                match<CameraOptions> {
+                    it.pitch == ZERO_PITCH &&
+                        it.bearing == BEARING_NORTH &&
+                        it.padding == EMPTY_EDGE_INSETS
+                },
+                null,
+                null,
+                null,
             )
         } returns overviewCameraOptions
 
         // run
         viewportDataSource.onLocationChanged(location)
-        viewportDataSource.onRouteChanged(route)
+        viewportDataSource.onRouteChanged(navigationRoute)
         viewportDataSource.onRouteProgressChanged(routeProgress)
 
         mockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
@@ -1155,11 +1245,11 @@ class MapboxNavigationViewportDataSourceTest {
         // verify
         assertEquals(
             followingCameraOptions,
-            data.cameraForFollowing
+            data.cameraForFollowing,
         )
         assertEquals(
             overviewCameraOptions,
-            data.cameraForOverview
+            data.cameraForOverview,
         )
     }
 
@@ -1195,9 +1285,14 @@ class MapboxNavigationViewportDataSourceTest {
         every {
             mapboxMap.cameraForCoordinates(
                 expectedPoints,
-                EMPTY_EDGE_INSETS,
-                overviewBearing,
-                overviewPitch
+                match<CameraOptions> {
+                    it.pitch == overviewPitch &&
+                        it.bearing == overviewBearing &&
+                        it.padding == EMPTY_EDGE_INSETS
+                },
+                null,
+                null,
+                null,
             )
         } returns overviewCameraOptions
 
@@ -1217,28 +1312,101 @@ class MapboxNavigationViewportDataSourceTest {
         // verify
         assertEquals(
             followingCameraOptions,
-            data.cameraForFollowing
+            data.cameraForFollowing,
         )
         assertEquals(
             overviewCameraOptions,
-            data.cameraForOverview
+            data.cameraForOverview,
         )
+    }
+
+    @Test
+    fun `viewport data changed only when map size is ready`() {
+        val callbackSlot = slot<(CameraOptions) -> Unit>()
+        every {
+            mapboxMap.cameraForCoordinates(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                capture(callbackSlot),
+            )
+        } returns Unit
+
+        val initialViewportData = viewportDataSource.getViewportData()
+
+        viewportDataSource.additionalPointsToFrameForOverview(listOf(Point.fromLngLat(10.0, 20.0)))
+        viewportDataSource.evaluate()
+
+        assertEquals(initialViewportData, viewportDataSource.getViewportData())
+
+        callbackSlot.captured.invoke(mockk())
+
+        assertNotEquals(initialViewportData, viewportDataSource.getViewportData())
+    }
+
+    @Test
+    fun `viewport data does not change while map size is not ready`() {
+        every {
+            mapboxMap.cameraForCoordinates(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } answers {
+            // do nothing, callback is not called
+        }
+
+        val initialViewportData = viewportDataSource.getViewportData()
+
+        viewportDataSource.additionalPointsToFrameForOverview(listOf(Point.fromLngLat(10.0, 20.0)))
+        viewportDataSource.evaluate()
+
+        assertEquals(initialViewportData, viewportDataSource.getViewportData())
+    }
+
+    @Test
+    fun `viewport data does not change if map size is ready after clearRouteData() called`() {
+        val callbackSlot = slot<(CameraOptions) -> Unit>()
+        every {
+            mapboxMap.cameraForCoordinates(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                capture(callbackSlot),
+            )
+        } returns Unit
+
+        val initialViewportData = viewportDataSource.getViewportData()
+
+        viewportDataSource.additionalPointsToFrameForOverview(listOf(Point.fromLngLat(10.0, 20.0)))
+        viewportDataSource.evaluate()
+        viewportDataSource.clearRouteData()
+
+        callbackSlot.captured.invoke(mockk())
+
+        assertEquals(initialViewportData, viewportDataSource.getViewportData())
     }
 
     @After
     fun tearDown() {
         unmockkObject(ViewportDataSourceProcessor)
-        unmockkStatic("com.mapbox.navigation.base.route.NavigationRouteEx")
     }
 
     private fun createLocation(
         lat: Double = 10.0,
         lng: Double = 20.0,
-        bear: Double = 30.0
+        bear: Double = 30.0,
     ) = mockk<Location> {
         every { latitude } returns lat
         every { longitude } returns lng
-        every { bearing } returns bear.toFloat()
+        every { bearing } returns bear
     }
 
     private fun createCameraOptions(block: CameraOptions.Builder.() -> Unit): CameraOptions {

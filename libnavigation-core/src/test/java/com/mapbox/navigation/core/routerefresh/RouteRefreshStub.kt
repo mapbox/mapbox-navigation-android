@@ -1,19 +1,17 @@
 package com.mapbox.navigation.core.routerefresh
 
-import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.route.NavigationRouterRefreshCallback
-import com.mapbox.navigation.base.route.RouterFactory.buildNavigationRouterRefreshError
 import com.mapbox.navigation.core.directions.session.RouteRefresh
+import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshCallback
+import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshError
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createNavigationRoute
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Test
 
-@OptIn(ExperimentalMapboxNavigationAPI::class)
-class RouteRefreshStub : RouteRefresh {
+internal class RouteRefreshStub : RouteRefresh {
 
     private var requestId = 0L
     private val handlers = mutableMapOf<String, RouteRefreshHandler>()
@@ -21,14 +19,14 @@ class RouteRefreshStub : RouteRefresh {
     override fun requestRouteRefresh(
         route: NavigationRoute,
         routeRefreshRequestData: RouteRefreshRequestData,
-        callback: NavigationRouterRefreshCallback
+        callback: NavigationRouterRefreshCallback,
     ): Long {
         val currentRequestId = requestId++
         val handler = handlers[route.id]
         if (handler != null) {
             handler(route, routeRefreshRequestData, callback)
         } else {
-            callback.onFailure(buildNavigationRouterRefreshError("handle isn't configured yet"))
+            callback.onFailure(NavigationRouterRefreshError("handle isn't configured yet"))
         }
 
         return currentRequestId
@@ -42,7 +40,7 @@ class RouteRefreshStub : RouteRefresh {
      */
     fun setRefreshedRoute(
         refreshedRoute: NavigationRoute,
-        expectedRefreshRequestData: RouteRefreshRequestData? = null
+        expectedRefreshRequestData: RouteRefreshRequestData? = null,
     ) {
         handlers[refreshedRoute.id] = { _, refreshRequestData, callback ->
             if (expectedRefreshRequestData == null ||
@@ -53,7 +51,7 @@ class RouteRefreshStub : RouteRefresh {
             } else {
                 throw IllegalArgumentException(
                     "Expected refresh data to be $expectedRefreshRequestData " +
-                        "but was $refreshRequestData"
+                        "but was $refreshRequestData",
                 )
             }
         }
@@ -65,9 +63,9 @@ class RouteRefreshStub : RouteRefresh {
     fun failRouteRefresh(navigationRouteId: String) {
         handlers[navigationRouteId] = { _, _, callback ->
             callback.onFailure(
-                buildNavigationRouterRefreshError(
-                    "Failed by RouteRefreshStub#failPendingRefreshRequest"
-                )
+                NavigationRouterRefreshError(
+                    "Failed by RouteRefreshStub#failPendingRefreshRequest",
+                ),
             )
         }
     }
@@ -80,7 +78,7 @@ class RouteRefreshStub : RouteRefresh {
 private typealias RouteRefreshHandler = (
     route: NavigationRoute,
     routeRefreshRequestData: RouteRefreshRequestData,
-    callback: NavigationRouterRefreshCallback
+    callback: NavigationRouterRefreshCallback,
 ) -> Unit
 
 class RouteRefreshStubTest {
@@ -93,7 +91,7 @@ class RouteRefreshStubTest {
         stub.requestRouteRefresh(
             createNavigationRoute(),
             RouteRefreshRequestData(0, 0, null, emptyMap()),
-            callback
+            callback,
         )
 
         verify(exactly = 1) { callback.onFailure(any()) }
@@ -106,14 +104,14 @@ class RouteRefreshStubTest {
         val originalRoute = createNavigationRoute(
             createDirectionsRoute(
                 duration = 1.0,
-                requestUuid = "test"
-            )
+                requestUuid = "test",
+            ),
         )
         val refreshed = createNavigationRoute(
             createDirectionsRoute(
                 duration = 2.0,
-                requestUuid = "test"
-            )
+                requestUuid = "test",
+            ),
         )
         stub.setRefreshedRoute(refreshed)
 
@@ -121,7 +119,7 @@ class RouteRefreshStubTest {
         stub.requestRouteRefresh(
             originalRoute,
             RouteRefreshRequestData(0, 0, null, emptyMap()),
-            callback
+            callback,
         )
 
         verify(exactly = 1) { callback.onRefreshReady(refreshed) }
@@ -135,14 +133,14 @@ class RouteRefreshStubTest {
         val originalRoute = createNavigationRoute(
             createDirectionsRoute(
                 duration = 1.0,
-                requestUuid = "test"
-            )
+                requestUuid = "test",
+            ),
         )
         val refreshed = createNavigationRoute(
             createDirectionsRoute(
                 duration = 2.0,
-                requestUuid = "test"
-            )
+                requestUuid = "test",
+            ),
         )
         stub.setRefreshedRoute(refreshed, requestData)
 
@@ -150,7 +148,7 @@ class RouteRefreshStubTest {
         stub.requestRouteRefresh(
             originalRoute,
             requestData,
-            callback
+            callback,
         )
 
         verify(exactly = 1) { callback.onRefreshReady(refreshed) }
@@ -164,14 +162,14 @@ class RouteRefreshStubTest {
         val originalRoute = createNavigationRoute(
             createDirectionsRoute(
                 duration = 1.0,
-                requestUuid = "test"
-            )
+                requestUuid = "test",
+            ),
         )
         val refreshed = createNavigationRoute(
             createDirectionsRoute(
                 duration = 2.0,
-                requestUuid = "test"
-            )
+                requestUuid = "test",
+            ),
         )
         stub.setRefreshedRoute(refreshed, expectedRequestData)
 
@@ -179,7 +177,7 @@ class RouteRefreshStubTest {
         stub.requestRouteRefresh(
             originalRoute,
             RouteRefreshRequestData(1, 2, 3, emptyMap()),
-            callback
+            callback,
         )
 
         verify(exactly = 0) { callback.onRefreshReady(refreshed) }
@@ -189,7 +187,7 @@ class RouteRefreshStubTest {
     @Test
     fun `refresh fails if stub was asked for`() {
         val testRoute = createNavigationRoute(
-            createDirectionsRoute(requestUuid = "test-fail")
+            createDirectionsRoute(requestUuid = "test-fail"),
         )
         val stub = RouteRefreshStub().apply {
             setRefreshedRoute(testRoute) // make sure that it overrides old setup
@@ -200,7 +198,7 @@ class RouteRefreshStubTest {
         stub.requestRouteRefresh(
             testRoute,
             RouteRefreshRequestData(0, 0, null, emptyMap()),
-            callback
+            callback,
         )
 
         verify(exactly = 1) { callback.onFailure(any()) }
@@ -210,7 +208,7 @@ class RouteRefreshStubTest {
     @Test
     fun `refresh won't respond if stub was asked for`() {
         val testRoute = createNavigationRoute(
-            createDirectionsRoute(requestUuid = "test-fail")
+            createDirectionsRoute(requestUuid = "test-fail"),
         )
         val stub = RouteRefreshStub().apply {
             setRefreshedRoute(testRoute) // make sure that it overrides old setup
@@ -221,7 +219,7 @@ class RouteRefreshStubTest {
         stub.requestRouteRefresh(
             testRoute,
             RouteRefreshRequestData(0, 0, null, emptyMap()),
-            callback
+            callback,
         )
 
         verify(exactly = 0) { callback.onFailure(any()) }

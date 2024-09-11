@@ -1,0 +1,188 @@
+package com.mapbox.navigation.base.options
+
+import androidx.annotation.StringDef
+import com.mapbox.common.location.AccuracyLevel
+import com.mapbox.common.location.DeviceLocationProviderFactory
+import com.mapbox.common.location.IntervalSettings
+import com.mapbox.common.location.LocationProvider
+import com.mapbox.common.location.LocationProviderRequest
+
+/**
+ * Location updates related config.
+ *
+ * @param request [LocationProviderRequest] that will be used for creating [LocationProvider].
+ * @param locationProviderFactory a lambda that creates custom location provider based on a request.
+ *  If not set, default location provider is used.
+ *  Note that locationProviderFactory can only be set together with an explicit locationProviderType.
+ * @param locationProviderType set together with custom locationProviderFactory.
+ *  This parameters tells the SDK what is the nature of locations that custom location provider will emit.
+ *  Can be one of the values listed in [LocationProviderType.Type].
+ */
+class LocationOptions private constructor(
+    val request: LocationProviderRequest,
+    val locationProviderFactory: DeviceLocationProviderFactory?,
+    @LocationProviderType.Type val locationProviderType: String,
+) {
+
+    /**
+     * Type of a location provider.
+     */
+    object LocationProviderType {
+
+        /**
+         * Location provider emits only real locations, where the device actually is.
+         */
+        const val REAL = "REAL"
+
+        /**
+         * Location provider emits only mocked locations.
+         * Used for cases with location simulations, replay, etc.
+         * Note that the locations emitted by a location provider with type "mocked" must have isMock extra set to true.
+         * To set this flag, use:
+         * ```
+         * Location.Builder#extra(Value.valueOf(hashMapOf(LocationExtraKeys.IS_MOCK to Value.valueOf(true))))
+         * ```
+         */
+        const val MOCKED = "MOCKED"
+
+        /**
+         * Location provider emits both mocked and real locations.
+         * Used for cases when you need to switch location providers in runtime,
+         * for example, if you have a toggle that enables/disables location simulation.
+         * Note that mocked locations emitted by a location provider with type "mixed" must have isMock extra set to true,
+         * while real locations must have it set to false or not set at all.
+         * To set this flag, use:
+         * ```
+         * Location.Builder#extra(Value.valueOf(hashMapOf(LocationExtraKeys.IS_MOCK to Value.valueOf(true/false))))
+         * ```
+         */
+        const val MIXED = "MIXED"
+
+        internal val acceptedValues = setOf(REAL, MOCKED, MIXED)
+
+        /**
+         * Possible values of location provider type.
+         */
+        @Retention(AnnotationRetention.BINARY)
+        @StringDef(
+            REAL,
+            MOCKED,
+            MIXED,
+        )
+        annotation class Type
+    }
+
+    companion object {
+
+        /**
+         * Default [LocationProviderRequest] that NavSDK uses if no custom request was specified.
+         */
+        val DEFAULT_REQUEST = LocationProviderRequest.Builder()
+            .interval(
+                IntervalSettings.Builder()
+                    .minimumInterval(500L)
+                    .interval(1000L)
+                    .build(),
+            )
+            .accuracy(AccuracyLevel.HIGH)
+            .build()
+    }
+
+    /**
+     * A builder class for [LocationOptions].
+     */
+    class Builder {
+
+        @LocationProviderType.Type
+        private var locationProviderType: String = LocationProviderType.REAL
+
+        private var request = DEFAULT_REQUEST
+        private var locationProviderFactory: DeviceLocationProviderFactory? = null
+
+        /**
+         * Set [LocationProviderRequest] that will be used for creating [LocationProvider].
+         * If not set, default request will be used (see [DEFAULT_REQUEST]).
+         *
+         * @param request [LocationProviderRequest]
+         * @return the same builder
+         */
+        fun request(request: LocationProviderRequest): Builder =
+            apply { this.request = request }
+
+        /**
+         * Set custom location provider implementation.
+         *
+         * @param locationProviderFactory a lambda that creates custom location provider based on a request.
+         *  If not set, default location provider is used.
+         *  Note that locations emitted by a custom location provider must set a valid value for isMock extra flag:
+         *  real locations must have it set to false or not set at all, while mocked/simulated locations must have it set to true.
+         *  Every location object specifies this flag, so if your location provider's type is [LocationProviderType.MIXED],
+         *  emitted locations will just have different flag values, depending on whether they are real or mocked.
+         * To set this flag, use:
+         * ```
+         * Location.Builder#extra(Value.valueOf(hashMapOf(LocationExtraKeys.IS_MOCK to Value.valueOf(true/false))))
+         * ```
+         * @param locationProviderType this parameters tells the SDK what is the nature of locations that custom location provider will emit.
+         *  Can be one of the values listed in [LocationProviderType.Type].
+         *
+         * @return the same builder
+         */
+        fun locationProviderFactory(
+            locationProviderFactory: DeviceLocationProviderFactory,
+            @LocationProviderType.Type locationProviderType: String,
+        ): Builder = apply {
+            if (locationProviderType !in LocationProviderType.acceptedValues) {
+                throw IllegalArgumentException(
+                    "locationProviderType should be one of: " +
+                        "[${LocationProviderType.acceptedValues}], but was $locationProviderType",
+                )
+            }
+            this.locationProviderFactory = locationProviderFactory
+            this.locationProviderType = locationProviderType
+        }
+
+        /**
+         * Build [LocationOptions] object.
+         */
+        fun build(): LocationOptions {
+            return LocationOptions(request, locationProviderFactory, locationProviderType)
+        }
+    }
+
+    /**
+     * Indicates whether some other object is "equal to" this one.
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as LocationOptions
+
+        if (request != other.request) return false
+        if (locationProviderFactory != other.locationProviderFactory) return false
+        if (locationProviderType != other.locationProviderType) return false
+
+        return true
+    }
+
+    /**
+     * Returns a hash code value for the object.
+     */
+    override fun hashCode(): Int {
+        var result = request.hashCode()
+        result = 31 * result + (locationProviderFactory?.hashCode() ?: 0)
+        result = 31 * result + locationProviderType.hashCode()
+        return result
+    }
+
+    /**
+     * Returns a string representation of the object.
+     */
+    override fun toString(): String {
+        return "LocationOptions(" +
+            "request=$request, " +
+            "locationProviderFactory=$locationProviderFactory, " +
+            "locationProviderType='$locationProviderType'" +
+            ")"
+    }
+}

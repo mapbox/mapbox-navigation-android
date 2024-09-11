@@ -17,7 +17,7 @@ class TimeParserTest {
             22,
             12,
             11,
-            34
+            34,
         )
         assertEquals(expectedDate, date)
     }
@@ -32,7 +32,7 @@ class TimeParserTest {
             15,
             13,
             0,
-            0
+            0,
         )
         assertEquals(expectedDate.time, date.time)
     }

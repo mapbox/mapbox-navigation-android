@@ -18,7 +18,7 @@ import kotlin.math.roundToLong
  * @param replayEvents events needed to be replayed by [MapboxReplayer]
  */
 internal class ReplayEventSimulator(
-    private val replayEvents: ReplayEvents
+    private val replayEvents: ReplayEvents,
 ) {
     private val jobControl = InternalJobControlFactory.createMainScopeJobControl()
 

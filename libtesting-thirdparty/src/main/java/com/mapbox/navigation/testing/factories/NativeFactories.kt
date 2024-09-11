@@ -8,7 +8,9 @@ import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.BannerSection
 import com.mapbox.navigator.CorrectedLocationData
 import com.mapbox.navigator.FixLocation
+import com.mapbox.navigator.HdMatchingResult
 import com.mapbox.navigator.MapMatcherOutput
+import com.mapbox.navigator.MapboxAPI
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.OffRoadStateProvider
 import com.mapbox.navigator.RoadName
@@ -42,6 +44,7 @@ fun createNavigationStatus(
     isFallback: Boolean = false,
     isTunnel: Boolean = false,
     isParkingAisle: Boolean = false,
+    isRoundabout: Boolean = false,
     predicted: Long = 0,
     geometryIndex: Int = 0,
     shapeIndex: Int = 0,
@@ -62,7 +65,8 @@ fun createNavigationStatus(
     alternativeRouteIndices: List<RouteIndices> = emptyList(),
     isSyntheticLocation: Boolean = false,
     correctedLocationData: CorrectedLocationData? = null,
-    mapMatchedSystemTime: Date = Date(),
+    hdMatchingResult: HdMatchingResult? = null,
+    mapMatchedSystemTime: Date = Date()
 ): NavigationStatus {
     return NavigationStatus(
         routeState,
@@ -76,6 +80,7 @@ fun createNavigationStatus(
         isFallback,
         isTunnel,
         isParkingAisle,
+        isRoundabout,
         predicted,
         geometryIndex,
         shapeIndex,
@@ -95,6 +100,7 @@ fun createNavigationStatus(
         layer,
         isSyntheticLocation,
         correctedLocationData,
+        hdMatchingResult,
         mapMatchedSystemTime,
     )
 }
@@ -187,9 +193,9 @@ fun createRouteInterface(
     routerOrigin: RouterOrigin = RouterOrigin.ONLINE,
     routeInfo: RouteInfo = RouteInfo(emptyList()),
     waypoints: List<Waypoint> = emptyList(),
-    waypointsJson: String = "",
     expirationTimeMs: Long? = null,
     lastRefreshTimestamp: Date? = null,
+    routeGeometry: List<Point> = emptyList(),
 ): RouteInterface = object : RouteInterface {
 
     override fun getRouteId() = "$responseUuid#$routeIndex"
@@ -206,6 +212,8 @@ fun createRouteInterface(
 
     override fun getRouterOrigin() = routerOrigin
 
+    override fun getMapboxAPI() = MapboxAPI.DIRECTIONS
+
     override fun getRouteInfo() = routeInfo
 
     override fun getWaypoints() = waypoints
@@ -213,24 +221,24 @@ fun createRouteInterface(
     override fun getExpirationTimeMs(): Long? = expirationTimeMs
 
     override fun getLastRefreshTimestamp(): Date? = lastRefreshTimestamp
+
+    override fun getRouteGeometry() = routeGeometry
 }
 
 fun String.toDataRef(): DataRef {
-    val responseBytes = encodeToByteArray()
-    val buffer = ByteBuffer.allocateDirect(responseBytes.size)
-    buffer.put(responseBytes)
+    val bytes = encodeToByteArray()
+    val buffer = ByteBuffer.allocateDirect(bytes.size)
+    buffer.put(bytes)
     return DataRef(buffer)
 }
 
 fun createRouterError(
     message: String = "test error",
-    code: Int = 0,
     type: RouterErrorType = RouterErrorType.UNKNOWN,
     requestId: Long = 0L,
     refreshTtl: Int? = null
 ) = RouterError(
     message,
-    code,
     type,
     requestId,
     refreshTtl

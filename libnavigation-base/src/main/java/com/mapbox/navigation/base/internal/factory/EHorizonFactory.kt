@@ -71,14 +71,14 @@ object EHorizonFactory {
         graphPosition.mapToNativeGraphPosition()
 
     fun buildNativeMatchableOpenLr(
-        matchable: MatchableOpenLr
+        matchable: MatchableOpenLr,
     ) = matchable.mapToNativeMatchableOpenLr()
 
     fun buildNativeMatchableGeometry(
-        matchable: MatchableGeometry
+        matchable: MatchableGeometry,
     ) = matchable.mapToNativeMatchableGeometry()
 
     fun buildNativeMatchablePoint(
-        matchable: MatchablePoint
+        matchable: MatchablePoint,
     ) = matchable.mapToNativeMatchablePoint()
 }

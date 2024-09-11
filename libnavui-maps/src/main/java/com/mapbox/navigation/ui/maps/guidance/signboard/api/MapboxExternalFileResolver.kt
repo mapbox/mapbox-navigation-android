@@ -11,7 +11,7 @@ import com.mapbox.navigation.utils.internal.logE
  * See [resolveFont].
  */
 open class MapboxExternalFileResolver(
-    private val assetManager: AssetManager
+    private val assetManager: AssetManager,
 ) : SVGExternalFileResolver() {
 
     /**
@@ -52,7 +52,7 @@ open class MapboxExternalFileResolver(
         } catch (exception: RuntimeException) {
             logE(
                 "exception: $exception",
-                LOG_CATEGORY
+                LOG_CATEGORY,
             )
         }
 
@@ -61,7 +61,7 @@ open class MapboxExternalFileResolver(
         } catch (exception: RuntimeException) {
             logE(
                 "exception: $exception",
-                LOG_CATEGORY
+                LOG_CATEGORY,
             )
             null
         }
@@ -71,7 +71,7 @@ open class MapboxExternalFileResolver(
         fontFamily: String?,
         fontWeight: Int,
         fontStyle: String?,
-        typefaceType: String
+        typefaceType: String,
     ): Typeface {
         val style = fontStyle?.let { s ->
             return@let when {

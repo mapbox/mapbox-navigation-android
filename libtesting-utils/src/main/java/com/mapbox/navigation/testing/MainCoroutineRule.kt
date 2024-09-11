@@ -8,6 +8,7 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.rules.TestRule
 import org.junit.runner.Description
@@ -42,5 +43,5 @@ class MainCoroutineRule : TestRule {
     }
 
     fun runBlockingTest(block: suspend TestCoroutineScope.() -> Unit) =
-        coroutineScope.runBlockingTest { block() }
+        coroutineScope.runTest { block() }
 }

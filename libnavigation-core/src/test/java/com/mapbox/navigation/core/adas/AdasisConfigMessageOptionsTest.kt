@@ -4,7 +4,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.testing.BuilderTest
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class AdasisConfigMessageOptionsTest :
+internal class AdasisConfigMessageOptionsTest :
     BuilderTest<AdasisConfigMessageOptions, AdasisConfigMessageOptions.Builder>() {
 
     override fun getImplementationClass() = AdasisConfigMessageOptions::class

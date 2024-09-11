@@ -12,7 +12,7 @@ internal class NativeRoutesDataParser : RoutesDataParser {
         withContext(ThreadController.DefaultDispatcher) {
             RouteParser.createRoutesData(
                 routes.first().nativeRoute(),
-                routes.drop(1).map { it.nativeRoute() }
+                routes.drop(1).map { it.nativeRoute() },
             )
         }
 }

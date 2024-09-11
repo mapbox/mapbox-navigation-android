@@ -9,7 +9,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * @param profileOptions options for each type of profile long message
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class AdasisProfileLongOptions private constructor(
+internal class AdasisProfileLongOptions private constructor(
     val options: AdasisConfigMessageOptions,
     val profileOptions: AdasisConfigProfileLongTypeOptions,
 ) {
@@ -25,7 +25,7 @@ class AdasisProfileLongOptions private constructor(
     internal fun toNativeProfileLong(): com.mapbox.navigator.Profilelong {
         return com.mapbox.navigator.Profilelong(
             options.toNativeAdasisConfigMessageOptions(),
-            profileOptions.toNativeAdasisConfigProfileLongTypeOptions()
+            profileOptions.toNativeAdasisConfigProfileLongTypeOptions(),
         )
     }
 
@@ -69,14 +69,14 @@ class AdasisProfileLongOptions private constructor(
         /**
          * Common options for profile long message
          */
-        fun options(options: AdasisConfigMessageOptions) = apply {
+        fun options(options: AdasisConfigMessageOptions): Builder = apply {
             this.options = options
         }
 
         /**
          * Types options for each type of profile long message
          */
-        fun profileOptions(profileOptions: AdasisConfigProfileLongTypeOptions) = apply {
+        fun profileOptions(profileOptions: AdasisConfigProfileLongTypeOptions): Builder = apply {
             this.profileOptions = profileOptions
         }
 

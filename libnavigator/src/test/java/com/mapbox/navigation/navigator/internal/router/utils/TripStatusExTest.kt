@@ -43,7 +43,7 @@ class TripStatusExTest {
                             internalWaypoints()
                         } returns provideMockListOfWaypoints(
                             Waypoint.REGULAR,
-                            Waypoint.REGULAR
+                            Waypoint.REGULAR,
                         )
                     },
                     0,
@@ -74,7 +74,7 @@ class TripStatusExTest {
             )
 
             private fun provideMockListOfWaypoints(
-                @Waypoint.Type vararg types: Int
+                @Waypoint.Type vararg types: Int,
             ): List<Waypoint> =
                 types.map { type ->
                     WaypointFactory.provideWaypoint(
@@ -95,7 +95,7 @@ class TripStatusExTest {
                     every {
                         nextWaypointIndex
                     } returns this@CalculateRemainingWaypointsTest.nextWaypointIndex
-                }
+                },
             )
 
             val result = tripStatus.calculateRemainingWaypoints()
@@ -158,7 +158,7 @@ class TripStatusExTest {
                             every { internalWaypoints() } returns emptyList()
                         },
                         0,
-                        null
+                        null,
                     ),
                     arrayOf(
                         "nextWaypointIndex is too big",
@@ -170,7 +170,7 @@ class TripStatusExTest {
                             )
                         },
                         3,
-                        null
+                        null,
                     ),
                     arrayOf(
                         "no leg waypoints left",
@@ -183,7 +183,7 @@ class TripStatusExTest {
                             )
                         },
                         3,
-                        null
+                        null,
                     ),
                     arrayOf(
                         "next waypoint is regular",
@@ -193,7 +193,7 @@ class TripStatusExTest {
                                 userEvWaypoint,
                                 silentWaypoint,
                                 evWaypoint,
-                                regularWaypoint2
+                                regularWaypoint2,
                             )
                         },
                         4,
@@ -203,7 +203,7 @@ class TripStatusExTest {
                             Point.fromLngLat(1.1, 1.1),
                             LegWaypoint.REGULAR,
                             null,
-                        )
+                        ),
                     ),
                     arrayOf(
                         "next waypoint is EV",
@@ -223,7 +223,7 @@ class TripStatusExTest {
                             Point.fromLngLat(3.1, 3.1),
                             LegWaypoint.EV_CHARGING_ADDED,
                             null,
-                        )
+                        ),
                     ),
                     arrayOf(
                         "next waypoint is user EV",
@@ -243,7 +243,7 @@ class TripStatusExTest {
                             Point.fromLngLat(4.1, 4.1),
                             LegWaypoint.EV_CHARGING_USER_PROVIDED,
                             null,
-                        )
+                        ),
                     ),
                 )
             }
@@ -257,7 +257,7 @@ class TripStatusExTest {
                     every {
                         nextWaypointIndex
                     } returns this@CalculateNextLegWaypointTest.nextWaypointIndex
-                }
+                },
             )
 
             assertEquals(expectedResult, tripStatus.getCurrentLegDestination(routeWithWaypoints))

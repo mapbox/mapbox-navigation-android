@@ -23,7 +23,7 @@ private const val COMMA_DELIMETER = ","
  * @param intersectionIndex index representing the intersection that includes the exclusion violation.
  * @param intersection [StepIntersection] that includes the exclusion violation.
  */
-data class ExclusionViolation(
+class ExclusionViolation(
     val type: String,
     val route: DirectionsRoute,
     val legIndex: Int,
@@ -31,16 +31,58 @@ data class ExclusionViolation(
     val stepIndex: Int,
     val step: LegStep,
     val intersectionIndex: Int,
-    val intersection: StepIntersection
-)
+    val intersection: StepIntersection,
+) {
 
-/**
- * Returns all violated exclusions for this route.
- *
- * @see [RouteOptions.Builder.exclude]
- */
-fun DirectionsRoute.exclusionViolations(): List<ExclusionViolation> {
-    return toNavigationRoute().exclusionViolations()
+    /**
+     * Indicates whether some other object is "equal to" this one.
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ExclusionViolation
+
+        if (type != other.type) return false
+        if (route != other.route) return false
+        if (legIndex != other.legIndex) return false
+        if (leg != other.leg) return false
+        if (stepIndex != other.stepIndex) return false
+        if (step != other.step) return false
+        if (intersectionIndex != other.intersectionIndex) return false
+        return intersection == other.intersection
+    }
+
+    /**
+     * Returns a hash code value for the object.
+     */
+    override fun hashCode(): Int {
+        var result = type.hashCode()
+        result = 31 * result + route.hashCode()
+        result = 31 * result + legIndex
+        result = 31 * result + leg.hashCode()
+        result = 31 * result + stepIndex
+        result = 31 * result + step.hashCode()
+        result = 31 * result + intersectionIndex
+        result = 31 * result + intersection.hashCode()
+        return result
+    }
+
+    /**
+     * Returns a string representation of the object.
+     */
+    override fun toString(): String {
+        return "ExclusionViolation(" +
+            "type='$type', " +
+            "route=$route, " +
+            "legIndex=$legIndex, " +
+            "leg=$leg, " +
+            "stepIndex=$stepIndex, " +
+            "step=$step, " +
+            "intersectionIndex=$intersectionIndex, " +
+            "intersection=$intersection," +
+            ")"
+    }
 }
 
 /**
@@ -65,7 +107,7 @@ fun NavigationRoute.exclusionViolations(): List<ExclusionViolation> {
                                 stepIndex,
                                 step,
                                 intersectionIndex,
-                                intersection
+                                intersection,
                             )
                             exclusionViolations.add(exclusionViolation)
                         }

@@ -7,5 +7,5 @@ internal fun interface SetNavigationRoutesStartedObserver {
 }
 
 internal data class RoutesSetStartedParams(
-    val routes: List<NavigationRoute>
+    val routes: List<NavigationRoute>,
 )

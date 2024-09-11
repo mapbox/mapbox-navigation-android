@@ -12,19 +12,17 @@ import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.preview.RoutesPreviewExtra
 import com.mapbox.navigation.core.preview.RoutesPreviewUpdate
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
-import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider
-import com.mapbox.navigation.instrumentation_tests.utils.routes.RoutesProvider.toNavigationRoutes
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesPreviewUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
-import com.mapbox.navigation.testing.ui.utils.getMapboxAccessTokenFromResources
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
+import com.mapbox.navigation.testing.utils.routes.RoutesProvider
+import com.mapbox.navigation.testing.utils.routes.requestMockRoutes
 import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Rule
@@ -47,8 +45,7 @@ class RoutesPreviewTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         runOnMainSync {
             mapboxNavigation = MapboxNavigationProvider.create(
                 NavigationOptions.Builder(activity)
-                    .accessToken(getMapboxAccessTokenFromResources(activity))
-                    .build()
+                    .build(),
             )
         }
     }
@@ -68,7 +65,10 @@ class RoutesPreviewTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         assertNull(currentRoutesPreview)
         assertNull(currentRoutes)
         // set routes preview
-        val routes = RoutesProvider.dc_very_short(activity).toNavigationRoutes()
+        val routes = mapboxNavigation.requestMockRoutes(
+            mockWebServerRule,
+            RoutesProvider.dc_very_short(activity),
+        )
         mapboxNavigation.setRoutesPreview(routes)
         mapboxNavigation.routesPreviewUpdates()
             .first { it.reason == RoutesPreviewExtra.PREVIEW_NEW }
@@ -113,7 +113,10 @@ class RoutesPreviewTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         assertNull(currentRoutesPreview)
         assertNull(currentRoutes)
         // set routes preview
-        val initialRoutes = RoutesProvider.dc_very_short(activity).toNavigationRoutes()
+        val initialRoutes = mapboxNavigation.requestMockRoutes(
+            mockWebServerRule,
+            RoutesProvider.dc_very_short(activity),
+        )
         mapboxNavigation.setRoutesPreview(initialRoutes)
         mapboxNavigation.routesPreviewUpdates()
             .first { it.reason == RoutesPreviewExtra.PREVIEW_NEW }
@@ -123,14 +126,17 @@ class RoutesPreviewTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         mapboxNavigation.routeProgressUpdates()
             .first { it.currentState == RouteProgressState.TRACKING }
         // preview a different route not leaving action guidance
-        val updatedRoutes = RoutesProvider.dc_very_short_two_legs(activity).toNavigationRoutes()
+        val updatedRoutes = mapboxNavigation.requestMockRoutes(
+            mockWebServerRule,
+            RoutesProvider.dc_very_short_two_legs(activity),
+        )
         mapboxNavigation.setRoutesPreview(updatedRoutes)
         mapboxNavigation.routesPreviewUpdates()
             .first { it.routesPreview?.routesList == updatedRoutes }
         assertEquals(
             "active guidance should track initial routes",
             initialRoutes,
-            currentRoutes?.navigationRoutes
+            currentRoutes?.navigationRoutes,
         )
         // user decided to switch to previewed routes
         mapboxNavigation.setNavigationRoutes(currentRoutesPreview!!.routesPreview!!.routesList)
@@ -143,13 +149,16 @@ class RoutesPreviewTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
     @Test
     fun start_active_guidance_from_previewed_alternative_route() = sdkTest {
         // set routes preview
-        val routes = RoutesProvider.dc_short_with_alternative(activity).toNavigationRoutes()
+        val routes = mapboxNavigation.requestMockRoutes(
+            mockWebServerRule,
+            RoutesProvider.dc_short_with_alternative(activity),
+        )
         mapboxNavigation.setRoutesPreview(routes)
         val preview = mapboxNavigation.routesPreviewUpdates()
             .first { it.reason == RoutesPreviewExtra.PREVIEW_NEW }
         // switch to alternative route
         mapboxNavigation.changeRoutesPreviewPrimaryRoute(
-            preview.routesPreview!!.originalRoutesList[1]
+            preview.routesPreview!!.originalRoutesList[1],
         )
         val updatedPreview = mapboxNavigation.routesPreviewUpdates()
             .first { it != preview }
@@ -161,36 +170,28 @@ class RoutesPreviewTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.j
         assertEquals(
             listOf(
                 routes[1],
-                routes[0]
+                routes[0],
             ),
-            routesUpdate.navigationRoutes
+            routesUpdate.navigationRoutes,
         )
         val previewAlternativeMetadata = updatedPreview.routesPreview!!.alternativesMetadata.first()
         val activeGuidanceAlternativeMetadata = mapboxNavigation
             .getAlternativeMetadataFor(routes[0])!!
         assertEquals(
-            0,
-            previewAlternativeMetadata.alternativeId
-        )
-        assertNotEquals(
-            previewAlternativeMetadata.alternativeId,
-            activeGuidanceAlternativeMetadata.alternativeId
-        )
-        assertEquals(
             previewAlternativeMetadata.infoFromStartOfPrimary,
-            activeGuidanceAlternativeMetadata.infoFromStartOfPrimary
+            activeGuidanceAlternativeMetadata.infoFromStartOfPrimary,
         )
         assertEquals(
             previewAlternativeMetadata.forkIntersectionOfAlternativeRoute,
-            activeGuidanceAlternativeMetadata.forkIntersectionOfAlternativeRoute
+            activeGuidanceAlternativeMetadata.forkIntersectionOfAlternativeRoute,
         )
         assertEquals(
             previewAlternativeMetadata.infoFromFork,
-            activeGuidanceAlternativeMetadata.infoFromFork
+            activeGuidanceAlternativeMetadata.infoFromFork,
         )
         assertEquals(
             previewAlternativeMetadata.forkIntersectionOfPrimaryRoute,
-            activeGuidanceAlternativeMetadata.forkIntersectionOfPrimaryRoute
+            activeGuidanceAlternativeMetadata.forkIntersectionOfPrimaryRoute,
         )
     }
 }

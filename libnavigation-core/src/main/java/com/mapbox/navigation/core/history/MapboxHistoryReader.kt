@@ -11,7 +11,7 @@ import com.mapbox.navigator.HistoryReader
  * @param filePath absolute path to a file containing the native history file.
  */
 class MapboxHistoryReader(
-    val filePath: String
+    val filePath: String,
 ) : Iterator<HistoryEvent> {
 
     private val nativeHistoryReader = HistoryReader(filePath)

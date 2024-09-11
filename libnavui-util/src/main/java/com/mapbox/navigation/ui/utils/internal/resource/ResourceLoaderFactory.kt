@@ -11,7 +11,7 @@ object ResourceLoaderFactory {
     private val sharedLoader: DefaultResourceLoader by lazy {
         DefaultResourceLoader(
             TileStore.create(),
-            ReachabilityFactory.reachability(null)
+            ReachabilityFactory.reachability(null),
         )
     }
 

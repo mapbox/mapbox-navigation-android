@@ -3,6 +3,7 @@ package com.mapbox.navigation.base.internal.utils
 import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.navigation.base.internal.route.RoutesResponse
 import com.mapbox.navigation.base.internal.route.toNavigationRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -16,25 +17,23 @@ suspend fun parseDirectionsResponse(
     dispatcher: CoroutineDispatcher,
     responseJson: DataRef,
     requestUrl: String,
-    routerOrigin: RouterOrigin,
-    responseTimeElapsedSeconds: Long,
-    parsingArguments: ParseArguments
-): Expected<Throwable, List<NavigationRoute>> =
+    @RouterOrigin routerOrigin: String,
+    responseTimeElapsedMillis: Long,
+): Expected<Throwable, RoutesResponse> =
     withContext(dispatcher) {
         return@withContext try {
-            val routes = NavigationRoute.createAsync(
+            val response = NavigationRoute.createAsync(
                 directionsResponseJson = responseJson,
                 routeRequestUrl = requestUrl,
                 routerOrigin,
-                responseTimeElapsedSeconds,
-                optimiseMemory = parsingArguments.optimiseDirectionsResponseStructure
+                responseTimeElapsedMillis,
             )
-            if (routes.isEmpty()) {
+            if (response.routes.isEmpty()) {
                 ExpectedFactory.createError(
-                    IllegalStateException("no routes returned, collection is empty")
+                    IllegalStateException("no routes returned, collection is empty"),
                 )
             } else {
-                ExpectedFactory.createValue(routes)
+                ExpectedFactory.createValue(response)
             }
         } catch (ex: Throwable) {
             logE { "Route parsing failed: ${ex.message}" }
@@ -45,7 +44,6 @@ suspend fun parseDirectionsResponse(
 fun parseRouteInterfaces(
     routes: List<RouteInterface>,
     responseTimeElapsedSeconds: Long,
-    parseArgs: ParseArguments
 ): Expected<Throwable, List<NavigationRoute>> {
     return try {
         routes.groupBy { it.responseUuid }
@@ -55,7 +53,6 @@ fun parseRouteInterfaces(
                     it.toNavigationRoute(
                         responseTimeElapsedSeconds,
                         directionsResponse,
-                        parseArgs.optimiseDirectionsResponseStructure
                     )
                 }
             }

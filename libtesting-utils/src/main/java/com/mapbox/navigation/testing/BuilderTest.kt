@@ -126,7 +126,9 @@ abstract class BuilderTest<Implementation : Any, Builder> {
     private val requiredFieldNames =
         builderClass.members.filter { it is KProperty && it !is KMutableProperty }.map { it.name }
     private val optionalFieldNames =
-        builderClass.members.filter { it is KProperty && it is KMutableProperty }.map { it.name }
+        builderClass.members.filter {
+            it is KProperty && it is KMutableProperty && it.visibility?.equals(KVisibility.PUBLIC) == true
+        }.map { it.name }
     private val buildMethod = builderClass.members.find { it.name == "build" } as? KFunction
         ?: throw RuntimeException("missing Builder.build method")
 

@@ -24,7 +24,7 @@ class MergingArea internal constructor(
     length,
     provider,
     isUrban,
-    nativeRoadObject
+    nativeRoadObject,
 ) {
 
     /**

@@ -31,7 +31,7 @@ class RoutesRefreshAttemptProcessorTest {
             RoutesRefresherResult(
                 mockk { every { status } returns RouteRefresherStatus.SUCCESS },
                 emptyList(),
-            )
+            ),
         )
 
         verify(exactly = 0) { observersManager.onRoutesInvalidated(any()) }
@@ -46,8 +46,8 @@ class RoutesRefreshAttemptProcessorTest {
                     RouteRefresherResult(alternativeRoute1, mockk(), RouteRefresherStatus.FAILURE),
                     RouteRefresherResult(alternativeRoute2, mockk(), RouteRefresherStatus.SUCCESS),
                     RouteRefresherResult(alternativeRoute3, mockk(), RouteRefresherStatus.INVALID),
-                )
-            )
+                ),
+            ),
         )
 
         verify(exactly = 1) {
@@ -65,11 +65,11 @@ class RoutesRefreshAttemptProcessorTest {
                     RouteRefresherResult(
                         alternativeRoute2,
                         mockk(),
-                        RouteRefresherStatus.INVALIDATED
+                        RouteRefresherStatus.INVALIDATED,
                     ),
                     RouteRefresherResult(alternativeRoute3, mockk(), RouteRefresherStatus.INVALID),
-                )
-            )
+                ),
+            ),
         )
 
         verify(exactly = 1) {
@@ -86,27 +86,27 @@ class RoutesRefreshAttemptProcessorTest {
                     RouteRefresherResult(
                         alternativeRoute1,
                         mockk(),
-                        RouteRefresherStatus.INVALIDATED
+                        RouteRefresherStatus.INVALIDATED,
                     ),
                     RouteRefresherResult(
                         alternativeRoute2,
                         mockk(),
-                        RouteRefresherStatus.INVALIDATED
+                        RouteRefresherStatus.INVALIDATED,
                     ),
                     RouteRefresherResult(
                         alternativeRoute3,
                         mockk(),
-                        RouteRefresherStatus.INVALIDATED
+                        RouteRefresherStatus.INVALIDATED,
                     ),
-                )
-            )
+                ),
+            ),
         )
 
         verify(exactly = 1) {
             observersManager.onRoutesInvalidated(
                 RoutesInvalidatedParams(
-                    listOf(primaryRoute, alternativeRoute1, alternativeRoute2, alternativeRoute3)
-                )
+                    listOf(primaryRoute, alternativeRoute1, alternativeRoute2, alternativeRoute3),
+                ),
             )
         }
     }
@@ -120,15 +120,15 @@ class RoutesRefreshAttemptProcessorTest {
                     RouteRefresherResult(
                         alternativeRoute1,
                         mockk(),
-                        RouteRefresherStatus.INVALIDATED
+                        RouteRefresherStatus.INVALIDATED,
                     ),
                     RouteRefresherResult(
                         alternativeRoute2,
                         mockk(),
-                        RouteRefresherStatus.INVALIDATED
+                        RouteRefresherStatus.INVALIDATED,
                     ),
-                )
-            )
+                ),
+            ),
         )
         clearAllMocks(answers = false)
 
@@ -139,16 +139,16 @@ class RoutesRefreshAttemptProcessorTest {
                     RouteRefresherResult(
                         alternativeRoute1,
                         mockk(),
-                        RouteRefresherStatus.INVALIDATED
+                        RouteRefresherStatus.INVALIDATED,
                     ),
                     RouteRefresherResult(
                         mockk { every { id } returns "id#2" },
                         mockk(),
-                        RouteRefresherStatus.INVALIDATED
+                        RouteRefresherStatus.INVALIDATED,
                     ),
                     RouteRefresherResult(alternativeRoute3, mockk(), RouteRefresherStatus.SUCCESS),
-                )
-            )
+                ),
+            ),
         )
 
         verify(exactly = 0) { observersManager.onRoutesInvalidated(any()) }
@@ -163,15 +163,15 @@ class RoutesRefreshAttemptProcessorTest {
                     RouteRefresherResult(
                         alternativeRoute1,
                         mockk(),
-                        RouteRefresherStatus.INVALIDATED
+                        RouteRefresherStatus.INVALIDATED,
                     ),
                     RouteRefresherResult(
                         alternativeRoute2,
                         mockk(),
-                        RouteRefresherStatus.SUCCESS
+                        RouteRefresherStatus.SUCCESS,
                     ),
-                )
-            )
+                ),
+            ),
         )
         clearAllMocks(answers = false)
 
@@ -182,27 +182,27 @@ class RoutesRefreshAttemptProcessorTest {
                     RouteRefresherResult(
                         alternativeRoute1,
                         mockk(),
-                        RouteRefresherStatus.INVALIDATED
+                        RouteRefresherStatus.INVALIDATED,
                     ),
                     RouteRefresherResult(
                         alternativeRoute2,
                         mockk(),
-                        RouteRefresherStatus.INVALIDATED
+                        RouteRefresherStatus.INVALIDATED,
                     ),
                     RouteRefresherResult(
                         alternativeRoute3,
                         mockk(),
-                        RouteRefresherStatus.INVALIDATED
+                        RouteRefresherStatus.INVALIDATED,
                     ),
-                )
-            )
+                ),
+            ),
         )
 
         verify(exactly = 1) {
             observersManager.onRoutesInvalidated(
                 RoutesInvalidatedParams(
-                    listOf(alternativeRoute2, alternativeRoute3)
-                )
+                    listOf(alternativeRoute2, alternativeRoute3),
+                ),
             )
         }
     }

@@ -47,6 +47,6 @@ interface MapboxDumpInterceptor {
     fun intercept(
         fileDescriptor: FileDescriptor,
         writer: PrintWriter,
-        commands: List<String>
+        commands: List<String>,
     )
 }

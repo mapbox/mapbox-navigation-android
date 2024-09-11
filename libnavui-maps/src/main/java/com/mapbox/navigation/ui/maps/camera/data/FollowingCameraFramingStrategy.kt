@@ -14,7 +14,7 @@ interface FollowingCameraFramingStrategy {
     fun getPointsToFrameOnCurrentStep(
         routeProgress: RouteProgress,
         followingFrameOptions: FollowingFrameOptions,
-        averageIntersectionDistancesOnRoute: List<List<Double>>
+        averageIntersectionDistancesOnRoute: List<List<Double>>,
     ): List<Point>
 
     /**
@@ -23,7 +23,7 @@ interface FollowingCameraFramingStrategy {
     fun getPointsToFrameAfterCurrentManeuver(
         routeProgress: RouteProgress,
         followingFrameOptions: FollowingFrameOptions,
-        postManeuverFramingPoints: List<List<List<Point>>>
+        postManeuverFramingPoints: List<List<List<Point>>>,
     ): List<Point>
 
     companion object {

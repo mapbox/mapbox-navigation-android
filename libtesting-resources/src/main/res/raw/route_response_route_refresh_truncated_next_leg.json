@@ -1,0 +1,546 @@
+{
+  "code": "Ok",
+  "route": {
+    "legs": [
+      {
+        "annotation": {
+          "maxspeed": [
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            }
+          ],
+          "congestion_numeric": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            0,
+            0,
+            null,
+            null,
+            null,
+            0,
+            0,
+            null,
+            0,
+            0,
+            0,
+            0,
+            null,
+            null,
+            0,
+            null,
+            null,
+            null,
+            0,
+            0,
+            null
+          ],
+          "speed": [
+            4.4,
+            4.4,
+            10.3,
+            10.3,
+            8.9,
+            8.9,
+            6.4,
+            8.3,
+            8.3,
+            8.3,
+            8.3,
+            12.5,
+            12.5,
+            12.5,
+            13.3,
+            13.3,
+            13.3,
+            11.9,
+            11.9,
+            11.9,
+            6.7,
+            6.7,
+            6.7,
+            9.4,
+            4.2,
+            10.6,
+            12.2,
+            13.3,
+            13.3,
+            13.3,
+            7.8,
+            7.8,
+            9.2,
+            9.2,
+            8.1,
+            10.8,
+            10.8,
+            8.6,
+            13.9,
+            13.9,
+            13.3,
+            13.3,
+            13.9,
+            13.9,
+            12.8,
+            7.2,
+            8.1,
+            10.6,
+            8.3,
+            8.3,
+            10.6
+          ],
+          "distance": [
+            26.6,
+            8.9,
+            13.3,
+            11.4,
+            10.7,
+            109.9,
+            121.8,
+            6.9,
+            4,
+            100.3,
+            10.6,
+            11.2,
+            101.6,
+            10.2,
+            10.1,
+            126.8,
+            11,
+            9.3,
+            102,
+            11.1,
+            11.5,
+            50.8,
+            59.8,
+            63.9,
+            58.7,
+            64.3,
+            48.2,
+            18.8,
+            3.7,
+            14.6,
+            52.6,
+            61.3,
+            19.6,
+            45.6,
+            64.3,
+            26.4,
+            38.4,
+            64.4,
+            48.6,
+            31.5,
+            9.7,
+            30.5,
+            50.8,
+            13.8,
+            61.4,
+            122.1,
+            34.1,
+            29.9,
+            7.8,
+            8,
+            9
+          ],
+          "duration": [
+            12.365,
+            19.064,
+            0.828,
+            0.477,
+            12.036,
+            1.275,
+            0.9,
+            8.125,
+            0.817,
+            0.76,
+            9.508,
+            0.828,
+            0.778,
+            8.542,
+            0.931,
+            1.722,
+            7.613,
+            8.964,
+            6.766,
+            14.081,
+            6.093,
+            3.944,
+            1.412,
+            0.28,
+            1.096,
+            6.769,
+            7.876,
+            2.134,
+            4.98,
+            7.984,
+            2.44,
+            3.548,
+            7.484,
+            3.499,
+            2.27,
+            0.724,
+            2.291,
+            3.66,
+            0.993,
+            4.804,
+            16.907,
+            4.231,
+            2.832,
+            0.935,
+            0.963,
+            0.854
+          ]
+        }
+      },
+      {
+        "closures": [
+          {
+            "geometry_index_start": 3,
+            "geometry_index_end": 5
+          }
+        ],
+        "incidents": [
+          {
+            "id": "9457146989091490",
+            "type": "construction",
+            "creation_time": "2022-09-21T07:40:42Z",
+            "start_time": "2022-08-08T08:15:59Z",
+            "end_time": "2023-09-01T03:59:00Z",
+            "iso_3166_1_alpha2": "US",
+            "iso_3166_1_alpha3": "USA",
+            "description": "NJ-70 E/B: intermittent lane closures between NJ-38 K and New Jersey Tpke",
+            "long_description": "Intermittent lane closures due to long-term construction on NJ-70 Eastbound between NJ-38 K and New Jersey Tpke.",
+            "impact": "minor",
+            "sub_type": "CONSTRUCTION",
+            "alertc_codes": [
+              701,
+              802
+            ],
+            "lanes_blocked": [],
+            "length": 8744,
+            "congestion": {
+              "value": 101
+            },
+            "geometry_index_start": 3,
+            "geometry_index_end": 7,
+            "affected_road_names": [
+              "NJ 70/John Davison Rockefeller Memorial Highway",
+              "NJ 70"
+            ]
+          }
+        ],
+        "annotation": {
+          "maxspeed": [
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 48,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "speed": 40,
+              "unit": "km/h"
+            },
+            {
+              "unknown": true
+            },
+            {
+              "unknown": true
+            }
+          ],
+          "congestion_numeric": [
+            null,
+            null,
+            null,
+            null,
+            0,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "speed": [
+            10.6,
+            10.6,
+            11.1,
+            11.1,
+            6.7,
+            10.8,
+            7.8,
+            7.8,
+            9.7,
+            9.7
+          ],
+          "distance": [
+            21.3,
+            10.3,
+            10.9,
+            15.9,
+            98.6,
+            63.3,
+            54.1,
+            10.4,
+            10.3,
+            52.8
+          ],
+          "duration": [
+            2.014,
+            0.976,
+            0.978,
+            1.431,
+            14.786,
+            5.839,
+            6.957,
+            1.333,
+            1.064,
+            5.426
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -91,7 +91,7 @@ class NotificationTurnIconResources private constructor(
     @DrawableRes override val turnIconTurnSlightRight: Int,
     @DrawableRes override val turnIconTurnSharpLeft: Int,
     @DrawableRes override val turnIconTurnSharpRight: Int,
-    @DrawableRes override val turnIconUturn: Int
+    @DrawableRes override val turnIconUturn: Int,
 ) : BaseTurnIconResources {
 
     companion object {
@@ -1056,7 +1056,7 @@ class NotificationTurnIconResources private constructor(
          * @return Builder
          */
         fun turnIconNotificationStraight(
-            @DrawableRes turnIconNotificationStraight: Int
+            @DrawableRes turnIconNotificationStraight: Int,
         ): Builder =
             apply { this.turnIconNotificationStraight = turnIconNotificationStraight }
 
@@ -1066,7 +1066,7 @@ class NotificationTurnIconResources private constructor(
          * @return Builder
          */
         fun turnIconNotificationSlightLeft(
-            @DrawableRes turnIconNotificationSlightLeft: Int
+            @DrawableRes turnIconNotificationSlightLeft: Int,
         ): Builder =
             apply { this.turnIconNotificationSlightLeft = turnIconNotificationSlightLeft }
 
@@ -1076,7 +1076,7 @@ class NotificationTurnIconResources private constructor(
          * @return Builder
          */
         fun turnIconNotificationSlightRight(
-            @DrawableRes turnIconNotificationSlightRight: Int
+            @DrawableRes turnIconNotificationSlightRight: Int,
         ): Builder =
             apply { this.turnIconNotificationSlightRight = turnIconNotificationSlightRight }
 
@@ -1086,7 +1086,7 @@ class NotificationTurnIconResources private constructor(
          * @return Builder
          */
         fun turnIconNotificationSharpLeft(
-            @DrawableRes turnIconNotificationSharpLeft: Int
+            @DrawableRes turnIconNotificationSharpLeft: Int,
         ): Builder =
             apply { this.turnIconNotificationSharpLeft = turnIconNotificationSharpLeft }
 
@@ -1096,7 +1096,7 @@ class NotificationTurnIconResources private constructor(
          * @return Builder
          */
         fun turnIconNotificationSharpRight(
-            @DrawableRes turnIconNotificationSharpRight: Int
+            @DrawableRes turnIconNotificationSharpRight: Int,
         ): Builder =
             apply { this.turnIconNotificationSharpRight = turnIconNotificationSharpRight }
 
@@ -1314,7 +1314,7 @@ class NotificationTurnIconResources private constructor(
          * @return Builder
          */
         fun turnIconRoundaboutSlightLeft(
-            @DrawableRes turnIconRoundaboutSlightLeft: Int
+            @DrawableRes turnIconRoundaboutSlightLeft: Int,
         ): Builder =
             apply { this.turnIconRoundaboutSlightLeft = turnIconRoundaboutSlightLeft }
 
@@ -1324,7 +1324,7 @@ class NotificationTurnIconResources private constructor(
          * @return Builder
          */
         fun turnIconRoundaboutSlightRight(
-            @DrawableRes turnIconRoundaboutSlightRight: Int
+            @DrawableRes turnIconRoundaboutSlightRight: Int,
         ): Builder =
             apply { this.turnIconRoundaboutSlightRight = turnIconRoundaboutSlightRight }
 
@@ -1342,7 +1342,7 @@ class NotificationTurnIconResources private constructor(
          * @return Builder
          */
         fun turnIconRoundaboutSharpRight(
-            @DrawableRes turnIconRoundaboutSharpRight: Int
+            @DrawableRes turnIconRoundaboutSharpRight: Int,
         ): Builder =
             apply { this.turnIconRoundaboutSharpRight = turnIconRoundaboutSharpRight }
 
@@ -1502,7 +1502,7 @@ class NotificationTurnIconResources private constructor(
                 turnIconTurnSlightRight,
                 turnIconTurnSharpLeft,
                 turnIconTurnSharpRight,
-                turnIconUturn
+                turnIconUturn,
             )
         }
     }

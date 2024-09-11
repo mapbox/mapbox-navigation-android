@@ -1,6 +1,10 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-parcelize'
+apply from: file("../gradle/testing-module-settings.gradle")
+
+group = project.ext.mapboxArtifactGroupId
+
 android {
     compileSdkVersion androidVersions.compileSdkVersion
 

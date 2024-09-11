@@ -1,14 +1,21 @@
 package com.mapbox.navigation.core.trip.session
 
 import android.annotation.SuppressLint
-import android.location.Location
-import android.os.Looper
 import android.os.SystemClock
-import com.mapbox.android.core.location.LocationEngineCallback
-import com.mapbox.android.core.location.LocationEngineResult
+import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.common.Cancelable
+import com.mapbox.common.location.GetLocationCallback
+import com.mapbox.common.location.Location
+import com.mapbox.common.location.LocationError
+import com.mapbox.common.location.LocationErrorCode
+import com.mapbox.common.location.LocationObserver
+import com.mapbox.common.location.LocationProvider
+import com.mapbox.common.location.LocationServiceFactory
+import com.mapbox.navigation.base.options.LocationOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.replay.MapboxReplayer
-import com.mapbox.navigation.core.replay.ReplayLocationEngine
+import com.mapbox.navigation.core.replay.ReplayLocationProvider
+import com.mapbox.navigation.core.utils.ThreadUtils
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logW
 import java.util.concurrent.TimeUnit
@@ -19,40 +26,84 @@ import java.util.concurrent.TimeUnit
  * Trip locations can come from the device, from an external location engine, or from a replay
  * simulator. This class is responsible for determining which LocationEngine is used.
  *
- * When a trip session is started with replay, use the [ReplayLocationEngine]. If the
- * trip session is not using replay, use the [NavigationOptions.locationEngine].
+ * When a trip session is started with replay, use the [ReplayLocationProvider]. If the
+ * trip session is not using replay, use the provider from [NavigationOptions.locationOptions].
  */
 internal class TripSessionLocationEngine constructor(
-    private val navigationOptions: NavigationOptions,
-    private val replayLocationEngineProvider: (MapboxReplayer) -> ReplayLocationEngine = {
-        ReplayLocationEngine(it)
-    }
+    locationOptions: LocationOptions,
+    private val replayLocationProviderProvider: (MapboxReplayer) -> ReplayLocationProvider = {
+        ReplayLocationProvider(it)
+    },
 ) {
 
     val mapboxReplayer: MapboxReplayer by lazy { MapboxReplayer() }
     var isReplayEnabled = false
         private set
 
-    private val replayLocationEngine: ReplayLocationEngine by lazy {
-        replayLocationEngineProvider.invoke(mapboxReplayer)
+    private val replayLocationProvider: ReplayLocationProvider by lazy {
+        replayLocationProviderProvider.invoke(mapboxReplayer)
     }
-    private var activeLocationEngine: CancellableLocationEngine? = null
+    private val optionsBasedLocationProvider: LocationProvider?
+    private var activeLocationProvider: LocationProvider? = null
     private var onRawLocationUpdate: (Location) -> Unit = { }
 
-    private val locationEngineCallback = object : LocationEngineCallback<LocationEngineResult> {
-        override fun onSuccess(result: LocationEngineResult?) {
-            logD(LOG_CATEGORY) {
-                "successful location engine callback $result"
-            }
-            result?.locations?.lastOrNull()?.let {
-                logIfLocationIsNotFreshEnough(it)
-                onRawLocationUpdate(it)
-            }
-        }
+    private val handlerThread = ThreadUtils.prepareHandlerThread("locations inputs thread")
 
-        override fun onFailure(exception: Exception) {
-            logD("location on failure exception=$exception", LOG_CATEGORY)
+    private val lastLocationCallback = GetLocationCallback {
+        logD(LOG_CATEGORY) {
+            "last location callback $it"
         }
+        if (it != null) {
+            handleReceivedLocation(it)
+        }
+    }
+    private val locationObserver = LocationObserver { locations ->
+        logD(LOG_CATEGORY) {
+            "location callback $locations"
+        }
+        locations.lastOrNull()?.let { handleReceivedLocation(it) }
+    }
+    private var lastLocationTask: Cancelable? = null
+
+    init {
+        val customFactory = locationOptions.locationProviderFactory
+        if (customFactory != null) {
+            // TODO remove this if in favour of setting location provider type: CORESDK-2290
+            if (locationOptions.locationProviderType == LocationOptions.LocationProviderType.REAL) {
+                LocationServiceFactory.getOrCreate()
+                    .setUserDefinedDeviceLocationProviderFactory(customFactory)
+            }
+        }
+        val deviceLocationProviderExpected =
+            if (locationOptions.locationProviderType == LocationOptions.LocationProviderType.REAL) {
+                LocationServiceFactory.getOrCreate()
+                    .getDeviceLocationProvider(locationOptions.request)
+            } else {
+                locationOptions.locationProviderFactory?.build(locationOptions.request)
+                    ?: ExpectedFactory.createError(
+                        LocationError(
+                            LocationErrorCode.INVALID_ARGUMENT,
+                            "Custom location provider factory is null, " +
+                                "while location provider type is " +
+                                locationOptions.locationProviderType,
+                        ),
+                    )
+            }
+        if (deviceLocationProviderExpected.isError) {
+            logW(
+                LOG_CATEGORY,
+                "Location updates are not possible: " +
+                    "could not find suitable location provider. " +
+                    "Error code: ${deviceLocationProviderExpected.error!!.code}, " +
+                    "message: ${deviceLocationProviderExpected.error!!.message}.",
+            )
+        }
+        optionsBasedLocationProvider = deviceLocationProviderExpected.value
+    }
+
+    private fun handleReceivedLocation(location: Location) {
+        logIfLocationIsNotFreshEnough(location)
+        onRawLocationUpdate(location)
     }
 
     @SuppressLint("MissingPermission")
@@ -62,43 +113,46 @@ internal class TripSessionLocationEngine constructor(
         }
         stopLocationUpdates()
         this.onRawLocationUpdate = onRawLocationUpdate
-        activeLocationEngine = CancellableLocationEngine(
-            if (isReplayEnabled) {
-                replayLocationEngine
-            } else {
-                navigationOptions.locationEngine
-            }
-        )
+        activeLocationProvider = if (isReplayEnabled) {
+            replayLocationProvider
+        } else {
+            optionsBasedLocationProvider
+        }
         this.isReplayEnabled = isReplayEnabled
-        activeLocationEngine?.requestLocationUpdates(
-            navigationOptions.locationEngineRequest,
-            locationEngineCallback,
-            Looper.getMainLooper()
-        )
-        activeLocationEngine?.getLastLocation(locationEngineCallback)
+        activeLocationProvider?.addLocationObserver(locationObserver, handlerThread.looper)
+        lastLocationTask = activeLocationProvider?.getLastLocation(lastLocationCallback)
     }
 
     fun stopLocationUpdates() {
         if (isReplayEnabled) {
-            replayLocationEngine.cleanUpLastLocation()
+            replayLocationProvider.cleanUpLastLocation()
         }
         isReplayEnabled = false
         onRawLocationUpdate = { }
-        activeLocationEngine?.run {
-            cancelLastLocationTask(locationEngineCallback)
-            removeLocationUpdates(locationEngineCallback)
+        activeLocationProvider?.run {
+            removeLocationObserver(locationObserver)
+            lastLocationTask?.cancel()
         }
-        activeLocationEngine = null
+        activeLocationProvider = null
+    }
+
+    fun destroy() {
+        LocationServiceFactory.getOrCreate().setUserDefinedDeviceLocationProviderFactory(null)
+        handlerThread.quit()
     }
 
     private fun logIfLocationIsNotFreshEnough(location: Location) {
         val currentTime = SystemClock.elapsedRealtimeNanos()
-        val locationAgeNanoSeconds = currentTime - location.elapsedRealtimeNanos
-        val locationAgeMilliseconds = TimeUnit.MILLISECONDS.convert(
-            locationAgeNanoSeconds,
-            TimeUnit.NANOSECONDS
-        )
-        if (locationAgeMilliseconds > DELAYED_LOCATION_WARNING_THRESHOLD_MS) {
+        val locationAgeMilliseconds = location.monotonicTimestamp?.let {
+            TimeUnit.MILLISECONDS.convert(
+                currentTime - it,
+                TimeUnit.NANOSECONDS,
+            )
+        }
+        if (
+            locationAgeMilliseconds == null ||
+            locationAgeMilliseconds > DELAYED_LOCATION_WARNING_THRESHOLD_MS
+        ) {
             logW("Got an obsolete location: age = $locationAgeMilliseconds ms", LOG_CATEGORY)
         }
     }

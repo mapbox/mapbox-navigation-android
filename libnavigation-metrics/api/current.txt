@@ -1,16 +1,1 @@
 // Signature format: 3.0
-package com.mapbox.navigation.metrics {
-
-  public final class MapboxMetricsReporter implements com.mapbox.navigation.base.metrics.MetricsReporter {
-    method public void addEvent(com.mapbox.navigation.base.metrics.MetricEvent metricEvent);
-    method public static void disable();
-    method public static void init(android.content.Context context, String accessToken, String userAgent);
-    method public void removeObserver();
-    method public void sendTurnstileEvent(com.mapbox.common.TurnstileEvent turnstileEvent);
-    method public void setMetricsObserver(com.mapbox.navigation.base.metrics.MetricsObserver metricsObserver);
-    method @Deprecated public static void toggleLogging(boolean isDebugLoggingEnabled);
-    field public static final com.mapbox.navigation.metrics.MapboxMetricsReporter INSTANCE;
-  }
-
-}
-

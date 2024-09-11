@@ -1,7 +1,8 @@
 package com.mapbox.navigation.core
 
 import com.mapbox.navigation.core.internal.RouteProgressData
-import com.mapbox.navigation.core.reroute.NavigationRerouteController
+import com.mapbox.navigation.core.internal.congestions.TrafficOverrideHandler
+import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 
 internal sealed class SetRoutes {
@@ -23,7 +24,7 @@ internal sealed class SetRoutes {
      * Triggered when the **primary route changes** due to a reroute.
      * Alternatives might've changed as well (and typically do).
      *
-     * Currently this can only be trigger internally by a response to [NavigationRerouteController.RoutesCallback].
+     * Currently this can only be trigger internally by a response to [RerouteController.RoutesCallback].
      */
     internal data class Reroute(
         val legIndex: Int,
@@ -45,9 +46,11 @@ internal sealed class SetRoutes {
     /**
      * Triggered when the **routes do not change but are refreshed**.
      *
-     * Currently this can only be trigger internally by a response to [RouteRefreshController.refresh].
+     * Currently this can only be trigger internally by a response to [RouteRefreshController.refresh]
+     * or applying traffic filtration in [TrafficOverrideHandler]
      */
     internal data class RefreshRoutes(
-        val routeProgressData: RouteProgressData
+        val routeProgressData: RouteProgressData,
+        val isManualRefresh: Boolean = false,
     ) : SetRoutes()
 }

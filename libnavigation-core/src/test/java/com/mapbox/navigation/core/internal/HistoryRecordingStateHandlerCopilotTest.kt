@@ -38,7 +38,7 @@ class HistoryRecordingStateHandlerCopilotTest {
         stateHandler.onSessionStateChanged(TripSessionState.STARTED)
         stateHandler.setRoutes(listOf(mockk()))
         assertTrue(
-            stateHandler.currentCopilotSession() is HistoryRecordingSessionState.ActiveGuidance
+            stateHandler.currentCopilotSession() is HistoryRecordingSessionState.ActiveGuidance,
         )
     }
 
@@ -59,7 +59,7 @@ class HistoryRecordingStateHandlerCopilotTest {
 
         verify {
             copilotObserver.onCopilotSessionChanged(
-                ofType<HistoryRecordingSessionState.FreeDrive>()
+                ofType<HistoryRecordingSessionState.FreeDrive>(),
             )
         }
     }
@@ -74,7 +74,7 @@ class HistoryRecordingStateHandlerCopilotTest {
 
         verify {
             copilotObserver.onCopilotSessionChanged(
-                ofType<HistoryRecordingSessionState.ActiveGuidance>()
+                ofType<HistoryRecordingSessionState.ActiveGuidance>(),
             )
         }
     }
@@ -123,7 +123,7 @@ class HistoryRecordingStateHandlerCopilotTest {
 
         verify {
             copilotObserver.onCopilotSessionChanged(
-                ofType<HistoryRecordingSessionState.ActiveGuidance>()
+                ofType<HistoryRecordingSessionState.ActiveGuidance>(),
             )
         }
     }
@@ -153,7 +153,7 @@ class HistoryRecordingStateHandlerCopilotTest {
 
         verify {
             copilotObserver.onCopilotSessionChanged(
-                ofType<HistoryRecordingSessionState.FreeDrive>()
+                ofType<HistoryRecordingSessionState.FreeDrive>(),
             )
         }
     }
