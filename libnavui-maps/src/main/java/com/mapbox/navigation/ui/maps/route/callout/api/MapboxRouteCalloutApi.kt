@@ -8,9 +8,9 @@ import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToLineString
 import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
-import com.mapbox.navigation.ui.maps.route.callout.model.DurationDifferenceType
+import com.mapbox.navigation.ui.maps.internal.route.callout.model.DurationDifferenceType
+import com.mapbox.navigation.ui.maps.internal.route.callout.model.RouteCallout
 import com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutApiOptions
-import com.mapbox.navigation.ui.maps.route.callout.model.RouteCallout
 import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutType
 import com.mapbox.navigation.utils.internal.logW

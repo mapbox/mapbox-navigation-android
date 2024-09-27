@@ -12,7 +12,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createNavigationRoute
-import com.mapbox.navigation.ui.maps.route.callout.model.RouteCallout
+import com.mapbox.navigation.ui.maps.internal.route.callout.model.RouteCallout
 import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData
 import io.mockk.Called
 import io.mockk.Runs

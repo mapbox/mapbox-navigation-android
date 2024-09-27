@@ -13,7 +13,7 @@ ext {
   // version which we should use in this build
   def mapboxNavigatorVersion = System.getenv("FORCE_MAPBOX_NAVIGATION_NATIVE_VERSION")
   if (mapboxNavigatorVersion == null || mapboxNavigatorVersion == '') {
-      mapboxNavigatorVersion = '318.0.0'
+      mapboxNavigatorVersion = '318.0.0-SNAPSHOT.0904T2113Z.f07d66e'
   }
   println("Navigation Native version: " + mapboxNavigatorVersion)
 
@@ -198,7 +198,7 @@ ext {
       // because the version used by license has been removed from the repository.
       // This dependency may be removed when we bump license version.
       kotlinHtmlJvm        : '0.7.2',
-      jacoco               : '0.2',
+      jacoco               : '0.8.12',
       googleServices       : '4.3.3',
       mapboxSdkVersions    : '1.1.3',
       dokka                : '1.6.21',
@@ -219,7 +219,7 @@ ext {
       kotlinHtmlJvm        : "org.jetbrains.kotlinx:kotlinx-html-jvm:${pluginVersion.kotlinHtmlJvm}",
       dependencyGraph      : "com.vanniktech:gradle-dependency-graph-generator-plugin:${pluginVersion.dependencyGraph}",
       dependencyUpdates    : "com.github.ben-manes:gradle-versions-plugin:${pluginVersion.dependencyUpdates}",
-      jacoco               : "com.hiya:jacoco-android:${pluginVersion.jacoco}",
+      jacoco               : "org.jacoco:org.jacoco.core:${pluginVersion.jacoco}",
       googleServices       : "com.google.gms:google-services:${pluginVersion.googleServices}",
       mapboxSdkVersions    : "com.mapbox.mapboxsdk:mapbox-android-sdk-versions:${pluginVersion.mapboxSdkVersions}",
       dokka                : "org.jetbrains.dokka:dokka-gradle-plugin:${pluginVersion.dokka}",

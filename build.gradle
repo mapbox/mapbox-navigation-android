@@ -37,7 +37,6 @@ buildscript {
   }
 }
 
-apply plugin: 'jacoco'
 apply plugin: 'org.jetbrains.dokka'
 
 task testReport(type: TestReport, group: 'Build') {
@@ -86,29 +85,12 @@ subprojects {
   apply from: "${rootDir}/gradle/dependency-updates.gradle"
   apply from: "${rootDir}/gradle/checkstyle.gradle"
   apply from: "${rootDir}/gradle/dependencies-graph.gradle"
+  apply from: "${rootDir}/gradle/save-sdk-version.gradle"
 
   plugins.withId('org.jetbrains.kotlin.jvm') {
     compileKotlin {
       kotlinOptions {
         jvmTarget = "1.8"
-      }
-    }
-  }
-}
-
-// Need for building Dash app from Nav SDK sources
-// Fix https://mapbox.atlassian.net/browse/NA-2065
-import org.gradle.util.VersionNumber
-if (VersionNumber.parse(project.getGradle().getGradleVersion()) >= VersionNumber.parse("8.0.0")) {
-  afterEvaluate {
-    subprojects {
-      tasks.configureEach {
-        if (name == "packageDebugAssets" || name == "packageReleaseAssets" || name == "mergeDebugAssets") {
-          def task = tasks.findByName("saveSDKVersion")
-          if (task != null) {
-            dependsOn task
-          }
-        }
       }
     }
   }

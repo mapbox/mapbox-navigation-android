@@ -12,6 +12,7 @@ class GroupedVoiceInstructionsFactoryTest {
 
         val result = GroupedVoiceInstructionsFactory.getGroupedAnnouncementRanges(
             route,
+            "abc",
             100.0,
         )
 
