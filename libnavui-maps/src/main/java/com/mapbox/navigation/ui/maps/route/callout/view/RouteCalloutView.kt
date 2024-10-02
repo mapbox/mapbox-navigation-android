@@ -14,9 +14,9 @@ import com.mapbox.navigation.base.internal.extensions.LocaleEx
 import com.mapbox.navigation.base.internal.time.TimeFormatter
 import com.mapbox.navigation.ui.maps.R
 import com.mapbox.navigation.ui.maps.databinding.MapboxNavigationRouteCalloutBinding
-import com.mapbox.navigation.ui.maps.route.callout.model.DurationDifferenceType
+import com.mapbox.navigation.ui.maps.internal.route.callout.model.DurationDifferenceType
+import com.mapbox.navigation.ui.maps.internal.route.callout.model.RouteCallout
 import com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutViewOptions
-import com.mapbox.navigation.ui.maps.route.callout.model.RouteCallout
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class RouteCalloutView : FrameLayout {

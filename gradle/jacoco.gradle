@@ -1,18 +1,92 @@
-// Need for the build form the Dash app with Gradle 8.1
-if (VersionNumber.parse(project.getGradle().getGradleVersion()) < VersionNumber.parse("8.0")) {
-  apply plugin: 'com.hiya.jacoco-android'
+apply plugin: 'jacoco'
 
-  jacoco {
-    toolVersion = "0.8.7"
-  }
+jacoco {
+    toolVersion = "0.8.12"
+}
 
-  tasks.withType(Test) {
-
-    // needed to capture coverage from Robolectric tests
+tasks.withType(Test) {
     jacoco.includeNoLocationClasses = true
-
-    // required to run on Java 9+
-    // refs https://github.com/gradle/gradle/issues/5184#issuecomment-457865951
     jacoco.excludes = ['jdk.internal.*']
-  }
+}
+
+static def excludes() {
+    return [
+            // Android
+            '**/R.class',
+            '**/R$*.class',
+            '**/BuildConfig.*',
+            '**/Manifest*.*',
+            // Android data binding
+            'android/databinding/**/*.class',
+            '**/android/databinding/*Binding.class',
+            '**/BR.*'
+    ]
+}
+
+def findOrCreateJacocoTestReportTask() {
+    Task jacocoTestReportTask = project.tasks.findByName("jacocoTestReport")
+    if (!jacocoTestReportTask) {
+        jacocoTestReportTask = project.tasks.create("jacocoTestReport") {
+            group = "reporting"
+        }
+    }
+    return jacocoTestReportTask
+}
+
+def createReportTask(variant) {
+    def sourceDirs = variant.sourceSets.java.srcDirs.collect { it.path }.flatten()
+    def classesDir = variant.hasProperty('javaCompileProvider')
+            ? variant.javaCompileProvider.get().destinationDir
+            : variant.javaCompile.destinationDir
+    def testTask = project.tasks.named("test${variant.name.capitalize()}UnitTest").get()
+    def kotlin = project.plugins.findPlugin('kotlin-android')
+
+    def reportTask = project.tasks.register("jacoco${testTask.name.capitalize()}Report", JacocoReport) {
+        dependsOn(testTask)
+
+        group = "reporting"
+        description = "Generates Jacoco coverage reports for the ${variant.name} variant."
+        executionData.setFrom(project.files(testTask.jacoco.destinationFile.path))
+        sourceDirectories.setFrom(project.files(sourceDirs))
+
+        FileTree javaTree = project.fileTree(dir: classesDir, excludes: excludes())
+
+        if (kotlin) {
+            def kotlinClassesDir = project.layout.buildDirectory.dir("tmp/kotlin-classes/${variant.name}").get().asFile.path
+            def kotlinTree = project.fileTree(dir: kotlinClassesDir, excludes: excludes())
+            classDirectories.setFrom(javaTree + kotlinTree)
+        } else {
+            classDirectories.setFrom(javaTree)
+        }
+
+        reports {
+            xml.required = true
+            csv.required = false
+            html.required = true
+
+            xml.outputLocation.set(project.layout.buildDirectory.file("jacoco/jacoco.xml").get())
+            csv.outputLocation.set(project.layout.buildDirectory.file("jacoco/jacoco.csv").get())
+            html.outputLocation.set(project.layout.buildDirectory.dir("jacoco/jacocoHtml").get())
+        }
+    }
+
+    return reportTask
+}
+
+private void logTaskAdded(JacocoReport reportTask) {
+    logger.info("Added $reportTask")
+    logger.info("  executionData: $reportTask.executionData.asPath")
+    logger.info("  sourceDirectories: $reportTask.sourceDirectories.asPath")
+    logger.info("  csv.outputLocation: ${reportTask.reports.csv.outputLocation.get()}")
+    logger.info("  xml.outputLocation: ${reportTask.reports.xml.outputLocation.get()}")
+    logger.info("  html.outputLocation: ${reportTask.reports.html.outputLocation.get()}")
+}
+
+project.android.libraryVariants.all { variant ->
+    def jacocoTestReportTask = findOrCreateJacocoTestReportTask()
+
+    def reportTask = createReportTask(variant)
+    jacocoTestReportTask.dependsOn(reportTask)
+
+    logTaskAdded(reportTask.get())
 }

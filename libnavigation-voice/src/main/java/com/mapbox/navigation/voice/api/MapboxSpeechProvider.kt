@@ -59,9 +59,9 @@ internal class MapboxSpeechProvider(
         }, {
             when (it.status) {
                 ResourceLoadStatus.AVAILABLE -> {
-                    val resourceData = it.data
-                    if (resourceData != null) {
-                        createValue(ByteBufferBackedInputStream(resourceData.data.buffer))
+                    val resourceDataBuffer = it.data?.data?.buffer
+                    if (resourceDataBuffer != null) {
+                        createValue(ByteBufferBackedInputStream(resourceDataBuffer))
                     } else {
                         createError("No data available.")
                     }

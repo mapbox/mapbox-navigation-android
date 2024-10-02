@@ -6,9 +6,9 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.testing.factories.createDirectionsResponse
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createNavigationRoutes
-import com.mapbox.navigation.ui.maps.route.callout.model.DurationDifferenceType
+import com.mapbox.navigation.ui.maps.internal.route.callout.model.DurationDifferenceType
+import com.mapbox.navigation.ui.maps.internal.route.callout.model.RouteCallout
 import com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutApiOptions
-import com.mapbox.navigation.ui.maps.route.callout.model.RouteCallout
 import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutType
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue

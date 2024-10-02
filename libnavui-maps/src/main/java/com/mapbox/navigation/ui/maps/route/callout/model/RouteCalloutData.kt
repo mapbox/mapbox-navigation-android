@@ -1,10 +1,7 @@
 package com.mapbox.navigation.ui.maps.route.callout.model
 
-import com.mapbox.geojson.Geometry
-import com.mapbox.geojson.LineString
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.base.route.NavigationRoute
-import kotlin.time.Duration
+import com.mapbox.navigation.ui.maps.internal.route.callout.model.RouteCallout
 
 @ExperimentalPreviewMapboxNavigationAPI
 class RouteCalloutData internal constructor(internal val callouts: List<RouteCallout>) {
@@ -28,22 +25,4 @@ class RouteCalloutData internal constructor(internal val callouts: List<RouteCal
     override fun hashCode(): Int {
         return callouts.hashCode()
     }
-}
-
-internal sealed class RouteCallout {
-
-    abstract val route: NavigationRoute
-    abstract val geometry: Geometry
-    data class Eta internal constructor(
-        override val route: NavigationRoute,
-        override val geometry: LineString,
-        val isPrimary: Boolean,
-    ) : RouteCallout()
-
-    data class DurationDifference internal constructor(
-        override val route: NavigationRoute,
-        override val geometry: LineString,
-        val duration: Duration,
-        val type: DurationDifferenceType,
-    ) : RouteCallout()
 }
