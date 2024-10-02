@@ -2089,6 +2089,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 navigationOptions.routingTilesOptions.tilesVersion,
                 navigationOptions.routingTilesOptions.minDaysBetweenServerAndLocalTilesVersion,
             ),
+            null,
         )
     }
 

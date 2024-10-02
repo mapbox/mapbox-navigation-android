@@ -12,24 +12,21 @@ object GroupedVoiceInstructionsFactory {
      * the voice instructions that are within a specified distance of each other.
      *
      * @param route the route to use
+     * @param routeId the route identifier
      * @param rangeDistance the distance in meters for the grouping. For example if the value is
      * 100 any voice instructions within 100 meters of each other will be grouped together. The
      * resulting grouping range can be greater than this distance. For example, voice instruction A
      * occurring at 50 meters into the route, voice instruction B at 100 meters and voice instruction C at 150 meters.
      * All three of these voice instructions would be grouped together. B is with in 100 meters of A and C is with
      * in 100 meters of B.
-     * @param rangePrefixDistance a distance in meters that is prepended to the beginning of
-     * the grouped range. This is useful for creating a range that starts at a distance before the
-     * voice instruction occurs.
-     * @param rangeSuffixDistance a distance in meters that is appended to the end of the grouped
-     * range.
-     * @return [GroupedAnnouncementRanges] which contains voice instruction ranges if they were
-     * derived.
+     *
+     * @return [GroupedVoiceInstructionRanges] which contains ranges
      */
     fun getGroupedAnnouncementRanges(
         route: DirectionsRoute,
+        routeId: String,
         rangeDistance: Double,
-    ): GroupedAnnouncementRanges {
+    ): GroupedVoiceInstructionRanges {
         var runningDist = 0.0
         val intermediateDistances = mutableListOf<Double>()
         val ranges = mutableListOf<IntRange>()
@@ -76,14 +73,15 @@ object GroupedVoiceInstructionsFactory {
             )
         }
 
-        return GroupedAnnouncementRanges(ranges)
+        return GroupedVoiceInstructionRanges(routeId, ranges)
     }
+}
 
-    class GroupedAnnouncementRanges internal constructor(
-        private val ranges: List<IntRange>,
-    ) {
-        fun isInRange(distance: Int): Boolean {
-            return ranges.any { it.contains(distance) }
-        }
+class GroupedVoiceInstructionRanges internal constructor(
+    val routeId: String,
+    private val ranges: List<IntRange>,
+) {
+    fun isInRange(distance: Int): Boolean {
+        return ranges.any { it.contains(distance) }
     }
 }

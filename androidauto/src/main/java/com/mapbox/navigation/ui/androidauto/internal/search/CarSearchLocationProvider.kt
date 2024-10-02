@@ -28,7 +28,7 @@ class CarSearchLocationProvider : LocationProvider, MapboxNavigationObserver {
         }
         private set
 
-    private val observers = ConcurrentHashMap<CommonLocationObserver, Looper?>()
+    private val observers = ConcurrentHashMap<CommonLocationObserver, () -> Looper?>()
 
     private val locationObserver = object : LocationObserver {
         override fun onNewRawLocation(rawLocation: Location) {
@@ -38,7 +38,7 @@ class CarSearchLocationProvider : LocationProvider, MapboxNavigationObserver {
         override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
             location = locationMatcherResult
             observers.forEach { (callback, looper) ->
-                notifyCallback(locationMatcherResult, callback, looper)
+                notifyCallback(locationMatcherResult, callback, looper())
             }
         }
     }
@@ -60,14 +60,14 @@ class CarSearchLocationProvider : LocationProvider, MapboxNavigationObserver {
     }
 
     override fun addLocationObserver(observer: CommonLocationObserver) {
-        observers[observer] = null
+        observers[observer] = { null }
     }
 
     override fun addLocationObserver(
         observer: com.mapbox.common.location.LocationObserver,
         looper: Looper,
     ) {
-        observers[observer] = looper
+        observers[observer] = { looper }
     }
 
     override fun removeLocationObserver(observer: com.mapbox.common.location.LocationObserver) {

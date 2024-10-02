@@ -11,8 +11,8 @@ import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.ui.maps.internal.route.callout.model.RouteCallout
 import com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutViewOptions
-import com.mapbox.navigation.ui.maps.route.callout.model.RouteCallout
 import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.route.callout.view.RouteCalloutView
 
