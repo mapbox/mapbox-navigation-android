@@ -79,7 +79,6 @@ registry {
     publish = true
     publishMessage = "cc @mapbox/navigation-android"
     publications = ["release"]
-    featureFlag = project.hasProperty('ARTIFACT_FEATURE_FLAG') ? project.property('ARTIFACT_FEATURE_FLAG') : ''
 }
 
 task androidSourcesJar(type: Jar) {
