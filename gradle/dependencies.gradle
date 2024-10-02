@@ -201,7 +201,7 @@ ext {
       jacoco               : '0.8.12',
       googleServices       : '4.3.3',
       mapboxSdkVersions    : '1.1.3',
-      dokka                : '1.6.21',
+      dokka                : '1.9.20',
       mapboxSdkRegistry    : '0.7.0',
       mapboxAccessToken    : '0.2.1',
       mapboxNativeDownload : '0.2.2',

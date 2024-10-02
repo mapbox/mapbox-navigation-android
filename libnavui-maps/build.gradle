@@ -46,7 +46,7 @@ android {
 dependencies {
     api project(":libnavui-base")
 
-    api (dependenciesList.mapboxMapSdk)
+    api(dependenciesList.mapboxMapSdk)
     api dependenciesList.mapboxSdkTurf
 
     implementation dependenciesList.androidXAppCompat
