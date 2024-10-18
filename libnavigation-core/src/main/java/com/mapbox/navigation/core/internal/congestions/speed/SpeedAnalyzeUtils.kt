@@ -1,6 +1,9 @@
+@file:OptIn(ExperimentalMapboxNavigationAPI::class)
+
 package com.mapbox.navigation.core.internal.congestions.speed
 
 import com.mapbox.api.directions.v5.models.LegAnnotation
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.CongestionNumericOverride
 import com.mapbox.navigation.base.internal.route.update
 import com.mapbox.navigation.base.route.NavigationRoute

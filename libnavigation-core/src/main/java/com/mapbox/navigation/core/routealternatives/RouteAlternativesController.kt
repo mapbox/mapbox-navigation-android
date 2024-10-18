@@ -1,6 +1,5 @@
 package com.mapbox.navigation.core.routealternatives
 
-import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.internal.utils.AlternativesInfo
 import com.mapbox.navigation.base.internal.utils.AlternativesParsingResult
@@ -12,6 +11,8 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.core.directions.session.DirectionsSession
+import com.mapbox.navigation.core.directions.session.findRoute
 import com.mapbox.navigation.core.internal.routealternatives.NavigationRouteAlternativesObserver
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
@@ -37,6 +38,7 @@ internal class RouteAlternativesController(
     private val tripSession: TripSession,
     private val threadController: ThreadController,
     private val routeParsingManager: RouteParsingManager,
+    private val directionSession: DirectionsSession,
 ) : AlternativeMetadataProvider {
 
     @RouterOrigin
@@ -63,13 +65,10 @@ internal class RouteAlternativesController(
 
     fun setRouteUpdateSuggestionListener(listener: UpdateRoutesSuggestionObserver?) {
         updateNativeObserver {
-            if (listener == null) {
-                defaultAlternativesHandler = null
+            defaultAlternativesHandler = if (listener == null) {
+                null
             } else {
-                defaultAlternativesHandler =
-                    RouteAlternativesToRouteUpdateSuggestionsAdapter(
-                        listener,
-                    )
+                RouteAlternativesToRouteUpdateSuggestionsAdapter(listener)
             }
         }
     }
@@ -135,21 +134,19 @@ internal class RouteAlternativesController(
             }
 
             observerProcessingJob?.cancel()
-            observerProcessingJob =
-                processRouteAlternatives(
-                    onlinePrimaryRoute,
-                    routeAlternatives,
-                ) { alternatives, origin ->
-                    logD("${alternatives.size} alternatives available", LOG_CATEGORY)
+            observerProcessingJob = processRouteAlternatives(
+                onlinePrimaryRoute,
+                routeAlternatives,
+            ) { alternatives, origin ->
+                logD("${alternatives.size} alternatives available", LOG_CATEGORY)
 
-                    val routeProgress = tripSession.getRouteProgress()
-                        ?: run {
-                            logD("skipping alternatives update - no progress", LOG_CATEGORY)
-                            return@processRouteAlternatives
-                        }
-
-                    observerToTrigger?.onRouteAlternatives(routeProgress, alternatives, origin)
+                val routeProgress = tripSession.getRouteProgress() ?: run {
+                    logD("skipping alternatives update - no progress", LOG_CATEGORY)
+                    return@processRouteAlternatives
                 }
+
+                observerToTrigger?.onRouteAlternatives(routeProgress, alternatives, origin)
+            }
         }
 
         override fun onError(message: String) {
@@ -175,20 +172,22 @@ internal class RouteAlternativesController(
         val primaryRoutes = onlinePrimaryRoute?.let { listOf(it) } ?: emptyList()
         val allAlternatives = primaryRoutes + nativeAlternatives.map { it.route }
 
-        val alternatives: List<NavigationRoute> = if (allAlternatives.isNotEmpty()) {
+        val alternatives = if (allAlternatives.isNotEmpty()) {
             val args = AlternativesInfo(
                 RouteResponseInfo.fromResponses(allAlternatives.map { it.responseJsonRef.buffer }),
             )
-            val alternativesParsingResult:
-                AlternativesParsingResult<Expected<Throwable, List<NavigationRoute>>> =
-                routeParsingManager.parseAlternatives(args) {
-                    withContext(ThreadController.DefaultDispatcher) {
-                        parseRouteInterfaces(
-                            allAlternatives,
-                            responseTimeElapsedSeconds,
-                        )
-                    }
+
+            val alternativesParsingResult = routeParsingManager.parseAlternatives(args) {
+                withContext(ThreadController.DefaultDispatcher) {
+                    parseRouteInterfaces(
+                        routes = allAlternatives,
+                        responseTimeElapsedSeconds = responseTimeElapsedSeconds,
+                        routeLookup = directionSession::findRoute,
+                        routeToDirections = routeParsingManager::parseRouteToDirections,
+                    )
                 }
+            }
+
             val expected = when (alternativesParsingResult) {
                 AlternativesParsingResult.NotActual -> {
                     ExpectedFactory.createError(
@@ -248,13 +247,11 @@ internal class RouteAlternativesController(
 
     private class RouteAlternativesToRouteUpdateSuggestionsAdapter(
         private val suggestRouteUpdate: (UpdateRouteSuggestion) -> Unit,
-    ) :
-        NavigationRouteAlternativesObserver {
+    ) : NavigationRouteAlternativesObserver {
         override fun onRouteAlternatives(
             routeProgress: RouteProgress,
             alternatives: List<NavigationRoute>,
-            @RouterOrigin
-            routerOrigin: String,
+            @RouterOrigin routerOrigin: String,
         ) {
             when (routeProgress.navigationRoute.origin) {
                 RouterOrigin.ONLINE -> {

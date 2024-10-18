@@ -19,7 +19,7 @@ internal sealed class JunctionResult {
     sealed class JunctionRaster : JunctionResult() {
         object Empty : JunctionRaster()
         data class Failure(val error: String?) : JunctionRaster()
-        data class Success(val dataRef: DataRef) : JunctionRaster()
+        data class Success(val dataRef: DataRef, val contentType: String) : JunctionRaster()
     }
 
     sealed class JunctionBitmap : JunctionResult() {

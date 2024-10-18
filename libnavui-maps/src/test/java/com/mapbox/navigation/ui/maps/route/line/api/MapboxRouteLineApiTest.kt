@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMapboxNavigationAPI::class)
+
 package com.mapbox.navigation.ui.maps.route.line.api
 
 import android.content.Context
@@ -16,6 +18,7 @@ import com.mapbox.maps.RenderedQueryGeometry
 import com.mapbox.maps.RenderedQueryOptions
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.Style
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.route.update
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress

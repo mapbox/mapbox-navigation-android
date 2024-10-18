@@ -1,9 +1,0 @@
-tasks.configureEach {
-    if (name == "packageDebugAssets" || name == "packageReleaseAssets"
-            || name == "mergeDebugAssets" || name == "mergeReleaseAssets") {
-        def task = tasks.findByName("saveSDKVersion")
-        if (task != null) {
-            dependsOn task
-        }
-    }
-}

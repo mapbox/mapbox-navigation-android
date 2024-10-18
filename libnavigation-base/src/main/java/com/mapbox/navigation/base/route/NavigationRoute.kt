@@ -57,7 +57,8 @@ import kotlin.time.Duration.Companion.milliseconds
  * Prefer using [waypoints] instead of [DirectionsRoute.waypoints] from [directionsRoute].
  * @param responseOriginAPI describes API which generated data for [NavigationRoute].
  * @param overriddenTraffic describes a segment of [NavigationRoute] with overridden
- * congestion_numeric.
+ * @param routeRefreshMetadata contains data that describes refreshing of this route object.
+ * The field is null until the first refresh.
  */
 class NavigationRoute private constructor(
     val directionsRoute: DirectionsRoute,
@@ -70,6 +71,8 @@ class NavigationRoute private constructor(
     @ExperimentalMapboxNavigationAPI
     @ResponseOriginAPI
     val responseOriginAPI: String,
+    @ExperimentalMapboxNavigationAPI
+    val routeRefreshMetadata: RouteRefreshMetadata?,
 ) {
 
     internal constructor(
@@ -92,6 +95,7 @@ class NavigationRoute private constructor(
         expirationTimeElapsedSeconds,
         overriddenTraffic,
         responseOriginAPI,
+        null,
     )
 
     /**
@@ -152,6 +156,7 @@ class NavigationRoute private constructor(
             responseOriginAPI,
             responseUUID,
             expirationTimeElapsedSeconds,
+            routeRefreshMetadata,
         )
         return gson.toJson(state)
     }
@@ -187,6 +192,7 @@ class NavigationRoute private constructor(
                     state.expirationTimeElapsedSeconds,
                     responseOriginAPI = state.responseOriginAPI,
                     overriddenTraffic = null,
+                    routeRefreshMetadata = state.routeRefreshMetadata,
                 )
                 ExpectedFactory.createValue(route)
             } catch (t: Throwable) {
@@ -625,6 +631,7 @@ class NavigationRoute private constructor(
         nativeRoute: RouteInterface = this.nativeRoute,
         overriddenTraffic: CongestionNumericOverride? = this.overriddenTraffic,
         expirationTimeElapsedSeconds: Long? = this.expirationTimeElapsedSeconds,
+        routeRefreshMetadata: RouteRefreshMetadata? = this.routeRefreshMetadata,
     ): NavigationRoute = NavigationRoute(
         directionsRoute,
         waypoints,
@@ -634,6 +641,7 @@ class NavigationRoute private constructor(
         expirationTimeElapsedSeconds,
         overriddenTraffic,
         this.responseOriginAPI,
+        routeRefreshMetadata,
     )
 
     @Keep
@@ -648,6 +656,7 @@ class NavigationRoute private constructor(
         val responseOriginAPI: String,
         val responseUUID: String,
         val expirationTimeElapsedSeconds: Long?,
+        val routeRefreshMetadata: RouteRefreshMetadata?,
     )
 }
 

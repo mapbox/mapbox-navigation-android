@@ -888,6 +888,7 @@ package com.mapbox.navigation.base.route {
     method public String getResponseOriginAPI();
     method public String getResponseUUID();
     method public int getRouteIndex();
+    method public com.mapbox.navigation.base.route.RouteRefreshMetadata? getRouteRefreshMetadata();
     method public java.util.List<com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject> getUpcomingRoadObjects();
     method public java.util.List<com.mapbox.api.directions.v5.models.DirectionsWaypoint>? getWaypoints();
     property public final com.mapbox.api.directions.v5.models.DirectionsRoute directionsRoute;
@@ -897,6 +898,7 @@ package com.mapbox.navigation.base.route {
     property public final String responseOriginAPI;
     property public final String responseUUID;
     property public final int routeIndex;
+    property public final com.mapbox.navigation.base.route.RouteRefreshMetadata? routeRefreshMetadata;
     property public final java.util.List<com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject> upcomingRoadObjects;
     property public final java.util.List<com.mapbox.api.directions.v5.models.DirectionsWaypoint>? waypoints;
     field public static final com.mapbox.navigation.base.route.NavigationRoute.Companion Companion;
@@ -942,6 +944,11 @@ package com.mapbox.navigation.base.route {
 
   public final class RouteExclusions {
     method public static java.util.List<com.mapbox.navigation.base.route.ExclusionViolation> exclusionViolations(com.mapbox.navigation.base.route.NavigationRoute);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class RouteRefreshMetadata {
+    method public boolean isUpToDate();
+    property public final boolean isUpToDate;
   }
 
   public final class RouteRefreshOptions {

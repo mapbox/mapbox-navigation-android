@@ -12,11 +12,13 @@ object RouteIndicesFactory {
         routeGeometryIndex: Int,
         legGeometryIndex: Int,
         intersectionIndex: Int,
+        isForkPointPassed: Boolean,
     ): RouteIndices = RouteIndices(
         legIndex,
         stepIndex,
         routeGeometryIndex,
         legGeometryIndex,
         intersectionIndex,
+        isForkPointPassed,
     )
 }

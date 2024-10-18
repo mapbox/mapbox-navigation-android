@@ -1,16 +1,21 @@
 package com.mapbox.navigation.core.reroute
 
 import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.factories.createRouteOptions
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
+import org.junit.Rule
 import org.junit.Test
 
 class MapboxRerouteOptionsAdapterTest {
 
     private val externalAdapter = mockk<RerouteOptionsAdapter>()
     private val inputOptions = createRouteOptions(profile = DirectionsCriteria.PROFILE_DRIVING)
+
+    @get:Rule
+    val logRule = LoggingFrontendTestRule()
 
     @Test
     fun noInternalAdaptersNorExternal() {

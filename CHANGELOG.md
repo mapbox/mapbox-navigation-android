@@ -1,24 +1,30 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
-## Navigation SDK Core Framework 3.4.0-rc.1 - 17 September, 2024
+## Navigation SDK Core Framework 3.5.0-beta.1 - 17 October, 2024
 #### Features
-
+- Added support for SVG junction views, see `MapboxJunctionApi#generateJunction(instructions: BannerInstructions, @JunctionViewFormat format: String, consumer: MapboxNavigationConsumer<Expected<JunctionError, JunctionViewData>>)`. [#6803](https://github.com/mapbox/mapbox-navigation-android/pull/6803)
+- Added experimental `NavigationRoute#routeRefreshMetadata` which contains data related to refresh of the route object. [#6736](https://github.com/mapbox/mapbox-navigation-android/pull/6736)
 
 #### Bug fixes and improvements
+- Nav SDK now removes passed alternative routes as soon as user passed fork point. [#6813](https://github.com/mapbox/mapbox-navigation-android/pull/6813)
+- Fixed a potential route line layers visibility race, which might have happened if you invoked `MapboxRouteLineView#showPrimaryRoute` and `MapboxRouteLineView#renderRouteDrawData` approximately at the same time.  [#6751](https://github.com/mapbox/mapbox-navigation-android/pull/6751)
+- Optimized CA routes handling by skiping route parsing if it's already exist in direction session    [#6868](https://github.com/mapbox/mapbox-navigation-android/pull/6868)
 - Fixed `CarSearchLocationProvider` produces _NullPointerException_ when using Mapbox Search SDK.  [#6702](https://github.com/mapbox/mapbox-navigation-android/pull/6702)
+- Fixed an issue preventing Copilot from correctly recording history events.   [#6787](https://github.com/mapbox/mapbox-navigation-android/pull/6787)
+- Improved reroute and alternative routes behavior [#6989](https://github.com/mapbox/mapbox-navigation-android/pull/6989)
 
 #### Known issues :warning:
 
 
 #### Other changes
-
+- Changed `AutoArrivalController`: moves to a next waypoint immediately.
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
-- Mapbox Maps SDK `v11.7.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.7.0-rc.1))
-- Mapbox Navigation Native `v319.0.0`
-- Mapbox Core Common `v24.7.0-rc.2`
-- Mapbox Java `v7.2.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.2.0))
+- Mapbox Maps SDK `v11.8.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.8.0-beta.1))
+- Mapbox Navigation Native `v321.0.0-beta.1`
+- Mapbox Core Common `v24.8.0-beta.1`
+- Mapbox Java `v7.3.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.3.1))
 
 
 ## Navigation SDK Core Framework 3.4.0-beta.1 - 05 September, 2024

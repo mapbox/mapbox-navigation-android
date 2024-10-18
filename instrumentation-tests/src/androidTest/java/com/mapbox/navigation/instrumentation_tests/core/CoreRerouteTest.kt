@@ -22,6 +22,8 @@ import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesExtra
+import com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE
+import com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.core.reroute.RerouteOptionsAdapter
 import com.mapbox.navigation.core.reroute.RerouteState
@@ -923,6 +925,58 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
                     .drop(1) // skipping initial route
                     .first { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_NEW }
             }
+        }
+    }
+
+    @Test
+    fun reroute_from_primary_route_to_ignored_alternative() = sdkTest {
+        withMapboxNavigation(
+            historyRecorderRule = mapboxHistoryTestRule,
+        ) { mapboxNavigation ->
+            val mockRoute = RoutesProvider.dc_short_alternative_with_fork_point(context)
+            mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
+
+            val routes = mapboxNavigation.requestRoutes(
+                RouteOptions.builder()
+                    .applyDefaultNavigationOptions()
+                    .applyLanguageAndVoiceUnitOptions(context)
+                    .baseUrl(mockWebServerRule.baseUrl)
+                    .waypointsPerRoute(true)
+                    .coordinatesList(mockRoute.routeWaypoints).build(),
+            ).getSuccessfulResultOrThrowException().routes
+
+            val mainRoute = routes[0]
+            val alternativeRoute = routes[1]
+
+            mockLocationReplayerRule.playRoute(
+                directionsRoute = mainRoute.directionsRoute,
+            )
+
+            mapboxNavigation.startTripSession()
+            mapboxNavigation.setNavigationRoutes(routes)
+
+            // alternative fork point passed reason should occur on this route
+            mapboxNavigation.routesUpdates().filter {
+                it.reason == ROUTES_UPDATE_REASON_ALTERNATIVE && it.ignoredRoutes.any {
+                    it.navigationRoute == alternativeRoute &&
+                        it.reason == "Alternative fork point passed"
+                }
+            }.first()
+
+            mockLocationReplayerRule.playRoute(
+                directionsRoute = alternativeRoute.directionsRoute,
+                eventsToDrop = 30, // approx value to start alternative rotue after "fork point"
+            )
+
+            // reroute to hidden alternative should occur
+            val rerouteToHiddenAlternativeUpdate = mapboxNavigation.routesUpdates().filter {
+                it.reason == ROUTES_UPDATE_REASON_REROUTE
+            }.first()
+
+            assertEquals(
+                alternativeRoute,
+                rerouteToHiddenAlternativeUpdate.navigationRoutes[0],
+            )
         }
     }
 
