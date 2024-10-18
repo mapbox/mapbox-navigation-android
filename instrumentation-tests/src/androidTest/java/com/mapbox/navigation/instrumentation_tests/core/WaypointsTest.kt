@@ -22,7 +22,6 @@ import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
-import com.mapbox.navigation.testing.ui.utils.coroutines.navigateNextRouteLeg
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForUpdate
@@ -162,7 +161,7 @@ class WaypointsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
             Point.fromLngLat(140.025878, 35.660315),
             Point.fromLngLat(140.02985194436837, 35.6621859075361),
             Point.fromLngLat(140.0277017481984, 35.65792632910045),
-            Point.fromLngLat(140.03887765416835, 35.66023142441715),
+            Point.fromLngLat(140.038772, 35.660329),
             Point.fromLngLat(140.0231453915486, 35.667495318461164),
             Point.fromLngLat(140.03969561587877, 35.67009382118668),
         )
@@ -205,7 +204,6 @@ class WaypointsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
         checkLocation(coordinates[1], legWaypoint.location)
         assertEquals(LegWaypoint.REGULAR, legWaypoint.type)
 
-        mapboxNavigation.navigateNextRouteLeg()
         stayOnPosition(coordinates[2], 270f)
         delay(1000)
         assertEquals(1, nextWaypoints.size)
@@ -216,7 +214,6 @@ class WaypointsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
         checkLocation(coordinates[3], legWaypoint.location)
         assertEquals(LegWaypoint.REGULAR, legWaypoint.type)
 
-        mapboxNavigation.navigateNextRouteLeg()
         stayOnPosition(coordinates[4], 45f)
         delay(1000)
         assertEquals(2, nextWaypoints.size)
@@ -263,7 +260,6 @@ class WaypointsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
         )
         assertEquals(LegWaypoint.EV_CHARGING_ADDED, legWaypoint.type)
 
-        mapboxNavigation.navigateNextRouteLeg()
         stayOnPosition(routes[0].waypoints!![2].location(), 0f)
         nextWaypoints.waitUntilHasSize(2)
         legWaypoint = nextWaypoints[1]!!

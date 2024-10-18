@@ -136,8 +136,6 @@ class MapboxRouteCalloutApi(
         val primaryRoute = routes.firstOrNull() ?: return emptyList()
         val alternativeRoutes = routes.drop(1)
 
-        if (alternativeRoutes.isEmpty()) return emptyList()
-
         return when (options.routeCalloutType) {
             RouteCalloutType.RouteDurations -> createRoutePreviewCallouts(
                 primaryRoute,
@@ -204,7 +202,7 @@ class MapboxRouteCalloutApi(
         val durationDiffAbsoluteValue = durationDiff.absoluteValue
 
         return durationDiffAbsoluteValue to when {
-            durationDiffAbsoluteValue < options.similarDurationDelta -> DurationDifferenceType.Same
+            durationDiffAbsoluteValue <= options.similarDurationDelta -> DurationDifferenceType.Same
 
             durationDiff < 0.seconds -> DurationDifferenceType.Slower
 
@@ -217,24 +215,17 @@ class MapboxRouteCalloutApi(
         primaryRoutePoints: List<Point>,
         alternativeRoutes: List<NavigationRoute>,
     ): List<RouteCallout.Eta> {
-        val primaryCallout = RouteCallout.Eta(
-            primaryRoute,
-            LineString.fromLngLats(primaryRoutePoints),
-            isPrimary = true,
-        )
+        return buildList(capacity = alternativeRoutes.size + 1) {
+            val primaryGeometry = LineString.fromLngLats(primaryRoutePoints)
+            add(RouteCallout.Eta(primaryRoute, primaryGeometry, isPrimary = true))
 
-        val alternativeCallouts = alternativeRoutes.map {
-            val geometry = alternativesGeometryDifference[it.id]
-                ?: it.directionsRoute.completeGeometryToLineString()
+            alternativeRoutes.mapTo(destination = this) { alternativeRoute ->
+                val geometry = alternativesGeometryDifference[alternativeRoute.id]
+                    ?: alternativeRoute.directionsRoute.completeGeometryToLineString()
 
-            RouteCallout.Eta(
-                it,
-                geometry,
-                isPrimary = false,
-            )
+                RouteCallout.Eta(alternativeRoute, geometry, isPrimary = false)
+            }
         }
-
-        return listOf(primaryCallout) + alternativeCallouts
     }
 
     private companion object {

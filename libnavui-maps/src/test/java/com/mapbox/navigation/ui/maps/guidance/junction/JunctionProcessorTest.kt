@@ -287,13 +287,15 @@ class JunctionProcessorTest {
     @Test
     fun `process ProcessJunctionResponse action with ResourceLoadStatus AVAILABLE`() {
         val blob = byteArrayOf(12, -12, 23, 65, -56, 74, 88, 90, -92, -11)
+        val contentType = "image/png"
         val loadResult = resourceLoadResult(
             data = resourceData(blob),
             status = ResourceLoadStatus.AVAILABLE,
+            contentType = contentType,
         )
         val response: Expected<ResourceLoadError, ResourceLoadResult> =
             ExpectedFactory.createValue(loadResult)
-        val expected = JunctionResult.JunctionRaster.Success(blob.toDataRef())
+        val expected = JunctionResult.JunctionRaster.Success(blob.toDataRef(), contentType)
         val action = JunctionAction.ProcessJunctionResponse(response)
 
         val result = JunctionProcessor.process(action) as JunctionResult.JunctionRaster.Success

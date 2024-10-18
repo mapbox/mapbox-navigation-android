@@ -8,6 +8,7 @@ package com.mapbox.navigation.base.internal.trip.model
  * @param routeGeometryIndex current index in the route geometry. Analogous to [RouteProgress.currentRouteGeometryIndex] for primary route.
  * @param legGeometryIndex current index in the leg geometry. Analogous to [RouteLegProgress.geometryIndex] for primary route.
  * @param intersectionIndex current step-wise intersection index. Analogous to [RouteStepProgress.intersectionIndex] for primary route.
+ * @param isForkPointPassed indicates whether the fork point was passed.
  */
 class RouteIndices internal constructor(
     val legIndex: Int,
@@ -15,6 +16,7 @@ class RouteIndices internal constructor(
     val routeGeometryIndex: Int,
     val legGeometryIndex: Int,
     val intersectionIndex: Int,
+    val isForkPointPassed: Boolean,
 ) {
 
     /**
@@ -31,6 +33,7 @@ class RouteIndices internal constructor(
         if (routeGeometryIndex != other.routeGeometryIndex) return false
         if (legGeometryIndex != other.legGeometryIndex) return false
         if (intersectionIndex != other.intersectionIndex) return false
+        if (isForkPointPassed != other.isForkPointPassed) return false
 
         return true
     }
@@ -44,6 +47,7 @@ class RouteIndices internal constructor(
         result = 31 * result + routeGeometryIndex
         result = 31 * result + legGeometryIndex
         result = 31 * result + intersectionIndex
+        result = 31 * result + isForkPointPassed.hashCode()
         return result
     }
 
@@ -56,7 +60,8 @@ class RouteIndices internal constructor(
             "stepIndex=$stepIndex, " +
             "routeGeometryIndex=$routeGeometryIndex, " +
             "legGeometryIndex=$legGeometryIndex, " +
-            "intersectionIndex=$intersectionIndex" +
+            "intersectionIndex=$intersectionIndex, " +
+            "isForkPointPassed=$isForkPointPassed" +
             ")"
     }
 }

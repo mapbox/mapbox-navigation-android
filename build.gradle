@@ -85,7 +85,6 @@ subprojects {
   apply from: "${rootDir}/gradle/dependency-updates.gradle"
   apply from: "${rootDir}/gradle/checkstyle.gradle"
   apply from: "${rootDir}/gradle/dependencies-graph.gradle"
-  apply from: "${rootDir}/gradle/save-sdk-version.gradle"
 
   plugins.withId('org.jetbrains.kotlin.jvm') {
     compileKotlin {

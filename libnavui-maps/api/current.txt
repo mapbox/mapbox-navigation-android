@@ -544,6 +544,7 @@ package com.mapbox.navigation.ui.maps.guidance.junction.api {
     ctor public MapboxJunctionApi();
     method public void cancelAll();
     method public void generateJunction(com.mapbox.api.directions.v5.models.BannerInstructions instructions, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionError,com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue>> consumer);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void generateJunction(com.mapbox.api.directions.v5.models.BannerInstructions instructions, @com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionViewFormat String format, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionError,com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionViewData>> consumer);
   }
 
 }
@@ -560,6 +561,58 @@ package com.mapbox.navigation.ui.maps.guidance.junction.model {
   public final class JunctionValue {
     method public android.graphics.Bitmap getBitmap();
     property public final android.graphics.Bitmap bitmap;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class JunctionViewData {
+    method public byte[] getData();
+    method public com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionViewData.PngData? getPngData();
+    method public String getResponseFormat();
+    method public com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionViewData.SvgData? getSvgData();
+    method public boolean isPngData();
+    method public boolean isSvgData();
+    property public final byte[] data;
+    property public final boolean isPngData;
+    property public final boolean isSvgData;
+    property public final String responseFormat;
+  }
+
+  public static final class JunctionViewData.PngData {
+    ctor public JunctionViewData.PngData(byte[] data);
+    method public android.graphics.Bitmap? getAsBitmap(android.graphics.BitmapFactory.Options options = DEFAULT_DECODE_OPTIONS);
+    method public byte[] getData();
+    property public final byte[] data;
+  }
+
+  @StringDef({com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionViewData.ResponseFormat.Companion.PNG, com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionViewData.ResponseFormat.Companion.SVG, com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionViewData.ResponseFormat.Companion.UNKNOWN}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface JunctionViewData.ResponseFormat {
+    field public static final com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionViewData.ResponseFormat.Companion Companion;
+    field public static final String PNG = "png";
+    field public static final String SVG = "svg";
+    field public static final String UNKNOWN = "unknown";
+  }
+
+  public static final class JunctionViewData.ResponseFormat.Companion {
+    field public static final String PNG = "png";
+    field public static final String SVG = "svg";
+    field public static final String UNKNOWN = "unknown";
+  }
+
+  public static final class JunctionViewData.SvgData {
+    ctor public JunctionViewData.SvgData(byte[] data);
+    method public android.graphics.Bitmap? getAsBitmap(int width, int height);
+    method public android.graphics.Bitmap? getAsBitmap(int width);
+    method public byte[] getData();
+    property public final byte[] data;
+  }
+
+  @StringDef({com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionViewFormat.Companion.PNG, com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionViewFormat.Companion.SVG}) @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public @interface JunctionViewFormat {
+    field public static final com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionViewFormat.Companion Companion;
+    field public static final String PNG = "png";
+    field public static final String SVG = "svg";
+  }
+
+  public static final class JunctionViewFormat.Companion {
+    field public static final String PNG = "png";
+    field public static final String SVG = "svg";
   }
 
 }

@@ -5,10 +5,10 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.telemetry.ExtendedUserFeedback
-import com.mapbox.navigation.core.internal.utils.encodedBitmapToNativeScreenshotFormat
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FeedbackHelper
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
+import com.mapbox.navigator.ScreenshotFormat
 
 /**
  * Class for user feedbacks, contains properties that were passed to
@@ -17,7 +17,7 @@ import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
  * @property feedbackType feedback type, one of [FeedbackEvent.Type] or a custom one
  * @property feedbackSubTypes list of [FeedbackEvent.SubType] and/or custom feedback subtypes
  * @property description description message
- * @property screenshot screenshot that will be attached to feedback
+ * @property screenshot base64-encoded screenshot that will be attached to feedback
  * @property feedbackMetadata use it to attach feedback to a specific passed location.
  */
 @ExperimentalPreviewMapboxNavigationAPI
@@ -110,7 +110,7 @@ class UserFeedback private constructor(
         }
 
         /**
-         * Screenshot that will be attached to feedback
+         * Base64-encoded screenshot that will be attached to feedback
          */
         fun screenshot(screenshot: String?): Builder = apply {
             this.screenshot = screenshot
@@ -143,7 +143,7 @@ class UserFeedback private constructor(
                 feedbackType,
                 feedbackSubTypes,
                 description,
-                screenshot?.encodedBitmapToNativeScreenshotFormat(),
+                ScreenshotFormat(null, screenshot),
             )
         }
 

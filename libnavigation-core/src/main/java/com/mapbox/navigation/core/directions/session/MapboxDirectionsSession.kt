@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.directions.session
 
+import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
@@ -26,9 +27,14 @@ internal class MapboxDirectionsSession(
     private val onSetNavigationRoutesStartedObservers =
         CopyOnWriteArraySet<SetNavigationRoutesStartedObserver>()
 
+    @VisibleForTesting
     override var routesUpdatedResult: RoutesUpdatedResult? = null
+
     override val routes: List<NavigationRoute>
         get() = routesUpdatedResult?.navigationRoutes ?: emptyList()
+
+    override val ignoredRoutes: List<IgnoredRoute>
+        get() = routesUpdatedResult?.ignoredRoutes ?: emptyList()
 
     override var initialLegIndex = DEFAULT_INITIAL_LEG_INDEX
         private set
@@ -39,6 +45,7 @@ internal class MapboxDirectionsSession(
 
     override fun setNavigationRoutesFinished(routes: DirectionsSessionRoutes) {
         this.initialLegIndex = routes.setRoutesInfo.initialLegIndex()
+
         if (
             routesUpdatedResult?.navigationRoutes?.isEmpty() == true &&
             routes.acceptedRoutes.isEmpty()
@@ -46,7 +53,10 @@ internal class MapboxDirectionsSession(
             return
         }
 
-        val result = routes.toRoutesUpdatedResult().also { routesUpdatedResult = it }
+        val result = routes.toRoutesUpdatedResult().also {
+            routesUpdatedResult = it
+        }
+
         onSetNavigationRoutesFinishedObservers.forEach {
             it.onRoutesChanged(result)
         }

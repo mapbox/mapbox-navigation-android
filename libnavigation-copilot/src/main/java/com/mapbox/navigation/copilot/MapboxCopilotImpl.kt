@@ -38,6 +38,7 @@ import com.mapbox.navigation.core.internal.telemetry.registerUserFeedbackObserve
 import com.mapbox.navigation.core.internal.telemetry.unregisterUserFeedbackObserver
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
+import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -76,13 +77,8 @@ internal class MapboxCopilotImpl(
     private val filepaths = HistoryFiles(applicationContext)
 
     private val appLifecycleObserver = object : DefaultLifecycleObserver {
-        override fun onResume(owner: LifecycleOwner) {
-            push(GoingToForegroundEvent)
-        }
-
-        override fun onPause(owner: LifecycleOwner) {
-            push(GoingToBackgroundEvent)
-        }
+        override fun onResume(owner: LifecycleOwner) = push(GoingToForegroundEvent)
+        override fun onPause(owner: LifecycleOwner) = push(GoingToBackgroundEvent)
     }
     private val deviceType = mapboxNavigation.navigationOptions.deviceProfile.deviceType
     private val copilotOptions
@@ -107,15 +103,8 @@ internal class MapboxCopilotImpl(
 
     private var arrivedAtFinalDestination = false
     private val arrivalObserver = object : ArrivalObserver {
-
-        override fun onWaypointArrival(routeProgress: RouteProgress) {
-            // Nothing to do
-        }
-
-        override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) {
-            // Nothing to do
-        }
-
+        override fun onWaypointArrival(routeProgress: RouteProgress) = Unit
+        override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) = Unit
         override fun onFinalDestinationArrival(routeProgress: RouteProgress) {
             arrivedAtFinalDestination = true
         }
@@ -218,12 +207,10 @@ internal class MapboxCopilotImpl(
         }
     }
 
-    private fun pushHistoryJson(eventType: String, eventJson: String) =
-        mainJobController.scope.launch {
-            // IMPORTANT! pushHistory calls must be executed from the thread owning
-            // the native HistoryRecorderHandleInterface instance
-            copilotHistoryRecorder.pushHistory(eventType, eventJson)
-        }
+    private fun pushHistoryJson(eventType: String, eventJson: String) {
+        logD("pushHistory event=$eventType")
+        copilotHistoryRecorder.pushHistory(eventType, eventJson)
+    }
 
     private fun pushFeedbackEvent(userFeedback: ExtendedUserFeedback) {
         val lat = userFeedback.location.latitude()
@@ -258,6 +245,7 @@ internal class MapboxCopilotImpl(
             driveMode = driveMode,
             recording = recording,
         )
+        logD("startRecording $activeSession")
         saveCopilotSession()
 
         mapboxNavigation.registerArrivalObserver(arrivalObserver)
@@ -280,6 +268,7 @@ internal class MapboxCopilotImpl(
 
     private fun restartRecordingHistory() {
         val session = activeSession.copy(endedAt = currentUtcTime())
+        logD("stopRecording $session")
         copilotHistoryRecorder.stopRecording { historyFilePath ->
             historyFilePath ?: return@stopRecording
             finishedSessions.add(session)
@@ -295,6 +284,7 @@ internal class MapboxCopilotImpl(
             recording = recording,
             startedAt = currentUtcTime(),
         )
+        logD("startRecording $activeSession")
     }
 
     private fun uploadRecording() {
@@ -308,6 +298,7 @@ internal class MapboxCopilotImpl(
             pushDriveEndsEvent()
 
             val historyFilesCopy = finishedSessions.toMutableList()
+            logD("stopRecording $session")
             stopRecording {
                 historyFilesCopy.add(session)
                 limitTotalHistoryFilesSize(historyFilesCopy)
@@ -438,5 +429,7 @@ internal class MapboxCopilotImpl(
         internal const val MEDIA_TYPE_ZIP = "application/zip"
         internal const val LOG_CATEGORY = "MapboxCopilot"
         internal const val PROD_BASE_URL = "https://events.mapbox.com"
+
+        internal fun logD(msg: String) = logD(msg, LOG_CATEGORY)
     }
 }

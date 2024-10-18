@@ -1,0 +1,65 @@
+import groovy.json.JsonSlurper
+import groovy.json.JsonOutput
+
+ext.patchPomDependencies = { Node mainNode ->
+    def dependenciesNode = mainNode['dependencies']
+
+    def patched = false
+
+    dependenciesNode.each { depNode ->
+        // Find all dependencies whose artifactId equals to the name of one of project's modules.
+        def navSdkDependencyNodes = depNode['dependency'].findAll { dependency ->
+            project.ext.navSdkArtifactSettings.containsKey(dependency['artifactId'].text())
+        }
+
+        navSdkDependencyNodes.each { navSdkNode ->
+            patched = true
+
+            def artifactId = navSdkNode['artifactId'].text()
+            navSdkNode['artifactId'][0].setValue(project.ext.navSdkArtifactSettings[artifactId].getV1())
+
+            def versionNode = navSdkNode['version']
+            if (versionNode) {
+                versionNode[0].setValue(project.ext.versionName)
+            } else {
+                navSdkNode.appendNode('version', project.ext.versionName)
+            }
+        }
+    }
+
+    if (patched) {
+        println("pom file has successfully been patched")
+    }
+}
+
+ext.patchArtifactMetadataFile = {
+    def taskConfig = project.gradle.startParameter.taskNames
+            .any { it.contains("Debug") } ? "debug" : "release"
+
+    def moduleFile = layout.buildDirectory.file("publications/$taskConfig/module.json").get().asFile
+    if (!moduleFile.exists()) {
+        println("$moduleFile file doesn't exist")
+        return
+    }
+
+    def jsonSlurper = new JsonSlurper()
+    def moduleData = jsonSlurper.parse(moduleFile)
+
+    def patched = false
+    if (moduleData.variants) {
+        moduleData.variants.each { variant ->
+            variant.dependencies.each { dependency ->
+                if (project.ext.navSdkArtifactSettings.containsKey(dependency.module)) {
+                    patched = true
+                    dependency.module = project.ext.navSdkArtifactSettings[dependency.module].getV1()
+                    dependency.version = [requires: project.ext.versionName]
+                }
+            }
+        }
+    }
+
+    if (patched) {
+        moduleFile.text = JsonOutput.prettyPrint(JsonOutput.toJson(moduleData))
+        println("module.json file has successfully been patched")
+    }
+}

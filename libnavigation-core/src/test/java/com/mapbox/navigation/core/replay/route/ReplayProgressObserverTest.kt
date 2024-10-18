@@ -1,7 +1,10 @@
+@file:OptIn(ExperimentalMapboxNavigationAPI::class)
+
 package com.mapbox.navigation.core.replay.route
 
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.geojson.utils.PolylineUtils
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.route.update
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress

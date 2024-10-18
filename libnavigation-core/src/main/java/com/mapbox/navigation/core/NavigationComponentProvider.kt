@@ -9,6 +9,7 @@ import com.mapbox.navigation.base.options.RerouteOptions
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.core.accounts.BillingController
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
+import com.mapbox.navigation.core.directions.ForkPointPassedObserver
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.MapboxDirectionsSession
 import com.mapbox.navigation.core.ev.EVDynamicDataHolder
@@ -24,6 +25,7 @@ import com.mapbox.navigation.core.trip.service.MapboxTripService
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.MapboxTripSession
 import com.mapbox.navigation.core.trip.session.NavigationSession
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.core.trip.session.TripSessionLocationEngine
 import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManagerImpl
@@ -152,5 +154,13 @@ internal object NavigationComponentProvider {
         rerouteOptions,
         threadController,
         evDynamicDataHolder,
+    )
+
+    fun createForkPointPassedObserver(
+        directionsSession: DirectionsSession,
+        currentLegIndex: () -> Int,
+    ): RouteProgressObserver = ForkPointPassedObserver(
+        directionsSession,
+        currentLegIndex,
     )
 }

@@ -2,6 +2,8 @@ package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.route.createRouteRefreshMetadata
 import com.mapbox.navigation.base.internal.route.update
 import com.mapbox.navigation.base.internal.time.parseISO8601DateToLocalTimeOrNull
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -35,6 +37,7 @@ internal class ExpiringDataRemover(
         )
     }
 
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
     private fun removeExpiringDataFromRoute(
         route: NavigationRoute,
         currentLegIndex: Int,
@@ -55,6 +58,7 @@ internal class ExpiringDataRemover(
         return route.update(
             directionsRouteBlock = directionsRouteBlock,
             waypointsBlock = { this },
+            routeRefreshMetadata = createRouteRefreshMetadata(isUpToDate = false),
         )
     }
 

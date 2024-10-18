@@ -192,6 +192,7 @@ private fun NavigationStatus.getRouteProgress(
             it.geometryIndex,
             it.shapeIndex,
             it.intersectionIndex,
+            it.isForkPointPassed,
         )
     }
 

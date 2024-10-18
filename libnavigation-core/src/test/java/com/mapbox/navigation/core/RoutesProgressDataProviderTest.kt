@@ -49,6 +49,7 @@ class RoutesProgressDataProviderTest {
                 altRouteGeometryIndex1,
                 altLegGeometryIndex1,
                 1,
+                false,
             ),
             altId2 to RouteIndicesFactory.buildRouteIndices(
                 altLegIndex2,
@@ -56,6 +57,7 @@ class RoutesProgressDataProviderTest {
                 altRouteGeometryIndex2,
                 altLegGeometryIndex2,
                 2,
+                false,
             ),
         )
     }
