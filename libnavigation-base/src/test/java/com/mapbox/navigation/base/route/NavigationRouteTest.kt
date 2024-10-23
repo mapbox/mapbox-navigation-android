@@ -202,22 +202,4 @@ class NavigationRouteTest {
 
         assertNull(value)
     }
-
-    @Test
-    fun `route refresh metadata is null after creation`() {
-        val requestUrl = FileUtils.loadJsonFixture("test_directions_request_url.txt")
-        val responseJson = FileUtils.loadJsonFixture("test_directions_response.json")
-
-        val navigationRoute = NavigationRoute.create(
-            directionsResponseJson = responseJson,
-            routeRequestUrl = requestUrl,
-            routerOrigin = RouterOrigin.ONLINE,
-        )
-
-        assertTrue(
-            navigationRoute.all {
-                it.routeRefreshMetadata == null
-            },
-        )
-    }
 }

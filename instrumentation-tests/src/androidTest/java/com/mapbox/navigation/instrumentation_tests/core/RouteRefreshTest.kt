@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMapboxNavigationAPI::class)
-
 package com.mapbox.navigation.instrumentation_tests.core
 
 import android.content.Context
@@ -11,7 +9,6 @@ import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.Incident
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -290,10 +287,6 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 requestedRoutes[1].waypoints,
                 refreshedRoutes[1].waypoints,
             )
-            assertEquals(
-                listOf(true, true),
-                refreshedRoutes.map { it.routeRefreshMetadata?.isUpToDate },
-            )
         }
 
     @Test
@@ -330,10 +323,6 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             .filter { it.reason == ROUTES_UPDATE_REASON_REFRESH }
             .map { it.navigationRoutes }
             .first()
-        assertEquals(
-            listOf(false, false),
-            refreshedRoutes.map { it.routeRefreshMetadata?.isUpToDate },
-        )
         val refreshedRouteCongestions = refreshedRoutes
             .first()
             .directionsRoute
@@ -356,10 +345,6 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS,
             ),
             observer.getStatesSnapshot(),
-        )
-        assertEquals(
-            listOf(true, true),
-            mapboxNavigation.getNavigationRoutes().map { it.routeRefreshMetadata?.isUpToDate },
         )
     }
 

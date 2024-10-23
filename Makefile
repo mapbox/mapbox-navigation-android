@@ -1,16 +1,5 @@
 PUBLIC_API_PREFIX = public-api
 
-# $(1) modules' names(e.g. "libnavigation-core, libnavigation-base...")
-define reports-copy-to
-	for module in $(1) ; do \
-		if [ -d "$${module}/build/jacoco" ]; then \
-			cp $${module}/build/jacoco/jacoco.xml $(2)/$${module}.xml || exit 1 & \
-		else \
-			echo "Directory $${module}/build/jacoco does not exist. Skipping." ; \
-		fi \
-	done
-endef
-
 RELEASED_CORE_MODULES = \
 libnavigation-base \
 libnavigation-metrics \
@@ -41,31 +30,31 @@ APPLICATION_MODULES = \
 instrumentation-tests
 
 define run-gradle-tasks
-	COMMAND="./gradlew"; \
+    COMMAND="./gradlew"; \
 	for module in $(1); do \
-		COMMAND="$${COMMAND} $$module:$(2)"; \
+	    COMMAND="$${COMMAND} $$module:$(2)"; \
 	done; \
 	echo "executing $$COMMAND"; \
-	eval $$COMMAND;
+	eval $$COMMAND
 endef
 
 .PHONY: check-kotlin-lint
 check-kotlin-lint:
-	$(call run-gradle-tasks,$(CORE_MODULES),ktlint)
-	$(call run-gradle-tasks,$(UI_MODULES),ktlint)
-	$(call run-gradle-tasks,$(APPLICATION_MODULES),ktlint)
+	$(call run-gradle-tasks,$(CORE_MODULES),ktlint) \
+	&& $(call run-gradle-tasks,$(UI_MODULES),ktlint) \
+	&& $(call run-gradle-tasks,$(APPLICATION_MODULES),ktlint)
 
 .PHONY: format-kotlin-lint
 format-kotlin-lint:
-	$(call run-gradle-tasks,$(CORE_MODULES),ktlintFormat)
-	$(call run-gradle-tasks,$(UI_MODULES),ktlintFormat)
-	$(call run-gradle-tasks,$(APPLICATION_MODULES),ktlintFormat)
+	$(call run-gradle-tasks,$(CORE_MODULES),ktlintFormat) \
+	&& $(call run-gradle-tasks,$(UI_MODULES),ktlintFormat) \
+	&& $(call run-gradle-tasks,$(APPLICATION_MODULES),ktlintFormat)
 
 .PHONY: check-android-lint
 check-android-lint:
-	$(call run-gradle-tasks,$(CORE_MODULES),lint)
-	$(call run-gradle-tasks,$(UI_MODULES),lint)
-	$(call run-gradle-tasks,$(APPLICATION_MODULES),lint)
+	$(call run-gradle-tasks,$(CORE_MODULES),lint) \
+	&& $(call run-gradle-tasks,$(UI_MODULES),lint) \
+	&& $(call run-gradle-tasks,$(APPLICATION_MODULES),lint)
 
 .PHONY: license-verification
 license-verification:
@@ -83,13 +72,13 @@ javadoc-dokka:
 
 .PHONY: dependency-graphs
 dependency-graphs:
-	$(call run-gradle-tasks,$(CORE_MODULES),generateDependencyGraphMapboxLibraries)
-	$(call run-gradle-tasks,$(UI_MODULES),generateDependencyGraphMapboxLibraries)
+	$(call run-gradle-tasks,$(CORE_MODULES),generateDependencyGraphMapboxLibraries) \
+	&& $(call run-gradle-tasks,$(UI_MODULES),generateDependencyGraphMapboxLibraries) \
 
 .PHONY: dependency-updates
 dependency-updates:
-	$(call run-gradle-tasks,$(CORE_MODULES),dependencyUpdates)
-	$(call run-gradle-tasks,$(UI_MODULES),dependencyUpdates)
+	$(call run-gradle-tasks,$(CORE_MODULES),dependencyUpdates) \
+	&& $(call run-gradle-tasks,$(UI_MODULES),dependencyUpdates) \
 
 .PHONY: find-all-common-sdk-versions
 find-all-common-sdk-versions:
@@ -117,18 +106,8 @@ core-unit-tests-jacoco:
 	$(call run-gradle-tasks,$(CORE_MODULES),jacocoTestReport)
 
 .PHONY: core-unit-tests-release-jacoco
-.SILENT: core-unit-tests-release-jacoco
 core-unit-tests-release-jacoco:
 	$(call run-gradle-tasks,$(CORE_MODULES),jacocoTestReleaseUnitTestReport)
-
-# Prepare core coverage
-.PHONY: prepare-core-coverage-reports
-.SILENT: prepare-core-coverage-reports
-prepare-core-coverage-reports: core-unit-tests-release-jacoco
-	rm -rf $(CORE_REPORTS_DIR) \
-	&& mkdir -p $(CORE_REPORTS_DIR) \
-	&& $(call reports-copy-to,$(RELEASED_CORE_MODULES),$(CORE_REPORTS_DIR)) \
-	&& wait
 
 .PHONY: core-dependency-graph
 core-dependency-graph:
@@ -177,18 +156,8 @@ ui-unit-tests-jacoco:
 	$(call run-gradle-tasks,$(UI_MODULES),jacocoTestReport)
 
 .PHONY: ui-unit-tests-release-jacoco
-.SILENT: core-unit-tests-release-jacoco
 ui-unit-tests-release-jacoco:
 	$(call run-gradle-tasks,$(UI_MODULES),jacocoTestReleaseUnitTestReport)
-
-# Prepare ui coverage
-.PHONY: prepare-ui-coverage-reports
-.SILENT: prepare-ui-coverage-reports
-prepare-ui-coverage-reports: ui-unit-tests-release-jacoco
-	rm -rf $(UI_REPORTS_DIR) \
-    && mkdir -p $(UI_REPORTS_DIR) \
-	&& $(call reports-copy-to,$(RELEASED_UI_MODULES),$(UI_REPORTS_DIR)) \
-	&& wait
 
 .PHONY: publish-local
 publish-local:

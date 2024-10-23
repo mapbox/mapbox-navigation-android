@@ -80,7 +80,7 @@ internal object JunctionProcessor {
                     ResourceLoadStatus.AVAILABLE -> {
                         val dataRef = responseData.data?.data
                         if (dataRef?.isNotEmpty() == true) {
-                            JunctionResult.JunctionRaster.Success(dataRef, responseData.contentType)
+                            JunctionResult.JunctionRaster.Success(dataRef)
                         } else {
                             JunctionResult.JunctionRaster.Empty
                         }

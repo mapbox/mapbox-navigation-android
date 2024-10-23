@@ -8,12 +8,4 @@ package com.mapbox.navigation.ui.maps.guidance.junction.model
 class JunctionError internal constructor(
     val errorMessage: String?,
     val throwable: Throwable?,
-) {
-
-    /**
-     * Returns a string representation of the object.
-     */
-    override fun toString(): String {
-        return "JunctionError(errorMessage=$errorMessage, throwable=$throwable)"
-    }
-}
+)

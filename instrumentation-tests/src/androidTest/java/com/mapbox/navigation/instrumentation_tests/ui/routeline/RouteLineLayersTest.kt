@@ -39,16 +39,11 @@ import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.cle
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setNavigationRoutes
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
-import com.mapbox.navigation.ui.maps.route.line.api.RoutesRenderedCallback
-import com.mapbox.navigation.ui.maps.route.line.api.RoutesRenderedResult
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -667,62 +662,6 @@ class RouteLineLayersTest : BaseTest<BasicNavigationViewActivity>(
             }.start()
         }
         countDownLatch.await()
-    }
-
-    /**
-     * There was a race with MapboxRouteLineView:
-     * when you invoke showRoutes and renderRouteDrawData approximately at the same time,
-     * the wrong visibility might appear as a result:
-     *
-     * 1. renderRouteDrawData gets the current visibility, which is none;
-     * 2. showPrimaryRoute changes the visibility to visible;
-     * 3. renderRouteDrawData sets the visibility back to none, since it has outdated information.
-     *
-     * This test checks the race is not present anymore.
-     */
-    @Test
-    fun hideRoutesRenderRoutesShowRoutes() {
-        val map = activity.mapboxMap
-        val routeLineApi = MapboxRouteLineApi(MapboxRouteLineApiOptions.Builder().build())
-        val routeLineView = MapboxRouteLineView(
-            MapboxRouteLineViewOptions.Builder(activity).build(),
-        )
-        val latch = CountDownLatch(2)
-
-        lateinit var style: Style
-        sdkTest {
-            style = waitForStyleLoad(map)
-
-            val setRoutesResult1 = routeLineApi.setNavigationRoutes(listOf(route1, route2, route3))
-            routeLineView.renderRouteDrawDataAsync(map, style, setRoutesResult1)
-
-            routeLineView.hidePrimaryRoute(style)
-
-            routeLineView.renderClearRouteLineValueAsync(map, style, routeLineApi.clearRouteLine())
-
-            val setRoutesResult = routeLineApi.setNavigationRoutes(listOf(route1, route2, route3))
-
-            val callback = object : RoutesRenderedCallback {
-                override fun onRoutesRendered(result: RoutesRenderedResult) {
-                    latch.countDown()
-                }
-            }
-
-            routeLineView.renderRouteDrawData(style, setRoutesResult, map, callback)
-            delay(20)
-            routeLineView.showPrimaryRoute(style)
-            latch.countDown()
-        }
-
-        latch.await()
-        runBlocking(Dispatchers.Main) {
-            val primaryRouteVisibility = style.getLayer("mapbox-layerGroup-1-main")
-                ?.visibility
-            val maskingRouteVisibility = style.getLayer("mapbox-masking-layer-main")
-                ?.visibility
-            assertEquals(Visibility.VISIBLE, primaryRouteVisibility)
-            assertEquals(Visibility.VISIBLE, maskingRouteVisibility)
-        }
     }
 
     @Test

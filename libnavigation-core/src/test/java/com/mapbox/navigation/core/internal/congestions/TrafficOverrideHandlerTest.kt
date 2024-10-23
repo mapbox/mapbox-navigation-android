@@ -1,9 +1,6 @@
-@file:OptIn(ExperimentalMapboxNavigationAPI::class)
-
 package com.mapbox.navigation.core.internal.congestions
 
 import com.mapbox.api.directions.v5.models.StepIntersection
-import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.CongestionNumericOverride
 import com.mapbox.navigation.base.internal.route.overriddenTraffic

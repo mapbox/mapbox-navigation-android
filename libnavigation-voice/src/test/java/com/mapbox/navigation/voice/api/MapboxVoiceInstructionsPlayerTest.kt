@@ -22,7 +22,6 @@ import io.mockk.verify
 import io.mockk.verifyOrder
 import org.junit.After
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import java.io.File
@@ -605,7 +604,6 @@ class MapboxVoiceInstructionsPlayerTest {
         }
     }
 
-    @Ignore
     @Test
     fun `should abandon focus after a options#abandonFocusDelay`() {
         val announcement: SpeechAnnouncement = SpeechAnnouncement

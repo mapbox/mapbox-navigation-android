@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMapboxNavigationAPI::class)
-
 package com.mapbox.navigation.base.internal.route
 
 import com.google.gson.JsonPrimitive
@@ -14,7 +12,6 @@ import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
-import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.testing.FileUtils

@@ -40,9 +40,7 @@ ext {
         'androidauto' : new Tuple2('android-auto-components', 'navigation-core-androidauto'),
         'libtesting-router' : new Tuple2('test-router', 'navigation-core-testing-router'),
         'libnavigation-custom-route' : new Tuple2('customroute', 'navigation-core-custom-route'),
-        'libnavigation-datainputs' : new Tuple2('datainputs', 'navigation-core-datainputs'),
-        'libnavigation-ev' : new Tuple2('ev', 'navigation-core-ev'),
-        'libnavigation-ev-ui' : new Tuple2('ev-ui', 'navigation-core-ev-ui')
+        'libnavigation-datainputs' : new Tuple2('datainputs', 'navigation-core-datainputs')
     ]
 }
 

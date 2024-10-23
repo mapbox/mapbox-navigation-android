@@ -50,16 +50,6 @@ class RoadObjectMatcher internal constructor(
         roadObjectMatcherObservers.add(roadObjectMatcherObserver)
     }
 
-    /**
-     * Unregister road object matcher observer.
-     */
-    fun unregisterRoadObjectMatcherObserver(roadObjectMatcherObserver: RoadObjectMatcherObserver) {
-        roadObjectMatcherObservers.remove(roadObjectMatcherObserver)
-        if (roadObjectMatcherObservers.isEmpty()) {
-            navigator.roadObjectMatcher.setListener(null)
-        }
-    }
-
     private val roadObjectMatcherListener = object : RoadObjectMatcherListener {
         override fun onRoadObjectMatched(
             roadObject: Expected<RoadObjectMatcherError, RoadObject>,

@@ -1,17 +1,13 @@
-@file:OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-
 package com.mapbox.navigation.ui.maps.guidance.junction.api
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.net.Uri
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.MapboxServices
 import com.mapbox.common.ResourceLoadError
 import com.mapbox.common.ResourceLoadResult
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.utils.MapboxOptionsUtil
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.toDataRef
@@ -21,8 +17,6 @@ import com.mapbox.navigation.ui.maps.guidance.junction.JunctionProcessor
 import com.mapbox.navigation.ui.maps.guidance.junction.JunctionResult
 import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionError
 import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue
-import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionViewData
-import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionViewFormat
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadCallback
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoader
@@ -50,12 +44,6 @@ import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-private typealias JunctionValueConsumer =
-    MapboxNavigationConsumer<Expected<JunctionError, JunctionValue>>
-
-private typealias JunctionViewDataConsumer =
-    MapboxNavigationConsumer<Expected<JunctionError, JunctionViewData>>
-
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class MapboxJunctionApiTest {
@@ -63,6 +51,8 @@ class MapboxJunctionApiTest {
     @get:Rule
     val coroutineRule = MainCoroutineRule()
 
+    private val consumer:
+        MapboxNavigationConsumer<Expected<JunctionError, JunctionValue>> = mockk(relaxed = true)
     private val bannerInstructions: BannerInstructions = mockk()
 
     private lateinit var junctionApi: MapboxJunctionApi
@@ -75,9 +65,7 @@ class MapboxJunctionApiTest {
         mockkStatic(BitmapFactory::class)
         mockkStatic(MapboxRasterToBitmapParser::class)
         mockkStatic(MapboxOptionsUtil::class)
-        every {
-            MapboxOptionsUtil.getTokenForService(MapboxServices.DIRECTIONS)
-        } returns DIRECTIONS_TOKEN
+        every { MapboxOptionsUtil.getTokenForService(MapboxServices.DIRECTIONS) } returns "pk.1234"
 
         mockResourceLoader = mockk(relaxed = true)
         every { ResourceLoaderFactory.getInstance() } returns mockResourceLoader
@@ -96,8 +84,6 @@ class MapboxJunctionApiTest {
 
     @Test
     fun `process state junction unavailable`() {
-        val consumer: JunctionValueConsumer = mockk(relaxed = true)
-
         val expectedError = "No junction available for current maneuver."
         givenProcessorResults(
             checkJunctionAvailability = JunctionResult.JunctionUnavailable,
@@ -112,8 +98,6 @@ class MapboxJunctionApiTest {
 
     @Test
     fun `process result incorrect result for action`() {
-        val consumer: JunctionValueConsumer = mockk(relaxed = true)
-
         val mockResult = JunctionResult.JunctionRequest(mockk())
         val mockAction = JunctionAction.CheckJunctionAvailability(bannerInstructions)
         every { JunctionProcessor.process(mockAction) } returns mockResult
@@ -130,8 +114,6 @@ class MapboxJunctionApiTest {
 
     @Test
     fun `process state junction available junction empty`() {
-        val consumer: JunctionValueConsumer = mockk(relaxed = true)
-
         val expectedError = "No junction available for current maneuver."
         val url = "https//abc.mapbox.com"
         val loadRequest = mockk<ResourceLoadRequest>()
@@ -157,8 +139,6 @@ class MapboxJunctionApiTest {
 
     @Test
     fun `process state junction available junction failure`() {
-        val consumer: JunctionValueConsumer = mockk(relaxed = true)
-
         val expectedError = "Resource is missing"
         val url = "https//abc.mapbox.com"
         val loadRequest = mockk<ResourceLoadRequest>()
@@ -186,14 +166,11 @@ class MapboxJunctionApiTest {
 
     @Test
     fun `process state junction available junction raster success parse fail`() {
-        val consumer: JunctionValueConsumer = mockk(relaxed = true)
-
         val expectedError = "Error parsing raster to bitmap as raster is empty"
         val url = "https//abc.mapbox.com"
         val loadRequest = mockk<ResourceLoadRequest>()
         val loadResponse = mockk<Expected<ResourceLoadError, ResourceLoadResult>>()
         val rasterData = byteArrayOf().toDataRef()
-        val contentType = "image/png"
         val parserFailure = ExpectedFactory.createError<String, Bitmap>(expectedError)
 
         givenResourceLoaderResponse(
@@ -203,10 +180,7 @@ class MapboxJunctionApiTest {
         givenProcessorResults(
             checkJunctionAvailability = JunctionResult.JunctionAvailable(url),
             prepareJunctionRequest = JunctionResult.JunctionRequest(loadRequest),
-            processJunctionResponse = JunctionResult.JunctionRaster.Success(
-                rasterData,
-                contentType,
-            ),
+            processJunctionResponse = JunctionResult.JunctionRaster.Success(rasterData),
             parseRasterToBitmap = JunctionResult.JunctionBitmap.Failure(parserFailure.error!!),
         )
 
@@ -219,15 +193,12 @@ class MapboxJunctionApiTest {
 
     @Test
     fun `process state junction available junction raster success parse success`() {
-        val consumer: JunctionValueConsumer = mockk(relaxed = true)
-
         val expectedBitmap = mockk<Bitmap>()
         val url = "https//abc.mapbox.com"
         val loadRequest = mockk<ResourceLoadRequest>()
         val loadResponse = mockk<Expected<ResourceLoadError, ResourceLoadResult>>()
         val rasterData = byteArrayOf(12, -12, 23, 45, 67, 65, 44, 45, 12, 34, 45, 56, 76)
             .toDataRef()
-        val contentType = "image/png"
         val parseSuccess: Expected<String, Bitmap> = ExpectedFactory.createValue(expectedBitmap)
 
         givenResourceLoaderResponse(
@@ -237,10 +208,7 @@ class MapboxJunctionApiTest {
         givenProcessorResults(
             checkJunctionAvailability = JunctionResult.JunctionAvailable(url),
             prepareJunctionRequest = JunctionResult.JunctionRequest(loadRequest),
-            processJunctionResponse = JunctionResult.JunctionRaster.Success(
-                rasterData,
-                contentType,
-            ),
+            processJunctionResponse = JunctionResult.JunctionRaster.Success(rasterData),
             parseRasterToBitmap = JunctionResult.JunctionBitmap.Success(parseSuccess.value!!),
         )
 
@@ -252,12 +220,6 @@ class MapboxJunctionApiTest {
         val messageSlot = slot<Expected<JunctionError, JunctionValue>>()
         verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
         assertEquals(expectedBitmap, messageSlot.captured.value!!.bitmap)
-        verify(exactly = 1) {
-            JunctionProcessor.process(
-                JunctionAction.PrepareJunctionRequest(buildExpectedJunctionUrl(url, null)),
-            )
-        }
-
         clearAllMocks(answers = false)
 
         // use new token
@@ -265,10 +227,7 @@ class MapboxJunctionApiTest {
         givenProcessorResults(
             checkJunctionAvailability = JunctionResult.JunctionAvailable(url),
             prepareJunctionRequest = JunctionResult.JunctionRequest(loadRequest),
-            processJunctionResponse = JunctionResult.JunctionRaster.Success(
-                rasterData,
-                contentType,
-            ),
+            processJunctionResponse = JunctionResult.JunctionRaster.Success(rasterData),
             parseRasterToBitmap = JunctionResult.JunctionBitmap.Success(parseSuccess.value!!),
             token = newToken,
         )
@@ -279,20 +238,11 @@ class MapboxJunctionApiTest {
         val messageSlot2 = slot<Expected<JunctionError, JunctionValue>>()
         verify(exactly = 1) { consumer.accept(capture(messageSlot2)) }
         assertEquals(expectedBitmap, messageSlot2.captured.value!!.bitmap)
-        verify(exactly = 1) {
-            JunctionProcessor.process(
-                JunctionAction.PrepareJunctionRequest(
-                    buildExpectedJunctionUrl(url, null, newToken),
-                ),
-            )
-        }
     }
 
     @Ignore("Make this test an instrumentation test to avoid UnsatisfiedLinkError from Common 11+")
     @Test
     fun `process request junction request cancel`() {
-        val consumer: JunctionValueConsumer = mockk(relaxed = true)
-
         val mockWebServer = MockWebServer()
         mockWebServer.enqueue(MockResponse().setResponseCode(401))
         mockWebServer.start()
@@ -318,147 +268,6 @@ class MapboxJunctionApiTest {
         mockWebServer.shutdown()
     }
 
-    @Test
-    fun `process state junction unavailable for svg request`() {
-        val consumer: JunctionViewDataConsumer = mockk(relaxed = true)
-
-        val expectedError = "No junction available for current maneuver."
-        givenProcessorResults(
-            checkJunctionAvailability = JunctionResult.JunctionUnavailable,
-        )
-
-        junctionApi.generateJunction(bannerInstructions, JunctionViewFormat.Companion.SVG, consumer)
-
-        val messageSlot = slot<Expected<JunctionError, JunctionViewData>>()
-        verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
-        assertEquals(expectedError, messageSlot.captured.error!!.errorMessage)
-    }
-
-    @Test
-    fun `process state junction available junction failure for svg`() {
-        val consumer: JunctionViewDataConsumer = mockk(relaxed = true)
-
-        val expectedError = "Resource is missing"
-        val url = "https//abc.mapbox.com"
-        val loadRequest = mockk<ResourceLoadRequest>()
-        val loadResponse = mockk<Expected<ResourceLoadError, ResourceLoadResult>>()
-        val rasterResult = mockk<JunctionResult.JunctionRaster.Failure> {
-            every { error } returns expectedError
-        }
-
-        givenResourceLoaderResponse(
-            request = loadRequest,
-            response = loadResponse,
-        )
-        givenProcessorResults(
-            checkJunctionAvailability = JunctionResult.JunctionAvailable(url),
-            prepareJunctionRequest = JunctionResult.JunctionRequest(loadRequest),
-            processJunctionResponse = rasterResult,
-        )
-
-        junctionApi.generateJunction(bannerInstructions, JunctionViewFormat.SVG, consumer)
-
-        val messageSlot = slot<Expected<JunctionError, JunctionViewData>>()
-        verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
-        assertEquals(expectedError, messageSlot.captured.error!!.errorMessage)
-    }
-
-    @Test
-    fun `process state junction available for svg`() {
-        val consumer: JunctionViewDataConsumer = mockk(relaxed = true)
-
-        val url = "https//abc.mapbox.com"
-        val loadRequest = mockk<ResourceLoadRequest>()
-        val loadResponse = mockk<Expected<ResourceLoadError, ResourceLoadResult>>()
-        val svgData = byteArrayOf(12, -12, 23, 45, 67, 65, 44, 45, 12, 34, 45, 56, 76)
-        val contentType = "image/svg+xml"
-
-        givenResourceLoaderResponse(
-            request = loadRequest,
-            response = loadResponse,
-        )
-        givenProcessorResults(
-            checkJunctionAvailability = JunctionResult.JunctionAvailable(url),
-            prepareJunctionRequest = JunctionResult.JunctionRequest(loadRequest),
-            processJunctionResponse = JunctionResult.JunctionRaster.Success(
-                svgData.toDataRef(),
-                contentType,
-            ),
-        )
-
-        junctionApi.generateJunction(bannerInstructions, JunctionViewFormat.SVG, consumer)
-
-        val messageSlot = slot<Expected<JunctionError, JunctionViewData>>()
-        verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
-
-        val junctionViewData = JunctionViewData(svgData, JunctionViewData.ResponseFormat.SVG)
-        assertEquals(junctionViewData, messageSlot.captured.value)
-
-        verify(exactly = 1) {
-            JunctionProcessor.process(
-                JunctionAction.PrepareJunctionRequest(
-                    buildExpectedJunctionUrl(url, JunctionViewFormat.SVG),
-                ),
-            )
-        }
-    }
-
-    @Test
-    fun `process state junction available for explicit png`() {
-        val consumer: JunctionViewDataConsumer = mockk(relaxed = true)
-
-        val url = "https//abc.mapbox.com"
-        val loadRequest = mockk<ResourceLoadRequest>()
-        val loadResponse = mockk<Expected<ResourceLoadError, ResourceLoadResult>>()
-        val svgData = byteArrayOf(12, -12, 23, 45, 67, 65, 44, 45, 12, 34, 45, 56, 76)
-        val contentType = "image/png"
-
-        givenResourceLoaderResponse(
-            request = loadRequest,
-            response = loadResponse,
-        )
-        givenProcessorResults(
-            checkJunctionAvailability = JunctionResult.JunctionAvailable(url),
-            prepareJunctionRequest = JunctionResult.JunctionRequest(loadRequest),
-            processJunctionResponse = JunctionResult.JunctionRaster.Success(
-                svgData.toDataRef(),
-                contentType,
-            ),
-        )
-
-        junctionApi.generateJunction(bannerInstructions, JunctionViewFormat.PNG, consumer)
-
-        val messageSlot = slot<Expected<JunctionError, JunctionViewData>>()
-        verify(exactly = 1) { consumer.accept(capture(messageSlot)) }
-
-        val junctionViewData = JunctionViewData(svgData, JunctionViewData.ResponseFormat.PNG)
-        assertEquals(junctionViewData, messageSlot.captured.value)
-
-        verify(exactly = 1) {
-            JunctionProcessor.process(
-                JunctionAction.PrepareJunctionRequest(
-                    buildExpectedJunctionUrl(url, JunctionViewFormat.PNG),
-                ),
-            )
-        }
-    }
-
-    private fun buildExpectedJunctionUrl(
-        baseUrl: String,
-        @JunctionViewFormat format: String?,
-        token: String? = DIRECTIONS_TOKEN,
-    ): String {
-        return Uri.parse(baseUrl).buildUpon()
-            .appendQueryParameter("access_token", token)
-            .apply {
-                if (format != null) {
-                    appendQueryParameter("image_format", format)
-                }
-            }
-            .build()
-            .toString()
-    }
-
     private fun givenResourceLoaderResponse(
         request: ResourceLoadRequest,
         response: Expected<ResourceLoadError, ResourceLoadResult>,
@@ -475,7 +284,7 @@ class MapboxJunctionApiTest {
         prepareJunctionRequest: JunctionResult? = null,
         processJunctionResponse: JunctionResult? = null,
         parseRasterToBitmap: JunctionResult? = null,
-        token: String = DIRECTIONS_TOKEN,
+        token: String = "pk.1234",
     ) {
         every {
             JunctionProcessor.process(JunctionAction.CheckJunctionAvailability(bannerInstructions))
@@ -503,9 +312,5 @@ class MapboxJunctionApiTest {
                 JunctionProcessor.process(ofType(JunctionAction.ParseRasterToBitmap::class))
             } returns parseRasterToBitmap
         }
-    }
-
-    private companion object {
-        const val DIRECTIONS_TOKEN = "pk.1234"
     }
 }

@@ -225,11 +225,6 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the Cronet (Cronet API. Does not contain implementation.).
-License: [Chromium and built-in dependencies](https://storage.cloud.google.com/chromium-cronet/android/119.0.6045.31/Release/cronet/LICENSE)
-
-===========================================================================
-
 Mapbox Navigation uses portions of the Experimental annotation (Java annotation for use on unstable Android API surfaces. When used in conjunction with the Experimental annotation lint checks, this annotation provides functional parity with Kotlin's Experimental annotation.).
 URL: [https://developer.android.com/jetpack/androidx/releases/annotation#1.3.0](https://developer.android.com/jetpack/androidx/releases/annotation#1.3.0)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -361,26 +356,6 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 Mapbox Navigation uses portions of the okio (A modern I/O library for Android, Java, and Kotlin Multiplatform.).
 URL: [https://github.com/square/okio/](https://github.com/square/okio/)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the play-services-base.
-License: [Android Software Development Kit License](https://developer.android.com/studio/terms.html)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the play-services-basement.
-License: [Android Software Development Kit License](https://developer.android.com/studio/terms.html)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the play-services-cronet.
-License: [Android Software Development Kit License](https://developer.android.com/studio/terms.html)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the play-services-tasks.
-License: [Android Software Development Kit License](https://developer.android.com/studio/terms.html)
 
 ===========================================================================
 
@@ -649,11 +624,6 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the Cronet (Cronet API. Does not contain implementation.).
-License: [Chromium and built-in dependencies](https://storage.cloud.google.com/chromium-cronet/android/119.0.6045.31/Release/cronet/LICENSE)
-
-===========================================================================
-
 Mapbox Navigation uses portions of the Experimental annotation (Java annotation for use on unstable Android API surfaces. When used in conjunction with the Experimental annotation lint checks, this annotation provides functional parity with Kotlin's Experimental annotation.).
 URL: [https://developer.android.com/jetpack/androidx/releases/annotation#1.3.0](https://developer.android.com/jetpack/androidx/releases/annotation#1.3.0)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -773,26 +743,6 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 Mapbox Navigation uses portions of the okio (A modern I/O library for Android, Java, and Kotlin Multiplatform.).
 URL: [https://github.com/square/okio/](https://github.com/square/okio/)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the play-services-base.
-License: [Android Software Development Kit License](https://developer.android.com/studio/terms.html)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the play-services-basement.
-License: [Android Software Development Kit License](https://developer.android.com/studio/terms.html)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the play-services-cronet.
-License: [Android Software Development Kit License](https://developer.android.com/studio/terms.html)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the play-services-tasks.
-License: [Android Software Development Kit License](https://developer.android.com/studio/terms.html)
 
 ===========================================================================
 
@@ -1403,12 +1353,6 @@ License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENS
 
 
 #### Nav SDK Test Router module
-Mapbox Navigation uses portions of the Activity (Provides the base Activity subclass and the relevant hooks to build a composable structure on top.).
-URL: [https://developer.android.com/jetpack/androidx](https://developer.android.com/jetpack/androidx)
-License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
 Mapbox Navigation uses portions of the Android App Startup Runtime.
 URL: [https://developer.android.com/jetpack/androidx/releases/startup#1.1.1](https://developer.android.com/jetpack/androidx/releases/startup#1.1.1)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -1439,26 +1383,8 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the Android Lifecycle LiveData.
-URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
-License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the Android Lifecycle LiveData Core.
-URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
-License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
 Mapbox Navigation uses portions of the Android Lifecycle Runtime.
 URL: [https://developer.android.com/jetpack/androidx/releases/lifecycle#2.3.1](https://developer.android.com/jetpack/androidx/releases/lifecycle#2.3.1)
-License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the Android Lifecycle ViewModel.
-URL: [https://developer.android.com/topic/libraries/architecture/index.html](https://developer.android.com/topic/libraries/architecture/index.html)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
@@ -1486,30 +1412,6 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the Android Support Library Custom View (The Support Library is a static library that you can add to your Android application in order to use APIs that are either not available for older platform versions or utility APIs that aren't a part of the framework APIs. Compatible on devices running API 14 or later.).
-URL: [http://developer.android.com/tools/extras/support-library.html](http://developer.android.com/tools/extras/support-library.html)
-License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the Android Support Library fragment (The Support Library is a static library that you can add to your Android application in order to use APIs that are either not available for older platform versions or utility APIs that aren't a part of the framework APIs. Compatible on devices running API 14 or later.).
-URL: [https://developer.android.com/jetpack/androidx](https://developer.android.com/jetpack/androidx)
-License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the Android Support Library loader (The Support Library is a static library that you can add to your Android application in order to use APIs that are either not available for older platform versions or utility APIs that aren't a part of the framework APIs. Compatible on devices running API 14 or later.).
-URL: [http://developer.android.com/tools/extras/support-library.html](http://developer.android.com/tools/extras/support-library.html)
-License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the Android Support Library View Pager (The Support Library is a static library that you can add to your Android application in order to use APIs that are either not available for older platform versions or utility APIs that aren't a part of the framework APIs. Compatible on devices running API 14 or later.).
-URL: [http://developer.android.com/tools/extras/support-library.html](http://developer.android.com/tools/extras/support-library.html)
-License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
 Mapbox Navigation uses portions of the Android Tracing.
 URL: [https://developer.android.com/jetpack/androidx/releases/tracing#1.0.0](https://developer.android.com/jetpack/androidx/releases/tracing#1.0.0)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -1531,11 +1433,6 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 Mapbox Navigation uses portions of the Annotation (Provides source annotations for tooling and readability.).
 URL: [https://developer.android.com/jetpack/androidx/releases/annotation#1.7.0](https://developer.android.com/jetpack/androidx/releases/annotation#1.7.0)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the Cronet (Cronet API. Does not contain implementation.).
-License: [Chromium and built-in dependencies](https://storage.cloud.google.com/chromium-cronet/android/119.0.6045.31/Release/cronet/LICENSE)
 
 ===========================================================================
 
@@ -1675,26 +1572,6 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 Mapbox Navigation uses portions of the okio (A modern I/O library for Android, Java, and Kotlin Multiplatform.).
 URL: [https://github.com/square/okio/](https://github.com/square/okio/)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the play-services-base.
-License: [Android Software Development Kit License](https://developer.android.com/studio/terms.html)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the play-services-basement.
-License: [Android Software Development Kit License](https://developer.android.com/studio/terms.html)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the play-services-cronet.
-License: [Android Software Development Kit License](https://developer.android.com/studio/terms.html)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the play-services-tasks.
-License: [Android Software Development Kit License](https://developer.android.com/studio/terms.html)
 
 ===========================================================================
 

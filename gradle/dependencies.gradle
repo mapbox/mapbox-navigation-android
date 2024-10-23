@@ -13,16 +13,16 @@ ext {
   // version which we should use in this build
   def mapboxNavigatorVersion = System.getenv("FORCE_MAPBOX_NAVIGATION_NATIVE_VERSION")
   if (mapboxNavigatorVersion == null || mapboxNavigatorVersion == '') {
-      mapboxNavigatorVersion = '321.0.0-beta.1'
+      mapboxNavigatorVersion = '320.2.0'
   }
   println("Navigation Native version: " + mapboxNavigatorVersion)
 
   version = [
-      mapboxMapSdk              : '11.8.0-beta.1',
-      mapboxSdkServices         : '7.3.1',
+      mapboxMapSdk              : '11.7.1',
+      mapboxSdkServices         : '7.2.0',
       mapboxNavigator           : "${mapboxNavigatorVersion}",
-      mapboxCommonNative        : '24.8.0-beta.1',
-      mapboxSearch              : '2.6.0-beta.1',
+      mapboxCommonNative        : '24.7.1',
+      mapboxSearch              : '2.5.1',
       mapboxBaseAndroid         : '0.11.0',
       androidXLifecycle         : '2.4.0',
       androidXCoreVersion       : '1.6.0',
@@ -48,7 +48,7 @@ ext {
       leakCanaryVersion         : '2.9.1',
       commonsIO                 : '2.6',
       robolectric               : '4.7.3',
-      mockwebserver             : '4.10.0',
+      mockwebserver             : '4.9.0',
       gmsLocation               : '17.0.0',
       ktlint                    : '0.47.1',
       kotlinStdLib              : kotlinVersion,
@@ -56,8 +56,8 @@ ext {
       multidex                  : '2.0.1',
       json                      : '20180813',
       coroutinesAndroid         : '1.6.4',
-      okhttp                    : '4.10.0',
-      okio                      : '3.4.0',
+      okhttp                    : '4.9.0',
+      okio                      : '2.10.0',
       androidxTestJunit         : '1.1.5',
       androidxTest              : '1.5.2',
       androidxTestCore          : '1.5.0',
@@ -71,8 +71,6 @@ ext {
       kaspresso                 : '1.5.3',
       equalsVerifier            : '3.15.8',
       toStringVerifier          : '1.4.8',
-      ktor                      : '2.3.0',
-      kotlinDateTime            : '0.4.1',
   ]
   dependenciesList = [
       // mapbox
@@ -185,17 +183,7 @@ ext {
       viewBinding               : "androidx.databinding:viewbinding:${version.viewBinding}",
 
       // Test app crashlytics
-      firebaseCrashlyticsNdk    : "com.google.firebase:firebase-crashlytics-ndk:${version.firebaseCrashlytics}",
-
-      // Ktor
-      ktorContentNegotiation    : "io.ktor:ktor-client-content-negotiation:${version.ktor}",
-      ktorClientCore            : "io.ktor:ktor-client-core:${version.ktor}",
-      ktorClientOkhttp          : "io.ktor:ktor-client-okhttp:${version.ktor}",
-      ktorClientLogging         : "io.ktor:ktor-client-logging:${version.ktor}",
-      ktorSerializationJson     : "io.ktor:ktor-serialization-kotlinx-json:${version.ktor}",
-      ktorClientEncoding        : "io.ktor:ktor-client-encoding:${version.ktor}",
-      ktorClientAuth            : "io.ktor:ktor-client-auth:${version.ktor}",
-      kotlinXDateTime           : "org.jetbrains.kotlinx:kotlinx-datetime:${version.kotlinDateTime}",
+      firebaseCrashlyticsNdk    : "com.google.firebase:firebase-crashlytics-ndk:${version.firebaseCrashlytics}"
   ]
 
   pluginVersion = [
@@ -212,7 +200,7 @@ ext {
       kotlinHtmlJvm        : '0.7.2',
       jacoco               : '0.8.12',
       googleServices       : '4.3.3',
-      mapboxSdkVersions    : '1.1.5',
+      mapboxSdkVersions    : '1.1.3',
       dokka                : '1.9.20',
       mapboxSdkRegistry    : '0.7.0',
       mapboxAccessToken    : '0.2.1',

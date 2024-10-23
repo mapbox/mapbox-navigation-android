@@ -7,6 +7,7 @@ import com.caverock.androidsvg.SVG
 import com.caverock.androidsvg.SVGExternalFileResolver
 import com.caverock.androidsvg.SVGParseException
 import com.mapbox.navigation.utils.internal.logE
+import java.io.ByteArrayInputStream
 import java.io.InputStream
 
 object SvgUtil {
@@ -14,7 +15,7 @@ object SvgUtil {
     private const val LOG_CATEGORY = "SvgUtil"
 
     fun renderAsBitmapWith(
-        stream: InputStream,
+        stream: ByteArrayInputStream,
         desiredWidth: Int,
         desiredHeight: Int,
         cssStyles: String? = null,
@@ -39,7 +40,7 @@ object SvgUtil {
     }
 
     fun renderAsBitmapWithHeight(
-        stream: InputStream,
+        stream: ByteArrayInputStream,
         desiredHeight: Int,
         cssStyles: String? = null,
     ): Bitmap? {

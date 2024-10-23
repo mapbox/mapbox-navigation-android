@@ -299,11 +299,9 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
             sender.sendInitialOptionsEvent(holder.data)
             sender.sendRenderRouteDrawDataEvent(style.getStyleId(), routeDrawData)
             rebuildSourcesAndLayersIfNeeded(style, holder.options)
-            val originalPrimaryRouteLayers = getLayerIdsForPrimaryRoute(
-                primaryRouteLineLayerGroup,
-                sourceLayerMap,
-                style,
-            )
+            val primaryRouteTrafficVisibility = getTrafficVisibility(style)
+            val primaryRouteVisibility = getPrimaryRouteVisibility(style)
+            val alternativeRouteVisibility = getAlternativeRoutesVisibility(style)
             val updateSourceCommands = mutableListOf<() -> Unit>()
             val mutationCommands = mutableListOf<() -> Unit>()
             routeDrawData.value?.let { routeSetValue ->
@@ -462,13 +460,6 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
 
             primaryRouteLineLayerGroup = getLayerIdsForPrimaryRoute(style, sourceLayerMap)
             updateLayerScaling(style, optionsHolder.options)
-
-            val primaryRouteTrafficVisibility =
-                getTrafficVisibility(originalPrimaryRouteLayers, style)
-            val primaryRouteVisibility =
-                getPrimaryRouteVisibility(originalPrimaryRouteLayers, style)
-            val alternativeRouteVisibility =
-                getAlternativeRoutesVisibility(originalPrimaryRouteLayers, style)
 
             // Any layer group can host the primary route.  If a call was made to
             // hide the primary our alternative routes, that state needs to be maintained
@@ -847,18 +838,11 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
      * @return the visibility value returned by the map for the primary route line.
      */
     fun getTrafficVisibility(style: Style): Visibility? {
-        return getTrafficVisibility(
-            getLayerIdsForPrimaryRoute(
-                primaryRouteLineLayerGroup,
-                sourceLayerMap,
-                style,
-            ),
+        return getLayerIdsForPrimaryRoute(
+            primaryRouteLineLayerGroup,
+            sourceLayerMap,
             style,
-        )
-    }
-
-    private fun getTrafficVisibility(primaryRouteLayers: Set<String>, style: Style): Visibility? {
-        return primaryRouteLayers.firstOrNull { layerId ->
+        ).firstOrNull { layerId ->
             layerId in trafficLayerIds
         }?.run {
             getLayerVisibility(style, this)
@@ -873,21 +857,11 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
      * @return the visibility value returned by the map.
      */
     fun getPrimaryRouteVisibility(style: Style): Visibility? {
-        return getPrimaryRouteVisibility(
-            getLayerIdsForPrimaryRoute(
-                primaryRouteLineLayerGroup,
-                sourceLayerMap,
-                style,
-            ),
+        return getLayerIdsForPrimaryRoute(
+            primaryRouteLineLayerGroup,
+            sourceLayerMap,
             style,
-        )
-    }
-
-    private fun getPrimaryRouteVisibility(
-        primaryRouteLayers: Set<String>,
-        style: Style,
-    ): Visibility? {
-        return primaryRouteLayers.firstOrNull { layerId ->
+        ).firstOrNull { layerId ->
             layerId in mainLayerIds
         }?.run {
             getLayerVisibility(style, this)
@@ -904,17 +878,10 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
     fun getAlternativeRoutesVisibility(style: Style): Visibility? {
         val primaryRouteLineLayers =
             getLayerIdsForPrimaryRoute(primaryRouteLineLayerGroup, sourceLayerMap, style)
-        return getAlternativeRoutesVisibility(primaryRouteLineLayers, style)
-    }
-
-    private fun getAlternativeRoutesVisibility(
-        primaryRouteLayers: Set<String>,
-        style: Style,
-    ): Visibility? {
         return layerGroup1SourceLayerIds
             .union(layerGroup2SourceLayerIds)
             .union(layerGroup3SourceLayerIds)
-            .subtract(primaryRouteLayers).firstOrNull { layerId ->
+            .subtract(primaryRouteLineLayers).firstOrNull { layerId ->
                 layerId in mainLayerIds
             }?.run {
                 getLayerVisibility(style, this)

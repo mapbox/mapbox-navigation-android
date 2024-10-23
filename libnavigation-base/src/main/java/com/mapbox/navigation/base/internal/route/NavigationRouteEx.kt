@@ -1,5 +1,4 @@
 @file:JvmName("NavigationRouteEx")
-@file:OptIn(ExperimentalMapboxNavigationAPI::class)
 
 package com.mapbox.navigation.base.internal.route
 
@@ -14,11 +13,9 @@ import com.mapbox.api.directions.v5.models.Incident
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
-import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.CongestionNumericOverride
 import com.mapbox.navigation.base.internal.utils.Constants
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.route.RouteRefreshMetadata
 import com.mapbox.navigation.base.route.toNavigationRoute
 import com.mapbox.navigation.base.utils.DecodeUtils.stepGeometryToPoints
 import com.mapbox.navigation.utils.internal.Time
@@ -146,7 +143,6 @@ internal fun NavigationRoute.refreshRoute(
         directionsRouteBlock,
         waypointsBlock,
         newExpirationTimeElapsedSeconds ?: expirationTimeElapsedSeconds,
-        routeRefreshMetadata = RouteRefreshMetadata(isUpToDate = true),
     )
 }
 
@@ -186,7 +182,6 @@ fun NavigationRoute.update(
     waypointsBlock: List<DirectionsWaypoint>?.() -> List<DirectionsWaypoint>?,
     newExpirationTimeElapsedSeconds: Long? = this.expirationTimeElapsedSeconds,
     overriddenTraffic: CongestionNumericOverride? = this.overriddenTraffic,
-    routeRefreshMetadata: RouteRefreshMetadata? = this.routeRefreshMetadata,
 ): NavigationRoute {
     val refreshedRoute = directionsRoute.directionsRouteBlock()
     return copy(
@@ -194,7 +189,6 @@ fun NavigationRoute.update(
         waypoints = waypoints.waypointsBlock(),
         expirationTimeElapsedSeconds = newExpirationTimeElapsedSeconds,
         overriddenTraffic = overriddenTraffic,
-        routeRefreshMetadata = routeRefreshMetadata,
     )
 }
 

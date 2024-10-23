@@ -1,9 +1,6 @@
-@file:OptIn(ExperimentalMapboxNavigationAPI::class)
-
 package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.api.directions.v5.models.LegAnnotation
-import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.time.parseISO8601DateToLocalTimeOrNull
 import com.mapbox.navigation.core.internal.RouteProgressData
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
@@ -208,15 +205,5 @@ class ExpiringDataRemoverTest {
         val actual = sut.removeExpiringDataFromRoutesProgressData(input)
 
         assertEquals(expected, actual)
-        assertEquals(
-            false,
-            actual.primaryRouteRefresherResult.route.routeRefreshMetadata?.isUpToDate,
-        )
-        assertEquals(
-            listOf(false, false),
-            actual.alternativesRouteRefresherResults.map {
-                it.route.routeRefreshMetadata?.isUpToDate
-            },
-        )
     }
 }

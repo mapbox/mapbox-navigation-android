@@ -4,7 +4,6 @@ import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.core.ev.EVDynamicDataHolder
 import com.mapbox.navigation.core.ev.EVRerouteOptionsAdapter
-import com.mapbox.navigation.utils.internal.logI
 
 internal class MapboxRerouteOptionsAdapter @VisibleForTesting constructor(
     private val internalOptionsAdapters: List<InternalRerouteOptionsAdapter>,
@@ -33,21 +32,6 @@ internal class MapboxRerouteOptionsAdapter @VisibleForTesting constructor(
         val internalOptions = internalOptionsAdapters.fold(routeOptions) { value, modifier ->
             modifier.onRouteOptions(value, params)
         }
-
-        logI(LOG_CATEGORY) {
-            "Initial options for reroute: ${internalOptions.toUrl("***")}"
-        }
-
-        val updatedOptions = externalOptionsAdapter?.onRouteOptions(internalOptions)
-        if (updatedOptions != null) {
-            logI(LOG_CATEGORY) {
-                "Options for reroute have been externally updated: ${updatedOptions.toUrl("***")}"
-            }
-        }
-        return updatedOptions ?: internalOptions
-    }
-
-    private companion object {
-        const val LOG_CATEGORY = "MapboxRerouteOptionsAdapter"
+        return externalOptionsAdapter?.onRouteOptions(internalOptions) ?: internalOptions
     }
 }

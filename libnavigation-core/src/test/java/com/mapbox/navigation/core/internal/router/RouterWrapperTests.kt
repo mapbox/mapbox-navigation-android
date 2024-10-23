@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMapboxNavigationAPI::class)
-
 package com.mapbox.navigation.core.internal.router
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse
@@ -10,7 +8,6 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.MapboxServices
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
@@ -743,8 +740,6 @@ class RouterWrapperTests {
 
         verify(exactly = 1) { routerRefreshCallback.onRefreshReady(capture(routeSlot)) }
         checkRefreshedNavigationRouteWithWithWaypoints(expected, routeSlot.captured)
-        assertNotNull(routeSlot.captured.routeRefreshMetadata)
-        assertTrue(routeSlot.captured.routeRefreshMetadata!!.isUpToDate)
     }
 
     @Test

@@ -19,11 +19,11 @@ import kotlin.time.Duration.Companion.seconds
 class MapboxRouteCalloutApiTest {
 
     @Test
-    fun `generate a single callout when there is only one route`() {
+    fun `generate no callouts when there is only one route`() {
         val routes = createMockRoutes(routeCount = 1)
         val result = MapboxRouteCalloutApi().setNavigationRoutes(routes)
 
-        assertTrue(result.callouts.singleOrNull() is RouteCallout.Eta)
+        assertTrue(result.callouts.isEmpty())
     }
 
     @Test
