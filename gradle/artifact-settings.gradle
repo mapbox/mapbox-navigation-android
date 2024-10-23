@@ -1,6 +1,5 @@
 ext {
     mapboxArtifactGroupId = 'com.mapbox.navigationcore'
-    mapboxArtifactId = project.property('POM_ARTIFACT_ID')
     mapboxArtifactTitle = project.property('POM_ARTIFACT_TITLE')
     mapboxArtifactDescription = project.property('POM_DESCRIPTION')
     mapboxDeveloperName = 'Mapbox'
@@ -13,6 +12,36 @@ ext {
     snapshot = project.hasProperty("snapshot") ? project.property("snapshot").toBoolean() : false
     releaseTagPrefix = project.hasProperty('RELEASE_TAG_PREFIX') ? project.property('RELEASE_TAG_PREFIX') : 'mapbox-navigation-android_dash-core_'
     versionName = getVersionName()
+        
+    /**
+     * Properties used for artifact publishing.
+     *
+     * The map consists of:
+     * - Key: The name of the Gradle module from which the artifact is built.
+     * - Value: A tuple with two elements:
+     *     1. The artifact ID.
+     *     2. The SDK name used in the SDK registry.
+     */
+    navSdkArtifactSettings = [
+        'libnavigation-android' : new Tuple2('android', 'navigation-core-android'),
+        'libnavigation-base' : new Tuple2('base', 'navigation-core-base'),
+        'libnavigation-core' : new Tuple2('navigation', 'navigation-core-navigation'),
+        'libnavigation-copilot' : new Tuple2('copilot', 'navigation-core-copilot'),
+        'libnavigation-metrics' : new Tuple2('metrics', 'navigation-core-metrics'),
+        'libnavigation-tripdata' : new Tuple2('tripdata', 'navigation-core-tripdata'),
+        'libnavigation-util' : new Tuple2('utils', 'navigation-core-utils'),
+        'libnavigation-voice' : new Tuple2('voice', 'navigation-core-voice'),
+        'libnavigator' : new Tuple2('navigator', 'navigation-core-navigator'),
+        'libnavui-base' : new Tuple2('ui-base', 'navigation-core-ui-base'),
+        'libnavui-maps' : new Tuple2('ui-maps', 'navigation-core-ui-maps'),
+        'libnavui-util' : new Tuple2('ui-utils', 'navigation-core-ui-utils'),
+        'libtrip-notification' : new Tuple2('notification', 'navigation-core-notification'),
+        'ui-components' : new Tuple2('ui-components', 'navigation-core-ui-components'),
+        'androidauto' : new Tuple2('android-auto-components', 'navigation-core-androidauto'),
+        'libtesting-router' : new Tuple2('test-router', 'navigation-core-testing-router'),
+        'libnavigation-custom-route' : new Tuple2('customroute', 'navigation-core-custom-route'),
+        'libnavigation-datainputs' : new Tuple2('datainputs', 'navigation-core-datainputs')
+    ]
 }
 
 def getVersionName() {
