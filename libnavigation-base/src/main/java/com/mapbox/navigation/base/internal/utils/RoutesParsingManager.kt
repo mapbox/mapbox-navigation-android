@@ -2,8 +2,11 @@
 
 package com.mapbox.navigation.base.internal.utils
 
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.route.toDirectionsResponse
 import com.mapbox.navigation.utils.internal.logD
+import com.mapbox.navigator.RouteInterface
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.nio.ByteBuffer
@@ -30,6 +33,11 @@ interface RouteParsingManager {
         arguments: AlternativesInfo,
         parsing: suspend () -> T,
     ): AlternativesParsingResult<T>
+
+    fun parseRouteToDirections(route: RouteInterface): DirectionsResponse {
+        logD(LOG_TAG) { "Parsing directions response for routeId = ${route.routeId}" }
+        return route.responseJsonRef.toDirectionsResponse()
+    }
 }
 
 fun createRouteParsingManager(): RouteParsingManager {

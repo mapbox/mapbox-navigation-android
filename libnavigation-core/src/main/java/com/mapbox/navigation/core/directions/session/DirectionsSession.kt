@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.directions.session
 
+import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
@@ -9,8 +10,18 @@ import com.mapbox.navigation.core.internal.utils.mapToReason
 
 internal interface DirectionsSession : RouteRefresh {
 
+    @VisibleForTesting
     val routesUpdatedResult: RoutesUpdatedResult?
+
     val routes: List<NavigationRoute>
+
+    /**
+     * A list of routes that have been ignored.
+     *
+     * Ignored routes are those that are not currently being used for navigation,
+     * but are still kept in memory for potential future use.
+     */
+    val ignoredRoutes: List<IgnoredRoute>
 
     val initialLegIndex: Int
 
@@ -71,6 +82,12 @@ internal interface DirectionsSession : RouteRefresh {
      */
     fun shutdown()
 }
+
+internal val DirectionsSession.routesPlusIgnored: List<NavigationRoute>
+    get() = routes + ignoredRoutes.map { it.navigationRoute }
+
+internal fun DirectionsSession.findRoute(routeId: String): NavigationRoute? =
+    routesPlusIgnored.find { it.id == routeId }
 
 internal data class DirectionsSessionRoutes(
     val acceptedRoutes: List<NavigationRoute>,

@@ -49,6 +49,7 @@ import com.mapbox.navigation.core.directions.session.RoutesSetStartedParams
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.directions.session.SetNavigationRoutesStartedObserver
 import com.mapbox.navigation.core.directions.session.Utils
+import com.mapbox.navigation.core.directions.session.routesPlusIgnored
 import com.mapbox.navigation.core.history.MapboxHistoryReader
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.internal.MapboxNavigationSDKInitializerImpl
@@ -589,6 +590,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             tripSession,
             threadController,
             routeParsingManager,
+            directionsSession,
         )
         routeAlternativesController.setRouteUpdateSuggestionListener(::updateRoutes)
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -640,6 +642,13 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         systemLocaleWatcher = SystemLocaleWatcher.create(
             navigationOptions.applicationContext,
             navigator,
+        )
+
+        registerRouteProgressObserver(
+            NavigationComponentProvider.createForkPointPassedObserver(
+                directionsSession,
+                ::currentLegIndex,
+            ),
         )
     }
 
@@ -2117,7 +2126,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private suspend fun prepareNavigationForRoutesParsing() {
         withContext(Dispatchers.Main.immediate) {
-            if (directionsSession.routes.size > 1) {
+            if (directionsSession.routesPlusIgnored.size > 1) {
                 suspendCoroutine<Unit> { continuation ->
                     setNavigationRoutes(directionsSession.routes.take(1), currentLegIndex()) {
                         continuation.resume(Unit)

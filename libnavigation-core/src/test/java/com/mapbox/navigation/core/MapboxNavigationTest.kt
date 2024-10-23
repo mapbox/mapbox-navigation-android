@@ -12,6 +12,7 @@ import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.arrival.ArrivalController
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
+import com.mapbox.navigation.core.directions.ForkPointPassedObserver
 import com.mapbox.navigation.core.directions.session.DirectionsSessionRoutes
 import com.mapbox.navigation.core.directions.session.IgnoredRoute
 import com.mapbox.navigation.core.directions.session.RoutesExtra
@@ -2299,6 +2300,19 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         verify(exactly = 1) {
             localeWatcher.destroy()
         }
+    }
+
+    @Test
+    fun `ForkPointPassedObserver is registered during instantiation`() {
+        val forkPassedObserverMock = mockk<ForkPointPassedObserver>(relaxed = true)
+
+        every {
+            NavigationComponentProvider.createForkPointPassedObserver(any(), any())
+        } returns forkPassedObserverMock
+
+        createMapboxNavigation()
+
+        verify { tripSession.registerRouteProgressObserver(refEq(forkPassedObserverMock)) }
     }
 
     private fun interceptRefreshObserver(): RouteRefreshObserver {

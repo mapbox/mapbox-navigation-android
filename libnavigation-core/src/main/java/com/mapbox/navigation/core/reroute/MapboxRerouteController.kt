@@ -19,6 +19,7 @@ import com.mapbox.navigation.base.route.ResponseOriginAPI
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.directions.session.DirectionsSession
+import com.mapbox.navigation.core.directions.session.routesPlusIgnored
 import com.mapbox.navigation.core.ev.EVDynamicDataHolder
 import com.mapbox.navigation.core.internal.router.GetRouteSignature
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
@@ -142,7 +143,7 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
 
         val routeProgress = tripSession.getRouteProgress()
         val routeAlternativeId = routeProgress?.routeAlternativeId
-        val routes = directionsSession.routes
+        val routes = directionsSession.routesPlusIgnored
         if (!ignoreDeviationToAlternatives && routeAlternativeId != null) {
             val relevantAlternative = routes.find { it.id == routeAlternativeId }
             if (relevantAlternative != null) {

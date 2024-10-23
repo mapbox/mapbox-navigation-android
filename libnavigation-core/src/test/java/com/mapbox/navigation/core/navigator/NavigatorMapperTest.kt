@@ -106,8 +106,8 @@ class NavigatorMapperTest {
             currentRouteGeometryIndex = routeGeometryIndex,
             inParkingAisle = true,
             alternativeRoutesIndices = mapOf(
-                "id#2" to RouteIndicesFactory.buildRouteIndices(2, 4, 6, 8, 10),
-                "id#3" to RouteIndicesFactory.buildRouteIndices(3, 7, 5, 11, 9),
+                "id#2" to RouteIndicesFactory.buildRouteIndices(2, 4, 6, 8, 10, false),
+                "id#3" to RouteIndicesFactory.buildRouteIndices(3, 7, 5, 11, 9, false),
             ),
         )
 

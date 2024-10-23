@@ -1,5 +1,81 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.4.1 - 19 October, 2024
+#### Features
+
+
+#### Bug fixes and improvements
+- Optimized CA routes handling by skiping route parsing if it's already exist in direction session    [#6868](https://github.com/mapbox/mapbox-navigation-android/pull/6868)
+- Improved map-matching experience in tunnels. [#7042](https://github.com/mapbox/mapbox-navigation-android/pull/7042)
+- Increased route stickiness in dead reckoning mode. [#7042](https://github.com/mapbox/mapbox-navigation-android/pull/7042)
+- Improved odometry and road graph fusing in Manhattan urban canyons. [#7042](https://github.com/mapbox/mapbox-navigation-android/pull/7042)
+- Nav SDK now removes passed alternative routes as soon as user passed fork point. [#6813](https://github.com/mapbox/mapbox-navigation-android/pull/6813)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.7.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.7.1))
+- Mapbox Navigation Native `v320.2.0`
+- Mapbox Core Common `v24.7.1`
+- Mapbox Java `v7.2.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.2.0))
+
+
+## Navigation SDK Core Framework 3.4.0 - 01 October, 2024
+#### Features
+- Split MotionData into more accurate parts. Introduced ImuTemperatureData, OrientationData, RawAccelerometer, RawGravity, RawGyroscope and SpeedData. [#6873](https://github.com/mapbox/mapbox-navigation-android/pull/6873)
+- Added unique route ID's after each subsequent restart. [#6873](https://github.com/mapbox/mapbox-navigation-android/pull/6873)
+- Added filtering online routes that are too far from current location. [#6873](https://github.com/mapbox/mapbox-navigation-android/pull/6873)
+- Added rerouting when server unrecognizes current route id to refresh or update alternatives. [#6873](https://github.com/mapbox/mapbox-navigation-android/pull/6873)
+- Improved route completion logic. Completed state is triggered only if the puck is leaving the waypoint or after timeout reaching the waypoint threshold. [#6760](https://github.com/mapbox/mapbox-navigation-android/pull/6760)
+- Signature of experimental `EtcGateApi#updateEtcGateInfo` function has been changed, now it accepts `EtcGateApi.EtcGateInfo` as a function parameter. [#6508](https://github.com/mapbox/mapbox-navigation-android/pull/6508)
+- Experimental Data Inputs functionality has been removed from the `core` module to a separate `datainputs` module (`MapboxNavigation#dataInputs` and everything from the package `com.mapbox.navigation.datainputs` have been removed). [Contact us](https://www.mapbox.com/support) to get more information on how to get access to the module. [#6508](https://github.com/mapbox/mapbox-navigation-android/pull/6508)
+- Experimental Adasis functionality has been removed from the `core` module (`MapboxNavigation`'s functions `setAdasisMessageObserver`, `resetAdasisMessageObserver`, `updateExternalSensorData`, and `GraphAccessor#getAdasisEdgeAttributes` have been removed). [Contact us](https://www.mapbox.com/support) in case you're interested in ADASIS functionality. [#6508](https://github.com/mapbox/mapbox-navigation-android/pull/6508)
+- Added experimental `RoutingTilesOptions#fallbackNavigationTilesVersion` which lets define version of navigation tiles to fallback in case of offline routing failure with navigation tiles defined in `RoutingTilesOptions#tilesVersion`. [#6475](https://github.com/mapbox/mapbox-navigation-android/pull/6475)
+- Added experimental `MapboxRouteLineViewOptions#fadeOnHighZoomsConfig` and `MapboxRouteArrowOptions#fadeOnHighZoomsConfig` to configure smooth fading out of route line or/and arrows on high zoom levels. [#6367](https://github.com/mapbox/mapbox-navigation-android/pull/6367)
+- The `PredictiveCacheController(PredictiveCacheOptions)` constructor is now deprecated. Use `PredictiveCacheController(MapboxNavigation, PredictiveCacheOptions)` instead. [#6376](https://github.com/mapbox/mapbox-navigation-android/pull/6376)
+- Added `NavigationScaleGestureHandlerOptions#followingRotationAngleThreshold` that define threshold angle for rotation for `FOLLOWING` Navigation Camera state. [#6234](https://github.com/mapbox/mapbox-navigation-android/pull/6234)
+- Added the ability to filter road names based on the system language [#6163](https://github.com/mapbox/mapbox-navigation-android/pull/6163)
+- `com.mapbox.navigation.base.road.model.RoadComponent` objects that contain only slashes in their text are filtered out [#6163](https://github.com/mapbox/mapbox-navigation-android/pull/6163)
+- Now `EHorizonResultType.Type` has a new element called `EHorizonResultType.NOT_AVAILABLE`. [#6290](https://github.com/mapbox/mapbox-navigation-android/pull/6290)
+- Old `MapboxNavigation.postUserFeedback()` functions have been deprecated, use an overloading that accepts `UserFeedback` as a parameter. [#5781](https://github.com/mapbox/mapbox-navigation-android/pull/5781)
+- Introduce MapboxRouteCalloutApi and MapboxRouteCalloutView to attach callouts to route lines with info about duration  [#2743](https://github.com/mapbox/mapbox-navigation-android/pull/2743)
+- Optimized memory usage in Directions API model classes by interning frequently occurring strings in JSON. [#5854](https://github.com/mapbox/mapbox-navigation-android/pull/5854)
+- Added experimental `MapboxNavigation#replanRoute` to handle cases when user changes route options during active guidance, [#5286](https://github.com/mapbox/mapbox-navigation-android/pull/5286)
+for example enabling avoid ferries.
+- Added `DataInputsManager` to allow the provision of data from external sensors to the navigator, see `MapboxNavigation.dataInputsManager`. Experimental `EtcGateInfo` has been moved to `com.mapbox.navigation.core.datainputs` package. `EtcGateApi` has been deprecated. [#5957](https://github.com/mapbox/mapbox-navigation-android/pull/5957)
+- Removing the ExperimentalMapboxNavigationAPI flag for Search predictive cache. [#5615](https://github.com/mapbox/mapbox-navigation-android/pull/5615)
+- [BREAKING CHANGE] `PredictiveCacheOptions.unrecognizedTilesetDescriptorOptions` has been renamed to `PredictiveCacheOptions.predictiveCacheSearchOptionsList`. Additionally, `PredictiveCacheUnrecognizedTilesetDescriptorOptions` has been renamed to `PredictiveCacheSearchOptions`. Now, only search-related options can be passed to `PredictiveCacheSearchOptions`. [#5244](https://github.com/mapbox/mapbox-navigation-android/pull/5244)
+- Introduced experimental traffic adjustment mechanism during a drive and added `TrafficOverrideOptions` to control this feature [#2811](https://github.com/mapbox/mapbox-navigation-android/pull/2811)
+- Changed `Alternatives` that deviate close to a destination point are removed before a fork is reached. [#5848](https://github.com/mapbox/mapbox-navigation-android/pull/5848)
+- Added `RerouteStrategyForMapMatchedRoutes` to `RerouteOptions`. Reroute option `enableLegacyBehaviorForMapMatchedRoute` was removed, use `NavigateToFinalDestination` strategy instead. [#5256](https://github.com/mapbox/mapbox-navigation-android/pull/5256)
+
+#### Bug fixes and improvements
+- Fixed unnecessary reroutes when using onboard router. [#6873](https://github.com/mapbox/mapbox-navigation-android/pull/6873)
+- Fixed remaining alternative routes when passing fork points. [#6873](https://github.com/mapbox/mapbox-navigation-android/pull/6873)
+- Improved updating alternative routes [#6760](https://github.com/mapbox/mapbox-navigation-android/pull/6760)
+- Fixed `CarSearchLocationProvider` produces _NullPointerException_ when using Mapbox Search SDK.  [#6702](https://github.com/mapbox/mapbox-navigation-android/pull/6702)
+- Fixed a bug causing some history files recorded during the previous app sessions not to be uploaded by the Copilot. [#6359](https://github.com/mapbox/mapbox-navigation-android/pull/6359)
+- Fixed an issue where native memory was not being properly released after the `MapboxNavigation` object was destroyed. [#6376](https://github.com/mapbox/mapbox-navigation-android/pull/6376)
+- Fixed the issue of unwanted rerouting occurring immediately after setting a new route [#6163](https://github.com/mapbox/mapbox-navigation-android/pull/6163)
+- Fixed a crash caused by an overflow in the JNI global reference table. [#6290](https://github.com/mapbox/mapbox-navigation-android/pull/6290)
+- Fixed an issue with vignettes in Romania and Bulgaria for offline routing when tolls are excluded. [#6290](https://github.com/mapbox/mapbox-navigation-android/pull/6290)
+- Addressed several issues that occurred when switching to an alternative route. [#6290](https://github.com/mapbox/mapbox-navigation-android/pull/6290)
+- Implementation of `RerouteController#registerRerouteStateObserver` now invokes observer immediately with current state instead of posting invocation to the main looper.  [#5286](https://github.com/mapbox/mapbox-navigation-android/pull/5286)
+- Fixed UI jank caused by on-device TextToSpeech player. [#5638](https://github.com/mapbox/mapbox-navigation-android/pull/5638)
+- Removed `PredictiveCacheController#removeSearchControllers` and `PredictiveCacheController#createSearchControllers`. Now search predictive cache controller is created and destroyed together with `PredictiveCacheController` instance if `PredictiveCacheOptions.predictiveCacheSearchOptionsList` is provided. [#5714](https://github.com/mapbox/mapbox-navigation-android/pull/5714)
+- Improve performance when handling large road objects on the eHorizon's MPP. [#6014](https://github.com/mapbox/mapbox-navigation-android/pull/6014)
+- Fixed `Routes` that origin is out of primary route cannot be added as alternatives. [#5848](https://github.com/mapbox/mapbox-navigation-android/pull/5848)
+- Fixed a crash due to incorrect OpenLR input data [#5400](https://github.com/mapbox/mapbox-navigation-android/pull/5400)
+- Fixed a bug with spinning smoothed coordinate [#5400](https://github.com/mapbox/mapbox-navigation-android/pull/5400)
+- Fixed issue for calculating the trim-offset value for the vanishing route line feature when the current geometry index emitted by route progress is greater than the value expected.
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.7.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.7.0))
+- Mapbox Navigation Native `v320.0.0`
+- Mapbox Core Common `v24.7.0`
+- Mapbox Java `v7.2.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.2.0))
+
+
 ## Navigation SDK Core Framework 3.4.0-rc.1 - 17 September, 2024
 #### Features
 

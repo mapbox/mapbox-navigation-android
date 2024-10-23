@@ -1,5 +1,6 @@
 package com.mapbox.navigation.base.internal.utils
 
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
@@ -7,7 +8,6 @@ import com.mapbox.navigation.base.internal.route.RoutesResponse
 import com.mapbox.navigation.base.internal.route.toNavigationRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.base.route.toDirectionsResponse
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigator.RouteInterface
 import kotlinx.coroutines.CoroutineDispatcher
@@ -44,13 +44,18 @@ suspend fun parseDirectionsResponse(
 fun parseRouteInterfaces(
     routes: List<RouteInterface>,
     responseTimeElapsedSeconds: Long,
+    routeLookup: (routeId: String) -> NavigationRoute?,
+    routeToDirections: (route: RouteInterface) -> DirectionsResponse,
 ): Expected<Throwable, List<NavigationRoute>> {
     return try {
         routes.groupBy { it.responseUuid }
             .map { (_, routes) ->
-                val directionsResponse = routes.first().responseJsonRef.toDirectionsResponse()
+                val directionsResponse by lazy {
+                    routeToDirections(routes.first())
+                }
+
                 routes.map {
-                    it.toNavigationRoute(
+                    routeLookup(it.routeId) ?: it.toNavigationRoute(
                         responseTimeElapsedSeconds,
                         directionsResponse,
                     )

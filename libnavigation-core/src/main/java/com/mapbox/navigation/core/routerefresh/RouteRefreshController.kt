@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.routerefresh
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.RoutesInvalidatedObserver
+import com.mapbox.navigation.core.directions.ForkPointPassedObserver
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
@@ -121,7 +122,16 @@ class RouteRefreshController internal constructor(
         if (result.reason != RoutesExtra.ROUTES_UPDATE_REASON_REFRESH) {
             routeRefresherResultProcessor.reset()
             immediateRouteRefreshController.cancel()
-            plannedRouteRefreshController.startRoutesRefreshing(result.navigationRoutes)
+
+            // "fork point passed" routes still have a chance to be useful for navigation,
+            // even if they are on the ignore list. We need to refresh them as well.
+            val validAlternatives = result.ignoredRoutes.filter {
+                it.reason == ForkPointPassedObserver.REASON_ALTERNATIVE_FORK_POINT_PASSED
+            }.map { it.navigationRoute }
+
+            plannedRouteRefreshController.startRoutesRefreshing(
+                result.navigationRoutes + validAlternatives,
+            )
         }
     }
 }
