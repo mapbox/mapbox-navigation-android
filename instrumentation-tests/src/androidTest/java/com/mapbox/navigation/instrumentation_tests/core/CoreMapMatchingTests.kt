@@ -313,8 +313,8 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
             val result = navigation.requestMapMatching(options).getSuccessfulOrThrowException()
             navigation.setNavigationRoutes(result.navigationRoutes)
             stayOnPosition(
-                latitude = 32.712012,
-                longitude = -117.172928,
+                latitude = 32.712702672167055,
+                longitude = -117.17290808578423,
                 bearing = 178.0f,
                 frequencyHz = 5,
             ) {
@@ -354,8 +354,8 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
 
             navigation.setNavigationRoutes(listOf(deserializedRoute))
             stayOnPosition(
-                latitude = 32.712012,
-                longitude = -117.172928,
+                latitude = 32.712702672167055,
+                longitude = -117.17290808578423,
                 bearing = 178.0f,
                 frequencyHz = 5,
             ) {

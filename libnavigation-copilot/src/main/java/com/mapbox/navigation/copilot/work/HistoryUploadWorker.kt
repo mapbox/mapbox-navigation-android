@@ -12,17 +12,14 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.mapbox.common.MapboxOptions
-import com.mapbox.common.MapboxServices
 import com.mapbox.common.TransferState
 import com.mapbox.common.UploadOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.base.internal.utils.MapboxOptionsUtil.getTokenForService
 import com.mapbox.navigation.copilot.AttachmentMetadata
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.attachmentFilename
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.generateSessionId
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.rename
-import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.retrieveOwnerFrom
 import com.mapbox.navigation.copilot.HttpServiceProvider
 import com.mapbox.navigation.copilot.MapboxCopilot
 import com.mapbox.navigation.copilot.MapboxCopilot.pushStatusObservers
@@ -106,8 +103,6 @@ internal class HistoryUploadWorker(
         HistoryAttachmentsUtils.delete(file)
     }
 
-    @Suppress("MaxLineLength")
-    /* ktlint-disable max-line-length */
     private suspend fun uploadHistoryFile(
         uploadOptions: UploadOptions,
     ): Boolean = suspendCancellableCoroutine { cont ->
@@ -120,7 +115,8 @@ internal class HistoryUploadWorker(
 
                 TransferState.IN_PROGRESS -> {
                     logD(
-                        "uploadStatus state = UPLOADING sent ${uploadStatus.totalSentBytes}/${uploadStatus.totalBytes} bytes",
+                        "uploadStatus state = UPLOADING sent ${uploadStatus.totalSentBytes}" +
+                            "/${uploadStatus.totalBytes} bytes",
                     )
                 }
 
@@ -132,7 +128,8 @@ internal class HistoryUploadWorker(
 
                 TransferState.FAILED -> {
                     logD(
-                        "uploadStatus state = FAILED error = ${uploadStatus.error}; HttpResponseData = ${uploadStatus.httpResult?.value}",
+                        "uploadStatus state = FAILED error = ${uploadStatus.error}; " +
+                            "HttpResponseData = ${uploadStatus.httpResult?.value}",
                     )
                     cont.resume(false)
                 }
@@ -144,7 +141,6 @@ internal class HistoryUploadWorker(
             }
         }
     }
-    /* ktlint-enable max-line-length */
 
     private fun failure(copilotSession: CopilotSession) {
         val failedStatus = PushStatus.Failed(copilotSession)
@@ -166,19 +162,20 @@ internal class HistoryUploadWorker(
 
     internal companion object {
 
-        private const val HISTORY_FILE_PATH: String = "history_file_path"
-        private const val APP_MODE: String = "app_mode"
-        private const val DRIVE_MODE: String = "drive_mode"
-        private const val DRIVE_ID: String = "drive_id"
-        private const val STARTED_AT: String = "started_at"
-        private const val ENDED_AT: String = "ended_at"
-        private const val NAV_SDK_VERSION: String = "nav_sdk_version"
-        private const val NAV_NATIVE_SDK_VERSION: String = "nav_native_sdk_version"
-        private const val APP_VERSION: String = "app_version"
-        private const val APP_USER_ID: String = "app_user_id"
-        private const val APP_SESSION_ID: String = "app_session_id"
-        private const val UPLOAD_URL: String = "upload_url"
-        private const val UPLOAD_SESSION_ID: String = "upload_session_id"
+        private const val HISTORY_FILE_PATH = "history_file_path"
+        private const val APP_MODE = "app_mode"
+        private const val DRIVE_MODE = "drive_mode"
+        private const val DRIVE_ID = "drive_id"
+        private const val STARTED_AT = "started_at"
+        private const val ENDED_AT = "ended_at"
+        private const val NAV_SDK_VERSION = "nav_sdk_version"
+        private const val NAV_NATIVE_SDK_VERSION = "nav_native_sdk_version"
+        private const val APP_VERSION = "app_version"
+        private const val APP_USER_ID = "app_user_id"
+        private const val APP_SESSION_ID = "app_session_id"
+        private const val UPLOAD_URL = "upload_url"
+        private const val UPLOAD_SESSION_ID = "upload_session_id"
+        private const val OWNER = "owner"
 
         // 2^8 x 338 = 86528 / 3600 = 24.03 hours
         private const val MAX_RUN_ATTEMPT_COUNT = 8
@@ -208,8 +205,7 @@ internal class HistoryUploadWorker(
 
         private fun inputData(copilotSession: CopilotSession): Data {
             val url = "$PROD_BASE_URL/attachments/v1?access_token=${MapboxOptions.accessToken}"
-            val owner = retrieveOwnerFrom(getTokenForService(MapboxServices.DIRECTIONS))
-            val uploadSessionId = generateSessionId(copilotSession, owner)
+            val uploadSessionId = generateSessionId(copilotSession)
 
             return Data.Builder()
                 .putCopilotSession(copilotSession)
@@ -230,6 +226,7 @@ internal class HistoryUploadWorker(
             appUserId = data.getString(APP_USER_ID)!!,
             appSessionId = data.getString(APP_SESSION_ID)!!,
             recording = data.getString(HISTORY_FILE_PATH)!!,
+            owner = data.getString(OWNER).orEmpty(),
         )
 
         @VisibleForTesting
@@ -245,5 +242,6 @@ internal class HistoryUploadWorker(
                 .putString(APP_VERSION, copilotSession.appVersion)
                 .putString(APP_SESSION_ID, copilotSession.appSessionId)
                 .putString(HISTORY_FILE_PATH, copilotSession.recording)
+                .putString(OWNER, copilotSession.owner)
     }
 }

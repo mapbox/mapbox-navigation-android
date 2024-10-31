@@ -37,8 +37,8 @@ internal object HistoryAttachmentsUtils {
                 .replace('_', '/'),
         ).getString("u")
 
-    fun generateSessionId(copilotSession: CopilotSession, owner: String): String =
-        "$COPILOT/$owner/${retrieveSpecVersion()}/" +
+    fun generateSessionId(copilotSession: CopilotSession): String =
+        "$COPILOT/${copilotSession.owner}/${retrieveSpecVersion()}/" +
             "${copilotSession.appMode}/-/-" +
             "/${copilotSession.driveMode}/-" +
             "/${copilotSession.driveId}"

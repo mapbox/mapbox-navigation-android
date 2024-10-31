@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.reroute
 
 import com.google.gson.JsonPrimitive
+import com.mapbox.api.directions.v5.DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.route.ResponseOriginAPI.Companion.DIRECTIONS_API
@@ -40,7 +41,8 @@ internal class RouteHistoryOptionsAdapter(
         val routeProgress = latestRouteProgressProvider()
         return if (routeProgress != null &&
             routeProgress.navigationRoute.origin == RouterOrigin.ONLINE &&
-            routeProgress.navigationRoute.responseOriginAPI == DIRECTIONS_API
+            routeProgress.navigationRoute.responseOriginAPI == DIRECTIONS_API &&
+            routeOptions.profile() == PROFILE_DRIVING_TRAFFIC
         ) {
             addCurrentRouteToHistory(routeProgress, routeOptions)
         } else {
