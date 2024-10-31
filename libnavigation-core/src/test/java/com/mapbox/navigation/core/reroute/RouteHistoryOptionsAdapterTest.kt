@@ -1,6 +1,12 @@
 package com.mapbox.navigation.core.reroute
 
+import com.google.gson.JsonElement
 import com.google.gson.JsonPrimitive
+import com.mapbox.api.directions.v5.DirectionsCriteria.PROFILE_CYCLING
+import com.mapbox.api.directions.v5.DirectionsCriteria.PROFILE_DRIVING
+import com.mapbox.api.directions.v5.DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
+import com.mapbox.api.directions.v5.DirectionsCriteria.PROFILE_WALKING
+import com.mapbox.api.directions.v5.DirectionsCriteria.ProfileCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -36,7 +42,7 @@ class RouteHistoryOptionsAdapterTest {
                 null
             },
         )
-        val initialOptions = createRouteOptions()
+        val initialOptions = createTestRouteOptions()
 
         val result = adapter.onRouteOptions(initialOptions, defaultRouteOptionsAdapterParams)
 
@@ -61,7 +67,7 @@ class RouteHistoryOptionsAdapterTest {
                 )
             },
         )
-        val originalRouteOptions = createRouteOptions(
+        val originalRouteOptions = createTestRouteOptions(
             unrecognizedProperties = mapOf("test-key" to JsonPrimitive("test-value")),
         )
 
@@ -79,6 +85,39 @@ class RouteHistoryOptionsAdapterTest {
             "test-value",
             url.queryParameter("test-key"),
         )
+    }
+
+    @Test
+    fun `adapter doesn't add current route to history for no driving traffic profiles`() {
+        val testNavigationRoute = createNavigationRoutes(
+            createDirectionsResponse(
+                uuid = "history-test",
+            ),
+        )
+        val adapter = createRouteHistoryOptionsAdapter(
+            latestRouteProgressProvider = {
+                createRouteProgress(
+                    testNavigationRoute[0],
+                    currentRouteGeometryIndexValue = 30,
+                )
+            },
+        )
+        for (profile in listOf(PROFILE_CYCLING, PROFILE_WALKING, PROFILE_DRIVING)) {
+            val originalRouteOptions = createTestRouteOptions(
+                profile = profile,
+            )
+
+            val updatedRouteOptions = adapter.onRouteOptions(
+                originalRouteOptions,
+                defaultRouteOptionsAdapterParams,
+            )
+
+            val url = updatedRouteOptions.toHttpUrl()
+            assertNull(
+                "failed for $profile profile",
+                url.getRoutesHistory(),
+            )
+        }
     }
 
     @Test
@@ -102,7 +141,7 @@ class RouteHistoryOptionsAdapterTest {
                 currentRouteProgress
             },
         )
-        val originalRouteOptions = createRouteOptions()
+        val originalRouteOptions = createTestRouteOptions()
 
         val routeOptionsFirstReroute = adapter.onRouteOptions(
             originalRouteOptions,
@@ -144,7 +183,7 @@ class RouteHistoryOptionsAdapterTest {
                 currentRouteProgress
             },
         )
-        val originalRouteOptions = createRouteOptions()
+        val originalRouteOptions = createTestRouteOptions()
 
         val routeOptionsFirstReroute = adapter.onRouteOptions(
             originalRouteOptions,
@@ -182,7 +221,7 @@ class RouteHistoryOptionsAdapterTest {
                 )
             },
         )
-        val originalRouteOptions = createRouteOptions()
+        val originalRouteOptions = createTestRouteOptions()
 
         val updatedRouteOptions = adapter.onRouteOptions(
             originalRouteOptions,
@@ -258,7 +297,7 @@ class RouteHistoryOptionsAdapterTest {
             },
         )
 
-        var routeOptions = createRouteOptions()
+        var routeOptions = createTestRouteOptions()
         repeat(100) {
             routeOptions = adapter.onRouteOptions(
                 routeOptions,
@@ -290,7 +329,7 @@ class RouteHistoryOptionsAdapterTest {
                 )
             },
         )
-        val originalRouteOptions = createRouteOptions(
+        val originalRouteOptions = createTestRouteOptions(
             unrecognizedProperties = mapOf("routes_history" to JsonPrimitive("")),
         )
 
@@ -323,7 +362,7 @@ class RouteHistoryOptionsAdapterTest {
                 )
             },
         )
-        val originalRouteOptions = createRouteOptions(
+        val originalRouteOptions = createTestRouteOptions(
             unrecognizedProperties = mapOf("routes_history" to JsonPrimitive(";1;0")),
         )
 
@@ -348,7 +387,7 @@ class RouteHistoryOptionsAdapterTest {
                 error("test error")
             },
         )
-        val initialOptions = createRouteOptions()
+        val initialOptions = createTestRouteOptions()
 
         val result = adapter.onRouteOptions(
             initialOptions,
@@ -377,7 +416,7 @@ class RouteHistoryOptionsAdapterTest {
                 )
             },
         )
-        val originalRouteOptions = createRouteOptions(
+        val originalRouteOptions = createTestRouteOptions(
             unrecognizedProperties = mapOf("test-key" to JsonPrimitive("test-value")),
         )
 
@@ -403,6 +442,14 @@ private fun createRouteProgress(
     every { navigationRoute } returns navigationRouteValue
     every { currentRouteGeometryIndex } returns currentRouteGeometryIndexValue
 }
+
+private fun createTestRouteOptions(
+    @ProfileCriteria profile: String = PROFILE_DRIVING_TRAFFIC,
+    unrecognizedProperties: Map<String, JsonElement>? = null,
+) = createRouteOptions(
+    profile = profile,
+    unrecognizedProperties = unrecognizedProperties,
+)
 
 private fun RouteOptions.toHttpUrl() = toUrl("***").toString().toHttpUrl()
 

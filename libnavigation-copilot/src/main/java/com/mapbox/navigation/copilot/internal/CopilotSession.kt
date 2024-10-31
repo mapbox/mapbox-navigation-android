@@ -3,11 +3,15 @@ package com.mapbox.navigation.copilot.internal
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import com.google.gson.Gson
+import com.mapbox.common.MapboxServices
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.options.getOwner
+import com.mapbox.navigation.base.internal.utils.MapboxOptionsUtil.getTokenForService
 import com.mapbox.navigation.base.options.EventsAppMetadata
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.retrieveNavNativeSdkVersion
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.retrieveNavSdkVersion
+import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.retrieveOwnerFrom
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.utcTimeNow
 import java.io.File
 import java.util.Locale
@@ -41,6 +45,7 @@ data class CopilotSession(
     val appUserId: String = "_",
     val appSessionId: String = "_",
     val recording: String = "",
+    val owner: String = "",
 ) {
     fun toJson(): String = Gson().toJson(this)
 
@@ -69,6 +74,8 @@ data class CopilotSession(
                 appUserId = copilotOptions.userId ?: eventsAppMetadata?.userId ?: "_",
                 appSessionId = eventsAppMetadata?.sessionId ?: "_",
                 recording = recording,
+                owner = copilotOptions.getOwner()?.takeUnless { it.isBlank() }
+                    ?: retrieveOwnerFrom(getTokenForService(MapboxServices.DIRECTIONS)),
             )
         }
     }

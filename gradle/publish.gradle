@@ -56,8 +56,7 @@ registry {
     sdkName = project.ext.navSdkArtifactSettings[project.name].getV2()
     production = true
     snapshot = project.ext.snapshot
-//    TODO revert override = snapshot
-    override = true
+    override = snapshot
     dryRun = false
     publish = true
     publishMessage = "cc @mapbox/navigation-android"

@@ -104,6 +104,7 @@ class MapboxCopilotImplTest {
 
         mockkObject(HistoryAttachmentsUtils)
         every { HistoryAttachmentsUtils.delete(any()) } returns false
+        every { HistoryAttachmentsUtils.retrieveOwnerFrom(fakeAccessToken) } returns "owner"
 
         val tmpFolder = folder.newFolder("copilot-test")
         mockedContext = mockk<Application>(relaxed = true) {

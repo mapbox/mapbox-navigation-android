@@ -1,5 +1,32 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.5.0-rc.1 - 26 October, 2024
+#### Features
+
+
+#### Bug fixes and improvements
+- Improved reroute and alternative routes behavior [#7114](https://github.com/mapbox/mapbox-navigation-android/pull/7114)
+- Fixed map matching bug after leaving a tunnel [#7114](https://github.com/mapbox/mapbox-navigation-android/pull/7114)
+- Increased route stickiness in dead reckoning mode [#7114](https://github.com/mapbox/mapbox-navigation-android/pull/7114)
+- Added ability to send raw unfused GNSS location in addition to fused one [#7114](https://github.com/mapbox/mapbox-navigation-android/pull/7114)
+- Improved odometry and road graph fusing in urban canyons [#7114](https://github.com/mapbox/mapbox-navigation-android/pull/7114)
+- Signature of experimental `RawGnssSatelliteData` has been changed, now it requires `residual` as a constructor parameter [#7114](https://github.com/mapbox/mapbox-navigation-android/pull/7114)
+- Experimental `RawGnssLocation` type has been removed, now `RawGnssData` requires `DilutionOfPrecision` as a parameter [#7114](https://github.com/mapbox/mapbox-navigation-android/pull/7114)
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.8.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.8.0-rc.1))
+- Mapbox Navigation Native `v321.0.0-rc.1`
+- Mapbox Core Common `v24.8.0-rc.1`
+- Mapbox Java `v7.3.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.3.1))
+
+
 ## Navigation SDK Core Framework 3.5.0-beta.1 - 17 October, 2024
 #### Features
 - Added support for SVG junction views, see `MapboxJunctionApi#generateJunction(instructions: BannerInstructions, @JunctionViewFormat format: String, consumer: MapboxNavigationConsumer<Expected<JunctionError, JunctionViewData>>)`. [#6803](https://github.com/mapbox/mapbox-navigation-android/pull/6803)

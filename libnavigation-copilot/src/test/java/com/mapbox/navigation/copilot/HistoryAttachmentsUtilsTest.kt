@@ -53,9 +53,10 @@ class HistoryAttachmentsUtilsTest {
             appVersion = "v0.108.0-9-g0527ee4",
             appUserId = "wBzYwfK0oCYMTNYPIFHhYuYOLLs1",
             appSessionId = "3e48fd7b-ac82-42a8-9abe-aaeb724f92ce",
+            owner = "owner",
         )
 
-        val sessionId = HistoryAttachmentsUtils.generateSessionId(navigationSession, "owner")
+        val sessionId = HistoryAttachmentsUtils.generateSessionId(navigationSession)
 
         val expectedSessionId = "co-pilot/owner/1.2/mbx-debug/-/-/free-drive/" +
             "-/3e48fd7a-fc82-42a8-9bae-baeb724f92ce"

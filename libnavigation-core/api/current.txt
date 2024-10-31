@@ -203,6 +203,9 @@ package com.mapbox.navigation.core.arrival {
 
 package com.mapbox.navigation.core.directions.session {
 
+  public final class DirectionsSessionKt {
+  }
+
   public final class IgnoredRoute {
     method public com.mapbox.navigation.base.route.NavigationRoute getNavigationRoute();
     method public String getReason();
@@ -1271,6 +1274,7 @@ package com.mapbox.navigation.core.trip.session.eh {
     method public void matchPolylineObjects(java.util.List<com.mapbox.navigation.base.trip.model.eh.MatchableGeometry> matchableGeometries, boolean useOnlyPreloadedTiles = false);
     method public void matchPolylineObjects(java.util.List<com.mapbox.navigation.base.trip.model.eh.MatchableGeometry> matchableGeometries);
     method public void registerRoadObjectMatcherObserver(com.mapbox.navigation.core.trip.session.eh.RoadObjectMatcherObserver roadObjectMatcherObserver);
+    method public void unregisterRoadObjectMatcherObserver(com.mapbox.navigation.core.trip.session.eh.RoadObjectMatcherObserver roadObjectMatcherObserver);
   }
 
   public final class RoadObjectMatcherKt {
