@@ -8,6 +8,7 @@ import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.app.Application
 import androidx.annotation.RequiresPermission
+import androidx.annotation.RestrictTo
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import com.mapbox.annotation.module.MapboxModuleType
@@ -58,6 +59,8 @@ import com.mapbox.navigation.core.internal.RouteProgressData
 import com.mapbox.navigation.core.internal.SdkInfoProvider
 import com.mapbox.navigation.core.internal.congestions.TrafficOverrideHandler
 import com.mapbox.navigation.core.internal.extensions.HistoryRecordingEnabledObserver
+import com.mapbox.navigation.core.internal.nativeNavigator
+import com.mapbox.navigation.core.internal.performance.RouteParsingHistoryTracker
 import com.mapbox.navigation.core.internal.routealternatives.NavigationRouteAlternativesObserver
 import com.mapbox.navigation.core.internal.router.GetRouteSignature
 import com.mapbox.navigation.core.internal.router.RouterWrapper
@@ -77,7 +80,7 @@ import com.mapbox.navigation.core.preview.RoutesPreview
 import com.mapbox.navigation.core.preview.RoutesPreviewObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.reroute.InternalRerouteController
-import com.mapbox.navigation.core.reroute.MapboxRerouteController
+import com.mapbox.navigation.core.reroute.NativeMapboxRerouteController
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteController.RerouteStateObserver
 import com.mapbox.navigation.core.reroute.RerouteOptionsAdapter
@@ -123,6 +126,7 @@ import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
 import com.mapbox.navigation.core.trip.session.eh.GraphAccessor
 import com.mapbox.navigation.core.trip.session.eh.RoadObjectMatcher
 import com.mapbox.navigation.core.trip.session.eh.RoadObjectsStore
+import com.mapbox.navigation.core.utils.PermissionsChecker
 import com.mapbox.navigation.core.utils.SystemLocaleWatcher
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.NavigatorLoader
@@ -252,6 +256,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     val historyRecorder: MapboxHistoryRecorder,
     internal val copilotHistoryRecorder: MapboxHistoryRecorder,
     internal val compositeRecorder: MapboxHistoryRecorder,
+    private val permissionsChecker: PermissionsChecker,
 ) {
 
     internal constructor(navigationOptions: NavigationOptions) : this(
@@ -260,11 +265,12 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         MapboxHistoryRecorder(navigationOptions),
         MapboxHistoryRecorder(navigationOptions),
         MapboxHistoryRecorder(navigationOptions),
+        PermissionsChecker(navigationOptions.applicationContext),
     )
 
     private val mainJobController = threadController.getMainScopeAndRootJob()
     private val directionsSession: DirectionsSession
-    private var historyRecorderHandles: NavigatorLoader.HistoryRecorderHandles
+    private val historyRecorderHandles: NavigatorLoader.HistoryRecorderHandles
     private val tripService: TripService
     private val tripSession: TripSession
     private val navigationSession: NavigationSession
@@ -442,7 +448,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private var _navigator: MapboxNativeNavigator?
 
-    internal val navigator: MapboxNativeNavigator
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    val navigator: MapboxNativeNavigator
         get() = _navigator ?: error("MapboxNavigation is destroyed")
 
     internal val skuIdProvider: SkuIdProvider
@@ -472,14 +479,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
         historyRecorderHandles = createHistoryRecorderHandles(config)
 
-        val cacheHandle = NavigatorLoader.createCacheHandle(
-            config,
-            tilesConfig,
-            historyRecorderHandles.composite,
-        )
-
         _navigator = NavigationComponentProvider.createNativeNavigator(
-            cacheHandle,
+            tilesConfig,
             config,
             historyRecorderHandles.composite,
             createOfflineCacheHandle(config),
@@ -496,12 +497,15 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             navigator.getRouter(),
             threadController,
             routeParsingManager,
-            compositeRecorder,
+            RouteParsingHistoryTracker(compositeRecorder),
         )
 
         etcGateAPI = EtcGateApi(navigator.experimental)
 
-        assignHistoryRecorders()
+        historyRecorder.historyRecorderHandle = historyRecorderHandles.general
+        copilotHistoryRecorder.historyRecorderHandle = historyRecorderHandles.copilot
+        compositeRecorder.historyRecorderHandle = historyRecorderHandles.composite
+
         navigationSession = NavigationComponentProvider.createNavigationSession()
         historyRecordingStateHandler = NavigationComponentProvider
             .createHistoryRecordingStateHandler()
@@ -612,14 +616,37 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             )
         }
 
-        defaultRerouteController = NavigationComponentProvider.createRerouteController(
-            directionsSession,
-            tripSession,
-            routeOptionsProvider,
-            navigationOptions.rerouteOptions,
-            threadController,
-            evDynamicDataHolder,
-        )
+        val nativeRerouteController = nativeNavigator.getRerouteController()
+        val nativeRerouteDetector = nativeNavigator.getRerouteDetector()
+        // NN initializes detector and controller in case reroute is enabled in custom config
+        // {"features": {"useInternalReroute": true }}
+        // until https://mapbox.atlassian.net/browse/NAVAND-3575 is completed
+        // useInternalReroute is supposed to be used only for internal testing
+        defaultRerouteController = if (
+            nativeRerouteController != null && nativeRerouteDetector != null
+        ) {
+            NativeMapboxRerouteController(
+                nativeNavigator,
+                nativeRerouteController,
+                nativeRerouteDetector,
+                directionsSession::routesPlusIgnored,
+                { routes, legIndex ->
+                    internalSetNavigationRoutes(routes, SetRoutes.Reroute(legIndex))
+                },
+                scope = mainJobController.scope,
+                parsingDispatcher = Dispatchers.Default,
+                RouteParsingHistoryTracker(compositeRecorder),
+            )
+        } else {
+            NavigationComponentProvider.createRerouteController(
+                directionsSession,
+                tripSession,
+                routeOptionsProvider,
+                navigationOptions.rerouteOptions,
+                threadController,
+                evDynamicDataHolder,
+            )
+        }
         rerouteController = defaultRerouteController
 
         internalRoutesObserver = createInternalRoutesObserver()
@@ -693,13 +720,59 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      *
      * @param withForegroundService Boolean if set to false, foreground service will not be started and
      * no notifications will be rendered, and no location updates will be available while the app is in the background.
-     * Default value is set to true.
+     * Default value is set to true. To start foreground service your application needs to have required permissions.
+     * See [FOREGROUND_SERVICE_TYPE_LOCATION documentation page](https://developer.android.com/reference/android/content/pm/ServiceInfo#FOREGROUND_SERVICE_TYPE_LOCATION)
+     * for more information.
+     *
      * @see [registerTripSessionStateObserver]
      * @see [registerRouteProgressObserver]
      */
     @RequiresPermission(anyOf = [ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION])
     @JvmOverloads
     fun startTripSession(withForegroundService: Boolean = true) {
+        if (withForegroundService) {
+            checkForegroundServiceLocationPermissions(justLogs = true)
+        }
+        startSession(withForegroundService, false)
+    }
+
+    /**
+     * Functionally the same as [startTripSession] but throws [IllegalStateException] if
+     * the application doesn't have permissions to start foreground service with location type.
+     *
+     * Starts listening for location updates and enters an `Active Guidance` state if there's a primary route available
+     * or a `Free Drive` state otherwise.
+     *
+     * **Starting a session can have an impact on your usage costs.** Refer to the [pricing documentation](https://docs.mapbox.com/android/beta/navigation/guides/pricing/) to learn more.
+     *
+     * If you set [withForegroundService] to true and your apps targets Android 12 or higher,
+     * you should only invoke this method when the app is in foreground.
+     * This is dictated by background restrictions introduced in Android 12.
+     * See https://developer.android.com/guide/components/foreground-services#background-start-restrictions
+     * for more info.
+     *
+     * @param withForegroundService Boolean if set to false, foreground service will not be started and
+     * no notifications will be rendered, and no location updates will be available while the app is in the background.
+     * Default value is set to true. To start foreground service your application needs to have required permissions.
+     * See [FOREGROUND_SERVICE_TYPE_LOCATION documentation page](https://developer.android.com/reference/android/content/pm/ServiceInfo#FOREGROUND_SERVICE_TYPE_LOCATION)
+     * for more information.
+     *
+     * @throws IllegalStateException if [withForegroundService] is true and the application
+     * doesn't have permissions to start foreground services with location type. See
+     * [FOREGROUND_SERVICE_TYPE_LOCATION documentation page](https://developer.android.com/reference/android/content/pm/ServiceInfo#FOREGROUND_SERVICE_TYPE_LOCATION)
+     * for more information.
+     *
+     * @see startTripSession
+     * @see [registerTripSessionStateObserver]
+     * @see [registerRouteProgressObserver]
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    @RequiresPermission(anyOf = [ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION])
+    @JvmOverloads
+    fun startTripSessionWithPermissionCheck(withForegroundService: Boolean = true) {
+        if (withForegroundService) {
+            checkForegroundServiceLocationPermissions(justLogs = false)
+        }
         startSession(withForegroundService, false)
     }
 
@@ -720,10 +793,71 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * [NavigationOptions.mockLocationProvider]. The events are emitted by the [mapboxReplayer].
      *
      * This allows you to simulate navigation routes or replay history from the [historyRecorder].
+     *
+     * @param withForegroundService Boolean if set to false, foreground service will not be started and
+     * no notifications will be rendered, and no location updates will be available while the app is in the background.
+     * Default value is set to true. To start foreground service your application needs to have required permissions.
+     * See [FOREGROUND_SERVICE_TYPE_LOCATION documentation page](https://developer.android.com/reference/android/content/pm/ServiceInfo#FOREGROUND_SERVICE_TYPE_LOCATION)
+     * for more information.
      */
     @ExperimentalPreviewMapboxNavigationAPI
     fun startReplayTripSession(withForegroundService: Boolean = true) {
+        if (withForegroundService) {
+            checkForegroundServiceLocationPermissions(justLogs = true)
+        }
+
         startSession(withForegroundService, true)
+    }
+
+    /**
+     * Functionally the same as [startReplayTripSession] but throws [IllegalStateException] if
+     * the application doesn't have permissions to start foreground service with location type.
+     *
+     * Functionally the same as [startTripSession] except the locations do not come from the
+     * [NavigationOptions.mockLocationProvider]. The events are emitted by the [mapboxReplayer].
+     *
+     * This allows you to simulate navigation routes or replay history from the [historyRecorder].
+     *
+     * @param withForegroundService Boolean if set to false, foreground service will not be started and
+     * no notifications will be rendered, and no location updates will be available while the app is in the background.
+     * Default value is set to true. To start foreground service your application needs to have required permissions.
+     * See [FOREGROUND_SERVICE_TYPE_LOCATION documentation page](https://developer.android.com/reference/android/content/pm/ServiceInfo#FOREGROUND_SERVICE_TYPE_LOCATION)
+     * for more information.
+     *
+     * @throws IllegalStateException if [withForegroundService] is true and the application
+     * doesn't have permissions to start foreground services with location type. See
+     * [FOREGROUND_SERVICE_TYPE_LOCATION documentation page](https://developer.android.com/reference/android/content/pm/ServiceInfo#FOREGROUND_SERVICE_TYPE_LOCATION)
+     * for more information.
+     *
+     * @see startReplayTripSession
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    @RequiresPermission(anyOf = [ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION])
+    fun startReplayTripSessionWithPermissionCheck(withForegroundService: Boolean = true) {
+        if (withForegroundService) {
+            checkForegroundServiceLocationPermissions(justLogs = false)
+        }
+
+        startSession(withForegroundService, true)
+    }
+
+    private fun checkForegroundServiceLocationPermissions(justLogs: Boolean) {
+        val result = permissionsChecker.hasForegroundServiceLocationPermissions()
+        if (result.isValue) {
+            return
+        }
+
+        val msg = "Starting foreground service on Android 14 or later require " +
+            "Manifest.permission.FOREGROUND_SERVICE_LOCATION and one of the following " +
+            "permissions: Manifest.permission.ACCESS_COARSE_LOCATION, " +
+            "Manifest.permission.ACCESS_FINE_LOCATION. " +
+            "${result.error}"
+
+        if (justLogs) {
+            logE(msg)
+        } else {
+            error(msg)
+        }
     }
 
     private fun resetTripSessionBlocking() {
@@ -1419,8 +1553,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     fun setRerouteOptionsAdapter(
         rerouteOptionsAdapter: RerouteOptionsAdapter?,
     ) {
-        (rerouteController as? MapboxRerouteController)
-            ?.setRerouteOptionsAdapter(rerouteOptionsAdapter)
+        rerouteController?.setRerouteOptionsAdapter(rerouteOptionsAdapter)
     }
 
     /**
@@ -1433,6 +1566,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      *
      * @param enabled true if rerouting should be enabled, false otherwise
      */
+    // TODO: support enable/disable for native reroute: https://mapbox.atlassian.net/browse/NAVAND-4492
     fun setRerouteEnabled(enabled: Boolean) {
         if (enabled) {
             if (rerouteController == null) {
@@ -1924,13 +2058,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             config,
             historyRecorder.fileDirectory(),
             copilotHistoryRecorder.copilotFileDirectory(),
+            sdkInformation = SdkInfoProvider.sdkInformation(),
         )
-
-    private fun assignHistoryRecorders() {
-        historyRecorder.historyRecorderHandle = historyRecorderHandles.general
-        copilotHistoryRecorder.historyRecorderHandle = historyRecorderHandles.copilot
-        compositeRecorder.historyRecorderHandle = historyRecorderHandles.composite
-    }
 
     private fun startSession(withTripService: Boolean, withReplayEnabled: Boolean) {
         runIfNotDestroyed {
@@ -2008,34 +2137,12 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             LOG_CATEGORY,
         )
 
-        val config = NavigatorLoader.createConfig(
-            deviceProfile = navigationOptions.deviceProfile,
-            navigatorConfig = navigatorConfig,
-        )
-        historyRecorderHandles = createHistoryRecorderHandles(config)
-
         mainJobController.scope.launch {
-            val cacheHandle = NavigatorLoader.createCacheHandle(
-                config,
-                createTilesConfig(isFallback, tilesVersion),
-                historyRecorderHandles.composite,
-            )
-
-            navigator.recreate(
-                cacheHandle,
-                config,
-                historyRecorderHandles.composite,
-                NavigationComponentProvider.createEventsMetadataInterface(
-                    navigationOptions.applicationContext,
-                    appLifecycleMonitor,
-                    navigationOptions.eventsAppMetadata,
-                ),
-            )
+            navigator.recreate(createTilesConfig(isFallback, tilesVersion))
 
             routerWrapper.resetRouter(navigator.getRouter())
 
             etcGateAPI.experimental = navigator.experimental
-            assignHistoryRecorders()
 
             val routes = directionsSession.routes
             if (routes.isNotEmpty()) {
@@ -2072,6 +2179,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         )
     }
 
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
     private fun createTilesConfig(
         isFallback: Boolean,
         tilesVersion: String,
@@ -2079,11 +2187,20 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         // TODO StrictMode may report a violation as we're creating a File from the Main
         val offlineFilesPath = RoutingTilesFiles(navigationOptions.applicationContext)
             .absolutePath(navigationOptions.routingTilesOptions)
-        val dataset = StringBuilder().apply {
-            append(navigationOptions.routingTilesOptions.tilesDataset)
-            append("/")
-            append(navigationOptions.routingTilesOptions.tilesProfile)
-        }.toString()
+        val sdDataset = createDataset(
+            navigationOptions.routingTilesOptions.tilesDataset,
+            navigationOptions.routingTilesOptions.tilesProfile,
+        )
+        val hdEndpointConfiguration = navigationOptions.routingTilesOptions.hdTilesOptions?.let {
+            TileEndpointConfiguration(
+                it.tilesBaseUri.toString(),
+                createDataset(it.tilesDataset, it.tilesProfile),
+                it.tilesVersion,
+                false,
+                it.tilesVersion,
+                it.minDaysBetweenServerAndLocalTilesVersion,
+            )
+        }
 
         return TilesConfig(
             offlineFilesPath,
@@ -2092,14 +2209,19 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             null,
             TileEndpointConfiguration(
                 navigationOptions.routingTilesOptions.tilesBaseUri.toString(),
-                dataset,
+                sdDataset,
                 tilesVersion,
                 isFallback,
                 navigationOptions.routingTilesOptions.tilesVersion,
                 navigationOptions.routingTilesOptions.minDaysBetweenServerAndLocalTilesVersion,
             ),
-            null,
+            hdEndpointConfiguration,
         )
+    }
+
+    private fun createDataset(dataset: String, profile: String): String {
+        val prefixedProfile = if (profile.isEmpty()) "" else "/$profile"
+        return "$dataset$prefixedProfile"
     }
 
     private fun runIfNotDestroyed(block: () -> Any?) {

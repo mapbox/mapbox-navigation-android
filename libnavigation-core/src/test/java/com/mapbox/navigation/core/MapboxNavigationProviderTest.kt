@@ -1,10 +1,12 @@
 package com.mapbox.navigation.core
 
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -13,6 +15,9 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(shadows = [ShadowReachabilityFactory::class])
 internal class MapboxNavigationProviderTest : MapboxNavigationBaseTest() {
+
+    @get:Rule
+    val logRule = LoggingFrontendTestRule()
 
     private val observer = mockk<MapboxNavigationObserver>(relaxed = true)
 

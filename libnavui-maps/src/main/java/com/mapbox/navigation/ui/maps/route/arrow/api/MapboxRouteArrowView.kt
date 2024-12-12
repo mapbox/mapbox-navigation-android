@@ -4,6 +4,7 @@ import androidx.annotation.UiThread
 import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
+import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.layers.Layer
 import com.mapbox.maps.extension.style.layers.getLayer
@@ -22,6 +23,7 @@ import com.mapbox.navigation.ui.maps.route.arrow.model.InvalidPointError
 import com.mapbox.navigation.ui.maps.route.arrow.model.RemoveArrowValue
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.arrow.model.UpdateManeuverArrowValue
+import com.mapbox.navigation.ui.maps.util.sdkStyleManager
 import com.mapbox.navigation.utils.internal.logE
 
 /**
@@ -171,6 +173,10 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
         )
     }
 
+    internal fun clearFinally(mapboxMap: MapboxMap) {
+        RouteArrowUtils.removeLayersAndSources(mapboxMap.sdkStyleManager)
+    }
+
     /**
      * Returns the maneuver arrow visibility.
      *
@@ -206,7 +212,7 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
     }
 
     private fun rebuildLayersAndSources(style: Style, options: RouteArrowOptions) {
-        RouteArrowUtils.removeLayersAndSources(style)
+        RouteArrowUtils.removeLayersAndSources(style.sdkStyleManager)
         initializeLayers(style, options)
     }
 

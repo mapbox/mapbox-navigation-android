@@ -25,6 +25,7 @@ class RoutingTilesOptionsTest : BuilderTest<RoutingTilesOptions, RoutingTilesOpt
             .filePath("123")
             .tileStore(mockk())
             .minDaysBetweenServerAndLocalTilesVersion(0)
+            .hdTilesOptions(mockk())
     }
 
     @Test
@@ -82,5 +83,13 @@ class RoutingTilesOptionsTest : BuilderTest<RoutingTilesOptions, RoutingTilesOpt
         val defaultOptions = RoutingTilesOptions.Builder().build()
 
         Assert.assertNull(defaultOptions.tileStore)
+    }
+
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
+    @Test
+    fun `null hdEndpointConfiguration is used by default`() {
+        val defaultOptions = RoutingTilesOptions.Builder().build()
+
+        Assert.assertNull(defaultOptions.hdTilesOptions)
     }
 }

@@ -8,7 +8,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
-import kotlin.jvm.Throws
+import com.mapbox.navigation.utils.internal.logD
 import kotlin.reflect.KClass
 
 /**
@@ -63,6 +63,8 @@ import kotlin.reflect.KClass
  */
 object MapboxNavigationApp {
 
+    private const val LOG_CATEGORY = "MapboxNavigationApp"
+
     // The singleton MapboxNavigationApp is not good for unit testing.
     // See the unit tests in MapboxNavigationAppDelegateTest
     private val mapboxNavigationAppDelegate by lazy { MapboxNavigationAppDelegate() }
@@ -93,6 +95,7 @@ object MapboxNavigationApp {
     @UiThread
     @JvmStatic
     fun setup(navigationOptions: NavigationOptions): MapboxNavigationApp = apply {
+        logD("setup()")
         mapboxNavigationAppDelegate.setup { navigationOptions }
     }
 
@@ -106,6 +109,7 @@ object MapboxNavigationApp {
     @UiThread
     @JvmStatic
     fun setup(navigationOptionsProvider: NavigationOptionsProvider): MapboxNavigationApp = apply {
+        logD("setup()")
         mapboxNavigationAppDelegate.setup(navigationOptionsProvider)
     }
 
@@ -115,6 +119,7 @@ object MapboxNavigationApp {
      */
     @JvmStatic
     fun attachAllActivities(application: Application): MapboxNavigationApp = apply {
+        logD("attachAllActivities()")
         mapboxNavigationAppDelegate.attachAllActivities(application)
     }
 
@@ -125,6 +130,7 @@ object MapboxNavigationApp {
     @UiThread
     @JvmStatic
     fun disable(): MapboxNavigationApp = apply {
+        logD("disable()")
         mapboxNavigationAppDelegate.disable()
     }
 
@@ -140,6 +146,7 @@ object MapboxNavigationApp {
     @UiThread
     @JvmStatic
     fun attach(lifecycleOwner: LifecycleOwner): MapboxNavigationApp = apply {
+        logD("attach()")
         mapboxNavigationAppDelegate.attach(lifecycleOwner)
     }
 
@@ -155,6 +162,7 @@ object MapboxNavigationApp {
     @UiThread
     @JvmStatic
     fun detach(lifecycleOwner: LifecycleOwner): MapboxNavigationApp = apply {
+        logD("detach()")
         mapboxNavigationAppDelegate.detach(lifecycleOwner)
     }
 
@@ -231,4 +239,6 @@ object MapboxNavigationApp {
      */
     @JvmStatic
     fun current(): MapboxNavigation? = mapboxNavigationAppDelegate.current()
+
+    private fun logD(msg: String) = logD(msg, LOG_CATEGORY)
 }

@@ -42,7 +42,14 @@ ext {
         'libnavigation-custom-route' : new Tuple2('customroute', 'navigation-core-custom-route'),
         'libnavigation-datainputs' : new Tuple2('datainputs', 'navigation-core-datainputs'),
         'libnavigation-ev' : new Tuple2('ev', 'navigation-core-ev'),
-        'libnavigation-ev-ui' : new Tuple2('ev-ui', 'navigation-core-ev-ui')
+        'libnavigation-ev-ui' : new Tuple2('ev-ui', 'navigation-core-ev-ui'),
+        'libnavigation-weather' : new Tuple2('weather', 'navigation-core-weather'),
+        'libnavigation-roadcam' : new Tuple2('roadcam', 'navigation-core-roadcam'),
+        'libnavigation-roadcam-ui' : new Tuple2('roadcam-ui', 'navigation-core-roadcam-ui'),
+        'libnavigation-compose' : new Tuple2('compose', 'navigation-core-compose'),
+        'libnavigation-compose-core' : new Tuple2('compose-core', 'navigation-core-compose-core'),
+        'libnavigation-compose-foundation' : new Tuple2('compose-foundation', 'navigation-core-compose-foundation'),
+        'libnavigation-coordination' : new Tuple2('coordination', 'navigation-core-coordination'),
     ]
 }
 

@@ -20,6 +20,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.VANISH_POINT_STOP_GAP
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
+import com.mapbox.navigation.ui.maps.util.StyleManager
 import com.mapbox.navigation.ui.utils.internal.extensions.getBitmap
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.turf.TurfConstants
@@ -276,14 +277,14 @@ internal object RouteArrowUtils {
             style.styleLayerExists(RouteLayerConstants.ARROW_HEAD_LAYER_ID)
     }
 
-    internal fun removeLayersAndSources(style: Style) {
-        style.removeStyleImage(RouteLayerConstants.ARROW_HEAD_ICON_CASING)
-        style.removeStyleImage(RouteLayerConstants.ARROW_HEAD_ICON)
-        style.removeStyleLayer(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID)
-        style.removeStyleLayer(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID)
-        style.removeStyleLayer(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID)
-        style.removeStyleLayer(RouteLayerConstants.ARROW_HEAD_LAYER_ID)
-        style.removeStyleSource(RouteLayerConstants.ARROW_SHAFT_SOURCE_ID)
-        style.removeStyleSource(RouteLayerConstants.ARROW_HEAD_SOURCE_ID)
+    internal fun removeLayersAndSources(styleManager: StyleManager) {
+        styleManager.removeStyleImage(RouteLayerConstants.ARROW_HEAD_ICON_CASING)
+        styleManager.removeStyleImage(RouteLayerConstants.ARROW_HEAD_ICON)
+        styleManager.removeStyleLayer(RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID)
+        styleManager.removeStyleLayer(RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID)
+        styleManager.removeStyleLayer(RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID)
+        styleManager.removeStyleLayer(RouteLayerConstants.ARROW_HEAD_LAYER_ID)
+        styleManager.removeStyleSource(RouteLayerConstants.ARROW_SHAFT_SOURCE_ID)
+        styleManager.removeStyleSource(RouteLayerConstants.ARROW_HEAD_SOURCE_ID)
     }
 }

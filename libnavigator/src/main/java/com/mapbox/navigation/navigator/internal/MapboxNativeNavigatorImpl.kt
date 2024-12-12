@@ -37,6 +37,9 @@ import com.mapbox.navigator.NavigatorObserver
 import com.mapbox.navigator.PredictiveCacheController
 import com.mapbox.navigator.PredictiveLocationTrackerOptions
 import com.mapbox.navigator.RefreshRouteResult
+import com.mapbox.navigator.RerouteControllerInterface
+import com.mapbox.navigator.RerouteDetectorInterface
+import com.mapbox.navigator.RerouteObserver
 import com.mapbox.navigator.RoadObjectMatcher
 import com.mapbox.navigator.RoadObjectsStore
 import com.mapbox.navigator.RoadObjectsStoreObserver
@@ -48,6 +51,7 @@ import com.mapbox.navigator.SetRoutesParams
 import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.SetRoutesResult
 import com.mapbox.navigator.Telemetry
+import com.mapbox.navigator.TilesConfig
 import com.mapbox.navigator.UpdateExternalSensorDataCallback
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -60,80 +64,65 @@ import kotlin.coroutines.resume
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 class MapboxNativeNavigatorImpl(
-    cacheHandle: CacheHandle,
-    config: ConfigHandle,
-    historyRecorderComposite: HistoryRecorderHandle?,
+    tilesConfig: TilesConfig,
+    private val historyRecorderComposite: HistoryRecorderHandle?,
     private val offlineCacheHandle: CacheHandle?,
-    eventsMetadataProvider: EventsMetadataInterface,
+    override val config: ConfigHandle,
+    override val eventsMetadataProvider: EventsMetadataInterface,
 ) : MapboxNativeNavigator {
 
-    private lateinit var navigator: Navigator
+    override lateinit var navigator: Navigator
     override lateinit var graphAccessor: GraphAccessor
     override lateinit var roadObjectMatcher: RoadObjectMatcher
     override lateinit var roadObjectsStore: RoadObjectsStore
     override lateinit var experimental: Experimental
     override lateinit var cache: CacheHandle
     override lateinit var routeAlternativesController: RouteAlternativesControllerInterface
-    override lateinit var inputsService: InputsServiceHandle
     override lateinit var telemetry: Telemetry
+
+    override val inputsService: InputsServiceHandle =
+        NavigatorLoader.createInputService(config, historyRecorderComposite)
+
     private val nativeNavigatorRecreationObservers =
         CopyOnWriteArraySet<NativeNavigatorRecreationObserver>()
 
     init {
-        init(
-            cacheHandle,
-            config,
-            historyRecorderComposite,
-            offlineCacheHandle,
-            eventsMetadataProvider,
-        )
+        init(tilesConfig)
     }
 
-    private fun init(
-        cacheHandle: CacheHandle,
-        config: ConfigHandle,
-        historyRecorderComposite: HistoryRecorderHandle?,
-        offlineCacheHandle: CacheHandle?,
-        eventsMetadataProvider: EventsMetadataInterface,
-    ) {
-        val nativeComponents = NavigatorLoader.createNavigator(
+    private fun init(tilesConfig: TilesConfig) {
+        val cacheHandle = NavigatorLoader.createCacheHandle(
+            config,
+            tilesConfig,
+            historyRecorderComposite,
+        )
+
+        navigator = NavigatorLoader.createNavigator(
             cacheHandle,
             config,
             historyRecorderComposite,
             offlineCacheHandle,
-            eventsMetadataProvider,
+            inputsService,
         )
-        navigator = nativeComponents.navigator
-        graphAccessor = nativeComponents.graphAccessor
-        roadObjectMatcher = nativeComponents.roadObjectMatcher
-        roadObjectsStore = nativeComponents.navigator.roadObjectStore()
-        experimental = nativeComponents.navigator.experimental
-        cache = nativeComponents.cache
-        routeAlternativesController = nativeComponents.routeAlternativesController
-        inputsService = nativeComponents.inputsService
-        telemetry = nativeComponents.telemetry
+
+        cache = cacheHandle
+        graphAccessor = GraphAccessor(cacheHandle)
+        roadObjectMatcher = RoadObjectMatcher(cacheHandle)
+        roadObjectsStore = navigator.roadObjectStore()
+        experimental = navigator.experimental
+        routeAlternativesController = navigator.routeAlternativesController
+        telemetry = navigator.getTelemetry(eventsMetadataProvider)
     }
 
     /**
      * Recreate native objects and notify listeners.
      */
-    override fun recreate(
-        cacheHandle: CacheHandle,
-        config: ConfigHandle,
-        historyRecorderComposite: HistoryRecorderHandle?,
-        eventsMetadataProvider: EventsMetadataInterface,
-    ) {
+    override fun recreate(tilesConfig: TilesConfig) {
         val storeNavSessionState = navigator.storeNavigationSession()
-
         navigator.shutdown()
 
-        init(
-            cacheHandle,
-            config,
-            historyRecorderComposite,
-            offlineCacheHandle,
-            eventsMetadataProvider,
-        )
+        init(tilesConfig)
+
         navigator.restoreNavigationSession(storeNavSessionState)
         nativeNavigatorRecreationObservers.forEach {
             it.onNativeNavigatorRecreated()
@@ -145,6 +134,14 @@ class MapboxNativeNavigatorImpl(
      */
     override fun getRouter(): RouterInterface {
         return navigator.router
+    }
+
+    override fun getRerouteDetector(): RerouteDetectorInterface? {
+        return navigator.rerouteDetector
+    }
+
+    override fun getRerouteController(): RerouteControllerInterface? {
+        return navigator.rerouteController
     }
 
     override suspend fun resetRideSession() = suspendCancellableCoroutine<Unit> {
@@ -449,6 +446,14 @@ class MapboxNativeNavigatorImpl(
 
     override fun setUserLanguages(languages: List<String>) {
         navigator.config().mutableSettings().setUserLanguages(languages)
+    }
+
+    override fun addRerouteObserver(nativeRerouteObserver: RerouteObserver) {
+        navigator.addRerouteObserver(nativeRerouteObserver)
+    }
+
+    override fun removeRerouteObserver(nativeRerouteObserver: RerouteObserver) {
+        navigator.removeRerouteObserver(nativeRerouteObserver)
     }
 
     private companion object {

@@ -166,65 +166,77 @@ class RouteLineLayersTest : BaseTest<BasicNavigationViewActivity>(
                         style.styleLayers[topLevelRouteLayerIndex - 10].id,
                     )
                     assertEquals(
-                        "mapbox-layerGroup-1-trail",
+                        "mapbox-layerGroup-1-blur",
                         style.styleLayers[topLevelRouteLayerIndex - 11].id,
                     )
                     assertEquals(
-                        "mapbox-layerGroup-1-trailCasing",
+                        "mapbox-layerGroup-1-trail",
                         style.styleLayers[topLevelRouteLayerIndex - 12].id,
                     )
                     assertEquals(
-                        "mapbox-layerGroup-2-restricted",
+                        "mapbox-layerGroup-1-trailCasing",
                         style.styleLayers[topLevelRouteLayerIndex - 13].id,
                     )
                     assertEquals(
-                        "mapbox-layerGroup-2-traffic",
+                        "mapbox-layerGroup-2-restricted",
                         style.styleLayers[topLevelRouteLayerIndex - 14].id,
                     )
                     assertEquals(
-                        "mapbox-layerGroup-2-main",
+                        "mapbox-layerGroup-2-traffic",
                         style.styleLayers[topLevelRouteLayerIndex - 15].id,
                     )
                     assertEquals(
-                        "mapbox-layerGroup-2-casing",
+                        "mapbox-layerGroup-2-main",
                         style.styleLayers[topLevelRouteLayerIndex - 16].id,
                     )
                     assertEquals(
-                        "mapbox-layerGroup-2-trail",
+                        "mapbox-layerGroup-2-casing",
                         style.styleLayers[topLevelRouteLayerIndex - 17].id,
                     )
                     assertEquals(
-                        "mapbox-layerGroup-2-trailCasing",
+                        "mapbox-layerGroup-2-blur",
                         style.styleLayers[topLevelRouteLayerIndex - 18].id,
+                    )
+                    assertEquals(
+                        "mapbox-layerGroup-2-trail",
+                        style.styleLayers[topLevelRouteLayerIndex - 19].id,
+                    )
+                    assertEquals(
+                        "mapbox-layerGroup-2-trailCasing",
+                        style.styleLayers[topLevelRouteLayerIndex - 20].id,
                     )
 
                     assertEquals(
                         "mapbox-layerGroup-3-restricted",
-                        style.styleLayers[topLevelRouteLayerIndex - 19].id,
-                    )
-                    assertEquals(
-                        "mapbox-layerGroup-3-traffic",
-                        style.styleLayers[topLevelRouteLayerIndex - 20].id,
-                    )
-                    assertEquals(
-                        "mapbox-layerGroup-3-main",
                         style.styleLayers[topLevelRouteLayerIndex - 21].id,
                     )
                     assertEquals(
-                        "mapbox-layerGroup-3-casing",
+                        "mapbox-layerGroup-3-traffic",
                         style.styleLayers[topLevelRouteLayerIndex - 22].id,
                     )
                     assertEquals(
-                        "mapbox-layerGroup-3-trail",
+                        "mapbox-layerGroup-3-main",
                         style.styleLayers[topLevelRouteLayerIndex - 23].id,
                     )
                     assertEquals(
-                        "mapbox-layerGroup-3-trailCasing",
+                        "mapbox-layerGroup-3-casing",
                         style.styleLayers[topLevelRouteLayerIndex - 24].id,
                     )
                     assertEquals(
-                        "mapbox-bottom-level-route-layer",
+                        "mapbox-layerGroup-3-blur",
                         style.styleLayers[topLevelRouteLayerIndex - 25].id,
+                    )
+                    assertEquals(
+                        "mapbox-layerGroup-3-trail",
+                        style.styleLayers[topLevelRouteLayerIndex - 26].id,
+                    )
+                    assertEquals(
+                        "mapbox-layerGroup-3-trailCasing",
+                        style.styleLayers[topLevelRouteLayerIndex - 27].id,
+                    )
+                    assertEquals(
+                        "mapbox-bottom-level-route-layer",
+                        style.styleLayers[topLevelRouteLayerIndex - 28].id,
                     )
                     countDownLatch.countDown()
                 }
@@ -316,12 +328,16 @@ class RouteLineLayersTest : BaseTest<BasicNavigationViewActivity>(
                         style.styleLayers[topLevelRouteLayerIndex!! - 10].id,
                     )
                     assertEquals(
-                        "mapbox-layerGroup-1-trail",
+                        "mapbox-layerGroup-1-blur",
                         style.styleLayers[topLevelRouteLayerIndex!! - 11].id,
                     )
                     assertEquals(
-                        "mapbox-layerGroup-1-trailCasing",
+                        "mapbox-layerGroup-1-trail",
                         style.styleLayers[topLevelRouteLayerIndex!! - 12].id,
+                    )
+                    assertEquals(
+                        "mapbox-layerGroup-1-trailCasing",
+                        style.styleLayers[topLevelRouteLayerIndex!! - 13].id,
                     )
                     countDownLatch1.countDown()
                 }
@@ -380,12 +396,16 @@ class RouteLineLayersTest : BaseTest<BasicNavigationViewActivity>(
                         style.styleLayers[topLevelRouteLayerIndex!! - 10].id,
                     )
                     assertEquals(
-                        "mapbox-layerGroup-2-trail",
+                        "mapbox-layerGroup-2-blur",
                         style.styleLayers[topLevelRouteLayerIndex!! - 11].id,
                     )
                     assertEquals(
-                        "mapbox-layerGroup-2-trailCasing",
+                        "mapbox-layerGroup-2-trail",
                         style.styleLayers[topLevelRouteLayerIndex!! - 12].id,
+                    )
+                    assertEquals(
+                        "mapbox-layerGroup-2-trailCasing",
+                        style.styleLayers[topLevelRouteLayerIndex!! - 13].id,
                     )
                     countDownLatch2.countDown()
                 }
@@ -508,12 +528,12 @@ class RouteLineLayersTest : BaseTest<BasicNavigationViewActivity>(
                     // Previously primary route group is 1 and is now visible
                     assertEquals(
                         "mapbox-layerGroup-1-traffic",
-                        style.styleLayers[topLevelRouteLayerIndex!! - 11].id,
+                        style.styleLayers[topLevelRouteLayerIndex!! - 12].id,
                     )
                     assertEquals(
                         Visibility.VISIBLE,
                         style.getLayer(
-                            style.styleLayers[topLevelRouteLayerIndex!! - 11].id,
+                            style.styleLayers[topLevelRouteLayerIndex!! - 12].id,
                         )?.visibility,
                     )
                     countDownLatch3.countDown()

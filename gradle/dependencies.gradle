@@ -13,16 +13,16 @@ ext {
   // version which we should use in this build
   def mapboxNavigatorVersion = System.getenv("FORCE_MAPBOX_NAVIGATION_NATIVE_VERSION")
   if (mapboxNavigatorVersion == null || mapboxNavigatorVersion == '') {
-      mapboxNavigatorVersion = '321.0.0-rc.1'
+      mapboxNavigatorVersion = '322.0.0-rc.1'
   }
   println("Navigation Native version: " + mapboxNavigatorVersion)
 
   version = [
-      mapboxMapSdk              : '11.8.0-rc.1',
+      mapboxMapSdk              : '11.9.0-rc.1',
       mapboxSdkServices         : '7.3.1',
       mapboxNavigator           : "${mapboxNavigatorVersion}",
-      mapboxCommonNative        : '24.8.0-rc.1',
-      mapboxSearch              : '2.6.0-rc.1',
+      mapboxCommonNative        : '24.9.0-rc.1',
+      mapboxSearch              : '2.7.0-rc.1',
       mapboxBaseAndroid         : '0.11.0',
       androidXLifecycle         : '2.4.0',
       androidXCoreVersion       : '1.6.0',
@@ -73,6 +73,7 @@ ext {
       toStringVerifier          : '1.4.8',
       ktor                      : '2.3.0',
       kotlinDateTime            : '0.4.1',
+      kotlinSerialization       : '1.3.1',
   ]
   dependenciesList = [
       // mapbox
@@ -195,7 +196,9 @@ ext {
       ktorSerializationJson     : "io.ktor:ktor-serialization-kotlinx-json:${version.ktor}",
       ktorClientEncoding        : "io.ktor:ktor-client-encoding:${version.ktor}",
       ktorClientAuth            : "io.ktor:ktor-client-auth:${version.ktor}",
+
       kotlinXDateTime           : "org.jetbrains.kotlinx:kotlinx-datetime:${version.kotlinDateTime}",
+      kotlinSerialization       : "org.jetbrains.kotlinx:kotlinx-serialization-json:${version.kotlinSerialization}",
   ]
 
   pluginVersion = [
@@ -205,6 +208,7 @@ ext {
       dependencyGraph      : '0.8.0',
       dependencyUpdates    : '0.29.0',
       kotlin               : kotlinVersion,
+      serialization        : '0.29.0',
       license              : '0.8.80',
       // Used by license. Add this dependency explicitly,
       // because the version used by license has been removed from the repository.

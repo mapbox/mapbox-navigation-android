@@ -294,7 +294,7 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
         }
     }
 
-    internal fun setRerouteOptionsAdapter(rerouteOptionsAdapter: RerouteOptionsAdapter?) {
+    override fun setRerouteOptionsAdapter(rerouteOptionsAdapter: RerouteOptionsAdapter?) {
         compositeRerouteOptionsAdapter.externalOptionsAdapter = rerouteOptionsAdapter
     }
 

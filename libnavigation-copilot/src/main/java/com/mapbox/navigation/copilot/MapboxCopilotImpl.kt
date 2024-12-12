@@ -66,6 +66,9 @@ internal class MapboxCopilotImpl(
                 return
             }
             field = value
+
+            logD("HistoryRecordingSessionState: $field")
+
             if (field is ActiveGuidance) {
                 filterOutActiveGuidance(SEARCH_RESULTS_EVENT_NAME)
                 filterOutActiveGuidance(SEARCH_RESULT_USED_EVENT_NAME)
@@ -217,7 +220,7 @@ internal class MapboxCopilotImpl(
         val lng = userFeedback.location.longitude()
         val feedbackId = userFeedback.feedbackId
         val feedbackType = userFeedback.feedback.feedbackType
-        val feedbackSubType = userFeedback.feedback.feedbackSubTypes?.toHashSet().orEmpty()
+        val feedbackSubType = userFeedback.feedback.feedbackSubTypes.toHashSet()
         val feedbackEvent = NavFeedbackSubmitted(
             feedbackId,
             feedbackType,

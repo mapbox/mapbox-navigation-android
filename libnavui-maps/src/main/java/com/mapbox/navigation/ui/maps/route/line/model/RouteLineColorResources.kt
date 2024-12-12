@@ -113,6 +113,7 @@ class RouteLineColorResources private constructor(
     @ColorInt val alternativeRouteCasingColor: Int,
     @ColorInt val inactiveRouteLegCasingColor: Int,
     @ColorInt val inActiveRouteLegsColor: Int,
+    @ColorInt val blurColor: Int,
 ) {
 
     /**
@@ -149,6 +150,7 @@ class RouteLineColorResources private constructor(
             .alternativeRouteCasingColor(alternativeRouteCasingColor)
             .inactiveRouteLegCasingColor(inactiveRouteLegCasingColor)
             .inActiveRouteLegsColor(inActiveRouteLegsColor)
+            .blurColor(blurColor)
     }
 
     /**
@@ -184,7 +186,8 @@ class RouteLineColorResources private constructor(
             "routeCasingColor=$routeCasingColor, " +
             "alternativeRouteCasingColor=$alternativeRouteCasingColor, " +
             "inactiveRouteLegCasingColor=$inactiveRouteLegCasingColor, " +
-            "inActiveRouteLegsColor=$inActiveRouteLegsColor" +
+            "inActiveRouteLegsColor=$inActiveRouteLegsColor, " +
+            "blurColor=$blurColor" +
             ")"
     }
 
@@ -221,6 +224,7 @@ class RouteLineColorResources private constructor(
         result = 31 * result + alternativeRouteCasingColor
         result = 31 * result + inactiveRouteLegCasingColor
         result = 31 * result + inActiveRouteLegsColor
+        result = 31 * result + blurColor
         return result
     }
 
@@ -294,6 +298,7 @@ class RouteLineColorResources private constructor(
         if (inActiveRouteLegsColor != other.inActiveRouteLegsColor) return false
         if (alternativeRouteCasingColor != other.alternativeRouteCasingColor) return false
         if (inactiveRouteLegCasingColor != other.inactiveRouteLegCasingColor) return false
+        if (blurColor != other.blurColor) return false
 
         return true
     }
@@ -352,6 +357,7 @@ class RouteLineColorResources private constructor(
             RouteLayerConstants.INACTIVE_ROUTE_LEG_CASING_COLOR
         private var inActiveRouteLegsColor: Int =
             RouteLayerConstants.IN_ACTIVE_ROUTE_LEG_COLOR
+        private var blurColor: Int = RouteLayerConstants.DEFAULT_BLUR_COLOR
 
         /**
          * The default color of the route line
@@ -663,6 +669,17 @@ class RouteLineColorResources private constructor(
             apply { this.inActiveRouteLegsColor = color }
 
         /**
+         * The color used for the route line blur when the feature is enabled and not
+         * configured to represent the traffic congestion colors.
+         *
+         * @param color the color to be used
+         *
+         * @return the builder
+         */
+        fun blurColor(@ColorInt color: Int): Builder =
+            apply { this.blurColor = color }
+
+        /**
          * Creates a instance of RouteLineResources
          *
          * @return the instance
@@ -698,6 +715,7 @@ class RouteLineColorResources private constructor(
                 alternativeRouteCasingColor = alternativeRouteCasingColor,
                 inactiveRouteLegCasingColor = inactiveRouteLegCasingColor,
                 inActiveRouteLegsColor = inActiveRouteLegsColor,
+                blurColor = blurColor,
             )
         }
     }

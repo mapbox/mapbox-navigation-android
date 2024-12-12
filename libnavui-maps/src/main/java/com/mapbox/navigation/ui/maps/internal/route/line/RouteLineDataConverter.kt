@@ -66,6 +66,10 @@ internal fun MapboxRouteLineViewOptions.toData(): RouteLineViewOptionsData {
         lineDepthOcclusionFactor,
         slotName,
         fadeOnHighZoomsConfig,
+        routeLineBlurWidth,
+        routeLineBlurEnabled,
+        applyTrafficColorsToRouteLineBlur,
+        routeLineBlurOpacity,
     )
 }
 
@@ -122,6 +126,7 @@ private suspend fun RouteLineDynamicData.toData(
         trimOffset,
         trailExpressionCommandHolder?.toRouteLineExpressionEventData(data),
         trailCasingExpressionCommandHolder?.toRouteLineExpressionEventData(data),
+        blurExpressionCommandHolder?.toRouteLineExpressionEventData(data),
     )
 }
 

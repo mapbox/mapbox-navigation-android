@@ -13,6 +13,8 @@ import com.mapbox.navigation.core.telemetry.events.FeedbackMetadataWrapper
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
+import com.mapbox.navigation.utils.internal.LoggerFrontend
 import com.mapbox.navigator.OuterDeviceAction
 import com.mapbox.navigator.Telemetry
 import com.mapbox.navigator.UserFeedbackHandle
@@ -30,6 +32,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -42,6 +45,12 @@ class NavigationTelemetryTest {
     private val tripSession = mockk<TripSession>(relaxed = true)
     private val nativeNavigator: MapboxNativeNavigator = mockk(relaxed = true)
     private val nativeTelemetry = mockk<Telemetry>(relaxed = true)
+    private val uuidProvider = mockk<() -> String>(relaxed = true)
+
+    private val mockLogger = mockk<LoggerFrontend>(relaxed = true)
+
+    @get:Rule
+    val logRule = LoggingFrontendTestRule(mockLogger)
 
     private lateinit var telemetry: NavigationTelemetry
 
@@ -52,7 +61,8 @@ class NavigationTelemetryTest {
         } just Runs
         every { nativeTelemetry.startBuildUserFeedbackMetadata() } returns userFeedbackHandle
         every { nativeNavigator.telemetry } returns nativeTelemetry
-        telemetry = NavigationTelemetry.create(tripSession, nativeNavigator)
+        every { uuidProvider.invoke() } returns TEST_UUID
+        telemetry = NavigationTelemetry(tripSession, nativeNavigator, uuidProvider)
 
         mockkObject(FeedbackMetadataWrapper)
         every { FeedbackMetadataWrapper.create(any()) } returns feedbackMetadataWrapper
@@ -149,6 +159,10 @@ class NavigationTelemetryTest {
         nativeUserFeedbackCallbackSlot.captured.run(ExpectedFactory.createValue(TEST_LOCATION))
 
         verify(exactly = 1) {
+            uuidProvider.invoke()
+        }
+
+        verify(exactly = 1) {
             callback.invoke(eq(TEST_EXTENDED_USER_FEEDBACK))
             registeredCallback.onNewUserFeedback(eq(TEST_EXTENDED_USER_FEEDBACK))
         }
@@ -162,11 +176,17 @@ class NavigationTelemetryTest {
         telemetry.registerUserFeedbackObserver(registeredCallback)
 
         telemetry.postUserFeedback(TEST_USER_FEEDBACK, callback)
-        nativeUserFeedbackCallbackSlot.captured.run(ExpectedFactory.createError("Error"))
+
+        val errorMessage = "Unknown test error"
+        nativeUserFeedbackCallbackSlot.captured.run(ExpectedFactory.createError(errorMessage))
 
         verify {
             callback wasNot called
             registeredCallback wasNot called
+        }
+
+        verify(exactly = 1) {
+            mockLogger.logE(eq("postUserFeedback failed: $errorMessage"), any())
         }
     }
 
@@ -227,9 +247,11 @@ class NavigationTelemetryTest {
             .feedbackMetadata(TEST_FEEDBACK_METADATA)
             .build()
 
+        const val TEST_UUID = "123"
+
         val TEST_EXTENDED_USER_FEEDBACK = ExtendedUserFeedback(
             feedback = TEST_USER_FEEDBACK,
-            feedbackId = "-1",
+            feedbackId = TEST_UUID,
             location = TEST_LOCATION,
         )
     }

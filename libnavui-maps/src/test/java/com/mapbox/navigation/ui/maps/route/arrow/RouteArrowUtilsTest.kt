@@ -21,6 +21,8 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_SHAFT_CASIN
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_SHAFT_SOURCE_ID
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
+import com.mapbox.navigation.ui.maps.util.StyleManager
+import com.mapbox.navigation.ui.maps.util.sdkStyleManager
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -44,6 +46,7 @@ class RouteArrowUtilsTest {
     @Before
     fun setUp() {
         mockkStatic(AppCompatResources::class)
+        mockkStatic(Style::sdkStyleManager)
         every { AppCompatResources.getDrawable(any(), any()) } returns mockk(relaxed = true) {
             every { intrinsicWidth } returns 24
             every { intrinsicHeight } returns 24
@@ -53,6 +56,7 @@ class RouteArrowUtilsTest {
     @After
     fun cleanUp() {
         unmockkStatic(AppCompatResources::class)
+        unmockkStatic(Style::sdkStyleManager)
     }
 
     @Test
@@ -402,7 +406,7 @@ class RouteArrowUtilsTest {
 
     @Test
     fun `styles sources are removed after style layers and images`() {
-        val style = mockk<Style> {
+        val style = mockk<StyleManager> {
             every { removeStyleSource(ARROW_SHAFT_SOURCE_ID) } returns mockk()
             every { removeStyleSource(ARROW_HEAD_SOURCE_ID) } returns mockk()
             every { removeStyleLayer(ARROW_SHAFT_CASING_LINE_LAYER_ID) } returns mockk()

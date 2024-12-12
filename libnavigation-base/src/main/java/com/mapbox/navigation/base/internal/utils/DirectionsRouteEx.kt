@@ -6,6 +6,7 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonParser
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
+import com.mapbox.navigation.base.internal.route.TimeZone
 import com.mapbox.navigation.base.internal.route.Waypoint
 import com.mapbox.navigation.base.utils.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
@@ -49,6 +50,7 @@ internal fun List<com.mapbox.navigator.Waypoint>.mapToSdk(): List<Waypoint> =
             name = nativeWaypoint.name,
             target = nativeWaypoint.target,
             metadata = nativeWaypoint.metadata?.parseMetadata(),
+            timeZone = nativeWaypoint.timeZone?.mapToSdk(),
         )
     }
 
@@ -84,3 +86,7 @@ private fun com.mapbox.navigator.WaypointType.mapToSdk(): Waypoint.InternalType 
             Waypoint.InternalType.EvChargingServer
         com.mapbox.navigator.WaypointType.EV_CHARGING_USER -> Waypoint.InternalType.EvChargingUser
     }
+
+private fun com.mapbox.navigator.TimeZone.mapToSdk(): TimeZone {
+    return TimeZone(offset, identifier, abbreviation)
+}

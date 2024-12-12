@@ -106,6 +106,8 @@ internal class HistoryUploadWorker(
     private suspend fun uploadHistoryFile(
         uploadOptions: UploadOptions,
     ): Boolean = suspendCancellableCoroutine { cont ->
+        logD("start history file upload")
+
         val uploadService = HttpServiceProvider.getInstance()
         val uploadId = uploadService.upload(uploadOptions) { uploadStatus ->
             when (uploadStatus.state) {

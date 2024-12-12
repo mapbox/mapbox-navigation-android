@@ -405,6 +405,36 @@ package com.mapbox.navigation.base.options {
     enum_constant public static final com.mapbox.navigation.base.options.DeviceType HANDHELD;
   }
 
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class DomainTilesOptions {
+    method public int getMinDaysBetweenServerAndLocalTilesVersion();
+    method public java.net.URI getTilesBaseUri();
+    method public String getTilesDataset();
+    method public String getTilesProfile();
+    method public String getTilesVersion();
+    method public com.mapbox.navigation.base.options.DomainTilesOptions.Builder toBuilder();
+    property public final int minDaysBetweenServerAndLocalTilesVersion;
+    property public final java.net.URI tilesBaseUri;
+    property public final String tilesDataset;
+    property public final String tilesProfile;
+    property public final String tilesVersion;
+    field public static final com.mapbox.navigation.base.options.DomainTilesOptions.Companion Companion;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public static final class DomainTilesOptions.Builder {
+    ctor public DomainTilesOptions.Builder(java.net.URI tilesBaseUri, String tilesDataset, String tilesProfile, String tilesVersion, int minDaysBetweenServerAndLocalTilesVersion);
+    method public com.mapbox.navigation.base.options.DomainTilesOptions build();
+    method public com.mapbox.navigation.base.options.DomainTilesOptions.Builder minDaysBetweenServerAndLocalTilesVersion(int minDaysBetweenServerAndLocalTilesVersion);
+    method public com.mapbox.navigation.base.options.DomainTilesOptions.Builder tilesBaseUri(java.net.URI tilesBaseUri);
+    method public com.mapbox.navigation.base.options.DomainTilesOptions.Builder tilesDataset(String tilesDataset);
+    method public com.mapbox.navigation.base.options.DomainTilesOptions.Builder tilesProfile(String tilesProfile);
+    method public com.mapbox.navigation.base.options.DomainTilesOptions.Builder tilesVersion(String version);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public static final class DomainTilesOptions.Companion {
+    method public com.mapbox.navigation.base.options.DomainTilesOptions defaultHdTilesOptions();
+    method public com.mapbox.navigation.base.options.DomainTilesOptions.Builder defaultHdTilesOptionsBuilder();
+  }
+
   public final class EHorizonOptions {
     method public com.mapbox.navigation.base.options.AlertServiceOptions getAlertServiceOptions();
     method public double getBranchLength();
@@ -685,6 +715,7 @@ package com.mapbox.navigation.base.options {
   public final class RoutingTilesOptions {
     method public String? getFallbackOfflineTilesVersion();
     method public String? getFilePath();
+    method public com.mapbox.navigation.base.options.DomainTilesOptions? getHdTilesOptions();
     method public int getMinDaysBetweenServerAndLocalTilesVersion();
     method public com.mapbox.common.TileStore? getTileStore();
     method public java.net.URI getTilesBaseUri();
@@ -694,6 +725,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.RoutingTilesOptions.Builder toBuilder();
     property public final String? fallbackOfflineTilesVersion;
     property public final String? filePath;
+    property public final com.mapbox.navigation.base.options.DomainTilesOptions? hdTilesOptions;
     property public final int minDaysBetweenServerAndLocalTilesVersion;
     property public final com.mapbox.common.TileStore? tileStore;
     property public final java.net.URI tilesBaseUri;
@@ -707,6 +739,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.RoutingTilesOptions build();
     method @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public com.mapbox.navigation.base.options.RoutingTilesOptions.Builder fallbackOfflineTilesVersion(String? version);
     method public com.mapbox.navigation.base.options.RoutingTilesOptions.Builder filePath(String? filePath);
+    method @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public com.mapbox.navigation.base.options.RoutingTilesOptions.Builder hdTilesOptions(com.mapbox.navigation.base.options.DomainTilesOptions? hdTilesOptions);
     method public com.mapbox.navigation.base.options.RoutingTilesOptions.Builder minDaysBetweenServerAndLocalTilesVersion(int minDaysBetweenServerAndLocalTilesVersion);
     method public com.mapbox.navigation.base.options.RoutingTilesOptions.Builder tileStore(com.mapbox.common.TileStore? tileStore);
     method public com.mapbox.navigation.base.options.RoutingTilesOptions.Builder tilesBaseUri(java.net.URI tilesBaseUri);

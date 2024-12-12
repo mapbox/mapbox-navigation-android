@@ -52,6 +52,7 @@ internal class RouteLineDataConverterTest {
             null,
             null,
             null,
+            null,
         )
         val input = RouteLineEventData(fc, dynamicData)
 
@@ -76,6 +77,7 @@ internal class RouteLineDataConverterTest {
         val trailExp = mockk<Expression>()
         val trailCasingExp = mockk<Expression>()
         val restrictedExp = mockk<Expression>()
+        val blurExp = mockk<Expression>()
         val dynamicData = RouteLineDynamicEventData(
             RouteLineProviderBasedExpressionEventData(
                 "line-gradient",
@@ -101,6 +103,10 @@ internal class RouteLineDataConverterTest {
             RouteLineProviderBasedExpressionEventData(
                 "line-gradient",
                 trailCasingExp,
+            ),
+            RouteLineProviderBasedExpressionEventData(
+                "line-gradient",
+                blurExp,
             ),
         )
         val input = RouteLineEventData(fc, dynamicData)
@@ -127,6 +133,7 @@ internal class RouteLineDataConverterTest {
             null,
             null,
             null,
+            null,
         )
         val actual = dynamicData.toRouteLineDynamicData()
 
@@ -147,6 +154,7 @@ internal class RouteLineDataConverterTest {
         val trailExp = mockk<Expression>()
         val trailCasingExp = mockk<Expression>()
         val restrictedExp = mockk<Expression>()
+        val blurExp = mockk<Expression>()
         val dynamicData = RouteLineDynamicEventData(
             RouteLineProviderBasedExpressionEventData(
                 "line-gradient",
@@ -173,6 +181,10 @@ internal class RouteLineDataConverterTest {
                 "line-gradient",
                 trailCasingExp,
             ),
+            RouteLineProviderBasedExpressionEventData(
+                "line-gradient",
+                blurExp,
+            ),
         )
         val actual = dynamicData.toRouteLineDynamicData()
 
@@ -193,6 +205,7 @@ internal class RouteLineDataConverterTest {
                 mockk(),
             ),
             RouteLineNoOpExpressionEventData(),
+            null,
             null,
             null,
             null,
@@ -251,6 +264,7 @@ internal class RouteLineDataConverterTest {
                     null,
                     null,
                     null,
+                    null,
                 ),
             ),
             emptyList(),
@@ -283,6 +297,7 @@ internal class RouteLineDataConverterTest {
         val exp16 = mockk<Expression>(relaxed = true)
         val exp17 = mockk<Expression>(relaxed = true)
         val exp18 = mockk<Expression>(relaxed = true)
+        val exp19 = mockk<Expression>(relaxed = true)
         val primaryFc = mockk<FeatureCollection>()
         val alt1Fc = mockk<FeatureCollection>()
         val waypointSource = mockk<FeatureCollection>()
@@ -310,6 +325,10 @@ internal class RouteLineDataConverterTest {
             ),
             RouteLineExpressionCommandHolder(
                 { exp6 },
+                LineGradientCommandApplier(),
+            ),
+            RouteLineExpressionCommandHolder(
+                { exp19 },
                 LineGradientCommandApplier(),
             ),
         )
@@ -389,6 +408,7 @@ internal class RouteLineDataConverterTest {
                     RouteLineTrimOffset(0.2),
                     RouteLineProviderBasedExpressionEventData("line-gradient", exp5),
                     RouteLineProviderBasedExpressionEventData("line-gradient", exp6),
+                    RouteLineProviderBasedExpressionEventData("line-gradient", exp19),
                 ),
             ),
             listOf(
@@ -402,6 +422,7 @@ internal class RouteLineDataConverterTest {
                         RouteLineTrimOffset(0.3),
                         RouteLineProviderBasedExpressionEventData("line-gradient", exp11),
                         RouteLineProviderBasedExpressionEventData("line-gradient", exp12),
+                        null,
                     ),
                 ),
             ),
@@ -414,6 +435,7 @@ internal class RouteLineDataConverterTest {
                 RouteLineTrimOffset(0.1),
                 RouteLineProviderBasedExpressionEventData("line-gradient", exp17),
                 RouteLineProviderBasedExpressionEventData("line-trim-offset", exp18),
+                null,
             ),
         )
 
@@ -548,6 +570,7 @@ internal class RouteLineDataConverterTest {
                 RouteLineTrimOffset(0.2),
                 RouteLineProviderBasedExpressionEventData("line-gradient", exp5),
                 RouteLineProviderBasedExpressionEventData("line-gradient", exp6),
+                null,
             ),
             listOf(
                 RouteLineDynamicEventData(
@@ -558,6 +581,7 @@ internal class RouteLineDataConverterTest {
                     RouteLineTrimOffset(0.3),
                     RouteLineProviderBasedExpressionEventData("line-gradient", exp11),
                     RouteLineProviderBasedExpressionEventData("line-gradient", exp12),
+                    null,
                 ),
             ),
             RouteLineDynamicEventData(
@@ -568,6 +592,7 @@ internal class RouteLineDataConverterTest {
                 RouteLineTrimOffset(0.1),
                 RouteLineProviderBasedExpressionEventData("line-gradient", exp17),
                 RouteLineProviderBasedExpressionEventData("line-trim-offset", exp18),
+                null,
             ),
         )
 
@@ -622,6 +647,10 @@ internal class RouteLineDataConverterTest {
                 .restrictedRoadDashArray(listOf(0.2, 0.8))
                 .restrictedRoadLineWidth(1.2)
                 .restrictedRoadOpacity(0.7)
+                .routeLineBlurWidth(11.1)
+                .routeLineBlurOpacity(.77)
+                .routeLineBlurEnabled(true)
+                .applyTrafficColorsToRouteLineBlur(true)
                 .slotName("someSlotName")
                 .fadeOnHighZoomsConfig(fadingConfig)
                 .build()
@@ -645,6 +674,10 @@ internal class RouteLineDataConverterTest {
                 0.85,
                 "someSlotName",
                 fadingConfig,
+                11.1,
+                true,
+                true,
+                .77,
             )
 
             val actual = viewOptions.toData()

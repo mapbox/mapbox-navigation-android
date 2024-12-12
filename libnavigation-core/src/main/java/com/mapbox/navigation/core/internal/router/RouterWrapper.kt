@@ -9,7 +9,6 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.common.MapboxServices
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.internal.RouterFailureFactory
-import com.mapbox.navigation.base.internal.route.RoutesResponse
 import com.mapbox.navigation.base.internal.route.refreshRoute
 import com.mapbox.navigation.base.internal.route.routeOptions
 import com.mapbox.navigation.base.internal.route.updateExpirationTime
@@ -25,7 +24,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterFailureType
 import com.mapbox.navigation.base.route.RouterFailureType.Companion.RESPONSE_PARSING_ERROR
-import com.mapbox.navigation.core.history.MapboxHistoryRecorder
+import com.mapbox.navigation.core.internal.performance.RouteParsingTracking
 import com.mapbox.navigation.navigator.internal.mapToRoutingMode
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.Time
@@ -46,7 +45,7 @@ internal class RouterWrapper(
     router: RouterInterface,
     private val threadController: ThreadController,
     private val routeParsingManager: RouteParsingManager,
-    private val historyRecorder: MapboxHistoryRecorder,
+    private val routeParsingTracking: RouteParsingTracking,
 ) : Router {
 
     private val mainJobControl by lazy { threadController.getMainScopeAndRootJob() }
@@ -165,7 +164,9 @@ internal class RouterWrapper(
                                                 LOG_CATEGORY,
                                             )
 
-                                            response.meta.pushToCopilot()
+                                            routeParsingTracking.routeResponseIsParsed(
+                                                response.meta,
+                                            )
                                             callback.onRoutesReady(routes, routeOrigin)
                                         },
                                     )
@@ -329,43 +330,8 @@ internal class RouterWrapper(
         router.cancelAll()
     }
 
-    private fun RoutesResponse.Metadata.pushToCopilot() {
-        val json =
-            """
-            {
-            "response_wait_duration": $responseWaitMillis,
-            "response_parse_duration": $responseParseMillis,
-            "response_parse_thread": "$responseParseThread",
-            "native_wait_duration": $nativeWaitMillis,
-            "native_parse_duration": $nativeParseMillis,
-            "route_options_wait_duration": $routeOptionsWaitMillis,
-            "route_options_parse_duration": $routeOptionsParseMillis,
-            "main_thread_wait_duration": ${Time.SystemClockImpl.millis() - createdAtElapsedMillis}
-            }
-            """.trimIndent()
-        historyRecorder.pushHistory("directions_response_parsing", json)
-    }
-
     private companion object {
-
         private const val LOG_CATEGORY = "RouterWrapper"
         private const val REQUEST_FAILURE = -1L
-
-        /**
-         * @throws [IllegalStateException] if [RouterErrorType] is [RouterErrorType.REQUEST_CANCELLED]
-         */
-        fun RouterErrorType.mapToSdkRouterFailureType(): String {
-            return when (this) {
-                RouterErrorType.UNKNOWN -> RouterFailureType.UNKNOWN_ERROR
-                RouterErrorType.THROTTLING_ERROR -> RouterFailureType.THROTTLING_ERROR
-                RouterErrorType.INPUT_ERROR -> RouterFailureType.INPUT_ERROR
-                RouterErrorType.NETWORK_ERROR -> RouterFailureType.NETWORK_ERROR
-                RouterErrorType.AUTHENTICATION_ERROR -> RouterFailureType.AUTHENTICATION_ERROR
-                RouterErrorType.ROUTE_CREATION_ERROR -> RouterFailureType.ROUTE_CREATION_ERROR
-                RouterErrorType.REQUEST_CANCELLED -> error("Should have been processed separately")
-                RouterErrorType.MAP_MATCHING_CREATION_ERROR ->
-                    RouterFailureType.ROUTE_CREATION_ERROR
-            }
-        }
     }
 }

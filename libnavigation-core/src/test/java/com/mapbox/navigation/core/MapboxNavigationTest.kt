@@ -1,8 +1,11 @@
 package com.mapbox.navigation.core
 
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.MapboxOptions
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.options.DomainTilesOptions
 import com.mapbox.navigation.base.options.IncidentsOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -63,6 +66,7 @@ import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.SetRoutesReason
+import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.navigator.TilesConfig
 import io.mockk.Ordering
 import io.mockk.Runs
@@ -96,6 +100,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import java.net.URI
 import kotlin.coroutines.resume
 
 @ExperimentalPreviewMapboxNavigationAPI
@@ -699,7 +704,15 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
         val slot = slot<TilesConfig>()
 
-        every { NavigatorLoader.createCacheHandle(any(), capture(slot), any()) } returns mockk()
+        every {
+            NavigationComponentProvider.createNativeNavigator(
+                capture(slot),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns navigator
 
         every {
             navigationOptions.routingTilesOptions
@@ -715,7 +728,15 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         threadController.cancelAllUICoroutines()
         val slot = slot<TilesConfig>()
 
-        every { NavigatorLoader.createCacheHandle(any(), capture(slot), any()) } returns mockk()
+        every {
+            NavigationComponentProvider.createNativeNavigator(
+                capture(slot),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns navigator
 
         every { navigationOptions.routingTilesOptions } returns RoutingTilesOptions.Builder()
             .tilesDataset("someUser.osm")
@@ -725,6 +746,49 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         createMapboxNavigation()
 
         assertEquals(slot.captured.endpointConfig!!.dataset, "someUser.osm/truck")
+    }
+
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
+    @Test
+    fun `verify tile config hd endpoint configuration`() {
+        threadController.cancelAllUICoroutines()
+        val slot = slot<TilesConfig>()
+
+        every {
+            NavigationComponentProvider.createNativeNavigator(
+                capture(slot),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns navigator
+
+        every { navigationOptions.routingTilesOptions } returns RoutingTilesOptions.Builder()
+            .hdTilesOptions(
+                DomainTilesOptions.defaultHdTilesOptionsBuilder()
+                    .tilesBaseUri(URI("https://my.uri.com"))
+                    .tilesDataset("someUser.osm")
+                    .tilesProfile("truck")
+                    .tilesVersion("33")
+                    .minDaysBetweenServerAndLocalTilesVersion(2)
+                    .build(),
+            )
+            .build()
+
+        createMapboxNavigation()
+
+        assertEquals(
+            TileEndpointConfiguration(
+                "https://my.uri.com",
+                "someUser.osm/truck",
+                "33",
+                false,
+                "33",
+                2,
+            ),
+            slot.captured.hdEndpointConfig,
+        )
     }
 
     @Test
@@ -952,7 +1016,15 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
         val slot = slot<TilesConfig>()
 
-        every { NavigatorLoader.createCacheHandle(any(), capture(slot), any()) } returns mockk()
+        every {
+            NavigationComponentProvider.createNativeNavigator(
+                capture(slot),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns navigator
 
         val tilesVersion = "tilesVersion"
         every { navigationOptions.routingTilesOptions } returns RoutingTilesOptions.Builder()
@@ -983,9 +1055,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
         val tileConfigSlot = slot<TilesConfig>()
 
-        every {
-            NavigatorLoader.createCacheHandle(any(), capture(tileConfigSlot), any())
-        } returns mockk()
+        every { navigator.recreate(capture(tileConfigSlot)) } returns Unit
 
         val tilesVersion = "tilesVersion"
         val latestTilesVersion = "latestTilesVersion"
@@ -995,6 +1065,58 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
         assertEquals(latestTilesVersion, tileConfigSlot.captured.endpointConfig?.version)
         assertTrue(tileConfigSlot.captured.endpointConfig?.isFallback!!)
+    }
+
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
+    @Test
+    fun `verify tile config hd endpoint configuration on fallback`() {
+        threadController.cancelAllUICoroutines()
+
+        val fallbackObserverSlot = slot<FallbackVersionsObserver>()
+        every {
+            tripSession.registerFallbackVersionsObserver(capture(fallbackObserverSlot))
+        } just Runs
+        every { directionsSession.routesUpdatedResult } returns createRoutesUpdatedResult(
+            emptyList(),
+            RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP,
+        )
+        every { tripSession.getRouteProgress() } returns mockk()
+
+        every { navigationOptions.routingTilesOptions } returns RoutingTilesOptions.Builder()
+            .hdTilesOptions(
+                DomainTilesOptions.defaultHdTilesOptionsBuilder()
+                    .tilesBaseUri(URI("https://my.uri.com"))
+                    .tilesDataset("someUser.osm")
+                    .tilesProfile("truck")
+                    .tilesVersion("33")
+                    .minDaysBetweenServerAndLocalTilesVersion(2)
+                    .build(),
+            )
+            .build()
+
+        createMapboxNavigation()
+
+        val tileConfigSlot = slot<TilesConfig>()
+
+        every { navigator.recreate(capture(tileConfigSlot)) } returns Unit
+
+        val tilesVersion = "tilesVersion"
+        val latestTilesVersion = "latestTilesVersion"
+        fallbackObserverSlot.captured.onFallbackVersionsFound(
+            listOf(tilesVersion, latestTilesVersion),
+        )
+
+        assertEquals(
+            TileEndpointConfiguration(
+                "https://my.uri.com",
+                "someUser.osm/truck",
+                "33",
+                false,
+                "33",
+                2,
+            ),
+            tileConfigSlot.captured.hdEndpointConfig,
+        )
     }
 
     @Test
@@ -1018,9 +1140,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
             val tileConfigSlot = slot<TilesConfig>()
 
-            every {
-                NavigatorLoader.createCacheHandle(any(), capture(tileConfigSlot), any())
-            } returns mockk()
+            every { navigator.recreate(capture(tileConfigSlot)) } returns Unit
 
             fallbackObserverSlot.captured.onCanReturnToLatest("")
 
@@ -1034,6 +1154,57 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                     SetRoutesReason.RESTORE_TO_ONLINE,
                 )
             }
+        }
+
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
+    @Test
+    fun `verify tile config hdTilesConfiguration on return to latest tiles version`() =
+        runBlocking {
+            threadController.cancelAllUICoroutines()
+
+            val fallbackObserverSlot = slot<FallbackVersionsObserver>()
+            every {
+                tripSession.registerFallbackVersionsObserver(capture(fallbackObserverSlot))
+            } just Runs
+            val mockPrimaryNavigationRoute = mockk<NavigationRoute>()
+            val mockAlternativeNavigationRoute = mockk<NavigationRoute>()
+            val index = 4
+            every {
+                directionsSession.routes
+            } returns listOf(mockPrimaryNavigationRoute, mockAlternativeNavigationRoute)
+            every { tripSession.getRouteProgress()?.currentLegProgress?.legIndex } returns index
+
+            every { navigationOptions.routingTilesOptions } returns RoutingTilesOptions.Builder()
+                .hdTilesOptions(
+                    DomainTilesOptions.defaultHdTilesOptionsBuilder()
+                        .tilesBaseUri(URI("https://my.uri.com"))
+                        .tilesDataset("someUser.osm")
+                        .tilesProfile("truck")
+                        .tilesVersion("33")
+                        .minDaysBetweenServerAndLocalTilesVersion(2)
+                        .build(),
+                )
+                .build()
+
+            createMapboxNavigation()
+
+            val tileConfigSlot = slot<TilesConfig>()
+
+            every { navigator.recreate(capture(tileConfigSlot)) } returns Unit
+
+            fallbackObserverSlot.captured.onCanReturnToLatest("")
+
+            assertEquals(
+                TileEndpointConfiguration(
+                    "https://my.uri.com",
+                    "someUser.osm/truck",
+                    "33",
+                    false,
+                    "33",
+                    2,
+                ),
+                tileConfigSlot.captured.hdEndpointConfig,
+            )
         }
 
     @Test
@@ -2313,6 +2484,60 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         createMapboxNavigation()
 
         verify { tripSession.registerRouteProgressObserver(refEq(forkPassedObserverMock)) }
+    }
+
+    @Test
+    fun `startTripSession() with foreground service doesn't throw exception when required permissions are not granted`() {
+        every {
+            permissionsChecker.hasForegroundServiceLocationPermissions()
+        } returns ExpectedFactory.createError("Error")
+        createMapboxNavigation()
+        mapboxNavigation.startTripSession(withForegroundService = true)
+    }
+
+    @Test
+    fun `startTripSessionWithPermissionCheck() doesn't throw exception when required permissions are granted`() {
+        every {
+            permissionsChecker.hasForegroundServiceLocationPermissions()
+        } returns ExpectedFactory.createValue(Unit)
+        createMapboxNavigation()
+        mapboxNavigation.startTripSessionWithPermissionCheck(withForegroundService = false)
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun `startTripSessionWithPermissionCheck() throws exception when required permissions are not granted`() {
+        every {
+            permissionsChecker.hasForegroundServiceLocationPermissions()
+        } returns ExpectedFactory.createError("Error")
+        createMapboxNavigation()
+        mapboxNavigation.startTripSessionWithPermissionCheck(withForegroundService = true)
+    }
+
+    @Test
+    fun `startReplayTripSession() with foreground service doesn't throw exception when required permissions are not granted`() {
+        every {
+            permissionsChecker.hasForegroundServiceLocationPermissions()
+        } returns ExpectedFactory.createError("Error")
+        createMapboxNavigation()
+        mapboxNavigation.startReplayTripSession(withForegroundService = true)
+    }
+
+    @Test
+    fun `startReplayTripSessionWithPermissionCheck() doesn't throw exception when required permissions are granted`() {
+        every {
+            permissionsChecker.hasForegroundServiceLocationPermissions()
+        } returns ExpectedFactory.createValue(Unit)
+        createMapboxNavigation()
+        mapboxNavigation.startReplayTripSessionWithPermissionCheck(withForegroundService = true)
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun `startReplayTripSessionWithPermissionCheck() throws exception when required permissions are not granted`() {
+        every {
+            permissionsChecker.hasForegroundServiceLocationPermissions()
+        } returns ExpectedFactory.createError("Error")
+        createMapboxNavigation()
+        mapboxNavigation.startReplayTripSessionWithPermissionCheck(withForegroundService = true)
     }
 
     private fun interceptRefreshObserver(): RouteRefreshObserver {

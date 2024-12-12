@@ -138,5 +138,51 @@ class MapboxRouteLineViewDynamicOptionsBuilder internal constructor(
         builder.fadeOnHighZoomsConfig(fadingConfig)
     }
 
+    /**
+     * Adds a blur effect to the route line.
+     *
+     * @param enableLineBlur indicates if the blur feature is enabled
+     * @return the builder
+     */
+    fun routeLineBlurEnabled(enableLineBlur: Boolean): MapboxRouteLineViewDynamicOptionsBuilder =
+        apply {
+            builder.routeLineBlurEnabled(enableLineBlur)
+        }
+
+    /**
+     * When `true` the blur effect will express the same colors used for traffic. The blur
+     * effect option must be enabled in order for this option to take effect.
+     *
+     * @param applyTrafficColors default is false
+     * @return the builder
+     */
+    fun applyTrafficColorsToRouteLineBlur(
+        applyTrafficColors: Boolean,
+    ): MapboxRouteLineViewDynamicOptionsBuilder = apply {
+        builder.applyTrafficColorsToRouteLineBlur(applyTrafficColors)
+    }
+
+    /**
+     * A width value applied to the line blur effect.
+     * See https://docs.mapbox.com/android/maps/api/11.0.0/mapbox-maps-android/com.mapbox.maps.extension.style.layers.generated/-line-layer/line-blur.html
+     * for more information.
+     *
+     * @param width value of lineBlur
+     * @return the builder
+     */
+    fun routeLineBlurWidth(width: Double) = apply {
+        builder.routeLineBlurWidth(width)
+    }
+
+    /**
+     * Determines the opacity of the route line blur.
+     *
+     * @param opacity the opacity level
+     * @return the builder
+     */
+    fun routeLineBlurOpacity(opacity: Double) = apply {
+        builder.routeLineBlurOpacity(opacity)
+    }
+
     internal fun build(): MapboxRouteLineViewOptions = builder.build()
 }

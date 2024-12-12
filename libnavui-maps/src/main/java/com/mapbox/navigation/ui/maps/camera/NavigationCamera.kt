@@ -149,6 +149,10 @@ class NavigationCamera(
      */
     @ExperimentalPreviewMapboxNavigationAPI
     var debugger: MapboxNavigationViewportDataSourceDebugger? = null
+        set(value) {
+            field = value
+            updateDebugger()
+        }
 
     private val sourceUpdateObserver =
         ViewportDataSourceUpdateObserver {

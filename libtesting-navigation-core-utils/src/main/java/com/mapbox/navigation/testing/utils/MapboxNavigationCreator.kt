@@ -64,7 +64,6 @@ suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigation(
             if (routeRefreshOptions != null) {
                 routeRefreshOptions(routeRefreshOptions)
             }
-            deviceProfile(DeviceProfile.Builder().build())
         }
             .build()
     )

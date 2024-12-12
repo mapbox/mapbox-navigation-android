@@ -1,5 +1,7 @@
 package com.mapbox.navigation.testing.utils.assertions
 
+import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.testing.ui.assertions.ValueTransitionAssertion
@@ -16,7 +18,15 @@ class RerouteStateTransitionAssertion(
     }
 }
 
-fun assertRerouteFailedTransition(rerouteStates: MutableList<RerouteState>) {
+fun MapboxNavigation.recordRerouteStates(): List<RerouteState> {
+    val rerouteStates = mutableListOf<RerouteState>()
+    getRerouteController()?.registerRerouteStateObserver {
+        rerouteStates.add(it)
+    }
+    return rerouteStates
+}
+
+fun assertRerouteFailedTransition(rerouteStates: List<RerouteState>) {
     Assert.assertEquals(
         "reroute states are: $rerouteStates",
         4,
@@ -34,5 +44,17 @@ fun assertRerouteFailedTransition(rerouteStates: MutableList<RerouteState>) {
     Assert.assertEquals(
         RerouteState.Idle,
         rerouteStates[3]
+    )
+}
+
+fun assertSuccessfulRerouteStateTransition(rerouteStates: List<RerouteState>) {
+    Assert.assertEquals(
+        listOf(
+            RerouteState.Idle,
+            RerouteState.FetchingRoute,
+            RerouteState.RouteFetched(RouterOrigin.ONLINE),
+            RerouteState.Idle,
+        ),
+        rerouteStates,
     )
 }

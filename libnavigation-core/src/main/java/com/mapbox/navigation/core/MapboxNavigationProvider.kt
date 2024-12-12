@@ -16,6 +16,8 @@ import java.util.concurrent.CopyOnWriteArrayList
 @UiThread
 object MapboxNavigationProvider {
 
+    private const val LOG_CATEGORY = "MapboxNavigationProvider"
+
     @Volatile
     private var mapboxNavigation: MapboxNavigation? = null
 
@@ -30,6 +32,7 @@ object MapboxNavigationProvider {
      */
     @JvmStatic
     fun create(navigationOptions: NavigationOptions): MapboxNavigation {
+        logD("create()")
         mapboxNavigation?.onDestroy()
         mapboxNavigation = MapboxNavigation(
             navigationOptions,
@@ -60,6 +63,8 @@ object MapboxNavigationProvider {
      */
     @JvmStatic
     fun destroy() {
+        logD("destroy()")
+
         mapboxNavigation?.let { navigation ->
             navigation.onDestroy()
             observers.forEach { it.onDetached(navigation) }
@@ -84,4 +89,6 @@ object MapboxNavigationProvider {
         observers.remove(observer)
         mapboxNavigation?.let { observer.onDetached(it) }
     }
+
+    private fun logD(msg: String) = com.mapbox.navigation.utils.internal.logD(msg, LOG_CATEGORY)
 }

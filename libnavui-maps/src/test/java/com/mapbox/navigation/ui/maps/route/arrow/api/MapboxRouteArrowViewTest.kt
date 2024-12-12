@@ -33,6 +33,7 @@ import com.mapbox.navigation.ui.maps.route.arrow.model.InvalidPointError
 import com.mapbox.navigation.ui.maps.route.arrow.model.RemoveArrowValue
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.arrow.model.UpdateManeuverArrowValue
+import com.mapbox.navigation.ui.maps.util.sdkStyleManager
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -57,12 +58,14 @@ class MapboxRouteArrowViewTest {
     @Before
     fun setUp() {
         mockkStatic(AppCompatResources::class)
+        mockkStatic(Style::sdkStyleManager)
         every { AppCompatResources.getDrawable(any(), any()) } returns mockk(relaxed = true)
     }
 
     @After
     fun cleanUp() {
         unmockkStatic(AppCompatResources::class)
+        unmockkStatic(Style::sdkStyleManager)
     }
 
     @Test
@@ -488,8 +491,10 @@ class MapboxRouteArrowViewTest {
             every { getStyleImage(ARROW_HEAD_ICON) } returns mockImage
             every { getStyleImage(ARROW_HEAD_ICON_CASING) } returns mockImage
             every { styleLayerExists(TOP_LEVEL_ROUTE_LINE_LAYER_ID) } returns true
-            every { removeStyleImage(any()) } returns ExpectedFactory.createNone()
-            every { removeStyleLayer(any()) } returns ExpectedFactory.createNone()
+            every { sdkStyleManager } returns mockk(relaxed = true) {
+                every { removeStyleImage(any()) } returns ExpectedFactory.createNone()
+                every { removeStyleLayer(any()) } returns ExpectedFactory.createNone()
+            }
             every { removeStyleSource(any()) } returns ExpectedFactory.createNone()
         }
     }

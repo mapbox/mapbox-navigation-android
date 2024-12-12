@@ -346,6 +346,12 @@ License: [Mapbox Terms of Service](https://www.mapbox.com/tos)
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the mapbox-base-annotation (Annotations used for Mapbox SDKs).
+URL: [https://github.com/mapbox/mapbox-maps-android](https://github.com/mapbox/mapbox-maps-android)
+License: [Mapbox Terms of Service](https://www.mapbox.com/legal/tos/)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the okhttp (Square’s meticulous HTTP client for Java and Kotlin.).
 URL: [https://square.github.io/okhttp/](https://square.github.io/okhttp/)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -761,6 +767,12 @@ License: [Mapbox Terms of Service](https://www.mapbox.com/legal/tos/)
 Mapbox Navigation uses portions of the Mapbox Navigation Native (Common multi-platform navigation logic).
 URL: [https://github.com/mapbox/mapbox-navigation-native](https://github.com/mapbox/mapbox-navigation-native)
 License: [Mapbox Terms of Service](https://www.mapbox.com/tos)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the mapbox-base-annotation (Annotations used for Mapbox SDKs).
+URL: [https://github.com/mapbox/mapbox-maps-android](https://github.com/mapbox/mapbox-maps-android)
+License: [Mapbox Terms of Service](https://www.mapbox.com/legal/tos/)
 
 ===========================================================================
 
@@ -1662,6 +1674,12 @@ License: [Mapbox Terms of Service](https://www.mapbox.com/legal/tos/)
 
 Mapbox Navigation uses portions of the Mapbox Logger (Artifact that provides Mapbox Logger module implementation).
 URL: [https://github.com/mapbox/mapbox-base-android](https://github.com/mapbox/mapbox-base-android)
+License: [Mapbox Terms of Service](https://www.mapbox.com/legal/tos/)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the mapbox-base-annotation (Annotations used for Mapbox SDKs).
+URL: [https://github.com/mapbox/mapbox-maps-android](https://github.com/mapbox/mapbox-maps-android)
 License: [Mapbox Terms of Service](https://www.mapbox.com/legal/tos/)
 
 ===========================================================================
