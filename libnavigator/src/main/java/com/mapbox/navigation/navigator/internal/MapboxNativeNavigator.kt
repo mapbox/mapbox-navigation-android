@@ -19,11 +19,13 @@ import com.mapbox.navigator.Experimental
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.GraphAccessorInterface
-import com.mapbox.navigator.HistoryRecorderHandle
 import com.mapbox.navigator.InputsServiceHandleInterface
 import com.mapbox.navigator.NavigationStatus
+import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorObserver
 import com.mapbox.navigator.PredictiveCacheController
+import com.mapbox.navigator.RerouteControllerInterface
+import com.mapbox.navigator.RerouteDetectorInterface
 import com.mapbox.navigator.RoadObjectMatcher
 import com.mapbox.navigator.RoadObjectsStore
 import com.mapbox.navigator.RoadObjectsStoreObserver
@@ -34,23 +36,19 @@ import com.mapbox.navigator.SensorData
 import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.SetRoutesResult
 import com.mapbox.navigator.Telemetry
+import com.mapbox.navigator.TilesConfig
 import com.mapbox.navigator.UpdateExternalSensorDataCallback
 
 /**
  * Provides API to work with native Navigator class. Exposed for internal usage only.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-interface MapboxNativeNavigator {
+interface MapboxNativeNavigator : RerouteEventsProvider {
 
     /**
      * Reinitialize the navigator with a device profile
      */
-    fun recreate(
-        cacheHandle: CacheHandle,
-        config: ConfigHandle,
-        historyRecorderComposite: HistoryRecorderHandle?,
-        eventsMetadataProvider: EventsMetadataInterface,
-    )
+    fun recreate(tilesConfig: TilesConfig)
 
     /**
      * Get router
@@ -58,6 +56,10 @@ interface MapboxNativeNavigator {
      * @return router [RouterInterface]
      */
     fun getRouter(): RouterInterface
+
+    fun getRerouteDetector(): RerouteDetectorInterface?
+
+    fun getRerouteController(): RerouteControllerInterface?
 
     suspend fun resetRideSession()
 
@@ -201,6 +203,12 @@ interface MapboxNativeNavigator {
     fun resetAdasisMessageCallback()
 
     fun setUserLanguages(languages: List<String>)
+
+    val config: ConfigHandle
+
+    val eventsMetadataProvider: EventsMetadataInterface
+
+    val navigator: Navigator
 
     val routeAlternativesController: RouteAlternativesControllerInterface
 

@@ -26,12 +26,24 @@ class RouteLineScaleExpressions private constructor(
     val alternativeRouteLineScaleExpression: Expression,
     val alternativeRouteCasingLineScaleExpression: Expression,
     val alternativeRouteTrafficLineScaleExpression: Expression,
+    val routeBlurScaleExpression: Expression,
 ) {
 
     /**
      * A builder class for [RouteLineScaleExpressions].
      */
     class Builder {
+
+        private var routeLineBlurScaleExpression: Expression =
+            MapboxRouteLineUtils.buildScalingExpression(
+                listOf(
+                    RouteLineScaleValue(10f, 7f, 2.0f),
+                    RouteLineScaleValue(14f, 10.5f, 2.0f),
+                    RouteLineScaleValue(16.5f, 15.5f, 2.0f),
+                    RouteLineScaleValue(19f, 24f, 2.0f),
+                    RouteLineScaleValue(22f, 29f, 2.0f),
+                ),
+            )
 
         private var routeLineScaleExpression: Expression =
             MapboxRouteLineUtils.buildScalingExpression(
@@ -167,6 +179,17 @@ class RouteLineScaleExpressions private constructor(
         }
 
         /**
+         * An expression that will define the scaling behavior of the blur applied to the route line.
+         *
+         * @param expression the expression to use for the blur effect of the route line
+         *
+         * @return the builder
+         */
+        fun routeLineBlurExpression(expression: Expression): Builder = apply {
+            this.routeLineBlurScaleExpression = expression
+        }
+
+        /**
          * Build a [RouteLineScaleExpressions] object.
          */
         fun build(): RouteLineScaleExpressions {
@@ -177,6 +200,7 @@ class RouteLineScaleExpressions private constructor(
                 alternativeRouteLineScaleExpression,
                 alternativeRouteCasingLineScaleExpression,
                 alternativeRouteTrafficLineScaleExpression,
+                routeLineBlurScaleExpression,
             )
         }
     }
@@ -208,6 +232,7 @@ class RouteLineScaleExpressions private constructor(
         ) {
             return false
         }
+        if (routeBlurScaleExpression != other.routeBlurScaleExpression) return false
 
         return true
     }
@@ -222,6 +247,7 @@ class RouteLineScaleExpressions private constructor(
         result = 31 * result + alternativeRouteLineScaleExpression.hashCode()
         result = 31 * result + alternativeRouteCasingLineScaleExpression.hashCode()
         result = 31 * result + alternativeRouteTrafficLineScaleExpression.hashCode()
+        result = 31 * result + routeBlurScaleExpression.hashCode()
         return result
     }
 
@@ -237,7 +263,8 @@ class RouteLineScaleExpressions private constructor(
             "alternativeRouteCasingLineScaleExpression=" +
             "$alternativeRouteCasingLineScaleExpression, " +
             "alternativeRouteTrafficLineScaleExpression=" +
-            "$alternativeRouteTrafficLineScaleExpression" +
+            "$alternativeRouteTrafficLineScaleExpression," +
+            "routeGlowScaleExpression=$routeBlurScaleExpression" +
             ")"
     }
 }

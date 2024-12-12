@@ -13,8 +13,8 @@ private const val LOG_TAG = "TestNetwork"
 private const val MILLISECONDS_TO_WAIT_FOR_INTERNET_CONNECTION = 5000L
 
 suspend fun BaseCoreNoCleanUpTest.withoutInternet(block: suspend () -> Unit) {
-    mockWebServerRule.withoutWebServer {
-        withoutWifiAndMobileData {
+    withoutWifiAndMobileData {
+        mockWebServerRule.withoutWebServer {
             block()
         }
     }
@@ -58,7 +58,7 @@ private suspend fun getPingAddress(): InetAddress = withContext(Dispatchers.IO) 
         "wasn't able to get address of $host" +
             " in $MILLISECONDS_TO_WAIT_FOR_INTERNET_CONNECTION ms" +
             ", check your internet connection.",
-        result != null
+        result != null,
     )
     Log.d(LOG_TAG, "Successfully resolved address for $host")
     result!!
@@ -74,7 +74,7 @@ private suspend fun InetAddress.waitForNetworkStatus(isNetworkReachabilityExpect
             Log.d(
                 LOG_TAG,
                 "is reachable: $isReachable, " +
-                    "is network reachability expected $isNetworkReachabilityExpected "
+                    "is network reachability expected $isNetworkReachabilityExpected ",
             )
         } while (isReachable != isNetworkReachabilityExpected)
         isNetworkReachabilityExpected
@@ -88,6 +88,6 @@ private suspend fun InetAddress.waitForNetworkStatus(isNetworkReachabilityExpect
     }
     assumeTrue(
         message,
-        isNetworkReachabilityExpected == actualReachability
+        isNetworkReachabilityExpected == actualReachability,
     )
 }

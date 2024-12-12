@@ -117,6 +117,10 @@ class MapboxRouteLineViewOptionsTest :
             )
             .slotName("foobar")
             .fadeOnHighZoomsConfig(FadingConfig.Builder(16.0, 16.1).build())
+            .applyTrafficColorsToRouteLineBlur(true)
+            .routeLineBlurEnabled(true)
+            .routeLineBlurWidth(33.3)
+            .routeLineBlurOpacity(.99)
     }
 
     override fun trigger() {

@@ -29,6 +29,7 @@ import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.buildScalingExpression
 import com.mapbox.navigation.ui.maps.internal.route.line.toData
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_BLUR
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_CASING
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_MAIN
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_RESTRICTED
@@ -36,6 +37,7 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_SOU
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_TRAFFIC
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_TRAIL
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_TRAIL_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_BLUR
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_CASING
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_MAIN
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_RESTRICTED
@@ -43,6 +45,7 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_SOU
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_TRAFFIC
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_TRAIL
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_TRAIL_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_BLUR
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_CASING
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_MAIN
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_RESTRICTED
@@ -71,6 +74,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineScaleValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineTrimOffset
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
+import com.mapbox.navigation.ui.maps.util.sdkStyleManager
 import com.mapbox.navigation.ui.maps.util.toDelayedRoutesRenderedCallback
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl
@@ -125,6 +129,7 @@ class MapboxRouteLineViewTest {
     fun setUp() {
         MockKAnnotations.init(this)
         mockkStatic(AppCompatResources::class)
+        mockkStatic(Style::sdkStyleManager)
         every { AppCompatResources.getDrawable(any(), any()) } returns mockk<Drawable>()
         mockkObject(InternalJobControlFactory)
         every { InternalJobControlFactory.createImmediateMainScopeJobControl() } returns JobControl(
@@ -133,11 +138,13 @@ class MapboxRouteLineViewTest {
         )
         mockkStatic("com.mapbox.navigation.ui.maps.internal.extensions.MapboxStyleEx")
         every { style.getStyleId() } returns styleId
+        every { style.sdkStyleManager } returns mockk(relaxed = true)
     }
 
     @After
     fun cleanUp() {
         unmockkStatic(AppCompatResources::class)
+        unmockkStatic(Style::sdkStyleManager)
         unmockkObject(InternalJobControlFactory)
         unmockkStatic("com.mapbox.navigation.ui.maps.internal.extensions.MapboxStyleEx")
     }
@@ -194,8 +201,11 @@ class MapboxRouteLineViewTest {
             every {
                 styleLayerExists(BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID)
             } returns true
+            every { sdkStyleManager } returns mockk(relaxed = true) {
+                every { removeStyleLayer(any()) } returns ExpectedFactory.createNone()
+                every { removeStyleImage(any()) } returns ExpectedFactory.createNone()
+            }
             every { removeStyleSource(any()) } returns ExpectedFactory.createNone()
-            every { removeStyleLayer(any()) } returns ExpectedFactory.createNone()
             every { getStyleLayerProperty(any(), any()) } returns mockk(relaxed = true)
         }
     }
@@ -239,66 +249,68 @@ class MapboxRouteLineViewTest {
             every {
                 removeStyleSource(BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID)
             } returns ExpectedFactory.createNone()
-            every {
-                removeStyleLayer(TOP_LEVEL_ROUTE_LINE_LAYER_ID)
-            } returns ExpectedFactory.createNone()
-            every {
-                removeStyleLayer(BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID)
-            } returns ExpectedFactory.createNone()
-            every {
-                removeStyleLayer(LAYER_GROUP_1_TRAIL_CASING)
-            } returns ExpectedFactory.createNone()
-            every {
-                removeStyleLayer(LAYER_GROUP_1_TRAIL)
-            } returns ExpectedFactory.createNone()
-            every {
-                removeStyleLayer(LAYER_GROUP_1_CASING)
-            } returns ExpectedFactory.createNone()
-            every {
-                removeStyleLayer(LAYER_GROUP_1_MAIN)
-            } returns ExpectedFactory.createNone()
-            every {
-                removeStyleLayer(LAYER_GROUP_1_TRAFFIC)
-            } returns ExpectedFactory.createNone()
-            every {
-                removeStyleLayer(LAYER_GROUP_1_RESTRICTED)
-            } returns ExpectedFactory.createNone()
-            every {
-                removeStyleLayer(LAYER_GROUP_2_TRAIL_CASING)
-            } returns ExpectedFactory.createNone()
-            every {
-                removeStyleLayer(LAYER_GROUP_2_TRAIL)
-            } returns ExpectedFactory.createNone()
-            every {
-                removeStyleLayer(LAYER_GROUP_2_CASING)
-            } returns ExpectedFactory.createNone()
-            every {
-                removeStyleLayer(LAYER_GROUP_2_MAIN)
-            } returns ExpectedFactory.createNone()
-            every {
-                removeStyleLayer(LAYER_GROUP_2_TRAFFIC)
-            } returns ExpectedFactory.createNone()
-            every {
-                removeStyleLayer(LAYER_GROUP_2_RESTRICTED)
-            } returns ExpectedFactory.createNone()
-            every {
-                removeStyleLayer(LAYER_GROUP_3_TRAIL_CASING)
-            } returns ExpectedFactory.createNone()
-            every {
-                removeStyleLayer(LAYER_GROUP_3_TRAIL)
-            } returns ExpectedFactory.createNone()
-            every {
-                removeStyleLayer(LAYER_GROUP_3_CASING)
-            } returns ExpectedFactory.createNone()
-            every {
-                removeStyleLayer(LAYER_GROUP_3_MAIN)
-            } returns ExpectedFactory.createNone()
-            every {
-                removeStyleLayer(LAYER_GROUP_3_TRAFFIC)
-            } returns ExpectedFactory.createNone()
-            every {
-                removeStyleLayer(LAYER_GROUP_3_RESTRICTED)
-            } returns ExpectedFactory.createNone()
+            every { sdkStyleManager } returns mockk(relaxed = true) {
+                every {
+                    removeStyleLayer(TOP_LEVEL_ROUTE_LINE_LAYER_ID)
+                } returns ExpectedFactory.createNone()
+                every {
+                    removeStyleLayer(BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID)
+                } returns ExpectedFactory.createNone()
+                every {
+                    removeStyleLayer(LAYER_GROUP_1_TRAIL_CASING)
+                } returns ExpectedFactory.createNone()
+                every {
+                    removeStyleLayer(LAYER_GROUP_1_TRAIL)
+                } returns ExpectedFactory.createNone()
+                every {
+                    removeStyleLayer(LAYER_GROUP_1_CASING)
+                } returns ExpectedFactory.createNone()
+                every {
+                    removeStyleLayer(LAYER_GROUP_1_MAIN)
+                } returns ExpectedFactory.createNone()
+                every {
+                    removeStyleLayer(LAYER_GROUP_1_TRAFFIC)
+                } returns ExpectedFactory.createNone()
+                every {
+                    removeStyleLayer(LAYER_GROUP_1_RESTRICTED)
+                } returns ExpectedFactory.createNone()
+                every {
+                    removeStyleLayer(LAYER_GROUP_2_TRAIL_CASING)
+                } returns ExpectedFactory.createNone()
+                every {
+                    removeStyleLayer(LAYER_GROUP_2_TRAIL)
+                } returns ExpectedFactory.createNone()
+                every {
+                    removeStyleLayer(LAYER_GROUP_2_CASING)
+                } returns ExpectedFactory.createNone()
+                every {
+                    removeStyleLayer(LAYER_GROUP_2_MAIN)
+                } returns ExpectedFactory.createNone()
+                every {
+                    removeStyleLayer(LAYER_GROUP_2_TRAFFIC)
+                } returns ExpectedFactory.createNone()
+                every {
+                    removeStyleLayer(LAYER_GROUP_2_RESTRICTED)
+                } returns ExpectedFactory.createNone()
+                every {
+                    removeStyleLayer(LAYER_GROUP_3_TRAIL_CASING)
+                } returns ExpectedFactory.createNone()
+                every {
+                    removeStyleLayer(LAYER_GROUP_3_TRAIL)
+                } returns ExpectedFactory.createNone()
+                every {
+                    removeStyleLayer(LAYER_GROUP_3_CASING)
+                } returns ExpectedFactory.createNone()
+                every {
+                    removeStyleLayer(LAYER_GROUP_3_MAIN)
+                } returns ExpectedFactory.createNone()
+                every {
+                    removeStyleLayer(LAYER_GROUP_3_TRAFFIC)
+                } returns ExpectedFactory.createNone()
+                every {
+                    removeStyleLayer(LAYER_GROUP_3_RESTRICTED)
+                } returns ExpectedFactory.createNone()
+            }
         }
         every { MapboxRouteLineUtils.initializeLayers(style, options) } just Runs
 
@@ -3150,6 +3162,7 @@ class MapboxRouteLineViewTest {
             LAYER_GROUP_1_MAIN,
             LAYER_GROUP_1_TRAFFIC,
             LAYER_GROUP_1_RESTRICTED,
+            LAYER_GROUP_1_BLUR,
         )
         every {
             MapboxRouteLineUtils.getLayerIdsForPrimaryRoute(any(), any())
@@ -3284,6 +3297,7 @@ class MapboxRouteLineViewTest {
         val layerGroup1SourceLayerIds = setOf(
             LAYER_GROUP_1_TRAIL_CASING,
             LAYER_GROUP_1_TRAIL,
+            LAYER_GROUP_1_BLUR,
             LAYER_GROUP_1_CASING,
             LAYER_GROUP_1_MAIN,
             LAYER_GROUP_1_TRAFFIC,
@@ -3311,6 +3325,9 @@ class MapboxRouteLineViewTest {
         val route3Main = mockk<LineLayer>(relaxed = true)
         val route3Traffic = mockk<LineLayer>(relaxed = true)
         val route3Restricted = mockk<LineLayer>(relaxed = true)
+        val route1Blur = mockk<LineLayer>(relaxed = true)
+        val route2Blur = mockk<LineLayer>(relaxed = true)
+        val route3Blur = mockk<LineLayer>(relaxed = true)
         val style = getMockedStyle().apply {
             every { styleLayerExists(any()) } returns true
             every {
@@ -3367,6 +3384,15 @@ class MapboxRouteLineViewTest {
             every {
                 getLayer(LAYER_GROUP_3_RESTRICTED)
             } returns route3Restricted
+            every {
+                getLayer(LAYER_GROUP_1_BLUR)
+            } returns route1Blur
+            every {
+                getLayer(LAYER_GROUP_2_BLUR)
+            } returns route2Blur
+            every {
+                getLayer(LAYER_GROUP_3_BLUR)
+            } returns route3Blur
         }
         every { MapboxRouteLineUtils.initializeLayers(style, options) } just Runs
 
@@ -3378,6 +3404,7 @@ class MapboxRouteLineViewTest {
         verify(exactly = 0) { route1Main.visibility(Visibility.VISIBLE) }
         verify(exactly = 0) { route1Traffic.visibility(Visibility.VISIBLE) }
         verify(exactly = 0) { route1Restricted.visibility(Visibility.VISIBLE) }
+        verify(exactly = 0) { route1Blur.visibility(Visibility.VISIBLE) }
         verify { route2TrailCasing.visibility(Visibility.VISIBLE) }
         verify { route2Trail.visibility(Visibility.VISIBLE) }
         verify { route2Casing.visibility(Visibility.VISIBLE) }
@@ -3390,6 +3417,7 @@ class MapboxRouteLineViewTest {
         verify { route3Main.visibility(Visibility.VISIBLE) }
         verify { route3Traffic.visibility(Visibility.VISIBLE) }
         verify { route3Restricted.visibility(Visibility.VISIBLE) }
+        verify { route3Blur.visibility(Visibility.VISIBLE) }
         unmockkObject(MapboxRouteLineUtils)
         unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
     }
@@ -3428,6 +3456,9 @@ class MapboxRouteLineViewTest {
         val route3Main = mockk<LineLayer>(relaxed = true)
         val route3Traffic = mockk<LineLayer>(relaxed = true)
         val route3Restricted = mockk<LineLayer>(relaxed = true)
+        val blur1 = mockk<LineLayer>(relaxed = true)
+        val blur2 = mockk<LineLayer>(relaxed = true)
+        val blur3 = mockk<LineLayer>(relaxed = true)
         val style = getMockedStyle().apply {
             every { styleLayerExists(any()) } returns true
             every {
@@ -3484,6 +3515,15 @@ class MapboxRouteLineViewTest {
             every {
                 getLayer(LAYER_GROUP_3_RESTRICTED)
             } returns route3Restricted
+            every {
+                getLayer(LAYER_GROUP_1_BLUR)
+            } returns blur1
+            every {
+                getLayer(LAYER_GROUP_2_BLUR)
+            } returns blur2
+            every {
+                getLayer(LAYER_GROUP_3_BLUR)
+            } returns blur3
         }
         every { MapboxRouteLineUtils.initializeLayers(style, options) } just Runs
 
@@ -3507,6 +3547,7 @@ class MapboxRouteLineViewTest {
         verify { route3Main.visibility(Visibility.NONE) }
         verify { route3Traffic.visibility(Visibility.NONE) }
         verify { route3Restricted.visibility(Visibility.NONE) }
+        verify { blur3.visibility(Visibility.NONE) }
         unmockkObject(MapboxRouteLineUtils)
         unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
     }
@@ -3515,7 +3556,10 @@ class MapboxRouteLineViewTest {
     fun hideTraffic() {
         mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
         mockkObject(MapboxRouteLineUtils)
-        val options = MapboxRouteLineViewOptions.Builder(ctx).build()
+        val options = MapboxRouteLineViewOptions.Builder(ctx)
+            .routeLineBlurEnabled(true)
+            .applyTrafficColorsToRouteLineBlur(true)
+            .build()
         val route1TrailCasing = mockk<LineLayer>(relaxed = true)
         val route1Trail = mockk<LineLayer>(relaxed = true)
         val route1Casing = mockk<LineLayer>(relaxed = true)
@@ -3539,6 +3583,7 @@ class MapboxRouteLineViewTest {
         val maskingCasing = mockk<LineLayer>(relaxed = true)
         val maskingMain = mockk<LineLayer>(relaxed = true)
         val maskingTraffic = mockk<LineLayer>(relaxed = true)
+        val blurLine1 = mockk<LineLayer>(relaxed = true)
         val style = getMockedStyle().apply {
             every {
                 getLayer(LAYER_GROUP_1_TRAIL_CASING)
@@ -3594,6 +3639,9 @@ class MapboxRouteLineViewTest {
             every {
                 getLayer(LAYER_GROUP_3_RESTRICTED)
             } returns route3Restricted
+            every {
+                getLayer(LAYER_GROUP_1_BLUR)
+            } returns blurLine1
             every { getLayer(MASKING_LAYER_TRAIL_CASING) } returns maskingTrailCasing
             every { getLayer(MASKING_LAYER_TRAIL) } returns maskingTrail
             every { getLayer(MASKING_LAYER_CASING) } returns maskingCasing
@@ -3603,6 +3651,7 @@ class MapboxRouteLineViewTest {
             every { styleLayerExists(LAYER_GROUP_2_TRAFFIC) } returns true
             every { styleLayerExists(LAYER_GROUP_3_TRAFFIC) } returns true
             every { styleLayerExists(MASKING_LAYER_TRAFFIC) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_BLUR) } returns true
         }
         every { MapboxRouteLineUtils.initializeLayers(style, options) } just Runs
 
@@ -3631,6 +3680,7 @@ class MapboxRouteLineViewTest {
         verify(exactly = 0) { maskingCasing.visibility(Visibility.NONE) }
         verify(exactly = 0) { maskingMain.visibility(Visibility.NONE) }
         verify(exactly = 1) { maskingTraffic.visibility(Visibility.NONE) }
+        verify(exactly = 1) { blurLine1.visibility(Visibility.NONE) }
 
         unmockkObject(MapboxRouteLineUtils)
         unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
@@ -3640,7 +3690,10 @@ class MapboxRouteLineViewTest {
     fun showTraffic() {
         mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
         mockkObject(MapboxRouteLineUtils)
-        val options = MapboxRouteLineViewOptions.Builder(ctx).build()
+        val options = MapboxRouteLineViewOptions.Builder(ctx)
+            .routeLineBlurEnabled(true)
+            .applyTrafficColorsToRouteLineBlur(true)
+            .build()
         val route1TrailCasing = mockk<LineLayer>(relaxed = true)
         val route1Trail = mockk<LineLayer>(relaxed = true)
         val route1Casing = mockk<LineLayer>(relaxed = true)
@@ -3664,6 +3717,7 @@ class MapboxRouteLineViewTest {
         val maskingCasing = mockk<LineLayer>(relaxed = true)
         val maskingMain = mockk<LineLayer>(relaxed = true)
         val maskingTraffic = mockk<LineLayer>(relaxed = true)
+        val blurLine1 = mockk<LineLayer>(relaxed = true)
         val style = getMockedStyle().apply {
             every {
                 getLayer(LAYER_GROUP_1_TRAIL_CASING)
@@ -3719,6 +3773,9 @@ class MapboxRouteLineViewTest {
             every {
                 getLayer(LAYER_GROUP_3_RESTRICTED)
             } returns route3Restricted
+            every {
+                getLayer(LAYER_GROUP_1_BLUR)
+            } returns blurLine1
             every { getLayer(MASKING_LAYER_TRAIL_CASING) } returns maskingTrailCasing
             every { getLayer(MASKING_LAYER_TRAIL) } returns maskingTrail
             every { getLayer(MASKING_LAYER_CASING) } returns maskingCasing
@@ -3728,6 +3785,7 @@ class MapboxRouteLineViewTest {
             every { styleLayerExists(LAYER_GROUP_2_TRAFFIC) } returns true
             every { styleLayerExists(LAYER_GROUP_3_TRAFFIC) } returns true
             every { styleLayerExists(MASKING_LAYER_TRAFFIC) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_BLUR) } returns true
         }
         every { MapboxRouteLineUtils.initializeLayers(style, options) } just Runs
 
@@ -3755,7 +3813,8 @@ class MapboxRouteLineViewTest {
         verify(exactly = 0) { maskingTrail.visibility(Visibility.VISIBLE) }
         verify(exactly = 0) { maskingCasing.visibility(Visibility.VISIBLE) }
         verify(exactly = 0) { maskingMain.visibility(Visibility.VISIBLE) }
-        verify(exactly = 1) { maskingTraffic.visibility(Visibility.VISIBLE) }
+        verify(exactly = 2) { maskingTraffic.visibility(Visibility.VISIBLE) }
+        verify(exactly = 1) { blurLine1.visibility(Visibility.VISIBLE) }
 
         unmockkObject(MapboxRouteLineUtils)
         unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
@@ -3768,6 +3827,7 @@ class MapboxRouteLineViewTest {
             LAYER_GROUP_1_TRAIL_CASING,
             LAYER_GROUP_1_TRAIL,
             LAYER_GROUP_1_CASING,
+            LAYER_GROUP_1_BLUR,
             LAYER_GROUP_1_MAIN,
             LAYER_GROUP_1_TRAFFIC,
             LAYER_GROUP_1_RESTRICTED,
@@ -4884,8 +4944,10 @@ class MapboxRouteLineViewTest {
     }
 
     private fun getMockedStyle(): Style = mockk(relaxed = true) {
-        every { removeStyleLayer(any()) } returns ExpectedFactory.createNone()
-        every { removeStyleImage(any()) } returns ExpectedFactory.createNone()
+        every { sdkStyleManager } returns mockk(relaxed = true) {
+            every { removeStyleLayer(any()) } returns ExpectedFactory.createNone()
+            every { removeStyleImage(any()) } returns ExpectedFactory.createNone()
+        }
         every { setStyleLayerProperty(any(), any(), any()) } returns ExpectedFactory.createNone()
     }
 
@@ -5011,8 +5073,10 @@ class MapboxRouteLineViewTest {
                 styleLayerExists(LAYER_GROUP_3_RESTRICTED)
             } returns true
             every { removeStyleSource(any()) } returns ExpectedFactory.createNone()
-            every { removeStyleLayer(any()) } returns ExpectedFactory.createNone()
-            every { removeStyleImage(any()) } returns ExpectedFactory.createNone()
+            every { sdkStyleManager } returns mockk(relaxed = true) {
+                every { removeStyleLayer(any()) } returns ExpectedFactory.createNone()
+                every { removeStyleImage(any()) } returns ExpectedFactory.createNone()
+            }
         }.also {
             mockCheckForLayerInitialization(it)
         }

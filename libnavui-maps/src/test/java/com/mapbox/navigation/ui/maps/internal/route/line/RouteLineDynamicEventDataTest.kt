@@ -18,6 +18,7 @@ internal class RouteLineDynamicEventDataTest :
         "restrictedSectionExpressionCommandHolder" to "restrictedSectionExpressionData",
         "trailExpressionCommandHolder" to "trailExpressionData",
         "trailCasingExpressionCommandHolder" to "trailCasingExpressionData",
+        "blurExpressionCommandHolder" to "blurExpressionCommandData",
     )
 
     override fun getDoublerClass(): Class<*> {

@@ -28,6 +28,7 @@ import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.ex
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getCongestionColorTypeForInactiveRouteLegs
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getPrimaryRouteLineDynamicData
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getRestrictedLineExpressionProducer
+import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getSingleColorExpression
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.granularDistancesProvider
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup1SourceLayerIds
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup2SourceLayerIds
@@ -1242,6 +1243,13 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                 LineGradientCommandApplier(),
             )
 
+        val alternateRoute1BlurExpressionHolder = RouteLineExpressionCommandHolder(
+            LightRouteLineExpressionProvider {
+                getSingleColorExpression(Color.TRANSPARENT)
+            },
+            LineGradientCommandApplier(),
+        )
+
         val alternateRoute2BaseExpressionCommandHolder = RouteLineExpressionCommandHolder(
             LightRouteLineExpressionProvider {
                 MapboxRouteLineUtils.getRouteLineExpression(
@@ -1297,6 +1305,13 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                 },
                 LineGradientCommandApplier(),
             )
+
+        val alternateRoute2BlurExpressionHolder = RouteLineExpressionCommandHolder(
+            LightRouteLineExpressionProvider {
+                getSingleColorExpression(Color.TRANSPARENT)
+            },
+            LineGradientCommandApplier(),
+        )
 
         val navigationRoute = primaryRoute.route
         val maskingLayerData = if (navigationRoute.isMultiLeg()) {
@@ -1365,6 +1380,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                             RouteLineTrimOffset(alternative1PercentageTraveled),
                             alternateRoute1TrailExpressionCommandHolder,
                             alternateRoute1TrailCasingExpressionCommandHolder,
+                            alternateRoute1BlurExpressionHolder,
                         ),
                     ),
                     RouteLineData(
@@ -1377,6 +1393,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                             RouteLineTrimOffset(alternative2PercentageTraveled),
                             alternateRoute2TrailExpressionCommandHolder,
                             alternateRoute2TrailCasingExpressionCommandHolder,
+                            alternateRoute2BlurExpressionHolder,
                         ),
                     ),
                 ),
@@ -1384,6 +1401,10 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                 maskingLayerData,
             ),
         )
+    }
+
+    internal fun clearFinally() {
+        resetCaches()
     }
 
     private fun resetCaches() {
@@ -1453,6 +1474,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                         it.routeLineCasingExpressionCommandHolder,
                         it.trafficLineExpressionCommandHolder,
                         it.restrictedRoadExpressionCommandHolder,
+                        blurExpressionCommandHolder = it.routeLineExpressionCommandHolder,
                     )
                 }
                 val maskingLayerDynamicData = if (primaryRoute.isMultiLeg()) {

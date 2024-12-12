@@ -9,6 +9,7 @@ continuation_indent_size=4
 ij_kotlin_allow_trailing_comma=true
 ij_kotlin_allow_trailing_comma_on_call_site=true
 ij_kotlin_imports_layout=*,java.**,javax.**,kotlin.**,^
+ktlint_function_naming_ignore_when_annotated_with=Composable, Test
 
 insert_final_newline=true
 

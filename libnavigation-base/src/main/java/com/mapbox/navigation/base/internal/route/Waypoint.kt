@@ -10,6 +10,7 @@ class Waypoint internal constructor(
     val target: Point?,
     internal val internalType: InternalType,
     val metadata: Map<String, JsonElement>?,
+    val timeZone: TimeZone?,
 ) {
 
     @Type
@@ -48,6 +49,7 @@ class Waypoint internal constructor(
         if (name != other.name) return false
         if (target != other.target) return false
         if (metadata != other.metadata) return false
+        if (timeZone != other.timeZone) return false
 
         return true
     }
@@ -58,16 +60,17 @@ class Waypoint internal constructor(
         result = 31 * result + name.hashCode()
         result = 31 * result + target.hashCode()
         result = 31 * result + metadata.hashCode()
+        result = 31 * result + timeZone.hashCode()
         return result
     }
 
     override fun toString(): String {
-        return "Waypoint(" +
-            "location=$location, " +
-            "type=$type, " +
-            "name='$name', " +
-            "target=$target, " +
-            "metadata=$metadata" +
+        return "Waypoint(location=$location" +
+            ", type=$type" +
+            ", name='$name'" +
+            ", target=$target" +
+            ", metadata=$metadata" +
+            ", timeZone=$timeZone" +
             ")"
     }
 

@@ -80,6 +80,10 @@ class MapboxRouteLineViewOptions private constructor(
     val lineDepthOcclusionFactor: Double,
     val slotName: String,
     val fadeOnHighZoomsConfig: FadingConfig?,
+    val routeLineBlurWidth: Double,
+    val routeLineBlurEnabled: Boolean,
+    val applyTrafficColorsToRouteLineBlur: Boolean,
+    val routeLineBlurOpacity: Double,
 ) {
 
     /**
@@ -106,6 +110,10 @@ class MapboxRouteLineViewOptions private constructor(
             .lineDepthOcclusionFactor(lineDepthOcclusionFactor)
             .slotName(slotName)
             .fadeOnHighZoomsConfig(fadeOnHighZoomsConfig)
+            .routeLineBlurWidth(routeLineBlurWidth)
+            .routeLineBlurEnabled(routeLineBlurEnabled)
+            .applyTrafficColorsToRouteLineBlur(applyTrafficColorsToRouteLineBlur)
+            .routeLineBlurOpacity(routeLineBlurOpacity)
     }
 
     /**
@@ -139,6 +147,12 @@ class MapboxRouteLineViewOptions private constructor(
         if (lineDepthOcclusionFactor != other.lineDepthOcclusionFactor) return false
         if (slotName != other.slotName) return false
         if (fadeOnHighZoomsConfig != other.fadeOnHighZoomsConfig) return false
+        if (routeLineBlurWidth != other.routeLineBlurWidth) return false
+        if (routeLineBlurEnabled != other.routeLineBlurEnabled) return false
+        if (applyTrafficColorsToRouteLineBlur != other.applyTrafficColorsToRouteLineBlur) {
+            return false
+        }
+        if (routeLineBlurOpacity != other.routeLineBlurOpacity) return false
 
         return true
     }
@@ -169,6 +183,10 @@ class MapboxRouteLineViewOptions private constructor(
         result = 31 * result + lineDepthOcclusionFactor.hashCode()
         result = 31 * result + slotName.hashCode()
         result = 31 * result + fadeOnHighZoomsConfig.hashCode()
+        result = 31 * result + routeLineBlurWidth.hashCode()
+        result = 31 * result + routeLineBlurEnabled.hashCode()
+        result = 31 * result + applyTrafficColorsToRouteLineBlur.hashCode()
+        result = 31 * result + routeLineBlurOpacity.hashCode()
 
         return result
     }
@@ -199,7 +217,12 @@ class MapboxRouteLineViewOptions private constructor(
             "shareLineGeometrySources=$shareLineGeometrySources, " +
             "lineDepthOcclusionFactor=$lineDepthOcclusionFactor, " +
             "slotName=$slotName, " +
-            "fadingConfig=$fadeOnHighZoomsConfig" +
+            "fadingConfig=$fadeOnHighZoomsConfig, " +
+            "lineDepthOcclusionFactor=$lineDepthOcclusionFactor, " +
+            "routeLineBlurWidth=$routeLineBlurWidth, " +
+            "routeLineBlurEnabled=$routeLineBlurEnabled, " +
+            "applyTrafficColorsToRouteLineBlur=$applyTrafficColorsToRouteLineBlur," +
+            "routeLineBlurOpacity=$routeLineBlurOpacity" +
             ")"
     }
 
@@ -239,6 +262,11 @@ class MapboxRouteLineViewOptions private constructor(
         private var lineDepthOcclusionFactor: Double = 0.0
         private var slotName: String = RouteLayerConstants.DEFAULT_ROUTE_LINE_SLOT
         private var fadeOnHighZoomsConfig: FadingConfig? = null
+
+        private var routeLineBlurWidth: Double = 5.0
+        private var routeLineBlurEnabled: Boolean = false
+        private var applyTrafficColorsToRouteLineBlur: Boolean = false
+        private var routeLineBlurOpacity: Double = .4
 
         /**
          * An instance of [RouteLineColorResources].
@@ -465,6 +493,48 @@ class MapboxRouteLineViewOptions private constructor(
         }
 
         /**
+         * A width value applied to the line blur effect.
+         * See https://docs.mapbox.com/android/maps/api/11.0.0/mapbox-maps-android/com.mapbox.maps.extension.style.layers.generated/-line-layer/line-blur.html
+         * for more information.
+         *
+         * @param blurWidth value of lineBlur
+         * @return the builder
+         */
+        fun routeLineBlurWidth(blurWidth: Double): Builder = apply {
+            routeLineBlurWidth = blurWidth
+        }
+
+        /**
+         * When enabled a blur effect is applied to the line blur. The blur can be a single color
+         * or can express the traffic colors.
+         *
+         * @param enable default is false
+         * @return the builder
+         */
+        fun routeLineBlurEnabled(enable: Boolean): Builder = apply { routeLineBlurEnabled = enable }
+
+        /**
+         * When `true` the blur effect will express the same colors used for traffic. The blur
+         * effect option must be enabled in order for this option to take effect.
+         *
+         * @param applyTrafficColors default is false
+         * @return the builder
+         */
+        fun applyTrafficColorsToRouteLineBlur(applyTrafficColors: Boolean): Builder = apply {
+            applyTrafficColorsToRouteLineBlur = applyTrafficColors
+        }
+
+        /**
+         * Determines the opacity of the route line blur.
+         *
+         * @param opacity the opacity level
+         * @return the builder
+         */
+        fun routeLineBlurOpacity(opacity: Double) = apply {
+            routeLineBlurOpacity = opacity
+        }
+
+        /**
          * Creates an instance of [MapboxRouteLineViewOptions].
          *
          * @return an instance of [MapboxRouteLineViewOptions].
@@ -518,6 +588,10 @@ class MapboxRouteLineViewOptions private constructor(
                 lineDepthOcclusionFactor,
                 slotName,
                 fadeOnHighZoomsConfig,
+                routeLineBlurWidth,
+                routeLineBlurEnabled,
+                applyTrafficColorsToRouteLineBlur,
+                routeLineBlurOpacity,
             )
         }
     }

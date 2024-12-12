@@ -29,7 +29,8 @@ import com.mapbox.api.directions.v5.models.LegStep
  * }
  *
  * A simplified data structure containing [BannerComponents.active] and list of [BannerComponents.directions].
- * @property isActive Boolean indicates if that lane can be used to complete the upcoming maneuver.
+ * @property isActive Boolean indicates whether the lane is recommended for performing the upcoming maneuver.
+ * If multiple lanes are active, all are equally recommended
  * @property drivingSide String indicates the driving side. The value is obtained from [BannerText.drivingSide].
  * However, if null the value determination falls back to [LegStep.drivingSide]
  * @property directions List<String> informs about all the possible directions a particular lane can take.

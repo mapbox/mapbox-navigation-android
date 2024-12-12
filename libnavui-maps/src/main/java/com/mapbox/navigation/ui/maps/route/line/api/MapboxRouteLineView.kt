@@ -29,18 +29,21 @@ import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.so
 import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineViewOptionsData
 import com.mapbox.navigation.ui.maps.internal.route.line.toData
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_BLUR
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_CASING
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_MAIN
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_RESTRICTED
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_TRAFFIC
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_TRAIL
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_TRAIL_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_BLUR
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_CASING
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_MAIN
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_RESTRICTED
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_TRAFFIC
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_TRAIL
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_TRAIL_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_BLUR
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_CASING
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_MAIN
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_RESTRICTED
@@ -66,6 +69,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineSourceKey
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import com.mapbox.navigation.ui.maps.util.MutexBasedScope
+import com.mapbox.navigation.ui.maps.util.sdkStyleManager
 import com.mapbox.navigation.ui.maps.util.toDelayedRoutesRenderedCallback
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.ifNonNull
@@ -171,6 +175,11 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         MASKING_LAYER_TRAFFIC,
         MASKING_LAYER_TRAIL_CASING,
         MASKING_LAYER_RESTRICTED,
+    )
+    private val blurLayerIds = setOf(
+        LAYER_GROUP_1_BLUR,
+        LAYER_GROUP_2_BLUR,
+        LAYER_GROUP_3_BLUR,
     )
     private val sourceToFeatureMap = mutableMapOf<RouteLineSourceKey, RouteLineFeatureId>(
         Pair(MapboxRouteLineUtils.layerGroup1SourceKey, RouteLineFeatureId(null)),
@@ -626,6 +635,16 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         renderClearRouteLineValueInternal(style, clearRouteLineValue, null)
     }
 
+    internal fun clearFinally(map: MapboxMap) {
+        sourceLayerMap.keys.forEach { routeLineSourceKey ->
+            map.styleManager.removeStyleSource(routeLineSourceKey.sourceId)
+            sourceToFeatureMap[routeLineSourceKey] = RouteLineFeatureId(null)
+        }
+        map.styleManager.removeStyleSource(RouteLayerConstants.WAYPOINT_SOURCE_ID)
+        primaryRouteLineLayerGroup = setOf()
+        MapboxRouteLineUtils.removeLayers(map.sdkStyleManager)
+    }
+
     /**
      * Applies side effects related to the vanishing route line feature.
      *
@@ -811,12 +830,20 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
      * @param style an instance of the [Style]
      */
     fun hideTraffic(style: Style) {
+        val additionalLayerIds = if (
+            optionsHolder.data.routeLineBlurEnabled &&
+            optionsHolder.data.applyTrafficColorsToRouteLineBlur
+        ) {
+            blurLayerIds
+        } else {
+            emptyList()
+        }
         sender.sendHideTrafficEvent(style.getStyleId())
         layerGroup1SourceLayerIds
             .union(layerGroup2SourceLayerIds)
             .union(layerGroup3SourceLayerIds)
             .union(maskingLayerIds)
-            .filter { it in trafficLayerIds }
+            .filter { it in trafficLayerIds || it in additionalLayerIds }
             .forEach { layerId ->
                 adjustLayerVisibility(style, layerId, Visibility.NONE)
             }
@@ -828,12 +855,26 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
      * @param style an instance of the [Style]
      */
     fun showTraffic(style: Style) {
+        // If the primary route was hidden and then this is called it doesn't make sense to
+        // show the traffic line by itself without the rest of the primary route line so
+        // it shall be set to visible.
+        if (getPrimaryRouteVisibility(style) != Visibility.VISIBLE) {
+            showPrimaryRoute(style)
+        }
+        val additionalLayerIds = if (
+            optionsHolder.data.routeLineBlurEnabled &&
+            optionsHolder.data.applyTrafficColorsToRouteLineBlur
+        ) {
+            blurLayerIds
+        } else {
+            emptyList()
+        }
         sender.sendShowTrafficEvent(style.getStyleId())
         layerGroup1SourceLayerIds
             .union(layerGroup2SourceLayerIds)
             .union(layerGroup3SourceLayerIds)
             .union(maskingLayerIds)
-            .filter { it in trafficLayerIds }
+            .filter { it in trafficLayerIds || it in additionalLayerIds }
             .forEach { layerId ->
                 adjustLayerVisibility(style, layerId, Visibility.VISIBLE)
             }
@@ -1061,7 +1102,7 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
                     it,
                     routeLineData.restrictedSectionExpressionCommandHolder,
                 )
-
+                in blurLayerIds -> Pair(it, routeLineData.blurExpressionCommandHolder)
                 else -> null
             }
         }.filter { it?.second != null }.map {
@@ -1196,7 +1237,7 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         alternativeRouteVisibility: Visibility?,
     ) {
         sourceLayerMap.values.flatten().map { layerID ->
-            when (layerID in trafficLayerIds) {
+            when (layerID in trafficLayerIds || layerID in blurLayerIds) {
                 true -> when (primaryRouteLineLayerGroup.contains(layerID)) {
                     true -> Pair(layerID, primaryRouteTrafficVisibility)
                     false -> Pair(layerID, alternativeRouteVisibility)
@@ -1223,6 +1264,7 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
             adjustLayerVisibility(style, MASKING_LAYER_TRAFFIC, this)
         }
         primaryRouteVisibility?.apply {
+            adjustLayerVisibility(style, MASKING_LAYER_RESTRICTED, this)
             adjustLayerVisibility(style, MASKING_LAYER_MAIN, this)
             adjustLayerVisibility(style, MASKING_LAYER_CASING, this)
             adjustLayerVisibility(style, MASKING_LAYER_TRAIL, this)
@@ -1260,6 +1302,10 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
                 routeLineDynamicData.restrictedSectionExpressionCommandHolder
             }
 
+            in blurLayerIds -> {
+                routeLineDynamicData.blurExpressionCommandHolder
+            }
+
             else -> null
         }
     }
@@ -1294,6 +1340,7 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
             .union(casingLayerIds)
             .union(mainLayerIds)
             .union(trafficLayerIds)
+            .union(blurLayerIds)
             .forEach {
                 when (it) {
                     in primaryRouteLineLayerGroup + maskingRouteLineLayerGroup -> {
@@ -1316,6 +1363,10 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
 
                             in trafficLayerIds -> {
                                 options.scaleExpressions.routeTrafficLineScaleExpression
+                            }
+
+                            in blurLayerIds -> {
+                                options.scaleExpressions.routeBlurScaleExpression
                             }
 
                             else -> null
@@ -1344,6 +1395,10 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
                                 options.scaleExpressions.alternativeRouteTrafficLineScaleExpression
                             }
 
+                            in blurLayerIds -> {
+                                options.scaleExpressions.routeBlurScaleExpression
+                            }
+
                             else -> null
                         }
                     }
@@ -1361,7 +1416,7 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
     }
 
     private fun resetLayers(style: Style, options: MapboxRouteLineViewOptions) {
-        MapboxRouteLineUtils.removeLayers(style)
+        MapboxRouteLineUtils.removeLayers(style.sdkStyleManager)
         MapboxRouteLineUtils.initializeLayers(style, options)
     }
 

@@ -1,15 +1,20 @@
 package com.mapbox.navigation.copilot
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.options.EventsAppMetadata
+import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.copilot.MapboxCopilot.push
 import com.mapbox.navigation.copilot.MapboxCopilot.start
 import com.mapbox.navigation.copilot.MapboxCopilot.stop
+import com.mapbox.navigation.copilot.MapboxCopilotImpl.Companion.LOG_CATEGORY
 import com.mapbox.navigation.copilot.internal.PushStatusObserver
+import com.mapbox.navigation.core.DeveloperMetadata
 import com.mapbox.navigation.core.DeveloperMetadataObserver
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.SdkInfoProvider
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
+import com.mapbox.navigation.utils.internal.logD
 import java.util.concurrent.CopyOnWriteArraySet
 
 /**
@@ -58,6 +63,7 @@ object MapboxCopilot : MapboxNavigationObserver {
      * Starts Copilot.
      */
     fun start() {
+        logD("MapboxCopilot started")
         MapboxNavigationApp.registerObserver(this)
     }
 
@@ -65,6 +71,7 @@ object MapboxCopilot : MapboxNavigationObserver {
      * Stops Copilot.
      */
     fun stop() {
+        logD("MapboxCopilot stopped")
         MapboxNavigationApp.unregisterObserver(this)
     }
 
@@ -85,8 +92,13 @@ object MapboxCopilot : MapboxNavigationObserver {
      */
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         if (copilot != null) {
+            logD("MapboxNavigation is attached, copilot instance is already instantiated")
             return
         }
+        logD(
+            "MapboxNavigation is attached, instantiate new copilot instance. " +
+                "Copilot options: ${mapboxNavigation.navigationOptions.copilotOptions}",
+        )
         copilot = MapboxCopilotImpl(mapboxNavigation).also { it.start() }
     }
 
@@ -97,7 +109,10 @@ object MapboxCopilot : MapboxNavigationObserver {
      * @param mapboxNavigation instance that is being detached
      */
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
+        logD("MapboxNavigation is detached, stopping copilot")
         copilot?.stop()
         copilot = null
     }
+
+    private fun logD(msg: String) = logD(msg, LOG_CATEGORY)
 }

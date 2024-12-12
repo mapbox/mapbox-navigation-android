@@ -16,6 +16,7 @@ import okhttp3.mockwebserver.RecordedRequest
 import org.junit.Assume.assumeTrue
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
+import java.io.IOException
 import java.lang.StringBuilder
 import kotlin.time.Duration
 
@@ -27,7 +28,9 @@ import kotlin.time.Duration
  */
 class MockWebServerRule : TestWatcher() {
 
-    var webServer = MockWebServer()
+    var webServer = MockWebServer().apply {
+        startMockWebServer()
+    }
         private set
 
     /**
@@ -103,6 +106,7 @@ class MockWebServerRule : TestWatcher() {
                 try {
                     webServer = MockWebServer()
                     webServer.start(port)
+                    Log.d("MockWebServerRule", "mock server is restarted")
                     break
                 } catch (t: Throwable) {
                     Log.e("MockWebServerRule", "error starting mock web server", t)
@@ -111,5 +115,23 @@ class MockWebServerRule : TestWatcher() {
             }
             true
         } ?: false
+    }
+
+    private fun MockWebServer.startMockWebServer() {
+        var startedSuccessfully = false
+        for (i in 1..300) {
+            val portToTry = 4000 + i
+            try {
+                start(portToTry)
+                startedSuccessfully = true
+                break
+            } catch (e: IOException) {
+                Log.e("MockWebServerRule", "failed to start server on port $portToTry")
+            }
+        }
+        if (!startedSuccessfully) {
+            Log.w("MockWebServerRule", "Wasn't able to start mock web server on predefined port. Trying default start.")
+            start()
+        }
     }
 }

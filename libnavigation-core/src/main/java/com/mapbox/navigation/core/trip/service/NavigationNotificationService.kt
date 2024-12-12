@@ -6,6 +6,7 @@ import android.app.Notification
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.os.IBinder
 import androidx.annotation.CallSuper
 import androidx.core.app.ServiceCompat
@@ -25,7 +26,11 @@ internal class NavigationNotificationService : Service() {
     private val notificationDataObserver = NotificationDataObserver { notificationResponse ->
         try {
             notificationResponse.notification.flags = Notification.FLAG_FOREGROUND_SERVICE
-            startForeground(notificationResponse.notificationId, notificationResponse.notification)
+            startForeground(
+                notificationResponse.notificationId,
+                notificationResponse.notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION,
+            )
         } catch (e: ForegroundServiceStartNotAllowedException) {
             // Even if startForeground is called in Activity.onResume callback there is a chance
             // that the application will be moved to background when this RPC call reaches

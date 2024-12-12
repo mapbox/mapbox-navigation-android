@@ -200,6 +200,9 @@ object RouteLayerConstants {
     @ColorInt
     internal val IN_ACTIVE_ROUTE_LEG_COLOR = Color.TRANSPARENT
 
+    @ColorInt
+    internal val DEFAULT_BLUR_COLOR = Color.parseColor("#ffffff")
+
     @DrawableRes
     internal val MANEUVER_ARROWHEAD_ICON_DRAWABLE: Int = R.drawable.mapbox_ic_arrow_head
 
@@ -209,6 +212,7 @@ object RouteLayerConstants {
 
     internal const val LAYER_GROUP_1_TRAIL_CASING = "mapbox-layerGroup-1-trailCasing"
     internal const val LAYER_GROUP_1_TRAIL = "mapbox-layerGroup-1-trail"
+    internal const val LAYER_GROUP_1_BLUR = "mapbox-layerGroup-1-blur"
     internal const val LAYER_GROUP_1_CASING = "mapbox-layerGroup-1-casing"
     internal const val LAYER_GROUP_1_MAIN = "mapbox-layerGroup-1-main"
     internal const val LAYER_GROUP_1_TRAFFIC = "mapbox-layerGroup-1-traffic"
@@ -216,6 +220,7 @@ object RouteLayerConstants {
 
     internal const val LAYER_GROUP_2_TRAIL_CASING = "mapbox-layerGroup-2-trailCasing"
     internal const val LAYER_GROUP_2_TRAIL = "mapbox-layerGroup-2-trail"
+    internal const val LAYER_GROUP_2_BLUR = "mapbox-layerGroup-2-blur"
     internal const val LAYER_GROUP_2_CASING = "mapbox-layerGroup-2-casing"
     internal const val LAYER_GROUP_2_MAIN = "mapbox-layerGroup-2-main"
     internal const val LAYER_GROUP_2_TRAFFIC = "mapbox-layerGroup-2-traffic"
@@ -223,6 +228,7 @@ object RouteLayerConstants {
 
     internal const val LAYER_GROUP_3_TRAIL_CASING = "mapbox-layerGroup-3-trailCasing"
     internal const val LAYER_GROUP_3_TRAIL = "mapbox-layerGroup-3-trail"
+    internal const val LAYER_GROUP_3_BLUR = "mapbox-layerGroup-3-blur"
     internal const val LAYER_GROUP_3_CASING = "mapbox-layerGroup-3-casing"
     internal const val LAYER_GROUP_3_MAIN = "mapbox-layerGroup-3-main"
     internal const val LAYER_GROUP_3_TRAFFIC = "mapbox-layerGroup-3-traffic"

@@ -153,6 +153,10 @@ data class RouteLineViewOptionsData(
     val lineDepthOcclusionFactor: Double,
     val slotName: String,
     val fadeOnHighZoomsConfig: FadingConfig?,
+    val routeLineBlurWidth: Double,
+    val routeLineBlurEnabled: Boolean,
+    val applyTrafficColorsToRouteLineBlur: Boolean,
+    val routeLineBlurOpacity: Double,
 )
 
 @Keep
@@ -269,6 +273,7 @@ data class RouteLineDynamicEventData(
     val trimOffset: RouteLineTrimOffset?,
     val trailExpressionData: RouteLineExpressionEventData?,
     val trailCasingExpressionData: RouteLineExpressionEventData?,
+    val blurExpressionCommandData: RouteLineExpressionEventData?,
 )
 
 @Keep

@@ -24,7 +24,7 @@ import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterFailureType
 import com.mapbox.navigation.base.route.RouterOrigin.Companion.OFFLINE
 import com.mapbox.navigation.base.route.RouterOrigin.Companion.ONLINE
-import com.mapbox.navigation.core.history.MapboxHistoryRecorder
+import com.mapbox.navigation.core.internal.performance.RouteParsingTracking
 import com.mapbox.navigation.core.internal.router.util.TestRouteFixtures
 import com.mapbox.navigation.navigator.internal.mapToRoutingMode
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
@@ -116,7 +116,7 @@ class RouterWrapperTests {
     private val routerResultFailure: Expected<List<RouterError>, DataRef> =
         ExpectedFactory.createError(
             listOf(
-                RouterError(
+                createRouterError(
                     FAILURE_MESSAGE,
                     FAILURE_TYPE,
                     REQUEST_ID,
@@ -128,7 +128,7 @@ class RouterWrapperTests {
     private val routerResultCancelled: Expected<List<RouterError>, DataRef> = ExpectedFactory
         .createError(
             listOf(
-                RouterError(
+                createRouterError(
                     CANCELLED_MESSAGE,
                     CANCELED_TYPE,
                     REQUEST_ID,
@@ -184,7 +184,7 @@ class RouterWrapperTests {
             router,
             ThreadController(),
             createRouteParsingManager(),
-            mockk<MapboxHistoryRecorder>(relaxed = true),
+            mockk<RouteParsingTracking>(relaxed = true),
         )
     }
 
@@ -855,7 +855,7 @@ class RouterWrapperTests {
         refreshRouteSlot.captured.run(
             ExpectedFactory.createError<List<RouterError>, DataRef>(
                 listOf(
-                    RouterError(
+                    createRouterError(
                         FAILURE_MESSAGE,
                         FAILURE_TYPE,
                         REQUEST_ID,
@@ -889,7 +889,7 @@ class RouterWrapperTests {
         refreshRouteSlot.captured.run(
             ExpectedFactory.createError<List<RouterError>, DataRef>(
                 listOf(
-                    RouterError(
+                    createRouterError(
                         FAILURE_MESSAGE,
                         FAILURE_TYPE,
                         REQUEST_ID,

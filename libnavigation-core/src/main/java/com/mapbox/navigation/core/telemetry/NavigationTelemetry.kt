@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.telemetry
 
+import com.mapbox.common.TelemetrySystemUtils
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.internal.telemetry.AndroidAutoEvent
 import com.mapbox.navigation.core.internal.telemetry.ExtendedUserFeedback
@@ -10,13 +11,15 @@ import com.mapbox.navigation.core.telemetry.events.FeedbackMetadataWrapper
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
+import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigator.Telemetry
 import java.util.concurrent.CopyOnWriteArraySet
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-internal class NavigationTelemetry private constructor(
+internal class NavigationTelemetry internal constructor(
     private val tripSession: TripSession,
     private val nativeNavigator: MapboxNativeNavigator,
+    private val uuidProvider: () -> String,
 ) {
 
     private val userFeedbackObservers = CopyOnWriteArraySet<UserFeedbackObserver>()
@@ -43,12 +46,14 @@ internal class NavigationTelemetry private constructor(
                 ?: telemetry.startBuildUserFeedbackMetadata().metadata,
             userFeedback.mapToNative(),
         ) { result ->
-            result.fold({
+            result.fold({ error ->
                 // TODO should we notify callback in case of error?
+                logE {
+                    "postUserFeedback failed: $error"
+                }
             }, { location ->
-                // TODO why do we use -1 for id?
                 val userFeedbackInternal = userFeedback.mapToInternal(
-                    "-1",
+                    uuidProvider(),
                     location,
                 )
                 userFeedbackCallback?.invoke(userFeedbackInternal)
@@ -80,7 +85,10 @@ internal class NavigationTelemetry private constructor(
     }
 
     companion object {
-        fun create(tripSession: TripSession, nativeNavigator: MapboxNativeNavigator) =
-            NavigationTelemetry(tripSession, nativeNavigator)
+        fun create(
+            tripSession: TripSession,
+            nativeNavigator: MapboxNativeNavigator,
+            uuidProvider: () -> String = TelemetrySystemUtils::obtainUniversalUniqueIdentifier,
+        ) = NavigationTelemetry(tripSession, nativeNavigator, uuidProvider)
     }
 }

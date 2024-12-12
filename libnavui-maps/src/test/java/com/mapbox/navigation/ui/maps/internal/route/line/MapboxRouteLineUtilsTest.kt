@@ -31,6 +31,7 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.BOTTOM_LEVEL_ROUT
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.CLOSURE_CONGESTION_VALUE
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.DESTINATION_MARKER_NAME
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.HEAVY_CONGESTION_VALUE
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_BLUR
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_CASING
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_MAIN
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_RESTRICTED
@@ -38,6 +39,7 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_SOU
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_TRAFFIC
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_TRAIL
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_TRAIL_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_BLUR
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_CASING
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_MAIN
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_RESTRICTED
@@ -45,6 +47,7 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_SOU
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_TRAFFIC
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_TRAIL
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_TRAIL_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_BLUR
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_CASING
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_MAIN
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_RESTRICTED
@@ -80,6 +83,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineScaleValue
 import com.mapbox.navigation.ui.maps.route.line.model.SegmentColorType
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadNavigationRoute
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils
+import com.mapbox.navigation.ui.maps.util.StyleManager
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import io.mockk.every
@@ -430,6 +434,9 @@ class MapboxRouteLineUtilsTest {
             every { styleLayerExists(MASKING_LAYER_MAIN) } returns true
             every { styleLayerExists(MASKING_LAYER_TRAFFIC) } returns true
             every { styleLayerExists(MASKING_LAYER_RESTRICTED) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_BLUR) } returns true
+            every { styleLayerExists(LAYER_GROUP_2_BLUR) } returns true
+            every { styleLayerExists(LAYER_GROUP_3_BLUR) } returns true
 
             every {
                 styleLayerExists(TOP_LEVEL_ROUTE_LINE_LAYER_ID)
@@ -440,6 +447,7 @@ class MapboxRouteLineUtilsTest {
             style,
             MapboxRouteLineViewOptions.Builder(ctx)
                 .displayRestrictedRoadSections(true)
+                .routeLineBlurEnabled(true)
                 .build(),
         )
 
@@ -472,6 +480,9 @@ class MapboxRouteLineUtilsTest {
         verify { style.styleLayerExists(MASKING_LAYER_CASING) }
         verify { style.styleLayerExists(MASKING_LAYER_MAIN) }
         verify { style.styleLayerExists(MASKING_LAYER_TRAFFIC) }
+        verify { style.styleLayerExists(LAYER_GROUP_1_BLUR) }
+        verify { style.styleLayerExists(LAYER_GROUP_2_BLUR) }
+        verify { style.styleLayerExists(LAYER_GROUP_3_BLUR) }
     }
 
     @Test
@@ -1809,7 +1820,7 @@ class MapboxRouteLineUtilsTest {
 
     @Test
     fun layerGroup1SourceLayerIds() {
-        assertEquals(6, MapboxRouteLineUtils.layerGroup1SourceLayerIds.size)
+        assertEquals(7, MapboxRouteLineUtils.layerGroup1SourceLayerIds.size)
         assertTrue(
             MapboxRouteLineUtils.layerGroup1SourceLayerIds.contains(
                 RouteLayerConstants.LAYER_GROUP_1_TRAIL_CASING,
@@ -1840,11 +1851,16 @@ class MapboxRouteLineUtilsTest {
                 RouteLayerConstants.LAYER_GROUP_1_RESTRICTED,
             ),
         )
+        assertTrue(
+            MapboxRouteLineUtils.layerGroup1SourceLayerIds.contains(
+                RouteLayerConstants.LAYER_GROUP_1_BLUR,
+            ),
+        )
     }
 
     @Test
     fun layerGroup2SourceLayerIds() {
-        assertEquals(6, MapboxRouteLineUtils.layerGroup2SourceLayerIds.size)
+        assertEquals(7, MapboxRouteLineUtils.layerGroup2SourceLayerIds.size)
         assertTrue(
             MapboxRouteLineUtils.layerGroup2SourceLayerIds.contains(
                 RouteLayerConstants.LAYER_GROUP_2_TRAIL_CASING,
@@ -1875,11 +1891,16 @@ class MapboxRouteLineUtilsTest {
                 RouteLayerConstants.LAYER_GROUP_2_RESTRICTED,
             ),
         )
+        assertTrue(
+            MapboxRouteLineUtils.layerGroup2SourceLayerIds.contains(
+                RouteLayerConstants.LAYER_GROUP_2_BLUR,
+            ),
+        )
     }
 
     @Test
     fun layerGroup3SourceLayerIds() {
-        assertEquals(6, MapboxRouteLineUtils.layerGroup3SourceLayerIds.size)
+        assertEquals(7, MapboxRouteLineUtils.layerGroup3SourceLayerIds.size)
         assertTrue(
             MapboxRouteLineUtils.layerGroup3SourceLayerIds.contains(
                 RouteLayerConstants.LAYER_GROUP_3_TRAIL_CASING,
@@ -1908,6 +1929,11 @@ class MapboxRouteLineUtilsTest {
         assertTrue(
             MapboxRouteLineUtils.layerGroup3SourceLayerIds.contains(
                 RouteLayerConstants.LAYER_GROUP_3_RESTRICTED,
+            ),
+        )
+        assertTrue(
+            MapboxRouteLineUtils.layerGroup3SourceLayerIds.contains(
+                RouteLayerConstants.LAYER_GROUP_3_BLUR,
             ),
         )
     }
@@ -2305,7 +2331,7 @@ class MapboxRouteLineUtilsTest {
 
     @Test
     fun removeLayers() {
-        val style = mockk<Style> {
+        val style = mockk<StyleManager> {
             every { removeStyleLayer(any()) } returns ExpectedFactory.createNone()
             every { removeStyleImage(any()) } returns ExpectedFactory.createNone()
         }
@@ -2335,6 +2361,9 @@ class MapboxRouteLineUtilsTest {
         verify { style.removeStyleLayer(WAYPOINT_LAYER_ID) }
         verify { style.removeStyleImage(ORIGIN_MARKER_NAME) }
         verify { style.removeStyleImage(DESTINATION_MARKER_NAME) }
+        verify { style.removeStyleLayer(LAYER_GROUP_1_BLUR) }
+        verify { style.removeStyleLayer(LAYER_GROUP_2_BLUR) }
+        verify { style.removeStyleLayer(LAYER_GROUP_3_BLUR) }
     }
 
     @Test

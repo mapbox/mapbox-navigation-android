@@ -4,8 +4,8 @@ import com.mapbox.navigation.core.MapboxNavigation
 
 object InternalUtils {
 
-    internal var UNCONDITIONAL_POLLING_PATIENCE_MILLISECONDS = 2000L
-    internal var UNCONDITIONAL_POLLING_INTERVAL_MILLISECONDS = 1000L
+    internal var UNCONDITIONAL_POLLING_PATIENCE_MILLISECONDS = 2000
+    internal var UNCONDITIONAL_POLLING_INTERVAL_MILLISECONDS = 1000
 
     /**
      * Internal API used for testing. Sets the static unconditional polling patience value for all
@@ -15,8 +15,8 @@ object InternalUtils {
      *
      * Do not use in a production environment.
      */
-    fun setUnconditionalPollingPatience(patienceInMillis: Long?) {
-        UNCONDITIONAL_POLLING_PATIENCE_MILLISECONDS = patienceInMillis ?: 2000L
+    fun setUnconditionalPollingPatience(patienceInMillis: Int?) {
+        UNCONDITIONAL_POLLING_PATIENCE_MILLISECONDS = patienceInMillis ?: 2000
     }
 
     /**
@@ -27,7 +27,7 @@ object InternalUtils {
      *
      * Do not use in a production environment.
      */
-    fun setUnconditionalPollingInterval(intervalInMillis: Long?) {
-        UNCONDITIONAL_POLLING_INTERVAL_MILLISECONDS = intervalInMillis ?: 1000L
+    fun setUnconditionalPollingInterval(intervalInMillis: Int?) {
+        UNCONDITIONAL_POLLING_INTERVAL_MILLISECONDS = intervalInMillis ?: 1000
     }
 }

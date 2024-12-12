@@ -32,6 +32,8 @@ import java.net.URI
  * Note that this only works if [tilesVersion] is empty.
  * @param fallbackOfflineTilesVersion is navigation tiles version which will be used for routing in case
  * an offline route can't be built with [tilesVersion]. Fallback doesn't happen if no [fallbackOfflineTilesVersion] provided.
+ * @param hdTilesOptions configures endpoint for HD tiles. Must be non-null for the HD mode to work seamlessly.
+ * Default configuration can be obtained by calling [DomainTilesOptions.defaultHdTilesOptions].
  */
 @OptIn(ExperimentalMapboxNavigationAPI::class)
 class RoutingTilesOptions private constructor(
@@ -44,6 +46,8 @@ class RoutingTilesOptions private constructor(
     val minDaysBetweenServerAndLocalTilesVersion: Int,
     @ExperimentalMapboxNavigationAPI
     val fallbackOfflineTilesVersion: String?,
+    @ExperimentalMapboxNavigationAPI
+    val hdTilesOptions: DomainTilesOptions?,
 ) {
     /**
      * @return the builder that created the [RoutingTilesOptions]
@@ -57,6 +61,7 @@ class RoutingTilesOptions private constructor(
         tileStore(tileStore)
         minDaysBetweenServerAndLocalTilesVersion(minDaysBetweenServerAndLocalTilesVersion)
         fallbackOfflineTilesVersion(fallbackOfflineTilesVersion)
+        hdTilesOptions(hdTilesOptions)
     }
 
     /**
@@ -80,6 +85,7 @@ class RoutingTilesOptions private constructor(
             return false
         }
         if (fallbackOfflineTilesVersion != other.fallbackOfflineTilesVersion) return false
+        if (hdTilesOptions != other.hdTilesOptions) return false
 
         return true
     }
@@ -96,6 +102,7 @@ class RoutingTilesOptions private constructor(
         result = 31 * result + tileStore.hashCode()
         result = 31 * result + minDaysBetweenServerAndLocalTilesVersion
         result = 31 * result + fallbackOfflineTilesVersion.hashCode()
+        result = 31 * result + hdTilesOptions.hashCode()
         return result
     }
 
@@ -110,7 +117,8 @@ class RoutingTilesOptions private constructor(
             "tilesVersion='$tilesVersion', " +
             "filePath=$filePath, " +
             "tileStore=$tileStore, " +
-            "minDaysBetweenServerAndLocalTilesVersion=$minDaysBetweenServerAndLocalTilesVersion" +
+            "minDaysBetweenServerAndLocalTilesVersion=$minDaysBetweenServerAndLocalTilesVersion, " +
+            "hdTilesOptions=$hdTilesOptions" +
             ")"
     }
 
@@ -128,6 +136,7 @@ class RoutingTilesOptions private constructor(
         private var filePath: String? = null
         private var tileStore: TileStore? = null
         private var minDaysBetweenServerAndLocalTilesVersion: Int = 56 // 8 weeks
+        private var hdTilesOptions: DomainTilesOptions? = null
 
         /**
          * Override the routing tiles base endpoint with a [URI].
@@ -231,6 +240,18 @@ class RoutingTilesOptions private constructor(
             }
 
         /**
+         * Override the configuration for HD tiles.
+         * Must be non-null for the HD mode to work seamlessly.
+         * Default configuration can be obtained by calling [DomainTilesOptions.defaultHdTilesOptions].
+         *
+         * @param hdTilesOptions [DomainTilesOptions] for HD tiles
+         */
+        @ExperimentalMapboxNavigationAPI
+        fun hdTilesOptions(hdTilesOptions: DomainTilesOptions?): Builder = apply {
+            this.hdTilesOptions = hdTilesOptions
+        }
+
+        /**
          * Build the [RoutingTilesOptions]
          */
         fun build(): RoutingTilesOptions {
@@ -243,6 +264,7 @@ class RoutingTilesOptions private constructor(
                 tileStore = tileStore,
                 minDaysBetweenServerAndLocalTilesVersion = minDaysBetweenServerAndLocalTilesVersion,
                 fallbackOfflineTilesVersion = fallbackOfflineTilesVersion,
+                hdTilesOptions = hdTilesOptions,
             )
         }
     }

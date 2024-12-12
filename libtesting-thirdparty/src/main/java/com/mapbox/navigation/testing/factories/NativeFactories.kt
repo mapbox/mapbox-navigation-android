@@ -1,5 +1,6 @@
 package com.mapbox.navigation.testing.factories
 
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.bindgen.DataRef
 import com.mapbox.geojson.Point
@@ -13,6 +14,8 @@ import com.mapbox.navigator.MapMatcherOutput
 import com.mapbox.navigator.MapboxAPI
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.OffRoadStateProvider
+import com.mapbox.navigator.RerouteError
+import com.mapbox.navigator.RerouteErrorType
 import com.mapbox.navigator.RoadName
 import com.mapbox.navigator.RouteIndices
 import com.mapbox.navigator.RouteInfo
@@ -24,6 +27,7 @@ import com.mapbox.navigator.RouterOrigin
 import com.mapbox.navigator.SpeedLimit
 import com.mapbox.navigator.SpeedLimitSign
 import com.mapbox.navigator.SpeedLimitUnit
+import com.mapbox.navigator.TimeZone
 import com.mapbox.navigator.UpcomingRouteAlertUpdate
 import com.mapbox.navigator.VoiceInstruction
 import com.mapbox.navigator.Waypoint
@@ -172,14 +176,16 @@ fun createNativeWaypoint(
     distance: Double? = null,
     metadata: String? = null,
     target: Point? = null,
-    type: WaypointType = WaypointType.REGULAR
+    type: WaypointType = WaypointType.REGULAR,
+    timeZone: TimeZone? = null,
 ) = Waypoint(
     name,
     location,
     distance,
     metadata,
     target,
-    type
+    type,
+    timeZone,
 )
 
 // Add default parameters if you define properties
@@ -236,10 +242,26 @@ fun createRouterError(
     message: String = "test error",
     type: RouterErrorType = RouterErrorType.UNKNOWN,
     requestId: Long = 0L,
-    refreshTtl: Int? = null
+    refreshTtl: Int? = null,
+    routerOrigin: RouterOrigin = RouterOrigin.ONLINE,
+    stringUrl: String = createRouteOptions().toUrl("***").toString(),
+    isRetryable: Boolean = false
 ) = RouterError(
     message,
     type,
     requestId,
-    refreshTtl
+    refreshTtl,
+    routerOrigin,
+    stringUrl,
+    isRetryable,
+)
+
+fun createRerouteError(
+    message: String = "test error",
+    errorType: RerouteErrorType = RerouteErrorType.ROUTER_ERROR,
+    routerErrors: List<RouterError> = listOf(createRouterError())
+) = RerouteError(
+    message,
+    errorType,
+    routerErrors,
 )

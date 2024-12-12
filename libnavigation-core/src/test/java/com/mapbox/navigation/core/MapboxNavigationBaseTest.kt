@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.net.ConnectivityManager
 import com.mapbox.annotation.module.MapboxModuleType
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.MapboxOptions
 import com.mapbox.common.MapboxSDKCommon
 import com.mapbox.common.module.provider.MapboxModuleProvider
@@ -44,6 +45,7 @@ import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.core.trip.session.TripSessionLocationEngine
 import com.mapbox.navigation.core.trip.session.createSetRouteResult
+import com.mapbox.navigation.core.utils.PermissionsChecker
 import com.mapbox.navigation.core.utils.SystemLocaleWatcher
 import com.mapbox.navigation.metrics.internal.TelemetryUtilsDelegate
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
@@ -120,6 +122,7 @@ internal open class MapboxNavigationBaseTest {
     val copilotHistoryRecorder = mockk<MapboxHistoryRecorder>(relaxed = true)
     val compositeHistoryRecorder = mockk<MapboxHistoryRecorder>(relaxed = true)
     val compositeHandle = mockk<HistoryRecorderHandle>(relaxed = true)
+    val permissionsChecker = mockk<PermissionsChecker>(relaxed = true)
 
     val navigationTelemetry = mockk<NavigationTelemetry>(relaxed = true)
 
@@ -163,6 +166,7 @@ internal open class MapboxNavigationBaseTest {
         every { NavigatorLoader.createConfig(any(), any()) } returns mockk()
         every {
             NavigatorLoader.createHistoryRecorderHandles(
+                any(),
                 any(),
                 any(),
                 any(),
@@ -266,6 +270,10 @@ internal open class MapboxNavigationBaseTest {
 
         mockkObject(NavigationTelemetry.Companion)
         every { NavigationTelemetry.create(any(), any()) } returns navigationTelemetry
+
+        every {
+            permissionsChecker.hasForegroundServiceLocationPermissions()
+        } returns ExpectedFactory.createValue(Unit)
     }
 
     @After
@@ -297,6 +305,7 @@ internal open class MapboxNavigationBaseTest {
             manualHistoryRecorder,
             copilotHistoryRecorder,
             compositeHistoryRecorder,
+            permissionsChecker,
         )
     }
 
@@ -318,6 +327,8 @@ internal open class MapboxNavigationBaseTest {
         }
         every { navigator.cache } returns cache
         every { navigator.telemetry } returns telemetry
+        every { navigator.getRerouteDetector() } returns null
+        every { navigator.getRerouteController() } returns null
     }
 
     private fun mockTripService() {

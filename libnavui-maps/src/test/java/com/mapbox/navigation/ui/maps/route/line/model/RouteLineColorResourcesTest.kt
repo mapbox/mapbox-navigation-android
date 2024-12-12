@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maps.route.line.model
 
+import android.graphics.Color
 import com.mapbox.navigation.testing.BuilderTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -42,6 +43,7 @@ class RouteLineColorResourcesTest :
             .alternativeRouteCasingColor(16)
             .inActiveRouteLegsColor(21)
             .inactiveRouteLegCasingColor(22)
+            .blurColor(Color.RED)
     }
 
     @Test

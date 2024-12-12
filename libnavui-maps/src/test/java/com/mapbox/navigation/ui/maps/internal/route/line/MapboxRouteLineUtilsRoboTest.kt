@@ -39,6 +39,7 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.ARROW_HEAD_ICON_C
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.DEFAULT_ROUTE_SOURCES_TOLERANCE
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.DESTINATION_MARKER_NAME
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_BLUR
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_CASING
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_MAIN
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_RESTRICTED
@@ -46,6 +47,7 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_SOU
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_TRAFFIC
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_TRAIL
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_TRAIL_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_BLUR
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_CASING
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_MAIN
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_RESTRICTED
@@ -53,6 +55,7 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_SOU
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_TRAFFIC
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_TRAIL
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_2_TRAIL_CASING
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_BLUR
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_CASING
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_MAIN
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_3_RESTRICTED
@@ -152,6 +155,9 @@ class MapboxRouteLineUtilsRoboTest {
                 styleLayerExists(LAYER_GROUP_1_TRAIL)
             } returns false
             every {
+                styleLayerExists(LAYER_GROUP_1_BLUR)
+            } returns false
+            every {
                 styleLayerExists(LAYER_GROUP_1_CASING)
             } returns false
             every {
@@ -168,6 +174,9 @@ class MapboxRouteLineUtilsRoboTest {
                 styleLayerExists(LAYER_GROUP_2_TRAIL)
             } returns false
             every {
+                styleLayerExists(LAYER_GROUP_2_BLUR)
+            } returns false
+            every {
                 styleLayerExists(LAYER_GROUP_2_CASING)
             } returns false
             every {
@@ -182,6 +191,9 @@ class MapboxRouteLineUtilsRoboTest {
             every { styleLayerExists(LAYER_GROUP_3_TRAIL_CASING) } returns false
             every {
                 styleLayerExists(LAYER_GROUP_3_TRAIL)
+            } returns false
+            every {
+                styleLayerExists(LAYER_GROUP_3_BLUR)
             } returns false
             every {
                 styleLayerExists(LAYER_GROUP_3_CASING)
@@ -386,124 +398,136 @@ class MapboxRouteLineUtilsRoboTest {
             (addStyleLayerSlots[2].contents as HashMap<String, Value>)["id"]!!.contents,
         )
         assertEquals(
-            "mapbox-layerGroup-3-casing",
+            "mapbox-layerGroup-3-blur",
             (addStyleLayerSlots[3].contents as HashMap<String, Value>)["id"]!!.contents,
         )
         assertEquals(
-            "mapbox-layerGroup-3-main",
+            "mapbox-layerGroup-3-casing",
             (addStyleLayerSlots[4].contents as HashMap<String, Value>)["id"]!!.contents,
         )
         assertEquals(
-            "mapbox-layerGroup-3-traffic",
+            "mapbox-layerGroup-3-main",
             (addStyleLayerSlots[5].contents as HashMap<String, Value>)["id"]!!.contents,
         )
         assertEquals(
-            "mapbox-layerGroup-3-restricted",
+            "mapbox-layerGroup-3-traffic",
             (addStyleLayerSlots[6].contents as HashMap<String, Value>)["id"]!!.contents,
         )
         assertEquals(
-            "mapbox-layerGroup-2-trailCasing",
+            "mapbox-layerGroup-3-restricted",
             (addStyleLayerSlots[7].contents as HashMap<String, Value>)["id"]!!.contents,
         )
         assertEquals(
-            "mapbox-layerGroup-2-trail",
+            "mapbox-layerGroup-2-trailCasing",
             (addStyleLayerSlots[8].contents as HashMap<String, Value>)["id"]!!.contents,
         )
         assertEquals(
-            "mapbox-layerGroup-2-casing",
+            "mapbox-layerGroup-2-trail",
             (addStyleLayerSlots[9].contents as HashMap<String, Value>)["id"]!!.contents,
         )
         assertEquals(
-            "mapbox-layerGroup-2-main",
+            "mapbox-layerGroup-2-blur",
             (addStyleLayerSlots[10].contents as HashMap<String, Value>)["id"]!!.contents,
         )
         assertEquals(
-            "mapbox-layerGroup-2-traffic",
+            "mapbox-layerGroup-2-casing",
             (addStyleLayerSlots[11].contents as HashMap<String, Value>)["id"]!!.contents,
         )
         assertEquals(
-            "mapbox-layerGroup-2-restricted",
+            "mapbox-layerGroup-2-main",
             (addStyleLayerSlots[12].contents as HashMap<String, Value>)["id"]!!.contents,
         )
         assertEquals(
-            "mapbox-layerGroup-1-trailCasing",
+            "mapbox-layerGroup-2-traffic",
             (addStyleLayerSlots[13].contents as HashMap<String, Value>)["id"]!!.contents,
         )
         assertEquals(
-            "mapbox-layerGroup-1-trail",
+            "mapbox-layerGroup-2-restricted",
             (addStyleLayerSlots[14].contents as HashMap<String, Value>)["id"]!!.contents,
         )
         assertEquals(
-            "mapbox-layerGroup-1-casing",
+            "mapbox-layerGroup-1-trailCasing",
             (addStyleLayerSlots[15].contents as HashMap<String, Value>)["id"]!!.contents,
         )
         assertEquals(
-            "mapbox-layerGroup-1-main",
+            "mapbox-layerGroup-1-trail",
             (addStyleLayerSlots[16].contents as HashMap<String, Value>)["id"]!!.contents,
         )
         assertEquals(
-            "mapbox-layerGroup-1-traffic",
+            "mapbox-layerGroup-1-blur",
             (addStyleLayerSlots[17].contents as HashMap<String, Value>)["id"]!!.contents,
         )
         assertEquals(
-            "mapbox-layerGroup-1-restricted",
+            "mapbox-layerGroup-1-casing",
             (addStyleLayerSlots[18].contents as HashMap<String, Value>)["id"]!!.contents,
+        )
+        assertEquals(
+            "mapbox-layerGroup-1-main",
+            (addStyleLayerSlots[19].contents as HashMap<String, Value>)["id"]!!.contents,
+        )
+        assertEquals(
+            "mapbox-layerGroup-1-traffic",
+            (addStyleLayerSlots[20].contents as HashMap<String, Value>)["id"]!!.contents,
+        )
+        assertEquals(
+            "mapbox-layerGroup-1-restricted",
+            (addStyleLayerSlots[21].contents as HashMap<String, Value>)["id"]!!.contents,
         )
 
         assertEquals(
             "mapbox-masking-layer-trailCasing",
-            (addStyleLayerSlots[19].contents as HashMap<String, Value>)["id"]!!.contents,
-        )
-        assertEquals(
-            "mapbox-masking-layer-trail",
-            (addStyleLayerSlots[20].contents as HashMap<String, Value>)["id"]!!.contents,
-        )
-        assertEquals(
-            "mapbox-masking-layer-casing",
-            (addStyleLayerSlots[21].contents as HashMap<String, Value>)["id"]!!.contents,
-        )
-        assertEquals(
-            "mapbox-masking-layer-main",
             (addStyleLayerSlots[22].contents as HashMap<String, Value>)["id"]!!.contents,
         )
         assertEquals(
-            "mapbox-masking-layer-traffic",
+            "mapbox-masking-layer-trail",
             (addStyleLayerSlots[23].contents as HashMap<String, Value>)["id"]!!.contents,
         )
         assertEquals(
-            "mapbox-masking-layer-restricted",
+            "mapbox-masking-layer-casing",
             (addStyleLayerSlots[24].contents as HashMap<String, Value>)["id"]!!.contents,
+        )
+        assertEquals(
+            "mapbox-masking-layer-main",
+            (addStyleLayerSlots[25].contents as HashMap<String, Value>)["id"]!!.contents,
+        )
+        assertEquals(
+            "mapbox-masking-layer-traffic",
+            (addStyleLayerSlots[26].contents as HashMap<String, Value>)["id"]!!.contents,
+        )
+        assertEquals(
+            "mapbox-masking-layer-restricted",
+            (addStyleLayerSlots[27].contents as HashMap<String, Value>)["id"]!!.contents,
         )
 
         assertEquals(
             "mapbox-top-level-route-layer",
-            (addStyleLayerSlots[25].contents as HashMap<String, Value>)["id"]!!.contents,
+            (addStyleLayerSlots[28].contents as HashMap<String, Value>)["id"]!!.contents,
         )
         assertEquals(
             "mapbox-navigation-waypoint-layer",
-            (addStyleLayerSlots[26].contents as HashMap<String, Value>)["id"]!!.contents,
+            (addStyleLayerSlots[29].contents as HashMap<String, Value>)["id"]!!.contents,
         )
         assertEquals(
             "bottom-right",
-            (addStyleLayerSlots[26].contents as HashMap<String, Value>)["icon-anchor"]!!.contents,
+            (addStyleLayerSlots[29].contents as HashMap<String, Value>)["icon-anchor"]!!.contents,
         )
         assertEquals(
             33.3,
             (
-                (addStyleLayerSlots[26].contents as HashMap<String, Value>)
+                (addStyleLayerSlots[29].contents as HashMap<String, Value>)
                 ["icon-offset"]!!.contents as ArrayList<Value>
                 ).first().contents,
         )
         assertEquals(
             44.4,
             (
-                (addStyleLayerSlots[26].contents as HashMap<String, Value>)
+                (addStyleLayerSlots[29].contents as HashMap<String, Value>)
                 ["icon-offset"]!!.contents as ArrayList<Value>
                 ).component2().contents,
         )
         assertEquals(
             "viewport",
-            (addStyleLayerSlots[26].contents as HashMap<String, Value>)
+            (addStyleLayerSlots[29].contents as HashMap<String, Value>)
             ["icon-pitch-alignment"]!!.contents,
         )
         assertEquals(
@@ -1683,6 +1707,15 @@ class MapboxRouteLineUtilsRoboTest {
         val waypointLayer = mockk<SymbolLayer>(relaxed = true) {
             every { layerId } returns WAYPOINT_LAYER_ID
         }
+        val blurLayer1 = mockk<LineLayer>(relaxed = true) {
+            every { layerId } returns LAYER_GROUP_1_BLUR
+        }
+        val blurLayer2 = mockk<LineLayer>(relaxed = true) {
+            every { layerId } returns LAYER_GROUP_2_BLUR
+        }
+        val blurLayer3 = mockk<LineLayer>(relaxed = true) {
+            every { layerId } returns LAYER_GROUP_3_BLUR
+        }
         val style = mockk<Style>(relaxed = true) {
             every { getLayer(LAYER_GROUP_3_TRAIL_CASING) } returns trailCasingLayer3
             every { getLayer(LAYER_GROUP_3_CASING) } returns casingLayer3
@@ -1711,6 +1744,9 @@ class MapboxRouteLineUtilsRoboTest {
             every { getLayer(MASKING_LAYER_MAIN) } returns maskingMainLayer
             every { getLayer(MASKING_LAYER_TRAFFIC) } returns maskingTrafficLayer
             every { getLayer(MASKING_LAYER_RESTRICTED) } returns maskingRestrictedLayer
+            every { getLayer(LAYER_GROUP_1_BLUR) } returns blurLayer1
+            every { getLayer(LAYER_GROUP_2_BLUR) } returns blurLayer2
+            every { getLayer(LAYER_GROUP_3_BLUR) } returns blurLayer3
 
             every { getLayer(WAYPOINT_LAYER_ID) } returns waypointLayer
         }
@@ -2053,6 +2089,9 @@ class MapboxRouteLineUtilsRoboTest {
                         relaxed = true,
                     )
 
+                    every { getLayer(LAYER_GROUP_1_BLUR) } returns mockk<LineLayer>(relaxed = true)
+                    every { getLayer(LAYER_GROUP_2_BLUR) } returns mockk<LineLayer>(relaxed = true)
+                    every { getLayer(LAYER_GROUP_3_BLUR) } returns mockk<LineLayer>(relaxed = true)
                     every { getLayer(WAYPOINT_LAYER_ID) } returns mockk<LineLayer>(relaxed = true)
                 }
 

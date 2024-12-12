@@ -1,29 +1,28 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
-## Navigation SDK Core Framework 3.5.0-rc.1 - 26 October, 2024
+## Navigation SDK Core Framework 3.6.0-beta.1 - 29 November, 2024
 #### Features
-
+- Added experimental `RoutingTilesOptions#hdTilesOptions` to configure HD tiles endpoint. 
+- `DataInputsManager` now can be used from any thread. 
+- Added experimental Road Cameras modules to provide notifications about road cameras along the route and show them on the map. 
+- Added option to display the route line with a blur effect. 
+- Added experimental functions `MapboxNavigation#startTripSessionWithPermissionCheck()` and `MapboxNavigation#startReplayTripSessionWithPermissionCheck` that immediately throw `IllegalStateException` if they are called with `withForegroundService` parameter set to true, but Android foreground service permissions requirements are not met. 
 
 #### Bug fixes and improvements
-- Improved reroute and alternative routes behavior [#7114](https://github.com/mapbox/mapbox-navigation-android/pull/7114)
-- Fixed map matching bug after leaving a tunnel [#7114](https://github.com/mapbox/mapbox-navigation-android/pull/7114)
-- Increased route stickiness in dead reckoning mode [#7114](https://github.com/mapbox/mapbox-navigation-android/pull/7114)
-- Added ability to send raw unfused GNSS location in addition to fused one [#7114](https://github.com/mapbox/mapbox-navigation-android/pull/7114)
-- Improved odometry and road graph fusing in urban canyons [#7114](https://github.com/mapbox/mapbox-navigation-android/pull/7114)
-- Signature of experimental `RawGnssSatelliteData` has been changed, now it requires `residual` as a constructor parameter [#7114](https://github.com/mapbox/mapbox-navigation-android/pull/7114)
-- Experimental `RawGnssLocation` type has been removed, now `RawGnssData` requires `DilutionOfPrecision` as a parameter [#7114](https://github.com/mapbox/mapbox-navigation-android/pull/7114)
-
-#### Known issues :warning:
-
-
-#### Other changes
-
+- Improved reroute and alternative routes behavior 
+- Fixed map matching bug after leaving a tunnel 
+- Increased route stickiness in dead reckoning mode 
+- Added ability to send raw unfused GNSS location in addition to fused one 
+- Improved odometry and road graph fusing in urban canyons 
+- Signature of experimental `RawGnssSatelliteData` has been changed, now it requires `residual` as a constructor parameter 
+- Experimental `RawGnssLocation` type has been removed, now `RawGnssData` requires `DilutionOfPrecision` as a parameter 
+- Now service type is specified explicitly when foreground location service starts. 
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
-- Mapbox Maps SDK `v11.8.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.8.0-rc.1))
-- Mapbox Navigation Native `v321.0.0-rc.1`
-- Mapbox Core Common `v24.8.0-rc.1`
+- Mapbox Maps SDK `v11.9.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.9.0-beta.1))
+- Mapbox Navigation Native `v322.0.0-beta.1`
+- Mapbox Core Common `v24.9.0-beta.1`
 - Mapbox Java `v7.3.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.3.1))
 
 
@@ -203,10 +202,10 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Modules structure (mostly UI components modules) has been significantly changed. See migration guide for more information https://docs.mapbox.com/android/navigation/guides/migration-from-v2/#artifacts
 - Deprecated classes, functions and fields have been removed. See [Nav SDK v2 documentation](https://docs.mapbox.com/android/navigation/api/2.17.7/) for more information about missing parts and migration guides.
 - `com.mapbox.navigation.core.reroute.NavigationRerouteController` has been merged with `com.mapbox.navigation.core.reroute.RerouteController`
-- Introduced support of Mapbox Map Matching API, see `MapboxNavigation#requestMapMatching`. [#2874](https://github.com/mapbox/navigation/pull/2874)
-- Changed LocationOptions API. Now custom location providers that emit mocked locations are allowed. See documentation to get more information. [#3392](https://github.com/mapbox/navigation/pull/3392)
-- Added Advanced Driver Assistance Systems (ADAS) functionality as an experimental API. [#3489](https://github.com/mapbox/navigation/pull/3489)
-- Added `NavigationViewApi#recenterCamera()` that allows to programatically recenter the camera position as if the recenter button was clicked. [#3489](https://github.com/mapbox/navigation/pull/3489)
+- Introduced support of Mapbox Map Matching API, see `MapboxNavigation#requestMapMatching`. 
+- Changed LocationOptions API. Now custom location providers that emit mocked locations are allowed. See documentation to get more information. 
+- Added Advanced Driver Assistance Systems (ADAS) functionality as an experimental API. 
+- Added `NavigationViewApi#recenterCamera()` that allows to programatically recenter the camera position as if the recenter button was clicked. 
 - Introduced support for highlighting 3D buildings.
 - Navigation Core Framework doesn't let creating `NavigationRoute` from json anymore. Use `MapboxNavigation#requestRoutes` and `MapboxNavigation#requestMapMatching` to request `NavigationRoute`s.
 - Changed type of `RouterOrigin`. Now it's an annotation which defines possible string values for router origin. `RouterOrigin.Offboard` is renamed to `RouterOrigin.ONLINE`, `RouterOrigin.Onboard` is renamed to `RouterOrigin.OFFLINE`, `RouterOrigin.Custom` is removed.
@@ -226,17 +225,17 @@ This release depends on, and has been tested with, the following Mapbox dependen
 
 #### Bug fixes and improvements
 - Made `MapboxNavigation` constructor and `onDestroy` internal. To create an instance of `MapboxNavigation` use `MapboxNavigationProvider#create`; to destroy it use `MapboxNavigationProvider#destroy`. [3274](https://github.com/mapbox/navigation/pull/3274)
-- Fixed a bug with multiple instances of cache which resulted in excessive memory consumption. [#3489](https://github.com/mapbox/navigation/pull/3489)
-- Fixed an issue where reroute for multi-leg routes used to fail in case waypoint_names or waypoint_targets parameters were specified without an explicit waypoint_indices parameter. [#3489](https://github.com/mapbox/navigation/pull/3489)
-- Improved handling of no storage available during navigation tiles downloading. [#3489](https://github.com/mapbox/navigation/pull/3489)
-- Improved handling of invalid config in `DeviceProfile#customConfig`. [#3489](https://github.com/mapbox/navigation/pull/3489)
-- Fixed a native crash in E-Horizon implementation caused by internal race condition. [#3489](https://github.com/mapbox/navigation/pull/3489)
-- Made `MapboxReplayer` constructor public. [#3392](https://github.com/mapbox/navigation/pull/3392)
-- Removed `OnlineRouteAlternativesSwitch`. Use `NavigationRouteAlternativesObserver` to receive an online alternative for the current offline route. Unlike `OnlineRouteAlternativesSwitch`, `NavigationRouteAlternativesObserver` doesn't switch to an online alternative automatically. [#3441](https://github.com/mapbox/navigation/pull/3441)
+- Fixed a bug with multiple instances of cache which resulted in excessive memory consumption. 
+- Fixed an issue where reroute for multi-leg routes used to fail in case waypoint_names or waypoint_targets parameters were specified without an explicit waypoint_indices parameter. 
+- Improved handling of no storage available during navigation tiles downloading. 
+- Improved handling of invalid config in `DeviceProfile#customConfig`. 
+- Fixed a native crash in E-Horizon implementation caused by internal race condition. 
+- Made `MapboxReplayer` constructor public. 
+- Removed `OnlineRouteAlternativesSwitch`. Use `NavigationRouteAlternativesObserver` to receive an online alternative for the current offline route. Unlike `OnlineRouteAlternativesSwitch`, `NavigationRouteAlternativesObserver` doesn't switch to an online alternative automatically. 
 - Changed structure of `NavigationRoute`. Now it can represent routes received from Mapbox Map Matching API as well as Mapbox Directions API.
   `NavigationRoute#directionsResponse` has been removed. Use `NavigationRoute#waypoints` and `NavigationRoute#responseUUID` to access data which used to be available via `NavigationRoute#directionsResponse`.
   `NavigationRoute#routeOptions` has been removed. Try to utilise data available in `NavigationRoute`, for example instead of using coordinates from route options, use `NavigationRoute#waypoints`. Temporary property `NavigationRoute#evMaxCharge` has been added to access maximum possible charge for the vehicle the route was requested for instead of `navigationRoute.routeOptions.getUnrecognizedProperty("ev_max_charge")`.
-  [#3441](https://github.com/mapbox/navigation/pull/3441)
+  
 - Improve GNSS jump detection for better pitch based map-matching in tunnels
 - Eliminate border crossing object when moving to neutral waters and back
 - Fixed leak of CarAppLifecycleOwner on every copilot start. [#3803](https://github.com/mapbox/mapbox-navigation-android/pull/3803)
@@ -453,31 +452,31 @@ This release depends on, and has been tested with, the following Mapbox dependen
 ### Changelog
 
 #### Bug fixes and improvements
-- Improved `CustomRouterRule` to work independently from device network setup. [#3430](https://github.com/mapbox/navigation/pull/3430)
-- Removed `CustomRouterRule#baseUrl`. Now `CustomRouterRule` intercepts all route and route refresh requests to Mapbox Directions API. [#3430](https://github.com/mapbox/navigation/pull/3430)
-- Fixed a bug with multiple instances of cache which resulted in excessive memory consumption. [#3489](https://github.com/mapbox/navigation/pull/3489)
-- Fixed an issue where reroute for multi-leg routes used to fail in case waypoint_names or waypoint_targets parameters were specified without an explicit waypoint_indices parameter. [#3489](https://github.com/mapbox/navigation/pull/3489)
-- Improved Map Matching to avoid false deviation of the location puck to a parallel street. [#3489](https://github.com/mapbox/navigation/pull/3489)
-- Improved handling of no storage available during navigation tiles downloading. [#3489](https://github.com/mapbox/navigation/pull/3489)
-- Improved handling of invalid config in `DeviceProfile#customConfig`. [#3489](https://github.com/mapbox/navigation/pull/3489)
-- Fixed a native crash in E-Horizon implementation caused by internal race condition. [#3489](https://github.com/mapbox/navigation/pull/3489)
-- Made `MapboxReplayer` constructor public. [#3392](https://github.com/mapbox/navigation/pull/3392)
-- Removed `OnlineRouteAlternativesSwitch`. Use `NavigationRouteAlternativesObserver` to receive an online alternative for the current offline route. Unlike `OnlineRouteAlternativesSwitch`, `NavigationRouteAlternativesObserver` doesn't switch to an online alternative automatically. [#3441](https://github.com/mapbox/navigation/pull/3441)
+- Improved `CustomRouterRule` to work independently from device network setup. 
+- Removed `CustomRouterRule#baseUrl`. Now `CustomRouterRule` intercepts all route and route refresh requests to Mapbox Directions API. 
+- Fixed a bug with multiple instances of cache which resulted in excessive memory consumption. 
+- Fixed an issue where reroute for multi-leg routes used to fail in case waypoint_names or waypoint_targets parameters were specified without an explicit waypoint_indices parameter. 
+- Improved Map Matching to avoid false deviation of the location puck to a parallel street. 
+- Improved handling of no storage available during navigation tiles downloading. 
+- Improved handling of invalid config in `DeviceProfile#customConfig`. 
+- Fixed a native crash in E-Horizon implementation caused by internal race condition. 
+- Made `MapboxReplayer` constructor public. 
+- Removed `OnlineRouteAlternativesSwitch`. Use `NavigationRouteAlternativesObserver` to receive an online alternative for the current offline route. Unlike `OnlineRouteAlternativesSwitch`, `NavigationRouteAlternativesObserver` doesn't switch to an online alternative automatically. 
 - Changed structure of `NavigationRoute`. Now it can represent routes received from Mapbox Map Matching API as well as Mapbox Directions API.
   `NavigationRoute#directionsResponse` has been removed. Use `NavigationRoute#waypoints`, `NavigationRoute#responseUUID`, and `NavigationRoute#responseMetadata` to access data which used to be available via `NavigationRoute#directionsResponse`.
   `NavigationRoute#routeOptions` has been removed. Try to utilise data available in `NavigationRoute`, for example instead of using coordinates from route options, use `NavigationRoute#waypoints`. Temporary property `NavigationRoute#evMaxCharge` has been added to access maximum possible charge for the vehicle the route was requested for instead of `navigationRoute.routeOptions.getUnrecognizedProperty("ev_max_charge")`.
-  [#3441](https://github.com/mapbox/navigation/pull/3441)
-- Added `MapMatchingSuccessfulResult#navigationRoutes` which represent routes that could be set to navigator using `MapboxNavigation#setNavigationRoutes`. [#3441](https://github.com/mapbox/navigation/pull/3441)
-- Changed type of `MapMatchingSuccessfulResult#matches` from `List<NavigationRoute>` to `List<MapMatchingMatch>`. Now every item from `MapMatchingSuccessfulResult#matches` represents a Match Object from Mapbox Map Matching API. [#3441](https://github.com/mapbox/navigation/pull/3441)
+  
+- Added `MapMatchingSuccessfulResult#navigationRoutes` which represent routes that could be set to navigator using `MapboxNavigation#setNavigationRoutes`. 
+- Changed type of `MapMatchingSuccessfulResult#matches` from `List<NavigationRoute>` to `List<MapMatchingMatch>`. Now every item from `MapMatchingSuccessfulResult#matches` represents a Match Object from Mapbox Map Matching API. 
 
 ## Features
 - Changed LocationOptions API. Now custom location providers that emit mocked locations are allowed. In order to set a custom location provider, you now need to invoke `LocationOptions.Builder#locationProviderFactory` and pass a factory that will create a DeviceLocationProvider implementation based on a request parameter together will location provider type, which can be one of: REAL, MOCKED, MIXED. Note that if your provider can emit non-real locations, it must set `isMock` extra flag value to true for such locations. To set this flag, use:
 ```
 Location.Builder#extra(Value.valueOf(hashMapOf(LocationExtraKeys.IS_MOCK to Value.valueOf(true/false))))
 ```
- [#3392](https://github.com/mapbox/navigation/pull/3392)
-- Added Advanced Driver Assistance Systems (ADAS) functionality as an experimental API. [#3489](https://github.com/mapbox/navigation/pull/3489)
-- Added `NavigationViewApi#recenterCamera()` that allows to programatically recenter the camera position as if the recenter button was clicked. [#3489](https://github.com/mapbox/navigation/pull/3489)
+ 
+- Added Advanced Driver Assistance Systems (ADAS) functionality as an experimental API. 
+- Added `NavigationViewApi#recenterCamera()` that allows to programatically recenter the camera position as if the recenter button was clicked. 
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
@@ -491,11 +490,11 @@ This release depends on, and has been tested with, the following Mapbox dependen
 ### Changelog
 
 #### Bug fixes and improvements
-- Support more options for `MapMatchingOptions`. [#3369](https://github.com/mapbox/navigation/pull/3369)
+- Support more options for `MapMatchingOptions`. 
 - Made `MapboxNavigation` constructor and `onDestroy` internal. To create an instance of `MapboxNavigation` use `MapboxNavigationProvider#create`; to destroy it use `MapboxNavigationProvider#destroy`. [3274](https://github.com/mapbox/navigation/pull/3274)
 
 ## Features
-- Introduced support of Mapbox Map Matching API, see `MapboxNavigation#requestMapMatching`. [#2874](https://github.com/mapbox/navigation/pull/2874)
+- Introduced support of Mapbox Map Matching API, see `MapboxNavigation#requestMapMatching`. 
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:

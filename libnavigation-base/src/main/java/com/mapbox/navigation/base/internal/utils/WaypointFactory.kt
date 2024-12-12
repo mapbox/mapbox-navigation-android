@@ -3,6 +3,7 @@ package com.mapbox.navigation.base.internal.utils
 import androidx.annotation.VisibleForTesting
 import com.google.gson.JsonElement
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.internal.route.TimeZone
 import com.mapbox.navigation.base.internal.route.Waypoint
 import org.jetbrains.annotations.TestOnly
 
@@ -15,6 +16,7 @@ object WaypointFactory {
         target: Point?,
         @Waypoint.Type type: Int,
         metadata: Map<String, JsonElement>?,
+        timeZone: TimeZone? = null,
     ): Waypoint = Waypoint(
         location,
         name,
@@ -27,5 +29,6 @@ object WaypointFactory {
             else -> throw IllegalStateException("Unknown waypoint type $type")
         },
         metadata,
+        timeZone,
     )
 }

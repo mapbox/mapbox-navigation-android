@@ -36,6 +36,7 @@ import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.EventsMetadataInterface
 import com.mapbox.navigator.HistoryRecorderHandle
+import com.mapbox.navigator.TilesConfig
 import kotlinx.coroutines.CoroutineScope
 
 internal object NavigationComponentProvider {
@@ -55,16 +56,16 @@ internal object NavigationComponentProvider {
     )
 
     fun createNativeNavigator(
-        cacheHandle: CacheHandle,
+        tilesConfig: TilesConfig,
         config: ConfigHandle,
         historyRecorderComposite: HistoryRecorderHandle?,
         offlineCacheHandle: CacheHandle?,
         eventsMetadataProvider: EventsMetadataInterface,
     ): MapboxNativeNavigator = MapboxNativeNavigatorImpl(
-        cacheHandle,
-        config,
+        tilesConfig,
         historyRecorderComposite,
         offlineCacheHandle,
+        config,
         eventsMetadataProvider,
     )
 

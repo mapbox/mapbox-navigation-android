@@ -50,6 +50,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import java.util.concurrent.CopyOnWriteArraySet
+import java.util.concurrent.TimeUnit
 
 /**
  * Default implementation of [TripSession]
@@ -278,23 +279,18 @@ internal class MapboxTripSession(
     // worker thread
     private val onRawLocationUpdate: (Location) -> Unit = { rawLocation ->
         val locationHash = rawLocation.hashCode()
-        logD(
-            "updateRawLocation; system elapsed time: ${System.nanoTime()}; " +
-                "location ($locationHash) elapsed time: ${rawLocation.monotonicTimestamp}",
-            LOG_CATEGORY,
-        )
         mainJobController.scope.launch {
             this@MapboxTripSession.rawLocation = rawLocation
             locationObservers.forEach { it.onNewRawLocation(rawLocation) }
         }
         mainJobController.scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            logD(
-                "updateRawLocation; notify navigator for ($locationHash) - start",
-                LOG_CATEGORY,
-            )
+            val monotonicStart = System.nanoTime()
             navigator.updateLocation(rawLocation.toFixLocation())
+            val diffMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - monotonicStart)
             logD(
-                "updateRawLocation; notify navigator for ($locationHash) - end",
+                "updateRawLocation; system elapsed time: ${System.nanoTime()}; " +
+                    "location ($locationHash) elapsed time: ${rawLocation.monotonicTimestamp}," +
+                    "notify NN for $diffMillis ms",
                 LOG_CATEGORY,
             )
         }
@@ -631,15 +627,13 @@ internal class MapboxTripSession(
 
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     private fun processNativeStatus(status: NavigationStatus) {
-        logD(
+        logD(LOG_CATEGORY) {
             "navigatorObserver#onStatus; " +
                 "fixLocation elapsed time: ${status.location.monotonicTimestampNanoseconds}, " +
-                "state: ${status.routeState}",
-            LOG_CATEGORY,
-        )
-        logD(LOG_CATEGORY) {
-            "navigatorObserver#onStatus; banner instruction: [${status.bannerInstruction}]," +
-                " voice instruction: [${status.voiceInstruction}]"
+                "state: ${status.routeState};" +
+                "instructions: " +
+                "banner idx [${status.bannerInstruction?.index}], " +
+                "voice idx [${status.voiceInstruction?.index}]"
         }
 
         val tripStatus = status.getTripStatusFrom(primaryRoute)
@@ -684,8 +678,8 @@ internal class MapboxTripSession(
                 lastVoiceInstruction,
                 upcomingRoadObjects,
                 currentLegDestination,
-            ).also {
-                if (it == null) {
+            ).also { routeProgress ->
+                if (routeProgress == null) {
                     logD(
                         "route progress update dropped - " +
                             "currentPrimaryRoute ID: ${primaryRoute?.id}; " +

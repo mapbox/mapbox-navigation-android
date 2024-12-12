@@ -51,6 +51,9 @@ internal class MapboxRouteLineViewDynamicOptionsBuilderTest {
             .shareLineGeometrySources(true)
             .softGradientTransition(20.0)
             .tolerance(5.0)
+            .routeLineBlurEnabled(true)
+            .applyTrafficColorsToRouteLineBlur(true)
+            .routeLineBlurWidth(77.77)
             .slotName("foobar")
             .fadeOnHighZoomsConfig(oldFadingConfig)
             .build()
@@ -62,6 +65,9 @@ internal class MapboxRouteLineViewDynamicOptionsBuilderTest {
             .scaleExpressions(newScaleExpressions)
             .displaySoftGradientForTraffic(false)
             .softGradientTransition(10.0)
+            .routeLineBlurEnabled(false)
+            .applyTrafficColorsToRouteLineBlur(false)
+            .routeLineBlurWidth(33.3)
             .slotName("new-foobar")
             .fadingConfig(newFadingConfig)
             .build()
@@ -84,5 +90,8 @@ internal class MapboxRouteLineViewDynamicOptionsBuilderTest {
         assertEquals(5.0, newOptions.tolerance, tolerance)
         assertEquals("new-foobar", newOptions.slotName)
         assertEquals(newFadingConfig, newOptions.fadeOnHighZoomsConfig)
+        assertEquals(false, newOptions.routeLineBlurEnabled)
+        assertEquals(false, newOptions.applyTrafficColorsToRouteLineBlur)
+        assertEquals(33.3, newOptions.routeLineBlurWidth, tolerance)
     }
 }

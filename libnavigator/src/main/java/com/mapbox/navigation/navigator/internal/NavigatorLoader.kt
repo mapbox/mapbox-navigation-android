@@ -1,6 +1,7 @@
 package com.mapbox.navigation.navigator.internal
 
 import androidx.annotation.VisibleForTesting
+import com.mapbox.common.SdkInformation
 import com.mapbox.navigation.base.BuildConfig
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.DeviceType
@@ -11,21 +12,17 @@ import com.mapbox.navigator.CacheFactory
 import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ConfigFactory
 import com.mapbox.navigator.ConfigHandle
-import com.mapbox.navigator.EventsMetadataInterface
-import com.mapbox.navigator.GraphAccessor
 import com.mapbox.navigator.HistoryRecorderHandle
 import com.mapbox.navigator.InputsServiceHandle
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.ProfileApplication
 import com.mapbox.navigator.ProfilePlatform
-import com.mapbox.navigator.RoadObjectMatcher
-import com.mapbox.navigator.RouteAlternativesControllerInterface
 import com.mapbox.navigator.RouterFactory
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.RouterType
+import com.mapbox.navigator.SdkHistoryInfo
 import com.mapbox.navigator.SettingsProfile
-import com.mapbox.navigator.Telemetry
 import com.mapbox.navigator.TilesConfig
 import org.json.JSONException
 import org.json.JSONObject
@@ -51,9 +48,14 @@ object NavigatorLoader {
         config: ConfigHandle,
         historyDir: String?,
         copilotHistoryDir: String?,
+        sdkInformation: SdkInformation,
     ): HistoryRecorderHandles {
-        val general = buildHistoryRecorder(historyDir, config)
-        val copilot = buildHistoryRecorder(copilotHistoryDir, config)
+        val sdkHistoryInfo = SdkHistoryInfo(
+            sdkInformation.version,
+            sdkInformation.name,
+        )
+        val general = buildHistoryRecorder(historyDir, config, sdkHistoryInfo)
+        val copilot = buildHistoryRecorder(copilotHistoryDir, config, sdkHistoryInfo)
         val composite = buildCompositeHistoryRecorder(general, copilot)
         return HistoryRecorderHandles(general, copilot, composite)
     }
@@ -63,27 +65,15 @@ object NavigatorLoader {
         config: ConfigHandle,
         historyRecorderComposite: HistoryRecorderHandle?,
         offlineCacheHandle: CacheHandle?,
-        eventsMetadataProvider: EventsMetadataInterface,
-    ): NativeComponents {
-        val navigator = Navigator(
+        inputsServiceHandle: InputsServiceHandle,
+    ): Navigator {
+        return Navigator(
             config,
             cacheHandle,
             historyRecorderComposite,
             RouterType.HYBRID,
-            null,
+            inputsServiceHandle,
             offlineCacheHandle,
-        )
-        val graphAccessor = GraphAccessor(cacheHandle)
-        val roadObjectMatcher = RoadObjectMatcher(cacheHandle)
-
-        return NativeComponents(
-            navigator,
-            graphAccessor,
-            cacheHandle,
-            roadObjectMatcher,
-            navigator.routeAlternativesController,
-            createInputService(config, historyRecorderComposite),
-            navigator.getTelemetry(eventsMetadataProvider),
         )
     }
 
@@ -108,7 +98,7 @@ object NavigatorLoader {
         )
     }
 
-    private fun createInputService(
+    fun createInputService(
         config: ConfigHandle,
         historyRecorder: HistoryRecorderHandle?,
     ): InputsServiceHandle {
@@ -118,9 +108,14 @@ object NavigatorLoader {
     private fun buildHistoryRecorder(
         historyDir: String?,
         config: ConfigHandle,
+        sdkHistoryInfo: SdkHistoryInfo,
     ): HistoryRecorderHandle? {
         return if (historyDir != null) {
-            val historyRecorderHandle = HistoryRecorderHandle.build(historyDir, config)
+            val historyRecorderHandle = HistoryRecorderHandle.build(
+                historyDir,
+                sdkHistoryInfo,
+                config,
+            )
             if (historyRecorderHandle == null) {
                 logE(
                     "Could not create directory directory to write events",
@@ -196,15 +191,5 @@ object NavigatorLoader {
         val general: HistoryRecorderHandle?,
         val copilot: HistoryRecorderHandle?,
         val composite: HistoryRecorderHandle?,
-    )
-
-    internal data class NativeComponents(
-        val navigator: Navigator,
-        val graphAccessor: GraphAccessor,
-        val cache: CacheHandle,
-        val roadObjectMatcher: RoadObjectMatcher,
-        val routeAlternativesController: RouteAlternativesControllerInterface,
-        val inputsService: InputsServiceHandle,
-        val telemetry: Telemetry,
     )
 }

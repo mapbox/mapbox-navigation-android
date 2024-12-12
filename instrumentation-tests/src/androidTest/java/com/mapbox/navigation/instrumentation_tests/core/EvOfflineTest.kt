@@ -48,8 +48,6 @@ import org.junit.Test
 import java.io.File
 import java.util.concurrent.TimeUnit
 
-const val TEST_TIMEOUT = 60_000L
-
 @OptIn(ExperimentalMapboxNavigationAPI::class)
 class EvOfflineTest : BaseCoreNoCleanUpTest() {
 
@@ -64,7 +62,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
-    fun requestRouteWithoutInternetAndTiles() = sdkTest(TEST_TIMEOUT) {
+    fun requestRouteWithoutInternetAndTiles() = sdkTest {
         val testRoute = setupBerlinEvRoute()
         withMapboxNavigation { navigation ->
             withoutInternet {
@@ -75,7 +73,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
-    fun startNavigationOfflineThenSwitchToOnlineRouteWhenInternetAppears() = sdkTest(TEST_TIMEOUT) {
+    fun startNavigationOfflineThenSwitchToOnlineRouteWhenInternetAppears() = sdkTest {
         val originalTestRoute = setupBerlinEvRoute()
 
         withMapboxNavigation(
@@ -116,7 +114,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
-    fun offlineOnlineSwitchWhenOnlineRouteIsTheSameAsCurrentOffline() = sdkTest(TEST_TIMEOUT) {
+    fun offlineOnlineSwitchWhenOnlineRouteIsTheSameAsCurrentOffline() = sdkTest {
         val evBerlinTestRoute = EvRoutesProvider.getBerlinEvRoute(
             context,
             mockWebServerRule.baseUrl,
@@ -155,7 +153,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
 
     @Test
     fun startOfflineWithUserProvidedChargingStationsThenSwitchToOnlineRouteWhenInternetAppears() =
-        sdkTest(TEST_TIMEOUT) {
+        sdkTest {
             val testRoute = setupBerlinEvRouteWithCustomProvidedChargingStation()
 
             withMapboxNavigation(
@@ -189,7 +187,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         }
 
     @Test
-    fun deviateFromOnlinePrimaryRouteWithoutInternet() = sdkTest(TEST_TIMEOUT) {
+    fun deviateFromOnlinePrimaryRouteWithoutInternet() = sdkTest {
         val originalTestRoute = setupBerlinEvRoute()
         val testRouteAfterReroute = setupBerlinEvRouteAfterReroute()
 
@@ -237,7 +235,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
-    fun refresh_online_ev_route_offline() = sdkTest(TEST_TIMEOUT) {
+    fun refresh_online_ev_route_offline() = sdkTest {
         val originalTestRoute = setupBerlinEvRoute()
 
         val routeRefreshOptions = RouteRefreshOptions.Builder()

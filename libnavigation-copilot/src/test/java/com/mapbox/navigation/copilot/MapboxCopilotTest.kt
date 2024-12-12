@@ -3,6 +3,7 @@ package com.mapbox.navigation.copilot
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.copilot.CopilotTestUtils.prepareLifecycleOwnerMockk
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -11,10 +12,14 @@ import io.mockk.mockkConstructor
 import io.mockk.unmockkAll
 import io.mockk.verify
 import org.junit.After
+import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class MapboxCopilotTest {
+
+    @get:Rule
+    val logRule = LoggingFrontendTestRule()
 
     private val mockedMapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
 
