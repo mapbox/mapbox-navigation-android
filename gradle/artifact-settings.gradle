@@ -12,7 +12,7 @@ ext {
     mapboxArtifactLicenseUrl = 'https://www.mapbox.com/legal/tos/'
     snapshot = project.hasProperty("snapshot") ? project.property("snapshot").toBoolean() : false
     releaseTagPrefix = project.hasProperty('RELEASE_TAG_PREFIX') ? project.property('RELEASE_TAG_PREFIX') : 'v'
-    versionName = "2.19.0-ndk-23-preview-1-SNAPSHOT"
+    versionName = "2.19.0-ndk-23-preview-2-SNAPSHOT"
 }
 
 def getVersionName() {
