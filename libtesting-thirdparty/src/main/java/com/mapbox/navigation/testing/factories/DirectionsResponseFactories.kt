@@ -20,6 +20,7 @@ import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.MaxSpeed
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.api.directions.v5.models.StepIntersection
 import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.geojson.Point
 
@@ -68,7 +69,7 @@ fun createRouteLeg(
     annotation: LegAnnotation? = createRouteLegAnnotation(),
     incidents: List<Incident>? = null,
     closures: List<Closure>? = null,
-    steps: List<LegStep> = listOf(createRouteStep()),
+    steps: List<LegStep>? = listOf(createRouteStep()),
     duration: Double? = null
 ): RouteLeg {
     return RouteLeg.builder()
@@ -86,7 +87,8 @@ fun createRouteStep(
     mode: String = "driving",
     maneuver: StepManeuver = createManeuver(),
     weight: Double = 111.0,
-    bannerInstructions: List<BannerInstructions> = listOf(createBannerInstructions())
+    bannerInstructions: List<BannerInstructions> = listOf(createBannerInstructions()),
+    intersections: List<StepIntersection>? = null,
 ): LegStep {
     return LegStep
         .builder()
@@ -96,6 +98,11 @@ fun createRouteStep(
         .maneuver(maneuver)
         .weight(weight)
         .bannerInstructions(bannerInstructions)
+        .apply {
+            if (intersections != null) {
+                intersections(intersections)
+            }
+        }
         .build()
 }
 
@@ -266,4 +273,14 @@ fun createRouteOptions(
 
 fun createCoordinatesList(waypointCount: Int): List<Point> = MutableList(waypointCount) { index ->
     Point.fromLngLat(index.toDouble(), index.toDouble())
+}
+
+fun createStepIntersection(
+    location: Point = Point.fromLngLat(1.0, 2.0),
+    classes: List<String>? = null,
+): StepIntersection {
+    return StepIntersection.builder()
+        .rawLocation(doubleArrayOf(location.longitude(), location.latitude()))
+        .classes(classes)
+        .build()
 }

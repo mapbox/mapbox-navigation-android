@@ -16,11 +16,14 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.navigator.internal.utils.toEvStateData
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigator.ADASISv2MessageCallback
 import com.mapbox.navigator.AdasisConfig
+import com.mapbox.navigator.AdasisFacadeBuilder
+import com.mapbox.navigator.AdasisFacadeHandle
 import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.ElectronicHorizonObserver
@@ -80,6 +83,8 @@ class MapboxNativeNavigatorImpl(
     override lateinit var routeAlternativesController: RouteAlternativesControllerInterface
     override lateinit var telemetry: Telemetry
 
+    private lateinit var adasisFacade: AdasisFacadeHandle
+
     override val inputsService: InputsServiceHandle =
         NavigatorLoader.createInputService(config, historyRecorderComposite)
 
@@ -97,12 +102,15 @@ class MapboxNativeNavigatorImpl(
             historyRecorderComposite,
         )
 
+        adasisFacade = AdasisFacadeBuilder.build(config, cacheHandle, historyRecorderComposite)
+
         navigator = NavigatorLoader.createNavigator(
             cacheHandle,
             config,
             historyRecorderComposite,
             offlineCacheHandle,
             inputsService,
+            adasisFacade,
         )
 
         cache = cacheHandle
@@ -322,6 +330,12 @@ class MapboxNativeNavigatorImpl(
             }
         }
 
+    // EV
+
+    override fun onEVDataUpdated(data: Map<String, String>) {
+        navigator.onEvDataUpdated(data.toEvStateData())
+    }
+
     // EH
 
     /**
@@ -437,11 +451,11 @@ class MapboxNativeNavigatorImpl(
         callback: ADASISv2MessageCallback,
         adasisConfig: AdasisConfig,
     ) {
-        navigator.setAdasisMessageCallback(callback, adasisConfig)
+        adasisFacade.setAdasisMessageCallback(callback, adasisConfig)
     }
 
     override fun resetAdasisMessageCallback() {
-        navigator.resetAdasisMessageCallback()
+        adasisFacade.resetAdasisMessageCallback()
     }
 
     override fun setUserLanguages(languages: List<String>) {

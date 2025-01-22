@@ -113,6 +113,10 @@ interface MapboxNativeNavigator : RerouteEventsProvider {
      */
     suspend fun updateLegIndex(legIndex: Int): Boolean
 
+    // EV
+
+    fun onEVDataUpdated(data: Map<String, String>)
+
     // EH
 
     /**

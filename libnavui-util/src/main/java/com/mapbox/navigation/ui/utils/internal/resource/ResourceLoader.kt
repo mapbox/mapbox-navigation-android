@@ -1,10 +1,11 @@
-package com.mapbox.navigation.ui.utils.internal.resource
+package com.mapbox.navigation.ui.base.util.resource
 
 import com.mapbox.bindgen.Expected
 import com.mapbox.common.ResourceLoadError
 import com.mapbox.common.ResourceLoadProgress
 import com.mapbox.common.ResourceLoadResult
 import com.mapbox.common.TileStore
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
 
 /**
  * ResourceLoader is responsible for downloading and storage of any Nav SDK BLOB assets.

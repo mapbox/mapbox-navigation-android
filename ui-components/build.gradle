@@ -41,9 +41,9 @@ android {
 
 dependencies {
     api project(":libnavui-base")
-    api project(":libnavui-maps")
-    api project(":libnavigation-tripdata")
-    api project(":libnavigation-voice")
+    api project(":ui-maps")
+    api project(":tripdata")
+    api project(":voice")
     implementation project(":libnavigation-util")
 
     implementation dependenciesList.androidXAppCompat

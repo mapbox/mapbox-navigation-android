@@ -236,18 +236,18 @@ mapboxNavigation.requestMapMatching(
 )
 ```
 
-9. `NavigaitonRoute` can be created only via `MapboxNavigation`.
+9. `NavigationRoute` can be created only via `MapboxNavigation`.
 Consider requesting routes from [Mapbox Directions API](https://docs.mapbox.com/api/navigation/directions/) using `MapboxNavigation#requestRoutes`
 or from [Mapbox Map Matching API](https://docs.mapbox.com/api/navigation/map-matching/).
 If you need to pass `NavigationRoute` instance between processes which use the same version of Navigation Core Framework, consider using `NavigationRoute#serialize` and `NavigationRoute#deserializeFrom`.
 
 10. UI functionality from `libnavui-maps`, `libnavui-voice`, `libnavui-tripprogress`, `libnavui-maneuver`, `libnavui-speedlimit`, `libnavui-status` has been moved into new module `libnavui-ui-components`.
 
-11. Core functionality from `libnavui-shield`, `libnavui-tripprogress`, `libnavui-maneuver`, `libnavui-speedlimit` has been moved into new module `libnavigation-tripdata`.
+11. Core functionality from `libnavui-shield`, `libnavui-tripprogress`, `libnavui-maneuver`, `libnavui-speedlimit` has been moved into new module `tripdata`.
 
 12. Modules `libnavui-app`, `libnavui-dropin`  have been removed. See [Navigation SDK v2 repository](https://github.com/mapbox/mapbox-navigation-android) if you need to copy UI sources to your projects.
 
-13. Module `libnavui-voice` has been renamed to `libnavigation-voice`. Package name has been changed to `com.mapbox.navigation.voice`.
+13. Module `libnavui-voice` has been renamed to `voice`. Package name has been changed to `com.mapbox.navigation.voice`.
 
 14. Added "mbx.RouteLine" history events. They will be collected automatically by Core Framework for both manual recorder and Copilot recorder when the recording is started.
     You can enable route line events collection for Copilot using `CopilotOptions#shouldRecordRouteLineEvents` option. It is disabled by default.

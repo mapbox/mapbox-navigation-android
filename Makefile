@@ -1,6 +1,6 @@
 PUBLIC_API_PREFIX = public-api
 
-# $(1) modules' names(e.g. "libnavigation-core, libnavigation-base...")
+# $(1) modules' names(e.g. "navigation, libnavigation-base...")
 define reports-copy-to
 	for module in $(1) ; do \
 		if [ -d "$${module}/build/jacoco" ]; then \
@@ -17,16 +17,16 @@ libnavigation-metrics \
 libnavigation-util \
 libnavigator \
 libtrip-notification \
-libnavigation-core \
-libnavigation-copilot \
-libnavigation-tripdata \
-libnavigation-voice \
+navigation \
+copilot \
+tripdata \
+voice \
 libtesting-router
 
 CORE_MODULES = $(RELEASED_CORE_MODULES)
 
 RELEASED_UI_MODULES = \
-libnavui-maps \
+ui-maps \
 ui-components \
 androidauto \
 libnavui-base \
@@ -141,10 +141,10 @@ core-check-api: assemble-core-release
 	./gradlew :libnavigation-util:checkApi -PhidePackage=com.mapbox.navigation.utils.internal
 	./gradlew :libnavigator:checkApi -PhidePackage=com.mapbox.navigation.navigator.internal
 	./gradlew :libtrip-notification:checkApi -PhidePackage=com.mapbox.navigation.trip.notification.internal
-	./gradlew :libnavigation-core:checkApi -PhidePackage=com.mapbox.navigation.core.internal
-	./gradlew :libnavigation-copilot:checkApi -PhidePackage=com.mapbox.navigation.copilot.internal
-	./gradlew :libnavigation-tripdata:checkApi -PhidePackage=com.mapbox.navigation.tripdata.internal,com.mapbox.navigation.tripdata.maneuver.internal,com.mapbox.navigation.tripdata.progress.internal,com.mapbox.navigation.tripdata.shield.internal,com.mapbox.navigation.tripdata.speedlimit.internal
-	./gradlew :libnavigation-voice:checkApi -PhidePackage=com.mapbox.navigation.voice.internal -PhideId=ReferencesHidden
+	./gradlew :navigation:checkApi -PhidePackage=com.mapbox.navigation.core.internal
+	./gradlew :copilot:checkApi -PhidePackage=com.mapbox.navigation.copilot.internal
+	./gradlew :tripdata:checkApi -PhidePackage=com.mapbox.navigation.tripdata.internal,com.mapbox.navigation.tripdata.maneuver.internal,com.mapbox.navigation.tripdata.progress.internal,com.mapbox.navigation.tripdata.shield.internal,com.mapbox.navigation.tripdata.speedlimit.internal
+	./gradlew :voice:checkApi -PhidePackage=com.mapbox.navigation.voice.internal -PhideId=ReferencesHidden
 	./gradlew :libtesting-router:checkApi -PhidePackage=com.mapbox.navigation.testing.router.internal
 
 .PHONY: core-update-api
@@ -154,10 +154,10 @@ core-update-api: assemble-core-release
 	./gradlew :libnavigation-util:updateApi -PhidePackage=com.mapbox.navigation.utils.internal
 	./gradlew :libnavigator:updateApi -PhidePackage=com.mapbox.navigation.navigator.internal
 	./gradlew :libtrip-notification:updateApi -PhidePackage=com.mapbox.navigation.trip.notification.internal
-	./gradlew :libnavigation-core:updateApi -PhidePackage=com.mapbox.navigation.core.internal
-	./gradlew :libnavigation-copilot:updateApi -PhidePackage=com.mapbox.navigation.copilot.internal
-	./gradlew :libnavigation-tripdata:updateApi -PhidePackage=com.mapbox.navigation.tripdata.internal,com.mapbox.navigation.tripdata.maneuver.internal,com.mapbox.navigation.tripdata.progress.internal,com.mapbox.navigation.tripdata.shield.internal,com.mapbox.navigation.tripdata.speedlimit.internal
-	./gradlew :libnavigation-voice:updateApi -PhidePackage=com.mapbox.navigation.voice.internal
+	./gradlew :navigation:updateApi -PhidePackage=com.mapbox.navigation.core.internal
+	./gradlew :copilot:updateApi -PhidePackage=com.mapbox.navigation.copilot.internal
+	./gradlew :tripdata:updateApi -PhidePackage=com.mapbox.navigation.tripdata.internal,com.mapbox.navigation.tripdata.maneuver.internal,com.mapbox.navigation.tripdata.progress.internal,com.mapbox.navigation.tripdata.shield.internal,com.mapbox.navigation.tripdata.speedlimit.internal
+	./gradlew :voice:updateApi -PhidePackage=com.mapbox.navigation.voice.internal
 	./gradlew :libtesting-router:updateApi -PhidePackage=com.mapbox.navigation.testing.router.internal
 
 .PHONY: assemble-ui-debug
@@ -214,7 +214,7 @@ publish-to-sdk-registry:
 .PHONY: ui-check-api
 ui-check-api: assemble-ui-release
 	# TODO Remove -PhideId=ReferencesHidden after fixing errors
-	./gradlew :libnavui-maps:checkApi -PhidePackage=com.mapbox.navigation.ui.maps.internal -PhideId=ReferencesHidden
+	./gradlew :ui-maps:checkApi -PhidePackage=com.mapbox.navigation.ui.maps.internal -PhideId=ReferencesHidden
 	./gradlew :ui-components:updateApi -PhidePackage=com.mapbox.navigation.ui.components.internal,com.mapbox.navigation.ui.components.maneuver.internal,com.mapbox.navigation.ui.components.maps.internal,com.mapbox.navigation.ui.components.speedlimit.internal,com.mapbox.navigation.ui.components.status.internal,com.mapbox.navigation.ui.components.tripprogress.internal,com.mapbox.navigation.ui.components.voice.internal
 	./gradlew :androidauto:updateApi -PhidePackage=com.mapbox.navigation.ui.androidauto.internal
 	./gradlew :libnavui-base:checkApi -PhidePackage=com.mapbox.navigation.ui.base.internal -PhideId=ReferencesHidden
@@ -222,7 +222,7 @@ ui-check-api: assemble-ui-release
 
 .PHONY: ui-update-api
 ui-update-api: assemble-ui-release
-	./gradlew :libnavui-maps:updateApi -PhidePackage=com.mapbox.navigation.ui.maps.internal
+	./gradlew :ui-maps:updateApi -PhidePackage=com.mapbox.navigation.ui.maps.internal
 	./gradlew :ui-components:updateApi -PhidePackage=com.mapbox.navigation.ui.components.internal,com.mapbox.navigation.ui.components.maneuver.internal,com.mapbox.navigation.ui.components.maps.internal,com.mapbox.navigation.ui.components.speedlimit.internal,com.mapbox.navigation.ui.components.status.internal,com.mapbox.navigation.ui.components.tripprogress.internal,com.mapbox.navigation.ui.components.voice.internal
 	./gradlew :androidauto:updateApi -PhidePackage=com.mapbox.navigation.ui.androidauto.internal
 	./gradlew :libnavui-base:updateApi -PhidePackage=com.mapbox.navigation.ui.base.internal

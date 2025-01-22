@@ -7,6 +7,7 @@ import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.DeviceType
 import com.mapbox.navigation.utils.internal.getOrPutJsonObject
 import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigator.AdasisFacadeHandle
 import com.mapbox.navigator.BillingProductType
 import com.mapbox.navigator.CacheFactory
 import com.mapbox.navigator.CacheHandle
@@ -66,6 +67,7 @@ object NavigatorLoader {
         historyRecorderComposite: HistoryRecorderHandle?,
         offlineCacheHandle: CacheHandle?,
         inputsServiceHandle: InputsServiceHandle,
+        adasisFacade: AdasisFacadeHandle,
     ): Navigator {
         return Navigator(
             config,
@@ -73,6 +75,7 @@ object NavigatorLoader {
             historyRecorderComposite,
             RouterType.HYBRID,
             inputsServiceHandle,
+            adasisFacade,
             offlineCacheHandle,
         )
     }

@@ -3,7 +3,6 @@ package com.mapbox.navigation.ui.components.tripprogress.internal.ui
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.bindgen.ExpectedFactory.createValue
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -23,46 +22,34 @@ import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 class TripProgressComponentTest {
 
     @get:Rule
-    var coroutineRule = MainCoroutineRule()
+    val coroutineRule = MainCoroutineRule()
 
-    private lateinit var ctx: Context
-    private lateinit var tripProgressView: MapboxTripProgressView
-    private lateinit var tripProgressApi: MapboxTripProgressApi
-    private lateinit var previewRoutesFlow: MutableStateFlow<List<NavigationRoute>>
-    private lateinit var mapboxNavigation: MapboxNavigation
-    private lateinit var sut: TripProgressComponent
-
-    @Before
-    fun setUp() {
-        ctx = ApplicationProvider.getApplicationContext()
-        tripProgressView = spyk(MapboxTripProgressView(ctx))
-        tripProgressApi = mockk(relaxed = true)
-        previewRoutesFlow = MutableStateFlow(emptyList())
-        mapboxNavigation = mockk(relaxed = true)
-        val contract = object : TripProgressComponentContract {
-            override val previewRoutes: Flow<List<NavigationRoute>> = previewRoutesFlow
-        }
-
-        sut = TripProgressComponent(
-            tripProgressView,
-            { contract },
-            TripProgressUpdateFormatter.Builder(ctx).build(),
-            tripProgressApi,
-        )
-    }
+    private val ctx = ApplicationProvider.getApplicationContext<Context>()
+    private val tripProgressView = spyk(MapboxTripProgressView(ctx))
+    private val tripProgressApi = mockk<MapboxTripProgressApi>(relaxed = true)
+    private val previewRoutesFlow = MutableStateFlow<List<NavigationRoute>>(emptyList())
+    private val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
+    private val sut = TripProgressComponent(
+        tripProgressView,
+        {
+            object : TripProgressComponentContract {
+                override val previewRoutes = previewRoutesFlow
+            }
+        },
+        TripProgressUpdateFormatter.Builder(ctx).build(),
+        tripProgressApi,
+    )
 
     @Test
     fun `onAttached should render trip overview when previewRoutes are not empty`() =
@@ -107,21 +94,24 @@ class TripProgressComponentTest {
                 legTime = 10.0,
                 legDistance = 20.0,
                 estimatedTimeToArrival = 10,
+                arrivalTimeZone = null,
             ),
         ),
         totalTime = 10.0,
         totalDistance = 20.0,
         totalEstimatedTimeToArrival = 10,
+        arrivalTimeZone = null,
         formatter = TripProgressUpdateFormatter.Builder(ctx).build(),
     )
 
     private fun tripProgressUpdateValue() = createTripProgressUpdateValue(
-        5,
-        20.0,
-        20.0,
-        5.0,
-        50.0,
-        -1,
+        estimatedTimeToArrival = 5,
+        arrivalTimeZone = null,
+        distanceRemaining = 20.0,
+        currentLegTimeRemaining = 20.0,
+        totalTimeRemaining = 5.0,
+        percentRouteTraveled = 50.0,
+        trafficCongestionColor = -1,
         TripProgressUpdateFormatter.Builder(ctx).build(),
     )
 

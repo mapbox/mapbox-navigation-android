@@ -28,6 +28,7 @@ import com.mapbox.navigator.SpeedLimit
 import com.mapbox.navigator.SpeedLimitSign
 import com.mapbox.navigator.SpeedLimitUnit
 import com.mapbox.navigator.TimeZone
+import com.mapbox.navigator.TurnLane
 import com.mapbox.navigator.UpcomingRouteAlertUpdate
 import com.mapbox.navigator.VoiceInstruction
 import com.mapbox.navigator.Waypoint
@@ -53,6 +54,7 @@ fun createNavigationStatus(
     geometryIndex: Int = 0,
     shapeIndex: Int = 0,
     intersectionIndex: Int = 0,
+    turnLanes: List<TurnLane> = emptyList(),
     roads: List<RoadName> = emptyList(),
     voiceInstruction: VoiceInstruction? = null,
     // default banner instruction workarounds the direct usage of the MapboxNativeNavigatorImpl
@@ -89,6 +91,7 @@ fun createNavigationStatus(
         geometryIndex,
         shapeIndex,
         intersectionIndex,
+        turnLanes,
         alternativeRouteIndices,
         roads,
         voiceInstruction,

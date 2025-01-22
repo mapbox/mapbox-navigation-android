@@ -1,5 +1,48 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.7.0-beta.1 - 22 January, 2025
+#### Features
+- Add `MapboxRoadCamera::inOnRoute` flag which indicates if the roiad camera is on the current route. 
+- Add `MapboxRoadCamerasDisplayConfig::showOnlyOnRoute` config parameter to display only road cameras on the route. 
+- Added support for EV charge point tariffs accessible via `EvStation.tariffs`. 
+- New experimental property `LocationMatcherResult.correctedLocationData` is available. 
+- New experimental function `GraphAccessor.getAdasisEdgeAttributes()` is available. It returns ADAS attributes for the requested edge. 
+- Expose road type in the `MapboxRoadCamera` 
+- Added support for section control speed cameras. 
+- Extended `MapboxTripProgressApi` to provide information about time zone at leg/route destination. 
+- Added `TripProgressUpdateFormatter.getEstimatedTimeToArrival` overload that formats ETA using a given time zone. 
+- Added curvatures support on intersections in ADAS tiles 
+- Reduced amount of error logs  
+- Added periodic logs of Navigator/Cache configs 
+- Added support for wheel speed usage during no signal simulation to determine passed distance for mobile profile 
+- Improved off road transitions 
+- :warning: Breaking changes in Experimental API `MapboxRouteCalloutView#renderCallouts(RouteCalloutData,MapboxRouteLineView)`. It's required to associate Route line with Callout View. 
+- Added experimental `SearchAlongRouteUtils` class to optimize search along routes scenario by providing optimally selected points. 
+
+#### Bug fixes and improvements
+- Fixed a crash that happened on foreground service start on Android APIs 28 and below. 
+- Deprecated EstimatedTimeToArrivalFormatter and introduced EstimatedTimeOfArrivalFormatter, which allows to format ETA with respect to destination time zone. 
+- Deprecated TripProgressUpdateFormatter.estimatedTimeToArrivalFormatter and introduced TripProgressUpdateFormatter.estimatedTimeOfArrivalFormatter, which allows to format ETA with respect to destination time zone. 
+- Fixed `MapboxNavigationSDKInitializerImpl` logic so that `uxfKey` is properly retrieved and sent over. 
+- Fixed the condition for verifying the last good signal state in the offroad detection logic 
+- Fixed incorrect calculation of a "missing part" of the route causing all lanes to be mark as divergent 
+- Fixed EHorizon rural road objects sometimes marked as urban 
+- Fixed a bug that happened during reroute in case if initial route was requested with `approaches` option specified. 
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.10.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.10.0-beta.1))
+- Mapbox Navigation Native `v323.0.0-beta.2`
+- Mapbox Core Common `v24.10.0-beta.2`
+- Mapbox Java `v7.3.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.3.1))
+
+
 ## Navigation SDK Core Framework 3.6.0-beta.1 - 29 November, 2024
 #### Features
 - Added experimental `RoutingTilesOptions#hdTilesOptions` to configure HD tiles endpoint. 
