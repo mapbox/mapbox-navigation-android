@@ -16,8 +16,8 @@ source_lang = en
 type = ANDROID
 
 [mapbox-navigation-sdk-for-android.libnavui-maps-strings-file]
-file_filter = libnavui-maps/src/main/res/values-<lang>/strings.xml
-source_file = libnavui-maps/src/main/res/values/strings.xml
+file_filter = ui-maps/src/main/res/values-<lang>/strings.xml
+source_file = ui-maps/src/main/res/values/strings.xml
 source_lang = en
 type = ANDROID
 

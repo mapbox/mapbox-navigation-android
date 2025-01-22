@@ -19,7 +19,6 @@ import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -27,12 +26,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class MapboxTripProgressViewTest {
 
-    lateinit var ctx: Context
-
-    @Before
-    fun setUp() {
-        ctx = ApplicationProvider.getApplicationContext()
-    }
+    private val ctx = ApplicationProvider.getApplicationContext<Context>()
 
     @Test
     fun `constructor with context`() {
@@ -117,12 +111,13 @@ class MapboxTripProgressViewTest {
                 },
             ).build()
         val state = createTripProgressUpdateValue(
-            1L,
-            2.0,
-            3.0,
-            4.0,
-            5.0,
-            6,
+            estimatedTimeToArrival = 1L,
+            arrivalTimeZone = null,
+            distanceRemaining = 2.0,
+            currentLegTimeRemaining = 3.0,
+            totalTimeRemaining = 4.0,
+            percentRouteTraveled = 5.0,
+            trafficCongestionColor = 6,
             formatter,
         )
 
@@ -197,9 +192,10 @@ class MapboxTripProgressViewTest {
         val result = ExpectedFactory.createValue<TripOverviewError, TripOverviewValue>(
             createTripOverviewValue(
                 emptyList(),
-                3.0,
-                2.0,
-                1L,
+                totalTime = 3.0,
+                totalDistance = 2.0,
+                totalEstimatedTimeToArrival = 1L,
+                arrivalTimeZone = null,
                 formatter,
             ),
         )
@@ -280,11 +276,13 @@ class MapboxTripProgressViewTest {
                         legTime = 3.0,
                         legDistance = 2.0,
                         estimatedTimeToArrival = 1L,
+                        arrivalTimeZone = null,
                     ),
                 ),
-                3.0,
-                2.0,
-                1L,
+                totalTime = 3.0,
+                totalDistance = 2.0,
+                totalEstimatedTimeToArrival = 1L,
+                arrivalTimeZone = null,
                 formatter,
             ),
         )

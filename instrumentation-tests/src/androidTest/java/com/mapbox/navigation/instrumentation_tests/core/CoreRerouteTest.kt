@@ -14,10 +14,7 @@ import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
-import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouteRefreshOptions
-import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
@@ -42,18 +39,15 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForAlternativesUpdate
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForUpdate
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
-import com.mapbox.navigation.testing.ui.utils.coroutines.stopRecording
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigation.testing.utils.DelayedResponseModifier
 import com.mapbox.navigation.testing.utils.assertions.RerouteStateTransitionAssertion
-import com.mapbox.navigation.testing.utils.assertions.RouteProgressStateTransitionAssertion
 import com.mapbox.navigation.testing.utils.assertions.assertRerouteFailedTransition
 import com.mapbox.navigation.testing.utils.assertions.assertSuccessfulRerouteStateTransition
 import com.mapbox.navigation.testing.utils.assertions.recordRerouteStates
 import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRefreshHandler
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
-import com.mapbox.navigation.testing.utils.idling.RouteProgressStateIdlingResource
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.testing.utils.location.stayOnPosition
 import com.mapbox.navigation.testing.utils.readRawFileText
@@ -61,17 +55,14 @@ import com.mapbox.navigation.testing.utils.routes.MockRoute
 import com.mapbox.navigation.testing.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.utils.withMapboxNavigation
 import com.mapbox.navigation.testing.utils.withoutInternet
-import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.toPoint
 import com.mapbox.turf.TurfMeasurement
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
@@ -141,24 +132,13 @@ class CoreRerouteTest(
     }
 
     @Test
-    fun reroute_completes() {
-        // prepare
-        val mapboxNavigation = createMapboxNavigation()
-        val locationTrackingIdlingResource = RouteProgressStateIdlingResource(
-            mapboxNavigation,
-            RouteProgressState.TRACKING,
-        )
-        val offRouteIdlingResource = RouteProgressStateIdlingResource(
-            mapboxNavigation,
-            RouteProgressState.OFF_ROUTE,
-        )
+    fun reroute_completes() = sdkTest {
         val mockRoute = RoutesProvider.dc_very_short(context)
         val originLocation = mockRoute.routeWaypoints.first()
         val offRouteLocationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
             latitude = originLocation.latitude() + 0.002
             longitude = originLocation.longitude()
         }
-
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
         mockWebServerRule.requestHandlers.add(
             MockDirectionsRequestHandler(
@@ -174,90 +154,40 @@ class CoreRerouteTest(
                 relaxedExpectedCoordinates = true,
             ),
         )
-        locationTrackingIdlingResource.register()
 
-        val expectedStates = RouteProgressStateTransitionAssertion(mapboxNavigation) {
-            requiredState(RouteProgressState.TRACKING)
-            requiredState(RouteProgressState.OFF_ROUTE)
-            optionalState(RouteProgressState.INITIALIZED)
-            requiredState(RouteProgressState.TRACKING)
-        }
-
-        // start a route
-        runOnMainSync {
-            mapboxNavigation.historyRecorder.startRecording()
-            mapboxNavigation.startTripSession()
-            mapboxNavigation.requestRoutes(
-                RouteOptions.builder()
-                    .applyDefaultNavigationOptions()
-                    .applyLanguageAndVoiceUnitOptions(context)
-                    .baseUrl(mockWebServerRule.baseUrl)
-                    .coordinatesList(mockRoute.routeWaypoints).build(),
-                object : NavigationRouterCallback {
-                    override fun onRoutesReady(
-                        routes: List<NavigationRoute>,
-                        @RouterOrigin routerOrigin: String,
-                    ) {
-                        mapboxNavigation.setNavigationRoutes(routes)
-                    }
-
-                    override fun onFailure(
-                        reasons: List<RouterFailure>,
-                        routeOptions: RouteOptions,
-                    ) {
-                        logE("onFailure reasons=$reasons", "DEBUG")
-                    }
-
-                    override fun onCanceled(
-                        routeOptions: RouteOptions,
-                        @RouterOrigin routerOrigin: String,
-                    ) {
-                        logE("onCanceled", "DEBUG")
-                    }
-                },
-            )
-        }
-
-        // wait for tracking to start
-        mapboxHistoryTestRule.stopRecordingOnCrash("no location tracking") {
-            Espresso.onIdle()
-        }
-        locationTrackingIdlingResource.unregister()
-
-        // push off route location and wait for the off route event
-        offRouteIdlingResource.register()
-        runOnMainSync {
-            mockLocationReplayerRule.loopUpdate(offRouteLocationUpdate, times = 5)
-        }
-
-        mapboxHistoryTestRule.stopRecordingOnCrash("no off route") {
-            Espresso.onIdle()
-        }
-        offRouteIdlingResource.unregister()
-
-        // wait for tracking to start again
-        locationTrackingIdlingResource.register()
-
-        mapboxHistoryTestRule.stopRecordingOnCrash("no tracking") {
-            Espresso.onIdle()
-        }
-        locationTrackingIdlingResource.unregister()
-
-        runBlocking(Dispatchers.Main) {
-            val historyPath = mapboxNavigation.historyRecorder.stopRecording()
-            logE("history path=$historyPath", "DEBUG")
-        }
-
-        // assert results
-        expectedStates.assert()
-
-        runOnMainSync {
-            val newWaypoints = mapboxNavigation.getNavigationRoutes().first()
-                .directionsRoute.routeOptions()!!.coordinatesList()
-            check(newWaypoints.size == 2) {
-                "Expected 2 waypoints in the route after reroute but was ${newWaypoints.size}"
+        withMapboxNavigation(
+            historyRecorderRule = mapboxHistoryTestRule,
+            customConfig = getTestCustomConfig(),
+        ) { navigation ->
+            val rerouteStates = navigation.recordRerouteStates()
+            stayOnPosition(originLocation, bearing = 0.0f) {
+                navigation.startTripSession()
+                val routes = navigation.requestRoutes(
+                    RouteOptions.builder()
+                        .applyDefaultNavigationOptions()
+                        .applyLanguageAndVoiceUnitOptions(context)
+                        .baseUrl(mockWebServerRule.baseUrl)
+                        .coordinatesList(mockRoute.routeWaypoints)
+                        .build(),
+                ).getSuccessfulResultOrThrowException().routes
+                navigation.setNavigationRoutesAsync(routes)
+                navigation.routeProgressUpdates().first {
+                    it.currentState == RouteProgressState.TRACKING
+                }
             }
-            check(newWaypoints[1] == mockRoute.routeWaypoints.last())
+            stayOnPosition(offRouteLocationUpdate) {
+                val routesUpdate = navigation.routesUpdates().first {
+                    it.reason == ROUTES_UPDATE_REASON_REROUTE
+                }
+                assertSuccessfulRerouteStateTransition(rerouteStates)
+                val newWaypoints = routesUpdate.navigationRoutes.first()
+                    .directionsRoute.routeOptions()!!.coordinatesList()
+                assertEquals(2, newWaypoints.size)
+                assertEquals(mockRoute.routeWaypoints.last(), newWaypoints[1])
+                navigation.routeProgressUpdates().first {
+                    it.currentState == RouteProgressState.TRACKING
+                }
+            }
         }
     }
 

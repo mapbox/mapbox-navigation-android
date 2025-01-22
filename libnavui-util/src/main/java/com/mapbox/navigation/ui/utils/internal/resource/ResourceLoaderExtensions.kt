@@ -4,6 +4,8 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.common.ResourceLoadError
 import com.mapbox.common.ResourceLoadProgress
 import com.mapbox.common.ResourceLoadResult
+import com.mapbox.navigation.ui.base.util.resource.ResourceLoadCallback
+import com.mapbox.navigation.ui.base.util.resource.ResourceLoader
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 

@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.utils.internal.resource
 
+import androidx.annotation.RestrictTo
 import com.mapbox.bindgen.Expected
 import com.mapbox.common.Cancelable
 import com.mapbox.common.NetworkRestriction
@@ -14,6 +15,10 @@ import com.mapbox.common.ResourceLoadResult
 import com.mapbox.common.ResourceLoadResultCallback
 import com.mapbox.common.TileDataDomain
 import com.mapbox.common.TileStore
+import com.mapbox.navigation.ui.base.util.resource.ResourceLoadCallback
+import com.mapbox.navigation.ui.base.util.resource.ResourceLoadObserver
+import com.mapbox.navigation.ui.base.util.resource.ResourceLoader
+import com.mapbox.navigation.utils.internal.NavigationTileStore
 import java.util.Queue
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -22,13 +27,14 @@ import java.util.concurrent.atomic.AtomicLong
 /**
  * Default [ResourceLoader] implementation.
  *
- * Uses [TileStore] to load resources.
+ * Uses [navigationTileStore]'s [TileStore] to load resources.
  * Keeps track of all [Cancelable] instances returned by the [TileStore.loadResource] and
  * assigns each a unique <i>id</i> that can be passed to [ResourceLoader.cancel] to
  * abort load operation.
  */
-internal class DefaultResourceLoader(
-    private val tileStore: TileStore,
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+class DefaultResourceLoader(
+    private val navigationTileStore: NavigationTileStore,
     private val reachability: ReachabilityInterface,
 ) : ResourceLoader() {
 
@@ -37,7 +43,7 @@ internal class DefaultResourceLoader(
     private val observers: Queue<ResourceLoadObserver> = ConcurrentLinkedQueue()
 
     override fun load(request: ResourceLoadRequest, callback: ResourceLoadCallback): Long {
-        return load(tileStore, request, callback)
+        return load(navigationTileStore(), request, callback)
     }
 
     override fun load(

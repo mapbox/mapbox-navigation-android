@@ -21,6 +21,7 @@ import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.ProfileApplication
 import com.mapbox.navigator.ProfilePlatform
+import com.mapbox.navigator.RerouteStrategyForMatchRoute
 import com.mapbox.navigator.SetRoutesParams
 import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.SettingsProfile
@@ -106,6 +107,7 @@ class NavigatorTest {
                 null,
                 null,
                 null,
+                RerouteStrategyForMatchRoute.REROUTE_DISABLED,
             ),
             "",
         )

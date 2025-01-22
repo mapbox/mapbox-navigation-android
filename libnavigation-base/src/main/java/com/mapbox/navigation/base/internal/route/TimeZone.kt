@@ -32,4 +32,9 @@ class TimeZone internal constructor(
             ", abbreviation='$abbreviation'" +
             ")"
     }
+
+    fun toJavaTimeZone(): java.util.TimeZone {
+        val identifier = identifier.takeIf { it in java.util.TimeZone.getAvailableIDs() }
+        return java.util.TimeZone.getTimeZone(identifier ?: "GMT$offset")
+    }
 }

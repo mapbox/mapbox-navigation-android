@@ -447,6 +447,7 @@ private fun ElectronicHorizonEdge.mapToEdge(): EHorizonEdge {
         id,
         level,
         probability,
+        isOnRoute,
         outgoingEdges,
     )
     // Recursively map the outgoing edges

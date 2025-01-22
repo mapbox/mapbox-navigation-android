@@ -15,12 +15,14 @@ package com.mapbox.navigation.base.trip.model.eh
  * 2 branches of level 1 branches, etc)
  * @param probability the probability for this edge in percentage to be taken by the driver.
  * The probabilities of all outgoing edges on a single intersection sum up to 1.
+ * @param isOnRoute Whether this edge is on primary route used for active guidance. Always false in free drive.
  * @param out the outgoing Edges
  */
 class EHorizonEdge internal constructor(
     val id: Long,
     val level: Byte,
     val probability: Double,
+    val isOnRoute: Boolean,
     val out: List<EHorizonEdge>,
 ) {
 
@@ -43,6 +45,7 @@ class EHorizonEdge internal constructor(
         if (id != other.id) return false
         if (level != other.level) return false
         if (probability != other.probability) return false
+        if (isOnRoute != other.isOnRoute) return false
         if (out != other.out) return false
 
         return true
@@ -55,6 +58,7 @@ class EHorizonEdge internal constructor(
         var result = id.hashCode()
         result = 31 * result + level
         result = 31 * result + probability.hashCode()
+        result = 31 * result + isOnRoute.hashCode()
         result = 31 * result + out.hashCode()
         return result
     }
@@ -67,6 +71,7 @@ class EHorizonEdge internal constructor(
             "id=$id, " +
             "level=$level, " +
             "probability=$probability, " +
+            "isOnRoute=$isOnRoute, " +
             "out=$out" +
             ")"
     }

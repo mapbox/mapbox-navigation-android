@@ -26,11 +26,11 @@ android {
 }
 
 dependencies {
-    api project(":libnavigation-core")
-    api project(':libnavigation-copilot')
-    api project(':libnavigation-tripdata')
-    api project(":libnavigation-voice")
-    api project(":libnavui-maps")
+    api project(":navigation")
+    api project(':copilot')
+    api project(':tripdata')
+    api project(":voice")
+    api project(":ui-maps")
 }
 
 apply from: "../gradle/track-public-apis.gradle"

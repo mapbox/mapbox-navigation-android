@@ -35,7 +35,7 @@ android {
 
 dependencies {
     api project(':libnavigation-base')
-    api project(':libnavigation-core')
+    api project(':navigation')
     api project(":libnavui-util")
     implementation dependenciesList.kotlinStdLib
     api dependenciesList.mapboxSdkGeoJSON

@@ -1210,7 +1210,9 @@ package com.mapbox.navigation.base.trip.model.eh {
     method public java.util.List<com.mapbox.navigation.base.trip.model.eh.EHorizonEdge> getOut();
     method public double getProbability();
     method public boolean isMpp();
+    method public boolean isOnRoute();
     property public final long id;
+    property public final boolean isOnRoute;
     property public final byte level;
     property public final java.util.List<com.mapbox.navigation.base.trip.model.eh.EHorizonEdge> out;
     property public final double probability;
