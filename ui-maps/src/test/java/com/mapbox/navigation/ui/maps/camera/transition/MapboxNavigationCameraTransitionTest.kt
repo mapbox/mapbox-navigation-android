@@ -11,7 +11,7 @@ import com.mapbox.maps.plugin.animation.animator.CameraAnimator
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.DEFAULT_FRAME_TRANSITION_OPT
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.DEFAULT_STATE_TRANSITION_OPT
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.NAVIGATION_CAMERA_OWNER
-import com.mapbox.navigation.ui.maps.camera.utils.constraintDurationTo
+import com.mapbox.navigation.ui.maps.camera.internal.constraintDurationTo
 import com.mapbox.navigation.ui.maps.camera.utils.createAnimatorSet
 import com.mapbox.navigation.ui.maps.camera.utils.createAnimatorSetWith
 import com.mapbox.navigation.ui.maps.camera.utils.getAnimatorsFactory
@@ -41,6 +41,7 @@ class MapboxNavigationCameraTransitionTest {
 
     @Before
     fun setup() {
+        mockkStatic("com.mapbox.navigation.ui.maps.camera.internal.MapboxNavigationCameraUtilsKt")
         mockkStatic("com.mapbox.navigation.ui.maps.camera.utils.MapboxNavigationCameraUtilsKt")
         every { createAnimatorSet(any()) } returns animatorSet
         every { createAnimatorSetWith(any()) } returns animatorSet
@@ -154,6 +155,7 @@ class MapboxNavigationCameraTransitionTest {
 
     @After
     fun tearDown() {
+        unmockkStatic("com.mapbox.navigation.ui.maps.camera.internal.MapboxNavigationCameraUtilsKt")
         unmockkStatic("com.mapbox.navigation.ui.maps.camera.utils.MapboxNavigationCameraUtilsKt")
     }
 }

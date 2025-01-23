@@ -2,7 +2,6 @@ package com.mapbox.navigation.ui.maps.camera.transition
 
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
-import androidx.annotation.RestrictTo
 import androidx.core.view.animation.PathInterpolatorCompat
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapboxMap
@@ -10,7 +9,7 @@ import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.CameraAnimatorOptions
 import com.mapbox.maps.plugin.animation.CameraAnimatorsFactory
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.NAVIGATION_CAMERA_OWNER
-import com.mapbox.navigation.ui.maps.camera.utils.constraintDurationTo
+import com.mapbox.navigation.ui.maps.camera.internal.constraintDurationTo
 import com.mapbox.navigation.ui.maps.camera.utils.createAnimatorSet
 import com.mapbox.navigation.ui.maps.camera.utils.createAnimatorSetWith
 import com.mapbox.navigation.ui.maps.camera.utils.getAnimatorsFactory
@@ -33,9 +32,6 @@ class MapboxNavigationCameraTransition(
     private val mapboxMap: MapboxMap,
     private val cameraPlugin: CameraAnimationsPlugin,
 ) : NavigationCameraTransition {
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-    var transitionLinearCenter = true
 
     override fun transitionFromLowZoomToHighZoom(
         cameraOptions: CameraOptions,
@@ -128,18 +124,16 @@ class MapboxNavigationCameraTransition(
     ): AnimatorSet {
         val animators = mutableListOf<ValueAnimator>()
 
-        if (transitionLinearCenter) {
-            cameraOptions.center?.let { center ->
-                val centerAnimator = cameraPlugin.createCenterAnimator(
-                    CameraAnimatorOptions.cameraAnimatorOptions(center) {
-                        owner(NAVIGATION_CAMERA_OWNER)
-                    },
-                ) {
-                    duration = LINEAR_ANIMATION_DURATION
-                    interpolator = LINEAR_INTERPOLATOR
-                }
-                animators.add(centerAnimator)
+        cameraOptions.center?.let { center ->
+            val centerAnimator = cameraPlugin.createCenterAnimator(
+                CameraAnimatorOptions.cameraAnimatorOptions(center) {
+                    owner(NAVIGATION_CAMERA_OWNER)
+                },
+            ) {
+                duration = LINEAR_ANIMATION_DURATION
+                interpolator = LINEAR_INTERPOLATOR
             }
+            animators.add(centerAnimator)
         }
 
         cameraOptions.zoom?.let { zoom ->
