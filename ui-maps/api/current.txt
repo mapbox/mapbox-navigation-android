@@ -514,12 +514,9 @@ package com.mapbox.navigation.ui.maps.camera.transition {
 
   public final class MapboxNavigationCameraTransition implements com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransition {
     ctor public MapboxNavigationCameraTransition(com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.animation.CameraAnimationsPlugin cameraPlugin);
-    method public boolean getTransitionLinearCenter();
-    method public void setTransitionLinearCenter(boolean);
     method public android.animation.AnimatorSet transitionFromHighZoomToLowZoom(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
     method public android.animation.AnimatorSet transitionFromLowZoomToHighZoom(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
     method public android.animation.AnimatorSet transitionLinear(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
-    property public final boolean transitionLinearCenter;
   }
 
   public final class MapboxNavigationCameraTransitionKt {

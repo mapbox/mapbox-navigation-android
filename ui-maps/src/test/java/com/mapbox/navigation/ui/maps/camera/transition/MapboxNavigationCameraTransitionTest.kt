@@ -12,10 +12,10 @@ import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.DEFAULT_F
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.DEFAULT_STATE_TRANSITION_OPT
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.NAVIGATION_CAMERA_OWNER
 import com.mapbox.navigation.ui.maps.camera.internal.constraintDurationTo
+import com.mapbox.navigation.ui.maps.camera.internal.normalizeBearing
 import com.mapbox.navigation.ui.maps.camera.utils.createAnimatorSet
 import com.mapbox.navigation.ui.maps.camera.utils.createAnimatorSetWith
 import com.mapbox.navigation.ui.maps.camera.utils.getAnimatorsFactory
-import com.mapbox.navigation.ui.maps.camera.utils.normalizeBearing
 import com.mapbox.navigation.ui.maps.camera.utils.normalizeProjection
 import com.mapbox.navigation.ui.maps.camera.utils.projectedDistance
 import com.mapbox.navigation.ui.maps.camera.utils.screenDistanceFromMapCenterToTarget

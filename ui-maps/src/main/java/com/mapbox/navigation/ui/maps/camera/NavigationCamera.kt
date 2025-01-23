@@ -387,7 +387,8 @@ class NavigationCamera(
         navigationCameraStateChangedObservers.remove(navigationCameraStateChangedObserver)
     }
 
-    // for coordination layer use only, remove after NAVAND-4832
+    // for coordination layer use only
+    // TODO remove after NAVAND-4832
     internal fun jumpToLocation(center: Point?, bearing: Double?) {
         mapboxMap.setCamera(
             CameraOptions.Builder()
