@@ -2,7 +2,7 @@ package com.mapbox.navigation.ui.maps.camera.internal
 
 import android.animation.AnimatorSet
 import androidx.annotation.RestrictTo
-import com.mapbox.common.location.Location
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 
 /**
@@ -25,6 +25,6 @@ fun AnimatorSet.constraintDurationTo(maxDuration: Long): AnimatorSet {
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-fun NavigationCamera.jumpToLocationInternal(location: Location) {
-    jumpToLocation(location)
+fun NavigationCamera.jumpToLocationInternal(center: Point?, bearing: Double?) {
+    jumpToLocation(center, bearing)
 }

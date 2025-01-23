@@ -5,6 +5,7 @@ import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import androidx.annotation.UiThread
 import com.mapbox.common.location.Location
+import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
@@ -394,11 +395,11 @@ class NavigationCamera(
     }
 
     // for coordination layer use only, remove after NAVAND-4832
-    internal fun jumpToLocation(location: Location) {
+    internal fun jumpToLocation(center: Point?, bearing: Double?) {
         mapboxMap.setCamera(
             CameraOptions.Builder()
-                .center(location.toPoint())
-                .bearing(location.bearing)
+                .center(center)
+                .bearing(bearing)
                 .build(),
         )
     }
