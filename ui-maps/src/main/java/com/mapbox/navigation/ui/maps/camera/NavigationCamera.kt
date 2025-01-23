@@ -4,7 +4,6 @@ import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import androidx.annotation.UiThread
-import com.mapbox.common.location.Location
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapView
@@ -31,7 +30,6 @@ import com.mapbox.navigation.ui.maps.camera.transition.MapboxNavigationCameraSta
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraStateTransition
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
 import com.mapbox.navigation.ui.maps.camera.transition.TransitionEndListener
-import com.mapbox.navigation.utils.internal.toPoint
 import java.util.concurrent.CopyOnWriteArraySet
 
 /**
@@ -159,7 +157,8 @@ class NavigationCamera(
         }
 
     private val sourceUpdateObserver =
-        ViewportDataSourceUpdateObserver { viewportData ->
+        ViewportDataSourceUpdateObserver {
+                viewportData ->
             updateFrame(viewportData, instant = false)
         }
 
@@ -218,11 +217,9 @@ class NavigationCamera(
                     transitionEndListeners.add(transitionEndListener)
                 }
             }
-
             FOLLOWING -> {
                 transitionEndListener?.onTransitionEnd(isCanceled = false)
             }
-
             IDLE, TRANSITION_TO_OVERVIEW, OVERVIEW -> {
                 val data = viewportDataSource.getViewportData()
                 startAnimation(
@@ -296,11 +293,9 @@ class NavigationCamera(
                     transitionEndListeners.add(transitionEndListener)
                 }
             }
-
             OVERVIEW -> {
                 transitionEndListener?.onTransitionEnd(isCanceled = false)
             }
-
             IDLE, TRANSITION_TO_FOLLOWING, FOLLOWING -> {
                 val data = viewportDataSource.getViewportData()
                 startAnimation(
@@ -356,7 +351,6 @@ class NavigationCamera(
                     instant,
                 )
             }
-
             OVERVIEW -> {
                 startAnimation(
                     stateTransition.updateFrameForOverview(
@@ -368,7 +362,6 @@ class NavigationCamera(
                     instant,
                 )
             }
-
             IDLE, TRANSITION_TO_FOLLOWING, TRANSITION_TO_OVERVIEW -> {
                 // no impl
             }
