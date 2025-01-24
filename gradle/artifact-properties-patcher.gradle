@@ -50,7 +50,7 @@ ext.patchArtifactMetadataFile = {
     if (moduleData.variants) {
         moduleData.variants.each { variant ->
             variant.dependencies.each { dependency ->
-                if (project.ext.navSdkArtifactSettings.containsKey(dependency.module)) {
+                if (dependency.group == "com.mapbox.navigationcore" && project.ext.navSdkArtifactSettings.containsKey(dependency.module)) {
                     patched = true
                     dependency.module = project.ext.navSdkArtifactSettings[dependency.module].getV1()
                     dependency.version = [requires: project.ext.versionName]
