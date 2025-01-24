@@ -9,7 +9,8 @@ ext.patchPomDependencies = { Node mainNode ->
     dependenciesNode.each { depNode ->
         // Find all dependencies whose artifactId equals to the name of one of project's modules.
         def navSdkDependencyNodes = depNode['dependency'].findAll { dependency ->
-            project.ext.navSdkArtifactSettings.containsKey(dependency['artifactId'].text())
+            dependency['groupId'].text() == 'com.mapbox.navigationcore' &&
+                    project.ext.navSdkArtifactSettings.containsKey(dependency['artifactId'].text())
         }
 
         navSdkDependencyNodes.each { navSdkNode ->
