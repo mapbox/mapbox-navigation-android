@@ -3,6 +3,7 @@ package com.mapbox.navigation.instrumentation_tests.core
 import android.location.Location
 import android.os.Looper
 import androidx.test.espresso.Espresso
+import com.adevinta.android.barista.rule.cleardata.ClearFilesRule
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
@@ -42,6 +43,7 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsyn
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigation.testing.utils.DelayedResponseModifier
 import com.mapbox.navigation.testing.utils.assertions.RerouteStateTransitionAssertion
+import com.mapbox.navigation.testing.utils.assertions.assertIs
 import com.mapbox.navigation.testing.utils.assertions.assertRerouteFailedTransition
 import com.mapbox.navigation.testing.utils.assertions.assertSuccessfulRerouteStateTransition
 import com.mapbox.navigation.testing.utils.assertions.recordRerouteStates
@@ -112,6 +114,14 @@ class CoreRerouteTest(
 
     @get:Rule
     val mapboxHistoryTestRule = MapboxHistoryTestRule()
+
+    /**
+     * Files cleanup is required because tests that use [withoutInternet] in this class
+     * expect navigator to not have enough tiles to build an offline route and fail
+     * building a route.
+     */
+    @get:Rule
+    val clearFilesRule = ClearFilesRule()
 
     @Before
     fun setup() {
@@ -908,10 +918,11 @@ class CoreRerouteTest(
             withoutInternet {
                 stayOnPosition(offRouteLocationUpdate) {
                     mapboxNavigation.offRouteUpdates().filter { it }.first()
-                    val failedState = mapboxNavigation.getRerouteController()!!
+                    val rerouteState = mapboxNavigation.getRerouteController()!!
                         .rerouteStates()
-                        .filterIsInstance<RerouteState.Failed>()
+                        .filter { it is RerouteState.Failed || it is RerouteState.RouteFetched }
                         .first()
+                    val failedState = assertIs<RerouteState.Failed>(rerouteState)
                     assertTrue(failedState.isRetryable)
                 }
             }

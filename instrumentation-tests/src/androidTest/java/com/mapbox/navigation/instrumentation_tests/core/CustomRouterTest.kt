@@ -566,10 +566,12 @@ class CustomRouterTest : BaseCoreNoCleanUpTest() {
 
     @Test
     fun no_test_router_provided() {
-        val mockRoute = RoutesProvider.dc_very_short(context)
         val testRouteOptions = RouteOptions.builder()
             .applyDefaultNavigationOptions()
-            .coordinatesList(mockRoute.routeWaypoints)
+            // Route is requested from a location that is far away from the current one,
+            // to make sure that the onboard router doesn't succeed in building a route,
+            // due to the absence of tiles in ambient cache for a different region.
+            .coordinates("11.9460162,57.7120152;-7.5830081,38.6731391")
             .build()
         sdkTest {
             withMapboxNavigation(
