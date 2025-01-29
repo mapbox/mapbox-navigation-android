@@ -35,5 +35,6 @@ dependencies {
 
 apply from: "../gradle/track-public-apis.gradle"
 apply from: "../gradle/jacoco.gradle"
+apply from: "../gradle/kover.gradle"
 apply from: "../gradle/publish.gradle"
 apply from: "../../../../scripts_shared/find-all-common-sdk-versions.gradle"

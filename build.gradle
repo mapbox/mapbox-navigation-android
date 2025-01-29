@@ -21,6 +21,7 @@ buildscript {
     classpath pluginDependencies.kotlin
     classpath pluginDependencies.dependencyUpdates
     classpath pluginDependencies.jacoco
+    classpath pluginDependencies.kover
     classpath pluginDependencies.googleServices
     classpath pluginDependencies.license
     // Used by license. Add this dependency explicitly,
@@ -99,6 +100,22 @@ apply from: "${rootDir}/gradle/kdoc-settings.gradle"
 
 dokkaHtmlMultiModule {
   outputDirectory.set(kdocPath)
+}
+
+apply plugin: 'org.jetbrains.kotlinx.kover'
+kover {
+  merge {
+    allProjects()
+  }
+
+  reports {
+    filters {
+      excludes {
+        annotatedBy("androidx.compose.ui.tooling.preview.Preview")
+        annotatedBy("androidx.compose.runtime.Composable")
+      }
+    }
+  }
 }
 
 task clean(type: Delete) {

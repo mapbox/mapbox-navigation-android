@@ -207,6 +207,7 @@ ext {
       // This dependency may be removed when we bump license version.
       kotlinHtmlJvm        : '0.7.2',
       jacoco               : '0.8.12',
+      kover                : '0.9.1',
       googleServices       : '4.3.3',
       mapboxSdkVersions    : '1.1.5',
       dokka                : '1.9.20',
@@ -228,6 +229,7 @@ ext {
       dependencyGraph      : "com.vanniktech:gradle-dependency-graph-generator-plugin:${pluginVersion.dependencyGraph}",
       dependencyUpdates    : "com.github.ben-manes:gradle-versions-plugin:${pluginVersion.dependencyUpdates}",
       jacoco               : "org.jacoco:org.jacoco.core:${pluginVersion.jacoco}",
+      kover                : "org.jetbrains.kotlinx:kover-gradle-plugin:${pluginVersion.kover}",
       googleServices       : "com.google.gms:google-services:${pluginVersion.googleServices}",
       mapboxSdkVersions    : "com.mapbox.mapboxsdk:mapbox-android-sdk-versions:${pluginVersion.mapboxSdkVersions}",
       dokka                : "org.jetbrains.dokka:dokka-gradle-plugin:${pluginVersion.dokka}",
