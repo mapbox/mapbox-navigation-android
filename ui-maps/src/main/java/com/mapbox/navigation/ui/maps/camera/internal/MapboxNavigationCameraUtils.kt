@@ -27,8 +27,8 @@ fun AnimatorSet.constraintDurationTo(maxDuration: Long): AnimatorSet {
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-fun NavigationCamera.jumpToLocationInternal(center: Point?, bearing: Double?) {
-    jumpToLocation(center, bearing)
+fun NavigationCamera.jumpToCameraCenterInternal(center: Point?) {
+    jumpToCameraCenter(center)
 }
 
 /**

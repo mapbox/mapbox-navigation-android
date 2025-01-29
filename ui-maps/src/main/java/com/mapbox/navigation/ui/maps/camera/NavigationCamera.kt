@@ -389,11 +389,10 @@ class NavigationCamera(
 
     // for coordination layer use only
     // TODO remove after NAVAND-4832
-    internal fun jumpToLocation(center: Point?, bearing: Double?) {
+    internal fun jumpToCameraCenter(center: Point?) {
         mapboxMap.setCamera(
             CameraOptions.Builder()
                 .center(center)
-                .bearing(bearing)
                 .build(),
         )
     }

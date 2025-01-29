@@ -30,6 +30,8 @@ import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.pro
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRoutePoints
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.simplifyCompleteRoutePoints
 import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger
+import com.mapbox.navigation.ui.maps.camera.internal.FollowingFramingMode
+import com.mapbox.navigation.ui.maps.camera.internal.FollowingFramingModeHolder
 import com.mapbox.navigation.ui.maps.camera.internal.normalizeBearing
 import com.mapbox.navigation.ui.maps.util.MapSizeReadyCallbackHelper
 import com.mapbox.navigation.utils.internal.ifNonNull
@@ -199,8 +201,9 @@ import kotlin.math.min
  * ```
  */
 @UiThread
-class MapboxNavigationViewportDataSource(
+class MapboxNavigationViewportDataSource internal constructor(
     private val mapboxMap: MapboxMap,
+    private val followingFramingModeHolder: FollowingFramingModeHolder?,
 ) : ViewportDataSource {
 
     internal companion object {
@@ -210,6 +213,8 @@ class MapboxNavigationViewportDataSource(
         internal const val ZERO_PITCH = 0.0
         internal const val BEARING_NORTH = 0.0
     }
+
+    constructor(mapboxMap: MapboxMap) : this(mapboxMap, null)
 
     /**
      * Set a [MapboxNavigationViewportDataSourceDebugger].
@@ -698,6 +703,7 @@ class MapboxNavigationViewportDataSource(
                 followingCenterProperty.fallback = cameraState.center
                 followingZoomProperty.fallback = max(min(cameraState.zoom, maxZoom), minZoom)
             }
+            followingFramingModeHolder?.mode = FollowingFramingMode.NONE
             // nothing to frame
             return
         }
@@ -725,6 +731,7 @@ class MapboxNavigationViewportDataSource(
                 options.followingFrameOptions.maximizeViewableGeometryWhenPitchZero &&
                 followingPitchProperty.get() == ZERO_PITCH
             ) {
+                followingFramingModeHolder?.mode = FollowingFramingMode.MULTIPLE_POINTS
                 mapboxMap.cameraForCoordinates(
                     pointsForFollowing,
                     CameraOptions.Builder()
@@ -744,6 +751,7 @@ class MapboxNavigationViewportDataSource(
                     followingPadding,
                     options.followingFrameOptions.focalPoint,
                 )
+                followingFramingModeHolder?.mode = FollowingFramingMode.LOCATION_INDICATOR
                 val fallbackCameraOptions = CameraOptions.Builder()
                     .center(
                         pointsForFollowing.firstOrNull() ?: cameraState.center,
@@ -766,6 +774,7 @@ class MapboxNavigationViewportDataSource(
 
         if (cameraFrame.isEmpty) {
             logW { "CameraOptions is empty" }
+            followingFramingModeHolder?.mode = FollowingFramingMode.NONE
             return
         }
 
