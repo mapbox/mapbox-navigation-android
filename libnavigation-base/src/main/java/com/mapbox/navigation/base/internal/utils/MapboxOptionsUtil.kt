@@ -22,3 +22,8 @@ object MapboxOptionsUtil {
         return MapboxOptionsImpl.getTokenForService(service)
     }
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+object NavSDKServices {
+    const val ISOCHRONE = "ISOCHRONE"
+}
