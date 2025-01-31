@@ -29,7 +29,7 @@ dependencies {
     compileOnly dependenciesList.mapboxAnnotations
     kapt dependenciesList.mapboxAnnotationsProcessor
 
-    api project(':libnavigation-base')
+    api project(':base')
 
     implementation dependenciesList.kotlinStdLib
     implementation project(':libnavigation-util')

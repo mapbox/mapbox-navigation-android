@@ -34,7 +34,7 @@ android {
 }
 
 dependencies {
-    api project(':libnavigation-base')
+    api project(':base')
     api project(':navigation')
     api project(":libnavui-util")
     implementation dependenciesList.kotlinStdLib

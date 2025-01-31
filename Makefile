@@ -1,6 +1,6 @@
 PUBLIC_API_PREFIX = public-api
 
-# $(1) modules' names(e.g. "navigation, libnavigation-base...")
+# $(1) modules' names(e.g. "navigation, base...")
 define reports-copy-to
 	for module in $(1) ; do \
 		if [ -d "$${module}/build/jacoco" ]; then \
@@ -12,7 +12,7 @@ define reports-copy-to
 endef
 
 RELEASED_CORE_MODULES = \
-libnavigation-base \
+base \
 libnavigation-metrics \
 libnavigation-util \
 libnavigator \
@@ -136,7 +136,7 @@ core-dependency-graph:
 
 .PHONY: core-check-api
 core-check-api: assemble-core-release
-	./gradlew :libnavigation-base:checkApi -PhidePackage=com.mapbox.navigation.base.internal
+	./gradlew :base:checkApi -PhidePackage=com.mapbox.navigation.base.internal
 	./gradlew :libnavigation-metrics:checkApi -PhidePackage=com.mapbox.navigation.metrics.internal
 	./gradlew :libnavigation-util:checkApi -PhidePackage=com.mapbox.navigation.utils.internal
 	./gradlew :libnavigator:checkApi -PhidePackage=com.mapbox.navigation.navigator.internal
@@ -149,7 +149,7 @@ core-check-api: assemble-core-release
 
 .PHONY: core-update-api
 core-update-api: assemble-core-release
-	./gradlew :libnavigation-base:updateApi -PhidePackage=com.mapbox.navigation.base.internal
+	./gradlew :base:updateApi -PhidePackage=com.mapbox.navigation.base.internal
 	./gradlew :libnavigation-metrics:updateApi -PhidePackage=com.mapbox.navigation.metrics.internal
 	./gradlew :libnavigation-util:updateApi -PhidePackage=com.mapbox.navigation.utils.internal
 	./gradlew :libnavigator:updateApi -PhidePackage=com.mapbox.navigation.navigator.internal

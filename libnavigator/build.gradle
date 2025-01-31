@@ -33,7 +33,7 @@ android {
 }
 
 dependencies {
-    implementation(project(':libnavigation-base'))
+    implementation(project(':base'))
     implementation(project(':libnavigation-util'))
 
     // mapbox-java GeoJSON

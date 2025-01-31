@@ -24,7 +24,7 @@ ext {
      */
     navSdkArtifactSettings = [
         'libnavigation-android' : new Tuple2('android', 'navigation-core-android'),
-        'libnavigation-base' : new Tuple2('base', 'navigation-core-base'),
+        'base' : new Tuple2('base', 'navigation-core-base'),
         'navigation' : new Tuple2('navigation', 'navigation-core-navigation'),
         'copilot' : new Tuple2('copilot', 'navigation-core-copilot'),
         'libnavigation-metrics' : new Tuple2('metrics', 'navigation-core-metrics'),

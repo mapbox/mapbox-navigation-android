@@ -10,8 +10,8 @@ source_lang = en
 type = ANDROID
 
 [mapbox-navigation-sdk-for-android.libnavigation-base-strings-file]
-file_filter = libnavigation-base/src/main/res/values-<lang>/strings.xml
-source_file = libnavigation-base/src/main/res/values/strings.xml
+file_filter = base/src/main/res/values-<lang>/strings.xml
+source_file = base/src/main/res/values/strings.xml
 source_lang = en
 type = ANDROID
 

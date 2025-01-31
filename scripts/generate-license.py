@@ -79,7 +79,7 @@ with codecs.open(licensePath, 'w', encoding='utf-8') as licenseFile:
     [licenseFile.write(l.text()) for l in staticLicenses]
 
     licenseFile.write("\n\n#### Navigation Base SDK module\n")
-    writeToFile(licenseFile, "/libnavigation-base/build/reports/licenses/licenseReleaseReport.json")
+    writeToFile(licenseFile, "/base/build/reports/licenses/licenseReleaseReport.json")
     licenseFile.write("\n\n#### Navigation Core SDK module\n")
     writeToFile(licenseFile, "/navigation/build/reports/licenses/licenseReleaseReport.json")
     licenseFile.write("\n\n#### Metrics SDK module\n")
@@ -105,7 +105,7 @@ with codecs.open(licensePath, 'w', encoding='utf-8') as licenseFile:
     licenseFile.write("\n\n#### Nav SDK Test Router module\n")
     writeToFile(licenseFile, "/libtesting-router/build/reports/licenses/licenseReleaseReport.json")
 
-removeLicenseHtmlFileForModule("libnavigation-base")
+removeLicenseHtmlFileForModule("base")
 removeLicenseHtmlFileForModule("navigation")
 removeLicenseHtmlFileForModule("libnavigation-metrics")
 removeLicenseHtmlFileForModule("tripdata")

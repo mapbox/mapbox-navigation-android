@@ -40,7 +40,7 @@ dependencies {
     implementation dependenciesList.mapboxAnnotations
     api dependenciesList.mapboxAndroidCommon
 
-    api project(':libnavigation-base')
+    api project(':base')
     api project(':libnavigation-util')
     implementation project(':libnavigator')
     runtimeOnly project(':libtrip-notification')
