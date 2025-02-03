@@ -34,7 +34,7 @@ android {
 }
 
 dependencies {
-    api project(":ui-base")
+    api project(":libnavui-base")
 
     api dependenciesList.mapboxSdkServices
 

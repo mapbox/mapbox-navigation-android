@@ -4,8 +4,8 @@ lang_map = pt_BR: pt-rBR, pt_PT: pt-rPT, es_ES: es-rES
 minimum_perc = 20
 
 [mapbox-navigation-sdk-for-android.libnavigation-util-strings-file]
-file_filter = utils/src/main/res/values-<lang>/strings.xml
-source_file = utils/src/main/res/values/strings.xml
+file_filter = libnavigation-util/src/main/res/values-<lang>/strings.xml
+source_file = libnavigation-util/src/main/res/values/strings.xml
 source_lang = en
 type = ANDROID
 

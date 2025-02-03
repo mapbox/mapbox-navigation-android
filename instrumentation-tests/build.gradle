@@ -43,8 +43,8 @@ android {
 dependencies {
     // Mapbox Navigation SDK
     api project(':libnavigation-android')
-    api project(":ui-utils")
-    api project(':utils')
+    api project(":libnavui-util")
+    api project(':libnavigation-util')
     api project(":ui-components")
 
     // test

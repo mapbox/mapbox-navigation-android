@@ -1,8 +1,14 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-parcelize'
 apply plugin: 'com.jaredsburrows.license'
+apply plugin: 'com.mapbox.android.sdk.versions'
 apply from: "../gradle/ktlint.gradle"
+apply from: file("../gradle/artifact-settings.gradle")
+
+version = project.ext.versionName
+group = project.ext.mapboxArtifactGroupId
 
 android {
     compileSdkVersion androidVersions.compileSdkVersion
@@ -17,6 +23,8 @@ android {
         targetSdkVersion androidVersions.targetSdkVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'proguard-rules.pro', "../proguard/proguard-project.pro"
+
+        buildConfigField 'String', "MAPBOX_NAVIGATION_VERSION_NAME", String.format("\"%s\"", project.ext.versionName)
     }
 
     testOptions {
@@ -26,22 +34,21 @@ android {
 }
 
 dependencies {
-    compileOnly dependenciesList.mapboxAnnotations
-    kapt dependenciesList.mapboxAnnotationsProcessor
-
-    api project(':base')
-
+    api project(":libnavigation-util")
+    api dependenciesList.svgParser
     implementation dependenciesList.kotlinStdLib
-    implementation project(':utils')
-
-    implementation dependenciesList.androidXCore
-
-    implementation dependenciesList.coroutinesAndroid
+    implementation dependenciesList.androidXAnnotation
+    implementation dependenciesList.androidXLifecycleRuntime
+    implementation(dependenciesList.androidXDataStore)
 
     apply from: "../gradle/unit-testing-dependencies.gradle"
+    testImplementation(project(':libtesting-utils'))
+    testImplementation project(':libtesting-navigation-util')
+    testImplementation dependenciesList.androidXLifecycleTesting
+    testImplementation dependenciesList.androidXArchCoreTesting
 }
 
 apply from: "../gradle/track-public-apis.gradle"
-apply from: "../gradle/publish.gradle"
 apply from: "../gradle/jacoco.gradle"
 apply from: "../gradle/kover.gradle"
+apply from: "../gradle/publish.gradle"

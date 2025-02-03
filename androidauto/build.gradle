@@ -49,7 +49,7 @@ android {
 
 dependencies {
     implementation(project(':libnavigation-android'))
-    implementation(project(':utils'))
+    implementation(project(':libnavigation-util'))
 
     api(dependenciesList.mapboxMapsAndroidAuto)
     api dependenciesList.mapboxSearch

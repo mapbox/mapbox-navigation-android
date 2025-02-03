@@ -37,7 +37,7 @@ android {
 }
 
 dependencies {
-    api project(":ui-base")
+    api project(":libnavui-base")
 
     implementation dependenciesList.androidXAppCompat
     implementation dependenciesList.kotlinStdLib

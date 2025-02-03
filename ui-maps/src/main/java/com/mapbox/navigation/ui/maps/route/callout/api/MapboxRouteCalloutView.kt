@@ -12,7 +12,6 @@ import com.mapbox.maps.viewannotation.viewAnnotationOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.ui.maps.internal.route.callout.model.RouteCallout
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutViewOptions
 import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.route.callout.view.RouteCalloutView
@@ -45,16 +44,6 @@ class MapboxRouteCalloutView(
     }
 
     init {
-        viewAnnotationManager.viewAnnotationAvoidLayers =
-            HashSet(
-                viewAnnotationManager.viewAnnotationAvoidLayers +
-                    setOf(
-                        RouteLayerConstants.LAYER_GROUP_1_MAIN,
-                        RouteLayerConstants.LAYER_GROUP_2_MAIN,
-                        RouteLayerConstants.LAYER_GROUP_3_MAIN,
-                        RouteLayerConstants.MASKING_LAYER_MAIN,
-                    ),
-            )
         viewAnnotationManager.addOnViewAnnotationUpdatedListener(onViewAnnotationUpdatedListener)
     }
 
@@ -86,13 +75,7 @@ class MapboxRouteCalloutView(
             val layer = routeLineView.getRouteMainLayerIdForFeature(calloutRoute.route.id)
             if (layer != null) {
                 val view = getOrCreateRouteCalloutView(calloutRoute)
-                addView(
-                    layer,
-                    view,
-                    calloutRoute.minZoom,
-                    calloutRoute.maxZoom,
-                    calloutRoute.priority,
-                )
+                addView(layer, view)
             } else {
                 logW(
                     TAG,
@@ -111,13 +94,7 @@ class MapboxRouteCalloutView(
         routeCallouts.addAll(remainingViews)
     }
 
-    private fun addView(
-        layerId: String,
-        view: View,
-        minZoom: Float?,
-        maxZoom: Float?,
-        priority: Long?,
-    ) {
+    private fun addView(layerId: String, view: View) {
         val density = mapView.resources.displayMetrics.density
         if (viewAnnotationManager.getViewAnnotationOptions(view) == null) {
             viewAnnotationManager.addViewAnnotation(
@@ -125,9 +102,6 @@ class MapboxRouteCalloutView(
                 options = viewAnnotationOptions {
                     ignoreCameraPadding(true)
                     annotatedLayerFeature(layerId)
-                    minZoom(minZoom)
-                    maxZoom(maxZoom)
-                    priority(priority)
                     annotationAnchors(
                         {
                             anchor(ViewAnnotationAnchor.TOP_RIGHT)

@@ -32,7 +32,7 @@ android {
 }
 
 dependencies {
-    implementation(project(':utils'))
+    implementation(project(':libnavigation-util'))
     api dependenciesList.mapboxCommonNative
     api dependenciesList.mapboxSdkDirectionsModels
     api dependenciesList.mapboxSdkServicesCore

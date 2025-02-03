@@ -15,6 +15,8 @@ import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.retrieveOwnerFrom
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.utcTimeNow
 import java.io.File
 import java.util.Locale
+import kotlin.io.path.Path
+import kotlin.io.path.nameWithoutExtension
 
 /**
  * Copilot session info.
@@ -91,7 +93,7 @@ internal fun currentUtcTime(
 ): String = utcTimeNow(format, locale)
 
 internal fun CopilotSession.saveFilename(): String {
-    val name = File(recording).nameWithoutExtension.substringBefore(".")
+    val name = Path(recording).nameWithoutExtension.substringBefore(".")
     return if (name.isNotBlank()) "$name.metadata.json" else "$startedAt.metadata.json"
 }
 

@@ -29,7 +29,7 @@ android {
 
 dependencies {
     implementation project(':navigation')
-    implementation project(':utils')
+    implementation project(':libnavigation-util')
 
     implementation dependenciesList.kotlinStdLib
     implementation dependenciesList.coroutinesAndroid

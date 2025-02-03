@@ -1,5 +1,27 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.7.0-rc.1 - 03 February, 2025
+#### Features
+- Support for danger zones in countries with legal restrictions on displaying speed camera locations (e.g. France) 
+
+#### Bug fixes and improvements
+- Fixed an issue where the location indicator might have teleported back to tunnel after exiting it. 
+- Added filter for zero-powered charging stations on EV layer 
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.10.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.10.0-rc.1))
+- Mapbox Navigation Native `v323.0.0-rc.1`
+- Mapbox Core Common `v24.10.0-rc.1`
+- Mapbox Java `v7.3.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.3.1))
+
+
 ## Navigation SDK Core Framework 3.7.0-beta.1 - 22 January, 2025
 #### Features
 - Add `MapboxRoadCamera::inOnRoute` flag which indicates if the roiad camera is on the current route. 

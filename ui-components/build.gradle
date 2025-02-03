@@ -40,11 +40,11 @@ android {
 }
 
 dependencies {
-    api project(":ui-base")
+    api project(":libnavui-base")
     api project(":ui-maps")
     api project(":tripdata")
     api project(":voice")
-    implementation project(":utils")
+    implementation project(":libnavigation-util")
 
     implementation dependenciesList.androidXAppCompat
     implementation dependenciesList.androidXCardView

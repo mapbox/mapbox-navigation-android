@@ -154,7 +154,6 @@ import com.mapbox.navigator.TilesConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
@@ -2019,16 +2018,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     fun onEVDataUpdated(data: Map<String, String>) {
         evDynamicDataHolder.updateData(data)
         navigator.onEVDataUpdated(evDynamicDataHolder.currentData(emptyMap()))
-    }
-
-    /**
-     * Allows other Nav SDK modules observe the latest EV state which is
-     * accumulated based on data provided in [onEVDataUpdated].
-     * Route options of the current route isn't taken into account in
-     * [internalEvUpdatedData], only data provided in [onEVDataUpdated].
-     */
-    internal fun internalEvUpdatedData(): StateFlow<Map<String, String>> {
-        return evDynamicDataHolder.updatedRawData()
     }
 
     /**
