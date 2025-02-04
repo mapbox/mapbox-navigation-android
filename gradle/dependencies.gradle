@@ -13,7 +13,7 @@ ext {
   // version which we should use in this build
   def mapboxNavigatorVersion = System.getenv("FORCE_MAPBOX_NAVIGATION_NATIVE_VERSION")
   if (mapboxNavigatorVersion == null || mapboxNavigatorVersion == '') {
-      mapboxNavigatorVersion = '323.0.0-SNAPSHOT-02-07--09-22.git-5aff9d6.release-v0-10'
+      mapboxNavigatorVersion = '323.0.0-SNAPSHOT-02-07--13-49.git-fafbec4.dd-drive3d-960-v10'
   }
   println("Navigation Native version: " + mapboxNavigatorVersion)
 
@@ -21,8 +21,8 @@ ext {
       mapboxMapSdk              : '11.10.0-rc.1',
       mapboxSdkServices         : '7.3.1',
       mapboxNavigator           : "${mapboxNavigatorVersion}",
-      mapboxCommonNative        : '24.10.0-SNAPSHOT-02-07--09-22.git-5aff9d6.release-v0-10',
-      mapboxNavSdkCpp           : '0.10.0-SNAPSHOT-02-07--09-22.git-5aff9d6.release-v0-10',
+      mapboxCommonNative        : '24.10.0-SNAPSHOT-02-07--13-49.git-fafbec4.dd-drive3d-960-v10',
+      mapboxNavSdkCpp           : '0.10.0-SNAPSHOT-02-07--13-49.git-fafbec4.dd-drive3d-960-v10',
       mapboxSearch              : '2.8.0-rc.1',
       mapboxBaseAndroid         : '0.11.0',
       androidXLifecycle         : '2.4.0',
