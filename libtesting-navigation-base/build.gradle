@@ -24,7 +24,7 @@ dependencies {
     api project(':libtesting-thirdparty')
     // testing modules should not transitively bring in project dependencies
     compileOnly(project(':base'))
-    compileOnly(project(':libnavigation-util'))
+    compileOnly(project(':utils'))
     implementation dependenciesList.junit
     implementation dependenciesList.mockk
 }

@@ -1,12 +1,15 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-parcelize'
 apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'com.jaredsburrows.license'
-apply from: file("../gradle/artifact-settings.gradle")
+apply plugin: 'com.mapbox.android.sdk.versions'
 apply from: "../gradle/ktlint.gradle"
+apply from: file("../gradle/artifact-settings.gradle")
 apply from: "../gradle/kdoc-settings.gradle"
 
-// for lint to correctly identify groupId
+version = project.ext.versionName
 group = project.ext.mapboxArtifactGroupId
 
 android {
@@ -16,36 +19,43 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-
+    
     defaultConfig {
         minSdkVersion androidVersions.minSdkVersion
         targetSdkVersion androidVersions.targetSdkVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'proguard-rules.pro', "../proguard/proguard-project.pro"
     }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+        unitTests.includeAndroidResources = true
+    }
 }
 
 dependencies {
     api project(':base')
-    implementation project(':libnavigation-util')
-
+    api project(':navigation')
+    api project(":ui-utils")
     implementation dependenciesList.kotlinStdLib
-    implementation dependenciesList.coroutinesAndroid
+    api dependenciesList.mapboxSdkGeoJSON
+    api dependenciesList.androidXCore
+    api dependenciesList.androidXAnnotation
+    implementation dependenciesList.androidXAppCompat
+    implementation dependenciesList.androidXConstraintLayout
 
-    testImplementation project(':libtesting-navigation-util')
-    testImplementation project(':libtesting-utils')
     apply from: "../gradle/unit-testing-dependencies.gradle"
+    testImplementation(project(':libtesting-utils'))
 }
 
 dokkaHtmlPartial {
     outputDirectory.set(kdocPath)
-    moduleName.set("Metrics")
+    moduleName.set("UI Base")
     dokkaSourceSets {
         configureEach {
             reportUndocumented.set(true)
-
             perPackageOption {
-                matchingRegex.set("com.mapbox.navigation.metrics.internal.*")
+                matchingRegex.set("com.mapbox.navigation.ui.base.internal.*")
                 suppress.set(true)
             }
         }
@@ -53,6 +63,6 @@ dokkaHtmlPartial {
 }
 
 apply from: "../gradle/track-public-apis.gradle"
-apply from: "../gradle/publish.gradle"
 apply from: "../gradle/jacoco.gradle"
 apply from: "../gradle/kover.gradle"
+apply from: "../gradle/publish.gradle"

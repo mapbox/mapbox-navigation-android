@@ -22,7 +22,7 @@ android {
 
 dependencies {
     // testing modules should not transitively bring in project dependencies
-    compileOnly(project(':libnavigation-util'))
+    compileOnly(project(':utils'))
     implementation dependenciesList.junit
     implementation dependenciesList.androidXAnnotation
     implementation dependenciesList.coroutinesTestAndroid

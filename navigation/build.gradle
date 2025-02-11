@@ -41,11 +41,11 @@ dependencies {
     api dependenciesList.mapboxAndroidCommon
 
     api project(':base')
-    api project(':libnavigation-util')
-    implementation project(':libnavigator')
-    runtimeOnly project(':libtrip-notification')
+    api project(':utils')
+    implementation project(':navigator')
+    runtimeOnly project(':notification')
     runtimeOnly dependenciesList.mapboxLogger
-    implementation project(':libnavigation-metrics')
+    implementation project(':metrics')
     implementation dependenciesList.mapboxSdkTurf
     implementation dependenciesList.mapboxSdkRefreshModels
 
@@ -63,7 +63,7 @@ dependencies {
     apply from: "../gradle/unit-testing-dependencies.gradle"
     testImplementation dependenciesList.commonsIO
 
-    testImplementation project(':libtrip-notification')
+    testImplementation project(':notification')
 
     androidTestImplementation project(':libtesting-ui')
 }
