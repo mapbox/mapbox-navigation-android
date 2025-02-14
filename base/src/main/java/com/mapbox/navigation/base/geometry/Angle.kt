@@ -89,10 +89,14 @@ class Angle private constructor(val value: Double, val unit: AngleUnit) {
     companion object {
 
         /**
-         * Converts this [Number] to an angle measurement in the specified [AngleUnit].
+         * Returns this [Number] as an [Angle] measurement in the specified [AngleUnit].
          *
-         * @param unit The unit to which the number should be converted.
-         * @return An Angle object representing the converted angle.
+         * The [Angle.value] will be stored in the original [Angle.unit] without conversion.
+         * To obtain the value in a different unit, use [Angle.convert], [Angle.toFloat],
+         * or [Angle.toDouble], providing the target [AngleUnit] for conversion.
+         *
+         * @param unit The unit of this value.
+         * @return An Angle object representing the value in the specified unit.
          */
         @JvmStatic
         fun Number.toAngle(unit: AngleUnit): Angle = Angle(toDouble(), unit)
