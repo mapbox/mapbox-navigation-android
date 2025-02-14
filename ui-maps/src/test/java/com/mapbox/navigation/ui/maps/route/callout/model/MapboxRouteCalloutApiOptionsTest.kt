@@ -14,6 +14,9 @@ class MapboxRouteCalloutApiOptionsTest :
         return MapboxRouteCalloutApiOptions.Builder()
             .routeCalloutType(RouteCalloutType.RelativeDurationsOnAlternative)
             .similarDurationDelta(1.minutes)
+            .maxZoom(10f)
+            .minZoom(15f)
+            .priority(2)
     }
 
     override fun trigger() {
