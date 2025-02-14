@@ -51,9 +51,13 @@ class MapboxRouteCalloutViewTest {
             every { getViewAnnotationOptions(any<View>()) } returns null
             every { addViewAnnotation(capture(viewsSlot), any()) } just Runs
             every { removeViewAnnotation(capture(viewsSlot)) } returns true
+            every { viewAnnotationAvoidLayers } returns hashSetOf()
+            every { viewAnnotationAvoidLayers = any() } just Runs
         }
         excludeRecords { mockViewAnnotationManager.addOnViewAnnotationUpdatedListener(any()) }
         excludeRecords { mockViewAnnotationManager.getViewAnnotationOptions(any<View>()) }
+        excludeRecords { mockViewAnnotationManager.viewAnnotationAvoidLayers }
+        excludeRecords { mockViewAnnotationManager.viewAnnotationAvoidLayers = any() }
         mapView = mockk {
             every { context } returns mockContext
             every { resources } returns mockk(relaxed = true) {
@@ -91,8 +95,8 @@ class MapboxRouteCalloutViewTest {
 
         val routeCalloutData = RouteCalloutData(
             listOf(
-                RouteCallout.Eta(routePrimary, true),
-                RouteCallout.Eta(routeAlternative, false),
+                RouteCallout.Eta(routePrimary, null, null, null, true),
+                RouteCallout.Eta(routeAlternative, null, null, null, false),
             ),
         )
         calloutView.renderCallouts(routeCalloutData, mockRouteLineView)
@@ -122,15 +126,15 @@ class MapboxRouteCalloutViewTest {
         } returns "main_layer_1"
         val routeCalloutData = RouteCalloutData(
             listOf(
-                RouteCallout.Eta(routePrimary, true),
-                RouteCallout.Eta(routeAlternative, false),
+                RouteCallout.Eta(routePrimary, null, null, null, true),
+                RouteCallout.Eta(routeAlternative, null, null, null, false),
             ),
         )
         calloutView.renderCallouts(routeCalloutData, mockRouteLineView)
 
         val routeCalloutData2 = RouteCalloutData(
             listOf(
-                RouteCallout.Eta(routeAlternative, false),
+                RouteCallout.Eta(routeAlternative, null, null, null, false),
             ),
         )
         every { mockViewAnnotationManager.getViewAnnotationOptions(any<View>()) } returns
@@ -158,16 +162,16 @@ class MapboxRouteCalloutViewTest {
 
         val routeCalloutData = RouteCalloutData(
             listOf(
-                RouteCallout.Eta(routePrimary, true),
-                RouteCallout.Eta(routeAlternative, false),
+                RouteCallout.Eta(routePrimary, null, null, null, true),
+                RouteCallout.Eta(routeAlternative, null, null, null, false),
             ),
         )
         calloutView.renderCallouts(routeCalloutData, mockRouteLineView)
 
         val routeCalloutData2 = RouteCalloutData(
             listOf(
-                RouteCallout.Eta(routeAlternative, true),
-                RouteCallout.Eta(routePrimary, false),
+                RouteCallout.Eta(routeAlternative, null, null, null, true),
+                RouteCallout.Eta(routePrimary, null, null, null, false),
             ),
         )
         every { mockViewAnnotationManager.getViewAnnotationOptions(any<View>()) } returns

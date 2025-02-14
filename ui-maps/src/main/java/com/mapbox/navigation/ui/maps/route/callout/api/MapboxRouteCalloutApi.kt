@@ -159,8 +159,12 @@ class MapboxRouteCalloutApi(
 
             RouteCallout.DurationDifference(
                 route,
+                options.maxZoom,
+                options.minZoom,
+                options.priority,
                 durationDifference,
                 type,
+
             )
         }
     }
@@ -187,10 +191,24 @@ class MapboxRouteCalloutApi(
         alternativeRoutes: List<NavigationRoute>,
     ): List<RouteCallout.Eta> {
         return buildList(capacity = alternativeRoutes.size + 1) {
-            add(RouteCallout.Eta(primaryRoute, isPrimary = true))
+            add(
+                RouteCallout.Eta(
+                    primaryRoute,
+                    isPrimary = true,
+                    maxZoom = options.maxZoom,
+                    minZoom = options.minZoom,
+                    priority = options.priority,
+                ),
+            )
 
             alternativeRoutes.mapTo(destination = this) { alternativeRoute ->
-                RouteCallout.Eta(alternativeRoute, isPrimary = false)
+                RouteCallout.Eta(
+                    alternativeRoute,
+                    isPrimary = false,
+                    maxZoom = options.maxZoom,
+                    minZoom = options.minZoom,
+                    priority = options.priority,
+                )
             }
         }
     }
