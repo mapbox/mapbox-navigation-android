@@ -314,6 +314,14 @@ package com.mapbox.navigation.core.directions.session {
 
 }
 
+package com.mapbox.navigation.core.ev {
+
+  public final class ConstantsKt {
+    field @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static final String EV_EFFICIENCY_KEY = "nav-sdk-ev-efficiency";
+  }
+
+}
+
 package com.mapbox.navigation.core.formatter {
 
   public final class FormattedDistanceData {

@@ -1,7 +1,10 @@
+@file:OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+
 package com.mapbox.navigation.core.ev
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -34,6 +37,7 @@ class EVDynamicDataHolderTest {
             "ev_pre_conditioning_time" to preConditioningTime,
         )
         assertEquals(expected, evDynamicDataHolder.currentData(initial))
+        assertEquals(emptyMap<String, String>(), evDynamicDataHolder.updatedRawData().value)
     }
 
     @Test
@@ -42,6 +46,7 @@ class EVDynamicDataHolderTest {
         evDynamicDataHolder.updateData(data)
 
         assertEquals(data, evDynamicDataHolder.currentData(emptyMap()))
+        assertEquals(data, evDynamicDataHolder.updatedRawData().value)
     }
 
     @Test
@@ -59,6 +64,7 @@ class EVDynamicDataHolderTest {
         evDynamicDataHolder.updateData(data)
 
         assertEquals(expected, evDynamicDataHolder.currentData(initial))
+        assertEquals(data, evDynamicDataHolder.updatedRawData().value)
     }
 
     @Test
@@ -70,6 +76,7 @@ class EVDynamicDataHolderTest {
         evDynamicDataHolder.updateData(data2)
 
         assertEquals(expected, evDynamicDataHolder.currentData(emptyMap()))
+        assertEquals(expected, evDynamicDataHolder.updatedRawData().value)
     }
 
     @Test
@@ -116,5 +123,23 @@ class EVDynamicDataHolderTest {
         )
 
         assertEquals(expected, evDynamicDataHolder.currentData(initial))
+    }
+
+    @Test
+    fun `internal values are available only in updatedData()`() {
+        val data = mapOf(
+            "aaa" to "bbb",
+            EV_EFFICIENCY_KEY to "33",
+        )
+        evDynamicDataHolder.updateData(data)
+
+        assertEquals(
+            mapOf("aaa" to "bbb"),
+            evDynamicDataHolder.currentData(emptyMap()),
+        )
+        assertEquals(
+            data,
+            evDynamicDataHolder.updatedRawData().value,
+        )
     }
 }
