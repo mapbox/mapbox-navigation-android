@@ -52,6 +52,8 @@ ext {
         'libnavigation-compose-core' : new Tuple2('compose-core', 'navigation-core-compose-core'),
         'libnavigation-compose-foundation' : new Tuple2('compose-foundation', 'navigation-core-compose-foundation'),
         'coordination' : new Tuple2('coordination', 'navigation-core-coordination'),
+        'core-mapgpt' : new Tuple2('core-mapgpt', 'navigation-core-mapgpt-core'),
+        'ui-mapgpt' : new Tuple2('ui-mapgpt', 'navigation-core-mapgpt-ui'),
     ]
 }
 
