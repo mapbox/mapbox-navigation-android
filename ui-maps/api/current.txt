@@ -413,6 +413,30 @@ package com.mapbox.navigation.ui.maps.camera.data.debugger {
 
 package com.mapbox.navigation.ui.maps.camera.internal {
 
+  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public enum FollowingFramingMode {
+    enum_constant public static final com.mapbox.navigation.ui.maps.camera.internal.FollowingFramingMode LOCATION_INDICATOR;
+    enum_constant public static final com.mapbox.navigation.ui.maps.camera.internal.FollowingFramingMode MULTIPLE_POINTS;
+    enum_constant public static final com.mapbox.navigation.ui.maps.camera.internal.FollowingFramingMode NONE;
+  }
+
+  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public final class FollowingFramingModeHolder {
+    ctor public FollowingFramingModeHolder();
+    method public com.mapbox.navigation.ui.maps.camera.internal.FollowingFramingMode getMode();
+    method public void setMode(com.mapbox.navigation.ui.maps.camera.internal.FollowingFramingMode);
+    property public final com.mapbox.navigation.ui.maps.camera.internal.FollowingFramingMode mode;
+  }
+
+  public final class MapboxNavigationCameraUtilsKt {
+    method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public static android.animation.AnimatorSet constraintDurationTo(android.animation.AnimatorSet, long maxDuration);
+    method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public static void jumpToCameraCenterInternal(com.mapbox.navigation.ui.maps.camera.NavigationCamera, com.mapbox.geojson.Point? center);
+    method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public static double normalizeBearing(double currentBearing, double targetBearing);
+  }
+
+  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public final class MapboxNavigationViewportDataSourceFactory {
+    method public com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource create(com.mapbox.maps.MapboxMap map, com.mapbox.navigation.ui.maps.camera.internal.FollowingFramingModeHolder followingFramingModeHolder);
+    field public static final com.mapbox.navigation.ui.maps.camera.internal.MapboxNavigationViewportDataSourceFactory INSTANCE;
+  }
+
   public final class NavigationCameraExKt {
     method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public static boolean isSinglePixelPadding(com.mapbox.maps.MapboxMap);
   }
@@ -987,9 +1011,15 @@ package com.mapbox.navigation.ui.maps.route.callout.api {
 package com.mapbox.navigation.ui.maps.route.callout.model {
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapboxRouteCalloutApiOptions {
+    method public Float? getMaxZoom();
+    method public Float? getMinZoom();
+    method public Long? getPriority();
     method public com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutType getRouteCalloutType();
     method public long getSimilarDurationDelta();
     method public com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutApiOptions.Builder toBuilder();
+    property public final Float? maxZoom;
+    property public final Float? minZoom;
+    property public final Long? priority;
     property public final com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutType routeCalloutType;
     property public final long similarDurationDelta;
   }
@@ -997,6 +1027,9 @@ package com.mapbox.navigation.ui.maps.route.callout.model {
   public static final class MapboxRouteCalloutApiOptions.Builder {
     ctor public MapboxRouteCalloutApiOptions.Builder();
     method public com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutApiOptions build();
+    method public com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutApiOptions.Builder maxZoom(Float? value);
+    method public com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutApiOptions.Builder minZoom(Float? value);
+    method public com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutApiOptions.Builder priority(Long? value);
     method public com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutApiOptions.Builder routeCalloutType(com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutType type);
     method public com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutApiOptions.Builder similarDurationDelta(long value);
   }
@@ -1055,6 +1088,7 @@ package com.mapbox.navigation.ui.maps.route.line {
     method public suspend Object? setNavigationRoutes(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, java.util.List<com.mapbox.navigation.base.route.NavigationRoute> newRoutes, int activeLegIndex, kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>>);
     method public suspend Object? setNavigationRoutes(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, java.util.List<com.mapbox.navigation.base.route.NavigationRoute> newRoutes, java.util.List<com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata> alternativeRoutesMetadata, kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>>);
     method public suspend Object? setNavigationRoutes(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, java.util.List<com.mapbox.navigation.base.route.NavigationRoute> newRoutes, int activeLegIndex, java.util.List<com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata> alternativeRoutesMetadata, kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue>>);
+    method public suspend Object? updateWithRouteProgress(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi, com.mapbox.navigation.base.trip.model.RouteProgress routeProgress, kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue>>);
     field public static final com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions INSTANCE;
   }
 
@@ -1096,6 +1130,7 @@ package com.mapbox.navigation.ui.maps.route.line.api {
     method public void cancel();
     method public com.mapbox.maps.extension.style.layers.properties.generated.Visibility? getAlternativeRoutesVisibility(com.mapbox.maps.Style style);
     method public com.mapbox.maps.extension.style.layers.properties.generated.Visibility? getPrimaryRouteVisibility(com.mapbox.maps.Style style);
+    method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public String? getRouteMainLayerIdForFeature(String? featureId);
     method public com.mapbox.maps.extension.style.layers.properties.generated.Visibility? getTrafficVisibility(com.mapbox.maps.Style style);
     method public void hideAlternativeRoutes(com.mapbox.maps.Style style);
     method public void hideOriginAndDestinationPoints(com.mapbox.maps.Style style);

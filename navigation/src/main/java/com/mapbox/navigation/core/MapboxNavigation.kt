@@ -24,6 +24,7 @@ import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.internal.accounts.SkuIdProvider
 import com.mapbox.navigation.base.internal.accounts.SkuIdProviderImpl
+import com.mapbox.navigation.base.internal.clearCache
 import com.mapbox.navigation.base.internal.tilestore.NavigationTileStoreOwner
 import com.mapbox.navigation.base.internal.trip.notification.TripNotificationInterceptorOwner
 import com.mapbox.navigation.base.internal.utils.createRouteParsingManager
@@ -39,6 +40,7 @@ import com.mapbox.navigation.base.trip.model.eh.EHorizonEdgeMetadata
 import com.mapbox.navigation.base.trip.notification.NotificationAction
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.base.trip.notification.TripNotificationInterceptor
+import com.mapbox.navigation.base.utils.DecodeUtils
 import com.mapbox.navigation.core.accounts.BillingController
 import com.mapbox.navigation.core.arrival.ArrivalController
 import com.mapbox.navigation.core.arrival.ArrivalObserver
@@ -54,6 +56,7 @@ import com.mapbox.navigation.core.directions.session.Utils
 import com.mapbox.navigation.core.directions.session.routesPlusIgnored
 import com.mapbox.navigation.core.history.MapboxHistoryReader
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
+import com.mapbox.navigation.core.internal.LowMemoryManager
 import com.mapbox.navigation.core.internal.MapboxNavigationSDKInitializerImpl
 import com.mapbox.navigation.core.internal.ReachabilityService
 import com.mapbox.navigation.core.internal.RouteProgressData
@@ -260,6 +263,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     internal val copilotHistoryRecorder: MapboxHistoryRecorder,
     internal val compositeRecorder: MapboxHistoryRecorder,
     private val permissionsChecker: PermissionsChecker,
+    private val lowMemoryManager: LowMemoryManager,
 ) {
 
     internal constructor(navigationOptions: NavigationOptions) : this(
@@ -269,6 +273,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         MapboxHistoryRecorder(navigationOptions),
         MapboxHistoryRecorder(navigationOptions),
         PermissionsChecker(navigationOptions.applicationContext),
+        LowMemoryManager.create(),
     )
 
     private val mainJobController = threadController.getMainScopeAndRootJob()
@@ -347,6 +352,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         navigationOptions.enableSensors,
         RerouteStrategyForMatchRoute.REROUTE_DISABLED,
     )
+
+    private val lowMemoryObserver = LowMemoryManager.Observer {
+        clearCaches()
+    }
 
     private var notificationChannelField: Field? = null
 
@@ -685,6 +694,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 ::currentLegIndex,
             ),
         )
+
+        lowMemoryManager.addObserver(lowMemoryObserver)
     }
 
     @OptIn(ExperimentalMapboxNavigationAPI::class)
@@ -1321,12 +1332,19 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      */
     fun getNavigationRoutes(): List<NavigationRoute> = directionsSession.routes
 
+    private fun clearCaches() {
+        DecodeUtils.clearCache()
+    }
+
     /**
      * Call this method whenever this instance of the [MapboxNavigation] is not going to be used anymore and should release all of its resources.
      */
     internal fun onDestroy() {
         if (isDestroyed) return
+
         logD("onDestroy", LOG_CATEGORY)
+
+        lowMemoryManager.removeObserver(lowMemoryObserver)
         systemLocaleWatcher.destroy()
         billingController.onDestroy()
         directionsSession.shutdown()
@@ -1370,6 +1388,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         }
         navigator.resetAdasisMessageCallback()
         historyRecorders.forEach { it.unregisterAllHistoryRecordingEnabledObservers() }
+
+        clearCaches()
 
         _navigator = null
         isDestroyed = true

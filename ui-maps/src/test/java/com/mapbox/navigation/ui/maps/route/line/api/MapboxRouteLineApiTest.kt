@@ -23,6 +23,7 @@ import com.mapbox.navigation.base.internal.route.update
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
+import com.mapbox.navigation.core.internal.LowMemoryManager
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.NativeRouteParserRule
@@ -37,6 +38,7 @@ import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.cle
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.findClosestRoute
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setNavigationRouteLines
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setNavigationRoutes
+import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.updateWithRouteProgress
 import com.mapbox.navigation.ui.maps.route.line.RouteLineHistoryRecordingApiSender
 import com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions
@@ -53,6 +55,7 @@ import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.LoggerFrontend
 import io.mockk.MockKAnnotations
 import io.mockk.clearAllMocks
+import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -118,6 +121,9 @@ class MapboxRouteLineApiTest {
     private val vanishingRouteLine = mockk<VanishingRouteLine>(relaxed = true)
     private val sender = mockk<RouteLineHistoryRecordingApiSender>(relaxed = true)
 
+    private val lowMemoryManager = mockk<LowMemoryManager>(relaxed = true)
+    private val lowMemoryObserverSlot = slot<LowMemoryManager.Observer>()
+
     @Before
     fun setUp() {
         MockKAnnotations.init(this)
@@ -130,13 +136,33 @@ class MapboxRouteLineApiTest {
         } returns JobControl(parentJob, testScope)
         mockkStatic(AppCompatResources::class)
         every { AppCompatResources.getDrawable(any(), any()) } returns mockk()
+
+        every { lowMemoryManager.addObserver(capture(lowMemoryObserverSlot)) } returns Unit
+
+        mockkObject(LowMemoryManager.Companion)
+        every { LowMemoryManager.create() } returns mockk(relaxed = true)
     }
 
     @After
     fun cleanUp() {
         unmockkStatic(AppCompatResources::class)
         unmockkObject(InternalJobControlFactory)
+        unmockkObject(LowMemoryManager.Companion)
     }
+
+    private fun createRouteLineApi(
+        options: MapboxRouteLineApiOptions = mockRouteOptions(),
+        calculationsScope: CoroutineScope = this.calculationsScope,
+        vanishingRouteLine: VanishingRouteLine? = this.vanishingRouteLine,
+        sender: RouteLineHistoryRecordingApiSender = this.sender,
+        lowMemoryManager: LowMemoryManager = this.lowMemoryManager,
+    ) = MapboxRouteLineApi(
+        options,
+        calculationsScope,
+        vanishingRouteLine,
+        sender,
+        lowMemoryManager,
+    )
 
     @Test
     fun getPrimaryRoute() = coroutineRule.runBlockingTest {
@@ -160,9 +186,7 @@ class MapboxRouteLineApiTest {
             .build()
         every { vanishingRouteLine.vanishPointOffset } returns 99.9
 
-        val result =
-            MapboxRouteLineApi(options, calculationsScope, vanishingRouteLine, sender)
-                .getVanishPointOffset()
+        val result = createRouteLineApi(options).getVanishPointOffset()
 
         assertEquals(
             99.9,
@@ -222,7 +246,8 @@ class MapboxRouteLineApiTest {
             .build()
         every { vanishingRouteLine.vanishPointOffset } returns 99.9
 
-        val api = MapboxRouteLineApi(options, calculationsScope, vanishingRouteLine, sender)
+        val api = createRouteLineApi(options)
+
         val route = loadNavigationRoute("short_route.json")
         val routes = listOf(NavigationRouteLine(route, null))
         api.setNavigationRouteLines(routes)
@@ -256,8 +281,8 @@ class MapboxRouteLineApiTest {
                 .calculateRestrictedRoadSections(false)
                 .build()
 
-            val api =
-                MapboxRouteLineApi(options, calculationsScope, vanishingRouteLine, sender)
+            val api = createRouteLineApi(options)
+
             val route = loadNavigationRoute("short_route.json")
             val routes = listOf(NavigationRouteLine(route, null))
 
@@ -274,8 +299,7 @@ class MapboxRouteLineApiTest {
     fun updateUpcomingRoutePointIndex() = coroutineRule.runBlockingTest {
         val route = shortRoute.navigationRoute
         every { vanishingRouteLine.vanishPointOffset } returns 0.0
-        val options = mockRouteOptions()
-        val api = MapboxRouteLineApi(options, calculationsScope, vanishingRouteLine, sender)
+        val api = createRouteLineApi()
         val routeProgress = shortRoute.mockRouteProgress(stepIndexValue = 2)
         api.updateVanishingPointState(RouteProgressState.TRACKING)
         api.setNavigationRoutes(listOf(route))
@@ -289,8 +313,7 @@ class MapboxRouteLineApiTest {
     fun updateWithRouteProgress() = coroutineRule.runBlockingTest {
         val route = shortRoute.navigationRoute
         every { vanishingRouteLine.vanishPointOffset } returns 0.0
-        val options = mockRouteOptions()
-        val api = MapboxRouteLineApi(options, calculationsScope, vanishingRouteLine, sender)
+        val api = createRouteLineApi()
         val routeProgress = shortRoute.mockRouteProgress(stepIndexValue = 2)
         api.setNavigationRoutes(listOf(route))
 
@@ -310,8 +333,7 @@ class MapboxRouteLineApiTest {
         } returns JobControl(parentJob, routeProgressScope)
         val route = shortRoute.navigationRoute
         every { vanishingRouteLine.vanishPointOffset } returns 0.0
-        val options = mockRouteOptions()
-        val api = MapboxRouteLineApi(options, calculationsScope, vanishingRouteLine, sender)
+        val api = createRouteLineApi()
         val routeProgress = shortRoute.mockRouteProgress(stepIndexValue = 2)
         api.setNavigationRoutes(listOf(route))
         val consumer = mockk<
@@ -359,9 +381,7 @@ class MapboxRouteLineApiTest {
             val route1 = loadNavigationRoute("multileg-route-two-legs.json", uuid = "abc")
             val route2 = loadNavigationRoute("short_route.json", uuid = "def")
             every { vanishingRouteLine.vanishPointOffset } returns 0.0
-            val options = mockRouteOptions()
-            val api =
-                MapboxRouteLineApi(options, calculationsScope, vanishingRouteLine, sender)
+            val api = createRouteLineApi()
             api.setNavigationRoutes(listOf(route1))
             val routeProgress = mockRouteProgress(route2, stepIndexValue = 2)
             val consumer =
@@ -430,8 +450,7 @@ class MapboxRouteLineApiTest {
             every { vanishingRouteLine.vanishPointOffset } returns 0.0
             val options = mockRouteOptions()
             every { options.styleInactiveRouteLegsIndependently } returns true
-            val api =
-                MapboxRouteLineApi(options, calculationsScope, vanishingRouteLine, sender)
+            val api = createRouteLineApi(options)
             val routeProgress = multiLegRouteTwoLegs.mockRouteProgress()
             api.updateVanishingPointState(RouteProgressState.TRACKING)
             api.setNavigationRoutes(listOf(route))
@@ -475,8 +494,7 @@ class MapboxRouteLineApiTest {
             .vanishingRouteLineEnabled(true)
             .build()
 
-        MapboxRouteLineApi(options, calculationsScope, vanishingRouteLine, sender)
-            .updateVanishingPointState(RouteProgressState.TRACKING)
+        createRouteLineApi(options).updateVanishingPointState(RouteProgressState.TRACKING)
 
         verify { vanishingRouteLine.updateVanishingPointState(RouteProgressState.TRACKING) }
     }
@@ -1625,7 +1643,7 @@ class MapboxRouteLineApiTest {
     @Test
     fun setNavigationRouteLinesPushesEvents() = runBlocking {
         val options = MapboxRouteLineApiOptions.Builder().build()
-        val api = MapboxRouteLineApi(options, calculationsScope, vanishingRouteLine, sender)
+        val api = createRouteLineApi(options)
         api.setNavigationRoutes(listOf(multilegRouteWithOverlap.navigationRoute), 1)
         verifyOrder {
             sender.sendOptionsEvent(options)
@@ -1638,6 +1656,242 @@ class MapboxRouteLineApiTest {
 
     @Test
     fun updateTraveledRouteLineDoesNotPushEventIfSkipped() = runBlocking { }
+
+    @Test
+    fun doesNotStartMemoryMonitoringOnCreation() {
+        createRouteLineApi()
+
+        verify(exactly = 0) {
+            lowMemoryManager.addObserver(any())
+            lowMemoryManager.removeObserver(any())
+        }
+    }
+
+    @Test
+    fun startsMemoryMonitoringOnRoutesSet() = runBlocking {
+        createRouteLineApi().setNavigationRoutes(listOf(multilegRouteWithOverlap.navigationRoute))
+
+        verify(exactly = 1) {
+            lowMemoryManager.addObserver(any())
+        }
+
+        verify(exactly = 0) {
+            lowMemoryManager.removeObserver(any())
+        }
+    }
+
+    @Test
+    fun startsMemoryMonitoringOnlyOnceOnMultipleRoutesSet() = runBlocking {
+        val api = createRouteLineApi()
+        api.setNavigationRoutes(listOf(loadNavigationRoute("short_route.json", uuid = "abc")))
+
+        clearMocks(lowMemoryManager)
+        api.setNavigationRoutes(listOf(loadNavigationRoute("short_route.json", uuid = "def")))
+
+        verify(exactly = 0) {
+            lowMemoryManager.addObserver(any())
+            lowMemoryManager.removeObserver(any())
+        }
+    }
+
+    @Test
+    fun doesNotStartMemoryMonitoringOnEmptyRoutesListSet() = runBlocking {
+        createRouteLineApi().setNavigationRoutes(emptyList())
+
+        verify(exactly = 0) {
+            lowMemoryManager.addObserver(any())
+            lowMemoryManager.removeObserver(any())
+        }
+    }
+
+    @Test
+    fun restartsMemoryMonitoringOnSetVanishingOffset() = runBlocking {
+        val options = MapboxRouteLineApiOptions.Builder()
+            .styleInactiveRouteLegsIndependently(true)
+            .vanishingRouteLineEnabled(true)
+            .build()
+
+        val api = createRouteLineApi(options)
+
+        api.setNavigationRoutes(listOf(multilegRouteWithOverlap.navigationRoute))
+        api.cancel()
+
+        clearMocks(lowMemoryManager)
+
+        api.setVanishingOffset(.5)
+
+        verify(exactly = 1) {
+            lowMemoryManager.addObserver(any())
+        }
+
+        verify(exactly = 0) {
+            lowMemoryManager.removeObserver(any())
+        }
+    }
+
+    @Test
+    fun doesNotRestartMemoryMonitoringOnSetVanishingOffsetIfRoutesEmpty() = runBlocking {
+        val options = MapboxRouteLineApiOptions.Builder()
+            .styleInactiveRouteLegsIndependently(true)
+            .vanishingRouteLineEnabled(true)
+            .build()
+
+        val api = MapboxRouteLineApi(options)
+
+        api.setNavigationRoutes(listOf(multilegRouteWithOverlap.navigationRoute))
+        api.cancel()
+
+        clearMocks(lowMemoryManager)
+
+        api.clearRouteLine()
+        api.setVanishingOffset(.5)
+
+        verify(exactly = 0) {
+            lowMemoryManager.addObserver(any())
+            lowMemoryManager.removeObserver(any())
+        }
+    }
+
+    @Test
+    fun restartsMemoryMonitoringOnUpdateWithRouteProgress() = runBlocking {
+        val route = multilegRouteWithOverlap
+        val api = createRouteLineApi()
+
+        api.setNavigationRoutes(listOf(route.navigationRoute))
+        api.cancel()
+
+        clearMocks(lowMemoryManager)
+        api.updateWithRouteProgress(multilegRouteWithOverlap.mockRouteProgress())
+
+        verify(exactly = 1) {
+            lowMemoryManager.addObserver(any())
+        }
+
+        verify(exactly = 0) {
+            lowMemoryManager.removeObserver(any())
+        }
+    }
+
+    @Test
+    fun doesNotRestartMemoryMonitoringOnUpdateWithRouteProgressIfRoutesEmpty() = runBlocking {
+        val route = multilegRouteWithOverlap
+        val api = createRouteLineApi()
+
+        api.setNavigationRoutes(listOf(route.navigationRoute))
+        api.cancel()
+
+        clearMocks(lowMemoryManager)
+
+        api.clearRouteLine()
+        api.updateWithRouteProgress(multilegRouteWithOverlap.mockRouteProgress())
+
+        verify(exactly = 0) {
+            lowMemoryManager.addObserver(any())
+            lowMemoryManager.removeObserver(any())
+        }
+    }
+
+    @Test
+    fun restartsMemoryMonitoringOnUpdateTraveledRouteLine() = runBlocking {
+        val route = multilegRouteWithOverlap
+
+        val api = createRouteLineApi()
+        api.setNavigationRoutes(listOf(route.navigationRoute))
+        api.updateWithRouteProgress(route.mockRouteProgress())
+        api.cancel()
+
+        clearMocks(lowMemoryManager)
+        api.updateTraveledRouteLine(Point.fromLngLat(-122.370112, 45.579391))
+
+        verify(exactly = 1) {
+            lowMemoryManager.addObserver(any())
+        }
+
+        verify(exactly = 0) {
+            lowMemoryManager.removeObserver(any())
+        }
+    }
+
+    @Test
+    fun doesNotRestartMemoryMonitoringOnUpdateTraveledRouteLineIfRoutesEmpty() = runBlocking {
+        val route = multilegRouteWithOverlap
+
+        val api = createRouteLineApi()
+        api.setNavigationRoutes(listOf(route.navigationRoute))
+        api.updateWithRouteProgress(route.mockRouteProgress())
+        api.cancel()
+
+        clearMocks(lowMemoryManager)
+        api.clearRouteLine()
+        api.updateTraveledRouteLine(Point.fromLngLat(-122.370112, 45.579391))
+
+        verify(exactly = 0) {
+            lowMemoryManager.addObserver(any())
+            lowMemoryManager.removeObserver(any())
+        }
+    }
+
+    @Test
+    fun stopMemoryMonitoringOnClearRouteLine() = runBlocking {
+        val api = createRouteLineApi()
+        api.setNavigationRoutes(listOf(multilegRouteWithOverlap.navigationRoute))
+        api.clearRouteLine()
+
+        verify(exactly = 1) {
+            lowMemoryManager.removeObserver(any())
+        }
+    }
+
+    @Test
+    fun stopMemoryMonitoringOnCancel() = runBlocking {
+        val api = createRouteLineApi()
+        api.setNavigationRoutes(listOf(multilegRouteWithOverlap.navigationRoute))
+        api.cancel()
+
+        verify(exactly = 1) {
+            lowMemoryManager.removeObserver(any())
+        }
+    }
+
+    @Test
+    fun doesNotStopMemoryMonitoringIfMonitoringIsNotStarted() = runBlocking {
+        val api = createRouteLineApi()
+        api.clearRouteLine()
+        api.cancel()
+
+        verify(exactly = 0) {
+            lowMemoryManager.removeObserver(any())
+        }
+    }
+
+    @Test
+    fun clearMapboxRouteLineUtilsOnLowMemoryEvent() = runBlocking {
+        mockkObject(MapboxRouteLineUtils)
+
+        val api = createRouteLineApi()
+        api.setNavigationRoutes(listOf(multilegRouteWithOverlap.navigationRoute))
+
+        lowMemoryObserverSlot.captured.onLowMemory()
+
+        verify(exactly = 1) {
+            MapboxRouteLineUtils.trimRouteDataCacheToSize(size = 0)
+        }
+
+        unmockkObject(MapboxRouteLineUtils)
+    }
+
+    @Test
+    fun clearMapboxRouteLineUtilsOnCancel() {
+        mockkObject(MapboxRouteLineUtils)
+
+        createRouteLineApi().cancel()
+
+        verify(exactly = 1) {
+            MapboxRouteLineUtils.trimRouteDataCacheToSize(size = 0)
+        }
+
+        unmockkObject(MapboxRouteLineUtils)
+    }
 
     private fun mockRouteProgress(route: NavigationRoute, stepIndexValue: Int = 0): RouteProgress =
         mockk {

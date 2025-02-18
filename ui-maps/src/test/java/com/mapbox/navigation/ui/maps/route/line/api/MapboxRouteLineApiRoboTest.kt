@@ -17,6 +17,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
+import com.mapbox.navigation.core.internal.LowMemoryManager
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
@@ -137,11 +138,15 @@ class MapboxRouteLineApiRoboTest {
             val defaultScope = coroutineRule.createTestScope()
             JobControl(defaultScope.coroutineContext.job, defaultScope)
         }
+
+        mockkObject(LowMemoryManager.Companion)
+        every { LowMemoryManager.create() } returns mockk(relaxed = true)
     }
 
     @After
     fun cleanUp() {
         unmockkObject(InternalJobControlFactory)
+        unmockkObject(LowMemoryManager.Companion)
     }
 
     @Test
@@ -5666,6 +5671,7 @@ class MapboxRouteLineApiRoboTest {
             coroutineRule.createTestScope(),
             vanishingRouteLine,
             sender,
+            mockk(relaxed = true),
         )
         val routeProgress = shortRoute.mockRouteProgress(stepIndexValue = 2)
 
@@ -5691,6 +5697,7 @@ class MapboxRouteLineApiRoboTest {
             coroutineRule.createTestScope(),
             vanishingRouteLine,
             sender,
+            mockk(relaxed = true),
         )
         val routeProgress = shortRoute.mockRouteProgress(stepIndexValue = 2)
 
@@ -5712,6 +5719,7 @@ class MapboxRouteLineApiRoboTest {
             coroutineRule.createTestScope(),
             mockk(relaxed = true),
             sender,
+            mockk(relaxed = true),
         )
         api.clearRouteLine()
 
@@ -5729,6 +5737,7 @@ class MapboxRouteLineApiRoboTest {
             coroutineRule.createTestScope(),
             mockk(relaxed = true),
             sender,
+            mockk(relaxed = true),
         )
         api.setVanishingOffset(0.2)
 
@@ -5745,6 +5754,7 @@ class MapboxRouteLineApiRoboTest {
             coroutineRule.createTestScope(),
             null,
             sender,
+            mockk(relaxed = true),
         )
         api.setNavigationRoutes(
             listOf(multilegRouteWithOverlapAndAllCongestionLevels.navigationRoute),

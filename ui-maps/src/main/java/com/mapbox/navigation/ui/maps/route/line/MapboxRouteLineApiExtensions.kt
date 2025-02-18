@@ -5,14 +5,17 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxMap
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
+import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions
 import com.mapbox.navigation.ui.maps.route.line.model.NavigationRouteLine
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -198,6 +201,32 @@ object MapboxRouteLineApiExtensions {
     suspend fun MapboxRouteLineApi.getRouteDrawData(): Expected<RouteLineError, RouteSetValue> {
         return suspendCancellableCoroutine { continuation ->
             this.getRouteDrawData { value -> continuation.resume(value) }
+
+            continuation.invokeOnCancellation {
+                this.cancel()
+            }
+        }
+    }
+
+    /**
+     * Updates the state of the route line based on data in the [RouteProgress] passing a result
+     * to the consumer that should be rendered by the [MapboxRouteLineView].
+     *
+     * Calling this method and rendering the result is required in order to use the vanishing
+     * route line feature and/or to style inactive route legs independently and/or display multi-leg
+     * routes with the active leg appearing to overlap the inactive leg(s).
+     *
+     * This method will execute tasks on a background thread.
+     * There is a cancel method which will cancel the background tasks.
+     *
+     * @param routeProgress a route progress object
+     * @return a value containing the [RouteLineUpdateValue] or an error
+     */
+    suspend fun MapboxRouteLineApi.updateWithRouteProgress(
+        routeProgress: RouteProgress,
+    ): Expected<RouteLineError, RouteLineUpdateValue> {
+        return suspendCancellableCoroutine { continuation ->
+            this.updateWithRouteProgress(routeProgress) { value -> continuation.resume(value) }
 
             continuation.invokeOnCancellation {
                 this.cancel()

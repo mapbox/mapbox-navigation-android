@@ -20,6 +20,7 @@ import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.internal.LowMemoryManager
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
@@ -200,6 +201,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
     private val calculationsScope: CoroutineScope,
     private var vanishingRouteLine: VanishingRouteLine?,
     private val sender: RouteLineHistoryRecordingApiSender,
+    private val lowMemoryManager: LowMemoryManager,
 ) {
     private var primaryRoute: NavigationRoute? = null
     private val routes: MutableList<NavigationRoute> = mutableListOf()
@@ -209,6 +211,12 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
     private var lastPointUpdateTimeNano: Long = 0
     private val routeFeatureData: MutableList<RouteFeatureData> = mutableListOf()
     private val mutex = Mutex()
+
+    private val lowMemoryObserver = LowMemoryManager.Observer {
+        resetCaches()
+    }
+
+    private var isMemoryMonitorObserverRegistered = false
 
     // We had a bug that when styleInactiveRouteLegsIndependently was enabled but we first
     // got route progress update and only then routes update,
@@ -267,6 +275,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
             null
         },
         RouteLineHistoryRecordingApiSender(),
+        LowMemoryManager.create(),
     )
 
     init {
@@ -274,6 +283,22 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         trafficBackfillRoadClasses.addAll(
             routeLineOptions.trafficBackfillRoadClasses,
         )
+    }
+
+    private fun startMemoryMonitoring() {
+        synchronized(lowMemoryObserver) {
+            if (isMemoryMonitorObserverRegistered) return
+            isMemoryMonitorObserverRegistered = true
+            lowMemoryManager.addObserver(lowMemoryObserver)
+        }
+    }
+
+    private fun stopMemoryMonitoring() {
+        synchronized(lowMemoryObserver) {
+            if (!isMemoryMonitorObserverRegistered) return
+            isMemoryMonitorObserverRegistered = false
+            lowMemoryManager.removeObserver(lowMemoryObserver)
+        }
     }
 
     /**
@@ -475,6 +500,8 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                 consumer.accept(result)
             }
         } else {
+            startMemoryMonitoring()
+
             calculationsScope.launch(Dispatchers.Main) {
                 mutex.withLock {
                     // To not depend on FreeDrive recording: we want options all the time,
@@ -550,10 +577,13 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                 ),
             )
         }
+
         sender.sendUpdateTraveledRouteLineEvent(point)
         lastLocationPoint = point
 
         val routeLineExpressionProviders = ifNonNull(primaryRoute) { route ->
+            startMemoryMonitoring()
+
             ifNonNull(granularDistancesProvider(route)) { granularDistances ->
                 vanishingRouteLine?.getTraveledRouteLineExpressions(
                     point,
@@ -579,12 +609,15 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
     fun clearRouteLine(
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteLineClearValue>>,
     ) {
+        stopMemoryMonitoring()
+
         calculationsScope.launch(Dispatchers.Main) {
             mutex.withLock {
                 sender.sendClearRouteLineEvent()
                 lastLocationPoint = null
                 vanishingRouteLine?.vanishPointOffset = 0.0
                 activeLegIndex = INVALID_ACTIVE_LEG_INDEX
+                primaryRoute = null
                 routes.clear()
                 routeFeatureData.clear()
                 routeLineExpressionData = emptyList()
@@ -622,6 +655,8 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
     ): Expected<RouteLineError, RouteLineUpdateValue> {
         sender.sendSetVanishingOffsetEvent(offset)
         return ifNonNull(primaryRoute, vanishingRouteLine) { _, vanishingRouteLine ->
+            startMemoryMonitoring()
+
             val expression = vanishingRouteLine.getTraveledRouteLineExpressions(offset)
             getTrimOffsetUpdate(expression)
         } ?: ExpectedFactory.createError(
@@ -680,6 +715,8 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                         )
                         logE(msg, LOG_CATEGORY)
                     } else {
+                        startMemoryMonitoring()
+
                         updateUpcomingRoutePointIndex(routeProgress)
                         updateVanishingPointState(routeProgress.currentState)
 
@@ -940,6 +977,9 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         sender.sendCancelEvent()
         calculationsScope.coroutineContext.cancelChildren()
         routeProgressUpdatesJobControl.job.cancelChildren()
+
+        stopMemoryMonitoring()
+        resetCaches()
     }
 
     private suspend fun findClosestRoute(

@@ -14,6 +14,7 @@ import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
+import com.mapbox.navigation.base.internal.clearCache
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.internal.tilestore.NavigationTileStoreOwner
 import com.mapbox.navigation.base.options.LocationOptions
@@ -21,12 +22,14 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.notification.TripNotification
+import com.mapbox.navigation.base.utils.DecodeUtils
 import com.mapbox.navigation.core.accounts.BillingController
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.ev.EVDynamicDataHolder
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
+import com.mapbox.navigation.core.internal.LowMemoryManager
 import com.mapbox.navigation.core.internal.SdkInfoProvider
 import com.mapbox.navigation.core.internal.router.RouterWrapper
 import com.mapbox.navigation.core.mapmatching.MapMatchingAPI
@@ -125,6 +128,7 @@ internal open class MapboxNavigationBaseTest {
     val compositeHistoryRecorder = mockk<MapboxHistoryRecorder>(relaxed = true)
     val compositeHandle = mockk<HistoryRecorderHandle>(relaxed = true)
     val permissionsChecker = mockk<PermissionsChecker>(relaxed = true)
+    val lowMemoryManager = mockk<LowMemoryManager>(relaxed = true)
 
     val navigationTelemetry = mockk<NavigationTelemetry>(relaxed = true)
 
@@ -278,6 +282,12 @@ internal open class MapboxNavigationBaseTest {
         every {
             permissionsChecker.hasForegroundServiceLocationPermissions()
         } returns ExpectedFactory.createValue(Unit)
+
+        mockkObject(LowMemoryManager.Companion)
+        every { LowMemoryManager.create() } returns lowMemoryManager
+
+        mockkObject(DecodeUtils)
+        mockkStatic(DecodeUtils::clearCache)
     }
 
     @After
@@ -301,6 +311,9 @@ internal open class MapboxNavigationBaseTest {
         unmockkObject(SystemLocaleWatcher.Companion)
         unmockkObject(NavigationTelemetry.Companion)
         unmockkObject(NavigationTileStoreOwner)
+        unmockkObject(LowMemoryManager.Companion)
+        unmockkObject(DecodeUtils)
+        unmockkStatic(DecodeUtils::clearCache)
     }
 
     fun createMapboxNavigation() {
@@ -311,6 +324,7 @@ internal open class MapboxNavigationBaseTest {
             copilotHistoryRecorder,
             compositeHistoryRecorder,
             permissionsChecker,
+            lowMemoryManager,
         )
     }
 
