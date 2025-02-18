@@ -1,0 +1,64 @@
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+    id 'kotlin-parcelize'
+    id 'com.jaredsburrows.license'
+    id 'com.mapbox.android.sdk.versions'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.7.20'
+}
+
+apply from: "../gradle/ktlint.gradle"
+apply from: file("../gradle/artifact-settings.gradle")
+
+version = project.ext.versionName
+group = project.ext.mapboxArtifactGroupId
+
+android {
+    namespace 'com.mapbox.navigation.mapgpt.ui'
+    compileSdkVersion androidVersions.compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion androidVersions.minSdkVersion
+        targetSdkVersion androidVersions.targetSdkVersion
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'proguard-rules.pro', "../proguard/proguard-project.pro"
+    }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+        unitTests.includeAndroidResources = true
+    }
+    buildFeatures {
+        aidl = true
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = project.ext.version.composeCompiler
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
+dependencies {
+
+    implementation dependenciesList.androidXActivity
+    implementation dependenciesList.kotlinStdLib
+    implementation dependenciesList.coroutinesCore
+    implementation project(":core-mapgpt")
+
+    implementation dependenciesList.coilCompose
+
+    def composeBom = platform("androidx.compose:compose-bom:2024.06.00")
+    implementation(composeBom)
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+}
+
+apply from: "$rootDir/gradle/track-public-apis.gradle"
+apply from: "$rootDir/gradle/jacoco.gradle"
+apply from: "$rootDir/gradle/publish.gradle"

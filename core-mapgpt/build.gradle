@@ -1,0 +1,64 @@
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+    id 'kotlin-parcelize'
+    id 'com.jaredsburrows.license'
+    id 'com.mapbox.android.sdk.versions'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.7.20'
+}
+
+apply from: "../gradle/ktlint.gradle"
+apply from: file("../gradle/artifact-settings.gradle")
+
+version = project.ext.versionName
+group = project.ext.mapboxArtifactGroupId
+
+android {
+    compileSdkVersion androidVersions.compileSdkVersion
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        minSdkVersion androidVersions.minSdkVersion
+        targetSdkVersion androidVersions.targetSdkVersion
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'proguard-rules.pro', "../proguard/proguard-project.pro"
+    }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+        unitTests.includeAndroidResources = true
+    }
+}
+
+dependencies {
+
+    implementation dependenciesList.androidXActivity
+    implementation dependenciesList.kotlinStdLib
+    implementation dependenciesList.coroutinesCore
+
+    implementation dependenciesList.kotlinSerialization
+    implementation dependenciesList.ktorClientAuth
+    implementation dependenciesList.ktorClientCore
+    implementation dependenciesList.ktorClientContentNegotiation
+    implementation dependenciesList.ktorClientEncoding
+    implementation dependenciesList.ktorClientOkHttp
+    implementation dependenciesList.ktorSerialization
+    implementation dependenciesList.ktorWebSockets
+    implementation dependenciesList.ktorCio
+
+    implementation dependenciesList.mapboxAnnotations
+    implementation dependenciesList.mapboxCommonNative
+    implementation dependenciesList.mapboxMapGptExpAndroid
+
+    testImplementation dependenciesList.androidxTestJunit
+    testImplementation dependenciesList.coroutinesTestAndroid
+    testImplementation dependenciesList.mockk
+}
+
+apply from: "$rootDir/gradle/track-public-apis.gradle"
+apply from: "$rootDir/gradle/jacoco.gradle"
+apply from: "$rootDir/gradle/publish.gradle"
