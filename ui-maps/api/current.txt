@@ -426,6 +426,14 @@ package com.mapbox.navigation.ui.maps.camera.internal {
     property public final com.mapbox.navigation.ui.maps.camera.internal.FollowingFramingMode mode;
   }
 
+  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public final class InternalViewportDataSourceOptions {
+    ctor public InternalViewportDataSourceOptions(boolean ignoreMinZoomWhenFramingManeuver);
+    method public boolean component1();
+    method public com.mapbox.navigation.ui.maps.camera.internal.InternalViewportDataSourceOptions copy(boolean ignoreMinZoomWhenFramingManeuver);
+    method public boolean getIgnoreMinZoomWhenFramingManeuver();
+    property public final boolean ignoreMinZoomWhenFramingManeuver;
+  }
+
   public final class MapboxNavigationCameraUtilsKt {
     method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public static android.animation.AnimatorSet constraintDurationTo(android.animation.AnimatorSet, long maxDuration);
     method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public static void jumpToCameraCenterInternal(com.mapbox.navigation.ui.maps.camera.NavigationCamera, com.mapbox.geojson.Point? center);
@@ -433,7 +441,7 @@ package com.mapbox.navigation.ui.maps.camera.internal {
   }
 
   @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public final class MapboxNavigationViewportDataSourceFactory {
-    method public com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource create(com.mapbox.maps.MapboxMap map, com.mapbox.navigation.ui.maps.camera.internal.FollowingFramingModeHolder followingFramingModeHolder);
+    method public com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource create(com.mapbox.maps.MapboxMap map, com.mapbox.navigation.ui.maps.camera.internal.FollowingFramingModeHolder followingFramingModeHolder, com.mapbox.navigation.ui.maps.camera.internal.InternalViewportDataSourceOptions internalViewportDataSourceOptions);
     field public static final com.mapbox.navigation.ui.maps.camera.internal.MapboxNavigationViewportDataSourceFactory INSTANCE;
   }
 

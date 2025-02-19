@@ -10,7 +10,12 @@ object MapboxNavigationViewportDataSourceFactory {
     fun create(
         map: MapboxMap,
         followingFramingModeHolder: FollowingFramingModeHolder,
+        internalViewportDataSourceOptions: InternalViewportDataSourceOptions,
     ): MapboxNavigationViewportDataSource {
-        return MapboxNavigationViewportDataSource(map, followingFramingModeHolder)
+        return MapboxNavigationViewportDataSource(
+            map,
+            followingFramingModeHolder,
+            internalViewportDataSourceOptions,
+        )
     }
 }
