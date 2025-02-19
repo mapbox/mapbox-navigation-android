@@ -327,6 +327,7 @@ internal class MapboxTripSession(
      */
     override fun start(withTripService: Boolean, withReplayEnabled: Boolean) {
         if (state != TripSessionState.STARTED) {
+            logI(LOG_CATEGORY) { "Start trip session, replay enabled: $withReplayEnabled" }
             navigator.addNavigatorObserver(navigatorObserver)
             navigator.startNavigationSession()
             if (withTripService) {
@@ -368,6 +369,7 @@ internal class MapboxTripSession(
         if (state == TripSessionState.STOPPED) {
             return
         }
+        logI(LOG_CATEGORY) { "Stop trip session" }
         navigator.stopNavigationSession()
         navigator.removeNavigatorObserver(navigatorObserver)
         tripService.stopService()
