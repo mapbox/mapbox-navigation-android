@@ -183,28 +183,24 @@ internal object ViewportDataSourceProcessor {
     }
 
     /**
-     * Returns the pitch based on route progress and settings.
+     * Returns whether we are in maneuver framing mode based on PitchNearManeuvers.
+     * NOTE: we only support framing maneuvers when PitchNearManeuvers is enabled
+     * (meaning it will set the pitch to 0). Might be extended in the future.
      */
-    fun getPitchFallbackFromRouteProgress(
+    fun isFramingManeuver(
         routeProgress: RouteProgress,
         followingFrameOptions: FollowingFrameOptions,
-    ): Double {
+    ): Boolean {
         val currentStepProgress = routeProgress.currentLegProgress?.currentStepProgress
         val upcomingManeuverType = routeProgress.bannerInstructions?.primary()?.type()
         if (currentStepProgress == null || upcomingManeuverType == null) {
-            return followingFrameOptions.defaultPitch
+            return false
         }
 
         return followingFrameOptions.pitchNearManeuvers.run {
-            if (
-                enabled &&
+            enabled &&
                 upcomingManeuverType !in excludedManeuvers &&
                 currentStepProgress.distanceRemaining <= triggerDistanceFromManeuver
-            ) {
-                MapboxNavigationViewportDataSource.ZERO_PITCH
-            } else {
-                followingFrameOptions.defaultPitch
-            }
         }
     }
 

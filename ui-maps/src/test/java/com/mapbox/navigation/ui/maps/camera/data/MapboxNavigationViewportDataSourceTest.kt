@@ -24,10 +24,10 @@ import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSou
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource.Companion.NULL_ISLAND_POINT
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource.Companion.ZERO_PITCH
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getMapAnchoredPaddingFromUserPadding
-import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getPitchFallbackFromRouteProgress
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getRemainingPointsOnRoute
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getScreenBoxForFraming
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getSmootherBearingForMap
+import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.isFramingManeuver
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteForPostManeuverFramingGeometry
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteIntersections
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRoutePoints
@@ -68,7 +68,6 @@ class MapboxNavigationViewportDataSourceTest {
         ScreenCoordinate(3.0, 4.0),
     )
     private val smoothedBearing = 333.0
-    private val pitchFromProgress = 45.0
 
     private val route: DirectionsRoute = mockk(relaxed = true) {
         every { routeIndex() } returns "0"
@@ -196,11 +195,11 @@ class MapboxNavigationViewportDataSourceTest {
             )
         } returns postManeuverFramingPoints
         every {
-            getPitchFallbackFromRouteProgress(
+            isFramingManeuver(
                 any(),
                 any(),
             )
-        } returns pitchFromProgress
+        } returns false
         every {
             getPointsToFrameOnCurrentStep(
                 any(),
@@ -669,7 +668,7 @@ class MapboxNavigationViewportDataSourceTest {
     }
 
     @Test
-    fun `verify frame - location + route + progress + pitch 0`() {
+    fun `verify frame - location + route + progress + framing a maneuver`() {
         val stepProgress = mockk<RouteStepProgress> {
             every { distanceRemaining } returns 123f
         }
@@ -678,6 +677,10 @@ class MapboxNavigationViewportDataSourceTest {
         }
         every { routeProgress.currentLegProgress } returns legProgress
         every { routeProgress.route } returns route
+
+        every {
+            isFramingManeuver(any(), any())
+        } returns true
 
         val location = createLocation()
 
@@ -738,7 +741,6 @@ class MapboxNavigationViewportDataSourceTest {
         viewportDataSource.onLocationChanged(location)
         viewportDataSource.onRouteChanged(navigationRoute)
         viewportDataSource.onRouteProgressChanged(routeProgress)
-        viewportDataSource.followingPitchPropertyOverride(ZERO_PITCH)
         viewportDataSource.evaluate()
         val data = viewportDataSource.getViewportData()
 
@@ -754,7 +756,7 @@ class MapboxNavigationViewportDataSourceTest {
     }
 
     @Test
-    fun `verify frame - location + route + progress + pitch 0 + no view maximization`() {
+    fun `verify frame - location + route + progress + framing maneuver + no view maximization`() {
         val stepProgress = mockk<RouteStepProgress> {
             every { distanceRemaining } returns 123f
         }
@@ -763,6 +765,10 @@ class MapboxNavigationViewportDataSourceTest {
         }
         every { routeProgress.currentLegProgress } returns legProgress
         every { routeProgress.route } returns route
+
+        every {
+            isFramingManeuver(any(), any())
+        } returns true
 
         val location = createLocation()
 
@@ -822,13 +828,101 @@ class MapboxNavigationViewportDataSourceTest {
         viewportDataSource.onLocationChanged(location)
         viewportDataSource.onRouteChanged(navigationRoute)
         viewportDataSource.onRouteProgressChanged(routeProgress)
-        viewportDataSource.followingPitchPropertyOverride(ZERO_PITCH)
         viewportDataSource.evaluate()
         val data = viewportDataSource.getViewportData()
 
         // verify
         assertEquals(
             followingCameraOptions,
+            data.cameraForFollowing,
+        )
+        assertEquals(
+            overviewCameraOptions,
+            data.cameraForOverview,
+        )
+    }
+
+    @Test
+    fun `verify frame - location + route + progress + overridden pitch 0`() {
+        val stepProgress = mockk<RouteStepProgress> {
+            every { distanceRemaining } returns 123f
+        }
+        val legProgress = mockk<RouteLegProgress> {
+            every { currentStepProgress } returns stepProgress
+        }
+        every { routeProgress.currentLegProgress } returns legProgress
+        every { routeProgress.route } returns route
+
+        every {
+            isFramingManeuver(any(), any())
+        } returns false
+
+        val location = createLocation()
+
+        // following mocks
+        val expectedFollowingPoints = mutableListOf(location.toPoint()).apply {
+            addAll(pointsToFrameOnCurrentStep)
+        }
+        val fallbackOptions = createCameraOptions {
+            center(location.toPoint())
+            bearing(smoothedBearing)
+            pitch(ZERO_PITCH)
+            zoom(mapboxMap.cameraState.zoom)
+            padding(singlePixelEdgeInsets)
+        }
+        val followingZoom = 5.0 // less than min zoom - should use min zoom
+        val followingCameraOptions = fallbackOptions.toBuilder()
+            .zoom(followingZoom)
+            .build()
+        every {
+            mapboxMap.cameraForCoordinates(
+                expectedFollowingPoints,
+                fallbackOptions,
+                followingScreenBox,
+            )
+        } returns followingCameraOptions
+
+        // overview mocks
+        val expectedOverviewPoints = mutableListOf(location.toPoint()).apply {
+            addAll(remainingPointsOnRoute)
+        }
+        val overviewCenter = Point.fromLngLat(5.0, 6.0)
+        val overviewZoom = 10.0
+        val overviewCameraOptions = createCameraOptions {
+            center(overviewCenter)
+            bearing(BEARING_NORTH)
+            pitch(ZERO_PITCH)
+            zoom(overviewZoom)
+        }
+        every {
+            mapboxMap.cameraForCoordinates(
+                expectedOverviewPoints,
+                match<CameraOptions> {
+                    it.pitch == ZERO_PITCH &&
+                        it.bearing == BEARING_NORTH &&
+                        it.padding == EMPTY_EDGE_INSETS
+                },
+                null,
+                null,
+                null,
+            )
+        } returns overviewCameraOptions
+
+        // run
+        viewportDataSource.options.followingFrameOptions
+            .maximizeViewableGeometryWhenPitchZero = false
+        viewportDataSource.onLocationChanged(location)
+        viewportDataSource.onRouteChanged(navigationRoute)
+        viewportDataSource.onRouteProgressChanged(routeProgress)
+        viewportDataSource.followingPitchPropertyOverride(0.0)
+        viewportDataSource.evaluate()
+        val data = viewportDataSource.getViewportData()
+
+        // verify
+        assertEquals(
+            followingCameraOptions.toBuilder()
+                .zoom(10.5)
+                .build(),
             data.cameraForFollowing,
         )
         assertEquals(
@@ -1106,8 +1200,8 @@ class MapboxNavigationViewportDataSourceTest {
     @Test
     fun `verify frame - location + route + progress + reset route`() {
         every {
-            getPitchFallbackFromRouteProgress(any(), any())
-        } returns ZERO_PITCH
+            isFramingManeuver(any(), any())
+        } returns true
 
         val stepProgress = mockk<RouteStepProgress> {
             every { distanceRemaining } returns 123f
@@ -1180,8 +1274,8 @@ class MapboxNavigationViewportDataSourceTest {
     @Test
     fun `verify frame - location + route + progress + reset route and forget to update`() {
         every {
-            getPitchFallbackFromRouteProgress(any(), any())
-        } returns ZERO_PITCH
+            isFramingManeuver(any(), any())
+        } returns true
 
         val stepProgress = mockk<RouteStepProgress> {
             every { distanceRemaining } returns 123f

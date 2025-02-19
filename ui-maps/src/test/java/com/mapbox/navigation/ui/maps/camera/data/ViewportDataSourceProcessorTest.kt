@@ -13,10 +13,10 @@ import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getMapAnchoredPaddingFromUserPadding
-import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getPitchFallbackFromRouteProgress
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getRemainingPointsOnRoute
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getScreenBoxForFraming
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getSmootherBearingForMap
+import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.isFramingManeuver
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteForPostManeuverFramingGeometry
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteIntersections
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRoutePoints
@@ -193,10 +193,10 @@ class ViewportDataSourceProcessorTest {
     }
 
     @Test
-    fun `test getPitchFallbackFromRouteProgress - pitch near maneuver, defaults`() {
+    fun `test isFramingManeuver - pitch near maneuver, false`() {
         val maneuvers = listOf("continue", "merge", "on ramp", "off ramp", "fork")
         maneuvers.forEach {
-            val actual = getPitchFallbackFromRouteProgress(
+            val actual = isFramingManeuver(
                 routeProgressWith(
                     upcomingManeuverType = it,
                     distanceToUpcomingManeuver = 150f,
@@ -206,78 +206,74 @@ class ViewportDataSourceProcessorTest {
 
             assertEquals(
                 "Camera pitch should not update to 0 for maneuver `$it`",
-                45.0,
+                false,
                 actual,
-                0.0000001,
             )
         }
     }
 
     @Test
-    fun `test getPitchFallbackFromRouteProgress - pitch near maneuver disabled`() {
-        val expected = 45.0
+    fun `test isFramingManeuver - pitch near maneuver disabled`() {
+        val expected = false
 
-        val actual = getPitchFallbackFromRouteProgress(
+        val actual = isFramingManeuver(
             routeProgressWith(
                 upcomingManeuverType = "fork",
                 distanceToUpcomingManeuver = 150f,
             ),
             FollowingFrameOptions().apply {
-                defaultPitch = 45.0
                 pitchNearManeuvers.enabled = false
                 pitchNearManeuvers.triggerDistanceFromManeuver = 180.0
                 pitchNearManeuvers.excludedManeuvers = emptyList()
             },
         )
 
-        assertEquals(expected, actual, 0.0000001)
+        assertEquals(expected, actual)
     }
 
     @Test
-    fun `test getPitchFallbackFromRouteProgress - pitch near maneuver enabled, not reached`() {
-        val expected = 45.0
+    fun `test isFramingManeuver - pitch near maneuver enabled, not reached`() {
+        val expected = false
 
-        val actual = getPitchFallbackFromRouteProgress(
+        val actual = isFramingManeuver(
             routeProgressWith(
                 upcomingManeuverType = "fork",
                 distanceToUpcomingManeuver = 200f,
             ),
             FollowingFrameOptions().apply {
-                defaultPitch = 45.0
                 pitchNearManeuvers.enabled = true
                 pitchNearManeuvers.triggerDistanceFromManeuver = 180.0
                 pitchNearManeuvers.excludedManeuvers = emptyList()
             },
         )
 
-        assertEquals(expected, actual, 0.0000001)
+        assertEquals(expected, actual)
     }
 
     @Test
-    fun `test getPitchFallbackFromRouteProgress - pitch near maneuver enabled, reached`() {
-        val expected = 0.0
+    fun `test isFramingManeuver - pitch near maneuver enabled, reached`() {
+        val expected = true
 
-        val actual = getPitchFallbackFromRouteProgress(
+        val actual = isFramingManeuver(
             routeProgressWith(
                 upcomingManeuverType = "fork",
                 distanceToUpcomingManeuver = 150f,
             ),
             FollowingFrameOptions().apply {
-                defaultPitch = 45.0
                 pitchNearManeuvers.enabled = true
                 pitchNearManeuvers.triggerDistanceFromManeuver = 180.0
                 pitchNearManeuvers.excludedManeuvers = emptyList()
             },
         )
 
-        assertEquals(expected, actual, 0.0000001)
+        assertEquals(expected, actual)
     }
 
     @Test
-    fun `test getPitchFallbackFromRouteProgress - pitch near maneuver enabled, reached but excluded`() {
-        val expected = 45.0
+    fun `test isFramingManeuver - pitch near maneuver enabled, reached but excluded`() {
+        val expected = false
 
-        val actual = getPitchFallbackFromRouteProgress(
+        val actual = isFramingManeuver(
             routeProgressWith(
                 upcomingManeuverType = "fork",
                 distanceToUpcomingManeuver = 150f,
@@ -290,7 +286,7 @@ class ViewportDataSourceProcessorTest {
             },
         )
 
-        assertEquals(expected, actual, 0.0000001)
+        assertEquals(expected, actual)
     }
 
     @Test

@@ -21,10 +21,10 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getMapAnchoredPaddingFromUserPadding
-import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getPitchFallbackFromRouteProgress
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getRemainingPointsOnRoute
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getScreenBoxForFraming
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getSmootherBearingForMap
+import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.isFramingManeuver
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteForPostManeuverFramingGeometry
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteIntersections
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRoutePoints
@@ -32,6 +32,7 @@ import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.sim
 import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger
 import com.mapbox.navigation.ui.maps.camera.internal.FollowingFramingMode
 import com.mapbox.navigation.ui.maps.camera.internal.FollowingFramingModeHolder
+import com.mapbox.navigation.ui.maps.camera.internal.InternalViewportDataSourceOptions
 import com.mapbox.navigation.ui.maps.camera.internal.normalizeBearing
 import com.mapbox.navigation.ui.maps.util.MapSizeReadyCallbackHelper
 import com.mapbox.navigation.utils.internal.ifNonNull
@@ -204,6 +205,7 @@ import kotlin.math.min
 class MapboxNavigationViewportDataSource internal constructor(
     private val mapboxMap: MapboxMap,
     private val followingFramingModeHolder: FollowingFramingModeHolder?,
+    private val internalOptions: InternalViewportDataSourceOptions,
 ) : ViewportDataSource {
 
     internal companion object {
@@ -214,7 +216,11 @@ class MapboxNavigationViewportDataSource internal constructor(
         internal const val BEARING_NORTH = 0.0
     }
 
-    constructor(mapboxMap: MapboxMap) : this(mapboxMap, null)
+    constructor(mapboxMap: MapboxMap) : this(
+        mapboxMap,
+        null,
+        InternalViewportDataSourceOptions(ignoreMinZoomWhenFramingManeuver = false),
+    )
 
     /**
      * Set a [MapboxNavigationViewportDataSourceDebugger].
@@ -238,6 +244,7 @@ class MapboxNavigationViewportDataSource internal constructor(
     private var simplifiedRemainingPointsOnRoute: List<Point> = emptyList()
     private var targetLocation: Location? = null
     private var averageIntersectionDistancesOnRoute: List<List<Double>> = emptyList()
+    private var isFramingManeuver = false
 
     /* -------- GENERATED FRAMES -------- */
     private var followingCameraOptions = CameraOptions.Builder().build()
@@ -480,10 +487,15 @@ class MapboxNavigationViewportDataSource internal constructor(
             routeProgress.currentLegProgress,
             routeProgress.currentLegProgress?.currentStepProgress,
         ) { currentLegProgress, currentStepProgress ->
-            followingPitchProperty.fallback = getPitchFallbackFromRouteProgress(
+            isFramingManeuver = isFramingManeuver(
                 routeProgress,
                 options.followingFrameOptions,
             )
+            followingPitchProperty.fallback = if (isFramingManeuver) {
+                ZERO_PITCH
+            } else {
+                options.followingFrameOptions.defaultPitch
+            }
 
             pointsToFrameOnCurrentStep = options.followingFrameOptions.framingStrategy
                 .getPointsToFrameOnCurrentStep(
@@ -721,7 +733,7 @@ class MapboxNavigationViewportDataSource internal constructor(
         }
 
         options.followingFrameOptions.frameGeometryAfterManeuver.run {
-            if (enabled && followingPitchProperty.get() == ZERO_PITCH) {
+            if (enabled && isFramingManeuver) {
                 pointsForFollowing.addAll(pointsToFrameAfterCurrentStep)
             }
         }
@@ -729,7 +741,7 @@ class MapboxNavigationViewportDataSource internal constructor(
         val cameraFrame =
             if (pointsForFollowing.size > 1 &&
                 options.followingFrameOptions.maximizeViewableGeometryWhenPitchZero &&
-                followingPitchProperty.get() == ZERO_PITCH
+                isFramingManeuver
             ) {
                 followingFramingModeHolder?.mode = FollowingFramingMode.MULTIPLE_POINTS
                 mapboxMap.cameraForCoordinates(
@@ -779,9 +791,16 @@ class MapboxNavigationViewportDataSource internal constructor(
         }
 
         followingCenterProperty.fallback = cameraFrame.center!!
+
         options.followingFrameOptions.run {
-            followingZoomProperty.fallback = max(min(cameraFrame.zoom!!, maxZoom), minZoom)
+            followingZoomProperty.fallback =
+                if (isFramingManeuver && internalOptions.ignoreMinZoomWhenFramingManeuver) {
+                    min(cameraFrame.zoom!!, maxZoom)
+                } else {
+                    max(min(cameraFrame.zoom!!, maxZoom), minZoom)
+                }
         }
+
         appliedFollowingPadding = cameraFrame.padding
 
         updateDebuggerForFollowing(pointsForFollowing)
