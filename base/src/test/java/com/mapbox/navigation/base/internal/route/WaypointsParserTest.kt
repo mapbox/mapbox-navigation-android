@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.internal.router
+package com.mapbox.navigation.base.internal.route
 
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
@@ -6,7 +6,7 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
-import org.junit.Assert.assertEquals
+import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -118,6 +118,6 @@ class WaypointsParserTest(
 
     @Test
     fun parse() {
-        assertEquals(output, WaypointsParser.parse(input))
+        Assert.assertEquals(output, WaypointsParser.parse(input))
     }
 }

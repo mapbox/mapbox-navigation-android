@@ -1881,7 +1881,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             createMapboxNavigation()
             val primary: NavigationRoute = mockk(relaxed = true)
             val routes = listOf(primary)
-            mapboxNavigation.setManuallyRefreshedRoutes(routes)
+            mapboxNavigation.setExternallyRefreshedRoutes(routes, isManualRefresh = true)
 
             val routesSlot = mutableListOf<List<NavigationRoute>>()
             verify {
@@ -1890,6 +1890,19 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
             routesSlot[0].run {
                 assertEquals(routes, this)
+            }
+        }
+
+    @Test
+    fun `externally refreshed route does not update routeRefreshController`() =
+        coroutineRule.runBlockingTest {
+            createMapboxNavigation()
+            val primary: NavigationRoute = mockk(relaxed = true)
+            val routes = listOf(primary)
+            mapboxNavigation.setExternallyRefreshedRoutes(routes, isManualRefresh = false)
+
+            verify(exactly = 0) {
+                routeRefreshController.onRoutesRefreshedManually(any())
             }
         }
 
