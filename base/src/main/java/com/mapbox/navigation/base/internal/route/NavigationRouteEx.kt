@@ -3,6 +3,7 @@
 
 package com.mapbox.navigation.base.internal.route
 
+import androidx.annotation.RestrictTo
 import androidx.annotation.WorkerThread
 import com.google.gson.JsonElement
 import com.google.gson.JsonPrimitive
@@ -14,9 +15,11 @@ import com.mapbox.api.directions.v5.models.Incident
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.api.directionsrefresh.v1.models.DirectionsRouteRefresh
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.CongestionNumericOverride
 import com.mapbox.navigation.base.internal.utils.Constants
+import com.mapbox.navigation.base.internal.utils.Constants.RouteResponse.KEY_REFRESH_TTL
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshMetadata
 import com.mapbox.navigation.base.route.toNavigationRoute
@@ -35,6 +38,30 @@ val NavigationRoute.routerOrigin: RouterOrigin get() = nativeRoute.routerOrigin
  * Internal handle for the route's native peer.
  */
 fun NavigationRoute.nativeRoute(): RouteInterface = this.nativeRoute
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+fun NavigationRoute.internalRefreshRoute(
+    routeRefresh: DirectionsRouteRefresh,
+    legIndex: Int,
+    legGeometryIndex: Int?,
+    responseTimeElapsedSeconds: Long,
+): NavigationRoute {
+    val updatedWaypoints = WaypointsParser.parse(
+        routeRefresh.unrecognizedJsonProperties
+            ?.get(Constants.RouteResponse.KEY_WAYPOINTS),
+    )
+    return this.refreshRoute(
+        legIndex,
+        legGeometryIndex,
+        routeRefresh.legs()?.map { it.annotation() },
+        routeRefresh.legs()?.map { it.incidents() },
+        routeRefresh.legs()?.map { it.closures() },
+        updatedWaypoints,
+        responseTimeElapsedSeconds,
+        routeRefresh.unrecognizedJsonProperties
+            ?.get(KEY_REFRESH_TTL)?.asInt,
+    )
+}
 
 /**
  * Updates route's annotations, incidents, and closures in place while keeping the Native peer as is.

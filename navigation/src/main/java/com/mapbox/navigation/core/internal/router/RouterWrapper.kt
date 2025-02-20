@@ -9,11 +9,9 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.common.MapboxServices
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.internal.RouterFailureFactory
-import com.mapbox.navigation.base.internal.route.refreshRoute
+import com.mapbox.navigation.base.internal.route.internalRefreshRoute
 import com.mapbox.navigation.base.internal.route.routeOptions
 import com.mapbox.navigation.base.internal.route.updateExpirationTime
-import com.mapbox.navigation.base.internal.utils.Constants
-import com.mapbox.navigation.base.internal.utils.Constants.RouteResponse.KEY_REFRESH_TTL
 import com.mapbox.navigation.base.internal.utils.MapboxOptionsUtil
 import com.mapbox.navigation.base.internal.utils.RouteParsingManager
 import com.mapbox.navigation.base.internal.utils.RouteResponseInfo
@@ -277,20 +275,11 @@ internal class RouterWrapper(
                                             )
                                         }
                                         .mapValue { routeRefresh ->
-                                            val updatedWaypoints = WaypointsParser.parse(
-                                                routeRefresh.unrecognizedJsonProperties
-                                                    ?.get(Constants.RouteResponse.KEY_WAYPOINTS),
-                                            )
-                                            route.refreshRoute(
+                                            route.internalRefreshRoute(
+                                                routeRefresh,
                                                 refreshOptions.legIndex,
                                                 routeRefreshRequestData.legGeometryIndex,
-                                                routeRefresh.legs()?.map { it.annotation() },
-                                                routeRefresh.legs()?.map { it.incidents() },
-                                                routeRefresh.legs()?.map { it.closures() },
-                                                updatedWaypoints,
                                                 responseTimeElapsedSeconds,
-                                                routeRefresh.unrecognizedJsonProperties
-                                                    ?.get(KEY_REFRESH_TTL)?.asInt,
                                             )
                                         }
                                 }.fold(

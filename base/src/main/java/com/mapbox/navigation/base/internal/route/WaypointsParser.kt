@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.internal.router
+package com.mapbox.navigation.base.internal.route
 
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject

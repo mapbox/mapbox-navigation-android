@@ -580,7 +580,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             tripSession.registerLocationObserver(trafficOverrideHandler)
             registerRoutesObserver(trafficOverrideHandler)
             trafficOverrideHandler.registerRouteTrafficRefreshObserver { navigationRoutes ->
-                setManuallyRefreshedRoutes(navigationRoutes)
+                setExternallyRefreshedRoutes(navigationRoutes, isManualRefresh = true)
             }
         }
 
@@ -1196,8 +1196,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             ?: directionsSession.initialLegIndex
     }
 
-    @VisibleForTesting
-    internal fun setManuallyRefreshedRoutes(routes: List<NavigationRoute>) {
+    internal fun setExternallyRefreshedRoutes(
+        routes: List<NavigationRoute>,
+        isManualRefresh: Boolean,
+    ) {
         internalSetNavigationRoutes(
             routes,
             SetRoutes.RefreshRoutes(
@@ -1206,7 +1208,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                     0, // isn't used
                     0, // isn't used
                 ),
-                isManualRefresh = true,
+                isManualRefresh = isManualRefresh,
             ),
         )
     }
