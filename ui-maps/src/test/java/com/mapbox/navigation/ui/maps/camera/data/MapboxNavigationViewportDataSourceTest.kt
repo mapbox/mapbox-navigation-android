@@ -1488,6 +1488,286 @@ class MapboxNavigationViewportDataSourceTest {
         assertEquals(initialViewportData, viewportDataSource.getViewportData())
     }
 
+    @Test
+    fun `reevaluate route - no route`() {
+        every { routeProgress.route } returns route
+        every { routeProgress.currentLegProgress } returns mockk(relaxed = true) {
+            every { currentStepProgress } returns mockk(relaxed = true)
+        }
+        every {
+            isFramingManeuver(
+                any(),
+                any(),
+            )
+        } returns true
+
+        val location = createLocation()
+
+        viewportDataSource.onLocationChanged(location)
+
+        viewportDataSource.evaluate()
+        val oldData = viewportDataSource.getViewportData()
+
+        val newDistance = 150.0
+        val newPostManeuverFramingPoints =
+            // legs
+            listOf(
+                // steps
+                listOf(
+                    // points
+                    listOf(Point.fromLngLat(10.0, 11.0)),
+                    listOf(Point.fromLngLat(12.0, 13.0)),
+                    listOf(Point.fromLngLat(14.0, 15.0)),
+                ),
+                listOf(
+                    // points
+                    listOf(Point.fromLngLat(16.0, 17.0)),
+                    listOf(Point.fromLngLat(18.0, 19.0)),
+                ),
+            )
+        val newPointsToFrameAfterCurrentStep: List<Point> = listOf(
+            Point.fromLngLat(39.0, 40.0),
+            Point.fromLngLat(41.0, 42.0),
+        )
+
+        every {
+            processRouteForPostManeuverFramingGeometry(any(), any(), newDistance, any(), any())
+        } returns newPostManeuverFramingPoints
+
+        every {
+            getPointsToFrameAfterCurrentManeuver(
+                any(),
+                any(),
+                newPostManeuverFramingPoints,
+            )
+        } returns newPointsToFrameAfterCurrentStep
+
+        every {
+            mapboxMap.cameraForCoordinates(
+                match<List<Point>> { points: List<Point> ->
+                    points.containsAll(newPointsToFrameAfterCurrentStep)
+                },
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns CameraOptions.Builder()
+            .center(Point.fromLngLat(12.3, 13.4))
+            .zoom(14.5)
+            .build()
+
+        viewportDataSource.options.followingFrameOptions.frameGeometryAfterManeuver
+            .distanceToFrameAfterManeuver = newDistance
+        viewportDataSource.reevaluateRoute()
+
+        verify(exactly = 0) {
+            processRouteForPostManeuverFramingGeometry(any(), any(), newDistance, any(), any())
+        }
+        verify(exactly = 0) {
+            mapboxMap.cameraForCoordinates(
+                match<List<Point>> { points: List<Point> ->
+                    points.containsAll(newPointsToFrameAfterCurrentStep)
+                },
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        }
+
+        val newData = viewportDataSource.getViewportData()
+        assertEquals(oldData, newData)
+    }
+
+    @Test
+    fun `reevaluate route - has route, no route progress`() {
+        every { routeProgress.route } returns route
+        every { routeProgress.currentLegProgress } returns mockk(relaxed = true) {
+            every { currentStepProgress } returns mockk(relaxed = true)
+        }
+        every {
+            isFramingManeuver(
+                any(),
+                any(),
+            )
+        } returns true
+
+        val location = createLocation()
+
+        viewportDataSource.onLocationChanged(location)
+        viewportDataSource.onRouteChanged(navigationRoute)
+
+        viewportDataSource.evaluate()
+        val oldData = viewportDataSource.getViewportData()
+
+        val newDistance = 150.0
+        val newPostManeuverFramingPoints =
+            // legs
+            listOf(
+                // steps
+                listOf(
+                    // points
+                    listOf(Point.fromLngLat(10.0, 11.0)),
+                    listOf(Point.fromLngLat(12.0, 13.0)),
+                    listOf(Point.fromLngLat(14.0, 15.0)),
+                ),
+                listOf(
+                    // points
+                    listOf(Point.fromLngLat(16.0, 17.0)),
+                    listOf(Point.fromLngLat(18.0, 19.0)),
+                ),
+            )
+        val newPointsToFrameAfterCurrentStep: List<Point> = listOf(
+            Point.fromLngLat(39.0, 40.0),
+            Point.fromLngLat(41.0, 42.0),
+        )
+
+        every {
+            processRouteForPostManeuverFramingGeometry(any(), any(), newDistance, any(), any())
+        } returns newPostManeuverFramingPoints
+
+        every {
+            getPointsToFrameAfterCurrentManeuver(
+                any(),
+                any(),
+                newPostManeuverFramingPoints,
+            )
+        } returns newPointsToFrameAfterCurrentStep
+
+        every {
+            mapboxMap.cameraForCoordinates(
+                match<List<Point>> { points: List<Point> ->
+                    points.containsAll(newPointsToFrameAfterCurrentStep)
+                },
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns CameraOptions.Builder()
+            .center(Point.fromLngLat(12.3, 13.4))
+            .zoom(14.5)
+            .build()
+
+        viewportDataSource.options.followingFrameOptions.frameGeometryAfterManeuver
+            .distanceToFrameAfterManeuver = newDistance
+        viewportDataSource.reevaluateRoute()
+
+        verify {
+            processRouteForPostManeuverFramingGeometry(any(), any(), newDistance, any(), any())
+        }
+        verify(exactly = 0) {
+            mapboxMap.cameraForCoordinates(
+                match<List<Point>> { points: List<Point> ->
+                    points.containsAll(newPointsToFrameAfterCurrentStep)
+                },
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        }
+
+        val newData = viewportDataSource.getViewportData()
+        assertEquals(oldData, newData)
+    }
+
+    @Test
+    fun `reevaluate route - has route and route progress`() {
+        val expectedOptions = CameraOptions.Builder()
+            .center(Point.fromLngLat(12.3, 13.4))
+            .zoom(14.5)
+            .build()
+
+        every { routeProgress.route } returns route
+        every { routeProgress.currentLegProgress } returns mockk(relaxed = true) {
+            every { currentStepProgress } returns mockk(relaxed = true)
+        }
+        every {
+            isFramingManeuver(
+                any(),
+                any(),
+            )
+        } returns true
+
+        val location = createLocation()
+
+        viewportDataSource.onLocationChanged(location)
+        viewportDataSource.onRouteChanged(navigationRoute)
+        viewportDataSource.onRouteProgressChanged(routeProgress)
+
+        viewportDataSource.evaluate()
+
+        val newDistance = 150.0
+        val newPostManeuverFramingPoints =
+            // legs
+            listOf(
+                // steps
+                listOf(
+                    // points
+                    listOf(Point.fromLngLat(10.0, 11.0)),
+                    listOf(Point.fromLngLat(12.0, 13.0)),
+                    listOf(Point.fromLngLat(14.0, 15.0)),
+                ),
+                listOf(
+                    // points
+                    listOf(Point.fromLngLat(16.0, 17.0)),
+                    listOf(Point.fromLngLat(18.0, 19.0)),
+                ),
+            )
+        val newPointsToFrameAfterCurrentStep: List<Point> = listOf(
+            Point.fromLngLat(39.0, 40.0),
+            Point.fromLngLat(41.0, 42.0),
+        )
+
+        every {
+            processRouteForPostManeuverFramingGeometry(any(), any(), newDistance, any(), any())
+        } returns newPostManeuverFramingPoints
+
+        every {
+            getPointsToFrameAfterCurrentManeuver(
+                any(),
+                any(),
+                newPostManeuverFramingPoints,
+            )
+        } returns newPointsToFrameAfterCurrentStep
+
+        every {
+            mapboxMap.cameraForCoordinates(
+                match<List<Point>> { points: List<Point> ->
+                    points.containsAll(newPointsToFrameAfterCurrentStep)
+                },
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns expectedOptions
+
+        viewportDataSource.options.followingFrameOptions.frameGeometryAfterManeuver
+            .distanceToFrameAfterManeuver = newDistance
+        viewportDataSource.reevaluateRoute()
+
+        verify {
+            processRouteForPostManeuverFramingGeometry(any(), any(), newDistance, any(), any())
+        }
+        verify {
+            mapboxMap.cameraForCoordinates(
+                match<List<Point>> { points: List<Point> ->
+                    points.containsAll(newPointsToFrameAfterCurrentStep)
+                },
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        }
+
+        val newData = viewportDataSource.getViewportData()
+        assertEquals(expectedOptions.center, newData.cameraForFollowing.center)
+    }
+
     @After
     fun tearDown() {
         unmockkObject(ViewportDataSourceProcessor)
