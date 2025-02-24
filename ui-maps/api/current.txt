@@ -440,13 +440,13 @@ package com.mapbox.navigation.ui.maps.camera.internal {
     method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public static double normalizeBearing(double currentBearing, double targetBearing);
   }
 
+  public final class MapboxNavigationViewportDataSourceExKt {
+    method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public static void internalReevaluateRoute(com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource);
+  }
+
   @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public final class MapboxNavigationViewportDataSourceFactory {
     method public com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource create(com.mapbox.maps.MapboxMap map, com.mapbox.navigation.ui.maps.camera.internal.FollowingFramingModeHolder followingFramingModeHolder, com.mapbox.navigation.ui.maps.camera.internal.InternalViewportDataSourceOptions internalViewportDataSourceOptions);
     field public static final com.mapbox.navigation.ui.maps.camera.internal.MapboxNavigationViewportDataSourceFactory INSTANCE;
-  }
-
-  public final class NavigationCameraExKt {
-    method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public static boolean isSinglePixelPadding(com.mapbox.maps.MapboxMap);
   }
 
 }

@@ -236,7 +236,7 @@ class MapboxNavigationViewportDataSource internal constructor(
     val options = MapboxNavigationViewportDataSourceOptions()
 
     private var navigationRoute: NavigationRoute? = null
-    private var completeRoutePoints: List<List<List<Point>>> = emptyList()
+    private var routeProgress: RouteProgress? = null
     private var simplifiedCompleteRoutePoints: List<List<List<Point>>> = emptyList()
     private var postManeuverFramingPoints: List<List<List<Point>>> = emptyList()
     private var pointsToFrameOnCurrentStep: List<Point> = emptyList()
@@ -421,32 +421,7 @@ class MapboxNavigationViewportDataSource internal constructor(
         if (!route.directionsRoute.isSameRoute(navigationRoute?.directionsRoute)) {
             clearRouteData()
             this.navigationRoute = route
-            completeRoutePoints = processRoutePoints(route.directionsRoute)
-            simplifiedCompleteRoutePoints = simplifyCompleteRoutePoints(
-                options.overviewFrameOptions.geometrySimplification.enabled,
-                options.overviewFrameOptions.geometrySimplification.simplificationFactor,
-                completeRoutePoints,
-            )
-            simplifiedRemainingPointsOnRoute = simplifiedCompleteRoutePoints.flatten().flatten()
-
-            options.followingFrameOptions.intersectionDensityCalculation.run {
-                averageIntersectionDistancesOnRoute = processRouteIntersections(
-                    enabled,
-                    minimumDistanceBetweenIntersections,
-                    route.directionsRoute,
-                    completeRoutePoints,
-                )
-            }
-
-            options.followingFrameOptions.frameGeometryAfterManeuver.run {
-                postManeuverFramingPoints = processRouteForPostManeuverFramingGeometry(
-                    enabled,
-                    distanceToCoalesceCompoundManeuvers,
-                    distanceToFrameAfterManeuver,
-                    route.directionsRoute,
-                    completeRoutePoints,
-                )
-            }
+            calculateRouteData(route)
         }
     }
 
@@ -464,6 +439,7 @@ class MapboxNavigationViewportDataSource internal constructor(
      * @see [evaluate]
      */
     fun onRouteProgressChanged(routeProgress: RouteProgress) {
+        this.routeProgress = routeProgress
         val currentRoute = this.navigationRoute
         if (currentRoute == null) {
             logW(
@@ -549,17 +525,53 @@ class MapboxNavigationViewportDataSource internal constructor(
         mapsSizeReadyCancellable = null
 
         navigationRoute = null
-        completeRoutePoints = emptyList()
         postManeuverFramingPoints = emptyList()
         simplifiedCompleteRoutePoints = emptyList()
         averageIntersectionDistancesOnRoute = emptyList()
         clearProgressData()
     }
 
+    private fun calculateRouteData(route: NavigationRoute) {
+        val completeRoutePoints = processRoutePoints(route.directionsRoute)
+        simplifiedCompleteRoutePoints = simplifyCompleteRoutePoints(
+            options.overviewFrameOptions.geometrySimplification.enabled,
+            options.overviewFrameOptions.geometrySimplification.simplificationFactor,
+            completeRoutePoints,
+        )
+        simplifiedRemainingPointsOnRoute = simplifiedCompleteRoutePoints.flatten().flatten()
+
+        options.followingFrameOptions.intersectionDensityCalculation.run {
+            averageIntersectionDistancesOnRoute = processRouteIntersections(
+                enabled,
+                minimumDistanceBetweenIntersections,
+                route.directionsRoute,
+                completeRoutePoints,
+            )
+        }
+
+        options.followingFrameOptions.frameGeometryAfterManeuver.run {
+            postManeuverFramingPoints = processRouteForPostManeuverFramingGeometry(
+                enabled,
+                distanceToCoalesceCompoundManeuvers,
+                distanceToFrameAfterManeuver,
+                route.directionsRoute,
+                completeRoutePoints,
+            )
+        }
+    }
+
+    internal fun reevaluateRoute() {
+        val route = navigationRoute ?: return
+        calculateRouteData(route)
+        routeProgress?.let { onRouteProgressChanged(it) }
+        evaluate()
+    }
+
     private fun clearProgressData() {
         followingPitchProperty.fallback = options.followingFrameOptions.defaultPitch
         pointsToFrameOnCurrentStep = emptyList()
         pointsToFrameAfterCurrentStep = emptyList()
+        this.routeProgress = null
         simplifiedRemainingPointsOnRoute = simplifiedCompleteRoutePoints.flatten().flatten()
     }
 
