@@ -13,14 +13,14 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
-suspend fun BaseCoreNoCleanUpTest.stayOnPosition(
+suspend fun <T> BaseCoreNoCleanUpTest.stayOnPosition(
     latitude: Double,
     longitude: Double,
     bearing: Float,
     frequencyHz: Int = 1,
-    block: suspend () -> Unit
-) {
-    coroutineScope {
+    block: suspend () -> T
+): T {
+    return coroutineScope {
         val updateLocations = launch(start = CoroutineStart.UNDISPATCHED) {
             while (true) {
                 mockLocationUpdatesRule.pushLocationUpdate {
@@ -31,7 +31,7 @@ suspend fun BaseCoreNoCleanUpTest.stayOnPosition(
                 delay(1000L / frequencyHz)
             }
         }
-        try {
+        return@coroutineScope try {
             block()
         } finally {
             updateLocations.cancel()
@@ -39,12 +39,12 @@ suspend fun BaseCoreNoCleanUpTest.stayOnPosition(
     }
 }
 
-suspend fun BaseCoreNoCleanUpTest.stayOnPosition(
+suspend fun <T> BaseCoreNoCleanUpTest.stayOnPosition(
     location: Location,
     frequencyHz: Int = 1,
-    block: suspend () -> Unit
-) {
-    stayOnPosition(
+    block: suspend () -> T
+): T {
+    return stayOnPosition(
         latitude = location.latitude,
         longitude = location.longitude,
         bearing = location.bearing,
@@ -53,13 +53,13 @@ suspend fun BaseCoreNoCleanUpTest.stayOnPosition(
     )
 }
 
-suspend fun BaseCoreNoCleanUpTest.stayOnPosition(
+suspend fun <T> BaseCoreNoCleanUpTest.stayOnPosition(
     point: Point,
     bearing: Float,
     frequencyHz: Int = 1,
-    block: suspend () -> Unit
-) {
-    stayOnPosition(
+    block: suspend () -> T
+): T {
+    return stayOnPosition(
         latitude = point.latitude(),
         longitude = point.longitude(),
         bearing = bearing,
@@ -68,15 +68,15 @@ suspend fun BaseCoreNoCleanUpTest.stayOnPosition(
     )
 }
 
-suspend fun BaseCoreNoCleanUpTest.stayOnPositionAndWaitForUpdate(
+suspend fun <T> BaseCoreNoCleanUpTest.stayOnPositionAndWaitForUpdate(
     mapboxNavigation: MapboxNavigation,
     latitude: Double,
     longitude: Double,
     bearing: Float,
     frequencyHz: Int = 1,
-    block: suspend () -> Unit
+    block: suspend () -> T
 ) {
-    stayOnPosition(latitude, longitude, bearing, frequencyHz) {
+    return stayOnPosition(latitude, longitude, bearing, frequencyHz) {
         mapboxNavigation.flowLocationMatcherResult().filter {
             abs(
                 it.enhancedLocation.latitude - latitude

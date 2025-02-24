@@ -57,7 +57,7 @@ class MockLocationUpdatesRule : ExternalResource() {
         location.accuracy = 5f
         location.altitude = 0.0
         location.bearing = 0f
-        location.speed = 5f
+        location.speed = 0f
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             location.verticalAccuracyMeters = 5f
             location.bearingAccuracyDegrees = 5f
