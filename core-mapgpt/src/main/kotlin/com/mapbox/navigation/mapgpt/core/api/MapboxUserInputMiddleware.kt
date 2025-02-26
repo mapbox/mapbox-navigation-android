@@ -23,12 +23,15 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.reduce
 import kotlinx.coroutines.launch
+import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
 import kotlin.time.toDuration
 
 class MapboxUserInputMiddleware(
     override val provider: UserInputProvider = UserInputProvider.MapboxASR,
+    private val stoppedSpeakingThreshold: Duration = STOPPED_SPEAKING_THRESHOLD,
+    private val checkSpeakingInterval: Duration = CHECK_SPEAKING_INTERVAL,
 ) : UserInputOwnerMiddleware, CoroutineMiddleware<UserInputMiddlewareContext>() {
 
     private val _state = MutableStateFlow<UserInputState>(UserInputState.Idle)
@@ -36,6 +39,8 @@ class MapboxUserInputMiddleware(
 
     private val _availableLanguages = MutableStateFlow(emptySet<Language>())
     override val availableLanguages: StateFlow<Set<Language>> = _availableLanguages.asStateFlow()
+
+    private var lastKnownStopSpeakingState: UserInputState? = null
 
     override fun startListening() {
         if (!isAttached) {
@@ -82,6 +87,7 @@ class MapboxUserInputMiddleware(
     }
 
     fun onTranscriptReceived(transcript: String, isFinal: Boolean) {
+        SharedLog.i(TAG) { "onTranscriptReceived. isFinal: $isFinal transcript: $transcript" }
         _state.value = when {
             !isFinal -> { UserInputState.Listening(text = transcript) }
             transcript.isNotBlank() -> { UserInputState.Result(transcript,true) }
@@ -128,15 +134,24 @@ class MapboxUserInputMiddleware(
     private fun launchStopSpeakingCheck() = mainScope.launch(Dispatchers.Default) {
         state.collectLatest { userInputState ->
             while (userInputState is UserInputState.Listening) {
-                val elapsed = userInputState.timeMark.elapsedNow()
-                if (elapsed >= STOPPED_SPEAKING_THRESHOLD) {
-                    val transcription = (state.value as? UserInputState.Listening)?.text ?: ""
-                    SharedLog.i(TAG) { "User has stopped speaking" }
-                    if (transcription.isEmpty()) {
+                val elapsed = try {
+                    userInputState.timeMark.elapsedNow()
+                } catch (iae: IllegalArgumentException) {
+                    stoppedSpeakingThreshold
+                }
+                if (elapsed >= stoppedSpeakingThreshold) {
+                    val stateValue = state.value
+                    val transcription = (stateValue as? UserInputState.Listening)?.text.orEmpty()
+                    SharedLog.i(TAG) { "User has stopped speaking: $transcription" }
+                    SharedLog.i(TAG) { "User has stopped speaking. State: $stateValue LastKnownState: $lastKnownStopSpeakingState" }
+                    if (transcription.isBlank() || lastKnownStopSpeakingState == stateValue) {
                         _state.value = UserInputState.Idle
+                        lastKnownStopSpeakingState = null
+                    } else {
+                        lastKnownStopSpeakingState = stateValue
                     }
                 }
-                delay(CHECK_SPEAKING_INTERVAL)
+                delay(checkSpeakingInterval)
             }
         }
     }
