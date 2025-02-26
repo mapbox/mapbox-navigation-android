@@ -62,6 +62,10 @@ internal class UserInputOwnerMiddlewareSwitcher constructor(
         middlewareState.value.stopListening()
     }
 
+    override fun interruptListening() {
+        middlewareState.value.interruptListening()
+    }
+
     private companion object {
         private const val TAG = "UserInputOwnerMiddlewareSwitcher"
     }

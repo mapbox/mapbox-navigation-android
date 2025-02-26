@@ -34,4 +34,9 @@ interface UserInputOwner {
      * and listening, it should be closed and the state should be updated to [UserInputState.Idle].
      */
     fun stopListening()
+
+    /**
+     * Triggered when the user terminate conversation manually.
+     */
+    fun interruptListening()
 }

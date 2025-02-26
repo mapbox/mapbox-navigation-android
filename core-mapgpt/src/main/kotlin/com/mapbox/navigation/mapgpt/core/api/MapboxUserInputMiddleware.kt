@@ -64,6 +64,10 @@ class MapboxUserInputMiddleware(
     override fun stopListening() {
         SharedLog.i(TAG) { "stopListening" }
         _state.value = UserInputState.Idle
+    }
+
+    override fun interruptListening() {
+        SharedLog.i(TAG) { "interruptListening" }
         middlewareContext?.mapGptService?.sendFinalAsrData()
     }
 

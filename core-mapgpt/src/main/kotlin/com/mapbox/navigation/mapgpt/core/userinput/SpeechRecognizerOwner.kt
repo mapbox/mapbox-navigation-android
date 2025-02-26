@@ -167,6 +167,10 @@ class SpeechRecognizerOwner : UserInputOwnerMiddleware,
         _state.value = UserInputState.Idle
     }
 
+    override fun interruptListening() {
+        // Do nothing
+    }
+
     /**
      * Provides access to the [SpeechRecognizer] to perform manual operations. This will throw an
      * exception if it is accessed when it is not available.
