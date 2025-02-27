@@ -1,0 +1,48 @@
+{
+  "name": "bertlin-nav-sdk-test",
+  "estimate-only": false,
+  "accept-expired": true,
+  "tilesets": [
+    {
+      "domain": "nav",
+      "name": "mapbox/driving-traffic",
+      "version": "2025_02_16-03_00_03"
+    }
+  ],
+  "geojson": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "coordinates": [
+            [
+              [
+                13.183403375857182,
+                52.64336040067323
+              ],
+              [
+                13.183403375857182,
+                52.36837024592373
+              ],
+              [
+                13.675657508198583,
+                52.36837024592373
+              ],
+              [
+                13.675657508198583,
+                52.64336040067323
+              ],
+              [
+                13.183403375857182,
+                52.64336040067323
+              ]
+            ]
+          ],
+          "type": "Polygon"
+        }
+      }
+    ]
+  }
+}
