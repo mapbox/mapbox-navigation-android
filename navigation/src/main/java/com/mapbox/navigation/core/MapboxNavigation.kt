@@ -2231,7 +2231,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 createDataset(it.tilesDataset, it.tilesProfile),
                 tilesVersion,
                 isFallback,
-                tilesVersion,
+                it.tilesVersion,
                 it.minDaysBetweenServerAndLocalTilesVersion,
             )
         }

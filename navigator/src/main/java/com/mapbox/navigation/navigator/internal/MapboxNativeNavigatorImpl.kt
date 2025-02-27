@@ -127,6 +127,8 @@ class MapboxNativeNavigatorImpl(
      */
     override fun recreate(tilesConfig: TilesConfig) {
         val storeNavSessionState = navigator.storeNavigationSession()
+
+        unregisterAllNativeNavigatorObservers()
         navigator.shutdown()
 
         init(tilesConfig)
@@ -180,11 +182,16 @@ class MapboxNativeNavigatorImpl(
             }
         }
 
-    override fun addNavigatorObserver(navigatorObserver: NavigatorObserver) =
+    private val currentNavigatorObservers = mutableListOf<NavigatorObserver>()
+    override fun addNavigatorObserver(navigatorObserver: NavigatorObserver) {
+        currentNavigatorObservers.add(navigatorObserver)
         navigator.addObserver(navigatorObserver)
+    }
 
-    override fun removeNavigatorObserver(navigatorObserver: NavigatorObserver) =
+    override fun removeNavigatorObserver(navigatorObserver: NavigatorObserver) {
         navigator.removeObserver(navigatorObserver)
+        currentNavigatorObservers.remove(navigatorObserver)
+    }
 
     // Routing
 
@@ -367,9 +374,17 @@ class MapboxNativeNavigatorImpl(
         nativeNavigatorRecreationObservers.add(nativeNavigatorRecreationObserver)
     }
 
-    override fun unregisterAllObservers() {
+    private fun unregisterAllNativeNavigatorObservers() {
         navigator.setElectronicHorizonObserver(null)
         navigator.setFallbackVersionsObserver(null)
+        currentNavigatorObservers.forEach {
+            navigator.removeObserver(it)
+        }
+        currentNavigatorObservers.clear()
+    }
+
+    override fun unregisterAllObservers() {
+        unregisterAllNativeNavigatorObservers()
         roadObjectsStore.removeAllCustomRoadObjects()
         nativeNavigatorRecreationObservers.clear()
     }

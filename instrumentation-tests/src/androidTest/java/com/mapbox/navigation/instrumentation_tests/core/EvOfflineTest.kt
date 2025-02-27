@@ -2,9 +2,7 @@
 
 package com.mapbox.navigation.instrumentation_tests.core
 
-import android.content.Context
 import android.location.Location
-import android.util.Log
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
@@ -18,8 +16,8 @@ import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.routerefresh.RouteRefreshExtra
-import com.mapbox.navigation.instrumentation_tests.utils.ZipUtils
 import com.mapbox.navigation.instrumentation_tests.utils.tiles.OfflineRegion
+import com.mapbox.navigation.instrumentation_tests.utils.tiles.unpackOfflineTiles
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.RouteRequestResult
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
@@ -42,10 +40,8 @@ import com.mapbox.navigation.testing.utils.withoutInternet
 import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
-import org.junit.Assume.assumeTrue
 import org.junit.Rule
 import org.junit.Test
-import java.io.File
 import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMapboxNavigationAPI::class)
@@ -360,38 +356,6 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
             routeRefreshOptions = routeRefreshOptions,
             block = block,
         )
-    }
-
-    /**
-     * Unpacks offline tiles for the given region and returns the version of the unpacked tileset.
-     * Returns null if the tileset can't be found/unpacked.
-     */
-    private fun Context.unpackOfflineTiles(region: OfflineRegion): String {
-        val tilesetResName = "tileset_${region.id}"
-        val tilesetResId = resources.getIdentifier(tilesetResName, "raw", packageName)
-
-        val tilesVersion = if (tilesetResId == 0) {
-            Log.e("unpackTileset", "Can't find raw resource with name `$tilesetResName`")
-            null
-        } else {
-            val tilesetStream = resources.openRawResource(tilesetResId)
-            val mapboxDir = File(filesDir, ".mapbox").apply {
-                deleteRecursively()
-                mkdir()
-            }
-            ZipUtils.unzip(tilesetStream, mapboxDir)
-
-            @Suppress("SpellCheckingInspection")
-            val tilesDir = File(mapboxDir, "tile_store/navigation/dmapbox%2fdriving-traffic")
-            tilesDir.listFiles()?.firstOrNull()?.name
-        }
-
-        assumeTrue(
-            "Wasn't able to prepare offline routing tiles",
-            tilesVersion != null,
-        )
-
-        return tilesVersion!!.drop(1)
     }
 }
 
