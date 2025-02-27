@@ -42,7 +42,7 @@ import kotlin.time.Duration.Companion.seconds
 class NativeMapGptService(
     processingTimeout: Duration = DEFAULT_PROCESSING_TIMEOUT,
     userInputMiddlewareManager: UserInputMiddlewareManager,
-    private val profileId: String,
+    private var profileId: String,
     private val languageRepository: LanguageRepository,
     private val coroutineScope: CoroutineScope = MainScope(),
 ) : MapGptService, NativePlatformMapGptObserver {
@@ -209,6 +209,10 @@ class NativeMapGptService(
 
     override fun setReplayRecorder(recorder: ReplayRecorder) {
         this.recorder = recorder
+    }
+
+    override fun updateProfile(profileId: String) {
+        this.profileId = profileId
     }
 
     override fun startAsrRequest(contextDTO: MapGptContextDTO, capabilities: Set<String>) {

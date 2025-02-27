@@ -132,5 +132,7 @@ interface MapGptService {
 
     fun setReplayRecorder(recorder: ReplayRecorder)
 
+    fun updateProfile(profileId: String)
+
     var replayerActive: Boolean
 }
