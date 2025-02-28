@@ -67,7 +67,7 @@ interface PlatformMicrophone {
          * The number of audio samples per second.
          * Many speech-to-text services perform best with 16000 Hz audio.
          */
-        val sampleRateHz: Int = 44000
+        val sampleRateHz: Int = 16000
     )
 
     sealed class State {
