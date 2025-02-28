@@ -30,3 +30,8 @@ fun MapboxNavigation.postUserFeedback(
 fun MapboxNavigation.postAndroidAutoEvent(event: AndroidAutoEvent) {
     navigationTelemetry.postAndroidAutoEvent(event)
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+fun MapboxNavigation.postCustomEvent(type: String, version: String, payload: String?) {
+    navigationTelemetry.postCustomEvent(type, version, payload)
+}
