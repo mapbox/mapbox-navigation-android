@@ -74,6 +74,7 @@ val sessionFrameSerializerModule = SerializersModule {
         subclass(SessionFrame.SendEvent.Body.StopListening::class)
         subclass(SessionFrame.SendEvent.Body.Landmark::class)
         subclass(SessionFrame.SendEvent.Body.PhoneCall::class)
+        subclass(SessionFrame.SendEvent.Body.Feedback::class)
         subclass(SessionFrame.SendEvent.Body.Unknown::class)
         defaultDeserializer {
             SessionFrame.SendEvent.Body.Unknown.UnknownDeserializationStrategy
@@ -429,7 +430,7 @@ abstract class SessionFrame {
                 @SerialName("is_supplement")
                 override val isSupplement: Boolean = false,
                 val data: Data,
-            ): Body() {
+            ) : Body() {
 
                 /**
                  * Car AC turn on/off content.
@@ -456,7 +457,7 @@ abstract class SessionFrame {
                 @SerialName("is_supplement")
                 override val isSupplement: Boolean = false,
                 val data: Data,
-            ): Body() {
+            ) : Body() {
 
                 /**
                  * Car auto climate turn on/off content.
@@ -483,7 +484,7 @@ abstract class SessionFrame {
                 @SerialName("is_supplement")
                 override val isSupplement: Boolean = false,
                 val data: Data,
-            ): Body() {
+            ) : Body() {
 
                 /**
                  * Car defogger turn on/off content.
@@ -510,7 +511,7 @@ abstract class SessionFrame {
                 @SerialName("is_supplement")
                 override val isSupplement: Boolean = false,
                 val data: Data,
-            ): Body() {
+            ) : Body() {
 
                 /**
                  * Car defroster turn on/off content.
@@ -537,7 +538,7 @@ abstract class SessionFrame {
                 @SerialName("is_supplement")
                 override val isSupplement: Boolean = false,
                 val data: Data,
-            ): Body() {
+            ) : Body() {
 
                 /**
                  * Car set temperature content.
@@ -567,7 +568,7 @@ abstract class SessionFrame {
                 @SerialName("is_supplement")
                 override val isSupplement: Boolean = false,
                 val data: Data,
-            ): Body() {
+            ) : Body() {
 
                 /**
                  * Car set temperature content.
@@ -596,7 +597,7 @@ abstract class SessionFrame {
                 @SerialName("is_supplement")
                 override val isSupplement: Boolean = false,
                 val data: Data,
-            ): Body() {
+            ) : Body() {
 
                 /**
                  * Car set temperature content.
@@ -960,6 +961,27 @@ abstract class SessionFrame {
                 data class Data(
                     @SerialName("phone_number")
                     val phoneNumber: String,
+                )
+            }
+
+            @Serializable
+            @SerialName("feedback")
+            data class Feedback(
+                override val id: Long,
+                override val timestamp: Long,
+                @SerialName("chunk_id")
+                override val chunkId: String,
+                @SerialName("is_supplement")
+                override val isSupplement: Boolean = false,
+                val data: Data,
+            ) : Body() {
+
+                @Serializable
+                data class Data(
+                    @SerialName("feedbackType")
+                    val feedbackType: String,
+                    @SerialName("feedbackDescription")
+                    val feedbackDescription: String,
                 )
             }
 
