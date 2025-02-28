@@ -2,8 +2,10 @@ package com.mapbox.navigation.tripdata.shield.api
 
 import android.graphics.Bitmap
 import com.mapbox.api.directions.v5.models.BannerComponents
+import com.mapbox.api.directions.v5.models.MapboxShield
 import com.mapbox.common.MapboxOptions
 import com.mapbox.navigation.base.road.model.Road
+import com.mapbox.navigation.base.road.model.RoadComponent
 import com.mapbox.navigation.tripdata.shield.RoadShieldContentManagerContainer
 import com.mapbox.navigation.tripdata.shield.internal.model.RouteShieldToDownload
 import com.mapbox.navigation.tripdata.shield.internal.model.ShieldSpriteToDownload
@@ -45,11 +47,11 @@ class MapboxRouteShieldApi {
      * The function returns list of [RouteShieldResult] or [RouteShieldError] in
      * [RouteShieldCallback.onRoadShields].
      *
-     * To convert the returned in [RouteShield] SVG [ByteArray] to a [Bitmap] use [toBitmap].
+     * To convert the returned in [RouteShield] SVG [ByteArray] to a [Bitmap] use [RouteShield.toBitmap].
      *
      * @param bannerComponents list of banner components
      * @param callback invoked with appropriate result
-     * @see toBitmap
+     * @see RouteShield.toBitmap
      */
     fun getRouteShields(
         bannerComponents: List<BannerComponents>?,
@@ -78,13 +80,13 @@ class MapboxRouteShieldApi {
      * The function returns list of [RouteShieldResult] or [RouteShieldError] in
      * [RouteShieldCallback.onRoadShields].
      *
-     * To convert the returned in [RouteShield] SVG [ByteArray] to a [Bitmap] use [toBitmap].
+     * To convert the returned in [RouteShield] SVG [ByteArray] to a [Bitmap] use [RouteShield.toBitmap].
      *
      * @param bannerComponents list of banner components
      * @param userId Mapbox user account name
      * @param styleId style id used to render the map
      * @param callback invoked with appropriate result
-     * @see toBitmap
+     * @see RouteShield.toBitmap
      */
     fun getRouteShields(
         bannerComponents: List<BannerComponents>?,
@@ -111,11 +113,11 @@ class MapboxRouteShieldApi {
      * The function returns list of [RouteShieldResult] or [RouteShieldError] in
      * [RouteShieldCallback.onRoadShields].
      *
-     * To convert the returned in [RouteShield] SVG [ByteArray] to a [Bitmap] use [toBitmap].
+     * To convert the returned in [RouteShield] SVG [ByteArray] to a [Bitmap] use [RouteShield.toBitmap].
      *
      * @param road object representing current road
      * @param callback invoked with appropriate result
-     * @see toBitmap
+     * @see RouteShield.toBitmap
      */
     fun getRouteShields(
         road: Road,
@@ -131,20 +133,20 @@ class MapboxRouteShieldApi {
 
     /**
      * Given a [Road] object, the function requests mapbox designed road shields (if available)
-     * using [Road.mapboxShield] for the current road. If for any reason the API is unable to
-     * download the shield, it falls back to download and return the legacy shield if available.
+     * using [RoadComponent.shield]'s [MapboxShield.baseUrl] for the current road. If for any reason the API is unable to
+     * download the shield, it falls back to download and return the legacy shield using [RoadComponent.imageBaseUrl].
      * Returns error otherwise.
      *
      * The function returns list of [RouteShieldResult] or [RouteShieldError] in
      * [RouteShieldCallback.onRoadShields].
      *
-     * To convert the returned in [RouteShield] SVG [ByteArray] to a [Bitmap] use [toBitmap].
+     * To convert the returned in [RouteShield] SVG [ByteArray] to a [Bitmap] use [RouteShield.toBitmap].
      *
      * @param road object representing current road
      * @param userId Mapbox user account name
      * @param styleId style id used to render the map
      * @param callback invoked with appropriate result
-     * @see toBitmap
+     * @see RouteShield.toBitmap
      */
     fun getRouteShields(
         road: Road,
@@ -152,7 +154,39 @@ class MapboxRouteShieldApi {
         styleId: String?,
         callback: RouteShieldCallback,
     ) {
-        val routeShieldToDownload = road.findShieldsToDownload(
+        getRoadComponentsShields(
+            roadComponents = road.components,
+            userId = userId,
+            styleId = styleId,
+            callback = callback,
+        )
+    }
+
+    /**
+     * The function requests mapbox designed road shields (if available) using
+     * [RoadComponent.shield]'s [MapboxShield.baseUrl] for the current road.
+     * If for any reason the API is unable to download the shield, it falls back to download
+     * and return the legacy shield using [RoadComponent.imageBaseUrl].
+     * Returns error otherwise.
+     *
+     * The function returns list of [RouteShieldResult] or [RouteShieldError] in
+     * [RouteShieldCallback.onRoadShields].
+     *
+     * To convert the returned in [RouteShield] SVG [ByteArray] to a [Bitmap] use [RouteShield.toBitmap].
+     *
+     * @param roadComponents list of [RoadComponent] objects
+     * @param userId Mapbox user account name
+     * @param styleId style id used to render the map
+     * @param callback invoked with appropriate result
+     * @see RouteShield.toBitmap
+     */
+    fun getRoadComponentsShields(
+        roadComponents: List<RoadComponent>,
+        userId: String?,
+        styleId: String?,
+        callback: RouteShieldCallback,
+    ) {
+        val routeShieldToDownload = roadComponents.findShieldsToDownloadFromRoadComponent(
             userId = userId,
             styleId = styleId,
             accessToken = MapboxOptions.accessToken,
@@ -218,19 +252,16 @@ class MapboxRouteShieldApi {
         }
     }
 
-    private fun Road.findShieldsToDownload(
+    private fun List<RoadComponent>.findShieldsToDownloadFromRoadComponent(
         accessToken: String,
         userId: String?,
         styleId: String?,
     ): List<RouteShieldToDownload> {
-        val routeShieldToDownload = mutableListOf<RouteShieldToDownload>()
-        components.forEach { roadComponent ->
-            val legacyShieldUrl = roadComponent.imageBaseUrl
-            val legacy = if (legacyShieldUrl != null) {
-                RouteShieldToDownload.MapboxLegacy(legacyShieldUrl)
-            } else {
-                null
+        return mapNotNull { roadComponent ->
+            val legacy = roadComponent.imageBaseUrl?.let {
+                RouteShieldToDownload.MapboxLegacy(it)
             }
+
             val mapboxDesign = if (
                 userId != null &&
                 styleId != null &&
@@ -248,12 +279,8 @@ class MapboxRouteShieldApi {
             } else {
                 null
             }
-            if (mapboxDesign != null) {
-                routeShieldToDownload.add(mapboxDesign)
-            } else if (legacy != null) {
-                routeShieldToDownload.add(legacy)
-            }
+
+            mapboxDesign ?: legacy
         }
-        return routeShieldToDownload
     }
 }

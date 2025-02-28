@@ -903,6 +903,7 @@ package com.mapbox.navigation.tripdata.shield.api {
   public final class MapboxRouteShieldApi {
     ctor public MapboxRouteShieldApi();
     method public void cancel();
+    method public void getRoadComponentsShields(java.util.List<com.mapbox.navigation.base.road.model.RoadComponent> roadComponents, String? userId, String? styleId, com.mapbox.navigation.tripdata.shield.model.RouteShieldCallback callback);
     method public void getRouteShields(java.util.List<? extends com.mapbox.api.directions.v5.models.BannerComponents>? bannerComponents, com.mapbox.navigation.tripdata.shield.model.RouteShieldCallback callback);
     method public void getRouteShields(java.util.List<? extends com.mapbox.api.directions.v5.models.BannerComponents>? bannerComponents, String? userId, String? styleId, com.mapbox.navigation.tripdata.shield.model.RouteShieldCallback callback);
     method public void getRouteShields(com.mapbox.navigation.base.road.model.Road road, com.mapbox.navigation.tripdata.shield.model.RouteShieldCallback callback);

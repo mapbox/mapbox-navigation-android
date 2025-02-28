@@ -647,4 +647,84 @@ class MapboxRouteShieldApiTest {
             assertEquals(mockResultList[0].value, shieldSlot.captured[0].value)
             assertEquals(mockResultList[1].value, shieldSlot.captured[1].value)
         }
+
+    @Test
+    fun `when get mapbox shields using road components`() = coroutineRule.runBlockingTest {
+        val userId = "userId"
+        val styleId = "styleId"
+        val mockMapboxShield1 = MapboxShield
+            .builder()
+            .name("us-interstate")
+            .baseUrl("https://shields.mapbox.com/mapbox/designed/using/road/1")
+            .textColor("black")
+            .displayRef("880")
+            .build()
+        val mockMapboxShield2 = MapboxShield
+            .builder()
+            .name("us-interstate")
+            .baseUrl("https://shields.mapbox.com/mapbox/designed/using/road/2")
+            .textColor("black")
+            .displayRef("680")
+            .build()
+        val roadComponent1 = mockk<RoadComponent> {
+            every { text } returns "Central Av"
+            every { shield } returns mockMapboxShield1
+            every { imageBaseUrl } returns null
+        }
+        val roadComponent2 = mockk<RoadComponent> {
+            every { text } returns "North Av"
+            every { shield } returns mockMapboxShield2
+            every { imageBaseUrl } returns null
+        }
+
+        val mockResultList = listOf<Expected<RouteShieldError, RouteShieldResult>>(
+            ExpectedFactory.createValue(
+                RouteShieldResult(
+                    shield = RouteShield.MapboxDesignedShield(
+                        url = "https://shields.mapbox.com/mapbox/designed/using/road/1",
+                        byteArray = byteArrayOf(1),
+                        mapboxShield = mockMapboxShield1,
+                        shieldSprite = mockk(),
+                    ),
+                    origin = RouteShieldOrigin(
+                        isFallback = false,
+                        originalUrl = "https://shields.mapbox.com/mapbox/designed/using/road/1",
+                        originalErrorMessage = "",
+                    ),
+                ),
+            ),
+            ExpectedFactory.createValue(
+                RouteShieldResult(
+                    shield = RouteShield.MapboxDesignedShield(
+                        url = "https://shields.mapbox.com/mapbox/designed/using/road/2",
+                        byteArray = byteArrayOf(1),
+                        mapboxShield = mockMapboxShield2,
+                        shieldSprite = mockk(),
+                    ),
+                    origin = RouteShieldOrigin(
+                        isFallback = false,
+                        originalUrl = "https://shields.mapbox.com/mapbox/designed/using/road/2",
+                        originalErrorMessage = "",
+                    ),
+                ),
+            ),
+        )
+        coEvery { RoadShieldContentManagerContainer.getShields(any()) } returns mockResultList
+        val callback: RouteShieldCallback = mockk(relaxed = true)
+        val shieldSlot = slot<List<Expected<RouteShieldError, RouteShieldResult>>>()
+
+        routeShieldApi.getRoadComponentsShields(
+            listOf(roadComponent1, roadComponent2),
+            userId,
+            styleId,
+            callback,
+        )
+
+        verify(exactly = 1) {
+            callback.onRoadShields(capture(shieldSlot))
+        }
+        assertEquals(mockResultList.size, shieldSlot.captured.size)
+        assertFalse(shieldSlot.captured[0].value!!.origin.isFallback)
+        assertEquals(mockResultList[1].value, shieldSlot.captured[1].value)
+    }
 }
