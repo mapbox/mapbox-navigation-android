@@ -232,4 +232,8 @@ class MapboxReplayer {
     internal fun isPlaying(): Boolean {
         return replayEventSimulator.isPlaying()
     }
+
+    internal fun replayEvents(events: List<ReplayEventBase>) {
+        replayEventsObservers.forEach { it.replayEvents(events) }
+    }
 }
