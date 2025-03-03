@@ -136,7 +136,7 @@ enum class TraceKey(
     /** Identifies the source of the trace like (ex: "remote", "local") */
     SOURCE("source"),
 
-    /** Identifies system provider or entities (ex: "spotify", "picovoice") */
+    /** Identifies system provider or entities (ex: "spotify", "speech_recognizer") */
     PROVIDER("provider"),
 
     /** Identifies the reason a trace has ended (ex: "success", "error", "canceled" */

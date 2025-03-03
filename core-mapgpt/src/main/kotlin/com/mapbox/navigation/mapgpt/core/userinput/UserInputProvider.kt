@@ -11,8 +11,6 @@ import com.mapbox.navigation.mapgpt.core.MiddlewareProvider
 abstract class UserInputProvider(key: String): MiddlewareProvider(key) {
     object SpeechRecognizer : UserInputProvider("speech_recognizer")
     object GoogleCloudPlatform : UserInputProvider("google_cloud_platform")
-    object PicovoiceCheetah : UserInputProvider("picovoice_cheetah")
-    object PicovoiceLeopard : UserInputProvider("picovoice_leopard")
     object MapboxASR : UserInputProvider("mapbox_asr")
 
     override fun toString(): String = "UserInputProvider(key=$key)"
