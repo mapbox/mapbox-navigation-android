@@ -416,7 +416,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         createMapboxNavigation()
         mapboxNavigation.onDestroy()
 
-        coVerify(exactly = 1) { navigator.resetRideSession() }
+        verify(exactly = 1) { navigator.reset(null) }
     }
 
     @Test

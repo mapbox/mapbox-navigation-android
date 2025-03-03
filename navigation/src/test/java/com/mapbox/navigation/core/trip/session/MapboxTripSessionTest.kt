@@ -1745,4 +1745,4 @@ fun createSetRouteError(
 
 fun createSetRouteResult(
     nativeAlternatives: List<RouteAlternative> = emptyList(),
-) = ExpectedFactory.createValue<String, SetRoutesResult>(SetRoutesResult(nativeAlternatives))
+) = ExpectedFactory.createValue<String, SetRoutesResult>(SetRoutesResult(null, nativeAlternatives))

@@ -159,7 +159,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -879,20 +878,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         }
     }
 
-    private fun resetTripSessionBlocking() {
-        // using a blocking function to keep parity with the original implementation so that
-        // Nav Native is fully done with the reset when this function returns
-        runBlocking {
-            logD(LOG_CATEGORY) {
-                "Resetting trip session"
-            }
-            navigator.resetRideSession()
-            logI(LOG_CATEGORY) {
-                "Trip session reset"
-            }
-        }
-    }
-
     /**
      * Reset the session with the same configuration. The location becomes unknown,
      * but the [NavigationOptions] stay the same.
@@ -1366,8 +1351,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         navigationTelemetry.clearObservers()
         internalSetNavigationRoutes(emptyList(), SetRoutes.CleanUp)
 
-        // TODO can resetTripSession() be non-blocking call?
-        resetTripSessionBlocking()
+        // using reset with callback = NULL to make sure it is run synchronously in NN
+        navigator.reset(null)
 
         navigator.unregisterAllObservers()
         navigator.shutdown()

@@ -43,6 +43,7 @@ import com.mapbox.navigator.RefreshRouteResult
 import com.mapbox.navigator.RerouteControllerInterface
 import com.mapbox.navigator.RerouteDetectorInterface
 import com.mapbox.navigator.RerouteObserver
+import com.mapbox.navigator.ResetCallback
 import com.mapbox.navigator.RoadObjectMatcher
 import com.mapbox.navigator.RoadObjectsStore
 import com.mapbox.navigator.RoadObjectsStoreObserver
@@ -475,6 +476,10 @@ class MapboxNativeNavigatorImpl(
 
     override fun setUserLanguages(languages: List<String>) {
         navigator.config().mutableSettings().setUserLanguages(languages)
+    }
+
+    override fun reset(callback: ResetCallback?) {
+        navigator.reset(callback)
     }
 
     override fun addRerouteObserver(nativeRerouteObserver: RerouteObserver) {
