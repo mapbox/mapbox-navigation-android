@@ -42,9 +42,7 @@ import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigationStatusOrigin
 import com.mapbox.navigator.NavigatorObserver
-import com.mapbox.navigator.PrimaryRouteChangeReason
 import com.mapbox.navigator.RouteAlternative
-import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouteState
 import com.mapbox.navigator.SetRoutesReason
 import kotlinx.coroutines.CoroutineStart
@@ -361,17 +359,6 @@ internal class MapboxTripSession(
                 }
                 throw NativeStatusProcessingError(error)
             }
-        }
-
-        override fun onPrimaryRouteChanged(
-            primaryRoute: RouteInterface?,
-            reason: PrimaryRouteChangeReason,
-        ) {
-            // no-op NAVAND-5180
-        }
-
-        override fun onAlternativeRoutesChanged(alternativeRoutes: MutableList<RouteAlternative>) {
-            // no-op NAVAND-5180
         }
     }
 

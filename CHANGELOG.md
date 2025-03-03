@@ -1,5 +1,43 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.8.0-beta.1 - 03 March, 2025
+#### Features
+- Added `MapboxRouteCalloutApiOptions#maxZoom` to allow for setting a maximum zoom level for the route callout. This is useful for preventing the route callout from being displayed at high zoom levels. 
+- Added `MapboxRouteCalloutApiOptions#minZoom` to allow for setting a minimum zoom level for the route callout. This is useful for preventing the route callout from being displayed at low zoom levels. 
+- Added `MapboxRouteCalloutApiOptions#priority` to allow for setting the priority of the route callout. This is useful for determining the order in which the route callout is displayed when multiple _Dynamic View Annotations_ are present on the map. 
+- Exposed MapGPT as a Navigation SDK Core Framework Module. 
+- Added support for `exclude_operators` parameter in EV search. 
+- Added a new function `MapboxRouteShieldApi#getRoadComponentsShields` which accepts a list of `RoadComponent`. 
+- Clear caches when device memory is low. 
+- Support for danger zones in countries with legal restrictions on displaying speed camera locations (e.g. France) 
+- Added a way to preview all road cameras for a given route using `RoadCamerasManager::previewCamerasOnRoute`. 
+
+#### Bug fixes and improvements
+- Fixed an alternative Callout point to primary route.   
+- Fixed an issue where overriding camera pitch to 0 caused the camera to go into "maneuver framing" mode.    
+- Removed usages of APIs that prevented Copilot from working on devices with Android 7 or older. 
+- Optimized road cameras processing logic to reduce ANRs. 
+- Added filter for zero-powered charging stations on EV layer 
+- Fixed jumps in location updates reported by `com.mapbox.navigation.core.trip.session.LocationObserver`. 
+The jumps started to happen after navigation tiles version switch reported in `NavigationVersionSwitchObserver`.
+- Fixed incorrect events from RoadCameras Callback interface. 
+- Fixed crash on invalid EV time parsing 
+- Fixed an issue where the location indicator might have teleported back to tunnel after exiting it. 
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.11.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.11.0-beta.1))
+- Mapbox Navigation Native `v324.0.0-beta.1`
+- Mapbox Core Common `v24.11.0-beta.1`
+- Mapbox Java `v7.3.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.3.1))
+
+
 ## Navigation SDK Core Framework 3.7.0-beta.1 - 22 January, 2025
 #### Features
 - Add `MapboxRoadCamera::inOnRoute` flag which indicates if the roiad camera is on the current route. 

@@ -75,7 +75,7 @@ internal class ArrivalProgressObserver(
         val hasMoreLegs = hasMoreLegs(routeProgress)
         if (hasMoreLegs) {
             doOnWaypointArrival(routeProgress, routeLegProgress)
-        } else {
+        } else if (!hasMoreLegs) {
             doFinalDestinationArrival(routeProgress)
         }
     }

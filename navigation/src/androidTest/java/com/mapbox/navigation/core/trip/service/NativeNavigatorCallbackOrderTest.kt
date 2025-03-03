@@ -18,12 +18,8 @@ import com.mapbox.navigation.core.tests.activity.TripServiceActivity
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigator.FixLocation
-import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigationStatusOrigin
 import com.mapbox.navigator.Navigator
-import com.mapbox.navigator.NavigatorObserver
-import com.mapbox.navigator.PrimaryRouteChangeReason
-import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouteParser
 import com.mapbox.navigator.SetRoutesDataParams
@@ -119,26 +115,9 @@ internal class NativeNavigatorCallbackOrderTest :
 
     @Test
     fun setRoutes() = runBlocking(Dispatchers.Main.immediate) {
-        navigator.addObserver(
-            object : NavigatorObserver {
-                override fun onStatus(origin: NavigationStatusOrigin, status: NavigationStatus) {
-                    callbackInvocations.add(CallbackInvocation.Status(origin))
-                }
-
-                override fun onPrimaryRouteChanged(
-                    primaryRoute: RouteInterface?,
-                    reason: PrimaryRouteChangeReason,
-                ) {
-                    // no-op
-                }
-
-                override fun onAlternativeRoutesChanged(
-                    alternativeRoutes: MutableList<RouteAlternative>,
-                ) {
-                    // no-op
-                }
-            },
-        )
+        navigator.addObserver { origin, _ ->
+            callbackInvocations.add(CallbackInvocation.Status(origin))
+        }
         waitForStatusUpdatesToBegin()
         navigator.setRoutes(
             SetRoutesParams(route.nativeRoute(), 0, emptyList<RouteInterface>()),
@@ -153,26 +132,9 @@ internal class NativeNavigatorCallbackOrderTest :
 
     @Test
     fun setRoutesData() = runBlocking(Dispatchers.Main.immediate) {
-        navigator.addObserver(
-            object : NavigatorObserver {
-                override fun onStatus(origin: NavigationStatusOrigin, status: NavigationStatus) {
-                    callbackInvocations.add(CallbackInvocation.Status(origin))
-                }
-
-                override fun onPrimaryRouteChanged(
-                    primaryRoute: RouteInterface?,
-                    reason: PrimaryRouteChangeReason,
-                ) {
-                    // no-op
-                }
-
-                override fun onAlternativeRoutesChanged(
-                    alternativeRoutes: MutableList<RouteAlternative>,
-                ) {
-                    // no-op
-                }
-            },
-        )
+        navigator.addObserver { origin, _ ->
+            callbackInvocations.add(CallbackInvocation.Status(origin))
+        }
         waitForStatusUpdatesToBegin()
         navigator.setRoutesData(
             SetRoutesDataParams(
@@ -196,26 +158,9 @@ internal class NativeNavigatorCallbackOrderTest :
 
     @Test
     fun refreshRoute() = runBlocking(Dispatchers.Main.immediate) {
-        navigator.addObserver(
-            object : NavigatorObserver {
-                override fun onStatus(origin: NavigationStatusOrigin, status: NavigationStatus) {
-                    callbackInvocations.add(CallbackInvocation.Status(origin))
-                }
-
-                override fun onPrimaryRouteChanged(
-                    primaryRoute: RouteInterface?,
-                    reason: PrimaryRouteChangeReason,
-                ) {
-                    // no-op
-                }
-
-                override fun onAlternativeRoutesChanged(
-                    alternativeRoutes: MutableList<RouteAlternative>,
-                ) {
-                    // no-op
-                }
-            },
-        )
+        navigator.addObserver { origin, _ ->
+            callbackInvocations.add(CallbackInvocation.Status(origin))
+        }
         navigator.setRoutesAndWaitForResult(
             SetRoutesParams(route.nativeRoute(), 0, emptyList<RouteInterface>()),
             SetRoutesReason.NEW_ROUTE,
@@ -244,26 +189,9 @@ internal class NativeNavigatorCallbackOrderTest :
             SetRoutesParams(multilegRoute.nativeRoute(), 0, emptyList<RouteInterface>()),
             SetRoutesReason.NEW_ROUTE,
         )
-        navigator.addObserver(
-            object : NavigatorObserver {
-                override fun onStatus(origin: NavigationStatusOrigin, status: NavigationStatus) {
-                    callbackInvocations.add(CallbackInvocation.Status(origin))
-                }
-
-                override fun onPrimaryRouteChanged(
-                    primaryRoute: RouteInterface?,
-                    reason: PrimaryRouteChangeReason,
-                ) {
-                    // no-op
-                }
-
-                override fun onAlternativeRoutesChanged(
-                    alternativeRoutes: MutableList<RouteAlternative>,
-                ) {
-                    // no-op
-                }
-            },
-        )
+        navigator.addObserver { origin, _ ->
+            callbackInvocations.add(CallbackInvocation.Status(origin))
+        }
         waitForStatusUpdatesToBegin()
 
         navigator.changeLeg(1) {
@@ -279,26 +207,9 @@ internal class NativeNavigatorCallbackOrderTest :
     @Ignore("bump NN to 124.0.0 (includes NN-361)")
     @Test
     fun updateLocation() = runBlocking(Dispatchers.Main.immediate) {
-        navigator.addObserver(
-            object : NavigatorObserver {
-                override fun onStatus(origin: NavigationStatusOrigin, status: NavigationStatus) {
-                    callbackInvocations.add(CallbackInvocation.Status(origin, status.location))
-                }
-
-                override fun onPrimaryRouteChanged(
-                    primaryRoute: RouteInterface?,
-                    reason: PrimaryRouteChangeReason,
-                ) {
-                    // no-op
-                }
-
-                override fun onAlternativeRoutesChanged(
-                    alternativeRoutes: MutableList<RouteAlternative>,
-                ) {
-                    // no-op
-                }
-            },
-        )
+        navigator.addObserver { origin, status ->
+            callbackInvocations.add(CallbackInvocation.Status(origin, status.location))
+        }
         waitForStatusUpdatesToBegin()
 
         val location = getSecondLocation()

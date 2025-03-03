@@ -221,13 +221,11 @@ internal class MapboxCopilotImpl(
         val feedbackId = userFeedback.feedbackId
         val feedbackType = userFeedback.feedback.feedbackType
         val feedbackSubType = userFeedback.feedback.feedbackSubTypes.toHashSet()
-        val description = userFeedback.feedback.description
         val feedbackEvent = NavFeedbackSubmitted(
             feedbackId,
             feedbackType,
             feedbackSubType,
             HistoryPoint(lat, lng),
-            description,
         )
         push(NavFeedbackSubmittedEvent(feedbackEvent))
     }
