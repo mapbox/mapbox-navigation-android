@@ -26,6 +26,7 @@ import com.mapbox.navigator.NavigatorObserver
 import com.mapbox.navigator.PredictiveCacheController
 import com.mapbox.navigator.RerouteControllerInterface
 import com.mapbox.navigator.RerouteDetectorInterface
+import com.mapbox.navigator.ResetCallback
 import com.mapbox.navigator.RoadObjectMatcher
 import com.mapbox.navigator.RoadObjectsStore
 import com.mapbox.navigator.RoadObjectsStoreObserver
@@ -207,6 +208,8 @@ interface MapboxNativeNavigator : RerouteEventsProvider {
     fun resetAdasisMessageCallback()
 
     fun setUserLanguages(languages: List<String>)
+
+    fun reset(callback: ResetCallback?)
 
     val config: ConfigHandle
 
