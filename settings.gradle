@@ -23,6 +23,4 @@ include ':app-tests-wrapper',
         ':libtesting-navigation-core-utils',
         ':libtesting-resources',
         ':androidauto',
-        ':ui-components',
-        ':core-mapgpt',
-        ':ui-mapgpt'
+        ':ui-components'
