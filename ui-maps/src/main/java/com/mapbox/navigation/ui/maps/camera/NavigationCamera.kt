@@ -1,9 +1,8 @@
 package com.mapbox.navigation.ui.maps.camera
 
-import android.animation.Animator
-import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import androidx.annotation.UiThread
+import androidx.annotation.VisibleForTesting
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapView
@@ -26,10 +25,16 @@ import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState.OVERVIEW
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState.TRANSITION_TO_FOLLOWING
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState.TRANSITION_TO_OVERVIEW
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraStateChangedObserver
+import com.mapbox.navigation.ui.maps.camera.transition.AnimatorsCreator
+import com.mapbox.navigation.ui.maps.camera.transition.FullFrameAnimatorsCreator
+import com.mapbox.navigation.ui.maps.camera.transition.MapboxAnimatorSet
+import com.mapbox.navigation.ui.maps.camera.transition.MapboxAnimatorSetListener
 import com.mapbox.navigation.ui.maps.camera.transition.MapboxNavigationCameraStateTransition
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraStateTransition
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
+import com.mapbox.navigation.ui.maps.camera.transition.SimplifiedFrameAnimatorsCreator
 import com.mapbox.navigation.ui.maps.camera.transition.TransitionEndListener
+import com.mapbox.navigation.ui.maps.camera.transition.UpdateFrameTransitionOptions
 import java.util.concurrent.CopyOnWriteArraySet
 
 /**
@@ -100,15 +105,67 @@ import java.util.concurrent.CopyOnWriteArraySet
  * the [MapboxNavigationViewportDataSource].
  *
  * Make sure to also provide the same instance to [MapboxNavigationViewportDataSource.debugger].
+ *
+ * There are 2 ways to create [NavigationCamera]:
+ * 1. Without custom [NavigationCameraStateTransition].
+ * 2. With custom [NavigationCameraStateTransition].
+ *
+ * If you use the second way, there is a possibility to also pass [UpdateFrameTransitionOptions].
+ * See the information below to understand whether you need to specify it or not.
+ *
+ * By default Navigation SDK assumes that frame transition animations
+ * (returned by [NavigationCameraStateTransition.updateFrameForFollowing] and [NavigationCameraStateTransition.updateFrameForOverview]`)
+ * are simple in a sense that:
+ * 1. They are played together (started at the same time);
+ * 2. They don't have start delays.
+ * Note 1: they can still be of different duration.
+ * Note 2: this is ony relevant for update frame animations. For state transition animations
+ * ([NavigationCameraStateTransition.transitionToFollowing] and [NavigationCameraStateTransition.transitionToOverview])
+ * no such assumptions are made.
+ *
+ * This allows NavSDK to execute the animations in a more performant way.
+ * However, if this is not the case for your custom update frame animations,
+ * pass [UpdateFrameTransitionOptions] to the [NavigationCamera] constructor along with your custom
+ * [NavigationCameraStateTransition] and specify this fact by setting [UpdateFrameTransitionOptions.nonSimultaneousAnimatorsDependency] to `true`.
  */
 @UiThread
-class NavigationCamera(
+class NavigationCamera
+@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+internal constructor(
     private val mapboxMap: MapboxMap,
     private val cameraPlugin: CameraAnimationsPlugin,
     private val viewportDataSource: ViewportDataSource,
-    private val stateTransition: NavigationCameraStateTransition =
-        MapboxNavigationCameraStateTransition(mapboxMap, cameraPlugin),
+    private val animatorsCreator: AnimatorsCreator,
 ) {
+
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    constructor(
+        mapboxMap: MapboxMap,
+        cameraPlugin: CameraAnimationsPlugin,
+        viewportDataSource: ViewportDataSource,
+        stateTransition: NavigationCameraStateTransition =
+            MapboxNavigationCameraStateTransition(mapboxMap, cameraPlugin),
+    ) : this(
+        mapboxMap,
+        cameraPlugin,
+        viewportDataSource,
+        stateTransition,
+        UpdateFrameTransitionOptions.Builder().build(),
+    )
+
+    @ExperimentalPreviewMapboxNavigationAPI
+    constructor(
+        mapboxMap: MapboxMap,
+        cameraPlugin: CameraAnimationsPlugin,
+        viewportDataSource: ViewportDataSource,
+        stateTransition: NavigationCameraStateTransition,
+        updateFrameTransitionOptions: UpdateFrameTransitionOptions,
+    ) : this(
+        mapboxMap,
+        cameraPlugin,
+        viewportDataSource,
+        getAnimatorsCreator(stateTransition, updateFrameTransitionOptions),
+    )
 
     companion object {
         /**
@@ -122,9 +179,25 @@ class NavigationCamera(
             NavigationCameraTransitionOptions.Builder().maxDuration(3500L).build()
         internal val DEFAULT_FRAME_TRANSITION_OPT =
             NavigationCameraTransitionOptions.Builder().maxDuration(1000L).build()
+
+        @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+        @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+        internal fun getAnimatorsCreator(
+            stateTransition: NavigationCameraStateTransition,
+            updateFrameTransitionOptions: UpdateFrameTransitionOptions,
+        ): AnimatorsCreator {
+            return when (updateFrameTransitionOptions.nonSimultaneousAnimatorsDependency) {
+                true -> {
+                    FullFrameAnimatorsCreator(stateTransition)
+                }
+                false -> {
+                    SimplifiedFrameAnimatorsCreator(stateTransition)
+                }
+            }
+        }
     }
 
-    private var runningAnimation: AnimatorSet? = null
+    private var runningAnimation: MapboxAnimatorSet? = null
     private val transitionEndListeners = CopyOnWriteArraySet<TransitionEndListener>()
     private var frameTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT
 
@@ -223,7 +296,7 @@ class NavigationCamera(
             IDLE, TRANSITION_TO_OVERVIEW, OVERVIEW -> {
                 val data = viewportDataSource.getViewportData()
                 startAnimation(
-                    stateTransition.transitionToFollowing(
+                    animatorsCreator.transitionToFollowing(
                         data.cameraForFollowing,
                         stateTransitionOptions,
                     ).apply {
@@ -299,7 +372,7 @@ class NavigationCamera(
             IDLE, TRANSITION_TO_FOLLOWING, FOLLOWING -> {
                 val data = viewportDataSource.getViewportData()
                 startAnimation(
-                    stateTransition.transitionToOverview(
+                    animatorsCreator.transitionToOverview(
                         data.cameraForOverview,
                         stateTransitionOptions,
                     ).apply {
@@ -342,22 +415,22 @@ class NavigationCamera(
         when (state) {
             FOLLOWING -> {
                 startAnimation(
-                    stateTransition.updateFrameForFollowing(
+                    animatorsCreator.updateFrameForFollowing(
                         viewportData.cameraForFollowing,
                         frameTransitionOptions,
                     ).apply {
-                        addListener(createFrameListener())
+                        addAnimationEndListener(createFrameListener())
                     },
                     instant,
                 )
             }
             OVERVIEW -> {
                 startAnimation(
-                    stateTransition.updateFrameForOverview(
+                    animatorsCreator.updateFrameForOverview(
                         viewportData.cameraForOverview,
                         frameTransitionOptions,
                     ).apply {
-                        addListener(createFrameListener())
+                        addAnimationEndListener(createFrameListener())
                     },
                     instant,
                 )
@@ -405,7 +478,7 @@ class NavigationCamera(
     private fun cancelAnimation() {
         runningAnimation?.let { set ->
             set.cancel()
-            set.childAnimations.forEach {
+            set.children.forEach {
                 cameraPlugin.unregisterAnimators(it as ValueAnimator)
             }
         }
@@ -413,7 +486,7 @@ class NavigationCamera(
     }
 
     private fun startAnimation(
-        animatorSet: AnimatorSet,
+        animatorSet: MapboxAnimatorSet,
         instant: Boolean,
         transitionEndListener: TransitionEndListener? = null,
     ) {
@@ -421,11 +494,11 @@ class NavigationCamera(
         if (transitionEndListener != null) {
             transitionEndListeners.add(transitionEndListener)
         }
-        animatorSet.childAnimations.forEach {
+        animatorSet.children.forEach {
             cameraPlugin.registerAnimators(it as ValueAnimator)
         }
         if (instant) {
-            animatorSet.duration = 0
+            animatorSet.makeInstant()
         }
 
         // workaround for https://github.com/mapbox/mapbox-maps-android/issues/277
@@ -435,8 +508,8 @@ class NavigationCamera(
         runningAnimation = animatorSet
     }
 
-    private fun finishAnimation(animatorSet: AnimatorSet) {
-        animatorSet.childAnimations.forEach {
+    private fun finishAnimation(animatorSet: MapboxAnimatorSet) {
+        animatorSet.children.forEach {
             cameraPlugin.unregisterAnimators(it as ValueAnimator)
         }
         if (runningAnimation == animatorSet) {
@@ -448,50 +521,43 @@ class NavigationCamera(
         progressState: NavigationCameraState,
         finalState: NavigationCameraState,
         frameTransitionOptions: NavigationCameraTransitionOptions,
-    ) = object : Animator.AnimatorListener {
+    ) = object : MapboxAnimatorSetListener {
 
         private var isCanceled = false
 
-        override fun onAnimationStart(animation: Animator) {
+        override fun onAnimationStart(animation: MapboxAnimatorSet) {
             this@NavigationCamera.frameTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT
             state = progressState
         }
 
-        override fun onAnimationEnd(animation: Animator) {
+        override fun onAnimationEnd(animation: MapboxAnimatorSet) {
             if (!isCanceled) {
                 this@NavigationCamera.frameTransitionOptions = frameTransitionOptions
                 state = finalState
             }
 
-            finishAnimation(animation as AnimatorSet)
+            finishAnimation(animation)
             transitionEndListeners.forEach { it.onTransitionEnd(isCanceled) }
             transitionEndListeners.clear()
             updateFrame(viewportDataSource.getViewportData(), instant = false)
         }
 
-        override fun onAnimationCancel(animation: Animator) {
+        override fun onAnimationCancel(animation: MapboxAnimatorSet) {
             isCanceled = true
-        }
-
-        override fun onAnimationRepeat(animation: Animator) {
         }
     }
 
-    private fun createFrameListener() = object : Animator.AnimatorListener {
+    private fun createFrameListener() = object : MapboxAnimatorSetListener {
 
-        override fun onAnimationStart(animation: Animator) {
+        override fun onAnimationStart(animation: MapboxAnimatorSet) {
             // no impl
         }
 
-        override fun onAnimationEnd(animation: Animator) {
-            finishAnimation(animation as AnimatorSet)
+        override fun onAnimationEnd(animation: MapboxAnimatorSet) {
+            finishAnimation(animation)
         }
 
-        override fun onAnimationCancel(animation: Animator) {
-            // no impl
-        }
-
-        override fun onAnimationRepeat(animation: Animator) {
+        override fun onAnimationCancel(animation: MapboxAnimatorSet) {
             // no impl
         }
     }

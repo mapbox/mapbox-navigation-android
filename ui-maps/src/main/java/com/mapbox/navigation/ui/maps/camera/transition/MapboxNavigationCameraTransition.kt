@@ -124,13 +124,16 @@ class MapboxNavigationCameraTransition(
     ): AnimatorSet {
         val animators = mutableListOf<ValueAnimator>()
 
+        val animationDuration = LINEAR_ANIMATION_DURATION
+            .coerceAtMost(transitionOptions.maxDuration)
+
         cameraOptions.center?.let { center ->
             val centerAnimator = cameraPlugin.createCenterAnimator(
                 CameraAnimatorOptions.cameraAnimatorOptions(center) {
                     owner(NAVIGATION_CAMERA_OWNER)
                 },
             ) {
-                duration = LINEAR_ANIMATION_DURATION
+                duration = animationDuration
                 interpolator = LINEAR_INTERPOLATOR
             }
             animators.add(centerAnimator)
@@ -142,7 +145,7 @@ class MapboxNavigationCameraTransition(
                     owner(NAVIGATION_CAMERA_OWNER)
                 },
             ) {
-                duration = LINEAR_ANIMATION_DURATION
+                duration = animationDuration
                 interpolator = LINEAR_INTERPOLATOR
             }
             animators.add(zoomAnimator)
@@ -155,7 +158,7 @@ class MapboxNavigationCameraTransition(
                     owner(NAVIGATION_CAMERA_OWNER)
                 },
             ) {
-                duration = LINEAR_ANIMATION_DURATION
+                duration = animationDuration
                 interpolator = LINEAR_INTERPOLATOR
             }
             animators.add(bearingAnimator)
@@ -167,7 +170,7 @@ class MapboxNavigationCameraTransition(
                     owner(NAVIGATION_CAMERA_OWNER)
                 },
             ) {
-                duration = LINEAR_ANIMATION_DURATION
+                duration = animationDuration
                 interpolator = LINEAR_INTERPOLATOR
             }
             animators.add(pitchAnimator)
@@ -179,13 +182,13 @@ class MapboxNavigationCameraTransition(
                     owner(NAVIGATION_CAMERA_OWNER)
                 },
             ) {
-                duration = LINEAR_ANIMATION_DURATION
+                duration = animationDuration
                 interpolator = LINEAR_INTERPOLATOR
             }
             animators.add(paddingAnimator)
         }
 
-        return createAnimatorSet(animators).constraintDurationTo(transitionOptions.maxDuration)
+        return createAnimatorSet(animators)
     }
 
     private fun flyFromLowZoomToHighZoom(

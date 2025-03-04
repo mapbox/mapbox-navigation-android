@@ -15,5 +15,6 @@ package com.mapbox.navigation.base
     AnnotationTarget.CLASS,
     AnnotationTarget.FUNCTION,
     AnnotationTarget.PROPERTY,
+    AnnotationTarget.CONSTRUCTOR,
 )
 annotation class ExperimentalPreviewMapboxNavigationAPI
