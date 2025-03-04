@@ -140,18 +140,13 @@ class MapboxNavigationViewportDataSourceTest {
     fun setup() {
         every { mapboxMap.cameraState } returns emptyCameraState
         every { mapboxMap.getSize() } returns mapSize
-        val cameraForCoordinatesCallbackSlot = slot<(CameraOptions) -> Unit>()
+        val actionSlot = slot<() -> Unit>()
         every {
-            mapboxMap.cameraForCoordinates(
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                capture(cameraForCoordinatesCallbackSlot),
+            mapboxMap.whenSizeReady(
+                capture(actionSlot),
             )
         } answers {
-            cameraForCoordinatesCallbackSlot.captured(mockk())
+            actionSlot.captured()
         }
 
         viewportDataSource = MapboxNavigationViewportDataSource(mapboxMap)
@@ -1416,15 +1411,10 @@ class MapboxNavigationViewportDataSourceTest {
 
     @Test
     fun `viewport data changed only when map size is ready`() {
-        val callbackSlot = slot<(CameraOptions) -> Unit>()
+        val actionSlot = slot<() -> Unit>()
         every {
-            mapboxMap.cameraForCoordinates(
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                capture(callbackSlot),
+            mapboxMap.whenSizeReady(
+                capture(actionSlot),
             )
         } returns Unit
 
@@ -1435,7 +1425,7 @@ class MapboxNavigationViewportDataSourceTest {
 
         assertEquals(initialViewportData, viewportDataSource.getViewportData())
 
-        callbackSlot.captured.invoke(mockk())
+        actionSlot.captured.invoke()
 
         assertNotEquals(initialViewportData, viewportDataSource.getViewportData())
     }
@@ -1443,14 +1433,7 @@ class MapboxNavigationViewportDataSourceTest {
     @Test
     fun `viewport data does not change while map size is not ready`() {
         every {
-            mapboxMap.cameraForCoordinates(
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-            )
+            mapboxMap.whenSizeReady(any())
         } answers {
             // do nothing, callback is not called
         }
@@ -1465,15 +1448,10 @@ class MapboxNavigationViewportDataSourceTest {
 
     @Test
     fun `viewport data does not change if map size is ready after clearRouteData() called`() {
-        val callbackSlot = slot<(CameraOptions) -> Unit>()
+        val actionSlot = slot<() -> Unit>()
         every {
-            mapboxMap.cameraForCoordinates(
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                capture(callbackSlot),
+            mapboxMap.whenSizeReady(
+                capture(actionSlot),
             )
         } returns Unit
 
@@ -1483,7 +1461,7 @@ class MapboxNavigationViewportDataSourceTest {
         viewportDataSource.evaluate()
         viewportDataSource.clearRouteData()
 
-        callbackSlot.captured.invoke(mockk())
+        actionSlot.captured.invoke()
 
         assertEquals(initialViewportData, viewportDataSource.getViewportData())
     }
