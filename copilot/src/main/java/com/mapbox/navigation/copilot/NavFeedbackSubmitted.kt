@@ -10,4 +10,5 @@ internal data class NavFeedbackSubmitted(
     val type: String,
     val subtype: Set<String>,
     val location: HistoryPoint,
+    val description: String,
 ) : EventDTO
