@@ -17,6 +17,9 @@ import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigationStatusOrigin
 import com.mapbox.navigator.NavigatorObserver
+import com.mapbox.navigator.PrimaryRouteChangeReason
+import com.mapbox.navigator.RouteAlternative
+import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouteState
 import com.mapbox.navigator.SetRoutesReason
 import kotlinx.coroutines.Dispatchers
@@ -106,8 +109,26 @@ data class OnStatusUpdateParameters(
 @OptIn(ExperimentalCoroutinesApi::class)
 fun MapboxNativeNavigator.statusUpdates(): Flow<OnStatusUpdateParameters> {
     return callbackFlow {
-        val observer = NavigatorObserver { origin, status ->
-            this.trySend(OnStatusUpdateParameters(origin, status))
+        val observer = object : NavigatorObserver {
+            override fun onStatus(
+                origin: NavigationStatusOrigin,
+                status: NavigationStatus,
+            ) {
+                trySend(OnStatusUpdateParameters(origin, status))
+            }
+
+            override fun onPrimaryRouteChanged(
+                primaryRoute: RouteInterface?,
+                reason: PrimaryRouteChangeReason,
+            ) {
+                // no-op
+            }
+
+            override fun onAlternativeRoutesChanged(
+                alternativeRoutes: MutableList<RouteAlternative>,
+            ) {
+                // no-op
+            }
         }
         addNavigatorObserver(observer)
         awaitClose {
