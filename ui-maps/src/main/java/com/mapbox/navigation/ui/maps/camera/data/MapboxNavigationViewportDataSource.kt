@@ -34,7 +34,7 @@ import com.mapbox.navigation.ui.maps.camera.internal.FollowingFramingMode
 import com.mapbox.navigation.ui.maps.camera.internal.FollowingFramingModeHolder
 import com.mapbox.navigation.ui.maps.camera.internal.InternalViewportDataSourceOptions
 import com.mapbox.navigation.ui.maps.camera.internal.normalizeBearing
-import com.mapbox.navigation.ui.maps.util.MapSizeReadyCallbackHelper
+import com.mapbox.navigation.ui.maps.util.MapSizeInitializedCallbackHelper
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logW
@@ -324,7 +324,7 @@ class MapboxNavigationViewportDataSource internal constructor(
     private val viewportDataSourceUpdateObservers =
         CopyOnWriteArraySet<ViewportDataSourceUpdateObserver>()
 
-    private val mapSizeReadyCallbackHelper = MapSizeReadyCallbackHelper(mapboxMap)
+    private val mapSizeReadyCallbackHelper = MapSizeInitializedCallbackHelper(mapboxMap)
     private var mapsSizeReadyCancellable: Cancelable? = null
 
     override fun getViewportData(): ViewportData = viewportData
@@ -351,7 +351,7 @@ class MapboxNavigationViewportDataSource internal constructor(
      */
     fun evaluate() {
         mapsSizeReadyCancellable?.cancel()
-        mapsSizeReadyCancellable = mapSizeReadyCallbackHelper.onMapSizeReady {
+        mapsSizeReadyCancellable = mapSizeReadyCallbackHelper.onMapSizeInitialized {
             evaluateImpl()
         }
     }
