@@ -203,13 +203,14 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the auto-value-gson-runtime.
+Mapbox Navigation uses portions of the autotransient (A transient annotation for AutoValue extensions.).
+URL: [https://github.com/ZacSweers/AutoTransient/](https://github.com/ZacSweers/AutoTransient/)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the autotransient (A transient annotation for AutoValue extensions.).
-URL: [https://github.com/ZacSweers/AutoTransient/](https://github.com/ZacSweers/AutoTransient/)
+Mapbox Navigation uses portions of the AutoValue: Gson Extension (Runtime) (Mapbox fork of an AutoValue extension that creates a Gson TypeAdapter for JSON serialization of AutoValue classes.).
+URL: [https://github.com/mapbox/auto-value-gson/](https://github.com/mapbox/auto-value-gson/)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
@@ -638,13 +639,14 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the auto-value-gson-runtime.
+Mapbox Navigation uses portions of the autotransient (A transient annotation for AutoValue extensions.).
+URL: [https://github.com/ZacSweers/AutoTransient/](https://github.com/ZacSweers/AutoTransient/)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the autotransient (A transient annotation for AutoValue extensions.).
-URL: [https://github.com/ZacSweers/AutoTransient/](https://github.com/ZacSweers/AutoTransient/)
+Mapbox Navigation uses portions of the AutoValue: Gson Extension (Runtime) (Mapbox fork of an AutoValue extension that creates a Gson TypeAdapter for JSON serialization of AutoValue classes.).
+URL: [https://github.com/mapbox/auto-value-gson/](https://github.com/mapbox/auto-value-gson/)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================

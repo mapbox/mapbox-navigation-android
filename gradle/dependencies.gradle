@@ -19,7 +19,7 @@ ext {
 
   version = [
       mapboxMapSdk              : '11.11.0-SNAPSHOT.0306T0845Z.dd-snapshots-dfff2f4.4b251e7',
-      mapboxSdkServices         : '7.3.1',
+      mapboxSdkServices         : '7.3.2',
       mapboxNavigator           : "${mapboxNavigatorVersion}",
       mapboxCommonNative        : '24.11.0-SNAPSHOT-03-06--04-29.git-dfff2f4',
       mapboxNavSdkCpp           : '0.11.0-SNAPSHOT-03-06--04-29.git-dfff2f4',
