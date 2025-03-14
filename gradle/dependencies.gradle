@@ -94,6 +94,7 @@ ext {
       mapboxNavigator           : "com.mapbox.navigator:dash-native:${version.mapboxNavigator}",
       mapboxCommonNative        : "com.mapbox.common:common:${version.mapboxCommonNative}",
       mapboxSearch              : "com.mapbox.search:mapbox-search-android:${version.mapboxSearch}",
+      mapboxOfflineSearch       : "com.mapbox.search:offline:${version.mapboxSearch}",
       mapboxNavSdkCpp           : "com.mapbox.navsdk:sdk:${version.mapboxNavSdkCpp}",
       mapboxMapGptExpAndroid   : "com.mapbox.mapgpt.experimental:mapgpt:${version.mapboxCommonNative}",
 

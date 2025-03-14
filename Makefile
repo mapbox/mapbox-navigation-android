@@ -20,6 +20,7 @@ notification \
 navigation \
 copilot \
 tripdata \
+search \
 voice \
 libtesting-router
 
