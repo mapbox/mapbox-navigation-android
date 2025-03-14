@@ -995,89 +995,104 @@ package com.mapbox.navigation.ui.maps.route.arrow.model {
 
 package com.mapbox.navigation.ui.maps.route.callout.api {
 
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class DefaultRouteCalloutAdapter extends com.mapbox.navigation.ui.maps.route.callout.api.MapboxRouteCalloutAdapter {
+    ctor public DefaultRouteCalloutAdapter(android.content.Context context, com.mapbox.navigation.ui.maps.route.callout.model.DefaultRouteCalloutAdapterOptions options = DefaultRouteCalloutAdapterOptions.<init>().build(), kotlin.jvm.functions.Function1<? super com.mapbox.navigation.ui.maps.route.callout.api.DefaultRouteCalloutAdapter.CalloutClickData,kotlin.Unit>? routeCalloutClickListener = null);
+    method public com.mapbox.navigation.ui.maps.route.callout.model.DefaultRouteCalloutAdapterOptions getOptions();
+    method public com.mapbox.navigation.ui.maps.route.callout.model.CalloutViewHolder onCreateViewHolder(com.mapbox.navigation.ui.maps.route.callout.model.RouteCallout callout);
+    method public void onUpdateAnchor(android.view.View view, com.mapbox.maps.ViewAnnotationAnchorConfig anchor);
+    method public void updateOptions(com.mapbox.navigation.ui.maps.route.callout.model.DefaultRouteCalloutAdapterOptions options);
+    property public final com.mapbox.navigation.ui.maps.route.callout.model.DefaultRouteCalloutAdapterOptions options;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static final class DefaultRouteCalloutAdapter.CalloutClickData {
+    method public com.mapbox.navigation.base.route.NavigationRoute getRoute();
+    property public final com.mapbox.navigation.base.route.NavigationRoute route;
+  }
+
   @RestrictTo({androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX}) public final class DurationKtxKt {
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapboxRouteCalloutApi {
-    ctor public MapboxRouteCalloutApi(com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutApiOptions apiOptions = MapboxRouteCalloutApiOptions.<init>().build());
-    method public com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutApiOptions getOptions();
-    method public com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData setNavigationRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> newRoutes);
-    method public com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData setNavigationRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> newRoutes, java.util.List<com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata> alternativeRoutesMetadata);
-    method public com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData updateOptions(com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutApiOptions options);
-    property public final com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutApiOptions options;
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class MapboxRouteCalloutAdapter {
+    ctor public MapboxRouteCalloutAdapter();
+    method public final void notifyDataSetChanged();
+    method public abstract com.mapbox.navigation.ui.maps.route.callout.model.CalloutViewHolder onCreateViewHolder(com.mapbox.navigation.ui.maps.route.callout.model.RouteCallout callout);
+    method public abstract void onUpdateAnchor(android.view.View view, com.mapbox.maps.ViewAnnotationAnchorConfig anchor);
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapboxRouteCalloutView {
-    ctor public MapboxRouteCalloutView(com.mapbox.maps.MapView mapView, com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutViewOptions options = MapboxRouteCalloutViewOptions.<init>().build());
-    method public void renderCallouts(com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData routeCalloutResult, com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView routeLineView);
-    method public void setRouteCalloutClickListener(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.base.route.NavigationRoute,kotlin.Unit>? listener);
-    method public void updateRouteCalloutViewOptions(com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutViewOptions options);
+  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapboxRouteCalloutApi {
+    method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData setNavigationRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> newRoutes, java.util.List<com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata> alternativeRoutesMetadata);
   }
 
 }
 
 package com.mapbox.navigation.ui.maps.route.callout.model {
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapboxRouteCalloutApiOptions {
-    method public Float? getMaxZoom();
-    method public Float? getMinZoom();
-    method public Long? getPriority();
-    method public com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutType getRouteCalloutType();
-    method public long getSimilarDurationDelta();
-    method public com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutApiOptions.Builder toBuilder();
-    property public final Float? maxZoom;
-    property public final Float? minZoom;
-    property public final Long? priority;
-    property public final com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutType routeCalloutType;
-    property public final long similarDurationDelta;
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class CalloutViewHolder {
+    method public com.mapbox.navigation.ui.maps.route.callout.model.CalloutViewHolder.Builder toBuilder();
   }
 
-  public static final class MapboxRouteCalloutApiOptions.Builder {
-    ctor public MapboxRouteCalloutApiOptions.Builder();
-    method public com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutApiOptions build();
-    method public com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutApiOptions.Builder maxZoom(Float? value);
-    method public com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutApiOptions.Builder minZoom(Float? value);
-    method public com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutApiOptions.Builder priority(Long? value);
-    method public com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutApiOptions.Builder routeCalloutType(com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutType type);
-    method public com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutApiOptions.Builder similarDurationDelta(long value);
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static final class CalloutViewHolder.Builder {
+    ctor public CalloutViewHolder.Builder(android.view.View view);
+    method public com.mapbox.navigation.ui.maps.route.callout.model.CalloutViewHolder build();
+    method public com.mapbox.navigation.ui.maps.route.callout.model.CalloutViewHolder.Builder options(com.mapbox.maps.ViewAnnotationOptions options);
+    method public com.mapbox.navigation.ui.maps.route.callout.model.CalloutViewHolder.Builder view(android.view.View view);
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapboxRouteCalloutViewOptions {
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class DefaultRouteCalloutAdapterOptions {
     method public int getBackgroundColor();
     method public int getDurationTextAppearance();
     method public int getFasterTextColor();
+    method public int getRouteCalloutType();
     method public int getSelectedBackgroundColor();
     method public int getSelectedTextColor();
+    method public long getSimilarDurationDelta();
     method public int getSlowerTextColor();
     method public int getTextColor();
-    method public com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutViewOptions.Builder toBuilder();
+    method public com.mapbox.navigation.ui.maps.route.callout.model.DefaultRouteCalloutAdapterOptions.Builder toBuilder();
     property public final int backgroundColor;
     property public final int durationTextAppearance;
     property public final int fasterTextColor;
+    property public final int routeCalloutType;
     property public final int selectedBackgroundColor;
     property public final int selectedTextColor;
+    property public final long similarDurationDelta;
     property public final int slowerTextColor;
     property public final int textColor;
   }
 
-  public static final class MapboxRouteCalloutViewOptions.Builder {
-    ctor public MapboxRouteCalloutViewOptions.Builder();
-    method public com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutViewOptions.Builder backgroundColor(@ColorRes int value);
-    method public com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutViewOptions build();
-    method public com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutViewOptions.Builder durationTextAppearance(@StyleRes int value);
-    method public com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutViewOptions.Builder fasterTextColor(@ColorRes int value);
-    method public com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutViewOptions.Builder selectedBackgroundColor(@ColorRes int value);
-    method public com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutViewOptions.Builder selectedTextColor(@ColorRes int value);
-    method public com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutViewOptions.Builder slowerTextColor(@ColorRes int value);
-    method public com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutViewOptions.Builder textColor(@ColorRes int value);
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static final class DefaultRouteCalloutAdapterOptions.Builder {
+    ctor public DefaultRouteCalloutAdapterOptions.Builder();
+    method public com.mapbox.navigation.ui.maps.route.callout.model.DefaultRouteCalloutAdapterOptions.Builder backgroundColor(@ColorRes int value);
+    method public com.mapbox.navigation.ui.maps.route.callout.model.DefaultRouteCalloutAdapterOptions build();
+    method public com.mapbox.navigation.ui.maps.route.callout.model.DefaultRouteCalloutAdapterOptions.Builder durationTextAppearance(@StyleRes int value);
+    method public com.mapbox.navigation.ui.maps.route.callout.model.DefaultRouteCalloutAdapterOptions.Builder fasterTextColor(@ColorRes int value);
+    method public com.mapbox.navigation.ui.maps.route.callout.model.DefaultRouteCalloutAdapterOptions.Builder routeCalloutType(@com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutType.Type int type);
+    method public com.mapbox.navigation.ui.maps.route.callout.model.DefaultRouteCalloutAdapterOptions.Builder selectedBackgroundColor(@ColorRes int value);
+    method public com.mapbox.navigation.ui.maps.route.callout.model.DefaultRouteCalloutAdapterOptions.Builder selectedTextColor(@ColorRes int value);
+    method public com.mapbox.navigation.ui.maps.route.callout.model.DefaultRouteCalloutAdapterOptions.Builder similarDurationDelta(long value);
+    method public com.mapbox.navigation.ui.maps.route.callout.model.DefaultRouteCalloutAdapterOptions.Builder slowerTextColor(@ColorRes int value);
+    method public com.mapbox.navigation.ui.maps.route.callout.model.DefaultRouteCalloutAdapterOptions.Builder textColor(@ColorRes int value);
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RouteCalloutData {
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RouteCallout {
+    method public long getDurationDifferenceWithPrimary();
+    method public com.mapbox.navigation.base.route.NavigationRoute getRoute();
+    method public boolean isPrimary();
+    property public final long durationDifferenceWithPrimary;
+    property public final boolean isPrimary;
+    property public final com.mapbox.navigation.base.route.NavigationRoute route;
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public enum RouteCalloutType {
-    enum_constant public static final com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutType RelativeDurationsOnAlternative;
-    enum_constant public static final com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutType RouteDurations;
+  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RouteCalloutData {
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RouteCalloutType {
+    field public static final com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutType INSTANCE;
+    field public static final int NAVIGATION = 1; // 0x1
+    field public static final int ROUTES_OVERVIEW = 0; // 0x0
+  }
+
+  @IntDef({com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutType.ROUTES_OVERVIEW, com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutType.NAVIGATION}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) @kotlin.annotation.Target(allowedTargets={kotlin.annotation.AnnotationTarget.PROPERTY, kotlin.annotation.AnnotationTarget.VALUE_PARAMETER, kotlin.annotation.AnnotationTarget.TYPE_PARAMETER, kotlin.annotation.AnnotationTarget.TYPE, kotlin.annotation.AnnotationTarget.FUNCTION}) public static @interface RouteCalloutType.Type {
   }
 
 }
@@ -1136,6 +1151,8 @@ package com.mapbox.navigation.ui.maps.route.line.api {
   @UiThread public final class MapboxRouteLineView {
     ctor public MapboxRouteLineView(com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions options);
     method public void cancel();
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void disableCallouts();
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void enableCallouts(com.mapbox.maps.viewannotation.ViewAnnotationManager viewAnnotationManager, com.mapbox.navigation.ui.maps.route.callout.api.MapboxRouteCalloutAdapter adapter);
     method public com.mapbox.maps.extension.style.layers.properties.generated.Visibility? getAlternativeRoutesVisibility(com.mapbox.maps.Style style);
     method public com.mapbox.maps.extension.style.layers.properties.generated.Visibility? getPrimaryRouteVisibility(com.mapbox.maps.Style style);
     method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public String? getRouteMainLayerIdForFeature(String? featureId);
@@ -1194,9 +1211,11 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public java.util.List<java.lang.String> getTrafficBackfillRoadClasses();
     method public boolean getVanishingRouteLineEnabled();
     method public long getVanishingRouteLineUpdateIntervalNano();
+    method public boolean isRouteCalloutsEnabled();
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions.Builder toBuilder();
     property public final boolean calculateRestrictedRoadSections;
     property public final kotlin.ranges.IntRange heavyCongestionRange;
+    property public final boolean isRouteCalloutsEnabled;
     property public final kotlin.ranges.IntRange lowCongestionRange;
     property public final kotlin.ranges.IntRange moderateCongestionRange;
     property public final kotlin.ranges.IntRange severeCongestionRange;
@@ -1211,6 +1230,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method @kotlin.jvm.Throws(exceptionClasses=IllegalStateException::class) public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions build() throws java.lang.IllegalStateException;
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions.Builder calculateRestrictedRoadSections(boolean calculateRestrictedRoadSections);
     method @kotlin.jvm.Throws(exceptionClasses=IllegalArgumentException::class) public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions.Builder heavyCongestionRange(kotlin.ranges.IntRange range) throws java.lang.IllegalArgumentException;
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions.Builder isRouteCalloutsEnabled(boolean enable);
     method @kotlin.jvm.Throws(exceptionClasses=IllegalArgumentException::class) public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions.Builder lowCongestionRange(kotlin.ranges.IntRange range) throws java.lang.IllegalArgumentException;
     method @kotlin.jvm.Throws(exceptionClasses=IllegalArgumentException::class) public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions.Builder moderateCongestionRange(kotlin.ranges.IntRange range) throws java.lang.IllegalArgumentException;
     method @kotlin.jvm.Throws(exceptionClasses=IllegalArgumentException::class) public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions.Builder severeCongestionRange(kotlin.ranges.IntRange range) throws java.lang.IllegalArgumentException;

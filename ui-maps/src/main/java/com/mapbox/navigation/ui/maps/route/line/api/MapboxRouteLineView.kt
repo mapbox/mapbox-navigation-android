@@ -16,6 +16,7 @@ import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.extension.style.sources.getSource
+import com.mapbox.maps.viewannotation.ViewAnnotationManager
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.maps.internal.extensions.getStyleId
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
@@ -57,7 +58,12 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_RES
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_TRAFFIC
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_TRAIL
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_TRAIL_CASING
+import com.mapbox.navigation.ui.maps.route.callout.api.DefaultRouteCalloutAdapter
+import com.mapbox.navigation.ui.maps.route.callout.api.MapboxRouteCalloutAdapter
+import com.mapbox.navigation.ui.maps.route.callout.api.MapboxRouteCalloutView
+import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.route.line.RouteLineHistoryRecordingViewSender
+import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewDynamicOptionsBuilder
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewDynamicOptionsBuilderBlock
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions
@@ -131,6 +137,11 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         DataIdHolder(),
         RouteLineHistoryRecordingViewSender(),
     )
+
+    private var routeCalloutView: MapboxRouteCalloutView? = null
+
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    private var lastRouteCalloutData: RouteCalloutData? = null
 
     private var primaryRouteLineLayerGroup = setOf<String>()
     private val trailCasingLayerIds = setOf(
@@ -298,6 +309,7 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
      *  particular operation, we use dataId: it is a monotonic increasing integer associated with a
      *  particular sourceId. See [RoutesExpector] docs on how it is used.
      */
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private fun renderRouteDrawDataInternal(
         style: Style,
         routeDrawData: Expected<RouteLineError, RouteSetValue>,
@@ -465,6 +477,9 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
                         mutationCommands.addAll(gradientCommands)
                     }
                 }
+
+                lastRouteCalloutData = routeSetValue.callouts
+                routeCalloutView?.renderCallouts(routeSetValue.callouts)
             }
             updateSourceCommands.forEach { it() }
             mutationCommands.forEach { mutationCommand ->
@@ -659,10 +674,42 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
     }
 
     /**
+     * Set a new [adapter] and associated [viewAnnotationManager] to provide route callout views on
+     * demand. [DefaultRouteCalloutAdapter] can be used as a default implementation.
+     *
+     * Note that corresponding [MapboxRouteLineApiOptions.isRouteCalloutsEnabled] should be
+     * set to true
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun enableCallouts(
+        viewAnnotationManager: ViewAnnotationManager,
+        adapter: MapboxRouteCalloutAdapter,
+    ) {
+        if (routeCalloutView != null) {
+            routeCalloutView?.release()
+        }
+
+        routeCalloutView = MapboxRouteCalloutView(
+            viewAnnotationManager,
+            adapter,
+            routeLineView = this,
+        )
+
+        lastRouteCalloutData?.let { data -> routeCalloutView?.renderCallouts(data) }
+    }
+
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun disableCallouts() {
+        routeCalloutView?.release()
+        routeCalloutView = null
+    }
+
+    /**
      * See [renderRouteDrawDataInternal] on how routes expecting works.
      * Keep in mind that technically `RouteLineClearValue#RouteLineData#FeatureCollection`
      * might be non-empty, which will result in drawing, not clearing the routes.
      */
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private fun renderClearRouteLineValueInternal(
         style: Style,
         clearRouteLineValue: Expected<RouteLineError, RouteLineClearValue>,
@@ -748,6 +795,9 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
                 )
 
                 primaryRouteLineLayerGroup = setOf()
+
+                lastRouteCalloutData = value.callouts
+                routeCalloutView?.renderCallouts(value.callouts)
             }
         }
         callback?.callback?.unlock()

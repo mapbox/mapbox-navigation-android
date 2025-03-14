@@ -62,6 +62,7 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_TRA
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_SOURCE_ID
+import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.route.line.RouteLineHistoryRecordingViewSender
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
@@ -331,6 +332,7 @@ class MapboxRouteLineViewTest {
             FeatureCollection.fromFeatures(listOf(getEmptyFeature(UUID.randomUUID().toString())))
         val waypointsFeatureCollection =
             FeatureCollection.fromFeatures(listOf(getEmptyFeature(UUID.randomUUID().toString())))
+        val routeCalloutData = RouteCalloutData(emptyList())
         val primaryRouteSource = mockk<GeoJsonSource>(relaxed = true)
         val altRoute1Source = mockk<GeoJsonSource>(relaxed = true)
         val altRoute2Source = mockk<GeoJsonSource>(relaxed = true)
@@ -371,6 +373,7 @@ class MapboxRouteLineViewTest {
                 primaryRouteFeatureCollection,
                 listOf(altRoutesFeatureCollection, altRoutesFeatureCollection),
                 waypointsFeatureCollection,
+                routeCalloutData,
             ),
         )
 
@@ -407,6 +410,7 @@ class MapboxRouteLineViewTest {
         mockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
         mockkObject(MapboxRouteLineUtils)
         val options = MapboxRouteLineViewOptions.Builder(ctx).build()
+        val routeCalloutData = RouteCalloutData(emptyList())
         val primaryRouteFeatureCollection =
             FeatureCollection.fromFeatures(listOf(getEmptyFeature(UUID.randomUUID().toString())))
         val altRoutesFeatureCollection =
@@ -440,6 +444,7 @@ class MapboxRouteLineViewTest {
                 primaryRouteFeatureCollection,
                 listOf(altRoutesFeatureCollection, altRoutesFeatureCollection),
                 waypointsFeatureCollection,
+                routeCalloutData,
             ),
         )
 
@@ -1428,6 +1433,7 @@ class MapboxRouteLineViewTest {
                         LineGradientCommandApplier(),
                     ),
                 ),
+                callouts = RouteCalloutData(emptyList()),
             ),
         )
         val style = getMockedStyle(
@@ -2301,6 +2307,7 @@ class MapboxRouteLineViewTest {
                         maskingTrailCasingApplier,
                     ),
                 ),
+                callouts = RouteCalloutData(emptyList()),
             ),
         )
         val style = getMockedStyle(
@@ -2671,6 +2678,7 @@ class MapboxRouteLineViewTest {
                         LineGradientCommandApplier(),
                     ),
                 ),
+                callouts = RouteCalloutData(emptyList()),
             ),
         )
         val style = getMockedStyle(
@@ -3020,6 +3028,7 @@ class MapboxRouteLineViewTest {
                 primaryRouteLineData = primaryRouteLine,
                 alternativeRouteLinesData = listOf(atlRouteLine1, atlRouteLine2),
                 waypointsFeatureCollection,
+                callouts = RouteCalloutData(emptyList()),
             ),
         )
         val state2: Expected<RouteLineError, RouteSetValue> = ExpectedFactory.createValue(
@@ -3027,6 +3036,7 @@ class MapboxRouteLineViewTest {
                 primaryRouteLineData = atlRouteLine1,
                 alternativeRouteLinesData = listOf(primaryRouteLine, atlRouteLine2),
                 waypointsFeatureCollection,
+                callouts = RouteCalloutData(emptyList()),
             ),
         )
         val style = getMockedStyle(
@@ -4403,6 +4413,7 @@ class MapboxRouteLineViewTest {
                     alternativeRouteLinesData = emptyList(),
                     FeatureCollection.fromFeatures(listOf(getEmptyFeature("1"))),
                     routeLineMaskingLayerDynamicData = null,
+                    callouts = RouteCalloutData(emptyList()),
                 ),
             )
 
@@ -4499,6 +4510,7 @@ class MapboxRouteLineViewTest {
                         FeatureCollection.fromFeatures(listOf(getEmptyFeature("1"))),
                         emptyList(),
                         FeatureCollection.fromFeatures(listOf(getEmptyFeature("2"))),
+                        RouteCalloutData(emptyList()),
                     ),
                 )
             view.renderClearRouteLineValue(style, state)
@@ -4853,6 +4865,7 @@ class MapboxRouteLineViewTest {
                         LineGradientCommandApplier(),
                     ),
                 ),
+                callouts = RouteCalloutData(emptyList()),
             ),
         )
         every { map.getStyle() } returns style
@@ -4930,6 +4943,7 @@ class MapboxRouteLineViewTest {
                 primaryRouteFeatureCollection,
                 listOf(alternativeRoute1FeatureCollection, alternativeRoute2FeatureCollection),
                 waypointsFeatureCollection,
+                RouteCalloutData(emptyList()),
             ),
         )
 

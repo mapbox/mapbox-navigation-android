@@ -13,6 +13,7 @@ import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.layers.Layer
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.CoalescingBlockingQueue
 import com.mapbox.navigation.base.internal.utils.isSameRoute
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -35,6 +36,8 @@ import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.la
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup2SourceLayerIds
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup3SourceLayerIds
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
+import com.mapbox.navigation.ui.maps.route.callout.api.MapboxRouteCalloutApi
+import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.route.line.RouteLineHistoryRecordingApiSender
 import com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue
 import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteRestrictionData
@@ -205,6 +208,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
 ) {
     private var primaryRoute: NavigationRoute? = null
     private val routes: MutableList<NavigationRoute> = mutableListOf()
+    private val alternativeRoutesMetadata: MutableList<AlternativeRouteMetadata> = mutableListOf()
     private var routeLineExpressionData: List<RouteLineExpressionData> = emptyList()
     private var restrictedExpressionData: List<ExtractedRouteRestrictionData> = emptyList()
     private var lastIndexUpdateTimeNano: Long = 0
@@ -256,6 +260,9 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
 
     private var lastLocationPoint: Point? = null
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    private val calloutApi: MapboxRouteCalloutApi?
+
     companion object {
         private const val INVALID_ACTIVE_LEG_INDEX = -1
         private const val LOG_CATEGORY = "MapboxRouteLineApi"
@@ -283,6 +290,12 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         trafficBackfillRoadClasses.addAll(
             routeLineOptions.trafficBackfillRoadClasses,
         )
+        @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+        calloutApi = if (routeLineOptions.isRouteCalloutsEnabled) {
+            MapboxRouteCalloutApi()
+        } else {
+            null
+        }
     }
 
     private fun startMemoryMonitoring() {
@@ -487,6 +500,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         if (newRoutes.isEmpty()) {
             clearRouteLine { clearRouteLineResult ->
                 val result = clearRouteLineResult.mapValue { clearValue ->
+                    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
                     RouteSetValue(
                         primaryRouteLineData = RouteLineData(
                             featureCollection = clearValue.primaryRouteSource,
@@ -494,6 +508,8 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                         alternativeRouteLinesData = clearValue.alternativeRoutesSources.map {
                             RouteLineData(featureCollection = it)
                         },
+
+                        callouts = clearValue.callouts,
                         waypointsSource = clearValue.waypointsSource,
                     )
                 }
@@ -619,12 +635,14 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                 activeLegIndex = INVALID_ACTIVE_LEG_INDEX
                 primaryRoute = null
                 routes.clear()
+                alternativeRoutesMetadata.clear()
                 routeFeatureData.clear()
                 routeLineExpressionData = emptyList()
                 resetCaches()
 
                 consumer.accept(
                     ExpectedFactory.createValue(
+                        @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
                         RouteLineClearValue(
                             FeatureCollection.fromFeatures(listOf()),
                             listOf(
@@ -632,6 +650,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                                 FeatureCollection.fromFeatures(listOf()),
                             ),
                             FeatureCollection.fromFeatures(listOf()),
+                            RouteCalloutData(listOf()),
                         ),
                     ),
                 )
@@ -1069,6 +1088,9 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
             }
         }
 
+        this.alternativeRoutesMetadata.clear()
+        this.alternativeRoutesMetadata.addAll(distinctAlternativeRouteMetadata)
+
         routes.clear()
         routes.addAll(distinctNewRoutes)
         primaryRoute = distinctNewRoutes.firstOrNull()
@@ -1395,7 +1417,12 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
             )
         }
 
+        @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+        val routeCalloutData = calloutApi?.setNavigationRoutes(routes, alternativeRoutesMetadata)
+            ?: RouteCalloutData(emptyList())
+
         return ExpectedFactory.createValue(
+            @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
             RouteSetValue(
                 primaryRouteLineData = RouteLineData(
                     primaryRouteSource,
@@ -1438,6 +1465,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                     ),
                 ),
                 wayPointsFeatureCollection,
+                routeCalloutData,
                 maskingLayerData,
             ),
         )

@@ -1,21 +1,36 @@
 package com.mapbox.navigation.ui.maps.route.callout.model
 
+import androidx.annotation.IntDef
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 
 /**
  * Describes the possible callout types on the route line.
  */
 @ExperimentalPreviewMapboxNavigationAPI
-enum class RouteCalloutType {
+object RouteCalloutType {
 
     /**
      * Shows the route duration
      */
-    RouteDurations,
+    const val ROUTES_OVERVIEW = 0
 
     /**
      * Shows the relative diff between the main route and the alternative
      *
      */
-    RelativeDurationsOnAlternative,
+    const val NAVIGATION = 1
+
+    @Retention(AnnotationRetention.BINARY)
+    @IntDef(
+        ROUTES_OVERVIEW,
+        NAVIGATION,
+    )
+    @Target(
+        AnnotationTarget.PROPERTY,
+        AnnotationTarget.VALUE_PARAMETER,
+        AnnotationTarget.TYPE_PARAMETER,
+        AnnotationTarget.TYPE,
+        AnnotationTarget.FUNCTION,
+    )
+    annotation class Type
 }

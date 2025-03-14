@@ -1,6 +1,8 @@
 package com.mapbox.navigation.ui.maps.internal.route.line
 
 import com.mapbox.geojson.FeatureCollection
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineDynamicData
@@ -15,6 +17,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class RouteLineExpectedFactoryTest {
 
     @Before
@@ -43,7 +46,13 @@ class RouteLineExpectedFactoryTest {
         )
 
         assertEquals(
-            RouteSetValue(expectedPrimary, emptyList(), waypointsSource, null),
+            RouteSetValue(
+                expectedPrimary,
+                emptyList(),
+                waypointsSource,
+                RouteCalloutData(emptyList()),
+                null,
+            ),
             actual,
         )
     }
@@ -81,6 +90,7 @@ class RouteLineExpectedFactoryTest {
                 expectedPrimary,
                 listOf(expectedAlt1, expectedAlt2),
                 waypointsSource,
+                RouteCalloutData(emptyList()),
                 expectedMasking,
             ),
             actual,
@@ -149,7 +159,12 @@ class RouteLineExpectedFactoryTest {
         )
 
         assertEquals(
-            RouteLineClearValue(primary, listOf(alt1, alt2), waypointSource),
+            RouteLineClearValue(
+                primary,
+                listOf(alt1, alt2),
+                waypointSource,
+                RouteCalloutData(emptyList()),
+            ),
             actual,
         )
     }

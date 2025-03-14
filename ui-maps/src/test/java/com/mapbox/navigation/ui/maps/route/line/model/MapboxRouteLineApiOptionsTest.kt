@@ -1,11 +1,13 @@
 package com.mapbox.navigation.ui.maps.route.line.model
 
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.testing.BuilderTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
 import kotlin.reflect.KClass
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class MapboxRouteLineApiOptionsTest :
     BuilderTest<MapboxRouteLineApiOptions, MapboxRouteLineApiOptions.Builder>() {
 
@@ -18,6 +20,7 @@ internal class MapboxRouteLineApiOptionsTest :
             .vanishingRouteLineUpdateIntervalNano(7878)
             .styleInactiveRouteLegsIndependently(true)
             .calculateRestrictedRoadSections(true)
+            .isRouteCalloutsEnabled(true)
             .trafficBackfillRoadClasses(listOf("a", "b"))
             .lowCongestionRange(0..29)
             .moderateCongestionRange(42..49)

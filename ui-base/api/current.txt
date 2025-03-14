@@ -73,4 +73,3 @@ package com.mapbox.navigation.ui.base.util {
   }
 
 }
-
