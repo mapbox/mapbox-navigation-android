@@ -1,5 +1,30 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.8.0-rc.1 - 14 March, 2025
+#### Features
+- ⚠️ Breaking changes in Experimental API: `MapboxRouteCalloutApi` and `MapboxRouteCalloutView` are no longer publicly available. 
+- New option `MapboxRouteLineApiOptions#isRouteCalloutsEnabled` to allow `MapboxRouteLineApi` calculate data for route callouts. 
+- New function `MapboxRouteLineView#enableCallouts` now allows to render route callouts on the map by setting an adapter. 
+- Added `DefaultRouteCalloutAdapter` which provides a built-in adapter for route callouts. 
+- Compensate input location stream outages with Odometry (when provided)
+
+#### Bug fixes and improvements
+
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.11.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.11.0-rc.1))
+- Mapbox Navigation Native `v324.0.0-rc.1`
+- Mapbox Core Common `v24.11.0-rc.1`
+- Mapbox Java `v7.3.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.3.1))
+
+
 ## Navigation SDK Core Framework 3.8.0-beta.1 - 03 March, 2025
 #### Features
 - Added `MapboxRouteCalloutApiOptions#maxZoom` to allow for setting a maximum zoom level for the route callout. This is useful for preventing the route callout from being displayed at high zoom levels. 
