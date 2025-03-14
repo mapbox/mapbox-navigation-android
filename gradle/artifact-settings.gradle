@@ -36,6 +36,7 @@ ext {
         'ui-maps' : new Tuple2('ui-maps', 'navigation-core-ui-maps'),
         'ui-utils' : new Tuple2('ui-utils', 'navigation-core-ui-utils'),
         'notification' : new Tuple2('notification', 'navigation-core-notification'),
+        'search' : new Tuple2('search', 'navigation-core-search'),
         'ui-components' : new Tuple2('ui-components', 'navigation-core-ui-components'),
         'androidauto' : new Tuple2('android-auto-components', 'navigation-core-androidauto'),
         'libtesting-router' : new Tuple2('test-router', 'navigation-core-testing-router'),
