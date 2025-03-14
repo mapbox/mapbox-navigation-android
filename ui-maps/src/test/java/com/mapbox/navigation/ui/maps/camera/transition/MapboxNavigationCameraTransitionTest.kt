@@ -147,15 +147,71 @@ class MapboxNavigationCameraTransitionTest {
         }
         val cameraOptions: CameraOptions = mockk(relaxed = true)
 
-        val animator = transitions.transitionLinear(cameraOptions, DEFAULT_FRAME_TRANSITION_OPT)
+        val maxDuration = 700L
 
-        verify { animatorSet.constraintDurationTo(DEFAULT_FRAME_TRANSITION_OPT.maxDuration) }
-        assertEquals(constrainedSet, animator)
+        val animator = transitions.transitionLinear(
+            cameraOptions,
+            NavigationCameraTransitionOptions.Builder().maxDuration(maxDuration).build(),
+        )
+
+        val centerBlockSlot = slot<(ValueAnimator.() -> Unit)>()
+        verify {
+            cameraPlugin.createCenterAnimator(
+                any(),
+                capture(centerBlockSlot),
+            )
+        }
+        verifyOptionsBlock(centerBlockSlot.captured, maxDuration)
+
+        val bearingBlockSlot = slot<(ValueAnimator.() -> Unit)>()
+        verify {
+            cameraPlugin.createBearingAnimator(
+                any(),
+                any(),
+                capture(bearingBlockSlot),
+            )
+        }
+        verifyOptionsBlock(bearingBlockSlot.captured, maxDuration)
+
+        val paddingBlockSlot = slot<(ValueAnimator.() -> Unit)>()
+        verify {
+            cameraPlugin.createPaddingAnimator(
+                any(),
+                capture(paddingBlockSlot),
+            )
+        }
+        verifyOptionsBlock(paddingBlockSlot.captured, maxDuration)
+
+        val pitchBlockSlot = slot<(ValueAnimator.() -> Unit)>()
+        verify {
+            cameraPlugin.createPitchAnimator(
+                any(),
+                capture(pitchBlockSlot),
+            )
+        }
+        verifyOptionsBlock(paddingBlockSlot.captured, maxDuration)
+
+        val zoomBlockSlot = slot<(ValueAnimator.() -> Unit)>()
+        verify {
+            cameraPlugin.createZoomAnimator(
+                any(),
+                capture(zoomBlockSlot),
+            )
+        }
+        verifyOptionsBlock(zoomBlockSlot.captured, maxDuration)
+
+        assertEquals(animatorSet, animator)
     }
 
     @After
     fun tearDown() {
         unmockkStatic("com.mapbox.navigation.ui.maps.camera.internal.MapboxNavigationCameraUtilsKt")
         unmockkStatic("com.mapbox.navigation.ui.maps.camera.utils.MapboxNavigationCameraUtilsKt")
+    }
+
+    private fun verifyOptionsBlock(block: ValueAnimator.() -> Unit, maxDuration: Long) {
+        val original = mockk<ValueAnimator>(relaxed = true)
+        original.block()
+        verify { original.duration = maxDuration }
     }
 }

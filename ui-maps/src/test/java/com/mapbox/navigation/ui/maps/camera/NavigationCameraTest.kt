@@ -23,7 +23,7 @@ import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraStateTran
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
 import com.mapbox.navigation.ui.maps.camera.transition.SimplifiedFrameAnimatorsCreator
 import com.mapbox.navigation.ui.maps.camera.transition.TransitionEndListener
-import com.mapbox.navigation.ui.maps.camera.transition.UpdateFrameTransitionOptions
+import com.mapbox.navigation.ui.maps.camera.transition.UpdateFrameAnimatorsOptions
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -116,8 +116,8 @@ class NavigationCameraTest {
         val stateTransition = mockk<NavigationCameraStateTransition>()
         val actual = NavigationCamera.getAnimatorsCreator(
             stateTransition,
-            UpdateFrameTransitionOptions.Builder()
-                .nonSimultaneousAnimatorsDependency(false)
+            UpdateFrameAnimatorsOptions.Builder()
+                .useSimplifiedAnimatorsDependency(true)
                 .build(),
         )
 
@@ -130,8 +130,8 @@ class NavigationCameraTest {
         val stateTransition = mockk<NavigationCameraStateTransition>()
         val actual = NavigationCamera.getAnimatorsCreator(
             stateTransition,
-            UpdateFrameTransitionOptions.Builder()
-                .nonSimultaneousAnimatorsDependency(true)
+            UpdateFrameAnimatorsOptions.Builder()
+                .useSimplifiedAnimatorsDependency(false)
                 .build(),
         )
 

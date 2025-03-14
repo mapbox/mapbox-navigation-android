@@ -34,7 +34,7 @@ import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraStateTran
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
 import com.mapbox.navigation.ui.maps.camera.transition.SimplifiedFrameAnimatorsCreator
 import com.mapbox.navigation.ui.maps.camera.transition.TransitionEndListener
-import com.mapbox.navigation.ui.maps.camera.transition.UpdateFrameTransitionOptions
+import com.mapbox.navigation.ui.maps.camera.transition.UpdateFrameAnimatorsOptions
 import java.util.concurrent.CopyOnWriteArraySet
 
 /**
@@ -98,6 +98,20 @@ import java.util.concurrent.CopyOnWriteArraySet
  * gestures to manipulate the camera's zoom level when in [NavigationCameraState.FOLLOWING] without
  * immediately falling back to [NavigationCameraState.IDLE].
  *
+ * ### Frame transitions
+ * By default, NavSDK supports any type of dependencies between animators in a compound frame update animation.
+ * Meaning that center, zoom, padding, pitch and bearing animators can form any dependencies graph supported by [AnimatorSet] API.
+ * However, this may poorly influence the performance.
+ * If you pass `updateFrameAnimatorsOptions` with [UpdateFrameAnimatorsOptions.useSimplifiedAnimatorsDependency] set to true,
+ * NavSDK will assume the following restrictions for update frame animations:
+ * 1. They are played together (started at the same time);
+ * 2. They don't have start delays.
+ * Note 1: they can still be of different duration.
+ * Note 2: this is ony relevant for update frame animations. For state transition animations (`NavigationCameraStateTransition#transitionToFollowing` and `NavigationCameraStateTransition#transitionToOverview`) no such assumptions are made.
+ * This allows NavSDK to execute the animations in a more performant way.
+ * If this simplified setup works for you (it's especially important to check these conditions if you use custom [NavigationCameraStateTransition]),
+ * you can set [UpdateFrameAnimatorsOptions.useSimplifiedAnimatorsDependency] to true for simpler, but more optimized update frame animations.
+ *
  * ## Debugging
  * If you are using the [MapboxNavigationViewportDataSource] instance,
  * you can use [debugger] to provide a [MapboxNavigationViewportDataSourceDebugger] instance
@@ -105,28 +119,6 @@ import java.util.concurrent.CopyOnWriteArraySet
  * the [MapboxNavigationViewportDataSource].
  *
  * Make sure to also provide the same instance to [MapboxNavigationViewportDataSource.debugger].
- *
- * There are 2 ways to create [NavigationCamera]:
- * 1. Without custom [NavigationCameraStateTransition].
- * 2. With custom [NavigationCameraStateTransition].
- *
- * If you use the second way, there is a possibility to also pass [UpdateFrameTransitionOptions].
- * See the information below to understand whether you need to specify it or not.
- *
- * By default Navigation SDK assumes that frame transition animations
- * (returned by [NavigationCameraStateTransition.updateFrameForFollowing] and [NavigationCameraStateTransition.updateFrameForOverview]`)
- * are simple in a sense that:
- * 1. They are played together (started at the same time);
- * 2. They don't have start delays.
- * Note 1: they can still be of different duration.
- * Note 2: this is ony relevant for update frame animations. For state transition animations
- * ([NavigationCameraStateTransition.transitionToFollowing] and [NavigationCameraStateTransition.transitionToOverview])
- * no such assumptions are made.
- *
- * This allows NavSDK to execute the animations in a more performant way.
- * However, if this is not the case for your custom update frame animations,
- * pass [UpdateFrameTransitionOptions] to the [NavigationCamera] constructor along with your custom
- * [NavigationCameraStateTransition] and specify this fact by setting [UpdateFrameTransitionOptions.nonSimultaneousAnimatorsDependency] to `true`.
  */
 @UiThread
 class NavigationCamera
@@ -150,7 +142,7 @@ internal constructor(
         cameraPlugin,
         viewportDataSource,
         stateTransition,
-        UpdateFrameTransitionOptions.Builder().build(),
+        UpdateFrameAnimatorsOptions.Builder().build(),
     )
 
     @ExperimentalPreviewMapboxNavigationAPI
@@ -158,13 +150,14 @@ internal constructor(
         mapboxMap: MapboxMap,
         cameraPlugin: CameraAnimationsPlugin,
         viewportDataSource: ViewportDataSource,
-        stateTransition: NavigationCameraStateTransition,
-        updateFrameTransitionOptions: UpdateFrameTransitionOptions,
+        stateTransition: NavigationCameraStateTransition =
+            MapboxNavigationCameraStateTransition(mapboxMap, cameraPlugin),
+        updateFrameAnimatorsOptions: UpdateFrameAnimatorsOptions,
     ) : this(
         mapboxMap,
         cameraPlugin,
         viewportDataSource,
-        getAnimatorsCreator(stateTransition, updateFrameTransitionOptions),
+        getAnimatorsCreator(stateTransition, updateFrameAnimatorsOptions),
     )
 
     companion object {
@@ -184,14 +177,14 @@ internal constructor(
         @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
         internal fun getAnimatorsCreator(
             stateTransition: NavigationCameraStateTransition,
-            updateFrameTransitionOptions: UpdateFrameTransitionOptions,
+            updateFrameAnimatorsOptions: UpdateFrameAnimatorsOptions,
         ): AnimatorsCreator {
-            return when (updateFrameTransitionOptions.nonSimultaneousAnimatorsDependency) {
+            return when (updateFrameAnimatorsOptions.useSimplifiedAnimatorsDependency) {
                 true -> {
-                    FullFrameAnimatorsCreator(stateTransition)
+                    SimplifiedFrameAnimatorsCreator(stateTransition)
                 }
                 false -> {
-                    SimplifiedFrameAnimatorsCreator(stateTransition)
+                    FullFrameAnimatorsCreator(stateTransition)
                 }
             }
         }

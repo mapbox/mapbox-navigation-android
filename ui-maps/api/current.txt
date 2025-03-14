@@ -152,8 +152,8 @@ package com.mapbox.navigation.ui.maps.building.view {
 package com.mapbox.navigation.ui.maps.camera {
 
   @UiThread public final class NavigationCamera {
-    ctor @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public NavigationCamera(com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.animation.CameraAnimationsPlugin cameraPlugin, com.mapbox.navigation.ui.maps.camera.data.ViewportDataSource viewportDataSource, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraStateTransition stateTransition, com.mapbox.navigation.ui.maps.camera.transition.UpdateFrameTransitionOptions updateFrameTransitionOptions);
     ctor public NavigationCamera(com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.animation.CameraAnimationsPlugin cameraPlugin, com.mapbox.navigation.ui.maps.camera.data.ViewportDataSource viewportDataSource, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraStateTransition stateTransition = com.mapbox.navigation.ui.maps.camera.transition.MapboxNavigationCameraStateTransition(mapboxMap, cameraPlugin));
+    ctor @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public NavigationCamera(com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.animation.CameraAnimationsPlugin cameraPlugin, com.mapbox.navigation.ui.maps.camera.data.ViewportDataSource viewportDataSource, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraStateTransition stateTransition = com.mapbox.navigation.ui.maps.camera.transition.MapboxNavigationCameraStateTransition(mapboxMap, cameraPlugin), com.mapbox.navigation.ui.maps.camera.transition.UpdateFrameAnimatorsOptions updateFrameAnimatorsOptions);
     method public com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger? getDebugger();
     method public com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState getState();
     method public void registerNavigationCameraStateChangeObserver(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraStateChangedObserver navigationCameraStateChangedObserver);
@@ -584,15 +584,16 @@ package com.mapbox.navigation.ui.maps.camera.transition {
     method @UiThread public void onTransitionEnd(boolean isCanceled);
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class UpdateFrameTransitionOptions {
-    method public boolean getNonSimultaneousAnimatorsDependency();
-    property public final boolean nonSimultaneousAnimatorsDependency;
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class UpdateFrameAnimatorsOptions {
+    method public boolean getUseSimplifiedAnimatorsDependency();
+    method public com.mapbox.navigation.ui.maps.camera.transition.UpdateFrameAnimatorsOptions.Builder toBuilder();
+    property public final boolean useSimplifiedAnimatorsDependency;
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static final class UpdateFrameTransitionOptions.Builder {
-    ctor public UpdateFrameTransitionOptions.Builder();
-    method public com.mapbox.navigation.ui.maps.camera.transition.UpdateFrameTransitionOptions build();
-    method public com.mapbox.navigation.ui.maps.camera.transition.UpdateFrameTransitionOptions.Builder nonSimultaneousAnimatorsDependency(boolean value);
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static final class UpdateFrameAnimatorsOptions.Builder {
+    ctor public UpdateFrameAnimatorsOptions.Builder();
+    method public com.mapbox.navigation.ui.maps.camera.transition.UpdateFrameAnimatorsOptions build();
+    method public com.mapbox.navigation.ui.maps.camera.transition.UpdateFrameAnimatorsOptions.Builder useSimplifiedAnimatorsDependency(boolean value);
   }
 
 }

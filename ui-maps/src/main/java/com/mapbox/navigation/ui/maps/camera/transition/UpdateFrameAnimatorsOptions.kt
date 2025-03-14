@@ -6,7 +6,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * Options that specify the restrictions of update frame animations
  * returned by [NavigationCameraStateTransition.updateFrameForFollowing] and [NavigationCameraStateTransition.updateFrameForOverview].
  *
- * @param nonSimultaneousAnimatorsDependency if `false`, NavSDK assumes that frame transition animations are simple in a sense that:
+ * @param useSimplifiedAnimatorsDependency if `true`, NavSDK assumes that frame transition animations are simple in a sense that:
  * 1. They are played together (started at the same time);
  * 2. They don't have start delays.
  * Note 1: they can still be of different duration.
@@ -15,9 +15,16 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * Set this to true if that is not the case for your custom update frame animations.
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class UpdateFrameTransitionOptions private constructor(
-    val nonSimultaneousAnimatorsDependency: Boolean,
+class UpdateFrameAnimatorsOptions private constructor(
+    val useSimplifiedAnimatorsDependency: Boolean,
 ) {
+
+    /**
+     * Get a builder to customize a subset of current options.
+     */
+    fun toBuilder(): Builder {
+        return Builder().useSimplifiedAnimatorsDependency(useSimplifiedAnimatorsDependency)
+    }
 
     /**
      * Indicates whether some other object is "equal to" this one.
@@ -26,37 +33,37 @@ class UpdateFrameTransitionOptions private constructor(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as UpdateFrameTransitionOptions
+        other as UpdateFrameAnimatorsOptions
 
-        return nonSimultaneousAnimatorsDependency == other.nonSimultaneousAnimatorsDependency
+        return useSimplifiedAnimatorsDependency == other.useSimplifiedAnimatorsDependency
     }
 
     /**
      * Returns a hash code value for the object.
      */
     override fun hashCode(): Int {
-        return nonSimultaneousAnimatorsDependency.hashCode()
+        return useSimplifiedAnimatorsDependency.hashCode()
     }
 
     /**
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "UpdateFrameTransitionOptions(" +
-            "nonSimultaneousAnimatorsDependency=$nonSimultaneousAnimatorsDependency" +
+        return "UpdateFrameAnimatorsOptions(" +
+            "useSimplifiedAnimatorsDependency=$useSimplifiedAnimatorsDependency" +
             ")"
     }
 
     /**
-     * Builder for [UpdateFrameTransitionOptions].
+     * Builder for [UpdateFrameAnimatorsOptions].
      */
     @ExperimentalPreviewMapboxNavigationAPI
     class Builder {
 
-        private var nonSimultaneousAnimatorsDependency: Boolean = false
+        private var useSimplifiedAnimatorsDependency: Boolean = false
 
         /**
-         * If `false`, NavSDK assumes that frame transition animations are simple in a sense that:
+         * If `true`, NavSDK assumes that frame transition animations are simple in a sense that:
          *  * 1. They are played together (started at the same time);
          *  * 2. They don't have start delays.
          *  * Note 1: they can still be of different duration.
@@ -64,15 +71,15 @@ class UpdateFrameTransitionOptions private constructor(
          *  * This allows NavSDK to execute the animations in a more performant way.
          *  * Set this to true if that is not the case for your custom update frame animations.
          */
-        fun nonSimultaneousAnimatorsDependency(value: Boolean): Builder = apply {
-            this.nonSimultaneousAnimatorsDependency = value
+        fun useSimplifiedAnimatorsDependency(value: Boolean): Builder = apply {
+            this.useSimplifiedAnimatorsDependency = value
         }
 
         /**
-         * Builds a [UpdateFrameTransitionOptions] object.
+         * Builds a [UpdateFrameAnimatorsOptions] object.
          */
-        fun build(): UpdateFrameTransitionOptions {
-            return UpdateFrameTransitionOptions(nonSimultaneousAnimatorsDependency)
+        fun build(): UpdateFrameAnimatorsOptions {
+            return UpdateFrameAnimatorsOptions(useSimplifiedAnimatorsDependency)
         }
     }
 }
