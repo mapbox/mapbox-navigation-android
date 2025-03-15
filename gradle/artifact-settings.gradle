@@ -56,6 +56,7 @@ ext {
         'coordination-full-hd' : new Tuple2('coordination-full-hd', 'navigation-core-coordination-full-hd'),
         'core-mapgpt' : new Tuple2('core-mapgpt', 'navigation-core-mapgpt-core'),
         'ui-mapgpt' : new Tuple2('ui-mapgpt', 'navigation-core-mapgpt-ui'),
+        'applemusic-mapgpt' : new Tuple2('applemusic-mapgpt', 'navigation-core-applemusic-mapgpt'),
     ]
 }
 
