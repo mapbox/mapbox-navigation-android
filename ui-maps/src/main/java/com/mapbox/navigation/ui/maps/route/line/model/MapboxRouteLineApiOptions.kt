@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maps.route.line.model
 
 import android.util.Log
 import androidx.annotation.Keep
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.utils.Constants
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 
@@ -27,8 +28,10 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
  * @param vanishingRouteLineEnabled indicates if the vanishing route line feature is enabled
  * @param vanishingRouteLineUpdateIntervalNano can be used to decrease the frequency of the vanishing route
  * line updates improving the performance at the expense of visual appearance of the vanishing point on the line during navigation.
+ * @param isRouteCalloutsEnabled indicates if route callout feature is enabled so [MapboxRouteLineApi] will calculate data for it
  */
 @Keep
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class MapboxRouteLineApiOptions private constructor(
     val lowCongestionRange: IntRange,
     val moderateCongestionRange: IntRange,
@@ -39,6 +42,8 @@ class MapboxRouteLineApiOptions private constructor(
     val styleInactiveRouteLegsIndependently: Boolean,
     val vanishingRouteLineEnabled: Boolean,
     val vanishingRouteLineUpdateIntervalNano: Long,
+    @ExperimentalPreviewMapboxNavigationAPI
+    val isRouteCalloutsEnabled: Boolean,
 ) {
 
     /**
@@ -55,6 +60,7 @@ class MapboxRouteLineApiOptions private constructor(
             .styleInactiveRouteLegsIndependently(styleInactiveRouteLegsIndependently)
             .vanishingRouteLineEnabled(vanishingRouteLineEnabled)
             .vanishingRouteLineUpdateIntervalNano(vanishingRouteLineUpdateIntervalNano)
+            .isRouteCalloutsEnabled(isRouteCalloutsEnabled)
     }
 
     /**
@@ -79,6 +85,7 @@ class MapboxRouteLineApiOptions private constructor(
         if (vanishingRouteLineUpdateIntervalNano != other.vanishingRouteLineUpdateIntervalNano) {
             return false
         }
+        if (isRouteCalloutsEnabled != other.isRouteCalloutsEnabled) return false
 
         return true
     }
@@ -96,6 +103,7 @@ class MapboxRouteLineApiOptions private constructor(
         result = 31 * result + styleInactiveRouteLegsIndependently.hashCode()
         result = 31 * result + vanishingRouteLineEnabled.hashCode()
         result = 31 * result + vanishingRouteLineUpdateIntervalNano.hashCode()
+        result = 31 * result + isRouteCalloutsEnabled.hashCode()
         return result
     }
 
@@ -113,6 +121,7 @@ class MapboxRouteLineApiOptions private constructor(
             "styleInactiveRouteLegsIndependently=$styleInactiveRouteLegsIndependently, " +
             "vanishingRouteLineEnabled=$vanishingRouteLineEnabled, " +
             "vanishingRouteLineUpdateIntervalNano=$vanishingRouteLineUpdateIntervalNano" +
+            "isRouteCalloutsEnabled=$isRouteCalloutsEnabled" +
             ")"
     }
 
@@ -132,6 +141,7 @@ class MapboxRouteLineApiOptions private constructor(
         private var vanishingRouteLineEnabled: Boolean = false
         private var calculateRestrictedRoadSections = false
         private var styleInactiveRouteLegsIndependently: Boolean = false
+        private var isRouteCalloutsEnabled: Boolean = false
         private var vanishingRouteLineUpdateIntervalNano: Long =
             RouteLayerConstants.DEFAULT_VANISHING_POINT_MIN_UPDATE_INTERVAL_NANO
 
@@ -263,6 +273,16 @@ class MapboxRouteLineApiOptions private constructor(
             apply { this.styleInactiveRouteLegsIndependently = enable }
 
         /**
+         * When enabled [MapboxRouteLineApi] calculates data for route callouts.
+         *
+         * @param enable whether route callout feature is enabled
+         * @return the builder
+         */
+        @ExperimentalPreviewMapboxNavigationAPI
+        fun isRouteCalloutsEnabled(enable: Boolean): Builder =
+            apply { this.isRouteCalloutsEnabled = enable }
+
+        /**
          * Can be used to decrease the frequency of the vanishing route
          * line updates improving the performance at the expense of visual appearance
          * of the vanishing point on the line during navigation.
@@ -297,6 +317,7 @@ class MapboxRouteLineApiOptions private constructor(
                 styleInactiveRouteLegsIndependently,
                 vanishingRouteLineEnabled,
                 vanishingRouteLineUpdateIntervalNano,
+                isRouteCalloutsEnabled,
             )
         }
 

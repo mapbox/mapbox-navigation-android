@@ -22,6 +22,7 @@ import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineViewRenderRout
 import com.mapbox.navigation.ui.maps.internal.route.line.toData
 import com.mapbox.navigation.ui.maps.internal.route.line.toEventValue
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
+import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
@@ -47,7 +48,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, ExperimentalPreviewMapboxNavigationAPI::class)
 internal class RouteLineHistoryRecordingViewSenderTest {
 
     @get:Rule
@@ -366,6 +367,7 @@ internal class RouteLineHistoryRecordingViewSenderTest {
                 getFeatureCollection("1"),
                 listOf(getFeatureCollection("2")),
                 getFeatureCollection("3"),
+                RouteCalloutData(emptyList()),
             ),
         )
         sender.sendClearRouteLineValueEvent(styleId, input)

@@ -9,6 +9,7 @@ import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.route.line.api.LineGradientCommandApplier
 import com.mapbox.navigation.ui.maps.route.line.api.LineTrimCommandApplier
 import com.mapbox.navigation.ui.maps.route.line.api.RouteLineExpressionCommandHolder
@@ -250,6 +251,7 @@ internal class RouteLineDataConverterTest {
                 RouteLineData(primaryFc, primaryDynamicData),
                 emptyList(),
                 waypointSource,
+                RouteCalloutData(emptyList()),
                 null,
             ),
         )
@@ -394,6 +396,7 @@ internal class RouteLineDataConverterTest {
                     RouteLineData(alt1Fc, alt1DynamicData),
                 ),
                 waypointSource,
+                RouteCalloutData(emptyList()),
                 maskingDynamicData,
             ),
         )
@@ -607,7 +610,12 @@ internal class RouteLineDataConverterTest {
         val altFc = mockk<FeatureCollection>()
         val waypointSource = mockk<FeatureCollection>()
         val input = ExpectedFactory.createValue<RouteLineError, RouteLineClearValue>(
-            RouteLineClearValue(primaryFc, listOf(altFc), waypointSource),
+            RouteLineClearValue(
+                primaryFc,
+                listOf(altFc),
+                waypointSource,
+                RouteCalloutData(emptyList()),
+            ),
         )
         val expected = RouteLineViewRenderRouteLineClearDataValue(
             primaryFc,

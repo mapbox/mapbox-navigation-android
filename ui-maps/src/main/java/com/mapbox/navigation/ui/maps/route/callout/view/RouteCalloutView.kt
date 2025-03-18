@@ -15,25 +15,30 @@ import com.mapbox.navigation.base.internal.time.TimeFormatter
 import com.mapbox.navigation.ui.maps.R
 import com.mapbox.navigation.ui.maps.databinding.MapboxNavigationRouteCalloutBinding
 import com.mapbox.navigation.ui.maps.internal.route.callout.model.DurationDifferenceType
-import com.mapbox.navigation.ui.maps.internal.route.callout.model.RouteCallout
-import com.mapbox.navigation.ui.maps.route.callout.model.MapboxRouteCalloutViewOptions
+import com.mapbox.navigation.ui.maps.route.callout.model.DefaultRouteCalloutAdapterOptions
+import com.mapbox.navigation.ui.maps.route.callout.model.RouteCallout
+import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutType
+import kotlin.time.Duration
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class RouteCalloutView : FrameLayout {
 
     internal constructor(
         context: Context,
-        options: MapboxRouteCalloutViewOptions,
-    ) : this(context, null, -1, options)
+        options: DefaultRouteCalloutAdapterOptions,
+        routeCallout: RouteCallout,
+    ) : this(context, null, -1, options, routeCallout)
 
-    @JvmOverloads
     internal constructor(
         context: Context,
         attrs: AttributeSet?,
         defStyleAttr: Int,
-        options: MapboxRouteCalloutViewOptions = MapboxRouteCalloutViewOptions.Builder().build(),
+        options: DefaultRouteCalloutAdapterOptions = DefaultRouteCalloutAdapterOptions.Builder()
+            .build(),
+        callout: RouteCallout,
     ) : super(context, attrs, defStyleAttr) {
         this.options = options
+        this.routeCallout = callout
         layoutParams = LayoutParams(
             LayoutParams.WRAP_CONTENT,
             LayoutParams.WRAP_CONTENT,
@@ -46,8 +51,8 @@ internal class RouteCalloutView : FrameLayout {
         this,
     )
 
-    private var options: MapboxRouteCalloutViewOptions
-    private var routeCallout: RouteCallout? = null
+    private var options: DefaultRouteCalloutAdapterOptions
+    private var routeCallout: RouteCallout
 
     @ColorInt
     private var backgroundColor = ContextCompat.getColor(context, R.color.colorSurface)
@@ -72,7 +77,7 @@ internal class RouteCalloutView : FrameLayout {
         R.color.mapbox_faster_route_callout_text,
     )
 
-    internal fun updateOptions(viewOptions: MapboxRouteCalloutViewOptions) {
+    internal fun updateOptions(viewOptions: DefaultRouteCalloutAdapterOptions) {
         options = viewOptions
 
         applyOptions()
@@ -102,19 +107,17 @@ internal class RouteCalloutView : FrameLayout {
     }
 
     private fun updateColors() {
-        val callout: RouteCallout = routeCallout ?: return
-
         binding.eta.background?.setTint(
-            if ((callout as? RouteCallout.Eta)?.isPrimary == true) {
+            if (routeCallout.isPrimary) {
                 selectedBackgroundColor
             } else {
                 backgroundColor
             },
         )
 
-        when (callout) {
-            is RouteCallout.Eta -> {
-                val textColor = if (callout.isPrimary) {
+        when (options.routeCalloutType) {
+            RouteCalloutType.ROUTES_OVERVIEW -> {
+                val textColor = if (routeCallout.isPrimary) {
                     selectedTextColor
                 } else {
                     this.textColor
@@ -122,8 +125,8 @@ internal class RouteCalloutView : FrameLayout {
                 binding.eta.setTextColor(textColor)
             }
 
-            is RouteCallout.DurationDifference -> {
-                val textColor = when (callout.type) {
+            RouteCalloutType.NAVIGATION -> {
+                val textColor = when (routeCallout.durationDifferenceWithPrimary.type) {
                     DurationDifferenceType.Faster -> fasterTextColor
                     DurationDifferenceType.Slower -> slowerTextColor
                     DurationDifferenceType.Same -> this.textColor
@@ -133,13 +136,24 @@ internal class RouteCalloutView : FrameLayout {
         }
     }
 
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        setRouteCallout(routeCallout)
+    }
+
     internal fun setRouteCallout(callout: RouteCallout) {
         this.routeCallout = callout
         val route = callout.route
         val locale = LocaleEx.getLocaleDirectionsRoute(route.directionsRoute, context)
 
-        when (callout) {
-            is RouteCallout.Eta -> {
+        if (options.routeCalloutType == RouteCalloutType.NAVIGATION && routeCallout.isPrimary) {
+            visibility = GONE
+        } else {
+            visibility = VISIBLE
+        }
+
+        when (options.routeCalloutType) {
+            RouteCalloutType.ROUTES_OVERVIEW -> {
                 isSelected = callout.isPrimary
                 val duration = TimeFormatter.formatTimeRemaining(
                     context,
@@ -152,14 +166,14 @@ internal class RouteCalloutView : FrameLayout {
                 binding.shape.text = duration
             }
 
-            is RouteCallout.DurationDifference -> {
+            RouteCalloutType.NAVIGATION -> {
                 isSelected = false
                 val relativeDuration = TimeFormatter.formatTimeRemaining(
                     context,
-                    callout.duration.inWholeSeconds.toDouble(),
+                    callout.durationDifferenceWithPrimary.absoluteValue.inWholeSeconds.toDouble(),
                     locale,
                 )
-                val relativeText = when (callout.type) {
+                val relativeText = when (callout.durationDifferenceWithPrimary.type) {
                     DurationDifferenceType.Faster -> context.getString(
                         R.string.mapbox_callout_faster,
                         relativeDuration,
@@ -207,7 +221,7 @@ internal class RouteCalloutView : FrameLayout {
         val drawableShadow = ContextCompat.getDrawable(context, shadowId)
         val drawableShape = ContextCompat.getDrawable(context, shapeId)
 
-        if ((routeCallout as? RouteCallout.Eta)?.isPrimary == true) {
+        if (routeCallout.isPrimary) {
             drawableShape?.setTint(selectedBackgroundColor)
         } else {
             drawableShape?.setTint(backgroundColor)
@@ -215,4 +229,13 @@ internal class RouteCalloutView : FrameLayout {
         binding.eta.background = drawableShape
         binding.shape.background = drawableShadow
     }
+
+    private val Duration.type
+        get() = when {
+            absoluteValue <= options.similarDurationDelta -> DurationDifferenceType.Same
+
+            isNegative() -> DurationDifferenceType.Slower
+
+            else -> DurationDifferenceType.Faster
+        }
 }

@@ -62,7 +62,7 @@ internal class RouteLineHistoryRecordingApiSenderTest {
     fun pushOptionsEventsIsAddedToQueue() {
         /* ktlint-disable max-line-length */
         val expected =
-            """{"value":{"options":{"lowCongestionRange":{"first":0,"last":39},"moderateCongestionRange":{"first":40,"last":59},"heavyCongestionRange":{"first":60,"last":79},"severeCongestionRange":{"first":80,"last":100},"trafficBackfillRoadClasses":["class1"],"calculateRestrictedRoadSections":true,"styleInactiveRouteLegsIndependently":true,"vanishingRouteLineEnabled":true,"vanishingRouteLineUpdateIntervalNano":123456},"action":"options"},"subtype":"api","instanceId":"5bd24d9d-8368-4e04-8dd3-fd55fa5bf2d4"}"""
+            """{"value":{"options":{"lowCongestionRange":{"first":0,"last":39},"moderateCongestionRange":{"first":40,"last":59},"heavyCongestionRange":{"first":60,"last":79},"severeCongestionRange":{"first":80,"last":100},"trafficBackfillRoadClasses":["class1"],"calculateRestrictedRoadSections":true,"styleInactiveRouteLegsIndependently":true,"vanishingRouteLineEnabled":true,"vanishingRouteLineUpdateIntervalNano":123456,"isRouteCalloutsEnabled":false},"action":"options"},"subtype":"api","instanceId":"5bd24d9d-8368-4e04-8dd3-fd55fa5bf2d4"}"""
         /* ktlint-enable max-line-length */
         val options = MapboxRouteLineApiOptions.Builder()
             .vanishingRouteLineUpdateIntervalNano(123456)

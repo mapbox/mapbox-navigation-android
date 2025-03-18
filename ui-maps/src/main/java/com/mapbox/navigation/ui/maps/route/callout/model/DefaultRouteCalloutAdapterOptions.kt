@@ -4,27 +4,34 @@ import androidx.annotation.ColorRes
 import androidx.annotation.StyleRes
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.maps.R
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.minutes
 
 /**
  * Options for configuration appearance of route callouts.
  *
+ * @param routeCalloutType defines the possible callout type on the route lines
+ * @param similarDurationDelta defines the delta between primary and alternative durations
+ * to consider their ETA similar
  * @param backgroundColor to style the background color of route callout
  * @param selectedBackgroundColor to style the background color of route callout attaching to
- * the primary route in [RouteCalloutType.RouteDurations] state
+ * the primary route in [RouteCalloutType.RouteOverview] state
  * @param textColor to style the text color of route callout
  * @param selectedTextColor to style the text color of route callout attaching to the primary
- * route in [RouteCalloutType.RouteDurations] state
+ * route in [RouteCalloutType.RouteOverview] state
  * @param fasterTextColor to style the text color of route callout attaching to alternative route
  * which duration is faster in comparison with the primary one in
- * [RouteCalloutType.RelativeDurationsOnAlternative] state
+ * [RouteCalloutType.Navigation] state
  * @param slowerTextColor to style the text color of route callout attaching to alternative route
  * which duration is slower in comparison with the primary one in
- * [RouteCalloutType.RelativeDurationsOnAlternative] state
+ * [RouteCalloutType.Navigation] state
  * @param durationTextAppearance to style the text appearance of route callout. Note that textColor
- * parameter will be overridden by other parameters from [MapboxRouteCalloutViewOptions]
+ * parameter will be overridden by other parameters from [DefaultRouteCalloutAdapterOptions]
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class MapboxRouteCalloutViewOptions private constructor(
+class DefaultRouteCalloutAdapterOptions private constructor(
+    @RouteCalloutType.Type val routeCalloutType: Int,
+    val similarDurationDelta: Duration,
     @ColorRes val backgroundColor: Int,
     @ColorRes val selectedBackgroundColor: Int,
     @ColorRes val textColor: Int,
@@ -38,6 +45,8 @@ class MapboxRouteCalloutViewOptions private constructor(
      * Get a builder to customize a subset of current options.
      */
     fun toBuilder() = Builder().apply {
+        routeCalloutType(routeCalloutType)
+        similarDurationDelta(similarDurationDelta)
         backgroundColor(backgroundColor)
         selectedBackgroundColor(selectedBackgroundColor)
         textColor(textColor)
@@ -54,8 +63,10 @@ class MapboxRouteCalloutViewOptions private constructor(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as MapboxRouteCalloutViewOptions
+        other as DefaultRouteCalloutAdapterOptions
 
+        if (routeCalloutType != other.routeCalloutType) return false
+        if (similarDurationDelta != other.similarDurationDelta) return false
         if (backgroundColor != other.backgroundColor) return false
         if (selectedBackgroundColor != other.selectedBackgroundColor) return false
         if (textColor != other.textColor) return false
@@ -71,7 +82,9 @@ class MapboxRouteCalloutViewOptions private constructor(
      * Returns a hash code value for the object.
      */
     override fun hashCode(): Int {
-        var result = backgroundColor.hashCode()
+        var result = routeCalloutType.hashCode()
+        result = 31 * result + similarDurationDelta.hashCode()
+        result = 31 * result + backgroundColor.hashCode()
         result = 31 * result + selectedBackgroundColor.hashCode()
         result = 31 * result + textColor.hashCode()
         result = 31 * result + selectedTextColor.hashCode()
@@ -86,6 +99,8 @@ class MapboxRouteCalloutViewOptions private constructor(
      */
     override fun toString(): String {
         return "MapboxRouteCalloutViewOptions(" +
+            "routeCalloutType=$routeCalloutType," +
+            "similarDurationDelta=$similarDurationDelta," +
             "backgroundColor=$backgroundColor," +
             "selectedBackgroundColor=$selectedBackgroundColor," +
             "textColor=$textColor," +
@@ -96,7 +111,12 @@ class MapboxRouteCalloutViewOptions private constructor(
             ")"
     }
 
+    @ExperimentalPreviewMapboxNavigationAPI
     class Builder {
+        @RouteCalloutType.Type
+        private var routeCalloutType = RouteCalloutType.ROUTES_OVERVIEW
+        private var similarDurationDelta = 3.minutes
+
         @ColorRes
         private var backgroundColor: Int = R.color.mapbox_route_callout_background
 
@@ -119,6 +139,16 @@ class MapboxRouteCalloutViewOptions private constructor(
         private var durationTextAppearance: Int = R.style.MapboxStyleRouteCalloutDuration
 
         /**
+         * Defines the possible callout type on the route lines
+         */
+        fun routeCalloutType(@RouteCalloutType.Type type: Int) = apply { routeCalloutType = type }
+
+        /**
+         * Defines the delta between primary and alternative durations to consider their ETA similar
+         */
+        fun similarDurationDelta(value: Duration) = apply { similarDurationDelta = value }
+
+        /**
          * to style the background color of route callout
          */
         fun backgroundColor(@ColorRes value: Int) = this.apply {
@@ -127,7 +157,7 @@ class MapboxRouteCalloutViewOptions private constructor(
 
         /**
          * to style the background color of route callout attaching to the primary route
-         * in [RouteCalloutType.RouteDurations] state
+         * in [RouteCalloutType.RouteOverview] state
          */
         fun selectedBackgroundColor(@ColorRes value: Int) = this.apply {
             selectedBackgroundColor = value
@@ -142,7 +172,7 @@ class MapboxRouteCalloutViewOptions private constructor(
 
         /**
          * to style the text color of route callout attaching to the primary route
-         * in [RouteCalloutType.RouteDurations] state
+         * in [RouteCalloutType.RouteOverview] state
          */
         fun selectedTextColor(@ColorRes value: Int) = this.apply {
             selectedTextColor = value
@@ -151,7 +181,7 @@ class MapboxRouteCalloutViewOptions private constructor(
         /**
          * to style the text color of route callout attaching to alternative route which duration
          * is faster in comparison with the primary one in
-         * [RouteCalloutType.RelativeDurationsOnAlternative] state
+         * [RouteCalloutType.Navigation] state
          */
         fun fasterTextColor(@ColorRes value: Int) = this.apply {
             fasterTextColor = value
@@ -160,7 +190,7 @@ class MapboxRouteCalloutViewOptions private constructor(
         /**
          * to style the text color of route callout attaching to alternative route which duration
          * is slower in comparison with the primary one in
-         * [RouteCalloutType.RelativeDurationsOnAlternative] state
+         * [RouteCalloutType.Navigation] state
          */
         fun slowerTextColor(@ColorRes value: Int) = this.apply {
             slowerTextColor = value
@@ -168,16 +198,18 @@ class MapboxRouteCalloutViewOptions private constructor(
 
         /**
          * to style the text appearance of route callout. Note that textColor
-         * parameter will be overridden by other parameters from [MapboxRouteCalloutViewOptions]
+         * parameter will be overridden by other parameters from [DefaultRouteCalloutAdapterOptions]
          */
         fun durationTextAppearance(@StyleRes value: Int) = this.apply {
             durationTextAppearance = value
         }
 
         /**
-         * Build the [MapboxRouteCalloutViewOptions]
+         * Build the [DefaultRouteCalloutAdapterOptions]
          */
-        fun build() = MapboxRouteCalloutViewOptions(
+        fun build() = DefaultRouteCalloutAdapterOptions(
+            routeCalloutType,
+            similarDurationDelta,
             backgroundColor,
             selectedBackgroundColor,
             textColor,

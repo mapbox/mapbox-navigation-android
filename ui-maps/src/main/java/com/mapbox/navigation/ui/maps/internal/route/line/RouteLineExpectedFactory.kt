@@ -1,6 +1,8 @@
 package com.mapbox.navigation.ui.maps.internal.route.line
 
 import com.mapbox.geojson.FeatureCollection
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
@@ -12,6 +14,7 @@ object RouteLineExpectedFactory {
         return RouteLineError(message, null)
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     fun routeSetValue(
         primary: RouteLineEventData,
         alternatives: List<RouteLineEventData>,
@@ -22,6 +25,7 @@ object RouteLineExpectedFactory {
             primary.toRouteLineData(),
             alternatives.map { it.toRouteLineData() },
             waypointSource,
+            RouteCalloutData(emptyList()),
             masking?.toRouteLineDynamicData(),
         )
     }
@@ -38,11 +42,17 @@ object RouteLineExpectedFactory {
         )
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     fun routeLineClearValue(
         primary: FeatureCollection,
         alternatives: List<FeatureCollection>,
         waypointSource: FeatureCollection,
     ): RouteLineClearValue {
-        return RouteLineClearValue(primary, alternatives, waypointSource)
+        return RouteLineClearValue(
+            primary,
+            alternatives,
+            waypointSource,
+            RouteCalloutData(emptyList()),
+        )
     }
 }
