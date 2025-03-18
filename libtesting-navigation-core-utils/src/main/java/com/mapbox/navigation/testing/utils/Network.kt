@@ -2,6 +2,7 @@ package com.mapbox.navigation.testing.utils
 
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
+import com.mapbox.common.OfflineSwitch
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -12,15 +13,49 @@ import java.net.InetAddress
 private const val LOG_TAG = "TestNetwork"
 private const val MILLISECONDS_TO_WAIT_FOR_INTERNET_CONNECTION = 5000L
 
-suspend fun BaseCoreNoCleanUpTest.withoutInternet(block: suspend () -> Unit) {
-    withoutWifiAndMobileData {
+suspend fun BaseCoreNoCleanUpTest.withoutInternet(
+    // flag is left to be able to run with really disabled internet locally
+    emulateInternetTurnOffInsteadOfReallyDisablingIt: Boolean = true,
+    block: suspend () -> Unit
+) {
+    val noMockWebServerAndProvidedBlock = suspend {
         mockWebServerRule.withoutWebServer {
             block()
         }
     }
+    if (emulateInternetTurnOffInsteadOfReallyDisablingIt) {
+        disableNetworkInCommon {
+            noMockWebServerAndProvidedBlock()
+        }
+    } else {
+        withoutWifiAndMobileData {
+            noMockWebServerAndProvidedBlock()
+        }
+    }
 }
 
-suspend fun withoutWifiAndMobileData(block: suspend () -> Unit) {
+/**
+ * Lightweight internet switch, which disables network only for
+ * Mapbox stack.
+ */
+private inline fun disableNetworkInCommon(block: () -> Unit) {
+    val offlineSwitch = OfflineSwitch.getInstance()
+    offlineSwitch.isMapboxStackConnected = false
+    try {
+        block()
+    } finally {
+        offlineSwitch.isMapboxStackConnected = true
+    }
+}
+
+
+/**
+ * Disabled Internet on device as if user turned it off in settings.
+ *
+ * Works stable locally but doesn't work stable on firebase device lab.
+ * Reason is unknown at the moment.
+ */
+private suspend inline fun withoutWifiAndMobileData(block: () -> Unit) {
     val pingAddress = getPingAddress()
     Log.d(LOG_TAG, "Got request to turn internet off")
     val instrumentation = InstrumentationRegistry.getInstrumentation()

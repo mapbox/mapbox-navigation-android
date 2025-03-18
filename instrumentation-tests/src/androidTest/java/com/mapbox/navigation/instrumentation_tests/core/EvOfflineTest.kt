@@ -40,11 +40,13 @@ import com.mapbox.navigation.testing.utils.withoutInternet
 import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMapboxNavigationAPI::class)
+@Ignore("https://mapbox.atlassian.net/browse/NN-3386")
 class EvOfflineTest : BaseCoreNoCleanUpTest() {
 
     @get:Rule
