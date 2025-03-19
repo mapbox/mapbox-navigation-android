@@ -23,6 +23,10 @@ import com.mapbox.navigation.base.trip.model.eh.EHorizon
  * navigation statuses to update electronic horizon (seconds). If null electronic horizon will be
  * updated on each navigation status. Default value null
  * @param alertServiceOptions control how Navigation SDK extracts road objects from the road graph and which objects are collected.
+ * @param enableEnhancedDataAlongEH controls access to enhanced data attributes (from ADAS data layer).
+ * Note: using enhanced data will require additional resources: bandwidth, disk space, and RAM.
+ * Note: regardless whether the flag is set, enhanced data will be accessible if ADASIS callback is set.
+ * Default value is false.
  */
 class EHorizonOptions private constructor(
     val length: Double,
@@ -30,6 +34,7 @@ class EHorizonOptions private constructor(
     val branchLength: Double,
     val minTimeDeltaBetweenUpdates: Double?,
     val alertServiceOptions: AlertServiceOptions,
+    val enableEnhancedDataAlongEH: Boolean,
 ) {
 
     /**
@@ -41,6 +46,7 @@ class EHorizonOptions private constructor(
         branchLength(branchLength)
         minTimeDeltaBetweenUpdates(minTimeDeltaBetweenUpdates)
         alertServiceOptions(alertServiceOptions)
+        enableEnhancedDataAlongEH(enableEnhancedDataAlongEH)
     }
 
     /**
@@ -57,6 +63,7 @@ class EHorizonOptions private constructor(
         if (branchLength != other.branchLength) return false
         if (minTimeDeltaBetweenUpdates != other.minTimeDeltaBetweenUpdates) return false
         if (alertServiceOptions != other.alertServiceOptions) return false
+        if (enableEnhancedDataAlongEH != other.enableEnhancedDataAlongEH) return false
 
         return true
     }
@@ -70,6 +77,7 @@ class EHorizonOptions private constructor(
         result = 31 * result + branchLength.hashCode()
         result = 31 * result + minTimeDeltaBetweenUpdates.hashCode()
         result = 31 * result + alertServiceOptions.hashCode()
+        result = 31 * result + enableEnhancedDataAlongEH.hashCode()
         return result
     }
 
@@ -82,7 +90,8 @@ class EHorizonOptions private constructor(
             "expansion=$expansion, " +
             "branchLength=$branchLength, " +
             "minTimeDeltaBetweenUpdates=$minTimeDeltaBetweenUpdates, " +
-            "alertServiceOptions=$alertServiceOptions" +
+            "alertServiceOptions=$alertServiceOptions, " +
+            "enableEnhancedDataAlongEH=$enableEnhancedDataAlongEH" +
             ")"
     }
 
@@ -96,6 +105,7 @@ class EHorizonOptions private constructor(
         private var branchLength: Double = DEFAULT_BRANCH_LENGTH
         private var minTimeDeltaBetweenUpdates: Double? = DEFAULT_MIN_DELTA
         private var alertServiceOptions: AlertServiceOptions = AlertServiceOptions.Builder().build()
+        private var enableEnhancedDataAlongEH: Boolean = DEFAULT_ENABLE_ENHANCED_DATA_ALONG_EH
 
         /**
          * Override the minimum length of the EHorizon ahead of the current position.
@@ -164,6 +174,17 @@ class EHorizonOptions private constructor(
             }
 
         /**
+         * Control access to enhanced data attributes (from ADAS data layer).
+         * Note: using enhanced data will require additional resources: bandwidth, disk space, and RAM.
+         * Note: regardless whether the flag is set, enhanced data will be accessible if ADASIS callback is set.
+         * Default value is false.
+         */
+        fun enableEnhancedDataAlongEH(enableEnhancedDataAlongEH: Boolean): Builder =
+            apply {
+                this.enableEnhancedDataAlongEH = enableEnhancedDataAlongEH
+            }
+
+        /**
          * Build the [EHorizonOptions]
          */
         fun build(): EHorizonOptions {
@@ -173,6 +194,7 @@ class EHorizonOptions private constructor(
                 branchLength = branchLength,
                 minTimeDeltaBetweenUpdates = minTimeDeltaBetweenUpdates,
                 alertServiceOptions = alertServiceOptions,
+                enableEnhancedDataAlongEH = enableEnhancedDataAlongEH,
             )
         }
 
@@ -181,6 +203,7 @@ class EHorizonOptions private constructor(
             private const val DEFAULT_EXPANSION = 0
             private const val DEFAULT_BRANCH_LENGTH = 50.0
             private val DEFAULT_MIN_DELTA = null
+            private const val DEFAULT_ENABLE_ENHANCED_DATA_ALONG_EH = false
         }
     }
 }

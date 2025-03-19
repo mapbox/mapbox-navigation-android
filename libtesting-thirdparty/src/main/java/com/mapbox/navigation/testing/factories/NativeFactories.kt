@@ -72,7 +72,8 @@ fun createNavigationStatus(
     isSyntheticLocation: Boolean = false,
     correctedLocationData: CorrectedLocationData? = null,
     hdMatchingResult: HdMatchingResult? = null,
-    mapMatchedSystemTime: Date = Date()
+    mapMatchedSystemTime: Date = Date(),
+    isAdasDataAvailable: Boolean? = null,
 ): NavigationStatus {
     return NavigationStatus(
         routeState,
@@ -109,6 +110,7 @@ fun createNavigationStatus(
         correctedLocationData,
         hdMatchingResult,
         mapMatchedSystemTime,
+        isAdasDataAvailable,
     )
 }
 

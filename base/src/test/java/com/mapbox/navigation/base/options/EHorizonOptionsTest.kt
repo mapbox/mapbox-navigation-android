@@ -23,6 +23,7 @@ class EHorizonOptionsTest : BuilderTest<EHorizonOptions, EHorizonOptions.Builder
                 .collectRestrictedAreas(true)
                 .build(),
         )
+        .enableEnhancedDataAlongEH(true)
 
     @Test
     override fun trigger() {
