@@ -311,6 +311,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             navigationOptions.eHorizonOptions.alertServiceOptions.collectMergingAreas,
             navigationOptions.eHorizonOptions.alertServiceOptions.collectServiceAreas,
         ),
+        navigationOptions.eHorizonOptions.enableEnhancedDataAlongEH,
     )
 
     private val routesPreviewController = NavigationComponentProvider.createRoutesPreviewController(

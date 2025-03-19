@@ -4,7 +4,7 @@ package com.mapbox.navigation.base {
   @kotlin.RequiresOptIn(level=kotlin.RequiresOptIn.Level.ERROR) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) @kotlin.annotation.Target(allowedTargets={kotlin.annotation.AnnotationTarget.CLASS, kotlin.annotation.AnnotationTarget.FUNCTION, kotlin.annotation.AnnotationTarget.PROPERTY}) public @interface ExperimentalMapboxNavigationAPI {
   }
 
-  @kotlin.RequiresOptIn(level=kotlin.RequiresOptIn.Level.ERROR) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) @kotlin.annotation.Target(allowedTargets={kotlin.annotation.AnnotationTarget.CLASS, kotlin.annotation.AnnotationTarget.FUNCTION, kotlin.annotation.AnnotationTarget.PROPERTY}) public @interface ExperimentalPreviewMapboxNavigationAPI {
+  @kotlin.RequiresOptIn(level=kotlin.RequiresOptIn.Level.ERROR) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) @kotlin.annotation.Target(allowedTargets={kotlin.annotation.AnnotationTarget.CLASS, kotlin.annotation.AnnotationTarget.FUNCTION, kotlin.annotation.AnnotationTarget.PROPERTY, kotlin.annotation.AnnotationTarget.CONSTRUCTOR}) public @interface ExperimentalPreviewMapboxNavigationAPI {
   }
 
   public final class TimeFormat {
@@ -438,12 +438,14 @@ package com.mapbox.navigation.base.options {
   public final class EHorizonOptions {
     method public com.mapbox.navigation.base.options.AlertServiceOptions getAlertServiceOptions();
     method public double getBranchLength();
+    method public boolean getEnableEnhancedDataAlongEH();
     method public int getExpansion();
     method public double getLength();
     method public Double? getMinTimeDeltaBetweenUpdates();
     method public com.mapbox.navigation.base.options.EHorizonOptions.Builder toBuilder();
     property public final com.mapbox.navigation.base.options.AlertServiceOptions alertServiceOptions;
     property public final double branchLength;
+    property public final boolean enableEnhancedDataAlongEH;
     property public final int expansion;
     property public final double length;
     property public final Double? minTimeDeltaBetweenUpdates;
@@ -454,6 +456,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.EHorizonOptions.Builder alertServiceOptions(com.mapbox.navigation.base.options.AlertServiceOptions alertServiceOptions);
     method public com.mapbox.navigation.base.options.EHorizonOptions.Builder branchLength(double branchLength);
     method public com.mapbox.navigation.base.options.EHorizonOptions build();
+    method public com.mapbox.navigation.base.options.EHorizonOptions.Builder enableEnhancedDataAlongEH(boolean enableEnhancedDataAlongEH);
     method public com.mapbox.navigation.base.options.EHorizonOptions.Builder expansion(int expansion);
     method public com.mapbox.navigation.base.options.EHorizonOptions.Builder length(double length);
     method public com.mapbox.navigation.base.options.EHorizonOptions.Builder minTimeDeltaBetweenUpdates(Double? minTimeDeltaBetweenUpdates);
