@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.maps.camera.internal.lifecycle
+package com.mapbox.navigation.ui.maps.internal.camera.lifecycle
 
 import androidx.annotation.RestrictTo
 

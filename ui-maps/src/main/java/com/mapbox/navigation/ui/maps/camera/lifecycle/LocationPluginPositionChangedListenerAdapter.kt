@@ -2,7 +2,7 @@ package com.mapbox.navigation.ui.maps.camera.lifecycle
 
 import com.mapbox.geojson.Point
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
-import com.mapbox.navigation.ui.maps.camera.internal.lifecycle.UserLocationIndicatorPositionObserver
+import com.mapbox.navigation.ui.maps.internal.camera.lifecycle.UserLocationIndicatorPositionObserver
 
 internal class LocationPluginPositionChangedListenerAdapter(
     private val observer: UserLocationIndicatorPositionObserver,

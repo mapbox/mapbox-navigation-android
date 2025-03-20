@@ -31,6 +31,7 @@ import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.isF
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteForPostManeuverFramingGeometry
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteIntersections
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRoutePoints
+import com.mapbox.navigation.ui.maps.internal.camera.OverviewMode
 import com.mapbox.navigation.utils.internal.toPoint
 import io.mockk.every
 import io.mockk.mockk
@@ -213,6 +214,7 @@ class MapboxNavigationViewportDataSourceTest {
             getRemainingPointsOnRoute(
                 completeRoutePoints,
                 pointsToFrameOnCurrentStep,
+                any(),
                 any(),
                 any(),
             )
@@ -574,6 +576,75 @@ class MapboxNavigationViewportDataSourceTest {
             followingCameraOptions,
             data.cameraForFollowing,
         )
+        assertEquals(
+            overviewCameraOptions,
+            data.cameraForOverview,
+        )
+    }
+
+    @Test
+    fun `verify frame - overview current leg only`() {
+        val stepProgress = mockk<RouteStepProgress> {
+            every { distanceRemaining } returns 123f
+        }
+        val legProgress = mockk<RouteLegProgress> {
+            every { currentStepProgress } returns stepProgress
+        }
+        every { routeProgress.currentLegProgress } returns legProgress
+        every { routeProgress.route } returns route
+
+        val location = createLocation()
+
+        // overview mocks
+
+        val remainingPointsOnRouteForCurrentLeg = listOf(
+            Point.fromLngLat(50.5, 51.5),
+            Point.fromLngLat(52.5, 53.5),
+        )
+
+        every {
+            getRemainingPointsOnRoute(
+                any(),
+                any(),
+                OverviewMode.ACTIVE_LEG,
+                any(),
+                any(),
+            )
+        } returns remainingPointsOnRouteForCurrentLeg
+
+        val expectedOverviewPoints = mutableListOf(location.toPoint()).apply {
+            addAll(remainingPointsOnRouteForCurrentLeg)
+        }
+        val overviewCenter = Point.fromLngLat(5.0, 6.0)
+        val overviewZoom = 10.0
+        val overviewCameraOptions = createCameraOptions {
+            center(overviewCenter)
+            bearing(BEARING_NORTH)
+            pitch(ZERO_PITCH)
+            zoom(overviewZoom)
+        }
+        every {
+            mapboxMap.cameraForCoordinates(
+                expectedOverviewPoints,
+                match<CameraOptions> {
+                    it.pitch == ZERO_PITCH &&
+                        it.bearing == BEARING_NORTH &&
+                        it.padding == EMPTY_EDGE_INSETS
+                },
+                null,
+                null,
+                null,
+            )
+        } returns overviewCameraOptions
+
+        // run
+        viewportDataSource.onLocationChanged(location)
+        viewportDataSource.onRouteChanged(navigationRoute)
+        viewportDataSource.onRouteProgressChanged(routeProgress)
+        viewportDataSource.evaluate()
+        val data = viewportDataSource.getViewportData()
+
+        // verify
         assertEquals(
             overviewCameraOptions,
             data.cameraForOverview,

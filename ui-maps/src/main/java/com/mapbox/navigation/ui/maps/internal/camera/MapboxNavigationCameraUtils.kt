@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.maps.camera.internal
+package com.mapbox.navigation.ui.maps.internal.camera
 
 import android.animation.AnimatorSet
 import androidx.annotation.RestrictTo

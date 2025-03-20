@@ -11,6 +11,7 @@ import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.base.utils.DecodeUtils.stepsGeometryToPoints
+import com.mapbox.navigation.ui.maps.internal.camera.OverviewMode
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
@@ -210,6 +211,7 @@ internal object ViewportDataSourceProcessor {
     fun getRemainingPointsOnRoute(
         simplifiedCompleteRoutePoints: List<List<List<Point>>>,
         pointsToFrameOnCurrentStep: List<Point>,
+        overviewMode: OverviewMode,
         currentLegProgress: RouteLegProgress,
         currentStepProgress: RouteStepProgress,
     ): List<Point> {
@@ -227,9 +229,17 @@ internal object ViewportDataSourceProcessor {
                 emptyList()
             }
         val remainingPointsAfterCurrentStep = remainingStepsAfterCurrentStep.flatten()
+        val remainingPointsAfterCurrentLeg = when (overviewMode) {
+            OverviewMode.ACTIVE_LEG -> emptyList()
+            OverviewMode.ENTIRE_ROUTE -> simplifiedCompleteRoutePoints.subList(
+                currentLegProgress.legIndex + 1,
+                simplifiedCompleteRoutePoints.size,
+            ).flatten().flatten()
+        }
         return listOf(
             pointsToFrameOnCurrentStep,
             remainingPointsAfterCurrentStep,
+            remainingPointsAfterCurrentLeg,
         ).flatten()
     }
 
