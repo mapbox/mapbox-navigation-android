@@ -152,6 +152,7 @@ class NavigatorMapperTest {
                 every { isFallback } returns false
                 every { inTunnel } returns false
                 every { correctedLocationData } returns null
+                every { isAdasDataAvailable } returns null
             },
         )
         val expected = LocationMatcherResult(
@@ -171,6 +172,7 @@ class NavigatorMapperTest {
             isDegradedMapMatching = false,
             inTunnel = false,
             correctedLocationData = null,
+            isAdasDataAvailable = null,
         )
 
         val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints, road)
@@ -200,6 +202,7 @@ class NavigatorMapperTest {
                 every { isFallback } returns false
                 every { inTunnel } returns false
                 every { correctedLocationData } returns null
+                every { isAdasDataAvailable } returns null
             },
         )
         val expected = LocationMatcherResult(
@@ -219,6 +222,7 @@ class NavigatorMapperTest {
             isDegradedMapMatching = false,
             inTunnel = false,
             correctedLocationData = null,
+            isAdasDataAvailable = null,
         )
 
         val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints, road)
@@ -248,6 +252,7 @@ class NavigatorMapperTest {
                 every { isFallback } returns true
                 every { inTunnel } returns false
                 every { correctedLocationData } returns null
+                every { isAdasDataAvailable } returns null
             },
         )
         val expected = LocationMatcherResult(
@@ -267,6 +272,7 @@ class NavigatorMapperTest {
             isDegradedMapMatching = true,
             inTunnel = false,
             correctedLocationData = null,
+            isAdasDataAvailable = null,
         )
 
         val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints, road)
@@ -296,6 +302,7 @@ class NavigatorMapperTest {
                 every { isFallback } returns false
                 every { inTunnel } returns false
                 every { correctedLocationData } returns null
+                every { isAdasDataAvailable } returns null
             },
         )
         val expected = LocationMatcherResult(
@@ -315,6 +322,7 @@ class NavigatorMapperTest {
             isDegradedMapMatching = false,
             inTunnel = false,
             correctedLocationData = null,
+            isAdasDataAvailable = null,
         )
 
         val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints, road)
@@ -337,6 +345,7 @@ class NavigatorMapperTest {
             every { isFallback } returns false
             every { inTunnel } returns false
             every { correctedLocationData } returns null
+            every { isAdasDataAvailable } returns null
         }
         val road: Road = RoadFactory.buildRoadObject(navigationStatus)
         val tripStatus = TripStatus(
@@ -360,6 +369,7 @@ class NavigatorMapperTest {
             isDegradedMapMatching = false,
             inTunnel = false,
             correctedLocationData = null,
+            isAdasDataAvailable = null,
         )
 
         val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints, road)
@@ -389,6 +399,7 @@ class NavigatorMapperTest {
                 every { isFallback } returns false
                 every { inTunnel } returns false
                 every { correctedLocationData } returns null
+                every { isAdasDataAvailable } returns null
             },
         )
         val expected = LocationMatcherResult(
@@ -408,6 +419,7 @@ class NavigatorMapperTest {
             isDegradedMapMatching = false,
             inTunnel = false,
             correctedLocationData = null,
+            isAdasDataAvailable = null,
         )
 
         val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints, road)
@@ -437,6 +449,7 @@ class NavigatorMapperTest {
                 every { isFallback } returns false
                 every { inTunnel } returns true
                 every { correctedLocationData } returns null
+                every { isAdasDataAvailable } returns null
             },
         )
         val expected = LocationMatcherResult(
@@ -456,6 +469,7 @@ class NavigatorMapperTest {
             isDegradedMapMatching = false,
             inTunnel = true,
             correctedLocationData = null,
+            isAdasDataAvailable = null,
         )
 
         val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints, road)
@@ -494,6 +508,7 @@ class NavigatorMapperTest {
                 every { isFallback } returns false
                 every { inTunnel } returns true
                 every { correctedLocationData } returns nativeCorrectedLocationData
+                every { isAdasDataAvailable } returns null
             },
         )
         val expected = LocationMatcherResult(
@@ -515,6 +530,57 @@ class NavigatorMapperTest {
             correctedLocationData = CorrectedLocationData.createFromNativeObject(
                 nativeCorrectedLocationData,
             ),
+            isAdasDataAvailable = null,
+        )
+
+        val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints, road)
+
+        assertEquals(expected, result)
+    }
+
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
+    @Test
+    fun `location matcher result isAdasDataAvailable`() {
+        val road: Road = RoadFactory.buildRoadObject(navigationStatus)
+        val tripStatus = TripStatus(
+            route,
+            mockk {
+                every { offRoadProba } returns 0f
+                every { speedLimit } returns createSpeedLimit()
+                every { mapMatcherOutput } returns mockk {
+                    every { isTeleport } returns false
+                    every { matches } returns listOf(
+                        mockk {
+                            every { proba } returns 1f
+                        },
+                    )
+                }
+                every { layer } returns null
+                every { roads } returns listOf(roadName)
+                every { isFallback } returns false
+                every { inTunnel } returns true
+                every { correctedLocationData } returns null
+                every { isAdasDataAvailable } returns true
+            },
+        )
+        val expected = LocationMatcherResult(
+            enhancedLocation,
+            keyPoints,
+            isOffRoad = false,
+            offRoadProbability = 0f,
+            isTeleport = false,
+            speedLimitInfo = SpeedLimitInfoFactory.createSpeedLimitInfo(
+                10,
+                SpeedUnit.KILOMETERS_PER_HOUR,
+                com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD,
+            ),
+            roadEdgeMatchProbability = 1f,
+            zLevel = null,
+            road = road,
+            isDegradedMapMatching = false,
+            inTunnel = true,
+            correctedLocationData = null,
+            isAdasDataAvailable = true,
         )
 
         val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints, road)

@@ -277,18 +277,22 @@ internal fun TripStatus.getLocationMatcherResult(
     road: Road,
 ): LocationMatcherResult {
     return LocationMatcherResult(
-        enhancedLocation,
-        keyPoints,
-        navigationStatus.offRoadProba > 0.5,
-        navigationStatus.offRoadProba,
-        navigationStatus.mapMatcherOutput.isTeleport,
-        navigationStatus.prepareSpeedLimitInfo(),
-        navigationStatus.mapMatcherOutput.matches.firstOrNull()?.proba ?: 0f,
-        navigationStatus.layer,
-        road,
-        navigationStatus.isFallback,
-        navigationStatus.inTunnel,
-        CorrectedLocationData.createFromNativeObject(navigationStatus.correctedLocationData),
+        enhancedLocation = enhancedLocation,
+        keyPoints = keyPoints,
+        isOffRoad = navigationStatus.offRoadProba > 0.5,
+        offRoadProbability = navigationStatus.offRoadProba,
+        isTeleport = navigationStatus.mapMatcherOutput.isTeleport,
+        speedLimitInfo = navigationStatus.prepareSpeedLimitInfo(),
+        roadEdgeMatchProbability = navigationStatus.mapMatcherOutput.matches.firstOrNull()?.proba
+            ?: 0f,
+        zLevel = navigationStatus.layer,
+        road = road,
+        isDegradedMapMatching = navigationStatus.isFallback,
+        inTunnel = navigationStatus.inTunnel,
+        correctedLocationData = CorrectedLocationData.createFromNativeObject(
+            navigationStatus.correctedLocationData,
+        ),
+        isAdasDataAvailable = navigationStatus.isAdasDataAvailable,
     )
 }
 

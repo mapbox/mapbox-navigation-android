@@ -474,6 +474,10 @@ class MapboxNativeNavigatorImpl(
         adasisFacade.resetAdasisMessageCallback()
     }
 
+    override fun triggerResetOfEhProvider() {
+        adasisFacade.triggerResetOfEhProvider()
+    }
+
     override fun setUserLanguages(languages: List<String>) {
         navigator.config().mutableSettings().setUserLanguages(languages)
     }

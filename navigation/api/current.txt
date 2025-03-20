@@ -1258,12 +1258,14 @@ package com.mapbox.navigation.core.trip.session {
     method public float getRoadEdgeMatchProbability();
     method public com.mapbox.navigation.base.speed.model.SpeedLimitInfo getSpeedLimitInfo();
     method public Integer? getZLevel();
+    method public Boolean? isAdasDataAvailable();
     method public boolean isDegradedMapMatching();
     method public boolean isOffRoad();
     method public boolean isTeleport();
     property public final com.mapbox.navigation.core.trip.session.location.CorrectedLocationData? correctedLocationData;
     property public final com.mapbox.common.location.Location enhancedLocation;
     property public final boolean inTunnel;
+    property public final Boolean? isAdasDataAvailable;
     property public final boolean isDegradedMapMatching;
     property public final boolean isOffRoad;
     property public final boolean isTeleport;

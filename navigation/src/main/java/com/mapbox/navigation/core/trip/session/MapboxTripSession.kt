@@ -40,7 +40,6 @@ import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.NavigationStatus
-import com.mapbox.navigator.NavigationStatusOrigin
 import com.mapbox.navigator.NavigatorObserver
 import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteState
@@ -345,20 +344,17 @@ internal class MapboxTripSession(
         return tripService.hasServiceStarted()
     }
 
-    @OptIn(ExperimentalMapboxNavigationAPI::class)
-    private val navigatorObserver = object : NavigatorObserver {
-        override fun onStatus(origin: NavigationStatusOrigin, status: NavigationStatus) {
-            try {
-                processNativeStatus(status)
-            } catch (error: Throwable) {
-                logE(LOG_CATEGORY) {
-                    "Error processing native status update: origin=$origin, status=$status.\n" +
-                        "Error: $error\n" +
-                        "MapboxTripSession state: " +
-                        "isUpdatingRoute=$isUpdatingRoute, primaryRoute=${primaryRoute?.id}"
-                }
-                throw NativeStatusProcessingError(error)
+    private val navigatorObserver = NavigatorObserver { origin, status ->
+        try {
+            processNativeStatus(status)
+        } catch (error: Throwable) {
+            logE(LOG_CATEGORY) {
+                "Error processing native status update: origin=$origin, status=$status.\n" +
+                    "Error: $error\n" +
+                    "MapboxTripSession state: " +
+                    "isUpdatingRoute=$isUpdatingRoute, primaryRoute=${primaryRoute?.id}"
             }
+            throw NativeStatusProcessingError(error)
         }
     }
 
