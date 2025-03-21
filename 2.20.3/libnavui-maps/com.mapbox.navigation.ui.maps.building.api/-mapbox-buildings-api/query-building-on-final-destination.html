@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>queryBuildingOnFinalDestination</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>code</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageids="UI Maps::com.mapbox.navigation.ui.maps.building.api/MapboxBuildingsApi/queryBuildingOnFinalDestination/#com.mapbox.navigation.base.trip.model.RouteProgress#com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer[com.mapbox.bindgen.Expected[com.mapbox.navigation.ui.maps.building.model.BuildingError,com.mapbox.navigation.ui.maps.building.model.BuildingValue]]/PointingToDeclaration//-1725360525">
+  <div class="breadcrumbs"><a href="../../index.html">UI Maps</a><span class="delimiter">/</span><a href="../index.html">com.mapbox.navigation.ui.maps.building.api</a><span class="delimiter">/</span><a href="index.html">MapboxBuildingsApi</a><span class="delimiter">/</span><a href="query-building-on-final-destination.html">queryBuildingOnFinalDestination</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>query</span><wbr><span>Building</span><wbr><span>On</span><wbr><span>Final</span><wbr><span><span>Destination</span></span></h1>
+  </div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="query-building-on-final-destination.html"><span class="token function">queryBuildingOnFinalDestination</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">progress<span class="token operator">: </span><a href="../../../libnavigation-base/com.mapbox.navigation.base.trip.model/-route-progress/index.html">RouteProgress</a><span class="token punctuation">, </span></span><span class="parameter ">callback<span class="token operator">: </span><a href="../../../libnavui-base/com.mapbox.navigation.ui.base.util/-mapbox-navigation-consumer/index.html">MapboxNavigationConsumer</a><span class="token operator">&lt;</span><span class="token keyword"></span><span data-unresolved-link="com.mapbox.bindgen/Expected///PointingToDeclaration/">Expected</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.mapbox.navigation.ui.maps.building.model/-building-error/index.html">BuildingError</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../com.mapbox.navigation.ui.maps.building.model/-building-value/index.html">BuildingValue</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">The API can be invoked to query a building on <span data-unresolved-link="com.mapbox.maps/MapboxMap///PointingToDeclaration/">MapboxMap</span> using the <a href="../../../libnavigation-base/com.mapbox.navigation.base.trip.model/-route-progress/index.html">RouteProgress</a> provided as an input. Use this function to query a building when you reach your destination. The API returns a <a href="../../com.mapbox.navigation.ui.maps.building.model/-building-error/index.html">BuildingError</a> if there is an internal issue fetching the buildings. Otherwise, it returns buildings wrapped inside <a href="../../com.mapbox.navigation.ui.maps.building.model/-building-value/index.html">BuildingValue</a> in a form of list of <span data-unresolved-link="com.mapbox.maps/QueriedFeature///PointingToDeclaration/">QueriedFeature</span>. This list is empty if the building is not found on the <span data-unresolved-link="com.mapbox.maps/MapboxMap///PointingToDeclaration/">MapboxMap</span></p><p class="paragraph">Note:</p><p class="paragraph">There are two kind of points that can be used here to query a building.</p><ul><li><p class="paragraph">A point you can obtain where the actual building is also known as location point</p></li><li><p class="paragraph">A point on a road snapped from the address also known as routable point</p></li></ul><p class="paragraph">For this method to work, your route's original request should be a "location point" and not a "routing point", otherwise, nothing will be returned. If the coordinate is a routing point (which is the correct way to do it), you should define a "waypoint_targets" in the original request, for each of the waypoints, and for the final destination.</p><p class="paragraph">For example when making a route request, you can specify the <span data-unresolved-link="com.mapbox.api.directions.v5.models/RouteOptions///PointingToDeclaration/">RouteOptions</span> as follows if you choose the coordinate to be a routing point:</p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">val routeOptions = RouteOptions.builder()<br>  .applyDefaultNavigationOptions()<br>  .applyLanguageAndVoiceUnitOptions(this)<br>  .coordinatesList(<br>    listOf(<br>      Point.fromLngLat(-122.4192, 37.7627), // origin<br>      Point.fromLngLat(-122.4145, 37.7653)  // final destination<br>    )<br>  )<br>  .waypointTargetsList(<br>    listOf(<br>      Point.fromLngLat(-122.4192, 37.7627), // origin<br>      Point.fromLngLat(-122.4146, 37.7655)  // final destination<br>    )<br>  )<br>  .build()</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">In this case the points mentioned in the <span data-unresolved-link="com.mapbox.api.directions.v5.models/RouteOptions/coordinatesList/#/PointingToDeclaration/">RouteOptions.coordinatesList</span> are routing points where you would want the router to route you to whereas the points mentioned in the <span data-unresolved-link="com.mapbox.api.directions.v5.models/RouteOptions/waypointTargetsList/#/PointingToDeclaration/">RouteOptions.waypointTargetsList</span> are the location points that would be highlighted when you reach your final destination. In case you don't specify the <span data-unresolved-link="com.mapbox.api.directions.v5.models/RouteOptions/waypointTargetsList/#/PointingToDeclaration/">RouteOptions.waypointTargetsList</span> the logic will fallback to <span data-unresolved-link="com.mapbox.api.directions.v5.models/RouteOptions/coordinatesList/#/PointingToDeclaration/">RouteOptions.coordinatesList</span> and would try to highlight these points. However the highlight will only work if they are location points.</p></div></div>
+</div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2025 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        </div>
+    </div>
+</div>
+
+</body></html>
+
