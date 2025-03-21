@@ -6,6 +6,25 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.20.3 - 21 March, 2025
+### Changelog
+[Changes between v2.20.2 and v2.20.3](https://github.com/mapbox/mapbox-navigation-android/compare/v2.20.2...v2.20.3)
+
+#### Features
+
+
+#### Bug fixes and improvements
+- Improved completion detection policy [#7897](https://github.com/mapbox/navigation/pull/7897)
+- Disabled continuous alternatives feature for the cycling profile [#7897](https://github.com/mapbox/navigation/pull/7897)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.18.3` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.18.3))
+- Mapbox Navigation Native `v206.1.1`
+- Mapbox Core Common `v23.10.1`
+- Mapbox Java `v7.1.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.1.0))
+
+
 ## Mapbox Navigation SDK 2.20.2 - 29 August, 2024
 ### Changelog
 [Changes between v2.20.1 and v2.20.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.20.1...v2.20.2)
