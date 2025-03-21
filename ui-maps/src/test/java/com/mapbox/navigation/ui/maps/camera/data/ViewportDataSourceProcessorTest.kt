@@ -21,6 +21,7 @@ import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.pro
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteIntersections
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRoutePoints
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.simplifyCompleteRoutePoints
+import com.mapbox.navigation.ui.maps.internal.camera.OverviewMode
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -307,6 +308,7 @@ class ViewportDataSourceProcessorTest {
         val actual = getRemainingPointsOnRoute(
             simplifiedCompleteRoutePoints = completeRoutePoints,
             pointsToFrameOnCurrentStep = emptyList(),
+            overviewMode = OverviewMode.ACTIVE_LEG,
             currentLegProgress = legProgress,
             currentStepProgress = stepProgress,
         )
@@ -315,7 +317,7 @@ class ViewportDataSourceProcessorTest {
     }
 
     @Test
-    fun `test getRemainingPointsOnRoute`() {
+    fun `test getRemainingPointsOnRoute activeLeg`() {
         val stepProgress: RouteStepProgress = mockk {
             every { stepIndex } returns 4
         }
@@ -337,6 +339,80 @@ class ViewportDataSourceProcessorTest {
                 Point.fromLngLat(-77.123, 38.77091),
                 Point.fromLngLat(-77.456, 38.77091),
             ),
+            overviewMode = OverviewMode.ACTIVE_LEG,
+            currentLegProgress = legProgress,
+            currentStepProgress = stepProgress,
+        )
+
+        assertArrays1(expected, actual, pointAdapter)
+    }
+
+    @Test
+    fun `test getRemainingPointsOnRoute entireRoute on the last leg`() {
+        val stepProgress: RouteStepProgress = mockk {
+            every { stepIndex } returns 4
+        }
+        val legProgress: RouteLegProgress = mockk {
+            every { legIndex } returns 1
+        }
+        val expected: List<Point> = listOf(
+            Point.fromLngLat(-77.123, 38.77091),
+            Point.fromLngLat(-77.456, 38.77091),
+            Point.fromLngLat(-77.153415, 38.771307),
+            Point.fromLngLat(-77.153451, 38.771105),
+            Point.fromLngLat(-77.153461, 38.770924),
+            Point.fromLngLat(-77.153468, 38.77091),
+        )
+
+        val actual = getRemainingPointsOnRoute(
+            simplifiedCompleteRoutePoints = completeRoutePoints,
+            pointsToFrameOnCurrentStep = listOf(
+                Point.fromLngLat(-77.123, 38.77091),
+                Point.fromLngLat(-77.456, 38.77091),
+            ),
+            overviewMode = OverviewMode.ENTIRE_ROUTE,
+            currentLegProgress = legProgress,
+            currentStepProgress = stepProgress,
+        )
+
+        assertArrays1(expected, actual, pointAdapter)
+    }
+
+    @Test
+    fun `test getRemainingPointsOnRoute entireRoute on non-last leg`() {
+        val stepProgress: RouteStepProgress = mockk {
+            every { stepIndex } returns 4
+        }
+        val legProgress: RouteLegProgress = mockk {
+            every { legIndex } returns 0
+        }
+
+        val expected: List<Point> = listOf(
+            Point.fromLngLat(-77.123, 38.456),
+            Point.fromLngLat(-77.456, 38.789),
+
+            Point.fromLngLat(-77.168762, 38.777048),
+            Point.fromLngLat(-77.168279, 38.777027),
+            Point.fromLngLat(-77.166911, 38.776967),
+
+            Point.fromLngLat(-77.166911, 38.776967),
+            Point.fromLngLat(-77.166957, 38.776341),
+            Point.fromLngLat(-77.166966, 38.776291),
+            Point.fromLngLat(-77.166979, 38.776222),
+            Point.fromLngLat(-77.167009, 38.776127),
+            Point.fromLngLat(-77.167058, 38.776014),
+            Point.fromLngLat(-77.167132, 38.77589),
+            Point.fromLngLat(-77.167202, 38.7758),
+            Point.fromLngLat(-77.167276, 38.775717),
+        ) + completeRoutePoints[1].flatten()
+
+        val actual = getRemainingPointsOnRoute(
+            simplifiedCompleteRoutePoints = completeRoutePoints,
+            pointsToFrameOnCurrentStep = listOf(
+                Point.fromLngLat(-77.123, 38.456),
+                Point.fromLngLat(-77.456, 38.789),
+            ),
+            overviewMode = OverviewMode.ENTIRE_ROUTE,
             currentLegProgress = legProgress,
             currentStepProgress = stepProgress,
         )

@@ -9,13 +9,13 @@ import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.CameraAnimatorOptions
 import com.mapbox.maps.plugin.animation.CameraAnimatorsFactory
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.NAVIGATION_CAMERA_OWNER
-import com.mapbox.navigation.ui.maps.camera.internal.constraintDurationTo
-import com.mapbox.navigation.ui.maps.camera.internal.normalizeBearing
 import com.mapbox.navigation.ui.maps.camera.utils.createAnimatorSet
 import com.mapbox.navigation.ui.maps.camera.utils.createAnimatorSetWith
 import com.mapbox.navigation.ui.maps.camera.utils.getAnimatorsFactory
 import com.mapbox.navigation.ui.maps.camera.utils.normalizeProjection
 import com.mapbox.navigation.ui.maps.camera.utils.projectedDistance
+import com.mapbox.navigation.ui.maps.internal.camera.constraintDurationTo
+import com.mapbox.navigation.ui.maps.internal.camera.normalizeBearing
 import com.mapbox.navigation.utils.internal.ifNonNull
 import kotlin.math.abs
 import kotlin.math.min

@@ -411,59 +411,6 @@ package com.mapbox.navigation.ui.maps.camera.data.debugger {
 
 }
 
-package com.mapbox.navigation.ui.maps.camera.internal {
-
-  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public enum FollowingFramingMode {
-    enum_constant public static final com.mapbox.navigation.ui.maps.camera.internal.FollowingFramingMode LOCATION_INDICATOR;
-    enum_constant public static final com.mapbox.navigation.ui.maps.camera.internal.FollowingFramingMode MULTIPLE_POINTS;
-    enum_constant public static final com.mapbox.navigation.ui.maps.camera.internal.FollowingFramingMode NONE;
-  }
-
-  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public final class FollowingFramingModeHolder {
-    ctor public FollowingFramingModeHolder();
-    method public com.mapbox.navigation.ui.maps.camera.internal.FollowingFramingMode getMode();
-    method public void setMode(com.mapbox.navigation.ui.maps.camera.internal.FollowingFramingMode);
-    property public final com.mapbox.navigation.ui.maps.camera.internal.FollowingFramingMode mode;
-  }
-
-  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public final class InternalViewportDataSourceOptions {
-    ctor public InternalViewportDataSourceOptions(boolean ignoreMinZoomWhenFramingManeuver);
-    method public boolean component1();
-    method public com.mapbox.navigation.ui.maps.camera.internal.InternalViewportDataSourceOptions copy(boolean ignoreMinZoomWhenFramingManeuver);
-    method public boolean getIgnoreMinZoomWhenFramingManeuver();
-    property public final boolean ignoreMinZoomWhenFramingManeuver;
-  }
-
-  public final class MapboxNavigationCameraUtilsKt {
-    method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public static android.animation.AnimatorSet constraintDurationTo(android.animation.AnimatorSet, long maxDuration);
-    method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public static void jumpToCameraCenterInternal(com.mapbox.navigation.ui.maps.camera.NavigationCamera, com.mapbox.geojson.Point? center);
-    method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public static double normalizeBearing(double currentBearing, double targetBearing);
-  }
-
-  public final class MapboxNavigationViewportDataSourceExKt {
-    method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public static void internalReevaluateRoute(com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource);
-  }
-
-  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public final class MapboxNavigationViewportDataSourceFactory {
-    method public com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource create(com.mapbox.maps.MapboxMap map, com.mapbox.navigation.ui.maps.camera.internal.FollowingFramingModeHolder followingFramingModeHolder, com.mapbox.navigation.ui.maps.camera.internal.InternalViewportDataSourceOptions internalViewportDataSourceOptions);
-    field public static final com.mapbox.navigation.ui.maps.camera.internal.MapboxNavigationViewportDataSourceFactory INSTANCE;
-  }
-
-}
-
-package com.mapbox.navigation.ui.maps.camera.internal.lifecycle {
-
-  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public fun interface UserLocationIndicatorPositionObserver {
-    method public void onPositionUpdated(com.mapbox.geojson.Point point);
-  }
-
-  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public interface UserLocationIndicatorPositionProvider {
-    method public void addObserver(com.mapbox.navigation.ui.maps.camera.internal.lifecycle.UserLocationIndicatorPositionObserver observer);
-    method public void removeObserver(com.mapbox.navigation.ui.maps.camera.internal.lifecycle.UserLocationIndicatorPositionObserver observer);
-  }
-
-}
-
 package com.mapbox.navigation.ui.maps.camera.lifecycle {
 
   public final class NavigationBasicGesturesHandler implements com.mapbox.maps.plugin.animation.CameraAnimationsLifecycleListener {
@@ -479,7 +426,6 @@ package com.mapbox.navigation.ui.maps.camera.lifecycle {
   }
 
   public final class NavigationScaleGestureHandler implements com.mapbox.maps.plugin.animation.CameraAnimationsLifecycleListener {
-    ctor @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public NavigationScaleGestureHandler(android.content.Context context, com.mapbox.navigation.ui.maps.camera.NavigationCamera navigationCamera, com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.gestures.GesturesPlugin gesturesPlugin, com.mapbox.navigation.ui.maps.camera.internal.lifecycle.UserLocationIndicatorPositionProvider userLocationIndicatorPositionProvider, com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureActionListener? scaleActionListener = null, com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandlerOptions options = NavigationScaleGestureHandlerOptions.<init>(context).build());
     ctor public NavigationScaleGestureHandler(android.content.Context context, com.mapbox.navigation.ui.maps.camera.NavigationCamera navigationCamera, com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.gestures.GesturesPlugin gesturesPlugin, com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin locationPlugin, com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureActionListener? scaleActionListener = null, com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandlerOptions options = NavigationScaleGestureHandlerOptions.<init>(context).build());
     method @UiThread public void cleanup();
     method public com.mapbox.android.gestures.AndroidGesturesManager getCustomGesturesManager();

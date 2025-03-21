@@ -30,10 +30,11 @@ import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.pro
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRoutePoints
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.simplifyCompleteRoutePoints
 import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger
-import com.mapbox.navigation.ui.maps.camera.internal.FollowingFramingMode
-import com.mapbox.navigation.ui.maps.camera.internal.FollowingFramingModeHolder
-import com.mapbox.navigation.ui.maps.camera.internal.InternalViewportDataSourceOptions
-import com.mapbox.navigation.ui.maps.camera.internal.normalizeBearing
+import com.mapbox.navigation.ui.maps.internal.camera.FollowingFramingMode
+import com.mapbox.navigation.ui.maps.internal.camera.FollowingFramingModeHolder
+import com.mapbox.navigation.ui.maps.internal.camera.InternalViewportDataSourceOptions
+import com.mapbox.navigation.ui.maps.internal.camera.OverviewMode
+import com.mapbox.navigation.ui.maps.internal.camera.normalizeBearing
 import com.mapbox.navigation.ui.maps.util.MapSizeInitializedCallbackHelper
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
@@ -205,7 +206,7 @@ import kotlin.math.min
 class MapboxNavigationViewportDataSource internal constructor(
     private val mapboxMap: MapboxMap,
     private val followingFramingModeHolder: FollowingFramingModeHolder?,
-    private val internalOptions: InternalViewportDataSourceOptions,
+    internal var internalOptions: InternalViewportDataSourceOptions,
 ) : ViewportDataSource {
 
     internal companion object {
@@ -219,7 +220,10 @@ class MapboxNavigationViewportDataSource internal constructor(
     constructor(mapboxMap: MapboxMap) : this(
         mapboxMap,
         null,
-        InternalViewportDataSourceOptions(ignoreMinZoomWhenFramingManeuver = false),
+        InternalViewportDataSourceOptions(
+            ignoreMinZoomWhenFramingManeuver = false,
+            overviewMode = OverviewMode.ACTIVE_LEG,
+        ),
     )
 
     /**
@@ -490,6 +494,7 @@ class MapboxNavigationViewportDataSource internal constructor(
             simplifiedRemainingPointsOnRoute = getRemainingPointsOnRoute(
                 simplifiedCompleteRoutePoints,
                 pointsToFrameOnCurrentStep,
+                internalOptions.overviewMode,
                 currentLegProgress,
                 currentStepProgress,
             )

@@ -4,8 +4,8 @@ import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import com.mapbox.maps.plugin.animation.animator.CameraAnimator
-import com.mapbox.navigation.ui.maps.camera.internal.constraintDurationTo
-import com.mapbox.navigation.ui.maps.camera.internal.normalizeBearing
+import com.mapbox.navigation.ui.maps.internal.camera.constraintDurationTo
+import com.mapbox.navigation.ui.maps.internal.camera.normalizeBearing
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Test
