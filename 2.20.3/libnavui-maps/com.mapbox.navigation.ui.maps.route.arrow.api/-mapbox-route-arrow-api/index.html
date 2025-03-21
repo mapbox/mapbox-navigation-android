@@ -1,0 +1,198 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>MapboxRouteArrowApi</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>code</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageids="UI Maps::com.mapbox.navigation.ui.maps.route.arrow.api/MapboxRouteArrowApi///PointingToDeclaration//-1725360525">
+  <div class="breadcrumbs"><a href="../../index.html">UI Maps</a><span class="delimiter">/</span><a href="../index.html">com.mapbox.navigation.ui.maps.route.arrow.api</a><span class="delimiter">/</span><a href="index.html">MapboxRouteArrowApi</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Mapbox</span><wbr><span>Route</span><wbr><span>Arrow</span><wbr><span><span>Api</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">MapboxRouteArrowApi</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Responsible for displaying a maneuver arrow representing the next maneuver. The maneuver arrow is calculated based on the route progress and the data returned should be rendered on the map using the <a href="../-mapbox-route-arrow-view/index.html">MapboxRouteArrowView</a> class. Generally this class should be called on each route progress update in order to ensure the arrow displayed is kept consistent with the state of navigation.</p><p class="paragraph">The two principal classes for the maneuver arrow are the <a href="index.html">MapboxRouteArrowApi</a> and the <a href="../-mapbox-route-arrow-view/index.html">MapboxRouteArrowView</a>.</p><p class="paragraph">Like the route line components the <a href="index.html">MapboxRouteArrowApi</a> consumes data from the Navigation SDK, specifically the <a href="../../../libnavigation-base/com.mapbox.navigation.base.trip.model/-route-progress/index.html">RouteProgress</a>, and produces data for rendering on the map by the <a href="../-mapbox-route-arrow-view/index.html">MapboxRouteArrowView</a>. Simple usage of the maneuver arrows would look like:</p><div class="sample-container"><pre><code class="block lang-java" theme="idea">RouteArrowOptions routeArrowOptions = new RouteArrowOptions.Builder(context)<br> .withAboveLayerId(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)<br> .build()<br>MapboxRouteArrowApi routeArrow = new MapboxRouteArrowApi()<br>MapboxRouteArrowView routeArrowView = new MapboxRouteArrowView(routeArrowOptions)</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">or</p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">val routeArrowOptions = RouteArrowOptions.Builder(context)<br>     .withAboveLayerId(RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID)<br>     .build()<br>val routeArrow = MapboxRouteArrowApi()<br>val routeArrowView = MapboxRouteArrowView(routeArrowOptions)</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">NOTE: the above example is setting the layer above which the arrow(s) should be located. This constant is a good starting point but you may have a use case that requires setting the layer elevation for the arrows differently. In addition, if using this constant it is important that the route line related layers be initialized before any rendering of the arrows is done. The route line related layers can be created either by calling <a href="../../com.mapbox.navigation.ui.maps.route.line.api/-mapbox-route-line-view/initialize-layers.html">MapboxRouteLineView.initializeLayers</a> or by calling one of the render methods on <a href="../../com.mapbox.navigation.ui.maps.route.line.api/-mapbox-route-line-view/index.html">MapboxRouteLineView</a>. In most cases it is not necessary to explicitly call <a href="../../com.mapbox.navigation.ui.maps.route.line.api/-mapbox-route-line-view/initialize-layers.html">MapboxRouteLineView.initializeLayers</a> as calling any of the render methods of <a href="../../com.mapbox.navigation.ui.maps.route.line.api/-mapbox-route-line-view/index.html">MapboxRouteLineView</a> will initialize the layers and typically a route line will be drawn before a maneuver arrow.</p><p class="paragraph">In order for the <a href="index.html">MapboxRouteArrowApi</a> to function it needs route progress updates. An application should register a <a href="../../../libnavigation-core/com.mapbox.navigation.core.trip.session/-route-progress-observer/index.html">RouteProgressObserver</a> with the <a href="../../../libnavigation-core/com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a> class instance and pass the route progress updates to the <a href="index.html">MapboxRouteArrowApi</a> class. Be sure to unregister this listener appropriately according to the lifecycle of your activity or Fragment in order to prevent resource leaks.</p><p class="paragraph">At a minimum an application should do the following with route progress updates:</p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">override fun onRouteProgressChanged(routeProgress: RouteProgress) {<br>val updateState = routeArrow.updateUpcomingManeuverArrow(routeProgress)<br>routeArrowView.render(mapboxMap.getStyle(), updateState)<br>}</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Constructors">Constructors</button><button class="section-tab" data-togglable="Functions">Functions</button></div>
+    <div class="tabs-section-body">
+      <h2 class="tabbedcontent">Constructors</h2>
+      <div class="table" data-togglable="Constructors"><a data-name="1968859898%2FConstructors%2F-1725360525" anchor-label="MapboxRouteArrowApi" id="1968859898%2FConstructors%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue TabbedContent">
+            <div class=""><span class="inline-flex">
+                <div><a href="-mapbox-route-arrow-api.html"><span>Mapbox</span><wbr><span>Route</span><wbr><span>Arrow</span><wbr><span><span>Api</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1968859898%2FConstructors%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="-mapbox-route-arrow-api.html"><span class="token function">MapboxRouteArrowApi</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="784546617%2FFunctions%2F-1725360525" anchor-label="addArrow" id="784546617%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="add-arrow.html"><span>add</span><wbr><span><span>Arrow</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="784546617%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="add-arrow.html"><span class="token function">addArrow</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">arrow<span class="token operator">: </span><a href="../../com.mapbox.navigation.ui.maps.route.arrow.model/-maneuver-arrow/index.html">ManeuverArrow</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.mapbox.bindgen/Expected///PointingToDeclaration/">Expected</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.mapbox.navigation.ui.maps.route.arrow.model/-invalid-point-error/index.html">InvalidPointError</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../com.mapbox.navigation.ui.maps.route.arrow.model/-arrow-added-value/index.html">ArrowAddedValue</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Adds an arrow to the map. An arrow is made up of at least two points. The direction of the arrow head is determined by calculating the bearing between the last two points submitted. Each call will add a new arrow.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="413682787%2FFunctions%2F-1725360525" anchor-label="addUpcomingManeuverArrow" id="413682787%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="add-upcoming-maneuver-arrow.html"><span>add</span><wbr><span>Upcoming</span><wbr><span>Maneuver</span><wbr><span><span>Arrow</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="413682787%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="add-upcoming-maneuver-arrow.html"><span class="token function">addUpcomingManeuverArrow</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">routeProgress<span class="token operator">: </span><a href="../../../libnavigation-base/com.mapbox.navigation.base.trip.model/-route-progress/index.html">RouteProgress</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.mapbox.bindgen/Expected///PointingToDeclaration/">Expected</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.mapbox.navigation.ui.maps.route.arrow.model/-invalid-point-error/index.html">InvalidPointError</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../com.mapbox.navigation.ui.maps.route.arrow.model/-update-maneuver-arrow-value/index.html">UpdateManeuverArrowValue</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Calculates a maneuver arrow based on the route progress and returns a state that can be used to render the arrow on the map.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1617761746%2FFunctions%2F-1725360525" anchor-label="clearArrows" id="-1617761746%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="clear-arrows.html"><span>clear</span><wbr><span><span>Arrows</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1617761746%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="clear-arrows.html"><span class="token function">clearArrows</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.mapbox.navigation.ui.maps.route.arrow.model/-clear-arrows-value/index.html">ClearArrowsValue</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Clears all arrows from the map.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-404569595%2FFunctions%2F-1725360525" anchor-label="getArrows" id="-404569595%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="get-arrows.html"><span>get</span><wbr><span><span>Arrows</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-404569595%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-arrows.html"><span class="token function">getArrows</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.mapbox.navigation.ui.maps.route.arrow.model/-maneuver-arrow/index.html">ManeuverArrow</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1841972407%2FFunctions%2F-1725360525" anchor-label="hideManeuverArrow" id="1841972407%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="hide-maneuver-arrow.html"><span>hide</span><wbr><span>Maneuver</span><wbr><span><span>Arrow</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1841972407%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="hide-maneuver-arrow.html"><span class="token function">hideManeuverArrow</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.mapbox.navigation.ui.maps.route.arrow.model/-arrow-visibility-change-value/index.html">ArrowVisibilityChangeValue</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Returns a state containing visibility modifications for hiding the maneuver arrow.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1680800802%2FFunctions%2F-1725360525" anchor-label="redraw" id="-1680800802%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="redraw.html"><span><span>redraw</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1680800802%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="redraw.html"><span class="token function">redraw</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.mapbox.navigation.ui.maps.route.arrow.model/-arrow-added-value/index.html">ArrowAddedValue</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Returns the data necessary to re-render or redraw the arrow(s).</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1463229722%2FFunctions%2F-1725360525" anchor-label="removeArrow" id="-1463229722%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="remove-arrow.html"><span>remove</span><wbr><span><span>Arrow</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1463229722%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="remove-arrow.html"><span class="token function">removeArrow</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">arrow<span class="token operator">: </span><a href="../../com.mapbox.navigation.ui.maps.route.arrow.model/-maneuver-arrow/index.html">ManeuverArrow</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.mapbox.navigation.ui.maps.route.arrow.model/-remove-arrow-value/index.html">RemoveArrowValue</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Will remove the arrow and return updated data for rendering the arrows.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="316546610%2FFunctions%2F-1725360525" anchor-label="showManeuverArrow" id="316546610%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="show-maneuver-arrow.html"><span>show</span><wbr><span>Maneuver</span><wbr><span><span>Arrow</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="316546610%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="show-maneuver-arrow.html"><span class="token function">showManeuverArrow</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.mapbox.navigation.ui.maps.route.arrow.model/-arrow-visibility-change-value/index.html">ArrowVisibilityChangeValue</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Returns a state containing visibility modifications for showing the maneuver arrow.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2025 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        </div>
+    </div>
+</div>
+
+</body></html>
+

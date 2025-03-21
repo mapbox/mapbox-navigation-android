@@ -1,0 +1,140 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>UICoordinator</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>code</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageids="UI Base::com.mapbox.navigation.ui.base.lifecycle/UICoordinator///PointingToDeclaration//-47568391">
+  <div class="breadcrumbs"><a href="../../index.html">UI Base</a><span class="delimiter">/</span><a href="../index.html">com.mapbox.navigation.ui.base.lifecycle</a><span class="delimiter">/</span><a href="index.html">UICoordinator</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>UICoordinator</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">class </span><a href="index.html">UICoordinator</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">T</a><span class="token operator"> : </span><a href="https://developer.android.com/reference/kotlin/android/view/ViewGroup.html">ViewGroup</a><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">viewGroup<span class="token operator">: </span><a href="index.html">T</a></span></span><span class="token punctuation">)</span> : <a href="../../../libnavigation-core/com.mapbox.navigation.core.lifecycle/-mapbox-navigation-observer/index.html">MapboxNavigationObserver</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Attach a UICoordinator to a <a href="https://developer.android.com/reference/kotlin/android/view/ViewGroup.html">ViewGroup</a> of your choosing. When you implement this class you will need to build a <span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span> with <a href="../-binder/index.html">Binder</a>. There can only be one view binder attached at a time for the <a href="https://developer.android.com/reference/kotlin/android/view/ViewGroup.html">ViewGroup</a>.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Constructors">Constructors</button><button class="section-tab" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button></div>
+    <div class="tabs-section-body">
+      <h2 class="tabbedcontent">Constructors</h2>
+      <div class="table" data-togglable="Constructors"><a data-name="-617040608%2FConstructors%2F-47568391" anchor-label="UICoordinator" id="-617040608%2FConstructors%2F-47568391" data-filterable-set=":libnavui-base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-base:dokkaHtmlPartial/release" data-filterable-set=":libnavui-base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue TabbedContent">
+            <div class=""><span class="inline-flex">
+                <div><a href="-u-i-coordinator.html"><span><span>UICoordinator</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-617040608%2FConstructors%2F-47568391"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">T</a><span class="token operator"> : </span><a href="https://developer.android.com/reference/kotlin/android/view/ViewGroup.html">ViewGroup</a><span class="token operator">&gt; </span><a href="-u-i-coordinator.html"><span class="token function">UICoordinator</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">viewGroup<span class="token operator">: </span><a href="index.html">T</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="341278396%2FFunctions%2F-47568391" anchor-label="flowViewBinders" id="341278396%2FFunctions%2F-47568391" data-filterable-set=":libnavui-base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-base:dokkaHtmlPartial/release" data-filterable-set=":libnavui-base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="flow-view-binders.html"><span>flow</span><wbr><span>View</span><wbr><span><span>Binders</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="341278396%2FFunctions%2F-47568391"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-base:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../../libnavigation-core/com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a><span class="token punctuation">.</span><a href="flow-view-binders.html"><span class="token function">flowViewBinders</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../-binder/index.html">Binder</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">T</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Create your flowable <a href="../-binder/index.html">Binder</a>. This allows you to use a flowable state to determine what is being shown in the <a href="../../../libnavui-base/com.mapbox.navigation.ui.base.lifecycle/-u-i-coordinator/view-group.html">viewGroup</a>.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1219667073%2FFunctions%2F-47568391" anchor-label="onAttached" id="1219667073%2FFunctions%2F-47568391" data-filterable-set=":libnavui-base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-base:dokkaHtmlPartial/release" data-filterable-set=":libnavui-base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="on-attached.html"><span>on</span><wbr><span><span>Attached</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1219667073%2FFunctions%2F-47568391"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-base:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/CallSuper.html"><span class="token annotation">CallSuper</span></a></div></div><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-attached.html"><span class="token function">onAttached</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">mapboxNavigation<span class="token operator">: </span><a href="../../../libnavigation-core/com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Signals that the <a href="on-attached.html">mapboxNavigation</a> instance is attached and ready for use.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="130263887%2FFunctions%2F-47568391" anchor-label="onDetached" id="130263887%2FFunctions%2F-47568391" data-filterable-set=":libnavui-base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-base:dokkaHtmlPartial/release" data-filterable-set=":libnavui-base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="on-detached.html"><span>on</span><wbr><span><span>Detached</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="130263887%2FFunctions%2F-47568391"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-base:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/CallSuper.html"><span class="token annotation">CallSuper</span></a></div></div><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-detached.html"><span class="token function">onDetached</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">mapboxNavigation<span class="token operator">: </span><a href="../../../libnavigation-core/com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Signals that the <a href="on-detached.html">mapboxNavigation</a> instance is being detached.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Properties</h2>
+      <div class="table" data-togglable="Properties"><a data-name="1375059518%2FProperties%2F-47568391" anchor-label="coroutineScope" id="1375059518%2FProperties%2F-47568391" data-filterable-set=":libnavui-base:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-base:dokkaHtmlPartial/release" data-filterable-set=":libnavui-base:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="coroutine-scope.html">coroutineScope</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1375059518%2FProperties%2F-47568391"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-base:dokkaHtmlPartial/release"><a data-name="1375059518%2FProperties%2F-47568391" anchor-label="coroutineScope" id="1375059518%2FProperties%2F-47568391" data-filterable-set=":libnavui-base:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword">lateinit </span><span class="token keyword">var </span><a href="coroutine-scope.html">coroutineScope</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="1375059518%2FProperties%2F-47568391" anchor-label="coroutineScope" id="1375059518%2FProperties%2F-47568391" data-filterable-set=":libnavui-base:dokkaHtmlPartial/release"></a><p class="paragraph">Defines a scope for new coroutine</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2025 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        </div>
+    </div>
+</div>
+
+</body></html>
+
