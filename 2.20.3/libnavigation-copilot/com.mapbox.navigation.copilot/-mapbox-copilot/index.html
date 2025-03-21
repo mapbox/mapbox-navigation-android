@@ -1,0 +1,140 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>MapboxCopilot</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>code</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageids="Copilot::com.mapbox.navigation.copilot/MapboxCopilot///PointingToDeclaration//-598400179">
+  <div class="breadcrumbs"><a href="../../index.html">Copilot</a><span class="delimiter">/</span><a href="../index.html">com.mapbox.navigation.copilot</a><span class="delimiter">/</span><a href="index.html">MapboxCopilot</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Mapbox</span><wbr><span><span>Copilot</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-copilot:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">object </span><a href="index.html">MapboxCopilot</a> : <a href="../../../libnavigation-core/com.mapbox.navigation.core.lifecycle/-mapbox-navigation-observer/index.html">MapboxNavigationObserver</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Mapbox Copilot is a Navigation SDK component that collects detailed trace files of navigation sessions together with search analytics data.</p><p class="paragraph">Copilot collects information that helps you in two different ways:</p><ul><li><p class="paragraph">It makes driver feedback more actionable.</p></li><li><p class="paragraph">It provides Mapbox teams with the necessary information to investigate and resolve driver-reported issues and, consequently, helps expedite SDK updates that improve the driver experience for the entire developer community.</p></li></ul><p class="paragraph">Copilot is a <a href="../../../libnavigation-core/com.mapbox.navigation.core.lifecycle/-mapbox-navigation-observer/index.html">MapboxNavigationObserver</a>, so it's tied to the <a href="../../../libnavigation-core/com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a> lifecycle automatically. We recommended tracking the DeveloperMetadata.copilotSessionId (see <a href="../../../libnavigation-core/com.mapbox.navigation.core/-developer-metadata-observer/index.html">DeveloperMetadataObserver</a>) so that Mapbox teams can better act on specific end-user feedback. This ID helps Mapbox teams find the respective traces and troubleshoot issues faster.</p><p class="paragraph">Copilot is an opt-in feature (see <a href="start.html">start</a> and <a href="stop.html">stop</a>), which means you have the choice to enable it for your users (drivers). Depending on the use case, you can enable Copilot for either all drivers (for example, during a pilot) or a subset of them. <strong>As the application developer, you are responsible for communicating to drivers about the data that is being collected from their drives, including what kind of data is being collected and when it is collected.</strong></p><p class="paragraph">Nav SDK exposes configuration settings (see NavigationOptions.copilotOptions) to use Copilot in two ways:</p><ol><li><p class="paragraph">Automatic data collection:</p></li></ol><ul><li><p class="paragraph">Enable Copilot for all trips performed by a specific driver (default option).</p></li></ul><ol><li><p class="paragraph">Manual data collection:</p></li></ol><ul><li><p class="paragraph">Copilot data is only sent when an end user submits negative feedback about a specific route to help take action on the issue. Data collection for Copilot is tightly coupled to the Navigation SDK Feedback, which means this is only effective if the feedback events are pushed through <a href="../../../libnavigation-core/com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a> Feedback APIs (see <a href="../../../libnavigation-core/com.mapbox.navigation.core/-mapbox-navigation/post-user-feedback.html">MapboxNavigation.postUserFeedback</a> and <a href="../../../libnavigation-core/com.mapbox.navigation.core/-mapbox-navigation/provide-feedback-metadata-wrapper.html">MapboxNavigation.provideFeedbackMetadataWrapper</a>).</p></li></ul><p class="paragraph">If you would like to provide Search analytics into Copilot, you can send the Search events over to Copilot (see <a href="push.html">push</a>). This information would include whether a routable point for navigation was available. Copilot helps understand the impact of search results to a navigation session (arrival experience, routable points).</p><p class="paragraph">WARNING: Mapbox Copilot is currently in public-preview. Copilot-related entities and APIs are currently marked as <a href="../../../libnavigation-base/com.mapbox.navigation.base/-experimental-preview-mapbox-navigation-a-p-i/index.html">ExperimentalPreviewMapboxNavigationAPI</a> and subject to change. These markings will be removed when the feature is generally available.</p><p class="paragraph">Copilot is a library included in the Navigation SDK that Processes full-trip-trace longitude and latitude data ("<strong>Copilot</strong>"). Copilot is turned off by default and optionally enabled by Customer at the application developer level to improve feedback resolution. If Customer enables Copilot, Customer shall obtain and maintain all necessary consents and permissions, including providing notice to and obtaining End Users' affirmative express consent before any access or use of Copilot.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="See also">See also</button></div>
+    <div class="tabs-section-body">
+      <h2 class="">See also</h2>
+      <div data-togglable="See also">
+        <div class="platform-hinted WithExtraAttributes" data-platform-hinted="data-platform-hinted" data-togglable="See also"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-copilot:dokkaHtmlPartial/release"><div data-togglable="See also"><div class="table" data-togglable="See also"><div class="table-row" data-filterable-current=":libnavigation-copilot:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-copilot:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>Navigation</span><wbr><span>Options.</span><wbr><span>copilot</span><wbr><span><span>Options</span></span></div></span></div><div><div class="title"><div data-togglable="See also"></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavigation-copilot:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-copilot:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><a href="../../../libnavigation-core/com.mapbox.navigation.core/-mapbox-navigation/post-user-feedback.html"><span>com.</span><wbr><span>mapbox.</span><wbr><span>navigation.</span><wbr><span>core.</span><wbr><span>Mapbox</span><wbr><span><span>Navigation</span></span></a></div></span></div><div><div class="title"><div data-togglable="See also"><p class="paragraph">and <a href="../../../libnavigation-core/com.mapbox.navigation.core/-mapbox-navigation/provide-feedback-metadata-wrapper.html">MapboxNavigation.provideFeedbackMetadataWrapper</a></p></div></div></div></div></div></div></div></div></div>
+      </div>
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="889233435%2FFunctions%2F-598400179" anchor-label="onAttached" id="889233435%2FFunctions%2F-598400179" data-filterable-set=":libnavigation-copilot:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-copilot:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-copilot:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="on-attached.html"><span>on</span><wbr><span><span>Attached</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="889233435%2FFunctions%2F-598400179"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-copilot:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-attached.html"><span class="token function">onAttached</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">mapboxNavigation<span class="token operator">: </span><a href="../../../libnavigation-core/com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Signals that the <a href="on-attached.html">mapboxNavigation</a> instance is ready for use. Use this function to register <a href="on-attached.html">mapboxNavigation</a> observers, such as <a href="../../../libnavigation-core/com.mapbox.navigation.core/-mapbox-navigation/register-routes-observer.html">MapboxNavigation.registerRoutesObserver</a>.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-200169751%2FFunctions%2F-598400179" anchor-label="onDetached" id="-200169751%2FFunctions%2F-598400179" data-filterable-set=":libnavigation-copilot:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-copilot:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-copilot:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="on-detached.html"><span>on</span><wbr><span><span>Detached</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-200169751%2FFunctions%2F-598400179"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-copilot:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-detached.html"><span class="token function">onDetached</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">mapboxNavigation<span class="token operator">: </span><a href="../../../libnavigation-core/com.mapbox.navigation.core/-mapbox-navigation/index.html">MapboxNavigation</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Signals that the <a href="on-detached.html">mapboxNavigation</a> instance is being detached. Use this function to unregister <a href="on-detached.html">mapboxNavigation</a> observers that were registered in <a href="on-attached.html">onAttached</a>.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="54640470%2FFunctions%2F-598400179" anchor-label="push" id="54640470%2FFunctions%2F-598400179" data-filterable-set=":libnavigation-copilot:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-copilot:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-copilot:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="push.html"><span><span>push</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="54640470%2FFunctions%2F-598400179"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-copilot:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="push.html"><span class="token function">push</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">historyEvent<span class="token operator">: </span><a href="../-history-event/index.html">HistoryEvent</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Pushes search events into Copilot.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1912344376%2FFunctions%2F-598400179" anchor-label="start" id="1912344376%2FFunctions%2F-598400179" data-filterable-set=":libnavigation-copilot:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-copilot:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-copilot:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="start.html"><span><span>start</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1912344376%2FFunctions%2F-598400179"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-copilot:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="start.html"><span class="token function">start</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Starts Copilot.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1357102270%2FFunctions%2F-598400179" anchor-label="stop" id="1357102270%2FFunctions%2F-598400179" data-filterable-set=":libnavigation-copilot:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-copilot:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-copilot:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="stop.html"><span><span>stop</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1357102270%2FFunctions%2F-598400179"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-copilot:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="stop.html"><span class="token function">stop</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Stops Copilot.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2025 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        </div>
+    </div>
+</div>
+
+</body></html>
+
