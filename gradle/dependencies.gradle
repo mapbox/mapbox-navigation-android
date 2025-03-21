@@ -186,11 +186,7 @@ ext {
       dependencyGraph      : '0.5.0',
       dependencyUpdates    : '0.29.0',
       kotlin               : kotlinVersion,
-      license              : '0.8.80',
-      // Used by license. Add this dependency explicitly,
-      // because the version used by license has been removed from the repository.
-      // This dependency may be removed when we bump license version.
-      kotlinHtmlJvm        : '0.7.2',
+      license              : '0.8.91',
       jacoco               : '0.2',
       googleServices       : '4.3.3',
       mapboxSdkVersions    : '1.1.3',
@@ -206,10 +202,6 @@ ext {
       kotlin               : "org.jetbrains.kotlin:kotlin-gradle-plugin:${pluginVersion.kotlin}",
       checkstyle           : "com.puppycrawl.tools:checkstyle:${pluginVersion.checkstyle}",
       license              : "com.jaredsburrows:gradle-license-plugin:${pluginVersion.license}",
-      // Used by license. Add this dependency explicitly,
-      // because the version used by license has been removed from the repository.
-      // This dependency may be removed when we bump license version.
-      kotlinHtmlJvm        : "org.jetbrains.kotlinx:kotlinx-html-jvm:${pluginVersion.kotlinHtmlJvm}",
       dependencyGraph      : "com.vanniktech:gradle-dependency-graph-generator-plugin:${pluginVersion.dependencyGraph}",
       dependencyUpdates    : "com.github.ben-manes:gradle-versions-plugin:${pluginVersion.dependencyUpdates}",
       jacoco               : "com.hiya:jacoco-android:${pluginVersion.jacoco}",
