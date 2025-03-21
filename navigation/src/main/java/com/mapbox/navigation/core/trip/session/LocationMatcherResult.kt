@@ -29,6 +29,10 @@ import com.mapbox.navigation.core.trip.session.location.CorrectedLocationData
  * In practice "degraded" mode means raw location in free drive and worse off-route experience in case of route set.
  * @param correctedLocationData corrected GPS location data, the result of corrections applied
  * to the input location, if any. Users still need to use [enhancedLocation].
+ * @param isAdasDataAvailable flag indicating whether ADAS data available for the current location:
+ * - Null if ADAS cache is OFF, e. g. neither ADASIS nor EH enabled
+ * - True if ADAS tiles are loaded for the current location
+ * - False if ADAS cache is ON, but no tiles around
  */
 @OptIn(ExperimentalMapboxNavigationAPI::class)
 class LocationMatcherResult internal constructor(
@@ -45,6 +49,8 @@ class LocationMatcherResult internal constructor(
     val inTunnel: Boolean,
     @ExperimentalMapboxNavigationAPI
     val correctedLocationData: CorrectedLocationData?,
+    @ExperimentalMapboxNavigationAPI
+    val isAdasDataAvailable: Boolean?,
 ) {
 
     /**
@@ -67,6 +73,7 @@ class LocationMatcherResult internal constructor(
         if (isDegradedMapMatching != other.isDegradedMapMatching) return false
         if (inTunnel != other.inTunnel) return false
         if (correctedLocationData != other.correctedLocationData) return false
+        if (isAdasDataAvailable != other.isAdasDataAvailable) return false
         return true
     }
 
@@ -85,6 +92,7 @@ class LocationMatcherResult internal constructor(
         result = 31 * result + isDegradedMapMatching.hashCode()
         result = 31 * result + inTunnel.hashCode()
         result = 31 * result + correctedLocationData.hashCode()
+        result = 31 * result + isAdasDataAvailable.hashCode()
         return result
     }
 
@@ -98,7 +106,8 @@ class LocationMatcherResult internal constructor(
             "roadEdgeMatchProbability=$roadEdgeMatchProbability, road=$road, " +
             "isDegradedMapMatching=$isDegradedMapMatching, " +
             "inTunnel=$inTunnel, " +
-            "correctedLocationData=$correctedLocationData" +
+            "correctedLocationData=$correctedLocationData, " +
+            "isAdasDataAvailable=$isAdasDataAvailable" +
             ")"
     }
 }

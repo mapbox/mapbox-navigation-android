@@ -207,6 +207,11 @@ interface MapboxNativeNavigator : RerouteEventsProvider {
      */
     fun resetAdasisMessageCallback()
 
+    /**
+     * Trigger reset of EHP for the case when external reconstructor needs it.
+     */
+    fun triggerResetOfEhProvider()
+
     fun setUserLanguages(languages: List<String>)
 
     fun reset(callback: ResetCallback?)

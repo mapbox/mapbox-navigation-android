@@ -347,7 +347,6 @@ internal class MapboxTripSession(
         return tripService.hasServiceStarted()
     }
 
-    @OptIn(ExperimentalMapboxNavigationAPI::class)
     private val navigatorObserver = object : NavigatorObserver {
         override fun onStatus(origin: NavigationStatusOrigin, status: NavigationStatus) {
             try {
