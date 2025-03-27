@@ -33,6 +33,8 @@ import com.mapbox.navigator.UpcomingRouteAlertUpdate
 import com.mapbox.navigator.VoiceInstruction
 import com.mapbox.navigator.Waypoint
 import com.mapbox.navigator.WaypointType
+import com.mapbox.navigator.route_data.RouteAnnotation
+import com.mapbox.navigator.route_data.RouteData
 import java.nio.ByteBuffer
 import java.time.Instant
 import java.util.Date
@@ -212,6 +214,14 @@ fun createRouteInterface(
     override fun getRouteId() = "$responseUuid#$routeIndex"
 
     override fun getResponseUuid() = responseUUID
+
+    override fun getRouteData(): RouteData {
+        TODO("Not yet implemented")
+    }
+
+    override fun getRouteAnnotation(): RouteAnnotation {
+        TODO("Not yet implemented")
+    }
 
     override fun getRouteIndex() = routeIndex
 
