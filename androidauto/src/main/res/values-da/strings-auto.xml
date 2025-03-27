@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="car_action_search_favorites">Favoritter</string>
+  <string name="car_search_no_results">Ingen resultater</string>
+  <string name="car_search_unknown_current_location">Ukendt nuværende placering</string>
+  <string name="car_search_unknown_search_location">Ukendt søgested</string>
+  <string name="car_label_ok">OK</string>
+  <string name="car_action_preview_title">Ruteoversigt</string>
+  <string name="car_action_preview_no_location">Nuværende placering ikke fundet</string>
+  <string name="car_action_preview_navigate_button">Fortsæt til ruten</string>
+  <string name="car_action_navigation_stop_button">Stop</string>
+  <string name="car_settings_title">Indstillinger</string>
+  <string name="car_settings_toggle_place_holder">Indstillinger pladsholder</string>
+  <string name="car_settings_preload_failure_title">Kunne ikke forindlæse indstillinger</string>
+  <string name="car_settings_preload_failure_message">Prøv at åbne appen igen.</string>
+  <string name="car_message_location_permissions">Åbn venligst applikationen og aktiver lokalitetstilladelse.</string>
+  <string name="car_message_location_permissions_title">Kræver lokalitetstilladelse</string>
+  <string name="car_preference_audio_guidance_enabled_description">Aktiverer lydvejledning</string>
+  <string name="car_feedback_title">Rapportér feedback</string>
+  <string name="car_feedback_submit">Indsend</string>
+  <string name="car_feedback_submit_toast_select_item">Vælg venligst et feedback-element</string>
+  <string name="car_feedback_submit_toast_success">Tak for din feedback!</string>
+  <string name="car_feedback_negative_routing_error">Rutekvalitet</string>
+  <string name="car_feedback_negative_incorrect_visual">Forkert visuel</string>
+  <string name="car_feedback_negative_incorrect_audio">Forkert lyd</string>
+  <string name="car_feedback_negative_road_issue">Vejproblem</string>
+  <string name="car_feedback_negative_road_closed">Vej lukket</string>
+  <string name="car_feedback_negative_traffic_issue">Trafikproblem</string>
+  <string name="car_feedback_negative_route_not_allowed">Ulovlig rute</string>
+  <string name="car_feedback_negative_positioning_issue">Positioneringsproblem</string>
+  <string name="car_feedback_negative_other_issue">Andet problem</string>
+  <string name="car_feedback_search_incorrect_address">Forkert adresse</string>
+  <string name="car_feedback_search_incorrect_location">Forkert placering</string>
+  <string name="car_feedback_search_incorrect_name">Forkert navn</string>
+  <string name="car_feedback_search_other">Andet problem</string>
+  <string name="car_feedback_arrival_positive">Godt</string>
+  <string name="car_feedback_arrival_negative">Ikke godt</string>
+</resources>

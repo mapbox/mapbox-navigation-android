@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="car_action_search_favorites">Izlase</string>
+  <string name="car_search_no_results">Nav rezultātu</string>
+  <string name="car_search_unknown_current_location">Nezināma pašreizējā atrašanās vieta</string>
+  <string name="car_search_unknown_search_location">Nezināma meklēšanas atrašanās vieta</string>
+  <string name="car_label_ok">Labi</string>
+  <string name="car_action_preview_title">Maršruta priekšskatījums</string>
+  <string name="car_action_preview_no_location">Pašreizējā atrašanās vieta nav atrasta</string>
+  <string name="car_action_preview_navigate_button">Turpināt uz maršrutu</string>
+  <string name="car_action_navigation_stop_button">Apturēt</string>
+  <string name="car_settings_title">Iestatījumi</string>
+  <string name="car_settings_toggle_place_holder">Iestatījumu vietturis</string>
+  <string name="car_settings_preload_failure_title">Neizdevās ielādēt iestatījumus iepriekš</string>
+  <string name="car_settings_preload_failure_message">Mēģiniet vēlreiz atvērt lietotni.</string>
+  <string name="car_message_location_permissions">Lūdzu, atveriet lietotni un aktivizējiet atrašanās vietas atļauju.</string>
+  <string name="car_message_location_permissions_title">Nepieciešama atrašanās vietas atļauja</string>
+  <string name="car_preference_audio_guidance_enabled_description">Iespējo audio vadību</string>
+  <string name="car_feedback_title">Ziņot atsauksmes</string>
+  <string name="car_feedback_submit">Iesniegt</string>
+  <string name="car_feedback_submit_toast_select_item">Lūdzu, izvēlieties atsauksmju vienumu</string>
+  <string name="car_feedback_submit_toast_success">Paldies par jūsu atsauksmēm!</string>
+  <string name="car_feedback_negative_routing_error">Maršruta kvalitāte</string>
+  <string name="car_feedback_negative_incorrect_visual">Nepareizs vizuālais</string>
+  <string name="car_feedback_negative_incorrect_audio">Nepareizs audio</string>
+  <string name="car_feedback_negative_road_issue">Ceļa problēma</string>
+  <string name="car_feedback_negative_road_closed">Ceļš slēgts</string>
+  <string name="car_feedback_negative_traffic_issue">Satiksmes problēma</string>
+  <string name="car_feedback_negative_route_not_allowed">Nederīgs maršruts</string>
+  <string name="car_feedback_negative_positioning_issue">Pozicionēšanas problēma</string>
+  <string name="car_feedback_negative_other_issue">Cits jautājums</string>
+  <string name="car_feedback_search_incorrect_address">Nepareiza adrese</string>
+  <string name="car_feedback_search_incorrect_location">Nepareiza atrašanās vieta</string>
+  <string name="car_feedback_search_incorrect_name">Nepareizs vārds</string>
+  <string name="car_feedback_search_other">Cits jautājums</string>
+  <string name="car_feedback_arrival_positive">Labi</string>
+  <string name="car_feedback_arrival_negative">Nav labi</string>
+</resources>

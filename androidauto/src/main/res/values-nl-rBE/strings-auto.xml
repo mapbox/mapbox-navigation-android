@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="car_action_search_favorites">Favorieten</string>
+  <string name="car_search_no_results">Geen resultaten</string>
+  <string name="car_search_unknown_current_location">Onbekende huidige locatie</string>
+  <string name="car_search_unknown_search_location">Onbekende zoeklocatie</string>
+  <string name="car_label_ok">OK</string>
+  <string name="car_action_preview_title">Routevoorbeeld</string>
+  <string name="car_action_preview_no_location">Huidige locatie niet gevonden</string>
+  <string name="car_action_preview_navigate_button">Blijf doorsturen</string>
+  <string name="car_action_navigation_stop_button">Stop</string>
+  <string name="car_settings_title">Instellingen</string>
+  <string name="car_settings_toggle_place_holder">Instellingen plaatsaanduiding</string>
+  <string name="car_settings_preload_failure_title">Kon instellingen niet vooraf laden</string>
+  <string name="car_settings_preload_failure_message">Probeer de app opnieuw te openen.</string>
+  <string name="car_message_location_permissions">Open de applicatie en schakel de locatiepermissie in.</string>
+  <string name="car_message_location_permissions_title">Locatietoestemming vereist</string>
+  <string name="car_preference_audio_guidance_enabled_description">Schakelt de audiobegeleiding in</string>
+  <string name="car_feedback_title">Feedback rapporteren</string>
+  <string name="car_feedback_submit">Indienen</string>
+  <string name="car_feedback_submit_toast_select_item">Selecteer een feedbackitem</string>
+  <string name="car_feedback_submit_toast_success">Bedankt voor uw feedback!</string>
+  <string name="car_feedback_negative_routing_error">Kwaliteit van de route</string>
+  <string name="car_feedback_negative_incorrect_visual">Onjuiste visuele weergave</string>
+  <string name="car_feedback_negative_incorrect_audio">Onjuiste audio</string>
+  <string name="car_feedback_negative_road_issue">Wegprobleem</string>
+  <string name="car_feedback_negative_road_closed">Weg afgesloten</string>
+  <string name="car_feedback_negative_traffic_issue">Verkeersprobleem</string>
+  <string name="car_feedback_negative_route_not_allowed">Illegale route</string>
+  <string name="car_feedback_negative_positioning_issue">Positioneringsprobleem</string>
+  <string name="car_feedback_negative_other_issue">Andere kwestie</string>
+  <string name="car_feedback_search_incorrect_address">Onjuist adres</string>
+  <string name="car_feedback_search_incorrect_location">Onjuiste locatie</string>
+  <string name="car_feedback_search_incorrect_name">Onjuiste naam</string>
+  <string name="car_feedback_search_other">Andere kwestie</string>
+  <string name="car_feedback_arrival_positive">Goed</string>
+  <string name="car_feedback_arrival_negative">Niet goed</string>
+</resources>

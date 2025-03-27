@@ -1,6 +1,0 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="mapbox_unit_kilometers">km</string>
-    <string name="mapbox_unit_meters">m</string>
-    <string name="mapbox_unit_miles">mil</string>
-    <string name="mapbox_unit_feet" tools:ignore="MissingTranslation">fut</string>
-</resources>

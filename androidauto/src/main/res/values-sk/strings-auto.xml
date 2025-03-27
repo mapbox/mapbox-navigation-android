@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="car_action_search_favorites">Obľúbené</string>
+  <string name="car_search_no_results">Žiadne výsledky</string>
+  <string name="car_search_unknown_current_location">Neznáme aktuálne miesto</string>
+  <string name="car_search_unknown_search_location">Neznáme miesto vyhľadávania</string>
+  <string name="car_label_ok">OK</string>
+  <string name="car_action_preview_title">Náhľad trasy</string>
+  <string name="car_action_preview_no_location">Aktuálna poloha nebola nájdená</string>
+  <string name="car_action_preview_navigate_button">Pokračujte na trasu</string>
+  <string name="car_action_navigation_stop_button">Zastav</string>
+  <string name="car_settings_title">Nastavenia</string>
+  <string name="car_settings_toggle_place_holder">Zástupný symbol nastavení</string>
+  <string name="car_settings_preload_failure_title">Nepodarilo sa predbežne načítať nastavenia</string>
+  <string name="car_settings_preload_failure_message">Skúste znova otvoriť aplikáciu.</string>
+  <string name="car_message_location_permissions">Prosím, otvorte aplikáciu a povoľte prístup k polohe.</string>
+  <string name="car_message_location_permissions_title">Vyžaduje povolenie na prístup k polohe</string>
+  <string name="car_preference_audio_guidance_enabled_description">Umožňuje zvukové navádzanie</string>
+  <string name="car_feedback_title">Nahlásiť spätnú väzbu</string>
+  <string name="car_feedback_submit">Odoslať</string>
+  <string name="car_feedback_submit_toast_select_item">Prosím, vyberte položku spätnej väzby</string>
+  <string name="car_feedback_submit_toast_success">Ďakujeme za vašu spätnú väzbu!</string>
+  <string name="car_feedback_negative_routing_error">Kvalita trasy</string>
+  <string name="car_feedback_negative_incorrect_visual">Nesprávny vizuál</string>
+  <string name="car_feedback_negative_incorrect_audio">Nesprávny zvuk</string>
+  <string name="car_feedback_negative_road_issue">Problém s cestou</string>
+  <string name="car_feedback_negative_road_closed">Cesta uzavretá</string>
+  <string name="car_feedback_negative_traffic_issue">Dopravný problém</string>
+  <string name="car_feedback_negative_route_not_allowed">Nelegálna trasa</string>
+  <string name="car_feedback_negative_positioning_issue">Problém s umiestnením</string>
+  <string name="car_feedback_negative_other_issue">Iný problém</string>
+  <string name="car_feedback_search_incorrect_address">Nesprávna adresa</string>
+  <string name="car_feedback_search_incorrect_location">Nesprávne umiestnenie</string>
+  <string name="car_feedback_search_incorrect_name">Nesprávne meno</string>
+  <string name="car_feedback_search_other">Iný problém</string>
+  <string name="car_feedback_arrival_positive">Dobrý</string>
+  <string name="car_feedback_arrival_negative">Nie dobré</string>
+</resources>

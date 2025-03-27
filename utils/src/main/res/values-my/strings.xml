@@ -1,6 +1,0 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="mapbox_unit_kilometers">ကီလိုမီတာ</string>
-    <string name="mapbox_unit_meters">မီတာ</string>
-    <string name="mapbox_unit_miles">မိုင်</string>
-    <string name="mapbox_unit_feet" tools:ignore="MissingTranslation">ပေ</string>
-</resources>

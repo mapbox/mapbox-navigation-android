@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Indicates voice instructions are muted -->
-    <string name="mapbox_muted">নিঃশব্দ করা</string>
-
-    <!-- Indicates voice instructions are unmuted -->
-    <string name="mapbox_unmuted">সশব্দ</string>
-</resources>

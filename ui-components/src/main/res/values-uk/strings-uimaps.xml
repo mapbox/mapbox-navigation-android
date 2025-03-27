@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="mapbox_recenter" tools:ignore="MissingTranslation">Повернутись</string>
-    <string name="mapbox_route_overview" tools:ignore="MissingTranslation">Огляд</string>
-    <string name="mapbox_route_follow" tools:ignore="MissingTranslation">Рух маршрутом</string>
+  <string name="mapbox_recenter" tools:ignore="MissingTranslation">Центрувати</string>
+  <string name="mapbox_route_overview" tools:ignore="MissingTranslation">Огляд</string>
+  <string name="mapbox_route_follow" tools:ignore="MissingTranslation">Наступне</string>
 </resources>

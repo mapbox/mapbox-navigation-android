@@ -1,6 +1,0 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="mapbox_unit_kilometers">χλμ</string>
-    <string name="mapbox_unit_meters">μ</string>
-    <string name="mapbox_unit_miles">μίλια</string>
-    <string name="mapbox_unit_feet" tools:ignore="MissingTranslation">πόδια</string>
-</resources>

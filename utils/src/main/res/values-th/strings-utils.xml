@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+  <string name="mapbox_unit_kilometers">กม.</string>
+  <string name="mapbox_unit_meters">ม</string>
+  <string name="mapbox_unit_miles">mi</string>
+  <string name="mapbox_unit_feet" tools:ignore="MissingTranslation">ฟุต</string>
+  <string name="mapbox_unit_yards" tools:ignore="MissingTranslation">yd</string>
+</resources>

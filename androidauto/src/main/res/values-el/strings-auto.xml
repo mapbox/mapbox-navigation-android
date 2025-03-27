@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="car_action_search_favorites">Αγαπημένα</string>
+  <string name="car_search_no_results">Χωρίς αποτελέσματα</string>
+  <string name="car_search_unknown_current_location">Άγνωστη τρέχουσα τοποθεσία</string>
+  <string name="car_search_unknown_search_location">Άγνωστη τοποθεσία αναζήτησης</string>
+  <string name="car_label_ok">Εντάξει</string>
+  <string name="car_action_preview_title">Προεπισκόπηση διαδρομής</string>
+  <string name="car_action_preview_no_location">Η τρέχουσα τοποθεσία δεν βρέθηκε</string>
+  <string name="car_action_preview_navigate_button">Συνέχεια στη διαδρομή</string>
+  <string name="car_action_navigation_stop_button">Σταμάτα</string>
+  <string name="car_settings_title">Ρυθμίσεις</string>
+  <string name="car_settings_toggle_place_holder">Κράτηση θέσης ρυθμίσεων</string>
+  <string name="car_settings_preload_failure_title">Αποτυχία προφόρτωσης ρυθμίσεων</string>
+  <string name="car_settings_preload_failure_message">Δοκιμάστε να ανοίξετε ξανά την εφαρμογή.</string>
+  <string name="car_message_location_permissions">Παρακαλώ ανοίξτε την εφαρμογή και ενεργοποιήστε την άδεια τοποθεσίας.</string>
+  <string name="car_message_location_permissions_title">Απαιτείται άδεια τοποθεσίας</string>
+  <string name="car_preference_audio_guidance_enabled_description">Ενεργοποιεί την ηχητική καθοδήγηση</string>
+  <string name="car_feedback_title">Αναφορά σχολίων</string>
+  <string name="car_feedback_submit">Υποβολή</string>
+  <string name="car_feedback_submit_toast_select_item">Παρακαλώ επιλέξτε ένα στοιχείο ανατροφοδότησης</string>
+  <string name="car_feedback_submit_toast_success">Σας ευχαριστούμε για τα σχόλιά σας!</string>
+  <string name="car_feedback_negative_routing_error">Ποιότητα διαδρομής</string>
+  <string name="car_feedback_negative_incorrect_visual">Λανθασμένη οπτική</string>
+  <string name="car_feedback_negative_incorrect_audio">Λανθασμένος ήχος</string>
+  <string name="car_feedback_negative_road_issue">Πρόβλημα στο δρόμο</string>
+  <string name="car_feedback_negative_road_closed">Ο δρόμος είναι κλειστός</string>
+  <string name="car_feedback_negative_traffic_issue">Πρόβλημα κυκλοφορίας</string>
+  <string name="car_feedback_negative_route_not_allowed">Παράνομη διαδρομή</string>
+  <string name="car_feedback_negative_positioning_issue">Πρόβλημα τοποθέτησης</string>
+  <string name="car_feedback_negative_other_issue">Άλλο ζήτημα</string>
+  <string name="car_feedback_search_incorrect_address">Λανθασμένη διεύθυνση</string>
+  <string name="car_feedback_search_incorrect_location">Λανθασμένη τοποθεσία</string>
+  <string name="car_feedback_search_incorrect_name">Λανθασμένο όνομα</string>
+  <string name="car_feedback_search_other">Άλλο ζήτημα</string>
+  <string name="car_feedback_arrival_positive">Καλό</string>
+  <string name="car_feedback_arrival_negative">Όχι καλό</string>
+</resources>

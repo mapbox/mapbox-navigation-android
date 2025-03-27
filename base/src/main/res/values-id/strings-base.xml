@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+  <plurals name="mapbox_number_of_days" tools:ignore="MissingTranslation">
+    <item quantity="other">hari</item>
+  </plurals>
+  <string name="mapbox_unit_hr" tools:ignore="MissingTranslation">jam</string>
+  <string name="mapbox_unit_min" tools:ignore="MissingTranslation">menit</string>
+  <string name="mapbox_callout_similar_eta" tools:ignore="MissingTranslation">ETA serupa</string>
+  <string name="mapbox_callout_faster" tools:ignore="MissingTranslation">-%s</string>
+  <string name="mapbox_callout_slower" tools:ignore="MissingTranslation">+%s</string>
+  <string name="mapbox_end_navigation">Akhir Navigasi</string>
+  <string name="mapbox_navigation_is_starting" tools:ignore="MissingTranslation">Navigasi dimulai…</string>
+  <string name="mapbox_stop_session" tools:ignore="MissingTranslation">Hentikan sesi</string>
+  <string name="mapbox_free_drive_session" tools:ignore="MissingTranslation">Sesi Mengemudi Gratis</string>
+  <string name="mapbox_eta_format" tools:ignore="MissingTranslation">%s ETA</string>
+</resources>

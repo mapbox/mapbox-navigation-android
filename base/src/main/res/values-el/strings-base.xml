@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+  <plurals name="mapbox_number_of_days" tools:ignore="MissingTranslation">
+    <item quantity="one">ημέρα</item>
+    <item quantity="other">ημέρες</item>
+  </plurals>
+  <string name="mapbox_unit_hr" tools:ignore="MissingTranslation">ώρες</string>
+  <string name="mapbox_unit_min" tools:ignore="MissingTranslation">λεπτά</string>
+  <string name="mapbox_callout_similar_eta" tools:ignore="MissingTranslation">Παρόμοια ΕΤΑ</string>
+  <string name="mapbox_callout_faster" tools:ignore="MissingTranslation">-%s</string>
+  <string name="mapbox_callout_slower" tools:ignore="MissingTranslation">+%s</string>
+  <string name="mapbox_end_navigation">Τέλος πλοήγησης</string>
+  <string name="mapbox_navigation_is_starting" tools:ignore="MissingTranslation">Η πλοήγηση ξεκινά…</string>
+  <string name="mapbox_stop_session" tools:ignore="MissingTranslation">Διακοπή συνεδρίας</string>
+  <string name="mapbox_free_drive_session" tools:ignore="MissingTranslation">Συνεδρία Ελεύθερης Οδήγησης</string>
+  <string name="mapbox_eta_format" tools:ignore="MissingTranslation">%s ETA</string>
+</resources>

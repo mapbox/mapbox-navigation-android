@@ -1,6 +1,0 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-
-    <!-- Notification Strings -->
-    <string name="mapbox_end_navigation">Avsluta Navigering</string>
-    <string name="mapbox_eta_format" tools:ignore="MissingTranslation">%s ETA</string>
-</resources>

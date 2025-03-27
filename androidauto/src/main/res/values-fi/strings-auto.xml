@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="car_action_search_favorites">Suosikit</string>
+  <string name="car_search_no_results">Ei tuloksia</string>
+  <string name="car_search_unknown_current_location">Tuntematon nykyinen sijainti</string>
+  <string name="car_search_unknown_search_location">Tuntematon hakupaikka</string>
+  <string name="car_label_ok">OK</string>
+  <string name="car_action_preview_title">Reitin esikatselu</string>
+  <string name="car_action_preview_no_location">Nykyistä sijaintia ei löydy</string>
+  <string name="car_action_preview_navigate_button">Jatka reitille</string>
+  <string name="car_action_navigation_stop_button">Pysähdy</string>
+  <string name="car_settings_title">Asetukset</string>
+  <string name="car_settings_toggle_place_holder">Asetusten paikkamerkki</string>
+  <string name="car_settings_preload_failure_title">Asetusten esilataus epäonnistui</string>
+  <string name="car_settings_preload_failure_message">Yritä avata sovellus uudelleen.</string>
+  <string name="car_message_location_permissions">Avaa sovellus ja ota sijaintilupa käyttöön.</string>
+  <string name="car_message_location_permissions_title">Tarvitsee sijaintiluvan</string>
+  <string name="car_preference_audio_guidance_enabled_description">Mahdollistaa ääniohjauksen</string>
+  <string name="car_feedback_title">Ilmoita palautetta</string>
+  <string name="car_feedback_submit">Lähetä</string>
+  <string name="car_feedback_submit_toast_select_item">Valitse palautekohta</string>
+  <string name="car_feedback_submit_toast_success">Kiitos palautteestasi!</string>
+  <string name="car_feedback_negative_routing_error">Reitin laatu</string>
+  <string name="car_feedback_negative_incorrect_visual">Virheellinen visuaalinen</string>
+  <string name="car_feedback_negative_incorrect_audio">Virheellinen ääni</string>
+  <string name="car_feedback_negative_road_issue">Tieliikenneongelma</string>
+  <string name="car_feedback_negative_road_closed">Tie suljettu</string>
+  <string name="car_feedback_negative_traffic_issue">Liikenneongelma</string>
+  <string name="car_feedback_negative_route_not_allowed">Laiton reitti</string>
+  <string name="car_feedback_negative_positioning_issue">Sijoitteluongelma</string>
+  <string name="car_feedback_negative_other_issue">Muu ongelma</string>
+  <string name="car_feedback_search_incorrect_address">Virheellinen osoite</string>
+  <string name="car_feedback_search_incorrect_location">Väärä sijainti</string>
+  <string name="car_feedback_search_incorrect_name">Väärä nimi</string>
+  <string name="car_feedback_search_other">Muu ongelma</string>
+  <string name="car_feedback_arrival_positive">Hyvä</string>
+  <string name="car_feedback_arrival_negative">Ei hyvä</string>
+</resources>

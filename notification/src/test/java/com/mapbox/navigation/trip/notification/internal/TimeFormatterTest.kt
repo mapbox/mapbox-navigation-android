@@ -74,7 +74,7 @@ class TimeFormatterTest {
     fun formatTimeRemainingDefaultLocaleReturnsMultiDayHoursMinNonDefaultLocale() {
         val result = TimeFormatter.formatTimeRemaining(ctx, 193963.3, Locale("hu"))
 
-        assertEquals("2 nap 5 óra 53 perc ", result.toString())
+        assertEquals("2 napok 5 óra 53 perc ", result.toString())
     }
 
     @Config(qualifiers = "en")
@@ -199,5 +199,13 @@ class TimeFormatterTest {
         val result = TimeFormatter.formatTimeRemaining(ctx, 23.3, null)
 
         assertEquals("< 1 min ", result.toString())
+    }
+
+    @Config(qualifiers = "fr")
+    @Test
+    fun formatTimeRemaining21inFranche() {
+        val result = TimeFormatter.formatTimeRemaining(ctx, 60 * 60 * 24 * 21.0, Locale("fr"))
+
+        assertEquals("21 jours ", result.toString())
     }
 }

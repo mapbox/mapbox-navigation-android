@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+  <plurals name="mapbox_number_of_days" tools:ignore="MissingTranslation">
+    <item quantity="one">יום</item>
+    <item quantity="two">יומיים</item>
+    <item quantity="many">ימים</item>
+    <item quantity="other">ימים</item>
+  </plurals>
+  <string name="mapbox_unit_hr" tools:ignore="MissingTranslation">שעות</string>
+  <string name="mapbox_unit_min" tools:ignore="MissingTranslation">דק׳</string>
+  <string name="mapbox_callout_similar_eta" tools:ignore="MissingTranslation">ETA דומה</string>
+  <string name="mapbox_callout_faster" tools:ignore="MissingTranslation">-%s</string>
+  <string name="mapbox_callout_slower" tools:ignore="MissingTranslation">+%s</string>
+  <string name="mapbox_end_navigation">סיום ניווט</string>
+  <string name="mapbox_navigation_is_starting" tools:ignore="MissingTranslation">הניווט מתחיל…</string>
+  <string name="mapbox_stop_session" tools:ignore="MissingTranslation">עצור מושב</string>
+  <string name="mapbox_free_drive_session" tools:ignore="MissingTranslation">סשן נהיגה חופשי</string>
+  <string name="mapbox_eta_format" tools:ignore="MissingTranslation">%s זמן הגעה משוער</string>
+</resources>
