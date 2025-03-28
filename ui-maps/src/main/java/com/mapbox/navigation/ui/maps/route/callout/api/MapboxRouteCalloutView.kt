@@ -42,7 +42,7 @@ internal class MapboxRouteCalloutView(
         viewAnnotationManager.addOnViewAnnotationUpdatedListener(onViewAnnotationUpdatedListener)
         viewAnnotationManager.viewAnnotationAvoidLayers =
             HashSet(
-                viewAnnotationManager.viewAnnotationAvoidLayers + layersToAvoid,
+                viewAnnotationManager.viewAnnotationAvoidLayers + layersToAttach,
             )
         routeCalloutAdapter.registerDataObserver(dataChangedObserver)
     }
@@ -106,16 +106,10 @@ internal class MapboxRouteCalloutView(
     }
 
     private companion object {
-        private val layersToAttach = listOf(
+        private val layersToAttach = setOf(
             RouteLayerConstants.LAYER_GROUP_1_MAIN,
             RouteLayerConstants.LAYER_GROUP_2_MAIN,
             RouteLayerConstants.LAYER_GROUP_3_MAIN,
-        )
-        private val layersToAvoid = setOf(
-            RouteLayerConstants.LAYER_GROUP_1_MAIN,
-            RouteLayerConstants.LAYER_GROUP_2_MAIN,
-            RouteLayerConstants.LAYER_GROUP_3_MAIN,
-            RouteLayerConstants.MASKING_LAYER_MAIN,
         )
 
         private const val TAG = "MapboxRouteCalloutView"
