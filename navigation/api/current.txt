@@ -233,18 +233,6 @@ package com.mapbox.navigation.core.adas {
     property public final java.util.List<java.lang.Integer> weatherConditionTypes;
   }
 
-  public static final class AdasSpeedLimitRestriction.VehicleType {
-    field public static final int BUS = 2; // 0x2
-    field public static final int CAR = 0; // 0x0
-    field public static final com.mapbox.navigation.core.adas.AdasSpeedLimitRestriction.VehicleType INSTANCE;
-    field public static final int MOTORCYCLE = 4; // 0x4
-    field public static final int TRAILER = 3; // 0x3
-    field public static final int TRUCK = 1; // 0x1
-  }
-
-  @IntDef({com.mapbox.navigation.core.adas.AdasSpeedLimitRestriction.VehicleType.CAR, com.mapbox.navigation.core.adas.AdasSpeedLimitRestriction.VehicleType.TRUCK, com.mapbox.navigation.core.adas.AdasSpeedLimitRestriction.VehicleType.BUS, com.mapbox.navigation.core.adas.AdasSpeedLimitRestriction.VehicleType.TRAILER, com.mapbox.navigation.core.adas.AdasSpeedLimitRestriction.VehicleType.MOTORCYCLE}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface AdasSpeedLimitRestriction.VehicleType.Type {
-  }
-
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasValueOnEdge {
     method public double getPercentAlong();
     method public float getShapeIndex();

@@ -97,8 +97,6 @@ import com.mapbox.navigation.core.routealternatives.UpdateRouteSuggestion
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
-import com.mapbox.navigation.core.sensor.SensorData
-import com.mapbox.navigation.core.sensor.UpdateExternalSensorDataCallback
 import com.mapbox.navigation.core.telemetry.ApplicationLifecycleMonitor
 import com.mapbox.navigation.core.telemetry.NavigationTelemetry
 import com.mapbox.navigation.core.telemetry.UserFeedback
@@ -2037,22 +2035,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      */
     internal fun internalEvUpdatedData(): StateFlow<Map<String, String>> {
         return evDynamicDataHolder.updatedRawData()
-    }
-
-    /**
-     * Asynchronously passes in the current sensor data of the user.
-     *
-     * @param data The current sensor data of user
-     * @param callback Callback which is called when the async operation is completed
-     */
-    @ExperimentalPreviewMapboxNavigationAPI
-    internal fun updateExternalSensorData(
-        data: SensorData,
-        callback: UpdateExternalSensorDataCallback,
-    ) {
-        navigator.updateExternalSensorData(data.toNativeSensorData()) {
-            callback.onResult(it)
-        }
     }
 
     internal fun registerOnRoutesSetStartedObserver(observer: SetNavigationRoutesStartedObserver) {

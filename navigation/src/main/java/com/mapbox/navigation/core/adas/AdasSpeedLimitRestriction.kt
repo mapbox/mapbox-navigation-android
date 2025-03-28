@@ -1,13 +1,15 @@
 package com.mapbox.navigation.core.adas
 
-import androidx.annotation.IntDef
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.core.sensor.SensorData
+import com.mapbox.navigation.base.internal.model.toPlatformConditionType
+import com.mapbox.navigation.base.internal.model.toPlatformVehicleType
+import com.mapbox.navigation.base.model.VehicleType
+import com.mapbox.navigation.base.model.WeatherCondition
 
 /**
  * Speed limit restriction
  *
- * @param weatherConditionTypes A list of [SensorData.Weather.ConditionType] types where the speed limit is applied. Empty means all
+ * @param weatherConditionTypes A list of [WeatherCondition.Type] types where the speed limit is applied. Empty means all
  * @param dateTimeCondition OSM "opening_hours" format, see https://wiki.openstreetmap.org/wiki/Key:opening_hours
  * @param vehicleTypes A list of [VehicleType.Type] types for that the speed limit is included. Empty means all
  * @param lanes Lane numbers where the speed limit is valid. Empty array means all lanes
@@ -58,72 +60,16 @@ class AdasSpeedLimitRestriction private constructor(
             ")"
     }
 
-    /**
-     * Type of vehicle for which the speed limit is included.
-     */
-    object VehicleType {
-
-        /**
-         * Car vehicle type
-         */
-        const val CAR = 0
-
-        /**
-         * Truck vehicle type
-         */
-        const val TRUCK = 1
-
-        /**
-         * Bus vehicle type
-         */
-        const val BUS = 2
-
-        /**
-         * Trailer vehicle type
-         */
-        const val TRAILER = 3
-
-        /**
-         * Motorcycle vehicle type
-         */
-        const val MOTORCYCLE = 4
-
-        /**
-         * Retention policy for the [VehicleType]
-         */
-        @Retention(AnnotationRetention.BINARY)
-        @IntDef(
-            CAR,
-            TRUCK,
-            BUS,
-            TRAILER,
-            MOTORCYCLE,
-        )
-        annotation class Type
-
-        @JvmSynthetic
-        @Type
-        internal fun createVehicleType(nativeObj: com.mapbox.navigator.VehicleType): Int {
-            return when (nativeObj) {
-                com.mapbox.navigator.VehicleType.CAR -> CAR
-                com.mapbox.navigator.VehicleType.TRUCK -> TRUCK
-                com.mapbox.navigator.VehicleType.BUS -> BUS
-                com.mapbox.navigator.VehicleType.TRAILER -> TRAILER
-                com.mapbox.navigator.VehicleType.MOTORCYCLE -> MOTORCYCLE
-            }
-        }
-    }
-
     internal companion object {
 
         @JvmSynthetic
         fun createFromNativeObject(nativeObj: com.mapbox.navigator.SpeedLimitRestriction) =
             AdasSpeedLimitRestriction(
                 weatherConditionTypes = nativeObj.weather.map {
-                    SensorData.Weather.ConditionType.createConditionType(it)
+                    it.toPlatformConditionType()
                 },
                 dateTimeCondition = nativeObj.dateTimeCondition,
-                vehicleTypes = nativeObj.vehicleTypes.map { VehicleType.createVehicleType(it) },
+                vehicleTypes = nativeObj.vehicleTypes.map { it.toPlatformVehicleType() },
                 lanes = nativeObj.lanes,
             )
     }
