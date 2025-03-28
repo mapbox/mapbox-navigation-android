@@ -43,8 +43,6 @@ import com.mapbox.navigation.core.routerefresh.RouteRefreshObserver
 import com.mapbox.navigation.core.routerefresh.RouteRefresherResult
 import com.mapbox.navigation.core.routerefresh.RouteRefresherStatus
 import com.mapbox.navigation.core.routerefresh.RoutesRefresherResult
-import com.mapbox.navigation.core.sensor.SensorData
-import com.mapbox.navigation.core.sensor.UpdateExternalSensorDataCallback
 import com.mapbox.navigation.core.telemetry.NavigationTelemetry
 import com.mapbox.navigation.core.telemetry.UserFeedback
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
@@ -2248,31 +2246,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
         verify(exactly = 1) {
             routeRefreshController.unregisterRoutesInvalidatedObserver(routesInvalidatedObserver)
-        }
-    }
-
-    @Test
-    fun updateExternalSensorData() {
-        createMapboxNavigation()
-
-        val nativeCallbackSlot = slot<com.mapbox.navigator.UpdateExternalSensorDataCallback>()
-        every { navigator.updateExternalSensorData(any(), capture(nativeCallbackSlot)) } answers {
-            nativeCallbackSlot.captured.run(true)
-        }
-
-        val weatherSensorData = SensorData.Weather(SensorData.Weather.ConditionType.FOG)
-        val callback = mockk<UpdateExternalSensorDataCallback>(relaxed = true)
-        mapboxNavigation.updateExternalSensorData(weatherSensorData, callback)
-
-        verify(exactly = 1) {
-            navigator.updateExternalSensorData(
-                eq(weatherSensorData.toNativeSensorData()),
-                eq(nativeCallbackSlot.captured),
-            )
-        }
-
-        verify(exactly = 1) {
-            callback.onResult(eq(true))
         }
     }
 

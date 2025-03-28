@@ -329,6 +329,33 @@ package com.mapbox.navigation.base.metrics {
 
 }
 
+package com.mapbox.navigation.base.model {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class VehicleType {
+    field public static final int BUS = 2; // 0x2
+    field public static final int CAR = 0; // 0x0
+    field public static final com.mapbox.navigation.base.model.VehicleType INSTANCE;
+    field public static final int MOTORCYCLE = 4; // 0x4
+    field public static final int TRAILER = 3; // 0x3
+    field public static final int TRUCK = 1; // 0x1
+  }
+
+  @IntDef({com.mapbox.navigation.base.model.VehicleType.CAR, com.mapbox.navigation.base.model.VehicleType.TRUCK, com.mapbox.navigation.base.model.VehicleType.BUS, com.mapbox.navigation.base.model.VehicleType.TRAILER, com.mapbox.navigation.base.model.VehicleType.MOTORCYCLE}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface VehicleType.Type {
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class WeatherCondition {
+    field public static final int FOG = 2; // 0x2
+    field public static final com.mapbox.navigation.base.model.WeatherCondition INSTANCE;
+    field public static final int RAIN = 0; // 0x0
+    field public static final int SNOW = 1; // 0x1
+    field public static final int WET_ROAD = 3; // 0x3
+  }
+
+  @IntDef({com.mapbox.navigation.base.model.WeatherCondition.RAIN, com.mapbox.navigation.base.model.WeatherCondition.SNOW, com.mapbox.navigation.base.model.WeatherCondition.FOG, com.mapbox.navigation.base.model.WeatherCondition.WET_ROAD}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface WeatherCondition.Type {
+  }
+
+}
+
 package com.mapbox.navigation.base.options {
 
   public final class AlertServiceOptions {

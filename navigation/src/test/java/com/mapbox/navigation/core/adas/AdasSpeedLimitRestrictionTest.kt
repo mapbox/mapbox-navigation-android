@@ -2,8 +2,8 @@ package com.mapbox.navigation.core.adas
 
 import com.jparams.verifier.tostring.ToStringVerifier
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.core.adas.AdasSpeedLimitRestriction.VehicleType
-import com.mapbox.navigation.core.sensor.SensorData.Weather.ConditionType
+import com.mapbox.navigation.base.model.VehicleType
+import com.mapbox.navigation.base.model.WeatherCondition
 import com.mapbox.navigator.Weather
 import nl.jqno.equalsverifier.EqualsVerifier
 import org.junit.Assert.assertEquals
@@ -35,7 +35,7 @@ class AdasSpeedLimitRestrictionTest {
 
         val platform = AdasSpeedLimitRestriction.createFromNativeObject(native)
         assertEquals(
-            listOf(ConditionType.WET_ROAD, ConditionType.RAIN),
+            listOf(WeatherCondition.WET_ROAD, WeatherCondition.RAIN),
             platform.weatherConditionTypes,
         )
         assertEquals(native.dateTimeCondition, platform.dateTimeCondition)
