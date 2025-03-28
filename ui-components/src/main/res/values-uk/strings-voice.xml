@@ -1,8 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <resources>
-    <!-- Indicates voice instructions are muted -->
-    <string name="mapbox_muted">Вимкнено</string>
-
-    <!-- Indicates voice instructions are unmuted -->
-    <string name="mapbox_unmuted">Увімкнено</string>
+  <string name="mapbox_muted">Вимкнено звук</string>
+  <string name="mapbox_unmuted">Увімкнено звук</string>
 </resources>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="car_action_search_favorites">Улюблені</string>
+  <string name="car_search_no_results">Немає результатів</string>
+  <string name="car_search_unknown_current_location">Невідоме поточне місцезнаходження</string>
+  <string name="car_search_unknown_search_location">Невідоме місце пошуку</string>
+  <string name="car_label_ok">OK</string>
+  <string name="car_action_preview_title">Попередній перегляд маршруту</string>
+  <string name="car_action_preview_no_location">Поточне місцезнаходження не знайдено</string>
+  <string name="car_action_preview_navigate_button">Продовжити маршрут</string>
+  <string name="car_action_navigation_stop_button">Зупинити</string>
+  <string name="car_settings_title">Налаштування</string>
+  <string name="car_settings_toggle_place_holder">Заповнювач налаштувань</string>
+  <string name="car_settings_preload_failure_title">Не вдалося попередньо завантажити налаштування</string>
+  <string name="car_settings_preload_failure_message">Спробуйте відкрити додаток знову.</string>
+  <string name="car_message_location_permissions">Будь ласка, відкрийте додаток і увімкніть дозвіл на доступ до місцезнаходження.</string>
+  <string name="car_message_location_permissions_title">Потрібен дозвіл на доступ до місцезнаходження</string>
+  <string name="car_preference_audio_guidance_enabled_description">Увімкнути аудіо-навігацію</string>
+  <string name="car_feedback_title">Повідомити про відгук</string>
+  <string name="car_feedback_submit">Надіслати</string>
+  <string name="car_feedback_submit_toast_select_item">Будь ласка, виберіть пункт відгуку</string>
+  <string name="car_feedback_submit_toast_success">Дякуємо за ваш відгук!</string>
+  <string name="car_feedback_negative_routing_error">Якість маршруту</string>
+  <string name="car_feedback_negative_incorrect_visual">Некоректне зображення</string>
+  <string name="car_feedback_negative_incorrect_audio">Некоректний аудіо</string>
+  <string name="car_feedback_negative_road_issue">Нема проїзду</string>
+  <string name="car_feedback_negative_road_closed">Дорога закрита</string>
+  <string name="car_feedback_negative_traffic_issue">Проблема з трафіком</string>
+  <string name="car_feedback_negative_route_not_allowed">Неправильний маршрут</string>
+  <string name="car_feedback_negative_positioning_issue">Проблема з позиціонуванням</string>
+  <string name="car_feedback_negative_other_issue">Інша проблема</string>
+  <string name="car_feedback_search_incorrect_address">Неправильна адреса</string>
+  <string name="car_feedback_search_incorrect_location">Неправильне місцезнаходження</string>
+  <string name="car_feedback_search_incorrect_name">Неправильне ім\'я</string>
+  <string name="car_feedback_search_other">Інша проблема</string>
+  <string name="car_feedback_arrival_positive">Добре</string>
+  <string name="car_feedback_arrival_negative">Не добре</string>
+</resources>

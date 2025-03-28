@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="car_action_search_favorites">מועדפים</string>
+  <string name="car_search_no_results">אין תוצאות</string>
+  <string name="car_search_unknown_current_location">מיקום נוכחי לא ידוע</string>
+  <string name="car_search_unknown_search_location">מיקום חיפוש לא ידוע</string>
+  <string name="car_label_ok">אישור</string>
+  <string name="car_action_preview_title">תצוגה מקדימה של מסלול</string>
+  <string name="car_action_preview_no_location">המיקום הנוכחי לא נמצא</string>
+  <string name="car_action_preview_navigate_button">המשך לנתב</string>
+  <string name="car_action_navigation_stop_button">עצור</string>
+  <string name="car_settings_title">הגדרות</string>
+  <string name="car_settings_toggle_place_holder">מקום מחזיק להגדרות</string>
+  <string name="car_settings_preload_failure_title">נכשל בטעינת ההגדרות מראש</string>
+  <string name="car_settings_preload_failure_message">נסה לפתוח את האפליקציה שוב.</string>
+  <string name="car_message_location_permissions">אנא פתח את היישום ואפשר הרשאת מיקום.</string>
+  <string name="car_message_location_permissions_title">נדרשת הרשאת מיקום</string>
+  <string name="car_preference_audio_guidance_enabled_description">מאפשר את ההדרכה הקולית</string>
+  <string name="car_feedback_title">דווח על משוב</string>
+  <string name="car_feedback_submit">שלח</string>
+  <string name="car_feedback_submit_toast_select_item">אנא בחר פריט משוב</string>
+  <string name="car_feedback_submit_toast_success">תודה על המשוב שלך!</string>
+  <string name="car_feedback_negative_routing_error">איכות המסלול</string>
+  <string name="car_feedback_negative_incorrect_visual">ויזואל לא נכון</string>
+  <string name="car_feedback_negative_incorrect_audio">שמע שגוי</string>
+  <string name="car_feedback_negative_road_issue">בעיה בכביש</string>
+  <string name="car_feedback_negative_road_closed">הכביש סגור</string>
+  <string name="car_feedback_negative_traffic_issue">בעיית תנועה</string>
+  <string name="car_feedback_negative_route_not_allowed">מסלול לא חוקי</string>
+  <string name="car_feedback_negative_positioning_issue">בעיה במיקום</string>
+  <string name="car_feedback_negative_other_issue">נושא אחר</string>
+  <string name="car_feedback_search_incorrect_address">כתובת שגויה</string>
+  <string name="car_feedback_search_incorrect_location">מיקום שגוי</string>
+  <string name="car_feedback_search_incorrect_name">שם שגוי</string>
+  <string name="car_feedback_search_other">נושא אחר</string>
+  <string name="car_feedback_arrival_positive">טוב</string>
+  <string name="car_feedback_arrival_negative">לא טוב</string>
+</resources>

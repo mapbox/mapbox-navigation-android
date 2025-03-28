@@ -1,8 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <resources>
-    <!-- Indicates voice instructions are muted -->
-    <string name="mapbox_muted">صامت</string>
-
-    <!-- Indicates voice instructions are unmuted -->
-    <string name="mapbox_unmuted">غير صامت</string>
+  <string name="mapbox_muted">مكتوم</string>
+  <string name="mapbox_unmuted">غير مكتوم</string>
 </resources>

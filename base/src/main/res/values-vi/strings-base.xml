@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+  <plurals name="mapbox_number_of_days" tools:ignore="MissingTranslation">
+    <item quantity="other">ngày</item>
+  </plurals>
+  <string name="mapbox_unit_hr" tools:ignore="MissingTranslation">giờ</string>
+  <string name="mapbox_unit_min" tools:ignore="MissingTranslation">phút</string>
+  <string name="mapbox_callout_similar_eta" tools:ignore="MissingTranslation">ETA tương tự</string>
+  <string name="mapbox_callout_faster" tools:ignore="MissingTranslation">-%s</string>
+  <string name="mapbox_callout_slower" tools:ignore="MissingTranslation">+%s</string>
+  <string name="mapbox_end_navigation">Kết thúc Điều hướng</string>
+  <string name="mapbox_navigation_is_starting" tools:ignore="MissingTranslation">Đang bắt đầu điều hướng…</string>
+  <string name="mapbox_stop_session" tools:ignore="MissingTranslation">Ngừng phiên điều hướng</string>
+  <string name="mapbox_free_drive_session" tools:ignore="MissingTranslation">Phiên Lái xe Tự do</string>
+  <string name="mapbox_eta_format" tools:ignore="MissingTranslation">Đến %s</string>
+</resources>

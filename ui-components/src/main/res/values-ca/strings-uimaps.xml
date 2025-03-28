@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="mapbox_recenter" tools:ignore="MissingTranslation">Centra de nou</string>
-    <string name="mapbox_route_overview" tools:ignore="MissingTranslation">Visió General</string>
-    <string name="mapbox_route_follow" tools:ignore="MissingTranslation">Seguint</string>
-</resources>

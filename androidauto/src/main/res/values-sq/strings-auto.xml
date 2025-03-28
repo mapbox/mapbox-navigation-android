@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="car_action_search_favorites">Të preferuarat</string>
+  <string name="car_search_no_results">Asnjë rezultat</string>
+  <string name="car_search_unknown_current_location">Vendndodhja aktuale e panjohur</string>
+  <string name="car_search_unknown_search_location">Vendndodhje e panjohur kërkimi</string>
+  <string name="car_label_ok">OK</string>
+  <string name="car_action_preview_title">Paraqitja e rrugës</string>
+  <string name="car_action_preview_no_location">Vendndodhja aktuale nuk u gjet</string>
+  <string name="car_action_preview_navigate_button">Vazhdo të drejtohesh</string>
+  <string name="car_action_navigation_stop_button">Ndal</string>
+  <string name="car_settings_title">Cilësimet</string>
+  <string name="car_settings_toggle_place_holder">Vendosjet vend mbajtës</string>
+  <string name="car_settings_preload_failure_title">Dështoi të ngarkohen paraprakisht cilësimet</string>
+  <string name="car_settings_preload_failure_message">Provoni të hapni aplikacionin përsëri.</string>
+  <string name="car_message_location_permissions">Ju lutemi hapni aplikacionin dhe aktivizoni lejen e vendndodhjes.</string>
+  <string name="car_message_location_permissions_title">Kërkon leje për vendndodhjen</string>
+  <string name="car_preference_audio_guidance_enabled_description">Mundëson udhëzimin audio</string>
+  <string name="car_feedback_title">Raporto komente</string>
+  <string name="car_feedback_submit">Dorëzo</string>
+  <string name="car_feedback_submit_toast_select_item">Ju lutemi zgjidhni një artikull të reagimit</string>
+  <string name="car_feedback_submit_toast_success">Faleminderit për komentin tuaj!</string>
+  <string name="car_feedback_negative_routing_error">Cilësia e rrugës</string>
+  <string name="car_feedback_negative_incorrect_visual">Pamje e pasaktë</string>
+  <string name="car_feedback_negative_incorrect_audio">Audio e pasaktë</string>
+  <string name="car_feedback_negative_road_issue">Çështje e rrugës</string>
+  <string name="car_feedback_negative_road_closed">Rruga e mbyllur</string>
+  <string name="car_feedback_negative_traffic_issue">Çështje trafiku</string>
+  <string name="car_feedback_negative_route_not_allowed">Rrugë e paligjshme</string>
+  <string name="car_feedback_negative_positioning_issue">Çështje e pozicionimit</string>
+  <string name="car_feedback_negative_other_issue">Çështje tjetër</string>
+  <string name="car_feedback_search_incorrect_address">Adresë e pasaktë</string>
+  <string name="car_feedback_search_incorrect_location">Vendndodhje e pasaktë</string>
+  <string name="car_feedback_search_incorrect_name">Emër i pasaktë</string>
+  <string name="car_feedback_search_other">Çështje tjetër</string>
+  <string name="car_feedback_arrival_positive">Mirë</string>
+  <string name="car_feedback_arrival_negative">Jo mirë</string>
+</resources>

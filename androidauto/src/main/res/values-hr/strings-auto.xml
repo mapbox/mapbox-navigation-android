@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="car_action_search_favorites">Omiljeno</string>
+  <string name="car_search_no_results">Nema rezultata</string>
+  <string name="car_search_unknown_current_location">Nepoznata trenutna lokacija</string>
+  <string name="car_search_unknown_search_location">Nepoznata lokacija pretraživanja</string>
+  <string name="car_label_ok">U redu</string>
+  <string name="car_action_preview_title">Pregled rute</string>
+  <string name="car_action_preview_no_location">Trenutna lokacija nije pronađena</string>
+  <string name="car_action_preview_navigate_button">Nastavi prema ruti</string>
+  <string name="car_action_navigation_stop_button">Zaustavi</string>
+  <string name="car_settings_title">Postavke</string>
+  <string name="car_settings_toggle_place_holder">Rezervirano mjesto za postavke</string>
+  <string name="car_settings_preload_failure_title">Nije uspjelo prethodno učitavanje postavki</string>
+  <string name="car_settings_preload_failure_message">Pokušajte ponovno otvoriti aplikaciju.</string>
+  <string name="car_message_location_permissions">Molimo otvorite aplikaciju i omogućite dopuštenje za lokaciju.</string>
+  <string name="car_message_location_permissions_title">Potrebna je dozvola za lokaciju</string>
+  <string name="car_preference_audio_guidance_enabled_description">Omogućuje audio vođenje</string>
+  <string name="car_feedback_title">Prijavi povratne informacije</string>
+  <string name="car_feedback_submit">Pošalji</string>
+  <string name="car_feedback_submit_toast_select_item">Molimo odaberite stavku povratne informacije</string>
+  <string name="car_feedback_submit_toast_success">Hvala vam na vašim povratnim informacijama!</string>
+  <string name="car_feedback_negative_routing_error">Kvaliteta rute</string>
+  <string name="car_feedback_negative_incorrect_visual">Netočan vizual</string>
+  <string name="car_feedback_negative_incorrect_audio">Netočan zvuk</string>
+  <string name="car_feedback_negative_road_issue">Problem s cestom</string>
+  <string name="car_feedback_negative_road_closed">Cesta zatvorena</string>
+  <string name="car_feedback_negative_traffic_issue">Prometni problem</string>
+  <string name="car_feedback_negative_route_not_allowed">Neispravna ruta</string>
+  <string name="car_feedback_negative_positioning_issue">Problem s pozicioniranjem</string>
+  <string name="car_feedback_negative_other_issue">Drugi problem</string>
+  <string name="car_feedback_search_incorrect_address">Netočna adresa</string>
+  <string name="car_feedback_search_incorrect_location">Netočna lokacija</string>
+  <string name="car_feedback_search_incorrect_name">Netočno ime</string>
+  <string name="car_feedback_search_other">Drugi problem</string>
+  <string name="car_feedback_arrival_positive">Dobro</string>
+  <string name="car_feedback_arrival_negative">Nije dobro</string>
+</resources>

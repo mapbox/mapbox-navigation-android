@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+  <plurals name="mapbox_number_of_days" tools:ignore="MissingTranslation">
+    <item quantity="one">päev</item>
+    <item quantity="other">päeva</item>
+  </plurals>
+  <string name="mapbox_unit_hr" tools:ignore="MissingTranslation">t</string>
+  <string name="mapbox_unit_min" tools:ignore="MissingTranslation">min</string>
+  <string name="mapbox_callout_similar_eta" tools:ignore="MissingTranslation">Sarnane ETA</string>
+  <string name="mapbox_callout_faster" tools:ignore="MissingTranslation">-%s</string>
+  <string name="mapbox_callout_slower" tools:ignore="MissingTranslation">+%s</string>
+  <string name="mapbox_end_navigation">Lõpeta navigeerimine</string>
+  <string name="mapbox_navigation_is_starting" tools:ignore="MissingTranslation">Navigatsioon algab...</string>
+  <string name="mapbox_stop_session" tools:ignore="MissingTranslation">Peata sessioon</string>
+  <string name="mapbox_free_drive_session" tools:ignore="MissingTranslation">Tasuta sõiduseanss</string>
+  <string name="mapbox_eta_format" tools:ignore="MissingTranslation">%s ETA</string>
+</resources>

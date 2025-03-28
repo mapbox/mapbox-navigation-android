@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+  <plurals name="mapbox_number_of_days" tools:ignore="MissingTranslation">
+    <item quantity="zero">أيام</item>
+    <item quantity="one">يوم</item>
+    <item quantity="two">يومان</item>
+    <item quantity="few">أيام</item>
+    <item quantity="many">يوماً</item>
+    <item quantity="other">أيام</item>
+  </plurals>
+  <string name="mapbox_unit_hr" tools:ignore="MissingTranslation">ساعة</string>
+  <string name="mapbox_unit_min" tools:ignore="MissingTranslation">دقيقة</string>
+  <string name="mapbox_callout_similar_eta" tools:ignore="MissingTranslation">وقت وصول مشابه</string>
+  <string name="mapbox_callout_faster" tools:ignore="MissingTranslation">-%s</string>
+  <string name="mapbox_callout_slower" tools:ignore="MissingTranslation">+%s</string>
+  <string name="mapbox_end_navigation">انهاء الرحلة</string>
+  <string name="mapbox_navigation_is_starting" tools:ignore="MissingTranslation">يبدأ التنقل...</string>
+  <string name="mapbox_stop_session" tools:ignore="MissingTranslation">إيقاف الجلسة</string>
+  <string name="mapbox_free_drive_session" tools:ignore="MissingTranslation">جلسة قيادة مجانية</string>
+  <string name="mapbox_eta_format" tools:ignore="MissingTranslation">%s الوقت المتوقع للوصول</string>
+</resources>

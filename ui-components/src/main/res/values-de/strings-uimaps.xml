@@ -1,5 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="mapbox_recenter" tools:ignore="MissingTranslation">Neu zentrieren</string>
-    <string name="mapbox_route_overview" tools:ignore="MissingTranslation">Übersicht</string>
-    </resources>
+  <string name="mapbox_recenter" tools:ignore="MissingTranslation">Zentrieren</string>
+  <string name="mapbox_route_overview" tools:ignore="MissingTranslation">Übersicht</string>
+  <string name="mapbox_route_follow" tools:ignore="MissingTranslation">Folgend</string>
+</resources>

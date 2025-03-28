@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+  <plurals name="mapbox_number_of_days" tools:ignore="MissingTranslation">
+    <item quantity="other"># 天</item>
+  </plurals>
+  <string name="mapbox_unit_hr" tools:ignore="MissingTranslation">小時</string>
+  <string name="mapbox_unit_min" tools:ignore="MissingTranslation">分鐘</string>
+  <string name="mapbox_callout_similar_eta" tools:ignore="MissingTranslation">相似 ETA</string>
+  <string name="mapbox_callout_faster" tools:ignore="MissingTranslation">-%s</string>
+  <string name="mapbox_callout_slower" tools:ignore="MissingTranslation">+%s</string>
+  <string name="mapbox_end_navigation">結束導航</string>
+  <string name="mapbox_navigation_is_starting" tools:ignore="MissingTranslation">導航即將開始…</string>
+  <string name="mapbox_stop_session" tools:ignore="MissingTranslation">停止會話</string>
+  <string name="mapbox_free_drive_session" tools:ignore="MissingTranslation">免費駕駛體驗</string>
+  <string name="mapbox_eta_format" tools:ignore="MissingTranslation">%s 預計到達時間</string>
+</resources>

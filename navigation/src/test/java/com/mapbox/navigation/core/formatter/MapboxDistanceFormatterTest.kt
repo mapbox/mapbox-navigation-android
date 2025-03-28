@@ -232,7 +232,7 @@ class MapboxDistanceFormatterTest {
                 .build(),
         ).formatDistance(19312.1)
 
-        assertEquals("12 mérföld", result.toString())
+        assertEquals("12 mi", result.toString())
     }
 
     @Test

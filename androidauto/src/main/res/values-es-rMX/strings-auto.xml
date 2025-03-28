@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="car_action_search_favorites">Favoritos</string>
+  <string name="car_search_no_results">Sin resultados</string>
+  <string name="car_search_unknown_current_location">Ubicación actual desconocida</string>
+  <string name="car_search_unknown_search_location">Ubicación de búsqueda desconocida</string>
+  <string name="car_label_ok">Aceptar</string>
+  <string name="car_action_preview_title">Vista previa de la ruta</string>
+  <string name="car_action_preview_no_location">Ubicación actual no encontrada</string>
+  <string name="car_action_preview_navigate_button">Continuar hacia la ruta</string>
+  <string name="car_action_navigation_stop_button">Detener</string>
+  <string name="car_settings_title">Configuración</string>
+  <string name="car_settings_toggle_place_holder">Marcador de posición de configuración</string>
+  <string name="car_settings_preload_failure_title">Error al precargar la configuración</string>
+  <string name="car_settings_preload_failure_message">Intenta abrir la aplicación de nuevo.</string>
+  <string name="car_message_location_permissions">Por favor, abre la aplicación y habilita el permiso de ubicación.</string>
+  <string name="car_message_location_permissions_title">Necesita permiso de ubicación</string>
+  <string name="car_preference_audio_guidance_enabled_description">Habilita la guía de audio</string>
+  <string name="car_feedback_title">Informar comentarios</string>
+  <string name="car_feedback_submit">Enviar</string>
+  <string name="car_feedback_submit_toast_select_item">Por favor seleccione un elemento de retroalimentación</string>
+  <string name="car_feedback_submit_toast_success">¡Gracias por tus comentarios!</string>
+  <string name="car_feedback_negative_routing_error">Calidad de la ruta</string>
+  <string name="car_feedback_negative_incorrect_visual">Visual incorrecto</string>
+  <string name="car_feedback_negative_incorrect_audio">Audio incorrecto</string>
+  <string name="car_feedback_negative_road_issue">Problema en la carretera</string>
+  <string name="car_feedback_negative_road_closed">Carretera cerrada</string>
+  <string name="car_feedback_negative_traffic_issue">Problema de tráfico</string>
+  <string name="car_feedback_negative_route_not_allowed">Ruta ilegal</string>
+  <string name="car_feedback_negative_positioning_issue">Problema de posicionamiento</string>
+  <string name="car_feedback_negative_other_issue">Otro problema</string>
+  <string name="car_feedback_search_incorrect_address">Dirección incorrecta</string>
+  <string name="car_feedback_search_incorrect_location">Ubicación incorrecta</string>
+  <string name="car_feedback_search_incorrect_name">Nombre incorrecto</string>
+  <string name="car_feedback_search_other">Otro problema</string>
+  <string name="car_feedback_arrival_positive">Bueno</string>
+  <string name="car_feedback_arrival_negative">No es bueno</string>
+</resources>

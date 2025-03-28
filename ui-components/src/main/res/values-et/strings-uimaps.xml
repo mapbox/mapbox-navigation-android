@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+  <string name="mapbox_recenter" tools:ignore="MissingTranslation">Keskendu uuesti</string>
+  <string name="mapbox_route_overview" tools:ignore="MissingTranslation">Ülevaade</string>
+  <string name="mapbox_route_follow" tools:ignore="MissingTranslation">Järgmine</string>
+</resources>

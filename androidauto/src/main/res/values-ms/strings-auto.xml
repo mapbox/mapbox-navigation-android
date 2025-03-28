@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="car_action_search_favorites">Kegemaran</string>
+  <string name="car_search_no_results">Tiada hasil</string>
+  <string name="car_search_unknown_current_location">Lokasi semasa tidak diketahui</string>
+  <string name="car_search_unknown_search_location">Lokasi carian tidak diketahui</string>
+  <string name="car_label_ok">OK</string>
+  <string name="car_action_preview_title">Pratonton laluan</string>
+  <string name="car_action_preview_no_location">Lokasi semasa tidak ditemui</string>
+  <string name="car_action_preview_navigate_button">Teruskan ke laluan</string>
+  <string name="car_action_navigation_stop_button">Berhenti</string>
+  <string name="car_settings_title">Tetapan</string>
+  <string name="car_settings_toggle_place_holder">Pemegang tempat Tetapan</string>
+  <string name="car_settings_preload_failure_title">Gagal memuat awal tetapan</string>
+  <string name="car_settings_preload_failure_message">Cuba buka semula aplikasi itu.</string>
+  <string name="car_message_location_permissions">Sila buka aplikasi dan benarkan kebenaran lokasi.</string>
+  <string name="car_message_location_permissions_title">Memerlukan kebenaran lokasi</string>
+  <string name="car_preference_audio_guidance_enabled_description">Mengaktifkan panduan audio</string>
+  <string name="car_feedback_title">Laporkan maklum balas</string>
+  <string name="car_feedback_submit">Hantar</string>
+  <string name="car_feedback_submit_toast_select_item">Sila pilih item maklum balas</string>
+  <string name="car_feedback_submit_toast_success">Terima kasih atas maklum balas anda!</string>
+  <string name="car_feedback_negative_routing_error">Kualiti laluan</string>
+  <string name="car_feedback_negative_incorrect_visual">Visual tidak betul</string>
+  <string name="car_feedback_negative_incorrect_audio">Audio tidak betul</string>
+  <string name="car_feedback_negative_road_issue">Isu jalan raya</string>
+  <string name="car_feedback_negative_road_closed">Jalan ditutup</string>
+  <string name="car_feedback_negative_traffic_issue">Isu trafik</string>
+  <string name="car_feedback_negative_route_not_allowed">Laluan haram</string>
+  <string name="car_feedback_negative_positioning_issue">Isu penempatan</string>
+  <string name="car_feedback_negative_other_issue">Isu lain</string>
+  <string name="car_feedback_search_incorrect_address">Alamat tidak betul</string>
+  <string name="car_feedback_search_incorrect_location">Lokasi tidak betul</string>
+  <string name="car_feedback_search_incorrect_name">Nama tidak betul</string>
+  <string name="car_feedback_search_other">Isu lain</string>
+  <string name="car_feedback_arrival_positive">Baik</string>
+  <string name="car_feedback_arrival_negative">Tidak baik</string>
+</resources>

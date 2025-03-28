@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+  <plurals name="mapbox_number_of_days" tools:ignore="MissingTranslation">
+    <item quantity="other">日</item>
+  </plurals>
+  <string name="mapbox_unit_hr" tools:ignore="MissingTranslation">時間</string>
+  <string name="mapbox_unit_min" tools:ignore="MissingTranslation">分</string>
+  <string name="mapbox_callout_similar_eta" tools:ignore="MissingTranslation">同様のETA</string>
+  <string name="mapbox_callout_faster" tools:ignore="MissingTranslation">-%s</string>
+  <string name="mapbox_callout_slower" tools:ignore="MissingTranslation">+%s</string>
+  <string name="mapbox_end_navigation">ナビゲーションを終了</string>
+  <string name="mapbox_navigation_is_starting" tools:ignore="MissingTranslation">ナビゲーションを開始しています…</string>
+  <string name="mapbox_stop_session" tools:ignore="MissingTranslation">セッションを停止</string>
+  <string name="mapbox_free_drive_session" tools:ignore="MissingTranslation">フリードライブセッション</string>
+  <string name="mapbox_eta_format" tools:ignore="MissingTranslation">%s予定時刻</string>
+</resources>

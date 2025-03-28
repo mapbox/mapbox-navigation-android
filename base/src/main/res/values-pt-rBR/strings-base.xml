@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+  <plurals name="mapbox_number_of_days" tools:ignore="MissingTranslation">
+    <item quantity="one">%d dia</item>
+    <item quantity="other">dias</item>
+  </plurals>
+  <string name="mapbox_unit_hr" tools:ignore="MissingTranslation">hr</string>
+  <string name="mapbox_unit_min" tools:ignore="MissingTranslation">min</string>
+  <string name="mapbox_callout_similar_eta" tools:ignore="MissingTranslation">ETA semelhante</string>
+  <string name="mapbox_callout_faster" tools:ignore="MissingTranslation">-%s</string>
+  <string name="mapbox_callout_slower" tools:ignore="MissingTranslation">+%s</string>
+  <string name="mapbox_end_navigation">Finalizar navegação</string>
+  <string name="mapbox_navigation_is_starting" tools:ignore="MissingTranslation">A navegação está começando…</string>
+  <string name="mapbox_stop_session" tools:ignore="MissingTranslation">Parar sessão</string>
+  <string name="mapbox_free_drive_session" tools:ignore="MissingTranslation">Sessão de Condução Livre</string>
+  <string name="mapbox_eta_format" tools:ignore="MissingTranslation">%s ETA</string>
+</resources>
