@@ -1,5 +1,52 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.8.0 - 28 March, 2025
+#### Features
+- Added helpPhone field to EV Location class. 
+- Added support of `exclude` parameter to EV Search. 
+- ⚠️ Breaking changes in Experimental API. `AdasSpeedLimitRestriction.VehicleType` has been moved to `com.mapbox.navigation.base.model.VehicleType`. 
+- Added new flag `LocationMatcherResult#isAdasDataAvailable` indicating whether ADAS data available at current position. 
+- Added support for Lane Control and Passage Control road cameras. 
+- ⚠️ Breaking changes in Experimental API: `MapboxRouteCalloutApi` and `MapboxRouteCalloutView` are no longer publicly available. 
+- New option `MapboxRouteLineApiOptions#isRouteCalloutsEnabled` to allow `MapboxRouteLineApi` calculate data for route callouts. 
+- New function `MapboxRouteLineView#enableCallouts` now allows to render route callouts on the map by setting an adapter. 
+- Added `DefaultRouteCalloutAdapter` which provides a built-in adapter for route callouts. 
+- Compensate input location stream outages with Odometry (when provided)
+- Added `MapboxRouteCalloutApiOptions#maxZoom` to allow for setting a maximum zoom level for the route callout. This is useful for preventing the route callout from being displayed at high zoom levels. 
+- Added `MapboxRouteCalloutApiOptions#minZoom` to allow for setting a minimum zoom level for the route callout. This is useful for preventing the route callout from being displayed at low zoom levels. 
+- Added `MapboxRouteCalloutApiOptions#priority` to allow for setting the priority of the route callout. This is useful for determining the order in which the route callout is displayed when multiple _Dynamic View Annotations_ are present on the map. 
+- Exposed MapGPT as a Navigation SDK Core Framework Module. 
+- Added support for `exclude_operators` parameter in EV search. 
+- Added a new function `MapboxRouteShieldApi#getRoadComponentsShields` which accepts a list of `RoadComponent`. 
+- Clear caches when device memory is low. 
+- Support for danger zones in countries with legal restrictions on displaying speed camera locations (e.g. France) 
+- Added a way to preview all road cameras for a given route using `RoadCamerasManager::previewCamerasOnRoute`. 
+
+#### Bug fixes and improvements
+- Avoid unnecessary bandwidth/memory consumption caused by loading of ADAS tiles if eHorizon is enabled while the ADASIS is unused. 
+- Support the stable output frequency for the internal DR and improve error recovery and calibration procedure. 
+- Improved EV charging station search along the route to provide more evenly distributed results. 
+- Processing of road cameras on location update has been moved from the main to the background thread 
+- Added `EHorizonOptions#enableEnhancedDataAlongEH` flag to control access to enhanced data attributes (from ADAS data layer). 
+- Fixed an alternative Callout point to primary route.   
+- Fixed an issue where overriding camera pitch to 0 caused the camera to go into "maneuver framing" mode.    
+- Removed usages of APIs that prevented Copilot from working on devices with Android 7 or older. 
+- Optimized road cameras processing logic to reduce ANRs. 
+- Added filter for zero-powered charging stations on EV layer 
+- Fixed jumps in location updates reported by `com.mapbox.navigation.core.trip.session.LocationObserver`. 
+The jumps started to happen after navigation tiles version switch reported in `NavigationVersionSwitchObserver`.
+- Fixed incorrect events from RoadCameras Callback interface. 
+- Fixed crash on invalid EV time parsing 
+- Fixed an issue where the location indicator might have teleported back to tunnel after exiting it. 
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.11.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.11.0))
+- Mapbox Navigation Native `v324.0.0`
+- Mapbox Core Common `v24.11.0`
+- Mapbox Java `v7.3.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.3.1))
+
+
 ## Navigation SDK Core Framework 3.8.0-rc.1 - 14 March, 2025
 #### Features
 - ⚠️ Breaking changes in Experimental API: `MapboxRouteCalloutApi` and `MapboxRouteCalloutView` are no longer publicly available. 
