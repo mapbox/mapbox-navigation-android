@@ -1,5 +1,21 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.8.1 - 31 March, 2025
+#### Features
+
+
+#### Bug fixes and improvements
+- Fixed an issue with not working EV requests on a systems without Google Play Services.  
+- Added automatic pause/resume of all direction calls when a navigation session stops/starts. 
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.11.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.11.0))
+- Mapbox Navigation Native `v324.0.0`
+- Mapbox Core Common `v24.11.0`
+- Mapbox Java `v7.3.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.3.1))
+
+
 ## Navigation SDK Core Framework 3.8.0 - 28 March, 2025
 #### Features
 - Added helpPhone field to EV Location class. 
