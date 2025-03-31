@@ -25,4 +25,9 @@ internal sealed class ViewportProperty<T>(var override: T?, var fallback: T) {
         override,
         fallback,
     )
+
+    class BooleanProperty(override: Boolean?, fallback: Boolean) : ViewportProperty<Boolean>(
+        override,
+        fallback,
+    )
 }

@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maps.camera.data
 
+import com.mapbox.annotation.MapboxDelicateApi
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.common.location.Location
 import com.mapbox.geojson.Point
@@ -10,6 +11,7 @@ import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.Size
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.route.routeOptions
 import com.mapbox.navigation.base.internal.utils.isSameRoute
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -582,6 +584,66 @@ class MapboxNavigationViewportDataSourceTest {
         )
     }
 
+    @OptIn(MapboxDelicateApi::class, ExperimentalPreviewMapboxNavigationAPI::class)
+    @Test
+    fun `verify frame - location + route + progress + not framing a maneuver, but isFramingManeuver is overridden to true`() {
+        val stepProgress = mockk<RouteStepProgress> {
+            every { distanceRemaining } returns 123f
+        }
+        val legProgress = mockk<RouteLegProgress> {
+            every { currentStepProgress } returns stepProgress
+        }
+        every { routeProgress.currentLegProgress } returns legProgress
+        every { routeProgress.route } returns route
+
+        every {
+            isFramingManeuver(any(), any())
+        } returns true
+
+        val location = createLocation()
+
+        // following mocks
+        val expectedFollowingPoints = mutableListOf(location.toPoint()).apply {
+            addAll(pointsToFrameOnCurrentStep)
+            addAll(pointsToFrameAfterCurrentStep)
+        }
+        val followingZoom = 16.0
+        val followingCameraOptions = createCameraOptions {
+            center(location.toPoint())
+            bearing(smoothedBearing)
+            pitch(ZERO_PITCH)
+            zoom(followingZoom)
+            padding(EMPTY_EDGE_INSETS)
+        }
+        every {
+            mapboxMap.cameraForCoordinates(
+                expectedFollowingPoints,
+                match<CameraOptions> {
+                    it.pitch == ZERO_PITCH &&
+                        it.bearing == smoothedBearing &&
+                        it.padding == EMPTY_EDGE_INSETS
+                },
+                null,
+                null,
+                null,
+            )
+        } returns followingCameraOptions
+
+        // run
+        viewportDataSource.onLocationChanged(location)
+        viewportDataSource.onRouteChanged(navigationRoute)
+        viewportDataSource.isFramingManeuverPropertyOverride(true)
+        viewportDataSource.onRouteProgressChanged(routeProgress)
+        viewportDataSource.evaluate()
+        val data = viewportDataSource.getViewportData()
+
+        // verify
+        assertEquals(
+            followingCameraOptions,
+            data.cameraForFollowing,
+        )
+    }
+
     @Test
     fun `verify frame - overview current leg only`() {
         val stepProgress = mockk<RouteStepProgress> {
@@ -818,6 +880,62 @@ class MapboxNavigationViewportDataSourceTest {
         assertEquals(
             overviewCameraOptions,
             data.cameraForOverview,
+        )
+    }
+
+    @OptIn(MapboxDelicateApi::class, ExperimentalPreviewMapboxNavigationAPI::class)
+    @Test
+    fun `verify frame - location + route + progress + framing a maneuver, isFramingManeuver is overridden to false`() {
+        every {
+            isFramingManeuver(any(), any())
+        } returns true
+
+        val stepProgress = mockk<RouteStepProgress> {
+            every { distanceRemaining } returns 123f
+        }
+        val legProgress = mockk<RouteLegProgress> {
+            every { currentStepProgress } returns stepProgress
+        }
+        every { routeProgress.currentLegProgress } returns legProgress
+        every { routeProgress.route } returns route
+
+        val location = createLocation()
+
+        // following mocks
+        val expectedFollowingPoints = mutableListOf(location.toPoint()).apply {
+            addAll(pointsToFrameOnCurrentStep)
+        }
+        val fallbackOptions = createCameraOptions {
+            center(location.toPoint())
+            bearing(smoothedBearing)
+            pitch(viewportDataSource.options.followingFrameOptions.defaultPitch)
+            zoom(mapboxMap.cameraState.zoom)
+            padding(singlePixelEdgeInsets)
+        }
+        val followingZoom = 16.0
+        val followingCameraOptions = fallbackOptions.toBuilder()
+            .zoom(followingZoom)
+            .build()
+        every {
+            mapboxMap.cameraForCoordinates(
+                expectedFollowingPoints,
+                fallbackOptions,
+                followingScreenBox,
+            )
+        } returns followingCameraOptions
+
+        // run
+        viewportDataSource.onLocationChanged(location)
+        viewportDataSource.onRouteChanged(navigationRoute)
+        viewportDataSource.isFramingManeuverPropertyOverride(false)
+        viewportDataSource.onRouteProgressChanged(routeProgress)
+        viewportDataSource.evaluate()
+        val data = viewportDataSource.getViewportData()
+
+        // verify
+        assertEquals(
+            followingCameraOptions,
+            data.cameraForFollowing,
         )
     }
 

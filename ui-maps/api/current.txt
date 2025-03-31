@@ -315,6 +315,7 @@ package com.mapbox.navigation.ui.maps.camera.data {
     method public com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSourceOptions getOptions();
     method public com.mapbox.maps.EdgeInsets getOverviewPadding();
     method public com.mapbox.navigation.ui.maps.camera.data.ViewportData getViewportData();
+    method @com.mapbox.annotation.MapboxDelicateApi @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void isFramingManeuverPropertyOverride(Boolean? value);
     method public void onLocationChanged(com.mapbox.common.location.Location location);
     method public void onRouteChanged(com.mapbox.navigation.base.route.NavigationRoute route);
     method public void onRouteProgressChanged(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);

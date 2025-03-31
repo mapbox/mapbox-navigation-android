@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.camera.data
 
 import androidx.annotation.UiThread
+import com.mapbox.annotation.MapboxDelicateApi
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.common.Cancelable
 import com.mapbox.common.location.Location
@@ -248,7 +249,6 @@ class MapboxNavigationViewportDataSource internal constructor(
     private var simplifiedRemainingPointsOnRoute: List<Point> = emptyList()
     private var targetLocation: Location? = null
     private var averageIntersectionDistancesOnRoute: List<List<Double>> = emptyList()
-    private var isFramingManeuver = false
 
     /* -------- GENERATED FRAMES -------- */
     private var followingCameraOptions = CameraOptions.Builder().build()
@@ -263,6 +263,8 @@ class MapboxNavigationViewportDataSource internal constructor(
         null,
         options.followingFrameOptions.defaultPitch,
     )
+    private val isFramingManeuverProperty = ViewportProperty.BooleanProperty(null, false)
+
     private val overviewCenterProperty = ViewportProperty.CenterProperty(null, NULL_ISLAND_POINT)
     private val overviewZoomProperty =
         ViewportProperty.ZoomProperty(null, options.overviewFrameOptions.maxZoom)
@@ -467,11 +469,11 @@ class MapboxNavigationViewportDataSource internal constructor(
             routeProgress.currentLegProgress,
             routeProgress.currentLegProgress?.currentStepProgress,
         ) { currentLegProgress, currentStepProgress ->
-            isFramingManeuver = isFramingManeuver(
+            isFramingManeuverProperty.fallback = isFramingManeuver(
                 routeProgress,
                 options.followingFrameOptions,
             )
-            followingPitchProperty.fallback = if (isFramingManeuver) {
+            followingPitchProperty.fallback = if (isFramingManeuverProperty.get()) {
                 ZERO_PITCH
             } else {
                 options.followingFrameOptions.defaultPitch
@@ -643,6 +645,26 @@ class MapboxNavigationViewportDataSource internal constructor(
     }
 
     /**
+     * By default, isFramingManeuver property is calculated based on route progress updates.
+     * This property affects the calculated pitch and,
+     * in case [FollowingFrameOptions.maximizeViewableGeometryWhenPitchZero] is set to true,
+     * the way the camera is framed: whether it's centered on the puck or not and instead
+     * uses the maximum possible zoom to frame the upcoming maneuver.
+     *
+     * If you want to explicitly move the camera to framing-maneuver / non-framing-maneuver mode,
+     * use this method.
+     * Pass null to remove the override.
+     *
+     * NOTE: for most cases you don't need to override this property.
+     * Use this method only if you are sure that's the only way to achieve the desired behaviour.
+     */
+    @MapboxDelicateApi
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun isFramingManeuverPropertyOverride(value: Boolean?) {
+        isFramingManeuverProperty.override = value
+    }
+
+    /**
      * Whenever [evaluate] is called, the source produces [ViewportData] updates
      * with opinionated values for all camera properties.
      *
@@ -750,7 +772,7 @@ class MapboxNavigationViewportDataSource internal constructor(
         }
 
         options.followingFrameOptions.frameGeometryAfterManeuver.run {
-            if (enabled && isFramingManeuver) {
+            if (enabled && isFramingManeuverProperty.get()) {
                 pointsForFollowing.addAll(pointsToFrameAfterCurrentStep)
             }
         }
@@ -758,7 +780,7 @@ class MapboxNavigationViewportDataSource internal constructor(
         val cameraFrame =
             if (pointsForFollowing.size > 1 &&
                 options.followingFrameOptions.maximizeViewableGeometryWhenPitchZero &&
-                isFramingManeuver
+                isFramingManeuverProperty.get()
             ) {
                 followingFramingModeHolder?.mode = FollowingFramingMode.MULTIPLE_POINTS
                 mapboxMap.cameraForCoordinates(
@@ -810,6 +832,7 @@ class MapboxNavigationViewportDataSource internal constructor(
         followingCenterProperty.fallback = cameraFrame.center!!
 
         options.followingFrameOptions.run {
+            val isFramingManeuver = isFramingManeuverProperty.get()
             followingZoomProperty.fallback =
                 if (isFramingManeuver && internalOptions.ignoreMinZoomWhenFramingManeuver) {
                     min(cameraFrame.zoom!!, maxZoom)
