@@ -57,7 +57,7 @@ class FollowingFrameOptions {
      *
      * Defaults to `FocalPoint(0.5, 1.0)` that centers horizontally on the bottom edge of the padding.
      *
-     * **NOTE:** The focal point change has no effect when the camera's pitch is `0` and [maximizeViewableGeometryWhenPitchZero] is enabled.
+     * **NOTE:** The focal point change has no effect when the camera is framing maneuver and [maximizeViewableGeometryWhenPitchZero] is enabled.
      */
     var focalPoint: FocalPoint = FocalPoint(0.5, 1.0)
 
