@@ -163,6 +163,31 @@ class RouteAlternativesControllerTest {
     }
 
     @Test
+    fun `should removeObserver from nav-native interface on pause`() {
+        val routeAlternativesController = createRouteAlternativesController()
+
+        routeAlternativesController.setRouteUpdateSuggestionListener { }
+        routeAlternativesController.setRouteAlternativesObserver(mockk(relaxed = true))
+        routeAlternativesController.pause()
+
+        verify(exactly = 1) { controllerInterface.addObserver(any()) }
+        verify(exactly = 1) { controllerInterface.removeObserver(any()) }
+    }
+
+    @Test
+    fun `should addObserver to nav-native interface on resume after pause`() {
+        val routeAlternativesController = createRouteAlternativesController()
+
+        routeAlternativesController.setRouteUpdateSuggestionListener { }
+        routeAlternativesController.setRouteAlternativesObserver(mockk(relaxed = true))
+        routeAlternativesController.pause()
+        routeAlternativesController.resume()
+
+        verify(exactly = 2) { controllerInterface.addObserver(any()) }
+        verify(exactly = 1) { controllerInterface.removeObserver(any()) }
+    }
+
+    @Test
     fun `should removeAllObservers from nav-native interface when unregisterAll is called`() {
         val routeAlternativesController = createRouteAlternativesController()
 

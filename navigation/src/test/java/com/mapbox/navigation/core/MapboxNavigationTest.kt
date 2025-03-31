@@ -1708,6 +1708,37 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
+    fun `stopping trip session it pauses routes controllers and navigator`() = coroutineRule.runBlockingTest {
+        createMapboxNavigation()
+        every { directionsSession.initialLegIndex } returns 0
+        every { tripSession.isRunningWithForegroundService() } returns true
+
+        mapboxNavigation.startTripSession()
+        mapboxNavigation.stopTripSession()
+
+        verify(exactly = 1) {
+            routeAlternativesController.pause()
+            routeRefreshController.pauseRouteRefreshes()
+            navigator.pause()
+        }
+    }
+
+    @Test
+    fun `stopping trip session it resumes routes controllers and navigator`() = coroutineRule.runBlockingTest {
+        createMapboxNavigation()
+        every { directionsSession.initialLegIndex } returns 0
+        every { tripSession.isRunningWithForegroundService() } returns true
+
+        mapboxNavigation.startTripSession()
+
+        verify(exactly = 1) {
+            navigator.resume()
+            routeRefreshController.resumeRouteRefreshes()
+            routeAlternativesController.resume()
+        }
+    }
+
+    @Test
     fun `setNavigationRoutes alternative for current primary route`() =
         coroutineRule.runBlockingTest {
             createMapboxNavigation()

@@ -142,6 +142,8 @@ interface MapboxNativeNavigator : RerouteEventsProvider {
      */
     fun unregisterAllObservers()
 
+    fun pause()
+    fun resume()
     fun shutdown()
 
     // Predictive cache
