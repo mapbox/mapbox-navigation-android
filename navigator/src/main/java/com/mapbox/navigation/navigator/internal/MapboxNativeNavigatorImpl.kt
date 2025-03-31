@@ -390,6 +390,14 @@ class MapboxNativeNavigatorImpl(
         nativeNavigatorRecreationObservers.clear()
     }
 
+    override fun pause() {
+        navigator.pause()
+    }
+
+    override fun resume() {
+        navigator.resume()
+    }
+
     override fun shutdown() {
         navigator.shutdown()
     }

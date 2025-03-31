@@ -801,7 +801,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     fun stopTripSession() {
         runIfNotDestroyed {
             latestLegIndex = tripSession.getRouteProgress()?.currentLegProgress?.legIndex
+            routeAlternativesController.pause()
+            routeRefreshController.pauseRouteRefreshes()
             tripSession.stop()
+            navigator.pause()
         }
     }
 
@@ -2070,10 +2073,13 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private fun startSession(withTripService: Boolean, withReplayEnabled: Boolean) {
         runIfNotDestroyed {
             val previousState = tripSession.getState()
+            navigator.resume()
             tripSession.start(
                 withTripService = withTripService,
                 withReplayEnabled = withReplayEnabled,
             )
+            routeAlternativesController.resume()
+            routeRefreshController.resumeRouteRefreshes()
             // It's possible that we are in a state when routes are set,
             // but session is not started. In this case, as soon as routes are set,
             // NN starts generating status updates (which results in our route progress updates,

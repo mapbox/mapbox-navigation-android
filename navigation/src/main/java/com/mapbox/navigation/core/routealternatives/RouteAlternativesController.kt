@@ -59,9 +59,22 @@ internal class RouteAlternativesController(
         }
 
     private val metadataMap = mutableMapOf<String, AlternativeRouteMetadata>()
-    private var defaultAlternativesHandler: RouteAlternativesToRouteUpdateSuggestionsAdapter? =
-        null
+
+    private var active = true
+    private var defaultAlternativesHandler: RouteAlternativesToRouteUpdateSuggestionsAdapter? = null
     private var customAlternativesHandler: NavigationRouteAlternativesObserver? = null
+
+    fun pause() {
+        updateNativeObserver {
+            active = false
+        }
+    }
+
+    fun resume() {
+        updateNativeObserver {
+            active = true
+        }
+    }
 
     fun setRouteUpdateSuggestionListener(listener: UpdateRoutesSuggestionObserver?) {
         updateNativeObserver {
@@ -99,10 +112,11 @@ internal class RouteAlternativesController(
     }
 
     private fun updateNativeObserver(block: () -> Unit) {
-        val wasRunning = customAlternativesHandler != null || defaultAlternativesHandler != null
+        val wasRunning = active &&
+            (customAlternativesHandler != null || defaultAlternativesHandler != null)
         block()
-        val shouldBeRunning = customAlternativesHandler != null ||
-            defaultAlternativesHandler != null
+        val shouldBeRunning = active &&
+            (customAlternativesHandler != null || defaultAlternativesHandler != null)
         if (shouldBeRunning && !wasRunning) {
             nativeRouteAlternativesController.addObserver(nativeObserver)
         }
