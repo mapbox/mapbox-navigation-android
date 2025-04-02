@@ -1111,8 +1111,7 @@ package com.mapbox.navigation.ui.maps.route.line.api {
   @UiThread public final class MapboxRouteLineView {
     ctor public MapboxRouteLineView(com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions options);
     method public void cancel();
-    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void disableCallouts();
-    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void enableCallouts(com.mapbox.maps.viewannotation.ViewAnnotationManager viewAnnotationManager, com.mapbox.navigation.ui.maps.route.callout.api.MapboxRouteCalloutAdapter adapter);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void clearCalloutAdapter();
     method public com.mapbox.maps.extension.style.layers.properties.generated.Visibility? getAlternativeRoutesVisibility(com.mapbox.maps.Style style);
     method public com.mapbox.maps.extension.style.layers.properties.generated.Visibility? getPrimaryRouteVisibility(com.mapbox.maps.Style style);
     method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public String? getRouteMainLayerIdForFeature(String? featureId);
@@ -1127,6 +1126,7 @@ package com.mapbox.navigation.ui.maps.route.line.api {
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void renderRouteDrawData(com.mapbox.maps.Style style, com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue> routeDrawData, com.mapbox.maps.MapboxMap map, com.mapbox.navigation.ui.maps.route.line.api.RoutesRenderedCallback callback);
     method public void renderRouteDrawData(com.mapbox.maps.Style style, com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue> routeDrawData);
     method public void renderRouteLineUpdate(com.mapbox.maps.Style style, com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue> update);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void setCalloutAdapter(com.mapbox.maps.viewannotation.ViewAnnotationManager viewAnnotationManager, com.mapbox.navigation.ui.maps.route.callout.api.MapboxRouteCalloutAdapter adapter);
     method public void showAlternativeRoutes(com.mapbox.maps.Style style);
     method public void showOriginAndDestinationPoints(com.mapbox.maps.Style style);
     method public void showPrimaryRoute(com.mapbox.maps.Style style);

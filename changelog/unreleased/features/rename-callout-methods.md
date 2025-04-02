@@ -1,0 +1,3 @@
+ - ⚠️ Breaking changes in Experimental API. Function `MapboxRouteLineView#enableCallouts` has been renamed to `MapboxRouteLineView#setCalloutAdapter`  
+ - ⚠️ Breaking changes in Experimental API. Function `MapboxRouteLineView#disableCallouts` has been renamed to `MapboxRouteLineView#clearCalloutAdapter`
+ - Clear route callout adapter once `MapboxRouteLineView#cancel` called

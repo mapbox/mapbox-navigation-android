@@ -677,11 +677,13 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
      * Set a new [adapter] and associated [viewAnnotationManager] to provide route callout views on
      * demand. [DefaultRouteCalloutAdapter] can be used as a default implementation.
      *
+     * You need to set your adapter again after calling [cancel]
+     *
      * Note that corresponding [MapboxRouteLineApiOptions.isRouteCalloutsEnabled] should be
      * set to true
      */
     @ExperimentalPreviewMapboxNavigationAPI
-    fun enableCallouts(
+    fun setCalloutAdapter(
         viewAnnotationManager: ViewAnnotationManager,
         adapter: MapboxRouteCalloutAdapter,
     ) {
@@ -698,8 +700,11 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         lastRouteCalloutData?.let { data -> routeCalloutView?.renderCallouts(data) }
     }
 
+    /**
+     * Stops rendering route callouts and release related resources
+     */
     @ExperimentalPreviewMapboxNavigationAPI
-    fun disableCallouts() {
+    fun clearCalloutAdapter() {
         routeCalloutView?.release()
         routeCalloutView = null
     }
@@ -1029,9 +1034,11 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
     }
 
     /**
-     * Cancels any/all background tasks that may be running.
+     * Cancels any/all background tasks that may be running and removes callout adapter.
      */
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     fun cancel() {
+        clearCalloutAdapter()
         sender.sendCancelEvent()
         scope.cancelChildren()
     }
