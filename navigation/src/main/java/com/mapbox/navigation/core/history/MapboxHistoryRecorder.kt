@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.history
 
+import androidx.annotation.RestrictTo
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
@@ -18,7 +19,8 @@ import java.util.concurrent.CopyOnWriteArrayList
  */
 class MapboxHistoryRecorder internal constructor(
     navigationOptions: NavigationOptions,
-    internal var historyRecorderHandle: HistoryRecorderHandleInterface? = null,
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY)
+    var historyRecorderHandle: HistoryRecorderHandleInterface? = null,
 ) {
 
     private var enabled: Boolean = false

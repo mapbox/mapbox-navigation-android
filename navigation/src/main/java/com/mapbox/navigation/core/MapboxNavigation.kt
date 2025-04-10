@@ -275,6 +275,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private val mainJobController = threadController.getMainScopeAndRootJob()
     private val directionsSession: DirectionsSession
+
     private val historyRecorderHandles: NavigatorLoader.HistoryRecorderHandles
     private val tripService: TripService
     private val tripSession: TripSession
