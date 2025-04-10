@@ -1,5 +1,18 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.8.3 - 10 April, 2025
+
+#### Bug fixes and improvements
+- Fixed crash in ADAS tiles loading. 
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.11.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.11.0))
+- Mapbox Navigation Native `v324.0.1`
+- Mapbox Core Common `v24.11.1`
+- Mapbox Java `v7.3.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.3.1))
+
+
 ## Navigation SDK Core Framework 3.8.2 - 02 April, 2025
 #### Features
 - Added `MapboxNavigationViewportDataSource#isFramingManeuverPropertyOverride` property to explicitly set the camera to framing-maneuver / non-framing-maneuver mode. Note that it is a delicate API and for most cases you don't need to override this property. Use this method only if you are sure that's the only way to achieve the desired behaviour. 
