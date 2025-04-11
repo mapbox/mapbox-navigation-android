@@ -146,7 +146,7 @@ fun mapToNativeWaypoints(
             directionsWaypoint.name(),
             directionsWaypoint.location(),
             directionsWaypoint.distance(),
-            directionsWaypoint.getUnrecognizedProperty("metadata")?.toString(),
+            null,
             routeOptions?.waypointTargetsList()?.get(index),
             when {
                 directionsWaypoint.getUnrecognizedProperty("metadata")

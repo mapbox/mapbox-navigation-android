@@ -1,5 +1,82 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.9.0-beta.1 - 11 April, 2025
+#### Features
+- Added `EHorizonOptions#enableEnhancedDataAlongEH` flag to control access to enhanced data attributes (from ADAS data layer). 
+- Added a new function `MapboxRouteShieldApi#getRoadComponentsShields` which accepts a list of `RoadComponent`. 
+- Added support for `exclude_operators` parameter in EV search. 
+- Clear caches when device memory is low. 
+- Added helpPhone field to EV Location class. 
+- ⚠️ Breaking changes in Experimental API. `AdasSpeedLimitRestriction.VehicleType` has been moved to `com.mapbox.navigation.base.model.VehicleType`. 
+- ⚠️ Breaking changes in Experimental API: MapboxRouteCalloutApi and MapboxRouteCalloutView are no longer publicly available. 
+- New option MapboxRouteLineApiOptions#isRouteCalloutsEnabled to allow MapboxRouteLineApi calculate data for route callouts. 
+- New function MapboxRouteLineView#enableCallouts now allows to render route callouts on the map by setting an adapter. 
+- Added DefaultRouteCalloutAdapter which provides a built-in adapter for route callouts. 
+
+- `TilesetDescriptorFactory#build` and `TilesetDescriptorFactory#getSpecificVersion` function now provide overloaded variants that accept a flag whether ADAS tiles should be loaded. 
+- Support for danger zones in countries with legal restrictions on displaying speed camera locations (e.g. France) 
+- Added support of `evInsufficientCharge`, `evMinChargeAtChargingStation`, `evMinChargeAtDestination`, and `stationUnavailable` notifications objects. 
+- Added new experimental function `MapboxNavigation#getRoadGraphVersionInfo` that retrieves current road graph version information. 
+- Added support of `exclude` parameter to EV Search. 
+ - ⚠️ Breaking changes in Experimental API. Function `MapboxRouteLineView#enableCallouts` has been renamed to `MapboxRouteLineView#setCalloutAdapter`  
+ - ⚠️ Breaking changes in Experimental API. Function `MapboxRouteLineView#disableCallouts` has been renamed to `MapboxRouteLineView#clearCalloutAdapter`
+ - Clear route callout adapter once `MapboxRouteLineView#cancel` called
+ - ⚠️ Breaking changes in Experimental API. Function `MapboxRouteLineView#enableCallouts` has been renamed to `MapboxRouteLineView#setCalloutAdapter`  
+ - ⚠️ Breaking changes in Experimental API. Function `MapboxRouteLineView#disableCallouts` has been renamed to `MapboxRouteLineView#clearCalloutAdapter`
+ - Clear route callout adapter once `MapboxRouteLineView#cancel` called
+- Added flag `RoadCamerasManager::isActiveInRoutePreview` to activate the road cameras preview (default is `false`). 
+- Added `MapboxNavigationViewportDataSource#isFramingManeuverPropertyOverride` property to explicitly set the camera to framing-maneuver / non-framing-maneuver mode. Note that it is a delicate API and for most cases you don't need to override this property. Use this method only if you are sure that's the only way to achieve the desired behaviour. 
+- Added a way to preview all road cameras for a given route using `RoadCamerasManager::previewCamerasOnRoute`. 
+- Added `MapboxRouteCalloutApiOptions#maxZoom` to allow for setting a maximum zoom level for the route callout. This is useful for preventing the route callout from being displayed at high zoom levels. 
+- Added `MapboxRouteCalloutApiOptions#minZoom` to allow for setting a minimum zoom level for the route callout. This is useful for preventing the route callout from being displayed at low zoom levels. 
+- Added `MapboxRouteCalloutApiOptions#priority` to allow for setting the priority of the route callout. This is useful for determining the order in which the route callout is displayed when multiple _Dynamic View Annotations_ are present on the map. 
+- Added a `NavigationCamera` constructor that accepts `UpdateFrameAnimatorsOptions`. This allows NavSDK to execute the update frame animations in a more performant way. 
+
+By default, NavSDK supports any type of dependencies between animators in a compound frame update animation.
+Meaning that center, zoom, padding, pitch and bearing animators can form any dependencies graph supported by `AnimatorSet` API.
+However, this may poorly influence the performance.
+If you pass `updateFrameAnimatorsOptions` with `UpdateFrameAnimatorsOptions#useSimplifiedAnimatorsDependency` set to true,
+NavSDK will assume the following restrictions for update frame animations:
+1. They are played together (started at the same time);
+2. They don't have start delays.
+Note 1: they can still be of different duration.
+Note 2: this is ony relevant for update frame animations. For state transition animations (`NavigationCameraStateTransition#transitionToFollowing` and `NavigationCameraStateTransition#transitionToOverview`) no such assumptions are made.
+This allows NavSDK to execute the animations in a more performant way.
+If this simplified setup works for you (it's especially important to check these conditions if you use custom `NavigationCameraStateTransition`),
+you can set `UpdateFrameAnimatorsOptions#useSimplifiedAnimatorsDependency`]` to true for simpler, but more optimized update frame animations.
+- Added support for Lane Control and Passage Control road cameras. 
+- Exposed MapGPT as a Navigation SDK Core Framework Module. 
+
+#### Bug fixes and improvements
+- Added support for filter operators with spaces in EV Search. 
+- Fixed crash on invalid EV time parsing 
+- Allow to search charging stations in large areas. 
+- Added filter for zero-powered charging stations on EV layer 
+- Fixed an issue where the location indicator might have teleported back to tunnel after exiting it. 
+- Fixed an issue where overriding camera pitch to 0 caused the camera to go into "maneuver framing" mode.    
+- Improved EV charging station search along the route to provide more evenly distributed results. 
+- Processing of road cameras on location update has been moved from the main to the background thread 
+- Removed usages of APIs that prevented Copilot from working on devices with Android 7 or older. 
+- Optimized road cameras processing logic to reduce ANRs. 
+- Improved charging stations selection when doing EV search in bounding box.  
+- Fixed jumps in location updates reported by `com.mapbox.navigation.core.trip.session.LocationObserver`. 
+The jumps started to happen after navigation tiles version switch reported in `NavigationVersionSwitchObserver`.
+- Fixed an issue with not working EV requests on a systems without Google Play Services.  
+- Optimize road cameras calculation in route preview mode  
+- Fixed incorrect events from RoadCameras Callback interface. 
+- Fixed an alternative Callout point to primary route.   
+- Improved `MapboxNavigationViewportDataSource#evaluate` performance. 
+- Added automatic pause/resume of all direction calls when a navigation session stops/starts. 
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.12.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.12.0-beta.1))
+- Mapbox Navigation Native `v324.12.0-beta.1`
+- Mapbox Core Common `v24.12.0-beta.1`
+- Mapbox Java `v7.4.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.4.0))
+
+
 ## Navigation SDK Core Framework 3.7.0-beta.1 - 22 January, 2025
 #### Features
 - Add `MapboxRoadCamera::inOnRoute` flag which indicates if the roiad camera is on the current route. 
