@@ -628,8 +628,13 @@ package com.mapbox.navigation.core.navigator {
     method public com.mapbox.common.TilesetDescriptor build(String? tilesDataset = null, String? tilesProfile = null);
     method public com.mapbox.common.TilesetDescriptor build(String? tilesDataset = null);
     method public com.mapbox.common.TilesetDescriptor build();
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.common.TilesetDescriptor build(String? tilesDataset = null, String? tilesProfile = null, String? tilesVersion = null, boolean includeAdas);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.common.TilesetDescriptor build(String? tilesDataset = null, String? tilesProfile = null, boolean includeAdas);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.common.TilesetDescriptor build(String? tilesDataset = null, boolean includeAdas);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.common.TilesetDescriptor build(boolean includeAdas);
     method public com.mapbox.common.TilesetDescriptor getLatest();
     method public com.mapbox.common.TilesetDescriptor getSpecificVersion(String tilesVersion);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.common.TilesetDescriptor getSpecificVersion(String tilesVersion, boolean includeAdas);
   }
 
   public final class TilesetDescriptorFactoryKt {

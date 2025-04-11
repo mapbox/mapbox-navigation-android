@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.navigator
 
 import com.mapbox.common.TilesetDescriptor
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigator.CacheHandle
 
@@ -39,12 +40,49 @@ class TilesetDescriptorFactory internal constructor(
         )
 
     /**
+     * Creates TilesetDescriptor using the specified dataset, profile and version.
+     *
+     * @param tilesDataset string built out of `<account>[.<graph>]` variables.
+     * Account can be `mapbox` for default datasets or your username for other.
+     * Graph can be left blank if you don't target any custom datasets.
+     * If null [RoutingTilesOptions.tilesDataset] will be used.
+     * @param tilesProfile profile of the dataset.
+     * If null [RoutingTilesOptions.tilesProfile] will be used.
+     * @param tilesVersion tiles version
+     * If null [RoutingTilesOptions.tilesVersion] will be used.
+     * @param includeAdas Whether to include ADAS tiles.
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    @JvmOverloads
+    fun build(
+        tilesDataset: String? = null,
+        tilesProfile: String? = null,
+        tilesVersion: String? = null,
+        includeAdas: Boolean,
+    ): TilesetDescriptor =
+        nativeFactoryWrapper.build(
+            combineDatasetWithProfile(tilesDataset, tilesProfile),
+            tilesVersion ?: routingTilesOptions.tilesVersion,
+            includeAdas,
+        )
+
+    /**
      * Gets TilesetDescriptor which corresponds to the currently used routing tiles dataset
      * and the specified `tilesVersion`.
      * @param tilesVersion TilesetDescriptor version
      */
     fun getSpecificVersion(tilesVersion: String): TilesetDescriptor =
         nativeFactoryWrapper.getSpecificVersion(cache, tilesVersion)
+
+    /**
+     * Gets TilesetDescriptor which corresponds to the currently used routing tiles dataset
+     * and the specified `tilesVersion`.
+     * @param tilesVersion TilesetDescriptor version
+     * @param includeAdas Whether to include ADAS tiles.
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun getSpecificVersion(tilesVersion: String, includeAdas: Boolean): TilesetDescriptor =
+        nativeFactoryWrapper.getSpecificVersion(cache, tilesVersion, includeAdas)
 
     /**
      * Gets TilesetDescriptor which corresponds to the latest available version of routing tiles.
@@ -69,11 +107,23 @@ class TilesetDescriptorFactory internal constructor(
             tilesVersion: String,
         ): TilesetDescriptor
 
+        fun getSpecificVersion(
+            cache: CacheHandle,
+            tilesVersion: String,
+            includeAdas: Boolean,
+        ): TilesetDescriptor
+
         fun getLatest(cache: CacheHandle): TilesetDescriptor
 
         fun build(
             tilesDatasetAndProfile: String,
             tilesVersion: String,
+        ): TilesetDescriptor
+
+        fun build(
+            tilesDatasetAndProfile: String,
+            tilesVersion: String,
+            includeAdas: Boolean,
         ): TilesetDescriptor
     }
 
@@ -89,6 +139,18 @@ class TilesetDescriptorFactory internal constructor(
             )
         }
 
+        override fun getSpecificVersion(
+            cache: CacheHandle,
+            tilesVersion: String,
+            includeAdas: Boolean,
+        ): TilesetDescriptor {
+            return NativeTilesetDescriptorFactory.getSpecificVersion(
+                cache,
+                tilesVersion,
+                includeAdas,
+            )
+        }
+
         override fun getLatest(cache: CacheHandle): TilesetDescriptor {
             return NativeTilesetDescriptorFactory.getLatest(cache)
         }
@@ -100,6 +162,18 @@ class TilesetDescriptorFactory internal constructor(
             return NativeTilesetDescriptorFactory.build(
                 tilesDatasetAndProfile,
                 tilesVersion,
+            )
+        }
+
+        override fun build(
+            tilesDatasetAndProfile: String,
+            tilesVersion: String,
+            includeAdas: Boolean,
+        ): TilesetDescriptor {
+            return NativeTilesetDescriptorFactory.build(
+                tilesDatasetAndProfile,
+                tilesVersion,
+                includeAdas,
             )
         }
     }

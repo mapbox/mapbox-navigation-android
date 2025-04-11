@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.navigator
 
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.core.navigator.TilesetDescriptorFactory.NativeFactoryWrapper
 import com.mapbox.navigator.CacheHandle
@@ -9,6 +10,7 @@ import io.mockk.verify
 import org.junit.Before
 import org.junit.Test
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class TilesDescriptorFactoryTest {
 
     private val routingTilesOptions: RoutingTilesOptions = mockk(relaxed = true)
@@ -27,37 +29,62 @@ class TilesDescriptorFactoryTest {
 
     @Test
     fun checkBuildWithParams() {
-        tilesetDescriptorFactory.build(DATASET, PROFILE, VERSION)
+        tilesetDescriptorFactory.build(DATASET, PROFILE, VERSION, true)
 
         verify {
-            nativeFactoryWrapper.build("$DATASET/$PROFILE", VERSION)
+            nativeFactoryWrapper.build("$DATASET/$PROFILE", VERSION, true)
         }
     }
 
     @Test
     fun checkBuildWithDefaultDataset() {
-        tilesetDescriptorFactory.build(tilesProfile = PROFILE, tilesVersion = VERSION)
+        tilesetDescriptorFactory.build(
+            tilesProfile = PROFILE,
+            tilesVersion = VERSION,
+            includeAdas = true,
+        )
 
         verify {
-            nativeFactoryWrapper.build("$OPTIONS_DATASET/$PROFILE", VERSION)
+            nativeFactoryWrapper.build("$OPTIONS_DATASET/$PROFILE", VERSION, true)
         }
     }
 
     @Test
     fun checkBuildWithDefaultProfile() {
-        tilesetDescriptorFactory.build(tilesDataset = DATASET, tilesVersion = VERSION)
+        tilesetDescriptorFactory.build(
+            tilesDataset = DATASET,
+            tilesVersion = VERSION,
+            includeAdas = true,
+        )
 
         verify {
-            nativeFactoryWrapper.build("$DATASET/$OPTIONS_PROFILE", VERSION)
+            nativeFactoryWrapper.build("$DATASET/$OPTIONS_PROFILE", VERSION, true)
         }
     }
 
     @Test
     fun checkBuildWithDefaultVersion() {
-        tilesetDescriptorFactory.build(tilesDataset = DATASET, tilesProfile = PROFILE)
+        tilesetDescriptorFactory.build(
+            tilesDataset = DATASET,
+            tilesProfile = PROFILE,
+            includeAdas = true,
+        )
 
         verify {
-            nativeFactoryWrapper.build("$DATASET/$PROFILE", OPTIONS_VERSION)
+            nativeFactoryWrapper.build("$DATASET/$PROFILE", OPTIONS_VERSION, true)
+        }
+    }
+
+    @Test
+    fun checkBuildWithDefaultAdasis() {
+        tilesetDescriptorFactory.build(
+            tilesDataset = DATASET,
+            tilesProfile = PROFILE,
+            tilesVersion = VERSION,
+        )
+
+        verify {
+            nativeFactoryWrapper.build("$DATASET/$PROFILE", VERSION)
         }
     }
 
