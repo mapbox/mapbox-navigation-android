@@ -64,17 +64,29 @@ class TilesetDescriptorFactory internal constructor(
 
     // need the wrapper to avoid UnsatisfiedLinkError in unit tests
     internal interface NativeFactoryWrapper {
-        fun getSpecificVersion(cache: CacheHandle, tilesVersion: String): TilesetDescriptor
+        fun getSpecificVersion(
+            cache: CacheHandle,
+            tilesVersion: String,
+        ): TilesetDescriptor
+
         fun getLatest(cache: CacheHandle): TilesetDescriptor
-        fun build(tilesDatasetAndProfile: String, tilesVersion: String): TilesetDescriptor
+
+        fun build(
+            tilesDatasetAndProfile: String,
+            tilesVersion: String,
+        ): TilesetDescriptor
     }
 
     internal class NativeFactoryWrapperImpl : NativeFactoryWrapper {
+
         override fun getSpecificVersion(
             cache: CacheHandle,
             tilesVersion: String,
         ): TilesetDescriptor {
-            return NativeTilesetDescriptorFactory.getSpecificVersion(cache, tilesVersion)
+            return NativeTilesetDescriptorFactory.getSpecificVersion(
+                cache,
+                tilesVersion,
+            )
         }
 
         override fun getLatest(cache: CacheHandle): TilesetDescriptor {
@@ -85,7 +97,10 @@ class TilesetDescriptorFactory internal constructor(
             tilesDatasetAndProfile: String,
             tilesVersion: String,
         ): TilesetDescriptor {
-            return NativeTilesetDescriptorFactory.build(tilesDatasetAndProfile, tilesVersion)
+            return NativeTilesetDescriptorFactory.build(
+                tilesDatasetAndProfile,
+                tilesVersion,
+            )
         }
     }
 }

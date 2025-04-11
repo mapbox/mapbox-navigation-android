@@ -4,7 +4,6 @@ import android.content.Context
 import android.location.Location
 import androidx.annotation.IntegerRes
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.api.directions.v5.models.IntersectionLanes
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.utils.readRawFileText
@@ -29,17 +28,17 @@ class LanesTest : BaseCoreNoCleanUpTest() {
 
         with(lanes.first()) {
             assertEquals(listOf("left", "straight", "unknown"), indications())
-            assertEquals(listOf("bicycle"), getDesignatedProperty())
+            assertEquals(listOf("bicycle"), access()?.designated())
         }
 
         with(lanes[1]) {
             assertEquals(listOf("straight"), indications())
-            assertEquals(listOf("hov", "bus"), getDesignatedProperty())
+            assertEquals(listOf("hov", "bus"), access()?.designated())
         }
 
         with(lanes[2]) {
             assertEquals(listOf("right", "unknown"), indications())
-            assertEquals(null, getDesignatedProperty())
+            assertEquals(null, access()?.designated())
             assertEquals("unknown", validIndication())
         }
     }
@@ -83,17 +82,6 @@ class LanesTest : BaseCoreNoCleanUpTest() {
     override fun setupMockLocation(): Location {
         return mockLocationUpdatesRule.generateLocationUpdate {
             // no op
-        }
-    }
-
-    private companion object {
-        fun IntersectionLanes.getDesignatedProperty(): List<String>? {
-            return unrecognizedJsonProperties
-                ?.get("access")?.asJsonObject
-                ?.get("designated")?.asJsonArray
-                ?.map {
-                    it.asString
-                }
         }
     }
 }

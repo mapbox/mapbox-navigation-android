@@ -39,6 +39,8 @@ package com.mapbox.navigation.core {
     method public com.mapbox.navigation.core.trip.session.NavigationSessionState getNavigationSessionState();
     method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public com.mapbox.navigation.navigator.internal.MapboxNativeNavigator getNavigator();
     method public com.mapbox.navigation.core.reroute.RerouteController? getRerouteController();
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void getRoadGraphVersionInfo(Integer? timeoutSeconds = null, com.mapbox.navigation.core.RoadGraphVersionInfoCallback callback);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void getRoadGraphVersionInfo(com.mapbox.navigation.core.RoadGraphVersionInfoCallback callback);
     method public com.mapbox.navigation.core.trip.session.eh.RoadObjectMatcher getRoadObjectMatcher();
     method public com.mapbox.navigation.core.trip.session.eh.RoadObjectsStore getRoadObjectsStore();
     method public com.mapbox.navigation.core.routerefresh.RouteRefreshController getRouteRefreshController();
@@ -145,6 +147,19 @@ package com.mapbox.navigation.core {
   }
 
   public final class RoadGraphVersionInfo {
+    method public String getDataset();
+    method public String getVersion();
+    property public final String dataset;
+    property public final String version;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public interface RoadGraphVersionInfoCallback {
+    method public void onError(boolean isTimeoutError);
+    method public void onVersionInfo(com.mapbox.navigation.core.RoadGraphVersionInfoCallback.VersionInfo versionInfo);
+  }
+
+  public static final class RoadGraphVersionInfoCallback.VersionInfo {
+    ctor public RoadGraphVersionInfoCallback.VersionInfo(String dataset, String version);
     method public String getDataset();
     method public String getVersion();
     property public final String dataset;
@@ -368,9 +383,12 @@ package com.mapbox.navigation.core.history {
 
   public final class MapboxHistoryRecorder {
     method public String? fileDirectory();
+    method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY) public com.mapbox.navigator.HistoryRecorderHandleInterface? getHistoryRecorderHandle();
     method public void pushHistory(String eventType, String eventJson);
+    method public void setHistoryRecorderHandle(com.mapbox.navigator.HistoryRecorderHandleInterface?);
     method public java.util.List<java.lang.String> startRecording();
     method public void stopRecording(com.mapbox.navigation.core.history.SaveHistoryCallback result);
+    property @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY) public final com.mapbox.navigator.HistoryRecorderHandleInterface? historyRecorderHandle;
   }
 
   public fun interface SaveHistoryCallback {

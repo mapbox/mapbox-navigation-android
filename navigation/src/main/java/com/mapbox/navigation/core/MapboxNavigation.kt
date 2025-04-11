@@ -2032,6 +2032,36 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     /**
+     * Retrieves current road graph version information. The retrieval process waits for the
+     * tiles config to resolve.
+     *
+     * @param timeoutSeconds Request timeout in seconds, pass null for the infinite timeout.
+     * @param callback The callback to call when result request finished,
+     * either with success or error, or when timeout passed.
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    @JvmOverloads
+    fun getRoadGraphVersionInfo(
+        timeoutSeconds: Int? = null,
+        callback: RoadGraphVersionInfoCallback,
+    ) {
+        navigator.cache.getCurrentRoadGraphVersionInfo(
+            { isVersionResolved, currentVersionInfo ->
+                if (!isVersionResolved || currentVersionInfo == null) {
+                    callback.onError(isTimeoutError = !isVersionResolved)
+                } else {
+                    callback.onVersionInfo(
+                        RoadGraphVersionInfoCallback.VersionInfo.createFromNative(
+                            currentVersionInfo,
+                        ),
+                    )
+                }
+            },
+            timeoutSeconds,
+        )
+    }
+
+    /**
      * Allows other Nav SDK modules observe the latest EV state which is
      * accumulated based on data provided in [onEVDataUpdated].
      * Route options of the current route isn't taken into account in
