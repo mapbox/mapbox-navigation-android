@@ -1,9 +1,9 @@
 package com.mapbox.navigation.core.ev
 
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.navigation.core.routeoptions.ROUTE_OPTIONS_KEY_ENGINE
-import com.mapbox.navigation.core.routeoptions.ROUTE_OPTIONS_VALUE_ELECTRIC
-import com.mapbox.navigation.core.routeoptions.isEVRoute
+import com.mapbox.navigation.base.internal.route.ROUTE_OPTIONS_KEY_ENGINE
+import com.mapbox.navigation.base.internal.route.ROUTE_OPTIONS_VALUE_ELECTRIC
+import com.mapbox.navigation.base.internal.route.isEVRoute
 
 internal class EVRefreshDataProvider(
     private val evDynamicDataHolder: EVDynamicDataHolder,

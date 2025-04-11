@@ -5,6 +5,7 @@ package com.mapbox.navigation.base.internal.route
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.WorkerThread
+import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonPrimitive
 import com.mapbox.api.directions.v5.models.Closure
@@ -19,6 +20,7 @@ import com.mapbox.api.directionsrefresh.v1.models.DirectionsRouteRefresh
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.CongestionNumericOverride
 import com.mapbox.navigation.base.internal.utils.Constants
+import com.mapbox.navigation.base.internal.utils.Constants.RouteResponse.KEY_NOTIFICATIONS
 import com.mapbox.navigation.base.internal.utils.Constants.RouteResponse.KEY_REFRESH_TTL
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshMetadata
@@ -57,6 +59,7 @@ fun NavigationRoute.internalRefreshRoute(
         routeRefresh.legs()?.map { it.incidents() },
         routeRefresh.legs()?.map { it.closures() },
         updatedWaypoints,
+        routeRefresh.legs()?.map { it.unrecognizedJsonProperties?.get(KEY_NOTIFICATIONS) },
         responseTimeElapsedSeconds,
         routeRefresh.unrecognizedJsonProperties
             ?.get(KEY_REFRESH_TTL)?.asInt,
@@ -76,6 +79,7 @@ fun NavigationRoute.refreshRoute(
     incidents: List<List<Incident>?>?,
     closures: List<List<Closure>?>?,
     waypoints: List<DirectionsWaypoint?>?,
+    unrecognizedLegNotifications: List<JsonElement?>?,
     responseTimeElapsedSeconds: Long,
     refreshTtl: Int?,
 ): NavigationRoute {
@@ -86,6 +90,7 @@ fun NavigationRoute.refreshRoute(
         incidents,
         closures,
         waypoints,
+        unrecognizedLegNotifications,
         responseTimeElapsedSeconds,
         refreshTtl,
         IncidentsRefresher(),
@@ -101,6 +106,7 @@ internal fun NavigationRoute.refreshRoute(
     incidents: List<List<Incident>?>?,
     closures: List<List<Closure>?>?,
     waypoints: List<DirectionsWaypoint?>?,
+    unrecognizedLegNotifications: List<JsonElement?>?,
     responseTimeElapsedSeconds: Long,
     refreshTtl: Int?,
     incidentsRefresher: IncidentsRefresher,
@@ -145,12 +151,18 @@ internal fun NavigationRoute.refreshRoute(
                 startingLegGeometryIndex,
                 lastLegRefreshIndex,
             )
+
             routeLeg.toBuilder()
                 .duration(mergedAnnotation?.duration()?.sumOf { it } ?: routeLeg.duration())
                 .annotation(mergedAnnotation)
                 .incidents(mergedIncidents)
                 .closures(mergedClosures)
                 .steps(routeLeg.steps()?.updateSteps(directionsRoute, mergedAnnotation))
+                .updateNotifications(
+                    routeLeg.unrecognizedJsonProperties,
+                    unrecognizedLegNotifications?.getOrNull(index) as? JsonArray,
+                    routeOptions.isEVRoute(),
+                )
                 .build()
         }
     }

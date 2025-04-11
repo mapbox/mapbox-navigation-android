@@ -12,6 +12,7 @@ import com.mapbox.common.TileStore
 import com.mapbox.common.TilesetDescriptor
 import com.mapbox.navigation.base.internal.route.nativeRoute
 import com.mapbox.navigation.base.internal.utils.Constants
+import com.mapbox.navigation.base.internal.utils.Constants.RouteResponse.KEY_NOTIFICATIONS
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
@@ -252,9 +253,11 @@ class MapboxNativeNavigatorImpl(
         route: NavigationRoute,
     ): Expected<String, List<RouteAlternative>> {
         val refreshedLegs = route.directionsRoute.legs()?.map { routeLeg ->
+            val notifications = routeLeg.unrecognizedJsonProperties?.get(KEY_NOTIFICATIONS)
             RouteLegRefresh.builder()
                 .annotation(routeLeg.annotation())
                 .incidents(routeLeg.incidents())
+                .unrecognizedJsonProperties(notifications?.let { mapOf(KEY_NOTIFICATIONS to it) })
                 .build()
         }
         val refreshedWaypoints = route.waypoints

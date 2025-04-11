@@ -1048,9 +1048,6 @@ package com.mapbox.navigation.core.routealternatives {
 
 package com.mapbox.navigation.core.routeoptions {
 
-  public final class RouteOptionsExKt {
-  }
-
   public final class RouteOptionsUpdaterKt {
   }
 

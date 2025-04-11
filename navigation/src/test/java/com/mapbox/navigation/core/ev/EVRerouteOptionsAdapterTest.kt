@@ -2,8 +2,8 @@ package com.mapbox.navigation.core.ev
 
 import com.google.gson.JsonPrimitive
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.internal.route.isEVRoute
 import com.mapbox.navigation.core.reroute.defaultRouteOptionsAdapterParams
-import com.mapbox.navigation.core.routeoptions.isEVRoute
 import com.mapbox.navigation.testing.factories.createRouteOptions
 import io.mockk.every
 import io.mockk.mockk

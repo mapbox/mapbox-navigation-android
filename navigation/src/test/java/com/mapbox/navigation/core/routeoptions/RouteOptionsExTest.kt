@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.routeoptions
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
+import com.mapbox.navigation.base.internal.route.isEVRoute
 import com.mapbox.navigation.testing.factories.createRouteOptions
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

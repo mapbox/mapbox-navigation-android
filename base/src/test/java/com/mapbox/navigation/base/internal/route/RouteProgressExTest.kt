@@ -2,6 +2,9 @@
 
 package com.mapbox.navigation.base.internal.route
 
+import com.google.gson.JsonArray
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.Closure
@@ -15,6 +18,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.utils.Constants.RouteResponse.KEY_NOTIFICATIONS
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.testing.FileUtils
@@ -85,6 +89,7 @@ class RouteProgressExTest {
             incidents = null,
             closures = null,
             waypoints = null,
+            unrecognizedLegNotifications = null,
             refreshTtl = null,
             responseTimeElapsedSeconds = 0,
         )
@@ -158,6 +163,7 @@ class RouteProgressExTest {
             incidents = null,
             closures = null,
             waypoints = null,
+            unrecognizedLegNotifications = null,
             refreshTtl = null,
             responseTimeElapsedSeconds = 0,
         )
@@ -212,6 +218,7 @@ class RouteProgressExTest {
             incidents = null,
             closures = null,
             waypoints = null,
+            unrecognizedLegNotifications = null,
             refreshTtl = null,
             responseTimeElapsedSeconds = 0,
         )
@@ -242,6 +249,143 @@ class RouteProgressExTest {
             0.0,
             steps[2].duration(),
             0.00001,
+        )
+    }
+
+    @Test
+    fun `route refresh updates leg without notifications with notifications`() {
+        val sourceRoute = createNavigationRouteFromResource(
+            "3-steps-route-directions-response-ev-without-notifications.json",
+            "3-steps-route-directions-request-url-ev-without-notifications.txt",
+        )
+        val refreshedRoute = sourceRoute.refreshRoute(
+            initialLegIndex = 0,
+            currentLegGeometryIndex = 0,
+            legAnnotations = null,
+            incidents = null,
+            closures = null,
+            waypoints = null,
+            unrecognizedLegNotifications = provideEvNotifications(),
+            refreshTtl = null,
+            responseTimeElapsedSeconds = 0,
+        )
+        assertEquals(
+            provideEvNotifications()[0],
+            refreshedRoute.directionsRoute.legs()?.get(0)?.unrecognizedJsonProperties?.get(
+                KEY_NOTIFICATIONS,
+            ),
+        )
+    }
+
+    @Test
+    fun `route refresh updates leg with only ev notifications with empty notifications list`() {
+        val sourceRoute = createNavigationRouteFromResource(
+            "3-steps-route-directions-response-ev-with-only-ev-notifications.json",
+            "3-steps-route-directions-request-url-ev-with-only-ev-notifications.txt",
+        )
+        val refreshedRoute = sourceRoute.refreshRoute(
+            initialLegIndex = 0,
+            currentLegGeometryIndex = 0,
+            legAnnotations = null,
+            incidents = null,
+            closures = null,
+            waypoints = null,
+            unrecognizedLegNotifications = listOf(null),
+            refreshTtl = null,
+            responseTimeElapsedSeconds = 0,
+        )
+        assertEquals(
+            null,
+            refreshedRoute.directionsRoute.legs()?.get(0)?.unrecognizedJsonProperties?.get(
+                KEY_NOTIFICATIONS,
+            ),
+        )
+    }
+
+    @Test
+    fun `route refresh updates leg with notifications with empty notifications list`() {
+        val sourceRoute = createNavigationRouteFromResource(
+            "3-steps-route-directions-response-ev-with-notifications.json",
+            "3-steps-route-directions-request-url-ev-with-notifications.txt",
+        )
+        val refreshedRoute = sourceRoute.refreshRoute(
+            initialLegIndex = 0,
+            currentLegGeometryIndex = 0,
+            legAnnotations = null,
+            incidents = null,
+            closures = null,
+            waypoints = null,
+            unrecognizedLegNotifications = listOf(null),
+            refreshTtl = null,
+            responseTimeElapsedSeconds = 0,
+        )
+
+        val notifications = JsonArray().apply {
+            add(
+                JsonObject().apply {
+                    add("type", JsonPrimitive("violation"))
+                    add("subtype", JsonPrimitive("stateBorderCrossing"))
+                    add("geometry_index_end", JsonPrimitive(1))
+                    add("geometry_index_start", JsonPrimitive(0))
+                    val details = JsonObject()
+                    details.add("actual_value", JsonPrimitive("US-NV,US-CA"))
+                    details.add(
+                        "message",
+                        JsonPrimitive("Crossing the border of the states of US-NV and US-CA."),
+                    )
+                    add("details", details)
+                },
+            )
+        }
+        assertEquals(
+            notifications,
+            refreshedRoute.directionsRoute.legs()?.get(0)?.unrecognizedJsonProperties?.get(
+                KEY_NOTIFICATIONS,
+            ),
+        )
+    }
+
+    @Test
+    fun `route refresh updates leg with notifications with notifications`() {
+        val sourceRoute = createNavigationRouteFromResource(
+            "3-steps-route-directions-response-ev-with-notifications.json",
+            "3-steps-route-directions-request-url-ev-with-notifications.txt",
+        )
+        val updateNotifications =
+            listOf(
+                (provideEvNotifications()[0] as JsonArray).apply { remove(0) },
+            )
+        val refreshedRoute = sourceRoute.refreshRoute(
+            initialLegIndex = 0,
+            currentLegGeometryIndex = 0,
+            legAnnotations = null,
+            incidents = null,
+            closures = null,
+            waypoints = null,
+            unrecognizedLegNotifications = updateNotifications,
+            refreshTtl = null,
+            responseTimeElapsedSeconds = 0,
+        )
+        updateNotifications[0].add(
+            JsonObject().apply {
+                add("type", JsonPrimitive("violation"))
+                add("subtype", JsonPrimitive("stateBorderCrossing"))
+                add("geometry_index_end", JsonPrimitive(1))
+                add("geometry_index_start", JsonPrimitive(0))
+                val details = JsonObject()
+                details.add("actual_value", JsonPrimitive("US-NV,US-CA"))
+                details.add(
+                    "message",
+                    JsonPrimitive("Crossing the border of the states of US-NV and US-CA."),
+                )
+                add("details", details)
+            },
+        )
+        assertEquals(
+            updateNotifications[0].sortedBy { it.toString() },
+            refreshedRoute.directionsRoute.legs()?.get(0)?.unrecognizedJsonProperties?.get(
+                KEY_NOTIFICATIONS,
+            )?.asJsonArray?.sortedBy { it.toString() },
         )
     }
 
@@ -626,6 +770,7 @@ class RouteProgressExTest {
                         refreshItems.incidents,
                         refreshItems.closures,
                         refreshItems.waypoints,
+                        null,
                         refreshItems.responseTime,
                         refreshItems.refreshTtl,
                         incidentsRefresher,
@@ -1018,6 +1163,7 @@ class RouteProgressExTest {
                 null,
                 null,
                 refreshedWaypoints,
+                unrecognizedLegNotifications = null,
                 0,
                 null,
                 mockk(relaxed = true),
@@ -1040,6 +1186,7 @@ class RouteProgressExTest {
                 null,
                 null,
                 refreshedWaypoints,
+                null,
                 0,
                 null,
             )
@@ -1048,6 +1195,7 @@ class RouteProgressExTest {
     }
 
     companion object {
+
         private fun provideNavigationRoute(
             annotations: LegAnnotation? = provideDefaultLegAnnotation(),
             incidents: List<Incident>? = provideDefaultIncidents(),
@@ -1155,6 +1303,59 @@ class RouteProgressExTest {
                 unrecognizedProperties = mapOf("some key 2" to JsonPrimitive("some value 2")),
             ),
         )
+
+        private fun provideEvNotifications(): List<JsonElement> {
+            return listOf(
+
+                JsonArray().apply {
+                    add(
+                        JsonObject().apply {
+                            add("type", JsonPrimitive("alert"))
+                            add("subtype", JsonPrimitive("stationUnavailable"))
+                            add("reason", JsonPrimitive("outOfOrder"))
+                            add("station_id", JsonPrimitive("station1"))
+                        },
+                    )
+                    add(
+                        JsonObject().apply {
+                            add("type", JsonPrimitive("alert"))
+                            add("subtype", JsonPrimitive("stationUnavailable"))
+                            add("reason", JsonPrimitive("outOfOrder"))
+                            add("station_id", JsonPrimitive("station2"))
+                        },
+                    )
+                    add(
+                        JsonObject().apply {
+                            add("type", JsonPrimitive("alert"))
+                            add("subtype", JsonPrimitive("evInsufficientCharge"))
+                            add("geometry_index", JsonPrimitive(3))
+                        },
+                    )
+                    add(
+                        JsonObject().apply {
+                            add("type", JsonPrimitive("violation"))
+                            add("subtype", JsonPrimitive("evMinChargeAtChargingStation"))
+                            val details = JsonObject()
+                            details.add("requested_value", JsonPrimitive(30000))
+                            details.add("actual_value", JsonPrimitive(27000))
+                            details.add("unit", JsonPrimitive("Wh"))
+                            add("details", details)
+                        },
+                    )
+                    add(
+                        JsonObject().apply {
+                            add("type", JsonPrimitive("violation"))
+                            add("subtype", JsonPrimitive("evMinChargeAtDestination"))
+                            val details = JsonObject()
+                            details.add("requested_value", JsonPrimitive(20000))
+                            details.add("actual_value", JsonPrimitive(13000))
+                            details.add("unit", JsonPrimitive("Wh"))
+                            add("details", details)
+                        },
+                    )
+                },
+            )
+        }
     }
 
     /**
