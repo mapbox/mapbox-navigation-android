@@ -12,7 +12,7 @@ internal fun RouteLeg.Builder.updateNotifications(
     isElectric: Boolean,
 ): RouteLeg.Builder {
     // Currently backend supports only EV Notifications refresh
-    // https://github.com/mapbox/api-valhalla/blob/maxx-zp-adas-tiles/src/handlers/refresh/handleRefresh.ts/#L328-L338
+    // https://github.com/mapbox/api-valhalla/blob/913aee076e4da6ee713d0b2eef56141cad1723b7/src/handlers/refresh/handleRefresh.ts#L328-L338
     if (!isElectric) {
         return this
     }

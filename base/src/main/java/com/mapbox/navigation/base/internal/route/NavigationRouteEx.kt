@@ -63,6 +63,8 @@ fun NavigationRoute.internalRefreshRoute(
         responseTimeElapsedSeconds,
         routeRefresh.unrecognizedJsonProperties
             ?.get(KEY_REFRESH_TTL)?.asInt,
+        IncidentsRefresher(),
+        ClosuresRefresher(),
     )
 }
 
