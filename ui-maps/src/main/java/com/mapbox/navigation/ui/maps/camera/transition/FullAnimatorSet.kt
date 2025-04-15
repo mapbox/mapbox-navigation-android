@@ -3,12 +3,15 @@ package com.mapbox.navigation.ui.maps.camera.transition
 import android.animation.Animator
 import android.animation.Animator.AnimatorListener
 import android.animation.AnimatorSet
+import android.animation.ValueAnimator
+import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 
 internal class FullAnimatorSet(
+    private val cameraPlugin: CameraAnimationsPlugin,
     private val animatorSet: AnimatorSet,
 ) : MapboxAnimatorSet {
 
-    override val children: List<Animator> = animatorSet.childAnimations
+    private val children = animatorSet.childAnimations.map { it as ValueAnimator }.toTypedArray()
 
     fun addListener(listener: MapboxAnimatorSetListener) {
         animatorSet.addListener(
@@ -59,14 +62,22 @@ internal class FullAnimatorSet(
     }
 
     override fun start() {
+        cameraPlugin.registerAnimators(*children)
         animatorSet.start()
     }
 
-    override fun end() {
-        animatorSet.end()
+    override fun onFinished() {
+        cameraPlugin.unregisterAnimators(
+            *children,
+            cancelAnimators = false,
+        )
     }
 
     override fun cancel() {
         animatorSet.cancel()
+        cameraPlugin.unregisterAnimators(
+            *children,
+            cancelAnimators = false,
+        )
     }
 }

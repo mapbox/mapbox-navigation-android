@@ -1,9 +1,12 @@
 package com.mapbox.navigation.ui.maps.camera.transition
 
 import com.mapbox.maps.CameraOptions
+import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 
 internal class SimplifiedFrameAnimatorsCreator(
+    private val cameraAnimationsPlugin: CameraAnimationsPlugin,
     private val stateTransition: NavigationCameraStateTransition,
+    private val simplifiedUpdateFrameTransition: SimplifiedUpdateFrameTransition,
 ) : AnimatorsCreator {
 
     override fun transitionToFollowing(
@@ -11,6 +14,7 @@ internal class SimplifiedFrameAnimatorsCreator(
         transitionOptions: NavigationCameraTransitionOptions,
     ): FullAnimatorSet {
         return FullAnimatorSet(
+            cameraAnimationsPlugin,
             stateTransition.transitionToFollowing(cameraOptions, transitionOptions),
         )
     }
@@ -20,6 +24,7 @@ internal class SimplifiedFrameAnimatorsCreator(
         transitionOptions: NavigationCameraTransitionOptions,
     ): FullAnimatorSet {
         return FullAnimatorSet(
+            cameraAnimationsPlugin,
             stateTransition.transitionToOverview(cameraOptions, transitionOptions),
         )
     }
@@ -29,8 +34,8 @@ internal class SimplifiedFrameAnimatorsCreator(
         transitionOptions: NavigationCameraTransitionOptions,
     ): MapboxAnimatorSet {
         return SimplifiedAnimatorSet(
-            stateTransition.updateFrameForFollowing(cameraOptions, transitionOptions)
-                .childAnimations,
+            cameraAnimationsPlugin,
+            simplifiedUpdateFrameTransition.updateFrame(cameraOptions, transitionOptions),
         )
     }
 
@@ -39,8 +44,8 @@ internal class SimplifiedFrameAnimatorsCreator(
         transitionOptions: NavigationCameraTransitionOptions,
     ): MapboxAnimatorSet {
         return SimplifiedAnimatorSet(
-            stateTransition.updateFrameForOverview(cameraOptions, transitionOptions)
-                .childAnimations,
+            cameraAnimationsPlugin,
+            simplifiedUpdateFrameTransition.updateFrame(cameraOptions, transitionOptions),
         )
     }
 }

@@ -20,9 +20,6 @@ import com.mapbox.navigation.utils.internal.ifNonNull
 import kotlin.math.abs
 import kotlin.math.min
 
-private const val LINEAR_ANIMATION_DURATION = 1000L
-private const val MAXIMUM_LOW_TO_HIGH_DURATION = 3000L
-private val LINEAR_INTERPOLATOR = PathInterpolatorCompat.create(0f, 0f, 1f, 1f)
 private val SLOW_OUT_SLOW_IN_INTERPOLATOR = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
 
 /**
@@ -32,6 +29,8 @@ class MapboxNavigationCameraTransition(
     private val mapboxMap: MapboxMap,
     private val cameraPlugin: CameraAnimationsPlugin,
 ) : NavigationCameraTransition {
+
+    private val updateFrame = SimplifiedUpdateFrameTransition(mapboxMap, cameraPlugin)
 
     override fun transitionFromLowZoomToHighZoom(
         cameraOptions: CameraOptions,
@@ -122,73 +121,7 @@ class MapboxNavigationCameraTransition(
         cameraOptions: CameraOptions,
         transitionOptions: NavigationCameraTransitionOptions,
     ): AnimatorSet {
-        val animators = mutableListOf<ValueAnimator>()
-
-        val animationDuration = LINEAR_ANIMATION_DURATION
-            .coerceAtMost(transitionOptions.maxDuration)
-
-        cameraOptions.center?.let { center ->
-            val centerAnimator = cameraPlugin.createCenterAnimator(
-                CameraAnimatorOptions.cameraAnimatorOptions(center) {
-                    owner(NAVIGATION_CAMERA_OWNER)
-                },
-            ) {
-                duration = animationDuration
-                interpolator = LINEAR_INTERPOLATOR
-            }
-            animators.add(centerAnimator)
-        }
-
-        cameraOptions.zoom?.let { zoom ->
-            val zoomAnimator = cameraPlugin.createZoomAnimator(
-                CameraAnimatorOptions.cameraAnimatorOptions(zoom) {
-                    owner(NAVIGATION_CAMERA_OWNER)
-                },
-            ) {
-                duration = animationDuration
-                interpolator = LINEAR_INTERPOLATOR
-            }
-            animators.add(zoomAnimator)
-        }
-
-        cameraOptions.bearing?.let { bearing ->
-            val bearingShortestRotation = normalizeBearing(mapboxMap.cameraState.bearing, bearing)
-            val bearingAnimator = cameraPlugin.createBearingAnimator(
-                CameraAnimatorOptions.cameraAnimatorOptions(bearingShortestRotation) {
-                    owner(NAVIGATION_CAMERA_OWNER)
-                },
-            ) {
-                duration = animationDuration
-                interpolator = LINEAR_INTERPOLATOR
-            }
-            animators.add(bearingAnimator)
-        }
-
-        cameraOptions.pitch?.let { pitch ->
-            val pitchAnimator = cameraPlugin.createPitchAnimator(
-                CameraAnimatorOptions.cameraAnimatorOptions(pitch) {
-                    owner(NAVIGATION_CAMERA_OWNER)
-                },
-            ) {
-                duration = animationDuration
-                interpolator = LINEAR_INTERPOLATOR
-            }
-            animators.add(pitchAnimator)
-        }
-
-        cameraOptions.padding?.let { padding ->
-            val paddingAnimator = cameraPlugin.createPaddingAnimator(
-                CameraAnimatorOptions.cameraAnimatorOptions(padding) {
-                    owner(NAVIGATION_CAMERA_OWNER)
-                },
-            ) {
-                duration = animationDuration
-                interpolator = LINEAR_INTERPOLATOR
-            }
-            animators.add(paddingAnimator)
-        }
-
-        return createAnimatorSet(animators)
+        return createAnimatorSet(updateFrame.updateFrame(cameraOptions, transitionOptions))
     }
 
     private fun flyFromLowZoomToHighZoom(

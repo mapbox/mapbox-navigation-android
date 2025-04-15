@@ -33,6 +33,7 @@ import com.mapbox.navigation.ui.maps.camera.transition.MapboxNavigationCameraSta
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraStateTransition
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
 import com.mapbox.navigation.ui.maps.camera.transition.SimplifiedFrameAnimatorsCreator
+import com.mapbox.navigation.ui.maps.camera.transition.SimplifiedUpdateFrameTransition
 import com.mapbox.navigation.ui.maps.camera.transition.TransitionEndListener
 import com.mapbox.navigation.ui.maps.camera.transition.UpdateFrameAnimatorsOptions
 import java.util.concurrent.CopyOnWriteArraySet
@@ -157,7 +158,7 @@ internal constructor(
         mapboxMap,
         cameraPlugin,
         viewportDataSource,
-        getAnimatorsCreator(stateTransition, updateFrameAnimatorsOptions),
+        getAnimatorsCreator(mapboxMap, cameraPlugin, stateTransition, updateFrameAnimatorsOptions),
     )
 
     companion object {
@@ -176,15 +177,21 @@ internal constructor(
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
         internal fun getAnimatorsCreator(
+            mapboxMap: MapboxMap,
+            cameraPlugin: CameraAnimationsPlugin,
             stateTransition: NavigationCameraStateTransition,
             updateFrameAnimatorsOptions: UpdateFrameAnimatorsOptions,
         ): AnimatorsCreator {
             return when (updateFrameAnimatorsOptions.useSimplifiedAnimatorsDependency) {
                 true -> {
-                    SimplifiedFrameAnimatorsCreator(stateTransition)
+                    SimplifiedFrameAnimatorsCreator(
+                        cameraPlugin,
+                        stateTransition,
+                        SimplifiedUpdateFrameTransition(mapboxMap, cameraPlugin),
+                    )
                 }
                 false -> {
-                    FullFrameAnimatorsCreator(stateTransition)
+                    FullFrameAnimatorsCreator(stateTransition, cameraPlugin)
                 }
             }
         }
@@ -454,7 +461,6 @@ internal constructor(
     }
 
     // for coordination layer use only
-    // TODO remove after NAVAND-4832
     internal fun jumpToCameraCenter(center: Point?) {
         mapboxMap.setCamera(
             CameraOptions.Builder()
@@ -469,12 +475,7 @@ internal constructor(
     }
 
     private fun cancelAnimation() {
-        runningAnimation?.let { set ->
-            set.cancel()
-            set.children.forEach {
-                cameraPlugin.unregisterAnimators(it as ValueAnimator)
-            }
-        }
+        runningAnimation?.cancel()
         runningAnimation = null
     }
 
@@ -486,9 +487,6 @@ internal constructor(
         cancelAnimation()
         if (transitionEndListener != null) {
             transitionEndListeners.add(transitionEndListener)
-        }
-        animatorSet.children.forEach {
-            cameraPlugin.registerAnimators(it as ValueAnimator)
         }
         if (instant) {
             animatorSet.makeInstant()
@@ -502,10 +500,8 @@ internal constructor(
     }
 
     private fun finishAnimation(animatorSet: MapboxAnimatorSet) {
-        animatorSet.children.forEach {
-            cameraPlugin.unregisterAnimators(it as ValueAnimator)
-        }
-        if (runningAnimation == animatorSet) {
+        animatorSet.onFinished()
+        if (runningAnimation === animatorSet) {
             runningAnimation = null
         }
     }

@@ -1,6 +1,8 @@
 package com.mapbox.navigation.ui.maps.camera.transition
 
 import android.animation.Animator
+import android.animation.ValueAnimator
+import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 
 /**
  * Only supports simple animators dependencies:
@@ -10,8 +12,11 @@ import android.animation.Animator
  * Used internal to avoid using [AnimatorSet.start] to make starting animations more performant.
  */
 internal class SimplifiedAnimatorSet(
-    override val children: List<Animator>,
+    val cameraPlugin: CameraAnimationsPlugin,
+    children: List<ValueAnimator>,
 ) : MapboxAnimatorSet {
+
+    private val children = children.toTypedArray()
 
     override fun addAnimationEndListener(listener: MapboxAnimatorSetEndListener) {
         val simplifiedAnimatorSetListener = SimplifiedAnimatorSetEndListener(listener)
@@ -23,15 +28,22 @@ internal class SimplifiedAnimatorSet(
     }
 
     override fun start() {
+        cameraPlugin.registerAnimators(*children)
         children.forEach { it.start() }
     }
 
-    override fun end() {
-        children.forEach { it.end() }
+    override fun onFinished() {
+        cameraPlugin.unregisterAnimators(
+            *children,
+            cancelAnimators = false,
+        )
     }
 
     override fun cancel() {
-        children.forEach { it.cancel() }
+        cameraPlugin.unregisterAnimators(
+            *children,
+            cancelAnimators = true,
+        )
     }
 
     private inner class SimplifiedAnimatorSetEndListener(

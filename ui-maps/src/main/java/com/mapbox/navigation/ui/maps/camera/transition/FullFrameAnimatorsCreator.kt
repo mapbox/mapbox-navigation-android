@@ -1,9 +1,11 @@
 package com.mapbox.navigation.ui.maps.camera.transition
 
 import com.mapbox.maps.CameraOptions
+import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 
 internal class FullFrameAnimatorsCreator(
     private val stateTransition: NavigationCameraStateTransition,
+    private val cameraAnimationsPlugin: CameraAnimationsPlugin,
 ) : AnimatorsCreator {
 
     override fun transitionToFollowing(
@@ -11,6 +13,7 @@ internal class FullFrameAnimatorsCreator(
         transitionOptions: NavigationCameraTransitionOptions,
     ): FullAnimatorSet {
         return FullAnimatorSet(
+            cameraAnimationsPlugin,
             stateTransition.transitionToFollowing(cameraOptions, transitionOptions),
         )
     }
@@ -20,6 +23,7 @@ internal class FullFrameAnimatorsCreator(
         transitionOptions: NavigationCameraTransitionOptions,
     ): FullAnimatorSet {
         return FullAnimatorSet(
+            cameraAnimationsPlugin,
             stateTransition.transitionToOverview(cameraOptions, transitionOptions),
         )
     }
@@ -29,6 +33,7 @@ internal class FullFrameAnimatorsCreator(
         transitionOptions: NavigationCameraTransitionOptions,
     ): MapboxAnimatorSet {
         return FullAnimatorSet(
+            cameraAnimationsPlugin,
             stateTransition.updateFrameForFollowing(cameraOptions, transitionOptions),
         )
     }
@@ -38,6 +43,7 @@ internal class FullFrameAnimatorsCreator(
         transitionOptions: NavigationCameraTransitionOptions,
     ): MapboxAnimatorSet {
         return FullAnimatorSet(
+            cameraAnimationsPlugin,
             stateTransition.updateFrameForOverview(cameraOptions, transitionOptions),
         )
     }
