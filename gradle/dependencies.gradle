@@ -21,7 +21,7 @@ ext {
       mapboxMapSdk              : '11.12.0-beta.1',
       mapboxSdkServices         : '7.4.0',
       mapboxNavigator           : "${mapboxNavigatorVersion}",
-      mapboxCommonNative        : '24.12.0-beta.1',
+      mapboxCommonNative        : '24.12.0-SNAPSHOT-04-15--07-58.git-310ef69',
       mapboxNavSdkCpp           : '0.12.0-beta.1',
       mapboxSearch              : '2.12.0-beta.1',
       mapboxBaseAndroid         : '0.11.0',
