@@ -203,6 +203,27 @@ class MapboxNavigationCameraTransitionTest {
         assertEquals(animatorSet, animator)
     }
 
+    @Test
+    fun simplifiedUpdateFrameTransitionIsUsedForLinear() {
+        val updateFrame = mockk<SimplifiedUpdateFrameTransition>(relaxed = true)
+        val cameraOptions = CameraOptions.Builder()
+            .center(Point.fromLngLat(139.7745686, 35.677573))
+            .zoom(22.0)
+            .build()
+        val transitionOptions = NavigationCameraTransitionOptions.Builder().maxDuration(700).build()
+        val child1 = mockk<ValueAnimator>()
+        val child2 = mockk<ValueAnimator>()
+        every {
+            updateFrame.updateFrame(cameraOptions, transitionOptions)
+        } returns listOf(child1, child2)
+        val transition = MapboxNavigationCameraTransition(mapboxMap, cameraPlugin, updateFrame)
+
+        val actual = transition.transitionLinear(cameraOptions, transitionOptions)
+
+        assertEquals(animatorSet, actual)
+        verify { createAnimatorSet(listOf(child1, child2)) }
+    }
+
     @After
     fun tearDown() {
         unmockkStatic("com.mapbox.navigation.ui.maps.internal.camera.MapboxNavigationCameraUtilsKt")

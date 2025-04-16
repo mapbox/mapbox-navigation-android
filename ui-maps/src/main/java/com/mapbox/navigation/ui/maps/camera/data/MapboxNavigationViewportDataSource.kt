@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.camera.data
 
 import androidx.annotation.UiThread
+import androidx.annotation.VisibleForTesting
 import com.mapbox.annotation.MapboxDelicateApi
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.common.Cancelable
@@ -207,7 +208,8 @@ class MapboxNavigationViewportDataSource private constructor(
     private val followingFramingModeHolder: FollowingFramingModeHolder?,
     options: MapboxNavigationViewportDataSourceOptions,
     internal var internalOptions: InternalViewportDataSourceOptions,
-    private val overviewViewportDataSource: OverviewViewportDataSource,
+    @get:VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal val overviewViewportDataSource: OverviewViewportDataSource,
 ) : ViewportDataSource {
 
     internal companion object {

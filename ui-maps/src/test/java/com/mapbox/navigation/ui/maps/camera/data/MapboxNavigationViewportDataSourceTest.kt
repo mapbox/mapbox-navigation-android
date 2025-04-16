@@ -33,8 +33,13 @@ import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.isF
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteForPostManeuverFramingGeometry
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteIntersections
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRoutePoints
+import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger
+import com.mapbox.navigation.ui.maps.internal.camera.FollowingFramingModeHolder
+import com.mapbox.navigation.ui.maps.internal.camera.InternalViewportDataSourceOptions
 import com.mapbox.navigation.ui.maps.internal.camera.OverviewMode
+import com.mapbox.navigation.ui.maps.internal.camera.OverviewViewportDataSource
 import com.mapbox.navigation.utils.internal.toPoint
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -43,10 +48,12 @@ import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import io.mockk.verify
+import io.mockk.verifyOrder
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -57,6 +64,7 @@ class MapboxNavigationViewportDataSourceTest {
     val loggerRule = LoggingFrontendTestRule()
 
     private val mapboxMap: MapboxMap = mockk(relaxed = true)
+    private val followingFrameModeHolder = mockk<FollowingFramingModeHolder>(relaxed = true)
     private val emptyCameraState = CameraState(
         NULL_ISLAND_POINT,
         EMPTY_EDGE_INSETS,
@@ -224,9 +232,420 @@ class MapboxNavigationViewportDataSourceTest {
     }
 
     @Test
+    fun publicConstructorUsesSameOptionsForDataSourceAndOverview() {
+        viewportDataSource = MapboxNavigationViewportDataSource(mapboxMap)
+
+        assertTrue(
+            viewportDataSource.options === viewportDataSource.overviewViewportDataSource.options,
+        )
+        assertTrue(
+            viewportDataSource.internalOptions ===
+                viewportDataSource.overviewViewportDataSource.internalOptions,
+        )
+    }
+
+    @Test
+    fun internalConstructorUsesSameOptionsForDataSourceAndOverview() {
+        val options = mockk<MapboxNavigationViewportDataSourceOptions>(relaxed = true)
+        val internalOptions = mockk<InternalViewportDataSourceOptions>(relaxed = true)
+        val overviewViewportDataSource = mockk<OverviewViewportDataSource>(relaxed = true) {
+            every { this@mockk.options } returns options
+            every { this@mockk.internalOptions } returns internalOptions
+        }
+        viewportDataSource = MapboxNavigationViewportDataSource(
+            mapboxMap,
+            followingFrameModeHolder,
+            overviewViewportDataSource,
+        )
+
+        assertTrue(viewportDataSource.options === options)
+        assertTrue(viewportDataSource.internalOptions === internalOptions)
+    }
+
+    @Test
     fun sanity() {
         assertNotNull(viewportDataSource)
     }
+
+    // region mocked OverviewViewportDataSource
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    @Test
+    fun settingDebuggerSetsItToOverviewDataSource() {
+        val overviewViewportDataSource = mockk<OverviewViewportDataSource>(relaxed = true)
+        viewportDataSource = MapboxNavigationViewportDataSource(
+            mapboxMap,
+            followingFrameModeHolder,
+            overviewViewportDataSource,
+        )
+
+        val debugger = mockk<MapboxNavigationViewportDataSourceDebugger>(relaxed = true)
+        viewportDataSource.debugger = debugger
+
+        verify { overviewViewportDataSource.debugger = debugger }
+    }
+
+    @Test
+    fun settingOverviewPaddingSetsItToOverviewDataSource() {
+        val overviewViewportDataSource = mockk<OverviewViewportDataSource>(relaxed = true)
+        viewportDataSource = MapboxNavigationViewportDataSource(
+            mapboxMap,
+            followingFrameModeHolder,
+            overviewViewportDataSource,
+        )
+
+        val padding = EdgeInsets(1.0, 2.0, 3.0, 4.0)
+        viewportDataSource.overviewPadding = padding
+
+        verify { overviewViewportDataSource.padding = padding }
+    }
+
+    @Test
+    fun initialOverviewViewportDataIsTakenFromOverviewDataSource() {
+        val overviewOptions = mockk<CameraOptions>()
+        val overviewViewportDataSource = mockk<OverviewViewportDataSource>(relaxed = true) {
+            every { viewportData } returns overviewOptions
+        }
+        viewportDataSource = MapboxNavigationViewportDataSource(
+            mapboxMap,
+            followingFrameModeHolder,
+            overviewViewportDataSource,
+        )
+
+        assertEquals(overviewOptions, viewportDataSource.getViewportData().cameraForOverview)
+    }
+
+    @Test
+    fun evaluateUsesOverviewDataSource() {
+        val overviewViewportDataSource = mockk<OverviewViewportDataSource>(relaxed = true)
+        viewportDataSource = MapboxNavigationViewportDataSource(
+            mapboxMap,
+            followingFrameModeHolder,
+            overviewViewportDataSource,
+        )
+
+        clearMocks(overviewViewportDataSource)
+
+        val overviewOptions = mockk<CameraOptions>()
+        every { overviewViewportDataSource.viewportData } returns overviewOptions
+
+        viewportDataSource.evaluate()
+
+        verifyOrder {
+            overviewViewportDataSource.evaluate()
+            overviewViewportDataSource.viewportData
+        }
+
+        assertEquals(overviewOptions, viewportDataSource.getViewportData().cameraForOverview)
+    }
+
+    @Test
+    fun onRouteProgressChangedIsNotPassedToOverviewDataSourceIfNoRouteIsSet() {
+        val overviewViewportDataSource = mockk<OverviewViewportDataSource>(relaxed = true)
+        viewportDataSource = MapboxNavigationViewportDataSource(
+            mapboxMap,
+            followingFrameModeHolder,
+            overviewViewportDataSource,
+        )
+
+        val legProgress = mockk<RouteLegProgress> {
+            every { currentStepProgress } returns mockk()
+        }
+        every { routeProgress.currentLegProgress } returns legProgress
+        every { routeProgress.route } returns route
+
+        viewportDataSource.onRouteProgressChanged(routeProgress)
+
+        verify(exactly = 0) {
+            overviewViewportDataSource.onRouteProgressChanged(any(), any())
+        }
+    }
+
+    @Test
+    fun onRouteProgressChangedIsNotPassedToOverviewDataSourceIfDifferentRouteIsSet() {
+        val overviewViewportDataSource = mockk<OverviewViewportDataSource>(relaxed = true)
+        viewportDataSource = MapboxNavigationViewportDataSource(
+            mapboxMap,
+            followingFrameModeHolder,
+            overviewViewportDataSource,
+        )
+
+        val legProgress = mockk<RouteLegProgress> {
+            every { currentStepProgress } returns mockk()
+        }
+        every { routeProgress.currentLegProgress } returns legProgress
+        every { routeProgress.route } returns mockk(relaxed = true)
+
+        viewportDataSource.onRouteChanged(navigationRoute)
+        clearMocks(overviewViewportDataSource)
+
+        mockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
+        every { route.isSameRoute(any()) } returns false
+        viewportDataSource.onRouteProgressChanged(routeProgress)
+        unmockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
+
+        verify(exactly = 0) {
+            overviewViewportDataSource.onRouteProgressChanged(any(), any())
+        }
+    }
+
+    @Test
+    fun onRouteProgressChangedIsNotPassedToOverviewDataSourceIfStepProgressIsNull() {
+        val overviewViewportDataSource = mockk<OverviewViewportDataSource>(relaxed = true)
+        viewportDataSource = MapboxNavigationViewportDataSource(
+            mapboxMap,
+            followingFrameModeHolder,
+            overviewViewportDataSource,
+        )
+
+        val legProgress = mockk<RouteLegProgress> {
+            every { currentStepProgress } returns null
+        }
+        every { routeProgress.currentLegProgress } returns legProgress
+        every { routeProgress.route } returns route
+
+        viewportDataSource.onRouteChanged(navigationRoute)
+        viewportDataSource.onRouteProgressChanged(routeProgress)
+
+        verify(exactly = 0) {
+            overviewViewportDataSource.onRouteProgressChanged(any(), any())
+        }
+    }
+
+    @Test
+    fun onRouteProgressChangedIsPassedToOverviewDataSource() {
+        val overviewViewportDataSource = mockk<OverviewViewportDataSource>(relaxed = true) {
+            every { options } returns mockk(relaxed = true) {
+                every { followingFrameOptions } returns mockk(relaxed = true) {
+                    every { framingStrategy } returns mockk(relaxed = true) {
+                        every {
+                            getPointsToFrameOnCurrentStep(routeProgress, any(), any())
+                        } returns pointsToFrameOnCurrentStep
+                    }
+                }
+            }
+        }
+        viewportDataSource = MapboxNavigationViewportDataSource(
+            mapboxMap,
+            followingFrameModeHolder,
+            overviewViewportDataSource,
+        )
+
+        val legProgress = mockk<RouteLegProgress> {
+            every { currentStepProgress } returns mockk()
+        }
+        every { routeProgress.currentLegProgress } returns legProgress
+        every { routeProgress.route } returns route
+
+        viewportDataSource.onRouteChanged(navigationRoute)
+        viewportDataSource.onRouteProgressChanged(routeProgress)
+
+        verify {
+            overviewViewportDataSource.onRouteProgressChanged(
+                routeProgress,
+                pointsToFrameOnCurrentStep,
+            )
+        }
+    }
+
+    @Test
+    fun onLocationChangedIsPassedToOverviewDataSource() {
+        val overviewViewportDataSource = mockk<OverviewViewportDataSource>(relaxed = true)
+        viewportDataSource = MapboxNavigationViewportDataSource(
+            mapboxMap,
+            followingFrameModeHolder,
+            overviewViewportDataSource,
+        )
+
+        val location = createLocation(1.0, 2.0)
+        viewportDataSource.onLocationChanged(location)
+
+        verify { overviewViewportDataSource.onLocationChanged(location) }
+    }
+
+    @Test
+    fun clearRouteDataClearsOverviewDataSource() {
+        val overviewViewportDataSource = mockk<OverviewViewportDataSource>(relaxed = true)
+        viewportDataSource = MapboxNavigationViewportDataSource(
+            mapboxMap,
+            followingFrameModeHolder,
+            overviewViewportDataSource,
+        )
+
+        viewportDataSource.clearRouteData()
+
+        verify { overviewViewportDataSource.clearRouteData() }
+    }
+
+    @Test
+    fun onRouteChangedIsPassedToOverviewDataSource() {
+        val overviewViewportDataSource = mockk<OverviewViewportDataSource>(relaxed = true)
+        viewportDataSource = MapboxNavigationViewportDataSource(
+            mapboxMap,
+            followingFrameModeHolder,
+            overviewViewportDataSource,
+        )
+
+        viewportDataSource.onRouteChanged(navigationRoute)
+
+        verify { overviewViewportDataSource.onRouteChanged(navigationRoute) }
+    }
+
+    @Test
+    fun onRouteChangedIsNotPassedToOverviewDataSourceIfSame() {
+        val overviewViewportDataSource = mockk<OverviewViewportDataSource>(relaxed = true)
+        viewportDataSource = MapboxNavigationViewportDataSource(
+            mapboxMap,
+            followingFrameModeHolder,
+            overviewViewportDataSource,
+        )
+
+        viewportDataSource.onRouteChanged(navigationRoute)
+
+        clearMocks(overviewViewportDataSource)
+
+        viewportDataSource.onRouteChanged(navigationRoute)
+
+        verify(exactly = 0) { overviewViewportDataSource.onRouteChanged(any()) }
+    }
+
+    @Test
+    fun routeIsPassedToOverviewDataSourceAfterReevaluate() {
+        val overviewViewportDataSource = mockk<OverviewViewportDataSource>(relaxed = true)
+        viewportDataSource = MapboxNavigationViewportDataSource(
+            mapboxMap,
+            followingFrameModeHolder,
+            overviewViewportDataSource,
+        )
+
+        viewportDataSource.onRouteChanged(navigationRoute)
+
+        clearMocks(overviewViewportDataSource)
+
+        viewportDataSource.reevaluateRoute()
+
+        verify { overviewViewportDataSource.onRouteChanged(navigationRoute) }
+    }
+
+    @Test
+    fun clearProgressDataIsPassedToOverviewDataSource() {
+        val overviewViewportDataSource = mockk<OverviewViewportDataSource>(relaxed = true)
+        viewportDataSource = MapboxNavigationViewportDataSource(
+            mapboxMap,
+            followingFrameModeHolder,
+            overviewViewportDataSource,
+        )
+
+        viewportDataSource.onRouteChanged(navigationRoute)
+        clearMocks(overviewViewportDataSource)
+        every { routeProgress.route } returns mockk(relaxed = true)
+        every { routeProgress.currentLegProgress } returns mockk(relaxed = true)
+
+        mockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
+        every { route.isSameRoute(any()) } returns false
+        viewportDataSource.onRouteProgressChanged(routeProgress)
+        unmockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
+
+        verify { overviewViewportDataSource.clearProgressData() }
+    }
+
+    @Test
+    fun additionalPointsToFrameForOverviewArePassedToOverviewDataSource() {
+        val overviewViewportDataSource = mockk<OverviewViewportDataSource>(relaxed = true)
+        viewportDataSource = MapboxNavigationViewportDataSource(
+            mapboxMap,
+            followingFrameModeHolder,
+            overviewViewportDataSource,
+        )
+
+        val points = listOf(
+            Point.fromLngLat(1.0, 2.0),
+            Point.fromLngLat(3.0, 4.0),
+        )
+
+        viewportDataSource.additionalPointsToFrameForOverview(points)
+
+        verify { overviewViewportDataSource.additionalPointsToFrame(points) }
+    }
+
+    @Test
+    fun overviewCenterPropertyOverrideIsPassedToOverviewDataSource() {
+        val overviewViewportDataSource = mockk<OverviewViewportDataSource>(relaxed = true)
+        viewportDataSource = MapboxNavigationViewportDataSource(
+            mapboxMap,
+            followingFrameModeHolder,
+            overviewViewportDataSource,
+        )
+
+        val point = Point.fromLngLat(1.0, 2.0)
+
+        viewportDataSource.overviewCenterPropertyOverride(point)
+
+        verify { overviewViewportDataSource.centerPropertyOverride(point) }
+    }
+
+    @Test
+    fun overviewZoomPropertyOverrideIsPassedToOverviewDataSource() {
+        val overviewViewportDataSource = mockk<OverviewViewportDataSource>(relaxed = true)
+        viewportDataSource = MapboxNavigationViewportDataSource(
+            mapboxMap,
+            followingFrameModeHolder,
+            overviewViewportDataSource,
+        )
+
+        val zoom = 13.5
+
+        viewportDataSource.overviewZoomPropertyOverride(zoom)
+
+        verify { overviewViewportDataSource.zoomPropertyOverride(zoom) }
+    }
+
+    @Test
+    fun overviewBearingPropertyOverrideIsPassedToOverviewDataSource() {
+        val overviewViewportDataSource = mockk<OverviewViewportDataSource>(relaxed = true)
+        viewportDataSource = MapboxNavigationViewportDataSource(
+            mapboxMap,
+            followingFrameModeHolder,
+            overviewViewportDataSource,
+        )
+
+        val bearing = 13.5
+
+        viewportDataSource.overviewBearingPropertyOverride(bearing)
+
+        verify { overviewViewportDataSource.bearingPropertyOverride(bearing) }
+    }
+
+    @Test
+    fun overviewPitchPropertyOverrideIsPassedToOverviewDataSource() {
+        val overviewViewportDataSource = mockk<OverviewViewportDataSource>(relaxed = true)
+        viewportDataSource = MapboxNavigationViewportDataSource(
+            mapboxMap,
+            followingFrameModeHolder,
+            overviewViewportDataSource,
+        )
+
+        val pitch = 13.5
+
+        viewportDataSource.overviewPitchPropertyOverride(pitch)
+
+        verify { overviewViewportDataSource.pitchPropertyOverride(pitch) }
+    }
+
+    @Test
+    fun clearOverviewOverridesIsPassedToOverviewDataSource() {
+        val overviewViewportDataSource = mockk<OverviewViewportDataSource>(relaxed = true)
+        viewportDataSource = MapboxNavigationViewportDataSource(
+            mapboxMap,
+            followingFrameModeHolder,
+            overviewViewportDataSource,
+        )
+
+        viewportDataSource.clearOverviewOverrides()
+
+        verify { overviewViewportDataSource.clearOverrides() }
+    }
+
+    // endregion mocked OverviewViewportDataSource
 
     @Test
     fun `empty source initializes at null island`() {
@@ -382,7 +801,7 @@ class MapboxNavigationViewportDataSourceTest {
                 center(NULL_ISLAND_POINT)
                 bearing(BEARING_NORTH)
                 pitch(ZERO_PITCH)
-                zoom(0.0)
+                zoom(16.35) // overviewOptions.maxZoom
                 padding(EMPTY_EDGE_INSETS)
                 anchor(null)
             },

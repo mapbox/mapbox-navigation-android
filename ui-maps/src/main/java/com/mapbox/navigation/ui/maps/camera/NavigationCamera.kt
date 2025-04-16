@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.maps.camera
 
-import android.animation.ValueAnimator
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import com.mapbox.geojson.Point

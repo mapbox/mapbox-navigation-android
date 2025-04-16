@@ -3,27 +3,24 @@ package com.mapbox.navigation.ui.maps.camera.transition
 import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
+import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import org.junit.Assert.assertEquals
+import io.mockk.verifyOrder
 import org.junit.Test
 
 internal class FullAnimatorSetTest {
 
+    private val cameraPlugin = mockk<CameraAnimationsPlugin>(relaxed = true)
     private val children = arrayListOf<Animator>(mockk<ValueAnimator>(), mockk<ValueAnimator>())
     private val originalAnimatorSet = mockk<AnimatorSet>(relaxed = true) {
         every { childAnimations } returns children
     }
 
-    private val fullAnimatorSet = FullAnimatorSet(originalAnimatorSet)
-
-    @Test
-    fun children() {
-        assertEquals(children, fullAnimatorSet.children)
-    }
+    private val fullAnimatorSet = FullAnimatorSet(cameraPlugin, originalAnimatorSet)
 
     @Test
     fun addListener() {
@@ -105,20 +102,34 @@ internal class FullAnimatorSetTest {
     fun start() {
         fullAnimatorSet.start()
 
-        verify { originalAnimatorSet.start() }
+        verifyOrder {
+            cameraPlugin.registerAnimators(*children.map { it as ValueAnimator }.toTypedArray())
+            originalAnimatorSet.start()
+        }
     }
 
     @Test
-    fun end() {
-        fullAnimatorSet.end()
+    fun onFinished() {
+        fullAnimatorSet.onFinished()
 
-        verify { originalAnimatorSet.end() }
+        verify {
+            cameraPlugin.unregisterAnimators(
+                *children.map { it as ValueAnimator }.toTypedArray(),
+                cancelAnimators = false,
+            )
+        }
     }
 
     @Test
     fun cancel() {
         fullAnimatorSet.cancel()
 
-        verify { originalAnimatorSet.cancel() }
+        verifyOrder {
+            originalAnimatorSet.cancel()
+            cameraPlugin.unregisterAnimators(
+                *children.map { it as ValueAnimator }.toTypedArray(),
+                cancelAnimators = false,
+            )
+        }
     }
 }

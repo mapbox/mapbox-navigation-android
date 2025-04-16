@@ -1,24 +1,21 @@
 package com.mapbox.navigation.ui.maps.camera.transition
 
-import android.animation.Animator
 import android.animation.Animator.AnimatorListener
+import android.animation.ValueAnimator
+import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import org.junit.Assert.assertEquals
+import io.mockk.verifyOrder
 import org.junit.Test
 
 internal class SimplifiedAnimatorSetTest {
 
-    private val child1 = mockk<Animator>(relaxed = true)
-    private val child2 = mockk<Animator>(relaxed = true)
+    private val cameraPlugin = mockk<CameraAnimationsPlugin>(relaxed = true)
+    private val child1 = mockk<ValueAnimator>(relaxed = true)
+    private val child2 = mockk<ValueAnimator>(relaxed = true)
     private val children = arrayListOf(child1, child2)
-    private val animatorSet = SimplifiedAnimatorSet(children)
-
-    @Test
-    fun children() {
-        assertEquals(children, animatorSet.children)
-    }
+    private val animatorSet = SimplifiedAnimatorSet(cameraPlugin, children)
 
     @Test
     fun addAnimationEndListener() {
@@ -61,23 +58,28 @@ internal class SimplifiedAnimatorSetTest {
     fun start() {
         animatorSet.start()
 
-        verify { child1.start() }
-        verify { child2.start() }
+        verifyOrder {
+            cameraPlugin.registerAnimators(*children.toTypedArray())
+            child1.start()
+            child2.start()
+        }
     }
 
     @Test
-    fun end() {
-        animatorSet.end()
+    fun onFinished() {
+        animatorSet.onFinished()
 
-        verify { child1.end() }
-        verify { child2.end() }
+        verify {
+            cameraPlugin.unregisterAnimators(*children.toTypedArray(), cancelAnimators = false)
+        }
     }
 
     @Test
     fun cancel() {
         animatorSet.cancel()
 
-        verify { child1.cancel() }
-        verify { child2.cancel() }
+        verify {
+            cameraPlugin.unregisterAnimators(*children.toTypedArray(), cancelAnimators = true)
+        }
     }
 }

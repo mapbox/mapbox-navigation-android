@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maps.camera.transition
 
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
+import androidx.annotation.VisibleForTesting
 import androidx.core.view.animation.PathInterpolatorCompat
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapboxMap
@@ -25,12 +26,16 @@ private val SLOW_OUT_SLOW_IN_INTERPOLATOR = PathInterpolatorCompat.create(0.4f, 
 /**
  * Helper class that provides default implementation of [NavigationCameraTransition] generators.
  */
-class MapboxNavigationCameraTransition(
+class MapboxNavigationCameraTransition @VisibleForTesting internal constructor(
     private val mapboxMap: MapboxMap,
     private val cameraPlugin: CameraAnimationsPlugin,
+    private val updateFrame: SimplifiedUpdateFrameTransition,
 ) : NavigationCameraTransition {
 
-    private val updateFrame = SimplifiedUpdateFrameTransition(mapboxMap, cameraPlugin)
+    constructor(
+        mapboxMap: MapboxMap,
+        cameraPlugin: CameraAnimationsPlugin,
+    ) : this(mapboxMap, cameraPlugin, SimplifiedUpdateFrameTransition(mapboxMap, cameraPlugin))
 
     override fun transitionFromLowZoomToHighZoom(
         cameraOptions: CameraOptions,

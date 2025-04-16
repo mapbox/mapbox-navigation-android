@@ -31,7 +31,6 @@ import com.mapbox.navigator.SpeedLimitUnit
 import com.mapbox.navigator.TimeZone
 import com.mapbox.navigator.TurnLane
 import com.mapbox.navigator.UpcomingRouteAlertUpdate
-import com.mapbox.navigator.VoiceInstruction
 import com.mapbox.navigator.VoiceInstructionInfo
 import com.mapbox.navigator.Waypoint
 import com.mapbox.navigator.WaypointType

@@ -1,7 +1,5 @@
 package com.mapbox.navigation.ui.maps.camera
 
-import android.animation.Animator
-import android.animation.ValueAnimator
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
@@ -44,20 +42,10 @@ class NavigationCameraTest {
     private val internalTransitionListenerSlot = slot<MapboxAnimatorSetListener>()
     private val internalFrameListenerSlot = slot<MapboxAnimatorSetEndListener>()
     private val transitionBlock: FullAnimatorSet.() -> Unit = {
-        every { children } returns arrayListOf<Animator>(
-            mockk<ValueAnimator>(),
-            mockk<ValueAnimator>(),
-            mockk<ValueAnimator>(),
-        )
         every { addListener(capture(internalTransitionListenerSlot)) } just Runs
         every { makeInstant() } answers {}
     }
     private val frameBlock: MapboxAnimatorSet.() -> Unit = {
-        every { children } returns arrayListOf<Animator>(
-            mockk<ValueAnimator>(),
-            mockk<ValueAnimator>(),
-            mockk<ValueAnimator>(),
-        )
         every { addAnimationEndListener(capture(internalFrameListenerSlot)) } just Runs
         every { makeInstant() } answers {}
     }
@@ -115,6 +103,8 @@ class NavigationCameraTest {
     fun getAnimatorsCreatorSimple() {
         val stateTransition = mockk<NavigationCameraStateTransition>()
         val actual = NavigationCamera.getAnimatorsCreator(
+            mapboxMap,
+            cameraPlugin,
             stateTransition,
             UpdateFrameAnimatorsOptions.Builder()
                 .useSimplifiedAnimatorsDependency(true)
@@ -129,6 +119,8 @@ class NavigationCameraTest {
     fun getAnimatorsCreatorFull() {
         val stateTransition = mockk<NavigationCameraStateTransition>()
         val actual = NavigationCamera.getAnimatorsCreator(
+            mapboxMap,
+            cameraPlugin,
             stateTransition,
             UpdateFrameAnimatorsOptions.Builder()
                 .useSimplifiedAnimatorsDependency(false)
@@ -375,9 +367,7 @@ class NavigationCameraTest {
         internalTransitionListenerSlot.captured.onAnimationStart(followingAnimatorSet)
         internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
 
-        followingAnimatorSet.children.forEach {
-            verify(exactly = 1) { cameraPlugin.unregisterAnimators(it as ValueAnimator) }
-        }
+        verify { followingAnimatorSet.onFinished() }
     }
 
     @Test
@@ -402,9 +392,7 @@ class NavigationCameraTest {
         internalTransitionListenerSlot.captured.onAnimationStart(overviewAnimatorSet)
         internalTransitionListenerSlot.captured.onAnimationEnd(overviewAnimatorSet)
 
-        overviewAnimatorSet.children.forEach {
-            verify(exactly = 1) { cameraPlugin.unregisterAnimators(it as ValueAnimator) }
-        }
+        verify { overviewAnimatorSet.onFinished() }
     }
 
     @Test
@@ -649,9 +637,7 @@ class NavigationCameraTest {
         internalDataSourceObserverSlot.captured.viewportDataSourceUpdated(viewportData)
         internalFrameListenerSlot.captured.onAnimationEnd(frameTransition.frameAnimatorSet)
 
-        frameTransition.frameAnimatorSet.children.forEach {
-            verify(exactly = 1) { cameraPlugin.unregisterAnimators(it as ValueAnimator) }
-        }
+        verify { frameTransition.frameAnimatorSet.onFinished() }
     }
 
     @Test
@@ -667,9 +653,7 @@ class NavigationCameraTest {
         internalDataSourceObserverSlot.captured.viewportDataSourceUpdated(viewportData)
         internalFrameListenerSlot.captured.onAnimationEnd(frameTransition.frameAnimatorSet)
 
-        frameTransition.frameAnimatorSet.children.forEach {
-            verify(exactly = 1) { cameraPlugin.unregisterAnimators(it as ValueAnimator) }
-        }
+        verify { frameTransition.frameAnimatorSet.onFinished() }
     }
 
     @Test
@@ -867,9 +851,6 @@ class NavigationCameraTest {
     ) {
         verify(exactly = times) {
             animatorsCreator.animatorsCreatorFun(transitionCameraOptions, transitionOptions)
-        }
-        returnTransitionSet.children.forEach {
-            verify(exactly = times) { cameraPlugin.registerAnimators(it as ValueAnimator) }
         }
         verify(exactly = times) { returnTransitionSet.start() }
         verify(exactly = if (instant) 1 else 0) { returnTransitionSet.makeInstant() }
