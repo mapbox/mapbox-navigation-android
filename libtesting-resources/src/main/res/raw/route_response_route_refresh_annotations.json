@@ -441,7 +441,50 @@
             0.79,
             52.499
           ]
-        }
+        },
+        "notifications": [
+          {
+            "type": "alert",
+            "subtype": "stationUnavailable",
+            "reason": "outOfOrder",
+            "station_id": "station1"
+          },
+          {
+            "type": "alert",
+            "subtype": "stationUnavailable",
+            "reason": "outOfOrder",
+            "station_id": "station2"
+          },
+          {
+            "type": "alert",
+            "subtype": "stationUnavailable",
+            "reason": "outOfOrder",
+            "station_id": "station3"
+          },
+          {
+            "type": "violation",
+            "subtype": "evMinChargeAtChargingStation",
+            "details": {
+              "requested_value": 30000,
+              "actual_value": 27000,
+              "unit": "Wh"
+            }
+          },
+          {
+            "type": "violation",
+            "subtype": "evMinChargeAtDestination",
+            "details": {
+              "requested_value": 20000,
+              "actual_value": 13000,
+              "unit": "Wh"
+            }
+          },
+          {
+            "type": "alert",
+            "subtype": "evInsufficientCharge",
+            "geometry_index": 3
+          }
+        ]
       }
     ]
   }

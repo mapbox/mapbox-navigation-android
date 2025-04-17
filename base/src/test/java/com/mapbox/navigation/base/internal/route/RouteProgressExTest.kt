@@ -2,6 +2,7 @@
 
 package com.mapbox.navigation.base.internal.route
 
+import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
@@ -271,9 +272,7 @@ class RouteProgressExTest {
         )
         assertEquals(
             provideEvNotifications()[0],
-            refreshedRoute.directionsRoute.legs()?.get(0)?.unrecognizedJsonProperties?.get(
-                KEY_NOTIFICATIONS,
-            ),
+            refreshedRoute.legNotifications(0),
         )
     }
 
@@ -296,9 +295,7 @@ class RouteProgressExTest {
         )
         assertEquals(
             null,
-            refreshedRoute.directionsRoute.legs()?.get(0)?.unrecognizedJsonProperties?.get(
-                KEY_NOTIFICATIONS,
-            ),
+            refreshedRoute.legNotifications(0),
         )
     }
 
@@ -320,28 +317,26 @@ class RouteProgressExTest {
             responseTimeElapsedSeconds = 0,
         )
 
-        val notifications = JsonArray().apply {
-            add(
-                JsonObject().apply {
-                    add("type", JsonPrimitive("violation"))
-                    add("subtype", JsonPrimitive("stateBorderCrossing"))
-                    add("geometry_index_end", JsonPrimitive(1))
-                    add("geometry_index_start", JsonPrimitive(0))
-                    val details = JsonObject()
-                    details.add("actual_value", JsonPrimitive("US-NV,US-CA"))
-                    details.add(
-                        "message",
-                        JsonPrimitive("Crossing the border of the states of US-NV and US-CA."),
-                    )
-                    add("details", details)
-                },
-            )
-        }
+        val targetNotifications = Gson().fromJson(
+            """
+                [ 
+                    {
+                      "type": "violation",
+                      "subtype": "stateBorderCrossing",
+                      "geometry_index_end": 1,
+                      "geometry_index_start": 0,
+                      "details": {
+                        "actual_value": "US-NV,US-CA",
+                        "message": "Crossing the border of the states of US-NV and US-CA."
+                      }
+                    }
+                ]
+            """.trimIndent(),
+            JsonArray::class.java,
+        )
         assertEquals(
-            notifications,
-            refreshedRoute.directionsRoute.legs()?.get(0)?.unrecognizedJsonProperties?.get(
-                KEY_NOTIFICATIONS,
-            ),
+            targetNotifications?.sorted(),
+            refreshedRoute.legNotifications(0)?.sorted(),
         )
     }
 
@@ -351,9 +346,55 @@ class RouteProgressExTest {
             "3-steps-route-directions-response-ev-with-notifications.json",
             "3-steps-route-directions-request-url-ev-with-notifications.txt",
         )
-        val updateNotifications =
+        val sourceNotifications = listOf((provideEvNotifications()[0]).apply { remove(0) })
+        val refreshedRoute = sourceRoute.refreshRoute(
+            initialLegIndex = 0,
+            currentLegGeometryIndex = 0,
+            legAnnotations = null,
+            incidents = null,
+            closures = null,
+            waypoints = null,
+            unrecognizedLegNotifications = sourceNotifications,
+            refreshTtl = null,
+            responseTimeElapsedSeconds = 0,
+        )
+        val targetNotifications = provideEvNotifications()[0]
+            .apply {
+                remove(0)
+                add(
+                    Gson().fromJson(
+                        """
+                            {
+                              "type": "violation",
+                              "subtype": "stateBorderCrossing",
+                              "geometry_index_end": 1,
+                              "geometry_index_start": 0,
+                              "details": {
+                                "actual_value": "US-NV,US-CA",
+                                "message": "Crossing the border of the states of US-NV and US-CA."
+                              }
+                            }
+                        """.trimIndent(),
+                        JsonObject::class.java,
+                    ),
+                )
+            }
+        assertEquals(
+            targetNotifications.sorted(),
+            refreshedRoute.legNotifications(0)?.sorted(),
+        )
+    }
+
+    @Test
+    fun `multi leg route refresh updates legs with notifications with notifications`() {
+        val sourceRoute = createNavigationRouteFromResource(
+            "6-steps-3-waypoints-directions-response-ev-with-notifications.json",
+            "6-steps-3-waypoints-directions-request-url-ev-with-notifications.txt",
+        )
+        val sourceNotifications =
             listOf(
-                (provideEvNotifications()[0] as JsonArray).apply { remove(0) },
+                (provideEvNotifications()[0]).apply { remove(0) },
+                (provideEvNotifications()[1]),
             )
         val refreshedRoute = sourceRoute.refreshRoute(
             initialLegIndex = 0,
@@ -362,30 +403,63 @@ class RouteProgressExTest {
             incidents = null,
             closures = null,
             waypoints = null,
-            unrecognizedLegNotifications = updateNotifications,
+            unrecognizedLegNotifications = sourceNotifications,
             refreshTtl = null,
             responseTimeElapsedSeconds = 0,
         )
-        updateNotifications[0].add(
-            JsonObject().apply {
-                add("type", JsonPrimitive("violation"))
-                add("subtype", JsonPrimitive("stateBorderCrossing"))
-                add("geometry_index_end", JsonPrimitive(1))
-                add("geometry_index_start", JsonPrimitive(0))
-                val details = JsonObject()
-                details.add("actual_value", JsonPrimitive("US-NV,US-CA"))
-                details.add(
-                    "message",
-                    JsonPrimitive("Crossing the border of the states of US-NV and US-CA."),
+
+        val targetNotification0 = provideEvNotifications()[0]
+            .apply {
+                remove(0)
+                add(
+                    Gson().fromJson(
+                        """
+                            {
+                              "type": "violation",
+                              "subtype": "stateBorderCrossing",
+                              "geometry_index_end": 1,
+                              "geometry_index_start": 0,
+                              "details": {
+                                "actual_value": "US-NV,US-CA",
+                                "message": "Crossing the border of the states of US-NV and US-CA."
+                              }
+                            }
+                        """.trimIndent(),
+                        JsonObject::class.java,
+                    ),
                 )
-                add("details", details)
-            },
+            }
+
+        val targetNotification1 =
+            provideEvNotifications()[1]
+                .apply {
+                    add(
+                        Gson().fromJson(
+                            """
+                               {
+                                  "type": "violation",
+                                  "subtype": "maxHeight",
+                                  "geometry_index_end": 5,
+                                  "geometry_index_start": 3,
+                                  "details": {
+                                    "actual_value": "4.60",
+                                    "requested_value": "4.70",
+                                    "unit": "meters",
+                                    "message": "The height of the vehicle (4.7 meters) is more than the permissible height of travel on the road (4.6 meters) by 0.10 meters."
+                                  }
+                               }
+                            """.trimIndent(),
+                            JsonObject::class.java,
+                        ),
+                    )
+                }
+        assertEquals(
+            targetNotification0.sorted(),
+            refreshedRoute.legNotifications(0)?.sorted(),
         )
         assertEquals(
-            updateNotifications[0].sortedBy { it.toString() },
-            refreshedRoute.directionsRoute.legs()?.get(0)?.unrecognizedJsonProperties?.get(
-                KEY_NOTIFICATIONS,
-            )?.asJsonArray?.sortedBy { it.toString() },
+            targetNotification1.sorted(),
+            refreshedRoute.legNotifications(1)?.sorted(),
         )
     }
 
@@ -1304,59 +1378,84 @@ class RouteProgressExTest {
             ),
         )
 
-        private fun provideEvNotifications(): List<JsonElement> {
+        private fun provideEvNotifications(): List<JsonArray> {
             return listOf(
-
-                JsonArray().apply {
-                    add(
-                        JsonObject().apply {
-                            add("type", JsonPrimitive("alert"))
-                            add("subtype", JsonPrimitive("stationUnavailable"))
-                            add("reason", JsonPrimitive("outOfOrder"))
-                            add("station_id", JsonPrimitive("station1"))
-                        },
-                    )
-                    add(
-                        JsonObject().apply {
-                            add("type", JsonPrimitive("alert"))
-                            add("subtype", JsonPrimitive("stationUnavailable"))
-                            add("reason", JsonPrimitive("outOfOrder"))
-                            add("station_id", JsonPrimitive("station2"))
-                        },
-                    )
-                    add(
-                        JsonObject().apply {
-                            add("type", JsonPrimitive("alert"))
-                            add("subtype", JsonPrimitive("evInsufficientCharge"))
-                            add("geometry_index", JsonPrimitive(3))
-                        },
-                    )
-                    add(
-                        JsonObject().apply {
-                            add("type", JsonPrimitive("violation"))
-                            add("subtype", JsonPrimitive("evMinChargeAtChargingStation"))
-                            val details = JsonObject()
-                            details.add("requested_value", JsonPrimitive(30000))
-                            details.add("actual_value", JsonPrimitive(27000))
-                            details.add("unit", JsonPrimitive("Wh"))
-                            add("details", details)
-                        },
-                    )
-                    add(
-                        JsonObject().apply {
-                            add("type", JsonPrimitive("violation"))
-                            add("subtype", JsonPrimitive("evMinChargeAtDestination"))
-                            val details = JsonObject()
-                            details.add("requested_value", JsonPrimitive(20000))
-                            details.add("actual_value", JsonPrimitive(13000))
-                            details.add("unit", JsonPrimitive("Wh"))
-                            add("details", details)
-                        },
-                    )
-                },
+                Gson().fromJson(
+                    """
+                        [
+                            {
+                                "type": "alert",
+                                "subtype": "stationUnavailable",
+                                "reason": "outOfOrder",
+                                "station_id": "station1"
+                            },
+                            {
+                                "type": "alert",
+                                "subtype": "stationUnavailable",
+                                "reason": "outOfOrder",
+                                "station_id": "station2"
+                            },
+                            {
+                                "type": "alert",
+                                "subtype": "evInsufficientCharge",
+                                "geometry_index": 3
+                            },
+                            {
+                                "type": "violation",
+                                "subtype": "evMinChargeAtChargingStation",
+                                "details":
+                                {
+                                    "requested_value": 30000,
+                                    "actual_value": 27000,
+                                    "unit": "Wh"
+                                }
+                            },
+                            {
+                                "type": "violation",
+                                "subtype": "evMinChargeAtDestination",
+                                "details":
+                                {
+                                    "requested_value": 20000,
+                                    "actual_value": 13000,
+                                    "unit": "Wh"
+                                }
+                            }
+                        ]
+                    """.trimIndent(),
+                    JsonArray::class.java,
+                ),
+                Gson().fromJson(
+                    """
+                        [
+                            {
+                                "type": "alert",
+                                "subtype": "stationUnavailable",
+                                "reason": "outOfOrder",
+                                "station_id": "station1"
+                            },
+                            {
+                                "type": "violation",
+                                "subtype": "evMinChargeAtDestination",
+                                "details":
+                                {
+                                    "requested_value": 20000,
+                                    "actual_value": 13000,
+                                    "unit": "Wh"
+                                }
+                            }
+                        ]
+                    """.trimIndent(),
+                    JsonArray::class.java,
+                ),
             )
         }
     }
+
+    private fun NavigationRoute.legNotifications(index: Int): JsonElement? =
+        directionsRoute.legs()?.get(index)?.unrecognizedJsonProperties?.get(KEY_NOTIFICATIONS)
+
+    private fun JsonElement.sorted(): List<JsonElement>? =
+        this.asJsonArray?.sortedBy { it.toString() }
 
     /**
      * Wrapper of test case

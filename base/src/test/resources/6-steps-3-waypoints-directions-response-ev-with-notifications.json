@@ -1,0 +1,674 @@
+{
+  "routes": [
+    {
+      "country_crossed": false,
+      "weight_typical": 80.738,
+      "duration_typical": 63.833,
+      "weight_name": "auto",
+      "weight": 80.738,
+      "duration": 63.833,
+      "distance": 334.476,
+      "legs": [
+        {
+          "via_waypoints": [],
+          "admins": [
+            {
+              "iso_3166_1_alpha3": "POL",
+              "iso_3166_1": "PL"
+            }
+          ],
+          "annotation": {
+            "duration": [
+              4.565,
+              4.555,
+              4.512,
+              3.841,
+              15.415,
+              1.507,
+              6.295
+            ]
+          },
+          "weight_typical": 50.638,
+          "duration_typical": 41.882,
+          "weight": 50.638,
+          "duration": 41.882,
+          "steps": [
+            {
+              "bannerInstructions": [
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "Bolesława Krzywoustego"
+                      }
+                    ],
+                    "type": "turn",
+                    "modifier": "right",
+                    "text": "Bolesława Krzywoustego"
+                  },
+                  "distanceAlongGeometry": 190.709
+                }
+              ],
+              "voiceInstructions": [
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Drive northwest on <say-as interpret-as=\"address\">Świętopełka</say-as>. Then Turn right onto <say-as interpret-as=\"address\">Bolesława Krzywoustego</say-as>.</prosody></amazon:effect></speak>",
+                  "announcement": "Drive northwest on Świętopełka. Then Turn right onto Bolesława Krzywoustego.",
+                  "distanceAlongGeometry": 190.709
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Turn right onto <say-as interpret-as=\"address\">Bolesława Krzywoustego</say-as>. Then Your destination will be on the left.</prosody></amazon:effect></speak>",
+                  "announcement": "Turn right onto Bolesława Krzywoustego. Then Your destination will be on the left.",
+                  "distanceAlongGeometry": 65.833
+                }
+              ],
+              "intersections": [
+                {
+                  "entry": [
+                    true
+                  ],
+                  "bearings": [
+                    321
+                  ],
+                  "duration": 32.888,
+                  "mapbox_streets_v8": {
+                    "class": "street"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 33.71,
+                  "geometry_index": 0,
+                  "location": [
+                    18.576644,
+                    54.410361
+                  ]
+                },
+                {
+                  "bearings": [
+                    77,
+                    166,
+                    258,
+                    356
+                  ],
+                  "entry": [
+                    false,
+                    false,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "turn_weight": 2,
+                  "turn_duration": 0.014,
+                  "mapbox_streets_v8": {
+                    "class": "street"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 3,
+                  "geometry_index": 5,
+                  "location": [
+                    18.575589,
+                    54.411858
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "depart",
+                "instruction": "Drive northwest on Świętopełka.",
+                "bearing_after": 321,
+                "bearing_before": 0,
+                "location": [
+                  18.576644,
+                  54.410361
+                ]
+              },
+              "name": "Świętopełka",
+              "weight_typical": 37.186,
+              "duration_typical": 34.341,
+              "duration": 34.341,
+              "distance": 190.709,
+              "driving_side": "right",
+              "weight": 37.186,
+              "mode": "driving",
+              "geometry": "w_bkI_gkpBc@n@e@j@g@`@c@RuC~@M@"
+            },
+            {
+              "bannerInstructions": [
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "Your destination will be on the left"
+                      }
+                    ],
+                    "type": "arrive",
+                    "modifier": "left",
+                    "text": "Your destination will be on the left"
+                  },
+                  "distanceAlongGeometry": 43.713
+                },
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "Your destination is on the left"
+                      }
+                    ],
+                    "type": "arrive",
+                    "modifier": "left",
+                    "text": "Your destination is on the left"
+                  },
+                  "distanceAlongGeometry": 41.667
+                }
+              ],
+              "voiceInstructions": [
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Your destination is on the left.</prosody></amazon:effect></speak>",
+                  "announcement": "Your destination is on the left.",
+                  "distanceAlongGeometry": 41.667
+                }
+              ],
+              "intersections": [
+                {
+                  "bearings": [
+                    0,
+                    76,
+                    176,
+                    256
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false,
+                    true
+                  ],
+                  "in": 2,
+                  "turn_weight": 7,
+                  "turn_duration": 1.246,
+                  "mapbox_streets_v8": {
+                    "class": "street"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "geometry_index": 6,
+                  "location": [
+                    18.575579,
+                    54.411933
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "turn",
+                "instruction": "Turn right onto Bolesława Krzywoustego.",
+                "modifier": "right",
+                "bearing_after": 76,
+                "bearing_before": 356,
+                "location": [
+                  18.575579,
+                  54.411933
+                ]
+              },
+              "name": "Bolesława Krzywoustego",
+              "weight_typical": 13.452,
+              "duration_typical": 7.541,
+              "duration": 7.541,
+              "distance": 43.713,
+              "driving_side": "right",
+              "weight": 13.452,
+              "mode": "driving",
+              "geometry": "qibkIk`kpBScC"
+            },
+            {
+              "bannerInstructions": [],
+              "voiceInstructions": [],
+              "intersections": [
+                {
+                  "bearings": [
+                    256
+                  ],
+                  "entry": [
+                    true
+                  ],
+                  "in": 0,
+                  "admin_index": 0,
+                  "geometry_index": 7,
+                  "location": [
+                    18.576235,
+                    54.412025
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "arrive",
+                "instruction": "Your destination is on the left.",
+                "modifier": "left",
+                "bearing_after": 0,
+                "bearing_before": 76,
+                "location": [
+                  18.576235,
+                  54.412025
+                ]
+              },
+              "name": "Bolesława Krzywoustego",
+              "weight_typical": 0,
+              "duration_typical": 0,
+              "duration": 0,
+              "distance": 0,
+              "driving_side": "right",
+              "weight": 0,
+              "mode": "driving",
+              "geometry": "ejbkIodkpB??"
+            }
+          ],
+          "notifications": [
+            {
+              "type": "violation",
+              "subtype": "stateBorderCrossing",
+              "geometry_index_end": 1,
+              "geometry_index_start": 0,
+              "details": {
+                "actual_value": "US-NV,US-CA",
+                "message": "Crossing the border of the states of US-NV and US-CA."
+              }
+            },
+            {
+              "type": "alert",
+              "subtype": "stationUnavailable",
+              "reason": "outOfOrder",
+              "station_id": "station1"
+            },
+            {
+              "type": "alert",
+              "subtype": "stationUnavailable",
+              "reason": "outOfOrder",
+              "station_id": "station2"
+            },
+            {
+              "type": "alert",
+              "subtype": "stationUnavailable",
+              "reason": "outOfOrder",
+              "station_id": "station3"
+            },
+            {
+              "type": "violation",
+              "subtype": "evMinChargeAtChargingStation",
+              "details": {
+                "requested_value": 30000,
+                "actual_value": 27000,
+                "unit": "Wh"
+              }
+            },
+            {
+              "type": "violation",
+              "subtype": "evMinChargeAtDestination",
+              "details": {
+                "requested_value": 20000,
+                "actual_value": 13000,
+                "unit": "Wh"
+              }
+            },
+            {
+              "type": "alert",
+              "subtype": "evInsufficientCharge",
+              "geometry_index": 3
+            }
+          ],
+          "distance": 234.423,
+          "summary": "Świętopełka, Bolesława Krzywoustego"
+        },
+        {
+          "via_waypoints": [],
+          "admins": [
+            {
+              "iso_3166_1_alpha3": "POL",
+              "iso_3166_1": "PL"
+            }
+          ],
+          "annotation": {
+            "duration": [
+              3.322,
+              2.077,
+              7.232,
+              6.939
+            ]
+          },
+          "weight_typical": 30.1,
+          "duration_typical": 21.951,
+          "weight": 30.1,
+          "duration": 21.951,
+          "steps": [
+            {
+              "bannerInstructions": [
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "Maurycego Beniowskiego"
+                      }
+                    ],
+                    "type": "turn",
+                    "modifier": "right",
+                    "text": "Maurycego Beniowskiego"
+                  },
+                  "distanceAlongGeometry": 23.286
+                }
+              ],
+              "voiceInstructions": [
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Drive east on <say-as interpret-as=\"address\">Bolesława Krzywoustego</say-as>. Then Turn right onto <say-as interpret-as=\"address\">Maurycego Beniowskiego</say-as>.</prosody></amazon:effect></speak>",
+                  "announcement": "Drive east on Bolesława Krzywoustego. Then Turn right onto Maurycego Beniowskiego.",
+                  "distanceAlongGeometry": 23.286
+                }
+              ],
+              "intersections": [
+                {
+                  "bearings": [
+                    76
+                  ],
+                  "entry": [
+                    true
+                  ],
+                  "mapbox_streets_v8": {
+                    "class": "street"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 0,
+                  "geometry_index": 0,
+                  "location": [
+                    18.576235,
+                    54.412025
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "depart",
+                "instruction": "Drive east on Bolesława Krzywoustego.",
+                "bearing_after": 76,
+                "bearing_before": 0,
+                "location": [
+                  18.576235,
+                  54.412025
+                ]
+              },
+              "name": "Bolesława Krzywoustego",
+              "weight_typical": 3.437,
+              "duration_typical": 3.353,
+              "duration": 3.353,
+              "distance": 23.286,
+              "driving_side": "right",
+              "weight": 3.437,
+              "mode": "driving",
+              "geometry": "ejbkIodkpBGcA"
+            },
+            {
+              "bannerInstructions": [
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "Your destination will be on the right"
+                      }
+                    ],
+                    "type": "arrive",
+                    "modifier": "right",
+                    "text": "Your destination will be on the right"
+                  },
+                  "distanceAlongGeometry": 76.766
+                },
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "Your destination is on the right"
+                      }
+                    ],
+                    "type": "arrive",
+                    "modifier": "right",
+                    "text": "Your destination is on the right"
+                  },
+                  "distanceAlongGeometry": 34.722
+                }
+              ],
+              "voiceInstructions": [
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Your destination is on the right.</prosody></amazon:effect></speak>",
+                  "announcement": "Your destination is on the right.",
+                  "distanceAlongGeometry": 34.722
+                }
+              ],
+              "intersections": [
+                {
+                  "entry": [
+                    true,
+                    true,
+                    false,
+                    true
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    76,
+                    167,
+                    256,
+                    346
+                  ],
+                  "duration": 4.432,
+                  "turn_weight": 7,
+                  "turn_duration": 2.315,
+                  "mapbox_streets_v8": {
+                    "class": "street"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 9.171,
+                  "geometry_index": 1,
+                  "location": [
+                    18.576581,
+                    54.412074
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 3,
+                  "bearings": [
+                    76,
+                    165,
+                    260,
+                    347
+                  ],
+                  "duration": 7.219,
+                  "turn_weight": 2,
+                  "turn_duration": 0.019,
+                  "mapbox_streets_v8": {
+                    "class": "street"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 9.38,
+                  "geometry_index": 2,
+                  "location": [
+                    18.576614,
+                    54.411988
+                  ]
+                },
+                {
+                  "bearings": [
+                    76,
+                    166,
+                    345
+                  ],
+                  "entry": [
+                    true,
+                    true,
+                    false
+                  ],
+                  "in": 2,
+                  "turn_weight": 1,
+                  "turn_duration": 0.007,
+                  "mapbox_streets_v8": {
+                    "class": "street"
+                  },
+                  "is_urban": false,
+                  "admin_index": 0,
+                  "out": 1,
+                  "geometry_index": 3,
+                  "location": [
+                    18.576746,
+                    54.411691
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "turn",
+                "instruction": "Turn right onto Maurycego Beniowskiego.",
+                "modifier": "right",
+                "bearing_after": 167,
+                "bearing_before": 76,
+                "location": [
+                  18.576581,
+                  54.412074
+                ]
+              },
+              "name": "Maurycego Beniowskiego",
+              "weight_typical": 26.663,
+              "duration_typical": 18.598,
+              "duration": 18.598,
+              "distance": 76.766,
+              "driving_side": "right",
+              "weight": 26.663,
+              "mode": "driving",
+              "geometry": "mjbkIsfkpBNEz@[v@W"
+            },
+            {
+              "bannerInstructions": [],
+              "voiceInstructions": [],
+              "intersections": [
+                {
+                  "bearings": [
+                    346
+                  ],
+                  "entry": [
+                    true
+                  ],
+                  "in": 0,
+                  "admin_index": 0,
+                  "geometry_index": 4,
+                  "location": [
+                    18.576872,
+                    54.411406
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "arrive",
+                "instruction": "Your destination is on the right.",
+                "modifier": "right",
+                "bearing_after": 0,
+                "bearing_before": 166,
+                "location": [
+                  18.576872,
+                  54.411406
+                ]
+              },
+              "name": "Maurycego Beniowskiego",
+              "weight_typical": 0,
+              "duration_typical": 0,
+              "duration": 0,
+              "distance": 0,
+              "driving_side": "right",
+              "weight": 0,
+              "mode": "driving",
+              "geometry": "ifbkImhkpB??"
+            }
+          ],
+          "notifications": [
+            {
+              "type": "alert",
+              "subtype": "stationUnavailable",
+              "reason": "outOfOrder",
+              "station_id": "station1"
+            },
+            {
+              "type": "alert",
+              "subtype": "stationUnavailable",
+              "reason": "outOfOrder",
+              "station_id": "station2"
+            },
+            {
+              "type": "violation",
+              "subtype": "evMinChargeAtDestination",
+              "details": {
+                "requested_value": 20000,
+                "actual_value": 13000,
+                "unit": "Wh"
+              }
+            },
+            {
+              "type": "alert",
+              "subtype": "evInsufficientCharge",
+              "geometry_index": 3
+            },
+            {
+              "type": "violation",
+              "subtype": "maxHeight",
+              "geometry_index_end": 5,
+              "geometry_index_start": 3,
+              "details": {
+                "actual_value": "4.60",
+                "requested_value": "4.70",
+                "unit": "meters",
+                "message": "The height of the vehicle (4.7 meters) is more than the permissible height of travel on the road (4.6 meters) by 0.10 meters."
+              }
+            }
+          ],
+          "distance": 100.053,
+          "summary": "Bolesława Krzywoustego, Maurycego Beniowskiego"
+        }
+      ],
+      "geometry": "w_bkI_gkpBc@n@e@j@g@`@c@RuC~@M@ScCGcANEz@[v@W",
+      "voiceLocale": "en-US"
+    }
+  ],
+  "waypoints": [
+    {
+      "distance": 0.031,
+      "name": "Świętopełka",
+      "location": [
+        18.576644,
+        54.410361
+      ]
+    },
+    {
+      "distance": 3.084,
+      "name": "Bolesława Krzywoustego",
+      "location": [
+        18.576235,
+        54.412025
+      ]
+    },
+    {
+      "distance": 1.412,
+      "name": "Maurycego Beniowskiego",
+      "location": [
+        18.576872,
+        54.411406
+      ]
+    }
+  ],
+  "code": "Ok",
+  "uuid": "-WWFCoqSnPqZTdqUjymqe-AoO8HAWTLYibicjxyRI57l3OKkf-od3A=="
+}

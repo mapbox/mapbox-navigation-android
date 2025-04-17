@@ -5,6 +5,8 @@ package com.mapbox.navigation.instrumentation_tests.core
 import android.content.Context
 import android.location.Location
 import androidx.annotation.IntegerRes
+import com.google.gson.Gson
+import com.google.gson.JsonArray
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.Closure
 import com.mapbox.api.directions.v5.models.DirectionsResponse
@@ -14,6 +16,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
+import com.mapbox.navigation.base.internal.utils.Constants.RouteResponse.KEY_NOTIFICATIONS
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshOptions
@@ -138,9 +141,9 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
     }
 
     @Test
-    fun expect_route_refresh_to_update_traffic_annotations_incidents_and_closures_for_all_routes() =
+    fun route_refresh_to_update_traffic_annotations_incidents_closures_notifications_for_all() =
         sdkTest {
-            val routeOptions = generateRouteOptions(twoCoordinates)
+            val routeOptions = generateRouteOptions(twoCoordinates, isEv = true)
             val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
                 .getSuccessfulResultOrThrowException()
                 .routes
@@ -281,6 +284,12 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 258.767,
                 refreshedRoutes[1].directionsRoute.legs()!!.first().duration()!!,
                 0.0001,
+            )
+            assertEquals(
+                JSON_NOTIFICATIONS_ARRAY.sortedBy { it.toString() },
+                refreshedRoutes[1].directionsRoute.legs()?.get(0)?.unrecognizedJsonProperties?.get(
+                    KEY_NOTIFICATIONS,
+                )?.asJsonArray?.sortedBy { it.toString() },
             )
             assertEquals(
                 requestedRoutes[0].waypoints,
@@ -1019,12 +1028,18 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         )
     }
 
-    private fun generateRouteOptions(coordinates: List<Point>): RouteOptions {
+    private fun generateRouteOptions(
+        coordinates: List<Point>,
+        isEv: Boolean = false,
+    ): RouteOptions {
         return RouteOptions.builder().applyDefaultNavigationOptions()
             .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
             .alternatives(true)
             .coordinatesList(coordinates)
             .baseUrl(mockWebServerRule.baseUrl) // Comment out to test a real server
+            .unrecognizedProperties(
+                if (isEv) { mapOf("engine" to "electric") } else null,
+            )
             .build()
     }
 
@@ -1073,6 +1088,58 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 ),
             ),
             coordinates,
+        )
+    }
+
+    private companion object {
+
+        private val JSON_NOTIFICATIONS_ARRAY = Gson().fromJson(
+            """
+            [
+               {
+                 "type": "alert",
+                 "subtype": "stationUnavailable",
+                 "reason": "outOfOrder",
+                 "station_id": "station1"
+               },
+               {
+                 "type": "alert",
+                 "subtype": "stationUnavailable",
+                 "reason": "outOfOrder",
+                 "station_id": "station2"
+               },
+               {
+                 "type": "alert",
+                 "subtype": "stationUnavailable",
+                 "reason": "outOfOrder",
+                 "station_id": "station3"
+               },
+               {
+                 "type": "violation",
+                 "subtype": "evMinChargeAtChargingStation",
+                 "details": {
+                   "requested_value": 30000,
+                   "actual_value": 27000,
+                   "unit": "Wh"
+                 }
+               },
+               {
+                 "type": "violation",
+                 "subtype": "evMinChargeAtDestination",
+                 "details": {
+                   "requested_value": 20000,
+                   "actual_value": 13000,
+                   "unit": "Wh"
+                 }
+               },
+               {
+                 "type": "alert",
+                 "subtype": "evInsufficientCharge",
+                 "geometry_index": 3
+               }
+            ]
+            """,
+            JsonArray::class.java,
         )
     }
 }
