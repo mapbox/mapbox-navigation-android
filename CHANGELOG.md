@@ -1,5 +1,20 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.8.4 - 17 April, 2025
+#### Features
+
+
+#### Bug fixes and improvements
+- Improved EV bounding box search to maximize charging station coverage within the selected area. 
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.11.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.11.0))
+- Mapbox Navigation Native `v324.0.2`
+- Mapbox Core Common `v24.11.2`
+- Mapbox Java `v7.3.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.3.1))
+
+
 ## Navigation SDK Core Framework 3.8.3 - 10 April, 2025
 
 #### Bug fixes and improvements
