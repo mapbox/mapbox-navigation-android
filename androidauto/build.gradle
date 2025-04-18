@@ -53,6 +53,7 @@ dependencies {
 
     api(dependenciesList.mapboxMapsAndroidAuto)
     api dependenciesList.mapboxSearch
+    implementation "com.mapbox.search:mapbox-search-android-native:2.12.0-SNAPSHOT-04-16--13-18.git-d194c03"
 
     implementation dependenciesList.androidXCore
     implementation dependenciesList.androidXAppCompat

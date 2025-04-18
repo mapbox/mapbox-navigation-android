@@ -170,7 +170,7 @@ class MapboxRouteLineViewDynamicOptionsBuilder internal constructor(
      * @param width value of lineBlur
      * @return the builder
      */
-    fun routeLineBlurWidth(width: Double) = apply {
+    fun routeLineBlurWidth(width: Double): MapboxRouteLineViewDynamicOptionsBuilder = apply {
         builder.routeLineBlurWidth(width)
     }
 
@@ -180,7 +180,7 @@ class MapboxRouteLineViewDynamicOptionsBuilder internal constructor(
      * @param opacity the opacity level
      * @return the builder
      */
-    fun routeLineBlurOpacity(opacity: Double) = apply {
+    fun routeLineBlurOpacity(opacity: Double): MapboxRouteLineViewDynamicOptionsBuilder = apply {
         builder.routeLineBlurOpacity(opacity)
     }
 
