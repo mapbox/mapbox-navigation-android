@@ -1,0 +1,79 @@
+// Signature format: 3.0
+package com.mapbox.navigation.driver.notification {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class DriverNotification {
+    ctor @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public DriverNotification();
+  }
+
+  public final class DriverNotificationManager implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+    ctor public DriverNotificationManager(com.mapbox.navigation.driver.notification.DriverNotificationManagerOptions options = DriverNotificationManagerOptions.<init>().build());
+    method public void attachDriverNotificationProvider(com.mapbox.navigation.driver.notification.DriverNotificationProvider... driverNotificationProviders);
+    method public void detachDriverNotificationProvider(com.mapbox.navigation.driver.notification.DriverNotificationProvider... driverNotificationProviders);
+    method public kotlinx.coroutines.flow.Flow<com.mapbox.navigation.driver.notification.DriverNotification> observeDriverNotifications();
+    method public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+  }
+
+  public final class DriverNotificationManagerOptions {
+    method public com.mapbox.navigation.driver.notification.DriverNotificationManagerOptions.Builder toBuilder();
+  }
+
+  public static final class DriverNotificationManagerOptions.Builder {
+    ctor public DriverNotificationManagerOptions.Builder();
+    method public com.mapbox.navigation.driver.notification.DriverNotificationManagerOptions build();
+  }
+
+  public abstract class DriverNotificationProvider implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+    ctor @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public DriverNotificationProvider();
+    method public abstract kotlinx.coroutines.flow.Flow<com.mapbox.navigation.driver.notification.DriverNotification> trackNotifications();
+  }
+
+}
+
+package com.mapbox.navigation.driver.notification.traffic {
+
+  public final class SlowTrafficNotification extends com.mapbox.navigation.driver.notification.DriverNotification {
+    method public long getFreeFlowRangeDuration();
+    method public int getLegIndex();
+    method public long getSlowTrafficDelay();
+    method public kotlin.ranges.IntRange getSlowTrafficGeometryRange();
+    method public double getSlowTrafficRangeDistance();
+    method public long getSlowTrafficRangeDuration();
+    property public final long freeFlowRangeDuration;
+    property public final int legIndex;
+    property public final long slowTrafficDelay;
+    property public final kotlin.ranges.IntRange slowTrafficGeometryRange;
+    property public final double slowTrafficRangeDistance;
+    property public final long slowTrafficRangeDuration;
+  }
+
+  public final class SlowTrafficNotificationOptions {
+    method public kotlin.ranges.IntRange getSlowTrafficCongestionRange();
+    method public long getSlowTrafficPeriodCheck();
+    method public long getTrafficDelay();
+    method public com.mapbox.navigation.driver.notification.traffic.SlowTrafficNotificationOptions.Builder toBuilder();
+    property public final kotlin.ranges.IntRange slowTrafficCongestionRange;
+    property public final long slowTrafficPeriodCheck;
+    property public final long trafficDelay;
+  }
+
+  public static final class SlowTrafficNotificationOptions.Builder {
+    ctor public SlowTrafficNotificationOptions.Builder();
+    method public com.mapbox.navigation.driver.notification.traffic.SlowTrafficNotificationOptions build();
+    method public com.mapbox.navigation.driver.notification.traffic.SlowTrafficNotificationOptions.Builder slowTrafficCongestionRange(kotlin.ranges.IntRange range);
+    method public com.mapbox.navigation.driver.notification.traffic.SlowTrafficNotificationOptions.Builder slowTrafficPeriodCheck(long period);
+    method public com.mapbox.navigation.driver.notification.traffic.SlowTrafficNotificationOptions.Builder trafficDelay(long delay);
+  }
+
+  public final class SlowTrafficNotificationProvider extends com.mapbox.navigation.driver.notification.DriverNotificationProvider {
+    ctor public SlowTrafficNotificationProvider(com.mapbox.navigation.driver.notification.traffic.SlowTrafficNotificationOptions options = SlowTrafficNotificationOptions.<init>().build());
+    method public com.mapbox.navigation.driver.notification.traffic.SlowTrafficNotificationOptions getOptions();
+    method public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public void setOptions(com.mapbox.navigation.driver.notification.traffic.SlowTrafficNotificationOptions);
+    method public kotlinx.coroutines.flow.Flow<com.mapbox.navigation.driver.notification.DriverNotification> trackNotifications();
+    property public final com.mapbox.navigation.driver.notification.traffic.SlowTrafficNotificationOptions options;
+  }
+
+}
+

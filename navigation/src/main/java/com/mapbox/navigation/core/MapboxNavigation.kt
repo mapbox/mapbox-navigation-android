@@ -2301,7 +2301,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             val preview = getRoutesPreview()
             if (preview != null) {
                 if (preview.routesList.size > 1) {
-                    suspendCoroutine<Unit> { continuation ->
+                    suspendCoroutine { continuation ->
                         routesPreviewController.previewNavigationRoutes(
                             listOf(preview.originalRoutesList[preview.primaryRouteIndex]),
                         ) {
