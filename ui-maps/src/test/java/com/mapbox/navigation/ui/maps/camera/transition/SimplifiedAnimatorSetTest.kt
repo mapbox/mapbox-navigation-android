@@ -43,7 +43,10 @@ internal class SimplifiedAnimatorSetTest {
 
         originalListener.onAnimationEnd(child1)
 
-        verify(exactly = 1) { listener.onAnimationEnd(animatorSet) }
+        verifyOrder {
+            cameraPlugin.unregisterAnimators(*children.toTypedArray(), cancelAnimators = false)
+            listener.onAnimationEnd(animatorSet)
+        }
     }
 
     @Test
@@ -66,8 +69,11 @@ internal class SimplifiedAnimatorSetTest {
     }
 
     @Test
-    fun onFinished() {
-        animatorSet.onFinished()
+    fun onFinishedWithoutExternalListeners() {
+        val originalListenerSlot = slot<AnimatorListener>()
+        verify { child1.addListener(capture(originalListenerSlot)) }
+        originalListenerSlot.captured.onAnimationEnd(child1)
+        originalListenerSlot.captured.onAnimationEnd(child2)
 
         verify {
             cameraPlugin.unregisterAnimators(*children.toTypedArray(), cancelAnimators = false)

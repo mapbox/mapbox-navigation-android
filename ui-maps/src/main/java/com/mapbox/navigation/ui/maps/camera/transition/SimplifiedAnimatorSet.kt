@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.maps.camera.transition
 import android.animation.Animator
 import android.animation.ValueAnimator
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * Only supports simple animators dependencies:
@@ -17,10 +18,22 @@ internal class SimplifiedAnimatorSet(
 ) : MapboxAnimatorSet {
 
     private val children = children.toTypedArray()
+    private val externalEndListeners = CopyOnWriteArrayList<MapboxAnimatorSetEndListener>()
+
+    init {
+        val simplifiedAnimatorSetListener = SimplifiedAnimatorSetEndListener(
+            object : MapboxAnimatorSetEndListener {
+                override fun onAnimationEnd(animation: MapboxAnimatorSet) {
+                    onFinished()
+                    externalEndListeners.forEach { it.onAnimationEnd(animation) }
+                }
+            },
+        )
+        children.forEach { it.addListener(simplifiedAnimatorSetListener) }
+    }
 
     override fun addAnimationEndListener(listener: MapboxAnimatorSetEndListener) {
-        val simplifiedAnimatorSetListener = SimplifiedAnimatorSetEndListener(listener)
-        children.forEach { it.addListener(simplifiedAnimatorSetListener) }
+        externalEndListeners.add(listener)
     }
 
     override fun makeInstant() {
@@ -32,7 +45,7 @@ internal class SimplifiedAnimatorSet(
         children.forEach { it.start() }
     }
 
-    override fun onFinished() {
+    private fun onFinished() {
         cameraPlugin.unregisterAnimators(
             *children,
             cancelAnimators = false,

@@ -361,13 +361,10 @@ class NavigationCameraTest {
     }
 
     @Test
-    fun `when following transition ends, unregister animators`() {
+    fun `listener is registered for when following transition end`() {
         navigationCamera.requestNavigationCameraToFollowing()
 
-        internalTransitionListenerSlot.captured.onAnimationStart(followingAnimatorSet)
-        internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
-
-        verify { followingAnimatorSet.onFinished() }
+        assertTrue(internalTransitionListenerSlot.isCaptured)
     }
 
     @Test
@@ -386,13 +383,10 @@ class NavigationCameraTest {
     }
 
     @Test
-    fun `when overview transition ends, unregister animators`() {
+    fun `listener is registered for overview transition end`() {
         navigationCamera.requestNavigationCameraToOverview()
 
-        internalTransitionListenerSlot.captured.onAnimationStart(overviewAnimatorSet)
-        internalTransitionListenerSlot.captured.onAnimationEnd(overviewAnimatorSet)
-
-        verify { overviewAnimatorSet.onFinished() }
+        assertTrue(internalTransitionListenerSlot.isCaptured)
     }
 
     @Test
@@ -625,35 +619,25 @@ class NavigationCameraTest {
     }
 
     @Test
-    fun `when following frame ends, unregister animators`() {
+    fun `listener is registered for following frame end`() {
         navigationCamera.requestNavigationCameraToFollowing()
 
         internalTransitionListenerSlot.captured.onAnimationStart(followingAnimatorSet)
         internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
 
-        val frameTransition = mockFrameTransitionForFollowing(
-            DEFAULT_FRAME_TRANSITION_OPT,
-        )
         internalDataSourceObserverSlot.captured.viewportDataSourceUpdated(viewportData)
-        internalFrameListenerSlot.captured.onAnimationEnd(frameTransition.frameAnimatorSet)
-
-        verify { frameTransition.frameAnimatorSet.onFinished() }
+        assertTrue(internalFrameListenerSlot.isCaptured)
     }
 
     @Test
-    fun `when overview frame ends, unregister animators`() {
+    fun `listener is registered for overview frame end`() {
         navigationCamera.requestNavigationCameraToOverview()
 
         internalTransitionListenerSlot.captured.onAnimationStart(overviewAnimatorSet)
         internalTransitionListenerSlot.captured.onAnimationEnd(overviewAnimatorSet)
 
-        val frameTransition = mockFrameTransitionForOverview(
-            DEFAULT_FRAME_TRANSITION_OPT,
-        )
         internalDataSourceObserverSlot.captured.viewportDataSourceUpdated(viewportData)
-        internalFrameListenerSlot.captured.onAnimationEnd(frameTransition.frameAnimatorSet)
-
-        verify { frameTransition.frameAnimatorSet.onFinished() }
+        assertTrue(internalFrameListenerSlot.isCaptured)
     }
 
     @Test

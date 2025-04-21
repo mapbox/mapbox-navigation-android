@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.camera.transition
 
 import android.animation.Animator
+import android.animation.Animator.AnimatorListener
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
@@ -26,6 +27,8 @@ internal class FullAnimatorSetTest {
     fun addListener() {
         val originalListener = slot<Animator.AnimatorListener>()
         val listener = mockk<MapboxAnimatorSetListener>(relaxed = true)
+
+        clearMocks(originalAnimatorSet)
 
         fullAnimatorSet.addListener(listener)
 
@@ -85,7 +88,13 @@ internal class FullAnimatorSetTest {
 
         originalListener.captured.onAnimationEnd(mockk())
 
-        verify(exactly = 1) { listener.onAnimationEnd(fullAnimatorSet) }
+        verifyOrder {
+            cameraPlugin.unregisterAnimators(
+                *children.map { it as ValueAnimator }.toTypedArray(),
+                cancelAnimators = false,
+            )
+            listener.onAnimationEnd(fullAnimatorSet)
+        }
         originalListener.captured.onAnimationEnd(mockk())
 
         verify(exactly = 2) { listener.onAnimationEnd(fullAnimatorSet) }
@@ -109,8 +118,10 @@ internal class FullAnimatorSetTest {
     }
 
     @Test
-    fun onFinished() {
-        fullAnimatorSet.onFinished()
+    fun onFinishedWithoutExternalListeners() {
+        val originalListenerSlot = slot<AnimatorListener>()
+        verify { originalAnimatorSet.addListener(capture(originalListenerSlot)) }
+        originalListenerSlot.captured.onAnimationEnd(originalAnimatorSet)
 
         verify {
             cameraPlugin.unregisterAnimators(

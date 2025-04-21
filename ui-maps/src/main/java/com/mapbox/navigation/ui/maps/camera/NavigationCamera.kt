@@ -499,7 +499,6 @@ internal constructor(
     }
 
     private fun finishAnimation(animatorSet: MapboxAnimatorSet) {
-        animatorSet.onFinished()
         if (runningAnimation === animatorSet) {
             runningAnimation = null
         }

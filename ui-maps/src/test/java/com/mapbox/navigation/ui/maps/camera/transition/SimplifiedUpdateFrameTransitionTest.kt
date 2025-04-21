@@ -26,12 +26,12 @@ class SimplifiedUpdateFrameTransitionTest {
 
     @Before
     fun setUp() {
-        mockkStatic("com.mapbox.navigation.ui.maps.internal.camera.MapboxNavigationCameraUtilsKt")
+        mockkStatic(::normalizeBearing)
     }
 
     @After
     fun tearDown() {
-        unmockkStatic("com.mapbox.navigation.ui.maps.internal.camera.MapboxNavigationCameraUtilsKt")
+        unmockkStatic(::normalizeBearing)
     }
 
     @Test

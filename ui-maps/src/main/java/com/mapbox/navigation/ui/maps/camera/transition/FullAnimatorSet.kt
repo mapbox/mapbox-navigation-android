@@ -5,6 +5,7 @@ import android.animation.Animator.AnimatorListener
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
+import java.util.concurrent.CopyOnWriteArrayList
 
 internal class FullAnimatorSet(
     private val cameraPlugin: CameraAnimationsPlugin,
@@ -12,6 +13,32 @@ internal class FullAnimatorSet(
 ) : MapboxAnimatorSet {
 
     private val children = animatorSet.childAnimations.map { it as ValueAnimator }.toTypedArray()
+    private val externalEndListeners = CopyOnWriteArrayList<MapboxAnimatorSetEndListener>()
+
+    init {
+        animatorSet.addListener(
+            object : AnimatorListener {
+                override fun onAnimationStart(animation: Animator) {
+                    // no-op
+                }
+
+                override fun onAnimationEnd(animation: Animator) {
+                    onFinished()
+                    externalEndListeners.forEach {
+                        it.onAnimationEnd(this@FullAnimatorSet)
+                    }
+                }
+
+                override fun onAnimationCancel(animation: Animator) {
+                    // no-op
+                }
+
+                override fun onAnimationRepeat(animation: Animator) {
+                    // no-op
+                }
+            },
+        )
+    }
 
     fun addListener(listener: MapboxAnimatorSetListener) {
         animatorSet.addListener(
@@ -36,25 +63,7 @@ internal class FullAnimatorSet(
     }
 
     override fun addAnimationEndListener(listener: MapboxAnimatorSetEndListener) {
-        animatorSet.addListener(
-            object : AnimatorListener {
-                override fun onAnimationStart(animation: Animator) {
-                    // no-op
-                }
-
-                override fun onAnimationEnd(animation: Animator) {
-                    listener.onAnimationEnd(this@FullAnimatorSet)
-                }
-
-                override fun onAnimationCancel(animation: Animator) {
-                    // no-op
-                }
-
-                override fun onAnimationRepeat(animation: Animator) {
-                    // no-op
-                }
-            },
-        )
+        externalEndListeners.add(listener)
     }
 
     override fun makeInstant() {
@@ -66,7 +75,7 @@ internal class FullAnimatorSet(
         animatorSet.start()
     }
 
-    override fun onFinished() {
+    private fun onFinished() {
         cameraPlugin.unregisterAnimators(
             *children,
             cancelAnimators = false,
