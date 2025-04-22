@@ -15,6 +15,7 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesExtra
+import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.core.routerefresh.RouteRefreshExtra
 import com.mapbox.navigation.instrumentation_tests.utils.tiles.OfflineRegion
 import com.mapbox.navigation.instrumentation_tests.utils.tiles.unpackOfflineTiles
@@ -40,13 +41,11 @@ import com.mapbox.navigation.testing.utils.withoutInternet
 import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMapboxNavigationAPI::class)
-@Ignore("https://mapbox.atlassian.net/browse/NN-3386")
 class EvOfflineTest : BaseCoreNoCleanUpTest() {
 
     @get:Rule
@@ -84,6 +83,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                 0.0f,
             ) {
                 withoutInternet {
+                    navigation.waitUntilNNIsReadyToBuildOfflineRoutesAfterColdStart()
                     val requestResult = navigation.requestRoutes(originalTestRoute.routeOptions)
                         .getSuccessfulResultOrThrowException()
                     assertEquals(RouterOrigin.OFFLINE, requestResult.routerOrigin)
@@ -127,6 +127,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                 0.0f,
             ) {
                 withoutInternet {
+                    navigation.waitUntilNNIsReadyToBuildOfflineRoutesAfterColdStart()
                     val requestResult = navigation.requestRoutes(evBerlinTestRoute.routeOptions)
                         .getSuccessfulResultOrThrowException()
                     assertEquals(RouterOrigin.OFFLINE, requestResult.routerOrigin)
@@ -164,6 +165,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                     testRoute.originBearing,
                 ) {
                     withoutInternet {
+                        navigation.waitUntilNNIsReadyToBuildOfflineRoutesAfterColdStart()
                         val requestResult = navigation.requestRoutes(testRoute.routeOptions)
                             .getSuccessfulResultOrThrowException()
                         assertEquals(RouterOrigin.OFFLINE, requestResult.routerOrigin)
@@ -392,4 +394,9 @@ private fun verifyUserProvidedChargingStationMetadata(
         listOf(null, testRoute.currentType, null),
         route.getChargingStationsCurrentType(),
     )
+}
+
+// workaround for https://mapbox.atlassian.net/browse/NN-3386
+private suspend fun MapboxNavigation.waitUntilNNIsReadyToBuildOfflineRoutesAfterColdStart() {
+    flowLocationMatcherResult().first { !it.isDegradedMapMatching }
 }
