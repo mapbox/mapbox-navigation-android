@@ -32,7 +32,7 @@ import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.RouteState
 import com.mapbox.navigator.SpeedLimitSign
 import com.mapbox.navigator.SpeedLimitUnit
-import com.mapbox.navigator.VoiceInstruction
+import com.mapbox.navigator.VoiceInstructionInfo
 import kotlin.math.roundToInt
 
 private const val ONE_INDEX = 1
@@ -250,7 +250,7 @@ internal fun NavigationStatus.getCurrentBannerInstructions(
     }
 }
 
-internal fun VoiceInstruction.mapToDirectionsApi(): VoiceInstructions? {
+internal fun VoiceInstructionInfo.mapToDirectionsApi(): VoiceInstructions? {
     return VoiceInstructions.builder()
         .announcement(this.announcement)
         .distanceAlongGeometry(this.remainingStepDistance.toDouble())

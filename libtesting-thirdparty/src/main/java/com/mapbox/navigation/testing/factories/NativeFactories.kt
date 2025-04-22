@@ -1,6 +1,5 @@
 package com.mapbox.navigation.testing.factories
 
-import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.bindgen.DataRef
 import com.mapbox.geojson.Point
@@ -17,6 +16,8 @@ import com.mapbox.navigator.OffRoadStateProvider
 import com.mapbox.navigator.RerouteError
 import com.mapbox.navigator.RerouteErrorType
 import com.mapbox.navigator.RoadName
+import com.mapbox.navigator.RouteAnnotation
+import com.mapbox.navigator.RouteData
 import com.mapbox.navigator.RouteIndices
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouteInterface
@@ -31,10 +32,9 @@ import com.mapbox.navigator.TimeZone
 import com.mapbox.navigator.TurnLane
 import com.mapbox.navigator.UpcomingRouteAlertUpdate
 import com.mapbox.navigator.VoiceInstruction
+import com.mapbox.navigator.VoiceInstructionInfo
 import com.mapbox.navigator.Waypoint
 import com.mapbox.navigator.WaypointType
-import com.mapbox.navigator.route_data.RouteAnnotation
-import com.mapbox.navigator.route_data.RouteData
 import java.nio.ByteBuffer
 import java.time.Instant
 import java.util.Date
@@ -58,7 +58,7 @@ fun createNavigationStatus(
     intersectionIndex: Int = 0,
     turnLanes: List<TurnLane> = emptyList(),
     roads: List<RoadName> = emptyList(),
-    voiceInstruction: VoiceInstruction? = null,
+    voiceInstruction: VoiceInstructionInfo? = null,
     // default banner instruction workarounds the direct usage of the MapboxNativeNavigatorImpl
     bannerInstruction: BannerInstruction? = createBannerInstruction(),
     speedLimit: SpeedLimit = SpeedLimit(null, SpeedLimitUnit.KILOMETRES_PER_HOUR, SpeedLimitSign.VIENNA),
@@ -118,8 +118,8 @@ fun createNavigationStatus(
 
 fun createVoiceInstruction(
     announcement: String = "test"
-): VoiceInstruction {
-    return VoiceInstruction("test", announcement, 0f, 0)
+): VoiceInstructionInfo {
+    return VoiceInstructionInfo("test", announcement, 0f, 0)
 }
 
 fun createBannerInstruction(
