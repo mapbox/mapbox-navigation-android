@@ -29,6 +29,7 @@ dependencies {
     api project(":navigation")
     api dependenciesList.mapboxSearch
     api dependenciesList.mapboxOfflineSearch
+    implementation "com.mapbox.search:mapbox-search-android-native:2.12.0-SNAPSHOT-04-16--13-18.git-d194c03"
 }
 
 apply from: "../gradle/track-public-apis.gradle"

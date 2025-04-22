@@ -488,7 +488,7 @@ class MapboxRouteLineViewOptions private constructor(
          * @param config [FadingConfig]
          * @return the builder
          */
-        fun fadeOnHighZoomsConfig(config: FadingConfig?) = apply {
+        fun fadeOnHighZoomsConfig(config: FadingConfig?): Builder = apply {
             this.fadeOnHighZoomsConfig = config
         }
 
@@ -530,7 +530,7 @@ class MapboxRouteLineViewOptions private constructor(
          * @param opacity the opacity level
          * @return the builder
          */
-        fun routeLineBlurOpacity(opacity: Double) = apply {
+        fun routeLineBlurOpacity(opacity: Double): Builder = apply {
             routeLineBlurOpacity = opacity
         }
 

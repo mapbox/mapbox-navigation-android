@@ -2020,6 +2020,18 @@ package com.mapbox.navigation.base.utils {
   public final class DecodeUtilsKt {
   }
 
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class GeoUtils {
+    method public long getTopoLinkId(com.mapbox.geojson.LineString geometry, int startIndex, int endIndex);
+    method public long getTopoLinkId(com.mapbox.geojson.MultiPoint geometry, int startIndex, int endIndex);
+    method public long getTopoLinkId(java.util.List<com.mapbox.geojson.Point> points, int startIndex = 0, int endIndex = points.size);
+    method public long getTopoLinkId(java.util.List<com.mapbox.geojson.Point> points, int startIndex = 0);
+    method public long getTopoLinkId(java.util.List<com.mapbox.geojson.Point> points);
+    field public static final com.mapbox.navigation.base.utils.GeoUtils INSTANCE;
+  }
+
+  public final class GeoUtilsKt {
+  }
+
   public final class NullUtilsKt {
   }
 

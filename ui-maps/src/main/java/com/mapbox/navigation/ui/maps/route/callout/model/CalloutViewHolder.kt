@@ -44,8 +44,8 @@ class CalloutViewHolder private constructor(
     class Builder(private var view: View) {
         private var options: ViewAnnotationOptions = ViewAnnotationOptions.Builder().build()
 
-        fun view(view: View) = apply { this.view = view }
-        fun options(options: ViewAnnotationOptions) = apply { this.options = options }
-        fun build() = CalloutViewHolder(view, options)
+        fun view(view: View): Builder = apply { this.view = view }
+        fun options(options: ViewAnnotationOptions): Builder = apply { this.options = options }
+        fun build(): CalloutViewHolder = CalloutViewHolder(view, options)
     }
 }

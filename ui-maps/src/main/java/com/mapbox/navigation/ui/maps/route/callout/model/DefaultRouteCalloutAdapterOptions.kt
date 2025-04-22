@@ -44,7 +44,7 @@ class DefaultRouteCalloutAdapterOptions private constructor(
     /**
      * Get a builder to customize a subset of current options.
      */
-    fun toBuilder() = Builder().apply {
+    fun toBuilder(): Builder = Builder().apply {
         routeCalloutType(routeCalloutType)
         similarDurationDelta(similarDurationDelta)
         backgroundColor(backgroundColor)
@@ -141,17 +141,19 @@ class DefaultRouteCalloutAdapterOptions private constructor(
         /**
          * Defines the possible callout type on the route lines
          */
-        fun routeCalloutType(@RouteCalloutType.Type type: Int) = apply { routeCalloutType = type }
+        fun routeCalloutType(@RouteCalloutType.Type type: Int): Builder = apply {
+            routeCalloutType = type
+        }
 
         /**
          * Defines the delta between primary and alternative durations to consider their ETA similar
          */
-        fun similarDurationDelta(value: Duration) = apply { similarDurationDelta = value }
+        fun similarDurationDelta(value: Duration): Builder = apply { similarDurationDelta = value }
 
         /**
          * to style the background color of route callout
          */
-        fun backgroundColor(@ColorRes value: Int) = this.apply {
+        fun backgroundColor(@ColorRes value: Int): Builder = this.apply {
             backgroundColor = value
         }
 
@@ -159,14 +161,14 @@ class DefaultRouteCalloutAdapterOptions private constructor(
          * to style the background color of route callout attaching to the primary route
          * in [RouteCalloutType.RouteOverview] state
          */
-        fun selectedBackgroundColor(@ColorRes value: Int) = this.apply {
+        fun selectedBackgroundColor(@ColorRes value: Int): Builder = this.apply {
             selectedBackgroundColor = value
         }
 
         /**
          * to style the text color of route callout
          */
-        fun textColor(@ColorRes value: Int) = this.apply {
+        fun textColor(@ColorRes value: Int): Builder = this.apply {
             textColor = value
         }
 
@@ -174,7 +176,7 @@ class DefaultRouteCalloutAdapterOptions private constructor(
          * to style the text color of route callout attaching to the primary route
          * in [RouteCalloutType.RouteOverview] state
          */
-        fun selectedTextColor(@ColorRes value: Int) = this.apply {
+        fun selectedTextColor(@ColorRes value: Int): Builder = this.apply {
             selectedTextColor = value
         }
 
@@ -183,7 +185,7 @@ class DefaultRouteCalloutAdapterOptions private constructor(
          * is faster in comparison with the primary one in
          * [RouteCalloutType.Navigation] state
          */
-        fun fasterTextColor(@ColorRes value: Int) = this.apply {
+        fun fasterTextColor(@ColorRes value: Int): Builder = this.apply {
             fasterTextColor = value
         }
 
@@ -192,7 +194,7 @@ class DefaultRouteCalloutAdapterOptions private constructor(
          * is slower in comparison with the primary one in
          * [RouteCalloutType.Navigation] state
          */
-        fun slowerTextColor(@ColorRes value: Int) = this.apply {
+        fun slowerTextColor(@ColorRes value: Int): Builder = this.apply {
             slowerTextColor = value
         }
 
@@ -200,14 +202,14 @@ class DefaultRouteCalloutAdapterOptions private constructor(
          * to style the text appearance of route callout. Note that textColor
          * parameter will be overridden by other parameters from [DefaultRouteCalloutAdapterOptions]
          */
-        fun durationTextAppearance(@StyleRes value: Int) = this.apply {
+        fun durationTextAppearance(@StyleRes value: Int): Builder = this.apply {
             durationTextAppearance = value
         }
 
         /**
          * Build the [DefaultRouteCalloutAdapterOptions]
          */
-        fun build() = DefaultRouteCalloutAdapterOptions(
+        fun build(): DefaultRouteCalloutAdapterOptions = DefaultRouteCalloutAdapterOptions(
             routeCalloutType,
             similarDurationDelta,
             backgroundColor,
