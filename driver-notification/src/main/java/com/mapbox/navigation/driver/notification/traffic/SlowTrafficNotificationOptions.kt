@@ -79,7 +79,7 @@ class SlowTrafficNotificationOptions private constructor(
         /**
          * Sets the range of congestion levels considered as slow traffic.
          */
-        fun slowTrafficCongestionRange(range: IntRange) = apply {
+        fun slowTrafficCongestionRange(range: IntRange): Builder = apply {
             this.slowTrafficCongestionRange = range
         }
 
@@ -87,14 +87,14 @@ class SlowTrafficNotificationOptions private constructor(
          * Sets the interval at which slow traffic conditions are checked.
 
          */
-        fun slowTrafficPeriodCheck(period: Duration) = apply {
+        fun slowTrafficPeriodCheck(period: Duration): Builder = apply {
             this.slowTrafficPeriodCheck = period
         }
 
         /**
          * Sets the minimum delay caused by slow traffic to trigger a notification.
          */
-        fun trafficDelay(delay: Duration) = apply {
+        fun trafficDelay(delay: Duration): Builder = apply {
             this.trafficDelay = delay
         }
 
