@@ -13,7 +13,6 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.findRoute
-import com.mapbox.navigation.core.internal.routealternatives.NavigationRouteAlternativesObserver
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.utils.internal.ThreadController
@@ -34,7 +33,7 @@ internal typealias UpdateRoutesSuggestionObserver = (UpdateRouteSuggestion) -> U
 
 internal class RouteAlternativesController(
     private val options: RouteAlternativesOptions,
-    private val navigator: MapboxNativeNavigator,
+    navigator: MapboxNativeNavigator,
     private val tripSession: TripSession,
     private val threadController: ThreadController,
     private val routeParsingManager: RouteParsingManager,
@@ -62,7 +61,6 @@ internal class RouteAlternativesController(
 
     private var active = true
     private var defaultAlternativesHandler: RouteAlternativesToRouteUpdateSuggestionsAdapter? = null
-    private var customAlternativesHandler: NavigationRouteAlternativesObserver? = null
 
     fun pause() {
         updateNativeObserver {
@@ -86,23 +84,8 @@ internal class RouteAlternativesController(
         }
     }
 
-    fun setRouteAlternativesObserver(
-        routeAlternativesObserver: NavigationRouteAlternativesObserver,
-    ) {
-        updateNativeObserver {
-            customAlternativesHandler = routeAlternativesObserver
-        }
-    }
-
-    fun restoreDefaultRouteAlternativesObserver() {
-        updateNativeObserver {
-            customAlternativesHandler = null
-        }
-    }
-
     fun unregisterAll() {
         nativeRouteAlternativesController.removeAllObservers()
-        customAlternativesHandler = null
         defaultAlternativesHandler = null
         observerProcessingJob?.cancel()
     }
@@ -112,11 +95,9 @@ internal class RouteAlternativesController(
     }
 
     private fun updateNativeObserver(block: () -> Unit) {
-        val wasRunning = active &&
-            (customAlternativesHandler != null || defaultAlternativesHandler != null)
+        val wasRunning = active && defaultAlternativesHandler != null
         block()
-        val shouldBeRunning = active &&
-            (customAlternativesHandler != null || defaultAlternativesHandler != null)
+        val shouldBeRunning = active && defaultAlternativesHandler != null
         if (shouldBeRunning && !wasRunning) {
             nativeRouteAlternativesController.addObserver(nativeObserver)
         }
@@ -155,19 +136,16 @@ internal class RouteAlternativesController(
                     return@processRouteAlternatives
                 }
 
-                observerToTrigger?.onRouteAlternatives(routeProgress, alternatives, origin)
+                defaultAlternativesHandler?.onRouteAlternatives(routeProgress, alternatives, origin)
             }
         }
 
         override fun onError(message: String) {
-            observerToTrigger?.onRouteAlternativesError(
-                RouteAlternativesError(message = message),
-            )
+            logE(LOG_CATEGORY) {
+                "error in native RouteAlternativesObserver: $message"
+            }
         }
     }
-
-    private val observerToTrigger: NavigationRouteAlternativesObserver? get() =
-        customAlternativesHandler ?: defaultAlternativesHandler
 
     /**
      * @param block invoked with results (on the main thread)
@@ -257,8 +235,8 @@ internal class RouteAlternativesController(
 
     private class RouteAlternativesToRouteUpdateSuggestionsAdapter(
         private val suggestRouteUpdate: (UpdateRouteSuggestion) -> Unit,
-    ) : NavigationRouteAlternativesObserver {
-        override fun onRouteAlternatives(
+    ) {
+        fun onRouteAlternatives(
             routeProgress: RouteProgress,
             alternatives: List<NavigationRoute>,
             @RouterOrigin routerOrigin: String,
@@ -308,9 +286,6 @@ internal class RouteAlternativesController(
                     }
                 }
             }
-        }
-
-        override fun onRouteAlternativesError(error: RouteAlternativesError) {
         }
     }
 

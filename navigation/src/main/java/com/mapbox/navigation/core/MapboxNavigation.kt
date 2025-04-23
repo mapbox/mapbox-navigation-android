@@ -65,7 +65,6 @@ import com.mapbox.navigation.core.internal.congestions.TrafficOverrideHandler
 import com.mapbox.navigation.core.internal.extensions.HistoryRecordingEnabledObserver
 import com.mapbox.navigation.core.internal.nativeNavigator
 import com.mapbox.navigation.core.internal.performance.RouteParsingHistoryTracker
-import com.mapbox.navigation.core.internal.routealternatives.NavigationRouteAlternativesObserver
 import com.mapbox.navigation.core.internal.router.GetRouteSignature
 import com.mapbox.navigation.core.internal.router.RouterWrapper
 import com.mapbox.navigation.core.internal.telemetry.ExtendedUserFeedback
@@ -1861,29 +1860,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      */
     fun getAlternativeMetadataFor(navigationRoute: NavigationRoute): AlternativeRouteMetadata? {
         return routeAlternativesController.getMetadataFor(navigationRoute)
-    }
-
-    /**
-     * Replaces default alternative routes handling by a custom one.
-     * [setContinuousAlternativesEnabled] doesn't affect custom alternative routes handling.
-     * Use [restoreDefaultRouteAlternativesObserver] to restore default .
-     */
-    internal fun setRouteAlternativesObserver(
-        routeAlternativesObserver: NavigationRouteAlternativesObserver,
-    ) {
-        routeAlternativesController.setRouteAlternativesObserver(
-            routeAlternativesObserver,
-        )
-    }
-
-    /**
-     * Restores default route alternative observer which could be replaced via
-     * [setRouteAlternativesObserver].
-     * Restore doesn't re-enable continuous alternatives if they were disabled by
-     * [setContinuousAlternativesEnabled].
-     */
-    internal fun restoreDefaultRouteAlternativesObserver() {
-        routeAlternativesController.restoreDefaultRouteAlternativesObserver()
     }
 
     /**
