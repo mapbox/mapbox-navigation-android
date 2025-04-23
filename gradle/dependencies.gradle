@@ -13,17 +13,17 @@ ext {
   // version which we should use in this build
   def mapboxNavigatorVersion = System.getenv("FORCE_MAPBOX_NAVIGATION_NATIVE_VERSION")
   if (mapboxNavigatorVersion == null || mapboxNavigatorVersion == '') {
-      mapboxNavigatorVersion = '324.13.0-SNAPSHOT-04-22--10-23.git-cba4663'
+      mapboxNavigatorVersion = '324.13.0-SNAPSHOT-04-23--04-29.git-3eea307'
   }
   println("Navigation Native version: " + mapboxNavigatorVersion)
 
   version = [
-      mapboxMapSdk              : '11.13.0-SNAPSHOT-04-22--10-23.git-cba4663',
+      mapboxMapSdk              : '11.13.0-SNAPSHOT-04-23--04-29.git-3eea307',
       mapboxSdkServices         : '7.4.0',
       mapboxNavigator           : "${mapboxNavigatorVersion}",
-      mapboxCommonNative        : '24.13.0-SNAPSHOT-04-22--10-23.git-cba4663',
-      mapboxNavSdkCpp           : '0.13.0-SNAPSHOT-04-22--10-23.git-cba4663',
-      mapboxSearch              : '2.13.0-cba4663-SNAPSHOT',
+      mapboxCommonNative        : '24.13.0-SNAPSHOT-04-23--04-29.git-3eea307',
+      mapboxNavSdkCpp           : '0.13.0-SNAPSHOT-04-23--04-29.git-3eea307',
+      mapboxSearch              : '2.13.0-3eea307-SNAPSHOT',
       mapboxBaseAndroid         : '0.11.0',
       androidXActivity          : '1.7.1',
       androidXActivityCompose   : '1.9.2',
@@ -96,6 +96,7 @@ ext {
       mapboxSearch              : "com.mapbox.search:mapbox-search-android:${version.mapboxSearch}",
       mapboxOfflineSearch       : "com.mapbox.search:offline:${version.mapboxSearch}",
       mapboxNavSdkCpp           : "com.mapbox.navsdk:sdk:${version.mapboxNavSdkCpp}",
+      mapboxNavSdkFullHdCpp     : "com.mapbox.navsdk:navsdk-hd:${version.mapboxNavSdkCpp}",
       mapboxMapGptExpAndroid   : "com.mapbox.mapgpt.experimental:mapgpt:${version.mapboxCommonNative}",
 
       mapboxAnnotations         : "com.mapbox.base:annotations:${version.mapboxBaseAndroid}",
