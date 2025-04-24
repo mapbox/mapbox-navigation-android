@@ -5,7 +5,8 @@
 
 
 #### Bug fixes and improvements
-
+- Starting far away from the custom external route starting position now triggers a reroute.
+- Do not extrapolate raw GNSS locations with incorrect bearing when stable location frequency feature is enabled.
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
