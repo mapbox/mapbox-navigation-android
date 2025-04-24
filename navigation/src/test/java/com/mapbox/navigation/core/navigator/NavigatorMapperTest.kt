@@ -34,7 +34,7 @@ import com.mapbox.navigator.RouteState
 import com.mapbox.navigator.SpeedLimitSign
 import com.mapbox.navigator.SpeedLimitUnit
 import com.mapbox.navigator.UpcomingRouteAlert
-import com.mapbox.navigator.VoiceInstruction
+import com.mapbox.navigator.VoiceInstructionInfo
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -810,7 +810,7 @@ class NavigatorMapperTest {
         every { view } returns null
         every { index } returns 0
     }
-    private val nativeVoiceInstructions = mockk<VoiceInstruction> {
+    private val nativeVoiceInstructions = mockk<VoiceInstructionInfo> {
         every { announcement } returns "announcement"
         every { remainingStepDistance } returns 111f
         every { ssmlAnnouncement } returns "ssmlAnnouncement"
