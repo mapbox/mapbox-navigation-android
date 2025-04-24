@@ -1,5 +1,21 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.9.0-rc.1 - 24 April, 2025
+#### Features
+- Added utility class `GeoUtils` which provide functionality to calculate unique identifier for provided link (part of a road between two intersection). 
+
+#### Bug fixes and improvements
+- Improved EV bounding box search to maximize charging station coverage within the selected area. 
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.12.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.12.0-rc.1))
+- Mapbox Navigation Native `v324.12.0-rc.1`
+- Mapbox Core Common `v24.12.0-rc.1`
+- Mapbox Java `v7.4.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.4.0))
+
+
 ## Navigation SDK Core Framework 3.9.0-beta.1 - 11 April, 2025
 #### Features
 - Added `EHorizonOptions#enableEnhancedDataAlongEH` flag to control access to enhanced data attributes (from ADAS data layer). 
