@@ -12,6 +12,8 @@ package com.mapbox.navigation.driver.notification {
     method public kotlinx.coroutines.flow.Flow<com.mapbox.navigation.driver.notification.DriverNotification> observeDriverNotifications();
     method public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
     method public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public void start();
+    method public void stop();
   }
 
   public final class DriverNotificationManagerOptions {
