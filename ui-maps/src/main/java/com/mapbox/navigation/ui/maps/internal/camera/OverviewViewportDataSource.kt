@@ -30,8 +30,16 @@ import kotlin.math.min
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 class OverviewViewportDataSource(
     private val mapboxMap: MapboxMap,
-    internal val internalOptions: InternalViewportDataSourceOptions,
+    internalOptions: InternalViewportDataSourceOptions,
 ) {
+
+    internal var internalOptions = internalOptions
+        set(value) {
+            if (field != value) {
+                field = value
+                reevaluate()
+            }
+        }
 
     val options = MapboxNavigationViewportDataSourceOptions()
 
@@ -69,10 +77,14 @@ class OverviewViewportDataSource(
     fun setActive(active: Boolean) {
         this.active = active
         if (active) {
-            navigationRoute?.let { calculateRouteData(it) }
-            routeProgress?.let { onRouteProgressChanged(it, pointsToFrameOnCurrentStep) }
-            evaluate()
+            reevaluate()
         }
+    }
+
+    private fun reevaluate() {
+        navigationRoute?.let { calculateRouteData(it) }
+        routeProgress?.let { onRouteProgressChanged(it, pointsToFrameOnCurrentStep) }
+        evaluate()
     }
 
     fun onRouteChanged(route: NavigationRoute) {

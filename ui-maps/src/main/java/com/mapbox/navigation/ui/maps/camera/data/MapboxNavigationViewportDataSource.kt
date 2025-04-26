@@ -207,7 +207,6 @@ class MapboxNavigationViewportDataSource private constructor(
     private val mapboxMap: MapboxMap,
     private val followingFramingModeHolder: FollowingFramingModeHolder?,
     options: MapboxNavigationViewportDataSourceOptions,
-    internal var internalOptions: InternalViewportDataSourceOptions,
     @get:VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal val overviewViewportDataSource: OverviewViewportDataSource,
 ) : ViewportDataSource {
@@ -241,7 +240,6 @@ class MapboxNavigationViewportDataSource private constructor(
         mapboxMap,
         followingFramingModeHolder,
         overviewViewportDataSource.options,
-        overviewViewportDataSource.internalOptions,
         overviewViewportDataSource,
     )
 
@@ -251,6 +249,12 @@ class MapboxNavigationViewportDataSource private constructor(
      * You can freely mutate these options and results will be applied when the next frame is evaluated.
      */
     val options = options
+
+    internal var internalOptions
+        get() = overviewViewportDataSource.internalOptions
+        set(value) {
+            overviewViewportDataSource.internalOptions = value
+        }
 
     /**
      * Set a [MapboxNavigationViewportDataSourceDebugger].

@@ -21,6 +21,7 @@ import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getRemainingPointsOnRoute
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRoutePoints
 import com.mapbox.navigation.utils.internal.toPoint
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -828,6 +829,70 @@ class OverviewViewportDataSourceTest {
         }
         verify {
             mapboxMap.cameraForCoordinates(any(), any(), any(), any(), any())
+        }
+    }
+
+    @Test
+    fun changeOverviewModeReevaluates() {
+        val location = createLocation(20.0, 10.0)
+
+        viewportDataSource.onLocationChanged(location)
+        viewportDataSource.onRouteChanged(navigationRoute)
+        viewportDataSource.onRouteProgressChanged(routeProgress, pointsToFrameOnCurrentStep)
+        viewportDataSource.evaluate()
+
+        clearMocks(ViewportDataSourceProcessor, mapboxMap, answers = false)
+
+        viewportDataSource.internalOptions = viewportDataSource.internalOptions.copy(
+            overviewMode = OverviewMode.ENTIRE_ROUTE,
+        )
+
+        verify {
+            processRoutePoints(route)
+        }
+        verify {
+            getRemainingPointsOnRoute(any(), any(), OverviewMode.ENTIRE_ROUTE, any(), any())
+        }
+        verify {
+            mapboxMap.cameraForCoordinates(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        }
+    }
+
+    @Test
+    fun changeOverviewModeToSameValueDoesNotReevaluate() {
+        val location = createLocation(20.0, 10.0)
+
+        viewportDataSource.onLocationChanged(location)
+        viewportDataSource.onRouteChanged(navigationRoute)
+        viewportDataSource.onRouteProgressChanged(routeProgress, pointsToFrameOnCurrentStep)
+        viewportDataSource.evaluate()
+
+        clearMocks(ViewportDataSourceProcessor, mapboxMap, answers = false)
+
+        viewportDataSource.internalOptions = viewportDataSource.internalOptions.copy(
+            overviewMode = OverviewMode.ACTIVE_LEG,
+        )
+
+        verify(exactly = 0) {
+            processRoutePoints(route)
+        }
+        verify(exactly = 0) {
+            getRemainingPointsOnRoute(any(), any(), any(), any(), any())
+        }
+        verify(exactly = 0) {
+            mapboxMap.cameraForCoordinates(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
         }
     }
 

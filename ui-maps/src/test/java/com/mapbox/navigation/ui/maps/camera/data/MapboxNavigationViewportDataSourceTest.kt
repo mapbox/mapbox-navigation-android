@@ -247,7 +247,9 @@ class MapboxNavigationViewportDataSourceTest {
     @Test
     fun internalConstructorUsesSameOptionsForDataSourceAndOverview() {
         val options = mockk<MapboxNavigationViewportDataSourceOptions>(relaxed = true)
+        val newOptions = mockk<MapboxNavigationViewportDataSourceOptions>(relaxed = true)
         val internalOptions = mockk<InternalViewportDataSourceOptions>(relaxed = true)
+        val newInternalOptions = mockk<InternalViewportDataSourceOptions>(relaxed = true)
         val overviewViewportDataSource = mockk<OverviewViewportDataSource>(relaxed = true) {
             every { this@mockk.options } returns options
             every { this@mockk.internalOptions } returns internalOptions
@@ -260,6 +262,28 @@ class MapboxNavigationViewportDataSourceTest {
 
         assertTrue(viewportDataSource.options === options)
         assertTrue(viewportDataSource.internalOptions === internalOptions)
+
+        every { overviewViewportDataSource.options } returns newOptions
+        every { overviewViewportDataSource.internalOptions } returns newInternalOptions
+
+        assertTrue(viewportDataSource.internalOptions === newInternalOptions)
+    }
+
+    @Test
+    fun internalOptionsSetterIsPassedToOverview() {
+        val internalOptions = mockk<InternalViewportDataSourceOptions>(relaxed = true)
+        val overviewViewportDataSource = mockk<OverviewViewportDataSource>(relaxed = true)
+        viewportDataSource = MapboxNavigationViewportDataSource(
+            mapboxMap,
+            followingFrameModeHolder,
+            overviewViewportDataSource,
+        )
+
+        viewportDataSource.internalOptions = internalOptions
+
+        verify {
+            overviewViewportDataSource.internalOptions = internalOptions
+        }
     }
 
     @Test
