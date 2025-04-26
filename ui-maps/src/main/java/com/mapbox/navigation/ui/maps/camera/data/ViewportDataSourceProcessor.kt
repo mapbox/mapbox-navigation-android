@@ -7,9 +7,7 @@ import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.Size
-import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.base.utils.DecodeUtils.stepsGeometryToPoints
 import com.mapbox.navigation.ui.maps.internal.camera.OverviewMode
 import com.mapbox.navigation.utils.internal.logE
@@ -212,18 +210,18 @@ internal object ViewportDataSourceProcessor {
         simplifiedCompleteRoutePoints: List<List<List<Point>>>,
         pointsToFrameOnCurrentStep: List<Point>,
         overviewMode: OverviewMode,
-        currentLegProgress: RouteLegProgress,
-        currentStepProgress: RouteStepProgress,
+        legIndex: Int,
+        stepIndex: Int,
     ): List<Point> {
         val currentLegPoints = if (simplifiedCompleteRoutePoints.isNotEmpty()) {
-            simplifiedCompleteRoutePoints[currentLegProgress.legIndex]
+            simplifiedCompleteRoutePoints[legIndex]
         } else {
             emptyList()
         }
         val remainingStepsAfterCurrentStep =
-            if (currentStepProgress.stepIndex < currentLegPoints.size) {
+            if (stepIndex < currentLegPoints.size) {
                 currentLegPoints.slice(
-                    currentStepProgress.stepIndex + 1 until currentLegPoints.size - 1,
+                    stepIndex + 1 until currentLegPoints.size - 1,
                 )
             } else {
                 emptyList()
@@ -232,7 +230,7 @@ internal object ViewportDataSourceProcessor {
         val remainingPointsAfterCurrentLeg = when (overviewMode) {
             OverviewMode.ACTIVE_LEG -> emptyList()
             OverviewMode.ENTIRE_ROUTE -> simplifiedCompleteRoutePoints.subList(
-                currentLegProgress.legIndex + 1,
+                legIndex + 1,
                 simplifiedCompleteRoutePoints.size,
             ).flatten().flatten()
         }

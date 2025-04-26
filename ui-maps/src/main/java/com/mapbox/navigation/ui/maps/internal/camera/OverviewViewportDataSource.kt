@@ -9,6 +9,8 @@ import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.toCameraOptions
 import com.mapbox.maps.util.isEmpty
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.extensions.internalAlternativeRouteIndices
+import com.mapbox.navigation.base.internal.utils.areSameRoutes
 import com.mapbox.navigation.base.internal.utils.isSameRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -43,11 +45,11 @@ class OverviewViewportDataSource(
 
     val options = MapboxNavigationViewportDataSourceOptions()
 
-    private var navigationRoute: NavigationRoute? = null
+    private var navigationRoutes: List<NavigationRoute> = emptyList()
     private var routeProgress: RouteProgress? = null
     private var pointsToFrameOnCurrentStep: List<Point> = emptyList()
-    private var simplifiedCompleteRoutePoints: List<List<List<Point>>> = emptyList()
-    private var simplifiedRemainingPointsOnRoute: List<Point> = emptyList()
+    private var simplifiedCompleteRoutesPoints: List<List<List<List<Point>>>> = emptyList()
+    private var simplifiedRemainingPointsOnRoutes: List<Point> = emptyList()
     private var targetLocation: Location? = null
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -82,35 +84,49 @@ class OverviewViewportDataSource(
     }
 
     private fun reevaluate() {
-        navigationRoute?.let { calculateRouteData(it) }
+        calculateRouteData(navigationRoutes)
         routeProgress?.let { onRouteProgressChanged(it, pointsToFrameOnCurrentStep) }
         evaluate()
     }
 
-    fun onRouteChanged(route: NavigationRoute) {
-        if (!route.directionsRoute.isSameRoute(navigationRoute?.directionsRoute)) {
-            this.navigationRoute = route
-            calculateRouteData(route)
+    fun onRoutesChanged(routes: List<NavigationRoute>) {
+        if (!areSameRoutes(navigationRoutes, routes)) {
+            navigationRoutes = routes
+            calculateRouteData(routes)
         }
     }
 
-    private fun calculateRouteData(route: NavigationRoute) {
+    private fun calculateRouteData(routes: List<NavigationRoute>) {
         runIfActive {
-            val completeRoutePoints = processRoutePoints(route.directionsRoute)
-            simplifiedCompleteRoutePoints = simplifyCompleteRoutePoints(
-                options.overviewFrameOptions.geometrySimplification.enabled,
-                options.overviewFrameOptions.geometrySimplification.simplificationFactor,
-                completeRoutePoints,
-            )
-            simplifiedRemainingPointsOnRoute = simplifiedCompleteRoutePoints.flatten().flatten()
+            if (routes.isEmpty()) {
+                clearRouteData()
+            } else {
+                val completeRoutePoints = routes
+                    .mapIndexedNotNull { index, route ->
+                        if (index == 0 || internalOptions.overviewAlternatives) {
+                            processRoutePoints(route.directionsRoute)
+                        } else {
+                            null
+                        }
+                    }
+                simplifiedCompleteRoutesPoints = completeRoutePoints.map {
+                    simplifyCompleteRoutePoints(
+                        options.overviewFrameOptions.geometrySimplification.enabled,
+                        options.overviewFrameOptions.geometrySimplification.simplificationFactor,
+                        it,
+                    )
+                }
+                simplifiedRemainingPointsOnRoutes =
+                    simplifiedCompleteRoutesPoints.flatten().flatten().flatten()
+            }
         }
     }
 
     fun clearRouteData() {
-        this.navigationRoute = null
+        this.navigationRoutes = emptyList()
         runIfActive {
-            simplifiedCompleteRoutePoints = emptyList()
-            simplifiedRemainingPointsOnRoute = emptyList()
+            simplifiedCompleteRoutesPoints = emptyList()
+            simplifiedRemainingPointsOnRoutes = emptyList()
         }
     }
 
@@ -118,7 +134,8 @@ class OverviewViewportDataSource(
         this.routeProgress = null
         pointsToFrameOnCurrentStep = emptyList()
         runIfActive {
-            simplifiedRemainingPointsOnRoute = simplifiedCompleteRoutePoints.flatten().flatten()
+            simplifiedRemainingPointsOnRoutes = simplifiedCompleteRoutesPoints
+                .flatten().flatten().flatten()
         }
     }
 
@@ -128,7 +145,7 @@ class OverviewViewportDataSource(
     ) {
         this.routeProgress = routeProgress
         this.pointsToFrameOnCurrentStep = pointsToFrameOnCurrentStep
-        val currentRoute = this.navigationRoute
+        val currentRoute = this.navigationRoutes.firstOrNull()
         if (currentRoute == null) {
             return
         }
@@ -141,13 +158,33 @@ class OverviewViewportDataSource(
                 routeProgress.currentLegProgress,
                 routeProgress.currentLegProgress?.currentStepProgress,
             ) { currentLegProgress, currentStepProgress ->
-                simplifiedRemainingPointsOnRoute = getRemainingPointsOnRoute(
-                    simplifiedCompleteRoutePoints,
+                val primaryPoints = getRemainingPointsOnRoute(
+                    simplifiedCompleteRoutesPoints.first(),
                     pointsToFrameOnCurrentStep,
                     internalOptions.overviewMode,
-                    currentLegProgress,
-                    currentStepProgress,
+                    currentLegProgress.legIndex,
+                    currentStepProgress.stepIndex,
                 )
+                val alternativePoints = if (internalOptions.overviewAlternatives) {
+                    navigationRoutes.drop(1).mapIndexedNotNull { index, route ->
+                        val alternativeIndices = routeProgress
+                            .internalAlternativeRouteIndices()[route.id]
+                        if (alternativeIndices == null) {
+                            null
+                        } else {
+                            getRemainingPointsOnRoute(
+                                simplifiedCompleteRoutesPoints[index + 1],
+                                emptyList(), // already overviewed by primary route
+                                internalOptions.overviewMode,
+                                alternativeIndices.legIndex,
+                                alternativeIndices.stepIndex,
+                            )
+                        }
+                    }.flatten()
+                } else {
+                    emptyList()
+                }
+                simplifiedRemainingPointsOnRoutes = primaryPoints + alternativePoints
             }
         }
     }
@@ -186,7 +223,7 @@ class OverviewViewportDataSource(
     fun evaluate() {
         val cameraState = mapboxMap.cameraState
         runIfActive {
-            val pointsForOverview = simplifiedRemainingPointsOnRoute.toMutableList()
+            val pointsForOverview = simplifiedRemainingPointsOnRoutes.toMutableList()
 
             val localTargetLocation = targetLocation
             if (localTargetLocation != null) {
@@ -196,48 +233,46 @@ class OverviewViewportDataSource(
             pointsForOverview.addAll(additionalPointsToFrame)
 
             if (pointsForOverview.isEmpty()) {
+                // nothing to frame
                 options.overviewFrameOptions.run {
                     bearingProperty.fallback = cameraState.bearing
                     pitchProperty.fallback = cameraState.pitch
                     centerProperty.fallback = cameraState.center
                     zoomProperty.fallback = min(cameraState.zoom, maxZoom)
                 }
-                // nothing to frame
-                return@runIfActive
-            }
-
-            bearingProperty.fallback = normalizeBearing(
-                cameraState.bearing,
-                BEARING_NORTH,
-            )
-
-            val cameraFrame = if (pointsForOverview.isNotEmpty()) {
-                mapboxMap.cameraForCoordinates(
-                    pointsForOverview,
-                    CameraOptions.Builder()
-                        .padding(padding)
-                        .bearing(bearingProperty.get())
-                        .pitch(pitchProperty.get())
-                        .build(),
-                    null,
-                    null,
-                    null,
-                )
             } else {
-                cameraState.toCameraOptions()
-            }
+                bearingProperty.fallback = normalizeBearing(
+                    cameraState.bearing,
+                    BEARING_NORTH,
+                )
 
-            if (cameraFrame.isEmpty) {
-                logW { "CameraOptions is empty" }
-                return@runIfActive
-            }
+                val cameraFrame = if (pointsForOverview.isNotEmpty()) {
+                    mapboxMap.cameraForCoordinates(
+                        pointsForOverview,
+                        CameraOptions.Builder()
+                            .padding(padding)
+                            .bearing(bearingProperty.get())
+                            .pitch(pitchProperty.get())
+                            .build(),
+                        null,
+                        null,
+                        null,
+                    )
+                } else {
+                    cameraState.toCameraOptions()
+                }
 
-            // TODO should be non-null (reproducible with Camera test)
-            centerProperty.fallback = cameraFrame.center!!
-            zoomProperty.fallback = min(
-                cameraFrame.zoom!!,
-                options.overviewFrameOptions.maxZoom,
-            )
+                if (cameraFrame.isEmpty) {
+                    logW { "CameraOptions is empty" }
+                } else {
+                    // TODO should be non-null (reproducible with Camera test)
+                    centerProperty.fallback = cameraFrame.center!!
+                    zoomProperty.fallback = min(
+                        cameraFrame.zoom!!,
+                        options.overviewFrameOptions.maxZoom,
+                    )
+                }
+            }
 
             updateDebugger(pointsForOverview)
 

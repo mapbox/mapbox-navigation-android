@@ -2,12 +2,14 @@
 
 package com.mapbox.navigation.base.internal.utils
 
+import androidx.annotation.RestrictTo
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.navigation.base.internal.route.TimeZone
 import com.mapbox.navigation.base.internal.route.Waypoint
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.utils.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
 
@@ -34,6 +36,19 @@ fun DirectionsRoute.isSameRoute(compare: DirectionsRoute?): Boolean {
     }
 
     return false
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+fun areSameRoutes(routes1: List<NavigationRoute>, routes2: List<NavigationRoute>): Boolean {
+    if (routes1.size != routes2.size) {
+        return false
+    }
+    for (i in routes1.indices) {
+        if (!routes1[i].directionsRoute.isSameRoute(routes2[i].directionsRoute)) {
+            return false
+        }
+    }
+    return true
 }
 
 private fun DirectionsRoute.stepsNamesAsString(): String? =

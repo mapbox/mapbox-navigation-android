@@ -6,4 +6,5 @@ import androidx.annotation.RestrictTo
 data class InternalViewportDataSourceOptions(
     val ignoreMinZoomWhenFramingManeuver: Boolean,
     val overviewMode: OverviewMode,
+    val overviewAlternatives: Boolean,
 )

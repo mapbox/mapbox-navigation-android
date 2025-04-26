@@ -292,12 +292,6 @@ class ViewportDataSourceProcessorTest {
 
     @Test
     fun `test getRemainingPointsOnRoute - empty current step`() {
-        val stepProgress: RouteStepProgress = mockk {
-            every { stepIndex } returns 4
-        }
-        val legProgress: RouteLegProgress = mockk {
-            every { legIndex } returns 1
-        }
         val expected: List<Point> = listOf(
             Point.fromLngLat(-77.153415, 38.771307),
             Point.fromLngLat(-77.153451, 38.771105),
@@ -309,8 +303,8 @@ class ViewportDataSourceProcessorTest {
             simplifiedCompleteRoutePoints = completeRoutePoints,
             pointsToFrameOnCurrentStep = emptyList(),
             overviewMode = OverviewMode.ACTIVE_LEG,
-            currentLegProgress = legProgress,
-            currentStepProgress = stepProgress,
+            legIndex = 1,
+            stepIndex = 4,
         )
 
         assertArrays1(expected, actual, pointAdapter)
@@ -318,12 +312,6 @@ class ViewportDataSourceProcessorTest {
 
     @Test
     fun `test getRemainingPointsOnRoute activeLeg`() {
-        val stepProgress: RouteStepProgress = mockk {
-            every { stepIndex } returns 4
-        }
-        val legProgress: RouteLegProgress = mockk {
-            every { legIndex } returns 1
-        }
         val expected: List<Point> = listOf(
             Point.fromLngLat(-77.123, 38.77091),
             Point.fromLngLat(-77.456, 38.77091),
@@ -340,8 +328,8 @@ class ViewportDataSourceProcessorTest {
                 Point.fromLngLat(-77.456, 38.77091),
             ),
             overviewMode = OverviewMode.ACTIVE_LEG,
-            currentLegProgress = legProgress,
-            currentStepProgress = stepProgress,
+            legIndex = 1,
+            stepIndex = 4,
         )
 
         assertArrays1(expected, actual, pointAdapter)
@@ -349,12 +337,6 @@ class ViewportDataSourceProcessorTest {
 
     @Test
     fun `test getRemainingPointsOnRoute entireRoute on the last leg`() {
-        val stepProgress: RouteStepProgress = mockk {
-            every { stepIndex } returns 4
-        }
-        val legProgress: RouteLegProgress = mockk {
-            every { legIndex } returns 1
-        }
         val expected: List<Point> = listOf(
             Point.fromLngLat(-77.123, 38.77091),
             Point.fromLngLat(-77.456, 38.77091),
@@ -371,8 +353,8 @@ class ViewportDataSourceProcessorTest {
                 Point.fromLngLat(-77.456, 38.77091),
             ),
             overviewMode = OverviewMode.ENTIRE_ROUTE,
-            currentLegProgress = legProgress,
-            currentStepProgress = stepProgress,
+            legIndex = 1,
+            stepIndex = 4,
         )
 
         assertArrays1(expected, actual, pointAdapter)
@@ -413,8 +395,8 @@ class ViewportDataSourceProcessorTest {
                 Point.fromLngLat(-77.456, 38.789),
             ),
             overviewMode = OverviewMode.ENTIRE_ROUTE,
-            currentLegProgress = legProgress,
-            currentStepProgress = stepProgress,
+            legIndex = 0,
+            stepIndex = 4,
         )
 
         assertArrays1(expected, actual, pointAdapter)

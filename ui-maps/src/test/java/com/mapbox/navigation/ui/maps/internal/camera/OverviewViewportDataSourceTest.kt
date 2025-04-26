@@ -7,6 +7,8 @@ import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.CameraState
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapboxMap
+import com.mapbox.maps.toCameraOptions
+import com.mapbox.navigation.base.internal.extensions.internalAlternativeRouteIndices
 import com.mapbox.navigation.base.internal.route.routeOptions
 import com.mapbox.navigation.base.internal.utils.isSameRoute
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -20,7 +22,9 @@ import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSou
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getRemainingPointsOnRoute
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRoutePoints
+import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.simplifyCompleteRoutePoints
 import com.mapbox.navigation.utils.internal.toPoint
+import io.mockk.clearAllMocks
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -56,10 +60,19 @@ class OverviewViewportDataSourceTest {
         every { routeIndex() } returns "0"
         every { routeOptions() } returns mockk()
     }
+    private val route2: DirectionsRoute = mockk(relaxed = true) {
+        every { routeIndex() } returns "0"
+        every { routeOptions() } returns mockk()
+    }
 
     private val navigationRoute: NavigationRoute = mockk(relaxed = true) {
         every { routeOptions } returns route.routeOptions()!!
         every { directionsRoute } returns route
+    }
+    private val navigationRoute2: NavigationRoute = mockk(relaxed = true) {
+        every { routeOptions } returns route2.routeOptions()!!
+        every { directionsRoute } returns route2
+        every { id } returns "routeId2"
     }
 
     private val completeRoutePoints: List<List<List<Point>>> =
@@ -78,6 +91,24 @@ class OverviewViewportDataSourceTest {
                 listOf(Point.fromLngLat(9.0, 10.0)),
             ),
         )
+
+    private val completeRoutePoints2: List<List<List<Point>>> =
+        // legs
+        listOf(
+            // steps
+            listOf(
+                // points
+                listOf(Point.fromLngLat(10.0, 2.0)),
+                listOf(Point.fromLngLat(30.0, 4.0)),
+                listOf(Point.fromLngLat(50.0, 6.0)),
+            ),
+            listOf(
+                // points
+                listOf(Point.fromLngLat(70.0, 8.0)),
+                listOf(Point.fromLngLat(90.0, 10.0)),
+            ),
+        )
+
     private val completeRoutePointsFlat: List<Point> = completeRoutePoints.flatten().flatten()
 
     private val remainingPointsOnRoute: List<Point> = listOf(
@@ -85,11 +116,26 @@ class OverviewViewportDataSourceTest {
         Point.fromLngLat(52.0, 53.0),
     )
 
+    private val remainingPointsOnRoute2: List<Point> = listOf(
+        Point.fromLngLat(55.0, 51.0),
+        Point.fromLngLat(57.0, 53.0),
+    )
+
     private val viewportDataSource = OverviewViewportDataSource(
         mapboxMap,
         InternalViewportDataSourceOptions(
             ignoreMinZoomWhenFramingManeuver = false,
             overviewMode = OverviewMode.ACTIVE_LEG,
+            overviewAlternatives = false,
+        ),
+    )
+
+    private val viewportDataSourceWithAlternatives = OverviewViewportDataSource(
+        mapboxMap,
+        InternalViewportDataSourceOptions(
+            ignoreMinZoomWhenFramingManeuver = false,
+            overviewMode = OverviewMode.ACTIVE_LEG,
+            overviewAlternatives = true,
         ),
     )
 
@@ -97,6 +143,7 @@ class OverviewViewportDataSourceTest {
     fun setUp() {
         mockkObject(ViewportDataSourceProcessor)
         every { processRoutePoints(route) } returns completeRoutePoints
+        every { processRoutePoints(route2) } returns completeRoutePoints2
         every {
             getRemainingPointsOnRoute(
                 completeRoutePoints,
@@ -106,6 +153,16 @@ class OverviewViewportDataSourceTest {
                 any(),
             )
         } returns remainingPointsOnRoute
+        every {
+            getRemainingPointsOnRoute(
+                completeRoutePoints2,
+                emptyList(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns remainingPointsOnRoute2
+        every { mapboxMap.cameraState } returns emptyCameraState
     }
 
     @After
@@ -214,7 +271,7 @@ class OverviewViewportDataSourceTest {
                 center(NULL_ISLAND_POINT)
                 bearing(BEARING_NORTH)
                 pitch(ZERO_PITCH)
-                zoom(16.35) // overviewOptions.maxZoom
+                zoom(0.0)
                 padding(EMPTY_EDGE_INSETS)
                 anchor(null)
             },
@@ -247,7 +304,7 @@ class OverviewViewportDataSourceTest {
             )
         } returns overviewCameraOptions
 
-        viewportDataSource.onRouteChanged(navigationRoute)
+        viewportDataSource.onRoutesChanged(listOf(navigationRoute))
         viewportDataSource.evaluate()
         val data = viewportDataSource.viewportData
 
@@ -301,10 +358,10 @@ class OverviewViewportDataSourceTest {
 
     @Test
     fun `verify frame - location + route + progress`() {
-        val stepProgress = mockk<RouteStepProgress> {
+        val stepProgress = mockk<RouteStepProgress>(relaxed = true) {
             every { distanceRemaining } returns 123f
         }
-        val legProgress = mockk<RouteLegProgress> {
+        val legProgress = mockk<RouteLegProgress>(relaxed = true) {
             every { currentStepProgress } returns stepProgress
         }
         every { routeProgress.currentLegProgress } returns legProgress
@@ -339,7 +396,7 @@ class OverviewViewportDataSourceTest {
 
         // run
         viewportDataSource.onLocationChanged(location)
-        viewportDataSource.onRouteChanged(navigationRoute)
+        viewportDataSource.onRoutesChanged(listOf(navigationRoute))
         viewportDataSource.onRouteProgressChanged(routeProgress, pointsToFrameOnCurrentStep)
         viewportDataSource.evaluate()
         val data = viewportDataSource.viewportData
@@ -353,10 +410,10 @@ class OverviewViewportDataSourceTest {
 
     @Test
     fun `verify frame - overview current leg only`() {
-        val stepProgress = mockk<RouteStepProgress> {
+        val stepProgress = mockk<RouteStepProgress>(relaxed = true) {
             every { distanceRemaining } returns 123f
         }
-        val legProgress = mockk<RouteLegProgress> {
+        val legProgress = mockk<RouteLegProgress>(relaxed = true) {
             every { currentStepProgress } returns stepProgress
         }
         every { routeProgress.currentLegProgress } returns legProgress
@@ -408,7 +465,7 @@ class OverviewViewportDataSourceTest {
 
         // run
         viewportDataSource.onLocationChanged(location)
-        viewportDataSource.onRouteChanged(navigationRoute)
+        viewportDataSource.onRoutesChanged(listOf(navigationRoute))
         viewportDataSource.onRouteProgressChanged(routeProgress, pointsToFrameOnCurrentStep)
         viewportDataSource.evaluate()
         val data = viewportDataSource.viewportData
@@ -422,10 +479,10 @@ class OverviewViewportDataSourceTest {
 
     @Test
     fun `verify frame after route data cleanup`() {
-        val stepProgress = mockk<RouteStepProgress> {
+        val stepProgress = mockk<RouteStepProgress>(relaxed = true) {
             every { distanceRemaining } returns 123f
         }
-        val legProgress = mockk<RouteLegProgress> {
+        val legProgress = mockk<RouteLegProgress>(relaxed = true) {
             every { currentStepProgress } returns stepProgress
         }
         every { routeProgress.currentLegProgress } returns legProgress
@@ -469,7 +526,7 @@ class OverviewViewportDataSourceTest {
 
         // run
         viewportDataSource.onLocationChanged(location)
-        viewportDataSource.onRouteChanged(navigationRoute)
+        viewportDataSource.onRoutesChanged(listOf(navigationRoute))
         viewportDataSource.onRouteProgressChanged(routeProgress, pointsToFrameOnCurrentStep)
         viewportDataSource.evaluate()
         viewportDataSource.clearRouteData()
@@ -486,10 +543,10 @@ class OverviewViewportDataSourceTest {
     @Test
     fun `verify frame - location + route + progress + padding`() {
         val overviewPadding = EdgeInsets(15.0, 16.0, 17.0, 18.0)
-        val stepProgress = mockk<RouteStepProgress> {
+        val stepProgress = mockk<RouteStepProgress>(relaxed = true) {
             every { distanceRemaining } returns 123f
         }
-        val legProgress = mockk<RouteLegProgress> {
+        val legProgress = mockk<RouteLegProgress>(relaxed = true) {
             every { currentStepProgress } returns stepProgress
         }
         every { routeProgress.currentLegProgress } returns legProgress
@@ -526,7 +583,7 @@ class OverviewViewportDataSourceTest {
         // run
         viewportDataSource.padding = overviewPadding
         viewportDataSource.onLocationChanged(location)
-        viewportDataSource.onRouteChanged(navigationRoute)
+        viewportDataSource.onRoutesChanged(listOf(navigationRoute))
         viewportDataSource.onRouteProgressChanged(routeProgress, pointsToFrameOnCurrentStep)
         viewportDataSource.evaluate()
         val data = viewportDataSource.viewportData
@@ -540,10 +597,10 @@ class OverviewViewportDataSourceTest {
 
     @Test
     fun `verify frame - location + route + progress + reset route`() {
-        val stepProgress = mockk<RouteStepProgress> {
+        val stepProgress = mockk<RouteStepProgress>(relaxed = true) {
             every { distanceRemaining } returns 123f
         }
-        val legProgress = mockk<RouteLegProgress> {
+        val legProgress = mockk<RouteLegProgress>(relaxed = true) {
             every { currentStepProgress } returns stepProgress
         }
         every { routeProgress.currentLegProgress } returns legProgress
@@ -578,11 +635,11 @@ class OverviewViewportDataSourceTest {
 
         // run
         viewportDataSource.onLocationChanged(location)
-        viewportDataSource.onRouteChanged(navigationRoute)
+        viewportDataSource.onRoutesChanged(listOf(navigationRoute))
         viewportDataSource.onRouteProgressChanged(routeProgress, pointsToFrameOnCurrentStep)
         mockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
         every { route.isSameRoute(any()) } returns false
-        viewportDataSource.onRouteChanged(navigationRoute)
+        viewportDataSource.onRoutesChanged(listOf(navigationRoute))
         unmockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
         viewportDataSource.evaluate()
         val data = viewportDataSource.viewportData
@@ -596,10 +653,10 @@ class OverviewViewportDataSourceTest {
 
     @Test
     fun `verify frame - location + route + progress + reset route and forget to update`() {
-        val stepProgress = mockk<RouteStepProgress> {
+        val stepProgress = mockk<RouteStepProgress>(relaxed = true) {
             every { distanceRemaining } returns 123f
         }
-        val legProgress = mockk<RouteLegProgress> {
+        val legProgress = mockk<RouteLegProgress>(relaxed = true) {
             every { currentStepProgress } returns stepProgress
         }
         every { routeProgress.currentLegProgress } returns legProgress
@@ -634,7 +691,7 @@ class OverviewViewportDataSourceTest {
 
         // run
         viewportDataSource.onLocationChanged(location)
-        viewportDataSource.onRouteChanged(navigationRoute)
+        viewportDataSource.onRoutesChanged(listOf(navigationRoute))
         viewportDataSource.onRouteProgressChanged(routeProgress, pointsToFrameOnCurrentStep)
 
         mockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
@@ -700,7 +757,7 @@ class OverviewViewportDataSourceTest {
 
     @Test
     fun activeByDefault() {
-        viewportDataSource.onRouteChanged(navigationRoute)
+        viewportDataSource.onRoutesChanged(listOf(navigationRoute))
         viewportDataSource.onRouteProgressChanged(routeProgress, pointsToFrameOnCurrentStep)
         viewportDataSource.evaluate()
 
@@ -743,7 +800,7 @@ class OverviewViewportDataSourceTest {
         viewportDataSource.setActive(false)
 
         viewportDataSource.onLocationChanged(location)
-        viewportDataSource.onRouteChanged(navigationRoute)
+        viewportDataSource.onRoutesChanged(listOf(navigationRoute))
         viewportDataSource.onRouteProgressChanged(routeProgress, pointsToFrameOnCurrentStep)
         viewportDataSource.evaluate()
 
@@ -785,7 +842,7 @@ class OverviewViewportDataSourceTest {
         viewportDataSource.setActive(false)
 
         viewportDataSource.onLocationChanged(location)
-        viewportDataSource.onRouteChanged(navigationRoute)
+        viewportDataSource.onRoutesChanged(listOf(navigationRoute))
         viewportDataSource.onRouteProgressChanged(routeProgress, pointsToFrameOnCurrentStep)
         viewportDataSource.evaluate()
 
@@ -817,7 +874,7 @@ class OverviewViewportDataSourceTest {
 
         viewportDataSource.setActive(true)
 
-        viewportDataSource.onRouteChanged(navigationRoute)
+        viewportDataSource.onRoutesChanged(listOf(navigationRoute))
         viewportDataSource.onRouteProgressChanged(routeProgress, pointsToFrameOnCurrentStep)
         viewportDataSource.evaluate()
 
@@ -837,7 +894,7 @@ class OverviewViewportDataSourceTest {
         val location = createLocation(20.0, 10.0)
 
         viewportDataSource.onLocationChanged(location)
-        viewportDataSource.onRouteChanged(navigationRoute)
+        viewportDataSource.onRoutesChanged(listOf(navigationRoute))
         viewportDataSource.onRouteProgressChanged(routeProgress, pointsToFrameOnCurrentStep)
         viewportDataSource.evaluate()
 
@@ -869,7 +926,7 @@ class OverviewViewportDataSourceTest {
         val location = createLocation(20.0, 10.0)
 
         viewportDataSource.onLocationChanged(location)
-        viewportDataSource.onRouteChanged(navigationRoute)
+        viewportDataSource.onRoutesChanged(listOf(navigationRoute))
         viewportDataSource.onRouteProgressChanged(routeProgress, pointsToFrameOnCurrentStep)
         viewportDataSource.evaluate()
 
@@ -893,6 +950,311 @@ class OverviewViewportDataSourceTest {
                 any(),
                 any(),
             )
+        }
+    }
+
+    @Test
+    fun clearRoutesDataClearsData() {
+        val currentCameraState = CameraState(
+            Point.fromLngLat(32.4, 56.7),
+            EdgeInsets(1.0, 1.0, 2.0, 2.0),
+            15.0,
+            33.0,
+            55.0,
+        )
+
+        viewportDataSource.onRoutesChanged(listOf(navigationRoute))
+        viewportDataSource.onRouteProgressChanged(routeProgress, pointsToFrameOnCurrentStep)
+        viewportDataSource.evaluate()
+
+        every { mapboxMap.cameraState } returns currentCameraState
+
+        viewportDataSource.clearRouteData()
+        viewportDataSource.evaluate()
+
+        val options = viewportDataSource.viewportData
+        assertEquals(currentCameraState.center, options.center)
+    }
+
+    @Test
+    fun onRoutesChangedEmptyClearsViewport() {
+        val currentCameraState = CameraState(
+            Point.fromLngLat(32.4, 56.7),
+            EdgeInsets(1.0, 1.0, 2.0, 2.0),
+            15.0,
+            33.0,
+            55.0,
+        )
+
+        viewportDataSource.onRoutesChanged(listOf(navigationRoute))
+        viewportDataSource.onRouteProgressChanged(routeProgress, pointsToFrameOnCurrentStep)
+        viewportDataSource.evaluate()
+
+        every { mapboxMap.cameraState } returns currentCameraState
+
+        viewportDataSource.onRoutesChanged(emptyList())
+        viewportDataSource.evaluate()
+
+        val options = viewportDataSource.viewportData
+        assertEquals(currentCameraState.toCameraOptions().center, options.center)
+    }
+
+    @Test
+    fun onRoutesChangedWithOverviewAlternativesEnabled() {
+        every {
+            routeProgress.internalAlternativeRouteIndices()
+        } returns mapOf(
+            "routeId2" to mockk(relaxed = true) {
+                every { legIndex } returns 1
+                every { stepIndex } returns 2
+            },
+        )
+        every { routeProgress.currentLegProgress } returns mockk(relaxed = true) {
+            every { legIndex } returns 0
+            every { currentStepProgress } returns mockk(relaxed = true) {
+                every { stepIndex } returns 3
+            }
+        }
+
+        val cameraOptions = CameraOptions.Builder()
+            .center(Point.fromLngLat(1.0, 2.0))
+            .zoom(16.0)
+            .build()
+
+        every {
+            mapboxMap.cameraForCoordinates(
+                remainingPointsOnRoute + remainingPointsOnRoute2,
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns cameraOptions
+
+        viewportDataSourceWithAlternatives.onRoutesChanged(
+            listOf(navigationRoute, navigationRoute2),
+        )
+
+        verify { processRoutePoints(route) }
+        verify { processRoutePoints(route2) }
+
+        viewportDataSourceWithAlternatives.onRouteProgressChanged(
+            routeProgress,
+            pointsToFrameOnCurrentStep,
+        )
+
+        verify { getRemainingPointsOnRoute(completeRoutePoints, any(), any(), 0, 3) }
+        verify { getRemainingPointsOnRoute(completeRoutePoints2, any(), any(), 1, 2) }
+
+        viewportDataSourceWithAlternatives.evaluate()
+
+        verify {
+            mapboxMap.cameraForCoordinates(
+                remainingPointsOnRoute + remainingPointsOnRoute2,
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        }
+
+        val options = viewportDataSourceWithAlternatives.viewportData
+        assertEquals(cameraOptions.center, options.center)
+    }
+
+    @Test
+    fun onRoutesChangedWithOverviewAlternativesEnabledNoAlternativeId() {
+        every {
+            routeProgress.internalAlternativeRouteIndices()
+        } returns mapOf("routeId3" to mockk(relaxed = true))
+        every { routeProgress.currentLegProgress } returns mockk(relaxed = true) {
+            every { legIndex } returns 0
+            every { currentStepProgress } returns mockk(relaxed = true) {
+                every { stepIndex } returns 3
+            }
+        }
+
+        val cameraOptions = CameraOptions.Builder()
+            .center(Point.fromLngLat(1.0, 2.0))
+            .zoom(16.0)
+            .build()
+
+        every {
+            mapboxMap.cameraForCoordinates(
+                remainingPointsOnRoute,
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns cameraOptions
+
+        viewportDataSourceWithAlternatives.onRoutesChanged(
+            listOf(navigationRoute, navigationRoute2),
+        )
+
+        verify { processRoutePoints(route) }
+        verify { processRoutePoints(route2) }
+
+        viewportDataSourceWithAlternatives.onRouteProgressChanged(
+            routeProgress,
+            pointsToFrameOnCurrentStep,
+        )
+
+        verify { getRemainingPointsOnRoute(completeRoutePoints, any(), any(), 0, 3) }
+        verify(exactly = 1) { getRemainingPointsOnRoute(any(), any(), any(), any(), any()) }
+
+        viewportDataSourceWithAlternatives.evaluate()
+
+        verify {
+            mapboxMap.cameraForCoordinates(
+                remainingPointsOnRoute,
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        }
+
+        val options = viewportDataSourceWithAlternatives.viewportData
+        assertEquals(cameraOptions.center, options.center)
+    }
+
+    @Test
+    fun onRoutesChangedWithOverviewAlternativesDisabled() {
+        every {
+            routeProgress.internalAlternativeRouteIndices()
+        } returns mapOf("routeId2" to mockk(relaxed = true))
+
+        val cameraOptions = CameraOptions.Builder()
+            .center(Point.fromLngLat(1.0, 2.0))
+            .zoom(16.0)
+            .build()
+
+        every {
+            mapboxMap.cameraForCoordinates(
+                remainingPointsOnRoute,
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns cameraOptions
+
+        viewportDataSource.onRoutesChanged(listOf(navigationRoute, navigationRoute2))
+
+        verify { processRoutePoints(route) }
+        verify(exactly = 1) { processRoutePoints(any()) }
+
+        viewportDataSource.onRouteProgressChanged(routeProgress, pointsToFrameOnCurrentStep)
+
+        verify { getRemainingPointsOnRoute(completeRoutePoints, any(), any(), any(), any()) }
+        verify(exactly = 1) { getRemainingPointsOnRoute(any(), any(), any(), any(), any()) }
+
+        viewportDataSource.evaluate()
+
+        verify {
+            mapboxMap.cameraForCoordinates(
+                remainingPointsOnRoute,
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        }
+
+        val options = viewportDataSource.viewportData
+        assertEquals(cameraOptions.center, options.center)
+    }
+
+    @Test
+    fun overviewAlternativesEnabledInfluencesViewportImmediately() {
+        val oldCameraOptions = CameraOptions.Builder()
+            .center(Point.fromLngLat(1.0, 2.0))
+            .zoom(16.0)
+            .build()
+        val newCameraOptions = CameraOptions.Builder()
+            .center(Point.fromLngLat(3.0, 4.0))
+            .zoom(16.0)
+            .build()
+        every {
+            mapboxMap.cameraForCoordinates(
+                remainingPointsOnRoute,
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns oldCameraOptions
+        every {
+            mapboxMap.cameraForCoordinates(
+                remainingPointsOnRoute + remainingPointsOnRoute2,
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns newCameraOptions
+        every {
+            routeProgress.internalAlternativeRouteIndices()
+        } returns mapOf("routeId2" to mockk(relaxed = true))
+        viewportDataSource.onRoutesChanged(listOf(navigationRoute, navigationRoute2))
+        viewportDataSource.onRouteProgressChanged(routeProgress, pointsToFrameOnCurrentStep)
+        viewportDataSource.evaluate()
+        val options = viewportDataSource.viewportData
+        assertEquals(oldCameraOptions.center, options.center)
+
+        viewportDataSource.internalOptions = viewportDataSource.internalOptions
+            .copy(overviewAlternatives = true)
+
+        val newOptions = viewportDataSource.viewportData
+        assertEquals(newCameraOptions.center, newOptions.center)
+    }
+
+    @Test
+    fun setActiveToTrueWithAlternatives() {
+        every {
+            routeProgress.internalAlternativeRouteIndices()
+        } returns mapOf("routeId2" to mockk(relaxed = true))
+        viewportDataSourceWithAlternatives.setActive(false)
+
+        viewportDataSourceWithAlternatives.onRoutesChanged(
+            listOf(navigationRoute, navigationRoute2),
+        )
+        viewportDataSourceWithAlternatives.onRouteProgressChanged(
+            routeProgress,
+            pointsToFrameOnCurrentStep,
+        )
+        viewportDataSourceWithAlternatives.evaluate()
+
+        clearAllMocks(answers = false)
+
+        viewportDataSourceWithAlternatives.setActive(true)
+
+        verify { processRoutePoints(route) }
+        verify { processRoutePoints(route2) }
+        verify { simplifyCompleteRoutePoints(any(), any(), completeRoutePoints) }
+        verify { simplifyCompleteRoutePoints(any(), any(), completeRoutePoints2) }
+        verify {
+            getRemainingPointsOnRoute(
+                completeRoutePoints,
+                pointsToFrameOnCurrentStep,
+                any(),
+                any(),
+                any(),
+            )
+        }
+        verify {
+            getRemainingPointsOnRoute(
+                completeRoutePoints2,
+                emptyList(),
+                any(),
+                any(),
+                any(),
+            )
+        }
+        verify {
+            mapboxMap.cameraForCoordinates(any(), any(), any(), any(), any())
         }
     }
 

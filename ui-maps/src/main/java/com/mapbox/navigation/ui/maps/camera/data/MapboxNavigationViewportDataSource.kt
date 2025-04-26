@@ -17,6 +17,7 @@ import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.toCameraOptions
 import com.mapbox.maps.util.isEmpty
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.utils.areSameRoutes
 import com.mapbox.navigation.base.internal.utils.isSameRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -227,6 +228,7 @@ class MapboxNavigationViewportDataSource private constructor(
             InternalViewportDataSourceOptions(
                 ignoreMinZoomWhenFramingManeuver = false,
                 overviewMode = OverviewMode.ACTIVE_LEG,
+                overviewAlternatives = false,
             ),
         ),
     )
@@ -266,7 +268,9 @@ class MapboxNavigationViewportDataSource private constructor(
             overviewViewportDataSource.debugger = value
         }
 
-    private var navigationRoute: NavigationRoute? = null
+    private var navigationRoutes: List<NavigationRoute> = emptyList()
+    private val navigationRoute: NavigationRoute?
+        get() = navigationRoutes.firstOrNull()
     private var routeProgress: RouteProgress? = null
     private var postManeuverFramingPoints: List<List<List<Point>>> = emptyList()
     private var pointsToFrameOnCurrentStep: List<Point> = emptyList()
@@ -413,10 +417,16 @@ class MapboxNavigationViewportDataSource private constructor(
      * @see [evaluate]
      */
     fun onRouteChanged(route: NavigationRoute) {
-        if (!route.directionsRoute.isSameRoute(navigationRoute?.directionsRoute)) {
+        onRoutesChanged(listOf(route))
+    }
+
+    internal fun onRoutesChanged(routes: List<NavigationRoute>) {
+        if (routes.isEmpty()) {
             clearRouteData()
-            this.navigationRoute = route
-            calculateRouteData(route)
+        } else if (!areSameRoutes(routes, navigationRoutes)) {
+            clearRouteData()
+            this.navigationRoutes = routes
+            calculateRouteData(routes)
         }
     }
 
@@ -518,16 +528,19 @@ class MapboxNavigationViewportDataSource private constructor(
         mapsSizeReadyCancellable?.cancel()
         mapsSizeReadyCancellable = null
 
-        navigationRoute = null
+        navigationRoutes = emptyList()
         postManeuverFramingPoints = emptyList()
         averageIntersectionDistancesOnRoute = emptyList()
         overviewViewportDataSource.clearRouteData()
         clearProgressData()
     }
 
-    private fun calculateRouteData(route: NavigationRoute) {
+    // non-empty routes
+    private fun calculateRouteData(routes: List<NavigationRoute>) {
+        overviewViewportDataSource.onRoutesChanged(routes)
+
+        val route = routes.firstOrNull() ?: return
         val completeRoutePoints = processRoutePoints(route.directionsRoute)
-        overviewViewportDataSource.onRouteChanged(route)
 
         options.followingFrameOptions.intersectionDensityCalculation.run {
             averageIntersectionDistancesOnRoute = processRouteIntersections(
@@ -550,8 +563,10 @@ class MapboxNavigationViewportDataSource private constructor(
     }
 
     internal fun reevaluateRoute() {
-        val route = navigationRoute ?: return
-        calculateRouteData(route)
+        if (navigationRoutes.isEmpty()) {
+            return
+        }
+        calculateRouteData(navigationRoutes)
         routeProgress?.let { onRouteProgressChanged(it) }
         evaluate()
     }

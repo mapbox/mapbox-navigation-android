@@ -7,6 +7,7 @@ import com.google.gson.JsonPrimitive
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigator.Waypoint
 import com.mapbox.navigator.WaypointType
@@ -93,6 +94,91 @@ class DirectionsRouteExTest {
             } else {
                 assertFalse(route1.isSameRoute(route2))
             }
+        }
+    }
+
+    @Test
+    fun areSameRoutes() {
+        val geometry1 = "aaabbb"
+        val geometry2 = "cccddd"
+        val directionsRoute1 = mockk<DirectionsRoute>(relaxed = true) {
+            every { geometry() } returns geometry1
+        }
+        val directionsRoute2 = mockk<DirectionsRoute>(relaxed = true) {
+            every { geometry() } returns geometry2
+        }
+        val directionsRoute1Same = mockk<DirectionsRoute>(relaxed = true) {
+            every { geometry() } returns geometry1
+        }
+        val directionsRoute2Same = mockk<DirectionsRoute>(relaxed = true) {
+            every { geometry() } returns geometry2
+        }
+        val directionsRoute3 = mockk<DirectionsRoute>(relaxed = true)
+        val directionsRoute4 = mockk<DirectionsRoute>(relaxed = true)
+
+        val navigationRoute1 = mockk<NavigationRoute>() {
+            every { directionsRoute } returns directionsRoute1
+        }
+        val navigationRoute2 = mockk<NavigationRoute>() {
+            every { directionsRoute } returns directionsRoute2
+        }
+        val navigationRoute1Same = mockk<NavigationRoute>() {
+            every { directionsRoute } returns directionsRoute1Same
+        }
+        val navigationRoute2Same = mockk<NavigationRoute>() {
+            every { directionsRoute } returns directionsRoute2Same
+        }
+        val navigationRoute3 = mockk<NavigationRoute>() {
+            every { directionsRoute } returns directionsRoute3
+        }
+        val navigationRoute4 = mockk<NavigationRoute>() {
+            every { directionsRoute } returns directionsRoute4
+        }
+        val items = listOf(
+            Triple(
+                emptyList<NavigationRoute>(),
+                emptyList<NavigationRoute>(),
+                true,
+            ),
+            Triple(
+                emptyList<NavigationRoute>(),
+                listOf(navigationRoute1),
+                false,
+            ),
+            Triple(
+                listOf(navigationRoute1),
+                emptyList<NavigationRoute>(),
+                false,
+            ),
+            Triple(
+                listOf(navigationRoute1, navigationRoute2),
+                listOf(navigationRoute1),
+                false,
+            ),
+            Triple(
+                listOf(navigationRoute1, navigationRoute2),
+                listOf(navigationRoute1, navigationRoute2),
+                true,
+            ),
+            Triple(
+                listOf(navigationRoute1, navigationRoute2),
+                listOf(navigationRoute1Same, navigationRoute2Same),
+                true,
+            ),
+            Triple(
+                listOf(navigationRoute1, navigationRoute2),
+                listOf(navigationRoute3, navigationRoute4),
+                false,
+            ),
+            Triple(
+                listOf(navigationRoute1, navigationRoute2),
+                listOf(navigationRoute2, navigationRoute1),
+                false,
+            ),
+        )
+
+        items.forEach { (list1, list2, expected) ->
+            assertEquals(expected, areSameRoutes(list1, list2))
         }
     }
 
