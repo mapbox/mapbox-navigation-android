@@ -25,6 +25,7 @@ import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.internal.accounts.SkuIdProvider
 import com.mapbox.navigation.base.internal.accounts.SkuIdProviderImpl
 import com.mapbox.navigation.base.internal.clearCache
+import com.mapbox.navigation.base.internal.extensions.internalAlternativeRouteIndices
 import com.mapbox.navigation.base.internal.tilestore.NavigationTileStoreOwner
 import com.mapbox.navigation.base.internal.trip.notification.TripNotificationInterceptorOwner
 import com.mapbox.navigation.base.internal.utils.createRouteParsingManager
@@ -1052,6 +1053,52 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             setRoutesInfo,
             callback,
         )
+    }
+
+    /**
+     * Switches [MapboxNavigation] to alternative route, i.e. the selected alternative become primary
+     * route, while primary route becomes alternative.
+     * Limitation: switch to alternative route could be performed only when [getTripSessionState]
+     * is [TripSessionState.STARTED] and after at lest one [RouteProgress] was emitted after
+     * the latest routes update.
+     * @param alternativeRoute is an alternative route the navigation should switch to. It should be
+     * present among [getNavigationRoutes] and should not be the same as primary route.
+     * @param callback notifies about result.
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun switchToAlternativeRoute(
+        alternativeRoute: NavigationRoute,
+        callback: RoutesSetCallback? = null,
+    ) {
+        val routeProgress = tripSession.getRouteProgress()
+        if (routeProgress == null) {
+            val errorMessage = "No route progress available"
+            logE(errorMessage, LOG_CATEGORY)
+            callback?.onRoutesSet(ExpectedFactory.createError(RoutesSetError(errorMessage)))
+            return
+        }
+        val alternativeIndices = routeProgress
+            .internalAlternativeRouteIndices()[alternativeRoute.id]
+        val allRoutes = getNavigationRoutes()
+        val alternativeSwitchTo = allRoutes.firstOrNull { it.id == alternativeRoute.id }
+        if (alternativeIndices == null || alternativeSwitchTo == null) {
+            val errorMessage = "Can't switch to alternative ${alternativeRoute.id} " +
+                "as it isn't present among currently tracked alternatives: " +
+                "${allRoutes.drop(1).map { it.id }}"
+            logE(errorMessage, LOG_CATEGORY)
+            callback?.onRoutesSet(
+                ExpectedFactory.createError(RoutesSetError(errorMessage)),
+            )
+            return
+        }
+        logI(LOG_CATEGORY) {
+            "Switching to ${alternativeSwitchTo.id} leg ${alternativeIndices.legIndex}"
+        }
+        val newRoutes = allRoutes.toMutableList().apply {
+            remove(alternativeSwitchTo)
+            add(0, alternativeSwitchTo)
+        }
+        setNavigationRoutes(newRoutes, alternativeIndices.legIndex)
     }
 
     /***

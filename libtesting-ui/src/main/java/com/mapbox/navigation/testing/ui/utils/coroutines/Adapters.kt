@@ -216,6 +216,14 @@ suspend fun MapboxNavigation.setNavigationRoutesAsync(
     setNavigationRoutes(routes, initialLegIndex, callback)
 }
 
+@ExperimentalPreviewMapboxNavigationAPI
+suspend fun MapboxNavigation.switchToAlternativeAsync(
+    alternativeRoute: NavigationRoute,
+) = suspendCoroutine<Expected<RoutesSetError, RoutesSetSuccess>> { continuation ->
+    val callback = RoutesSetCallback { result -> continuation.resume(result) }
+    switchToAlternativeRoute(alternativeRoute, callback)
+}
+
 sealed class RouteRequestResult {
     data class Success(
         val routes: List<NavigationRoute>,
