@@ -2,11 +2,12 @@ package com.mapbox.navigation.ui.maps.camera.transition
 
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
+import com.mapbox.navigation.ui.maps.internal.camera.SimplifiedUpdateFrameTransitionProvider
 
 internal class SimplifiedFrameAnimatorsCreator(
     private val cameraAnimationsPlugin: CameraAnimationsPlugin,
     private val stateTransition: NavigationCameraStateTransition,
-    private val simplifiedUpdateFrameTransition: SimplifiedUpdateFrameTransition,
+    private val simplifiedUpdateFrameTransition: SimplifiedUpdateFrameTransitionProvider,
 ) : AnimatorsCreator {
 
     override fun transitionToFollowing(

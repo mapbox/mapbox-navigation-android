@@ -205,7 +205,7 @@ class MapboxNavigationCameraTransitionTest {
 
     @Test
     fun simplifiedUpdateFrameTransitionIsUsedForLinear() {
-        val updateFrame = mockk<SimplifiedUpdateFrameTransition>(relaxed = true)
+        val updateFrame = mockk<DefaultSimplifiedUpdateFrameTransitionProvider>(relaxed = true)
         val cameraOptions = CameraOptions.Builder()
             .center(Point.fromLngLat(139.7745686, 35.677573))
             .zoom(22.0)

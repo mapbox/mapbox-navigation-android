@@ -18,11 +18,14 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 
-class SimplifiedUpdateFrameTransitionTest {
+class DefaultSimplifiedUpdateFrameTransitionProviderTest {
 
     private val mapboxMap: MapboxMap = mockk(relaxed = true)
     private val cameraPlugin: CameraAnimationsPlugin = mockk(relaxed = true)
-    private val updateFrame = SimplifiedUpdateFrameTransition(mapboxMap, cameraPlugin)
+    private val updateFrame = DefaultSimplifiedUpdateFrameTransitionProvider(
+        mapboxMap,
+        cameraPlugin,
+    )
 
     @Before
     fun setUp() {

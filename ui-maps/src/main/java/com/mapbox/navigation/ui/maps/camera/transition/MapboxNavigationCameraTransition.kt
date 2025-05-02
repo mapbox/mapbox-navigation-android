@@ -29,13 +29,17 @@ private val SLOW_OUT_SLOW_IN_INTERPOLATOR = PathInterpolatorCompat.create(0.4f, 
 class MapboxNavigationCameraTransition @VisibleForTesting internal constructor(
     private val mapboxMap: MapboxMap,
     private val cameraPlugin: CameraAnimationsPlugin,
-    private val updateFrame: SimplifiedUpdateFrameTransition,
+    private val updateFrame: DefaultSimplifiedUpdateFrameTransitionProvider,
 ) : NavigationCameraTransition {
 
     constructor(
         mapboxMap: MapboxMap,
         cameraPlugin: CameraAnimationsPlugin,
-    ) : this(mapboxMap, cameraPlugin, SimplifiedUpdateFrameTransition(mapboxMap, cameraPlugin))
+    ) : this(
+        mapboxMap,
+        cameraPlugin,
+        DefaultSimplifiedUpdateFrameTransitionProvider(mapboxMap, cameraPlugin),
+    )
 
     override fun transitionFromLowZoomToHighZoom(
         cameraOptions: CameraOptions,

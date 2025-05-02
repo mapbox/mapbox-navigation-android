@@ -7,14 +7,15 @@ import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.CameraAnimatorOptions
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.NAVIGATION_CAMERA_OWNER
+import com.mapbox.navigation.ui.maps.internal.camera.SimplifiedUpdateFrameTransitionProvider
 import com.mapbox.navigation.ui.maps.internal.camera.normalizeBearing
 
-internal class SimplifiedUpdateFrameTransition(
+internal class DefaultSimplifiedUpdateFrameTransitionProvider(
     private val mapboxMap: MapboxMap,
     private val cameraPlugin: CameraAnimationsPlugin,
-) {
+) : SimplifiedUpdateFrameTransitionProvider {
 
-    fun updateFrame(
+    override fun updateFrame(
         cameraOptions: CameraOptions,
         transitionOptions: NavigationCameraTransitionOptions,
     ): List<ValueAnimator> {

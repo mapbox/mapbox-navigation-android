@@ -26,7 +26,7 @@ internal class SimplifiedFrameAnimatorsCreatorTest {
     private val stateTransition = mockk<NavigationCameraStateTransition>(relaxed = true)
     private val cameraAnimationsPlugin = mockk<CameraAnimationsPlugin>(relaxed = true)
     private val simplifiedUpdateFrameTransition =
-        mockk<SimplifiedUpdateFrameTransition>(relaxed = true)
+        mockk<DefaultSimplifiedUpdateFrameTransitionProvider>(relaxed = true)
 
     private val animatorsCreator = SimplifiedFrameAnimatorsCreator(
         cameraAnimationsPlugin,

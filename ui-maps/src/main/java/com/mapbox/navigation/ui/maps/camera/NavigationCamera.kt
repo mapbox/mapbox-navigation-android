@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maps.camera
 
+import androidx.annotation.RestrictTo
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import com.mapbox.geojson.Point
@@ -25,6 +26,7 @@ import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState.TRANSITI
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState.TRANSITION_TO_OVERVIEW
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraStateChangedObserver
 import com.mapbox.navigation.ui.maps.camera.transition.AnimatorsCreator
+import com.mapbox.navigation.ui.maps.camera.transition.DefaultSimplifiedUpdateFrameTransitionProvider
 import com.mapbox.navigation.ui.maps.camera.transition.FullFrameAnimatorsCreator
 import com.mapbox.navigation.ui.maps.camera.transition.MapboxAnimatorSet
 import com.mapbox.navigation.ui.maps.camera.transition.MapboxAnimatorSetListener
@@ -32,9 +34,9 @@ import com.mapbox.navigation.ui.maps.camera.transition.MapboxNavigationCameraSta
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraStateTransition
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
 import com.mapbox.navigation.ui.maps.camera.transition.SimplifiedFrameAnimatorsCreator
-import com.mapbox.navigation.ui.maps.camera.transition.SimplifiedUpdateFrameTransition
 import com.mapbox.navigation.ui.maps.camera.transition.TransitionEndListener
 import com.mapbox.navigation.ui.maps.camera.transition.UpdateFrameAnimatorsOptions
+import com.mapbox.navigation.ui.maps.internal.camera.SimplifiedUpdateFrameTransitionProvider
 import java.util.concurrent.CopyOnWriteArraySet
 
 /**
@@ -157,7 +159,32 @@ internal constructor(
         mapboxMap,
         cameraPlugin,
         viewportDataSource,
-        getAnimatorsCreator(mapboxMap, cameraPlugin, stateTransition, updateFrameAnimatorsOptions),
+        getAnimatorsCreator(
+            mapboxMap,
+            cameraPlugin,
+            stateTransition,
+            updateFrameAnimatorsOptions,
+        ),
+    )
+
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    constructor(
+        mapboxMap: MapboxMap,
+        cameraPlugin: CameraAnimationsPlugin,
+        viewportDataSource: ViewportDataSource,
+        stateTransition: NavigationCameraStateTransition,
+        simplifiedUpdateFrameTransitionProvider: SimplifiedUpdateFrameTransitionProvider =
+            DefaultSimplifiedUpdateFrameTransitionProvider(mapboxMap, cameraPlugin),
+    ) : this(
+        mapboxMap,
+        cameraPlugin,
+        viewportDataSource,
+        SimplifiedFrameAnimatorsCreator(
+            cameraPlugin,
+            stateTransition,
+            simplifiedUpdateFrameTransitionProvider,
+        ),
     )
 
     companion object {
@@ -186,7 +213,7 @@ internal constructor(
                     SimplifiedFrameAnimatorsCreator(
                         cameraPlugin,
                         stateTransition,
-                        SimplifiedUpdateFrameTransition(mapboxMap, cameraPlugin),
+                        DefaultSimplifiedUpdateFrameTransitionProvider(mapboxMap, cameraPlugin),
                     )
                 }
                 false -> {
