@@ -15,7 +15,10 @@ ext {
   if (mapboxNavigatorVersion == null || mapboxNavigatorVersion == '') {
       mapboxNavigatorVersion = '324.13.0-SNAPSHOT-05-05--04-29.git-a7c22c9'
   }
-  println("Navigation Native version: " + mapboxNavigatorVersion)
+  if (!project.hasProperty("hasPrintedNavigatorVersion")) {
+    println("Navigation Native version: " + mapboxNavigatorVersion)
+    project.ext.hasPrintedNavigatorVersion = true
+  }
 
   version = [
       mapboxMapSdk              : '11.13.0-SNAPSHOT-05-05--04-29.git-a7c22c9',

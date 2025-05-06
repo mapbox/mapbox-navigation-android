@@ -1,8 +1,14 @@
-task downloadSchema(type: Copy) {
-    def address = 'https://mapbox.s3.amazonaws.com/mapbox-gl-native/event-schema/mobile-event-schemas.jsonl.gz'
-    def target = "${projectDir}/src/test/resources/"
+def downloadSchema = tasks.register("downloadSchema") {
+    doLast {
+        def address = 'https://mapbox.s3.amazonaws.com/mapbox-gl-native/event-schema/mobile-event-schemas.jsonl.gz'
+        def target = "${projectDir}/src/test/resources/"
 
-    new File(target + "${address.tokenize('/')[-1]}").withOutputStream { out ->
-        new URL(address).withInputStream { from -> out << from }
+        new File(target + "${address.tokenize('/')[-1]}").withOutputStream { out ->
+            new URL(address).withInputStream { from -> out << from }
+        }
     }
+}
+
+tasks.withType(Test).configureEach {
+    dependsOn(downloadSchema)
 }

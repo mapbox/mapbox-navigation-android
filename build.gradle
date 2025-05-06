@@ -64,7 +64,10 @@ allprojects {
     // if you need to use snapshots while development, just set `addSnapshotsRepo` to true manually
     def addSnapshotsRepo = project.hasProperty('ALLOW_SNAPSHOT_REPOSITORY') ? project.property('ALLOW_SNAPSHOT_REPOSITORY') : (System.getenv("ALLOW_SNAPSHOT_REPOSITORY")?.toBoolean() ?: true)
     if (addSnapshotsRepo) {
-      println("Snapshot repository reference added.")
+      if (!project.hasProperty("hasPrintedSnapshotRepositoryAdded")) {
+        println("Snapshot repository reference added.")
+        project.ext.hasPrintedSnapshotRepositoryAdded = true
+      }
       maven {
         url 'https://api.mapbox.com/downloads/v2/snapshots/maven'
         authentication {
