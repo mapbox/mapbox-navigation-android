@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.telemetry
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.core.internal.telemetry.AndroidAutoEvent
 import com.mapbox.navigation.core.internal.telemetry.ExtendedUserFeedback
 import com.mapbox.navigation.core.internal.telemetry.UserFeedbackObserver
@@ -87,6 +88,8 @@ internal class NavigationTelemetry internal constructor(
         fun create(
             tripSession: TripSession,
             nativeNavigator: MapboxNativeNavigator,
-        ) = NavigationTelemetry(tripSession, nativeNavigator)
+        ) = PerformanceTracker.trackPerformance("NavigationTelemetry#create") {
+            NavigationTelemetry(tripSession, nativeNavigator)
+        }
     }
 }
