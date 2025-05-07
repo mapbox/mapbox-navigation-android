@@ -25,6 +25,7 @@ import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.internal.accounts.SkuIdProvider
 import com.mapbox.navigation.base.internal.accounts.SkuIdProviderImpl
 import com.mapbox.navigation.base.internal.clearCache
+import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.tilestore.NavigationTileStoreOwner
 import com.mapbox.navigation.base.internal.trip.notification.TripNotificationInterceptorOwner
 import com.mapbox.navigation.base.internal.utils.createRouteParsingManager
@@ -466,7 +467,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     internal val skuIdProvider: SkuIdProvider
 
     init {
-        BaseMapboxInitializer.init(MapboxNavigationSDKInitializerImpl::class.java)
+        PerformanceTracker.trackPerformance("MapboxNavigationSDKInitializerImpl") {
+            BaseMapboxInitializer.init(MapboxNavigationSDKInitializerImpl::class.java)
+        }
         if (hasInstance) {
             throw IllegalStateException(
                 """
@@ -498,7 +501,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             tilesConfig,
             config,
             historyRecorderHandles.composite,
-            createOfflineCacheHandle(config),
+            PerformanceTracker.trackPerformance("createOfflineCacheHandle") {
+                createOfflineCacheHandle(config)
+            },
             NavigationComponentProvider.createEventsMetadataInterface(
                 navigationOptions.applicationContext,
                 appLifecycleMonitor,
@@ -508,14 +513,18 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
         val routeParsingManager = createRouteParsingManager()
         routeParsingManager.setPrepareForParsingAction(this::prepareNavigationForRoutesParsing)
-        routerWrapper = RouterWrapper(
-            navigator.getRouter(),
-            threadController,
-            routeParsingManager,
-            RouteParsingHistoryTracker(compositeRecorder),
-        )
+        routerWrapper = PerformanceTracker.trackPerformance("RouterWrapper") {
+            RouterWrapper(
+                navigator.getRouter(),
+                threadController,
+                routeParsingManager,
+                RouteParsingHistoryTracker(compositeRecorder),
+            )
+        }
 
-        etcGateAPI = EtcGateApi(navigator.experimental)
+        etcGateAPI = PerformanceTracker.trackPerformance("etcGateAPI") {
+            EtcGateApi(navigator.experimental)
+        }
 
         historyRecorder.historyRecorderHandle = historyRecorderHandles.general
         copilotHistoryRecorder.historyRecorderHandle = historyRecorderHandles.copilot
@@ -528,18 +537,20 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             historyRecordingStateHandler,
         )
 
-        val notification: TripNotification = MapboxModuleProvider
-            .createModule(
-                MapboxModuleType.NavigationTripNotification,
-            ) {
-                paramsProvider(
-                    ModuleParams.NavigationTripNotification(
-                        navigationOptions,
-                        tripNotificationInterceptorOwner,
-                        navigationOptions.distanceFormatterOptions,
-                    ),
-                )
-            }
+        val notification: TripNotification = PerformanceTracker.trackPerformance("notification") {
+            MapboxModuleProvider
+                .createModule(
+                    MapboxModuleType.NavigationTripNotification,
+                ) {
+                    paramsProvider(
+                        ModuleParams.NavigationTripNotification(
+                            navigationOptions,
+                            tripNotificationInterceptorOwner,
+                            navigationOptions.distanceFormatterOptions,
+                        ),
+                    )
+                }
+        }
         if (notification.javaClass.name == MAPBOX_NAVIGATION_NOTIFICATION_PACKAGE_NAME) {
             notificationChannelField =
                 notification.javaClass.getDeclaredField(MAPBOX_NOTIFICATION_ACTION_CHANNEL).apply {
@@ -675,10 +686,14 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
         roadObjectsStore = RoadObjectsStore(navigator)
         graphAccessor = GraphAccessor(navigator)
-        tilesetDescriptorFactory = TilesetDescriptorFactory(
-            navigationOptions.routingTilesOptions,
-            navigator.cache,
-        )
+        tilesetDescriptorFactory = PerformanceTracker.trackPerformance(
+            "MapboxNavigation#init-tilesetDescriptorFactory",
+        ) {
+            TilesetDescriptorFactory(
+                navigationOptions.routingTilesOptions,
+                navigator.cache,
+            )
+        }
         roadObjectMatcher = RoadObjectMatcher(navigator)
 
         systemLocaleWatcher = SystemLocaleWatcher.create(
@@ -2062,13 +2077,16 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         historyRecorders.forEach { it.unregisterHistoryRecordingEnabledObserver(observer) }
     }
 
-    private fun createHistoryRecorderHandles(config: ConfigHandle) =
+    private fun createHistoryRecorderHandles(
+        config: ConfigHandle,
+    ) = PerformanceTracker.trackPerformance("createHistoryRecorderHandles") {
         NavigatorLoader.createHistoryRecorderHandles(
             config,
             historyRecorder.fileDirectory(),
             copilotHistoryRecorder.copilotFileDirectory(),
             sdkInformation = SdkInfoProvider.sdkInformation(),
         )
+    }
 
     private fun startSession(withTripService: Boolean, withReplayEnabled: Boolean) {
         runIfNotDestroyed {

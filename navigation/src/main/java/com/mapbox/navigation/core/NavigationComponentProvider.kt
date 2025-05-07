@@ -3,6 +3,7 @@ package com.mapbox.navigation.core
 import android.content.Context
 import com.mapbox.common.SdkInformation
 import com.mapbox.navigation.base.internal.accounts.SkuIdProvider
+import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.options.EventsAppMetadata
 import com.mapbox.navigation.base.options.LocationOptions
 import com.mapbox.navigation.base.options.RerouteOptions
@@ -49,11 +50,15 @@ internal object NavigationComponentProvider {
         context: Context,
         lifecycleMonitor: ApplicationLifecycleMonitor,
         eventsAppMetadata: EventsAppMetadata?,
-    ): EventsMetadataInterface = EventsMetadataInterfaceImpl(
-        context.applicationContext,
-        lifecycleMonitor,
-        eventsAppMetadata,
-    )
+    ): EventsMetadataInterface = PerformanceTracker.trackPerformance(
+        "createEventsMetadataInterface",
+    ) {
+        EventsMetadataInterfaceImpl(
+            context.applicationContext,
+            lifecycleMonitor,
+            eventsAppMetadata,
+        )
+    }
 
     fun createNativeNavigator(
         tilesConfig: TilesConfig,
@@ -61,40 +66,50 @@ internal object NavigationComponentProvider {
         historyRecorderComposite: HistoryRecorderHandle?,
         offlineCacheHandle: CacheHandle?,
         eventsMetadataProvider: EventsMetadataInterface,
-    ): MapboxNativeNavigator = MapboxNativeNavigatorImpl(
-        tilesConfig,
-        historyRecorderComposite,
-        offlineCacheHandle,
-        config,
-        eventsMetadataProvider,
-    )
+    ): MapboxNativeNavigator = PerformanceTracker.trackPerformance("createNativeNavigator") {
+        MapboxNativeNavigatorImpl(
+            tilesConfig,
+            historyRecorderComposite,
+            offlineCacheHandle,
+            config,
+            eventsMetadataProvider,
+        )
+    }
 
     fun createTripService(
         applicationContext: Context,
         tripNotification: TripNotification,
         threadController: ThreadController,
-    ): TripService = MapboxTripService(
-        applicationContext,
-        tripNotification,
-        threadController,
-    )
+    ): TripService = PerformanceTracker.trackPerformance("createTripService") {
+        MapboxTripService(
+            applicationContext,
+            tripNotification,
+            threadController,
+        )
+    }
 
     fun createTripSessionLocationEngine(
         locationOptions: LocationOptions,
-    ): TripSessionLocationEngine = TripSessionLocationEngine(locationOptions)
+    ): TripSessionLocationEngine = PerformanceTracker.trackPerformance(
+        "createTripSessionLocationEngine",
+    ) {
+        TripSessionLocationEngine(locationOptions)
+    }
 
     fun createTripSession(
         tripService: TripService,
         tripSessionLocationEngine: TripSessionLocationEngine,
         navigator: MapboxNativeNavigator,
         threadController: ThreadController,
-    ): TripSession = MapboxTripSession(
-        tripService,
-        tripSessionLocationEngine,
-        navigator = navigator,
-        threadController,
-        EHorizonSubscriptionManagerImpl(navigator, threadController),
-    )
+    ): TripSession = PerformanceTracker.trackPerformance("createTripSession") {
+        MapboxTripSession(
+            tripService,
+            tripSessionLocationEngine,
+            navigator = navigator,
+            threadController,
+            EHorizonSubscriptionManagerImpl(navigator, threadController),
+        )
+    }
 
     fun createNavigationSession(): NavigationSession = NavigationSession()
 
@@ -104,13 +119,15 @@ internal object NavigationComponentProvider {
         arrivalProgressObserver: ArrivalProgressObserver,
         skuIdProvider: SkuIdProvider,
         sdkInformation: SdkInformation,
-    ): BillingController = BillingController(
-        navigationSession,
-        arrivalProgressObserver,
-        tripSession,
-        skuIdProvider,
-        sdkInformation,
-    )
+    ): BillingController = PerformanceTracker.trackPerformance("createBillingController") {
+        BillingController(
+            navigationSession,
+            arrivalProgressObserver,
+            tripSession,
+            skuIdProvider,
+            sdkInformation,
+        )
+    }
 
     fun createArrivalProgressObserver(
         tripSession: TripSession,
