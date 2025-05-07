@@ -26,4 +26,5 @@ include ':app-tests-wrapper',
         ':androidauto',
         ':ui-components',
         ':core-mapgpt',
-        ':ui-mapgpt'
+        ':ui-mapgpt',
+        ':driver-notification'

@@ -22,7 +22,8 @@ copilot \
 tripdata \
 search \
 voice \
-libtesting-router
+libtesting-router \
+driver-notification
 
 CORE_MODULES = $(RELEASED_CORE_MODULES)
 
@@ -147,6 +148,7 @@ core-check-api: assemble-core-release
 	./gradlew :tripdata:checkApi -PhidePackage=com.mapbox.navigation.tripdata.internal,com.mapbox.navigation.tripdata.maneuver.internal,com.mapbox.navigation.tripdata.progress.internal,com.mapbox.navigation.tripdata.shield.internal,com.mapbox.navigation.tripdata.speedlimit.internal
 	./gradlew :voice:checkApi -PhidePackage=com.mapbox.navigation.voice.internal -PhideId=ReferencesHidden
 	./gradlew :libtesting-router:checkApi -PhidePackage=com.mapbox.navigation.testing.router.internal
+	./gradlew :driver-notification:checkApi -PhidePackage=com.mapbox.navigation.driver.notification.internal
 
 .PHONY: core-update-api
 core-update-api: assemble-core-release
@@ -160,6 +162,7 @@ core-update-api: assemble-core-release
 	./gradlew :tripdata:updateApi -PhidePackage=com.mapbox.navigation.tripdata.internal,com.mapbox.navigation.tripdata.maneuver.internal,com.mapbox.navigation.tripdata.progress.internal,com.mapbox.navigation.tripdata.shield.internal,com.mapbox.navigation.tripdata.speedlimit.internal
 	./gradlew :voice:updateApi -PhidePackage=com.mapbox.navigation.voice.internal
 	./gradlew :libtesting-router:updateApi -PhidePackage=com.mapbox.navigation.testing.router.internal
+	./gradlew :driver-notification:updateApi -PhidePackage=com.mapbox.navigation.driver.notification.internal
 
 .PHONY: assemble-ui-debug
 assemble-ui-debug:
