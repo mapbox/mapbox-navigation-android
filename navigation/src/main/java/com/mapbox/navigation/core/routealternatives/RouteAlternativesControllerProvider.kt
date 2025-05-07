@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.routealternatives
 
+import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.utils.RouteParsingManager
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.core.directions.session.DirectionsSession
@@ -16,12 +17,14 @@ internal object RouteAlternativesControllerProvider {
         threadController: ThreadController,
         routeParsingManager: RouteParsingManager,
         directionsSession: DirectionsSession,
-    ) = RouteAlternativesController(
-        options,
-        navigator,
-        tripSession,
-        threadController,
-        routeParsingManager,
-        directionsSession,
-    )
+    ) = PerformanceTracker.trackPerformance("RouteAlternativesControllerProvider#create") {
+        RouteAlternativesController(
+            options,
+            navigator,
+            tripSession,
+            threadController,
+            routeParsingManager,
+            directionsSession,
+        )
+    }
 }

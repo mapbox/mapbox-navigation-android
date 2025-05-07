@@ -10,6 +10,7 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.TileStore
 import com.mapbox.common.TilesetDescriptor
+import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.route.nativeRoute
 import com.mapbox.navigation.base.internal.utils.Constants
 import com.mapbox.navigation.base.internal.utils.Constants.RouteResponse.KEY_NOTIFICATIONS
@@ -98,30 +99,51 @@ class MapboxNativeNavigatorImpl(
     }
 
     private fun init(tilesConfig: TilesConfig) {
-        val cacheHandle = NavigatorLoader.createCacheHandle(
-            config,
-            tilesConfig,
-            historyRecorderComposite,
-        )
+        val sectionName = "MapboxNativeNavigatorImpl#init-"
+        val cacheHandle = PerformanceTracker.trackPerformance("${sectionName}cacheHandle") {
+            NavigatorLoader.createCacheHandle(
+                config,
+                tilesConfig,
+                historyRecorderComposite,
+            )
+        }
 
-        adasisFacade = AdasisFacadeBuilder.build(config, cacheHandle, historyRecorderComposite)
+        adasisFacade = PerformanceTracker.trackPerformance("${sectionName}adasisFacade") {
+            AdasisFacadeBuilder.build(config, cacheHandle, historyRecorderComposite)
+        }
 
-        navigator = NavigatorLoader.createNavigator(
-            cacheHandle,
-            config,
-            historyRecorderComposite,
-            offlineCacheHandle,
-            inputsService,
-            adasisFacade,
-        )
+        navigator = PerformanceTracker.trackPerformance("${sectionName}navigator") {
+            NavigatorLoader.createNavigator(
+                cacheHandle,
+                config,
+                historyRecorderComposite,
+                offlineCacheHandle,
+                inputsService,
+                adasisFacade,
+            )
+        }
 
         cache = cacheHandle
-        graphAccessor = GraphAccessor(cacheHandle)
-        roadObjectMatcher = RoadObjectMatcher(cacheHandle)
-        roadObjectsStore = navigator.roadObjectStore()
-        experimental = navigator.experimental
-        routeAlternativesController = navigator.routeAlternativesController
-        telemetry = navigator.getTelemetry(eventsMetadataProvider)
+        graphAccessor = PerformanceTracker.trackPerformance("${sectionName}graphAccessor") {
+            GraphAccessor(cacheHandle)
+        }
+        roadObjectMatcher = PerformanceTracker.trackPerformance("${sectionName}roadObjectMatcher") {
+            RoadObjectMatcher(cacheHandle)
+        }
+        roadObjectsStore = PerformanceTracker.trackPerformance("${sectionName}roadObjectsStore") {
+            navigator.roadObjectStore()
+        }
+        experimental = PerformanceTracker.trackPerformance("${sectionName}experimental") {
+            navigator.experimental
+        }
+        routeAlternativesController = PerformanceTracker.trackPerformance(
+            "${sectionName}routeAlternativesController",
+        ) {
+            navigator.routeAlternativesController
+        }
+        telemetry = PerformanceTracker.trackPerformance("${sectionName}telemetry") {
+            navigator.getTelemetry(eventsMetadataProvider)
+        }
     }
 
     /**
