@@ -16,8 +16,6 @@ import com.mapbox.navigator.OffRoadStateProvider
 import com.mapbox.navigator.RerouteError
 import com.mapbox.navigator.RerouteErrorType
 import com.mapbox.navigator.RoadName
-import com.mapbox.navigator.RouteAnnotation
-import com.mapbox.navigator.RouteData
 import com.mapbox.navigator.RouteIndices
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouteInterface
@@ -32,7 +30,6 @@ import com.mapbox.navigator.TimeZone
 import com.mapbox.navigator.TurnLane
 import com.mapbox.navigator.UpcomingRouteAlertUpdate
 import com.mapbox.navigator.VoiceInstruction
-import com.mapbox.navigator.VoiceInstructionInfo
 import com.mapbox.navigator.Waypoint
 import com.mapbox.navigator.WaypointType
 import java.nio.ByteBuffer
@@ -58,7 +55,7 @@ fun createNavigationStatus(
     intersectionIndex: Int = 0,
     turnLanes: List<TurnLane> = emptyList(),
     roads: List<RoadName> = emptyList(),
-    voiceInstruction: VoiceInstructionInfo? = null,
+    voiceInstruction: VoiceInstruction? = null,
     // default banner instruction workarounds the direct usage of the MapboxNativeNavigatorImpl
     bannerInstruction: BannerInstruction? = createBannerInstruction(),
     speedLimit: SpeedLimit = SpeedLimit(null, SpeedLimitUnit.KILOMETRES_PER_HOUR, SpeedLimitSign.VIENNA),
@@ -118,8 +115,8 @@ fun createNavigationStatus(
 
 fun createVoiceInstruction(
     announcement: String = "test"
-): VoiceInstructionInfo {
-    return VoiceInstructionInfo("test", announcement, 0f, 0)
+): VoiceInstruction {
+    return VoiceInstruction("test", announcement, 0f, 0)
 }
 
 fun createBannerInstruction(
@@ -214,14 +211,6 @@ fun createRouteInterface(
     override fun getRouteId() = "$responseUuid#$routeIndex"
 
     override fun getResponseUuid() = responseUUID
-
-    override fun getRouteData(): RouteData {
-        TODO("Not yet implemented")
-    }
-
-    override fun getRouteAnnotation(): RouteAnnotation {
-        TODO("Not yet implemented")
-    }
 
     override fun getRouteIndex() = routeIndex
 
