@@ -36,7 +36,7 @@ internal class SimplifiedFrameAnimatorsCreator(
     ): MapboxAnimatorSet {
         return SimplifiedAnimatorSet(
             cameraAnimationsPlugin,
-            simplifiedUpdateFrameTransition.updateFrame(cameraOptions, transitionOptions),
+            simplifiedUpdateFrameTransition.updateFollowingFrame(cameraOptions, transitionOptions),
         )
     }
 
@@ -46,7 +46,7 @@ internal class SimplifiedFrameAnimatorsCreator(
     ): MapboxAnimatorSet {
         return SimplifiedAnimatorSet(
             cameraAnimationsPlugin,
-            simplifiedUpdateFrameTransition.updateFrame(cameraOptions, transitionOptions),
+            simplifiedUpdateFrameTransition.updateOverviewFrame(cameraOptions, transitionOptions),
         )
     }
 }

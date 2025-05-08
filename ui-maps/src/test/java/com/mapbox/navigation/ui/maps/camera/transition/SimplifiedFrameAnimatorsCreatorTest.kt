@@ -61,7 +61,7 @@ internal class SimplifiedFrameAnimatorsCreatorTest {
     @Test
     fun updateFrameForFollowing() {
         every {
-            simplifiedUpdateFrameTransition.updateFrame(cameraOptions, transitionOptions)
+            simplifiedUpdateFrameTransition.updateFollowingFrame(cameraOptions, transitionOptions)
         } returns updateFrameChildren
 
         val actual = animatorsCreator.updateFrameForFollowing(cameraOptions, transitionOptions)
@@ -73,7 +73,7 @@ internal class SimplifiedFrameAnimatorsCreatorTest {
     @Test
     fun updateFrameForOverview() {
         every {
-            simplifiedUpdateFrameTransition.updateFrame(cameraOptions, transitionOptions)
+            simplifiedUpdateFrameTransition.updateOverviewFrame(cameraOptions, transitionOptions)
         } returns updateFrameChildren
 
         val actual = animatorsCreator.updateFrameForOverview(cameraOptions, transitionOptions)

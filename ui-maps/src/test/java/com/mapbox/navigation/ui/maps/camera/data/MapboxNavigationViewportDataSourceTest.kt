@@ -224,7 +224,7 @@ class MapboxNavigationViewportDataSourceTest {
         every {
             getRemainingPointsOnRoute(
                 completeRoutePoints,
-                pointsToFrameOnCurrentStep,
+                any(),
                 any(),
                 any(),
                 any(),
@@ -381,7 +381,7 @@ class MapboxNavigationViewportDataSourceTest {
         viewportDataSource.onRouteProgressChanged(routeProgress)
 
         verify(exactly = 0) {
-            overviewViewportDataSource.onRouteProgressChanged(any(), any())
+            overviewViewportDataSource.onRouteProgressChanged(any())
         }
     }
 
@@ -409,7 +409,7 @@ class MapboxNavigationViewportDataSourceTest {
         unmockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
 
         verify(exactly = 0) {
-            overviewViewportDataSource.onRouteProgressChanged(any(), any())
+            overviewViewportDataSource.onRouteProgressChanged(any())
         }
     }
 
@@ -432,7 +432,7 @@ class MapboxNavigationViewportDataSourceTest {
         viewportDataSource.onRouteProgressChanged(routeProgress)
 
         verify(exactly = 0) {
-            overviewViewportDataSource.onRouteProgressChanged(any(), any())
+            overviewViewportDataSource.onRouteProgressChanged(any())
         }
     }
 
@@ -467,7 +467,6 @@ class MapboxNavigationViewportDataSourceTest {
         verify {
             overviewViewportDataSource.onRouteProgressChanged(
                 routeProgress,
-                pointsToFrameOnCurrentStep,
             )
         }
     }

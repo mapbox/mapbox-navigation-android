@@ -8,7 +8,12 @@ import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitio
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 interface SimplifiedUpdateFrameTransitionProvider {
 
-    fun updateFrame(
+    fun updateFollowingFrame(
+        cameraOptions: CameraOptions,
+        transitionOptions: NavigationCameraTransitionOptions,
+    ): List<ValueAnimator>
+
+    fun updateOverviewFrame(
         cameraOptions: CameraOptions,
         transitionOptions: NavigationCameraTransitionOptions,
     ): List<ValueAnimator>

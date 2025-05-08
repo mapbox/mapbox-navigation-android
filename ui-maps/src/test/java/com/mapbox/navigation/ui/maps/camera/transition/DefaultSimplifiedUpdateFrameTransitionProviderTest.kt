@@ -57,7 +57,29 @@ class DefaultSimplifiedUpdateFrameTransitionProviderTest {
     }
 
     @Test
-    fun `transitionLinear - duration constrained`() {
+    fun updateFrame() {
+        testAnimatorsAndDuration { cameraOptions, transitionOptions ->
+            updateFrame.updateFrame(cameraOptions, transitionOptions)
+        }
+    }
+
+    @Test
+    fun updateFollowingFrame() {
+        testAnimatorsAndDuration { cameraOptions, transitionOptions ->
+            updateFrame.updateFollowingFrame(cameraOptions, transitionOptions)
+        }
+    }
+
+    @Test
+    fun updateOverviewFrame() {
+        testAnimatorsAndDuration { cameraOptions, transitionOptions ->
+            updateFrame.updateOverviewFrame(cameraOptions, transitionOptions)
+        }
+    }
+
+    private fun testAnimatorsAndDuration(
+        block: (CameraOptions, NavigationCameraTransitionOptions) -> List<ValueAnimator>,
+    ) {
         every { mapboxMap.cameraState } returns mockk {
             every { center } returns mockk()
             every { zoom } returns 0.0
@@ -80,7 +102,7 @@ class DefaultSimplifiedUpdateFrameTransitionProviderTest {
 
         val maxDuration = 700L
 
-        val animations = updateFrame.updateFrame(
+        val animations = block(
             cameraOptions,
             NavigationCameraTransitionOptions.Builder().maxDuration(maxDuration).build(),
         )

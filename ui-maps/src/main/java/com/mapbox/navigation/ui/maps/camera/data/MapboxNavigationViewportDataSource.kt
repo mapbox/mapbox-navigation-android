@@ -492,10 +492,7 @@ class MapboxNavigationViewportDataSource private constructor(
                     postManeuverFramingPoints,
                 )
 
-            overviewViewportDataSource.onRouteProgressChanged(
-                routeProgress,
-                pointsToFrameOnCurrentStep,
-            )
+            overviewViewportDataSource.onRouteProgressChanged(routeProgress)
         } ?: run {
             logE(
                 "You're calling #onRouteProgressChanged with empty leg or step progress.",

@@ -15,7 +15,21 @@ internal class DefaultSimplifiedUpdateFrameTransitionProvider(
     private val cameraPlugin: CameraAnimationsPlugin,
 ) : SimplifiedUpdateFrameTransitionProvider {
 
-    override fun updateFrame(
+    override fun updateFollowingFrame(
+        cameraOptions: CameraOptions,
+        transitionOptions: NavigationCameraTransitionOptions,
+    ): List<ValueAnimator> {
+        return updateFrame(cameraOptions, transitionOptions)
+    }
+
+    override fun updateOverviewFrame(
+        cameraOptions: CameraOptions,
+        transitionOptions: NavigationCameraTransitionOptions,
+    ): List<ValueAnimator> {
+        return updateFrame(cameraOptions, transitionOptions)
+    }
+
+    fun updateFrame(
         cameraOptions: CameraOptions,
         transitionOptions: NavigationCameraTransitionOptions,
     ): List<ValueAnimator> {

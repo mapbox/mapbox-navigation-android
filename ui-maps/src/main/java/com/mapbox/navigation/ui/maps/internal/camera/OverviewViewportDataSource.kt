@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.internal.camera
 
 import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import com.mapbox.common.location.Location
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
@@ -14,6 +15,7 @@ import com.mapbox.navigation.base.internal.utils.areSameRoutes
 import com.mapbox.navigation.base.internal.utils.isSameRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.base.utils.DecodeUtils.stepGeometryToPoints
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource.Companion.BEARING_NORTH
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource.Companion.EMPTY_EDGE_INSETS
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource.Companion.NULL_ISLAND_POINT
@@ -29,11 +31,28 @@ import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigation.utils.internal.toPoint
 import kotlin.math.min
 
+private data class RouteIndices(
+    val legIndex: Int,
+    val stepIndex: Int,
+    val legGeometryIndex: Int,
+)
+
+private data class CachedRemainingPoints(
+    val indices: RouteIndices,
+    val remainingPointsOnCurrentStep: List<Point>,
+)
+
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-class OverviewViewportDataSource(
+class OverviewViewportDataSource @VisibleForTesting internal constructor(
     private val mapboxMap: MapboxMap,
     internalOptions: InternalViewportDataSourceOptions,
+    private val indicesConverter: RoutesIndicesConverter,
 ) {
+
+    constructor(
+        mapboxMap: MapboxMap,
+        internalOptions: InternalViewportDataSourceOptions,
+    ) : this(mapboxMap, internalOptions, RoutesIndicesConverter())
 
     internal var internalOptions = internalOptions
         set(value) {
@@ -47,10 +66,10 @@ class OverviewViewportDataSource(
 
     private var navigationRoutes: List<NavigationRoute> = emptyList()
     private var routeProgress: RouteProgress? = null
-    private var pointsToFrameOnCurrentStep: List<Point> = emptyList()
     private var simplifiedCompleteRoutesPoints: List<List<List<List<Point>>>> = emptyList()
     private var simplifiedRemainingPointsOnRoutes: List<Point> = emptyList()
     private var targetLocation: Location? = null
+    private var cachedRemainingPoints: MutableMap<String, CachedRemainingPoints> = hashMapOf()
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     var debugger: MapboxNavigationViewportDataSourceDebugger? = null
@@ -85,7 +104,7 @@ class OverviewViewportDataSource(
 
     private fun reevaluate() {
         calculateRouteData(navigationRoutes)
-        routeProgress?.let { onRouteProgressChanged(it, pointsToFrameOnCurrentStep) }
+        routeProgress?.let { onRouteProgressChanged(it) }
         evaluate()
     }
 
@@ -101,7 +120,7 @@ class OverviewViewportDataSource(
             if (routes.isEmpty()) {
                 clearRouteData()
             } else {
-                val completeRoutePoints = routes
+                val completeRoutesPoints = routes
                     .mapIndexedNotNull { index, route ->
                         if (index == 0 || internalOptions.overviewAlternatives) {
                             processRoutePoints(route.directionsRoute)
@@ -109,7 +128,14 @@ class OverviewViewportDataSource(
                             null
                         }
                     }
-                simplifiedCompleteRoutesPoints = completeRoutePoints.map {
+                indicesConverter.onRoutesChanged(
+                    if (internalOptions.overviewAlternatives) {
+                        routes
+                    } else {
+                        routes.take(1)
+                    },
+                )
+                simplifiedCompleteRoutesPoints = completeRoutesPoints.map {
                     simplifyCompleteRoutePoints(
                         options.overviewFrameOptions.geometrySimplification.enabled,
                         options.overviewFrameOptions.geometrySimplification.simplificationFactor,
@@ -124,6 +150,7 @@ class OverviewViewportDataSource(
 
     fun clearRouteData() {
         this.navigationRoutes = emptyList()
+        indicesConverter.onRoutesChanged(emptyList())
         runIfActive {
             simplifiedCompleteRoutesPoints = emptyList()
             simplifiedRemainingPointsOnRoutes = emptyList()
@@ -132,7 +159,7 @@ class OverviewViewportDataSource(
 
     fun clearProgressData() {
         this.routeProgress = null
-        pointsToFrameOnCurrentStep = emptyList()
+        cachedRemainingPoints = hashMapOf()
         runIfActive {
             simplifiedRemainingPointsOnRoutes = simplifiedCompleteRoutesPoints
                 .flatten().flatten().flatten()
@@ -141,10 +168,8 @@ class OverviewViewportDataSource(
 
     fun onRouteProgressChanged(
         routeProgress: RouteProgress,
-        pointsToFrameOnCurrentStep: List<Point>,
     ) {
         this.routeProgress = routeProgress
-        this.pointsToFrameOnCurrentStep = pointsToFrameOnCurrentStep
         val currentRoute = this.navigationRoutes.firstOrNull()
         if (currentRoute == null) {
             return
@@ -158,35 +183,69 @@ class OverviewViewportDataSource(
                 routeProgress.currentLegProgress,
                 routeProgress.currentLegProgress?.currentStepProgress,
             ) { currentLegProgress, currentStepProgress ->
-                val primaryPoints = getRemainingPointsOnRoute(
-                    simplifiedCompleteRoutesPoints.first(),
-                    pointsToFrameOnCurrentStep,
-                    internalOptions.overviewMode,
-                    currentLegProgress.legIndex,
-                    currentStepProgress.stepIndex,
-                )
-                val alternativePoints = if (internalOptions.overviewAlternatives) {
-                    navigationRoutes.drop(1).mapIndexedNotNull { index, route ->
-                        val alternativeIndices = routeProgress
-                            .internalAlternativeRouteIndices()[route.id]
-                        if (alternativeIndices == null) {
+                simplifiedRemainingPointsOnRoutes =
+                    navigationRoutes.mapIndexedNotNull { index, route ->
+                        if (index > 0 && !internalOptions.overviewAlternatives) {
                             null
                         } else {
-                            getRemainingPointsOnRoute(
-                                simplifiedCompleteRoutesPoints[index + 1],
-                                emptyList(), // already overviewed by primary route
-                                internalOptions.overviewMode,
-                                alternativeIndices.legIndex,
-                                alternativeIndices.stepIndex,
-                            )
+                            val indices = if (index == 0) {
+                                RouteIndices(
+                                    currentLegProgress.legIndex,
+                                    currentStepProgress.stepIndex,
+                                    currentLegProgress.geometryIndex,
+                                )
+                            } else {
+                                routeProgress.internalAlternativeRouteIndices()[route.id]?.let {
+                                    RouteIndices(it.legIndex, it.stepIndex, it.legGeometryIndex)
+                                }
+                            }
+                            if (indices == null) {
+                                null
+                            } else {
+                                if (indices != cachedRemainingPoints[route.id]?.indices) {
+                                    val stepGeometryIndex = indicesConverter.convert(
+                                        route.id,
+                                        indices.legIndex,
+                                        indices.stepIndex,
+                                        indices.legGeometryIndex,
+                                    )
+                                    if (stepGeometryIndex != null) {
+                                        cachedRemainingPoints[route.id] = getCachedRemainingPoints(
+                                            route,
+                                            indices,
+                                            stepGeometryIndex,
+                                        )
+                                    }
+                                }
+                                getRemainingPointsOnRoute(
+                                    simplifiedCompleteRoutesPoints[index],
+                                    cachedRemainingPoints[route.id]?.remainingPointsOnCurrentStep
+                                        .orEmpty(),
+                                    internalOptions.overviewMode,
+                                    indices.legIndex,
+                                    indices.stepIndex,
+                                )
+                            }
                         }
                     }.flatten()
-                } else {
-                    emptyList()
-                }
-                simplifiedRemainingPointsOnRoutes = primaryPoints + alternativePoints
             }
         }
+    }
+
+    private fun getCachedRemainingPoints(
+        route: NavigationRoute,
+        indices: RouteIndices,
+        stepGeometryIndex: Int,
+    ): CachedRemainingPoints {
+        val remainingPointsOnCurrentStep = route.directionsRoute.legs()
+            ?.getOrNull(indices.legIndex)
+            ?.steps()
+            ?.getOrNull(indices.stepIndex)?.let {
+                route.directionsRoute.stepGeometryToPoints(it)
+            }
+            ?.drop(stepGeometryIndex)
+            .orEmpty()
+        return CachedRemainingPoints(indices, remainingPointsOnCurrentStep)
     }
 
     fun onLocationChanged(location: Location) {
