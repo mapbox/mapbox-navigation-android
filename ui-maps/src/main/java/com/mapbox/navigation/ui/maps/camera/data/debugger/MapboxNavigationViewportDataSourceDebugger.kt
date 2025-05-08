@@ -5,12 +5,13 @@ import android.graphics.Color
 import android.view.View
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
+import com.mapbox.annotation.MapboxExperimental
 import com.mapbox.common.Cancelable
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
-import com.mapbox.maps.CameraChangedCallback
+import com.mapbox.maps.CameraChangedCoalescedCallback
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapView
 import com.mapbox.maps.extension.style.layers.addLayer
@@ -83,7 +84,9 @@ class MapboxNavigationViewportDataSourceDebugger @JvmOverloads constructor(
                 mapView.addView(mapPaddingBorder)
                 mapView.addView(userPaddingBorder)
                 mapView.addView(cameraCenter)
-                cameraChangedSubscription = mapboxMap.subscribeCameraChanged(cameraChangeCallback)
+                cameraChangedSubscription = mapboxMap.subscribeCameraChangedCoalesced(
+                    cameraChangeCallback,
+                )
             } else {
                 mapView.removeView(cameraCenter)
                 mapView.removeView(userPaddingBorder)
@@ -92,8 +95,9 @@ class MapboxNavigationViewportDataSourceDebugger @JvmOverloads constructor(
                 mapboxMap.getStyle()?.removeStyleLayer(pointsLayerId)
                 mapboxMap.getStyle()?.removeStyleSource(pointsSourceId)
             }
-            updateMapCameraCenter()
-            updateMapPadding()
+            val initialCameraState = mapboxMap.cameraState
+            updateMapCameraCenter(initialCameraState.center)
+            updateMapPadding(initialCameraState.padding)
             updateUserPadding()
             updatePoints()
         }
@@ -143,23 +147,22 @@ class MapboxNavigationViewportDataSourceDebugger @JvmOverloads constructor(
         setBackgroundColor(Color.RED)
     }
 
-    private val cameraChangeCallback = CameraChangedCallback {
+    @OptIn(MapboxExperimental::class)
+    private val cameraChangeCallback = CameraChangedCoalescedCallback {
         mapView.post {
-            updateMapCameraCenter()
-            updateMapPadding()
+            updateMapCameraCenter(it.cameraState.center)
+            updateMapPadding(it.cameraState.padding)
         }
     }
     private var cameraChangedSubscription: Cancelable? = null
 
-    private fun updateMapCameraCenter() {
-        val center = mapboxMap.pixelForCoordinate(mapboxMap.cameraState.center)
+    private fun updateMapCameraCenter(cameraStateCenter: Point) {
+        val center = mapboxMap.pixelForCoordinate(cameraStateCenter)
         cameraCenter.x = center.x.toFloat() - cameraCenter.width / 2
         cameraCenter.y = center.y.toFloat() - cameraCenter.height / 2
     }
 
-    private fun updateMapPadding() {
-        val padding = mapboxMap.cameraState.padding
-
+    private fun updateMapPadding(padding: EdgeInsets) {
         val width = (mapView.width - padding.left - padding.right).toInt()
         val height = (mapView.height - padding.top - padding.bottom).toInt()
         val params = mapPaddingBorder.layoutParams

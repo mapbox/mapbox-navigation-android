@@ -6,9 +6,10 @@ import androidx.annotation.UiThread
 import com.mapbox.android.gestures.AndroidGesturesManager
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.android.gestures.RotateGestureDetector
+import com.mapbox.annotation.MapboxExperimental
 import com.mapbox.common.Cancelable
 import com.mapbox.geojson.Point
-import com.mapbox.maps.CameraChangedCallback
+import com.mapbox.maps.CameraChangedCoalescedCallback
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.plugin.animation.CameraAnimationsLifecycleListener
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
@@ -263,7 +264,8 @@ class NavigationScaleGestureHandler(
             puckScreenPosition = point.also { adjustFocalPoint(it) }
         }
 
-    private val onCameraChangedCallback = CameraChangedCallback {
+    @OptIn(MapboxExperimental::class)
+    private val onCameraChangedCallback = CameraChangedCoalescedCallback {
         puckScreenPosition?.let { adjustFocalPoint(it) }
     }
     private var cameraChangedSubscription: Cancelable? = null
@@ -318,7 +320,10 @@ class NavigationScaleGestureHandler(
 
         userLocationIndicatorPositionProvider.addObserver(onIndicatorPositionChangedListener)
 
-        cameraChangedSubscription = mapboxMap.subscribeCameraChanged(onCameraChangedCallback)
+        @OptIn(MapboxExperimental::class)
+        cameraChangedSubscription = mapboxMap.subscribeCameraChangedCoalesced(
+            onCameraChangedCallback,
+        )
 
         navigationCamera.registerNavigationCameraStateChangeObserver(
             navigationCameraStateChangedObserver,

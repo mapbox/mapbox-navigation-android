@@ -2,9 +2,12 @@ package com.mapbox.navigation.ui.components.maps.internal.ui
 
 import android.view.View
 import androidx.appcompat.widget.AppCompatImageView
+import com.mapbox.annotation.MapboxExperimental
 import com.mapbox.common.Cancelable
-import com.mapbox.maps.CameraChangedCallback
+import com.mapbox.maps.CameraChangedCoalesced
+import com.mapbox.maps.CameraChangedCoalescedCallback
 import com.mapbox.maps.CameraOptions
+import com.mapbox.maps.CameraState
 import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.plugin.animation.flyTo
@@ -21,6 +24,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 
+@OptIn(MapboxExperimental::class)
 class CompassButtonComponentTest {
 
     private val mapboxMap = mockk<MapboxMap>(relaxed = true)
@@ -61,17 +65,17 @@ class CompassButtonComponentTest {
         component.onAttached(mapboxNavigation)
 
         verify(exactly = 1) { compassButton.setOnClickListener(any()) }
-        verify(exactly = 1) { mapboxMap.subscribeCameraChanged(any()) }
+        verify(exactly = 1) { mapboxMap.subscribeCameraChangedCoalesced(any()) }
     }
 
     @Test
     fun `onDetached`() {
         val cameraChangedTask = mockk<Cancelable>(relaxed = true)
-        every { mapboxMap.subscribeCameraChanged(any()) } returns cameraChangedTask
-        val cameraCallbacks = mutableListOf<CameraChangedCallback>()
+        every { mapboxMap.subscribeCameraChangedCoalesced(any()) } returns cameraChangedTask
+        val cameraCallbacks = mutableListOf<CameraChangedCoalescedCallback>()
         component = CompassButtonComponent(compassButton, mapView)
         component.onAttached(mapboxNavigation)
-        verify(exactly = 1) { mapboxMap.subscribeCameraChanged(capture(cameraCallbacks)) }
+        verify(exactly = 1) { mapboxMap.subscribeCameraChangedCoalesced(capture(cameraCallbacks)) }
 
         component.onDetached(mapboxNavigation)
 
@@ -96,17 +100,16 @@ class CompassButtonComponentTest {
     @Test
     fun `camera state change rotates the image accordingly`() {
         val cameraChangedTask = mockk<Cancelable>()
-        every { mapboxMap.subscribeCameraChanged(any()) } returns cameraChangedTask
-        val cameraCallbacks = mutableListOf<CameraChangedCallback>()
+        every { mapboxMap.subscribeCameraChangedCoalesced(any()) } returns cameraChangedTask
+        val cameraCallbacks = mutableListOf<CameraChangedCoalescedCallback>()
         component = CompassButtonComponent(compassButton, mapView)
 
         component.onAttached(mapboxNavigation)
 
-        verify(exactly = 1) { mapboxMap.subscribeCameraChanged(capture(cameraCallbacks)) }
-        every { mapboxMap.cameraState } returns mockk {
-            every { bearing } returns 78.12
-        }
-        cameraCallbacks.first().run(mockk())
+        verify(exactly = 1) { mapboxMap.subscribeCameraChangedCoalesced(capture(cameraCallbacks)) }
+        val cameraState = mockk<CameraState>()
+        every { cameraState.bearing } returns 78.12
+        cameraCallbacks.first().run(CameraChangedCoalesced(cameraState, mockk()))
         verify { iconImage.rotation = -78.12f }
     }
 }
