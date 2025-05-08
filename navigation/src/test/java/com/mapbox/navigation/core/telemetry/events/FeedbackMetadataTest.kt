@@ -7,7 +7,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.testing.withPrefabTestPoint
 import com.mapbox.navigator.FixLocation
-import com.mapbox.navigator.StepData
+import com.mapbox.navigator.Step
 import com.mapbox.navigator.UserFeedbackMetadata
 import nl.jqno.equalsverifier.EqualsVerifier
 import org.json.JSONObject
@@ -235,8 +235,8 @@ class FeedbackMetadataTest {
             previousType: String,
             previousModifier: String,
             previousInstruction: String,
-        ): StepData {
-            return StepData(
+        ): Step {
+            return Step(
                 distance,
                 distanceRemaining,
                 duration,
