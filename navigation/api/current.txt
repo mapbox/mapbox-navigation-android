@@ -98,7 +98,6 @@ package com.mapbox.navigation.core {
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void startTripSessionWithPermissionCheck(boolean withForegroundService = true);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void startTripSessionWithPermissionCheck();
     method public void stopTripSession();
-    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void switchToAlternativeRoute(com.mapbox.navigation.base.route.NavigationRoute alternativeRoute, com.mapbox.navigation.core.RoutesSetCallback? callback = null);
     method public void unregisterArrivalObserver(com.mapbox.navigation.core.arrival.ArrivalObserver arrivalObserver);
     method public void unregisterBannerInstructionsObserver(com.mapbox.navigation.core.trip.session.BannerInstructionsObserver bannerInstructionsObserver);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void unregisterDeveloperMetadataObserver(com.mapbox.navigation.core.DeveloperMetadataObserver developerMetadataObserver);

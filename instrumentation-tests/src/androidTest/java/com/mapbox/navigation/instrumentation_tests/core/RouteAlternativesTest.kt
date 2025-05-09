@@ -9,10 +9,8 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
-import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.internal.route.routeOptions
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
@@ -25,7 +23,6 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
-import com.mapbox.navigation.testing.ui.utils.coroutines.switchToAlternativeAsync
 import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.testing.utils.http.MockDynamicDirectionsRefreshHandler
@@ -33,7 +30,6 @@ import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.testing.utils.location.stayOnPosition
 import com.mapbox.navigation.testing.utils.openRawResource
 import com.mapbox.navigation.testing.utils.readRawFileText
-import com.mapbox.navigation.testing.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.utils.withMapboxNavigation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
@@ -417,102 +413,6 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
                 alternativesUpdate.navigationRoutes.drop(1)
                     .firstOrNull()?.directionsRoute?.requestUuid(),
             )
-        }
-    }
-
-    @Test
-    fun switch_from_multi_leg_primary_to_single_leg_alternative_and_back() = sdkTest {
-        withMapboxNavigation(
-            historyRecorderRule = mapboxHistoryTestRule,
-        ) { mapboxNavigation ->
-            val mockRoute = RoutesProvider.dc_short_alternative_has_more_legs(context)
-            mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
-
-            val routes = mapboxNavigation.requestRoutes(
-                RouteOptions.builder()
-                    .applyDefaultNavigationOptions()
-                    .applyLanguageAndVoiceUnitOptions(context)
-                    .baseUrl(mockWebServerRule.baseUrl)
-                    .waypointsPerRoute(true)
-                    .coordinatesList(mockRoute.routeWaypoints).build(),
-            ).getSuccessfulResultOrThrowException().routes
-
-            mockLocationReplayerRule.playRoute(
-                routes[0].directionsRoute,
-                eventsToDrop = 15,
-            )
-            mapboxNavigation.startTripSession()
-            mapboxNavigation.setNavigationRoutes(routes)
-
-            mapboxNavigation.routeProgressUpdates()
-                .filter {
-                    it.currentLegProgress?.legIndex == 0 &&
-                        it.currentRouteGeometryIndex > 16
-                }
-                .first()
-
-            mapboxNavigation.switchToAlternativeRoute(routes[1])
-
-            val routeProgress = mapboxNavigation.routeProgressUpdates()
-                .first {
-                    it.currentState == RouteProgressState.TRACKING &&
-                        it.navigationRoute.id == routes[1].id
-                }
-            assertEquals(
-                1,
-                routeProgress.remainingWaypoints,
-            )
-        }
-    }
-
-    @Test
-    fun switch_to_alternative_when_no_routes_are_set() = sdkTest {
-        withMapboxNavigation(
-            historyRecorderRule = mapboxHistoryTestRule,
-        ) { mapboxNavigation ->
-            setupMockRequestHandlers()
-            val routes = mapboxNavigation.requestNavigationRoutes(startCoordinates)
-            val result = mapboxNavigation.switchToAlternativeAsync(routes[0])
-            assertTrue(result.isError)
-        }
-    }
-
-    @Test
-    fun switch_to_not_tracking_alternative() = sdkTest {
-        withMapboxNavigation(
-            historyRecorderRule = mapboxHistoryTestRule,
-        ) { mapboxNavigation ->
-            setupMockRequestHandlers()
-            val routes = mapboxNavigation.requestNavigationRoutes(startCoordinates)
-            val differentRoutes = mapboxNavigation.requestNavigationRoutes(continueCoordinates)
-
-            stayOnPosition(startCoordinates.first(), 0f) {
-                mapboxNavigation.startTripSession()
-                mapboxNavigation.setNavigationRoutes(routes)
-                mapboxNavigation.routeProgressUpdates().first()
-
-                val result = mapboxNavigation.switchToAlternativeAsync(differentRoutes[0])
-                assertTrue(result.isError)
-            }
-        }
-    }
-
-    @Test
-    fun use_primary_during_switching_to_alternative() = sdkTest {
-        withMapboxNavigation(
-            historyRecorderRule = mapboxHistoryTestRule,
-        ) { mapboxNavigation ->
-            setupMockRequestHandlers()
-            val routes = mapboxNavigation.requestNavigationRoutes(startCoordinates)
-
-            stayOnPosition(startCoordinates.first(), 0f) {
-                mapboxNavigation.startTripSession()
-                mapboxNavigation.setNavigationRoutes(routes)
-                mapboxNavigation.routeProgressUpdates().first()
-
-                val result = mapboxNavigation.switchToAlternativeAsync(routes.first())
-                assertTrue(result.isError)
-            }
         }
     }
 
