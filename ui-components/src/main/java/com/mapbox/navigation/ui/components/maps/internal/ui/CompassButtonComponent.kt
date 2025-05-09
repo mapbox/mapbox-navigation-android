@@ -1,7 +1,8 @@
 package com.mapbox.navigation.ui.components.maps.internal.ui
 
+import com.mapbox.annotation.MapboxExperimental
 import com.mapbox.common.Cancelable
-import com.mapbox.maps.CameraChangedCallback
+import com.mapbox.maps.CameraChangedCoalescedCallback
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
@@ -16,9 +17,10 @@ class CompassButtonComponent(
 ) : UIComponent() {
 
     private val mapboxMap: MapboxMap? = mapView?.getMapboxMap()
-    private var onCameraChangeCallback: CameraChangedCallback? = null
+    private var onCameraChangeCallback: CameraChangedCoalescedCallback? = null
     private var cameraChangedSubscription: Cancelable? = null
 
+    @OptIn(MapboxExperimental::class)
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
@@ -26,14 +28,15 @@ class CompassButtonComponent(
             compassButton.setOnClickListener {
                 mapboxMap.flyTo(CameraOptions.Builder().bearing(.0).build())
             }
-            onCameraChangeCallback = CameraChangedCallback {
-                compassButton.iconImage.rotation = -mapboxMap.cameraState.bearing.toFloat()
+            onCameraChangeCallback = CameraChangedCoalescedCallback {
+                compassButton.iconImage.rotation = -it.cameraState.bearing.toFloat()
             }.also {
-                cameraChangedSubscription = mapboxMap.subscribeCameraChanged(it)
+                cameraChangedSubscription = mapboxMap.subscribeCameraChangedCoalesced(it)
             }
         }
     }
 
+    @OptIn(MapboxExperimental::class)
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         super.onDetached(mapboxNavigation)
         compassButton.setOnClickListener(null)

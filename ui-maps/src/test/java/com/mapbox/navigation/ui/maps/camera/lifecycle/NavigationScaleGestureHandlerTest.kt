@@ -4,9 +4,10 @@ import android.content.Context
 import com.mapbox.android.gestures.AndroidGesturesManager
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.android.gestures.RotateGestureDetector
+import com.mapbox.annotation.MapboxExperimental
 import com.mapbox.common.Cancelable
 import com.mapbox.geojson.Point
-import com.mapbox.maps.CameraChangedCallback
+import com.mapbox.maps.CameraChangedCoalescedCallback
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.plugin.animation.CameraAnimatorType
@@ -70,7 +71,9 @@ class NavigationScaleGestureHandlerTest {
     private val customGesturesInteractorSlot = slot<(AndroidGesturesManager) -> Unit>()
     private val onMoveListenerSlot = slot<OnMoveListener>()
     private val onIndicatorPositionChangedListenerSlot = slot<OnIndicatorPositionChangedListener>()
-    private val cameraChangedCallbackSlot = slot<CameraChangedCallback>()
+
+    @OptIn(MapboxExperimental::class)
+    private val cameraChangedCallbackSlot = slot<CameraChangedCoalescedCallback>()
     private val cameraChangedTask = mockk<Cancelable>(relaxed = true)
     private val navigationCameraStateChangedObserverSlot =
         slot<NavigationCameraStateChangedObserver>()
@@ -107,7 +110,8 @@ class NavigationScaleGestureHandlerTest {
             )
         } just Runs
         every {
-            mapboxMap.subscribeCameraChanged(capture(cameraChangedCallbackSlot))
+            @OptIn(MapboxExperimental::class)
+            mapboxMap.subscribeCameraChangedCoalesced(capture(cameraChangedCallbackSlot))
         } returns cameraChangedTask
         every {
             navigationCamera.registerNavigationCameraStateChangeObserver(
