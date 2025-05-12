@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.maps.internal.route.line
 import androidx.annotation.Keep
 import com.google.gson.GsonBuilder
 import com.google.gson.annotations.SerializedName
+import com.mapbox.bindgen.Value
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.PointAsCoordinatesTypeAdapter
@@ -298,7 +299,9 @@ class RouteLineNoOpExpressionEventData : RouteLineExpressionEventData(Keys.TYPE_
 @Keep
 data class RouteLineProviderBasedExpressionEventData(
     val property: String,
-    val expression: Expression,
+    @Deprecated("Used for backwards compatibility")
+    val expression: Expression? = null,
+    val value: Value? = null,
 ) : RouteLineExpressionEventData(Keys.TYPE_PROVIDER_BASED)
 
 object Keys {

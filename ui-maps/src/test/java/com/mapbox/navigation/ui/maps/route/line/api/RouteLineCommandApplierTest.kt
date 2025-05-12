@@ -36,13 +36,13 @@ internal class RouteLineCommandApplierTest {
 
         applier.applyCommand(style, layerId, expression)
 
-        verify { style.setStyleLayerProperty(layerId, "line-trim-offset", expression) }
+        verify { style.setStyleLayerProperty(layerId, "line-trim-end", expression) }
     }
 
     @Test
     fun getProperty_LineTrimExpressionApplier() = runBlocking {
         val applier = LineTrimCommandApplier()
 
-        assertEquals("line-trim-offset", applier.getProperty())
+        assertEquals("line-trim-end", applier.getProperty())
     }
 }

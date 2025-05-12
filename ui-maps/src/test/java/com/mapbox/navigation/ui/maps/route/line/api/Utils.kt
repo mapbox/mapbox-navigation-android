@@ -10,7 +10,7 @@ import io.mockk.verify
 
 internal suspend fun checkAppliedExpression(
     expectedExpression: List<(Value) -> Unit>,
-    commandHolder: RouteLineExpressionCommandHolder,
+    commandHolder: RouteLineValueCommandHolder,
     viewOptions: RouteLineViewOptionsData,
     property: String,
 ) {
@@ -21,10 +21,18 @@ internal suspend fun checkAppliedExpression(
 }
 
 internal suspend fun getAppliedExpression(
-    commandHolder: RouteLineExpressionCommandHolder,
+    commandHolder: RouteLineValueCommandHolder,
     viewOptions: RouteLineViewOptionsData,
     property: String,
 ): Expression {
+    return getAppliedValue(commandHolder, viewOptions, property) as Expression
+}
+
+internal suspend fun getAppliedValue(
+    commandHolder: RouteLineValueCommandHolder,
+    viewOptions: RouteLineViewOptionsData,
+    property: String,
+): Value {
     val style = mockk<Style>(relaxed = true)
     val layerId = "some-layer-id"
     val exp = commandHolder.provider.generateCommand(viewOptions)
@@ -33,5 +41,5 @@ internal suspend fun getAppliedExpression(
     verify {
         style.setStyleLayerProperty(layerId, property, capture(expressionSlot))
     }
-    return expressionSlot.captured as Expression
+    return expressionSlot.captured
 }
