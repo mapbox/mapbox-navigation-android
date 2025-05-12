@@ -1,7 +1,7 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
+import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Point
-import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
@@ -132,34 +132,34 @@ internal class VanishingRouteLine() {
         offset: Double,
     ): VanishingRouteLineExpressions {
         vanishPointOffset = offset
-        val trimmedOffsetExpression = literal(listOf(0.0, offset))
-        val trafficLineExpressionCommandHolder = RouteLineExpressionCommandHolder(
-            LightRouteLineExpressionProvider {
-                trimmedOffsetExpression
+        val trimmedOffsetValue = Value.valueOf(offset)
+        val trafficLineExpressionCommandHolder = RouteLineValueCommandHolder(
+            LightRouteLineValueProvider {
+                trimmedOffsetValue
             },
             LineTrimCommandApplier(),
         )
-        val routeLineExpressionCommandHolder = RouteLineExpressionCommandHolder(
-            LightRouteLineExpressionProvider {
-                trimmedOffsetExpression
+        val routeLineValueCommandHolder = RouteLineValueCommandHolder(
+            LightRouteLineValueProvider {
+                trimmedOffsetValue
             },
             LineTrimCommandApplier(),
         )
-        val routeLineCasingExpressionCommandHolder = RouteLineExpressionCommandHolder(
-            LightRouteLineExpressionProvider {
-                trimmedOffsetExpression
+        val routeLineCasingExpressionCommandHolder = RouteLineValueCommandHolder(
+            LightRouteLineValueProvider {
+                trimmedOffsetValue
             },
             LineTrimCommandApplier(),
         )
-        val restrictedRoadExpressionCommandHolder = RouteLineExpressionCommandHolder(
-            LightRouteLineExpressionProvider {
-                trimmedOffsetExpression
+        val restrictedRoadExpressionCommandHolder = RouteLineValueCommandHolder(
+            LightRouteLineValueProvider {
+                trimmedOffsetValue
             },
             LineTrimCommandApplier(),
         )
         return VanishingRouteLineExpressions(
             trafficLineExpressionCommandHolder,
-            routeLineExpressionCommandHolder,
+            routeLineValueCommandHolder,
             routeLineCasingExpressionCommandHolder,
             restrictedRoadExpressionCommandHolder,
         )

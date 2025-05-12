@@ -1,6 +1,6 @@
 package com.mapbox.navigation.ui.maps.route.line.model
 
-import com.mapbox.navigation.ui.maps.route.line.api.RouteLineExpressionCommandHolder
+import com.mapbox.navigation.ui.maps.route.line.api.RouteLineValueCommandHolder
 
 /**
  * Provides information needed to draw a route.
@@ -15,12 +15,12 @@ import com.mapbox.navigation.ui.maps.route.line.api.RouteLineExpressionCommandHo
  * @param blurExpressionCommandHolder expression used to style the blur layer
  */
 internal data class RouteLineDynamicData(
-    val baseExpressionCommandHolder: RouteLineExpressionCommandHolder,
-    val casingExpressionCommandHolder: RouteLineExpressionCommandHolder,
-    val trafficExpressionCommandHolder: RouteLineExpressionCommandHolder?,
-    val restrictedSectionExpressionCommandHolder: RouteLineExpressionCommandHolder?,
+    val baseExpressionCommandHolder: RouteLineValueCommandHolder,
+    val casingExpressionCommandHolder: RouteLineValueCommandHolder,
+    val trafficExpressionCommandHolder: RouteLineValueCommandHolder?,
+    val restrictedSectionExpressionCommandHolder: RouteLineValueCommandHolder?,
     val trimOffset: RouteLineTrimOffset? = null,
-    val trailExpressionCommandHolder: RouteLineExpressionCommandHolder? = null,
-    val trailCasingExpressionCommandHolder: RouteLineExpressionCommandHolder? = null,
-    val blurExpressionCommandHolder: RouteLineExpressionCommandHolder? = null,
+    val trailExpressionCommandHolder: RouteLineValueCommandHolder? = null,
+    val trailCasingExpressionCommandHolder: RouteLineValueCommandHolder? = null,
+    val blurExpressionCommandHolder: RouteLineValueCommandHolder? = null,
 )

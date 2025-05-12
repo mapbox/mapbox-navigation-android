@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.maps.route.line.api
 import android.content.Context
 import android.graphics.Color
 import androidx.appcompat.content.res.AppCompatResources
+import com.mapbox.bindgen.Value
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
 import com.mapbox.navigation.testing.MainCoroutineRule
@@ -70,9 +71,9 @@ class VanishingRouteLineRoboTest {
 
     @Test
     fun getTraveledRouteLineExpressionsWithZeroPoint() = coroutineRule.runBlockingTest {
-        val expectedTrafficExpression = "[literal, [0.0, 0.0]]"
-        val expectedRouteLineExpression = "[literal, [0.0, 0.0]]"
-        val expectedCasingExpression = "[literal, [0.0, 0.0]]"
+        val expectedTrafficExpression = Value.valueOf(0.0)
+        val expectedRouteLineExpression = Value.valueOf(0.0)
+        val expectedCasingExpression = Value.valueOf(0.0)
 
         val route = loadNavigationRoute("short_route.json")
         val lineString = LineString.fromPolyline(
@@ -99,64 +100,46 @@ class VanishingRouteLineRoboTest {
 
         assertEquals(
             expectedTrafficExpression,
-            getAppliedExpression(
+            getAppliedValue(
                 result!!.trafficLineExpressionCommandHolder,
                 viewOptions,
-                "line-trim-offset",
-            ).toString(),
+                "line-trim-end",
+            ),
         )
         assertEquals(
             expectedRouteLineExpression,
-            getAppliedExpression(
-                result!!.routeLineExpressionCommandHolder,
+            getAppliedValue(
+                result!!.routeLineValueCommandHolder,
                 viewOptions,
-                "line-trim-offset",
-            ).toString(),
+                "line-trim-end",
+            ),
         )
         assertEquals(
             expectedCasingExpression,
-            getAppliedExpression(
+            getAppliedValue(
                 result!!.routeLineCasingExpressionCommandHolder,
                 viewOptions,
-                "line-trim-offset",
-            ).toString(),
+                "line-trim-end",
+            ),
         )
 
         assertTrue(
-            result.routeLineExpressionCommandHolder.provider is LightRouteLineExpressionProvider,
+            result.routeLineValueCommandHolder.provider is LightRouteLineValueProvider,
         )
         assertTrue(
-            result.trafficLineExpressionCommandHolder.provider is LightRouteLineExpressionProvider,
+            result.trafficLineExpressionCommandHolder.provider is LightRouteLineValueProvider,
         )
         assertTrue(
             result.routeLineCasingExpressionCommandHolder.provider
-            is LightRouteLineExpressionProvider,
+            is LightRouteLineValueProvider,
         )
     }
 
     @Test
     fun getTraveledRouteLineExpressionsWithNonZeroPoint() = coroutineRule.runBlockingTest {
-        val expectedTrafficExpressionContents = listOf(
-            StringChecker("literal"),
-            ListChecker(
-                DoubleChecker(0.0),
-                DoubleChecker(0.2638437072304186),
-            ),
-        )
-        val expectedRouteLineExpressionContents = listOf(
-            StringChecker("literal"),
-            ListChecker(
-                DoubleChecker(0.0),
-                DoubleChecker(0.2638437072304186),
-            ),
-        )
-        val expectedCasingExpressionContents = listOf(
-            StringChecker("literal"),
-            ListChecker(
-                DoubleChecker(0.0),
-                DoubleChecker(0.2638437072304186),
-            ),
-        )
+        val expectedTrafficExpressionContents = Value.valueOf(0.2638437072304186)
+        val expectedRouteLineExpressionContents = Value.valueOf(0.2638437072304186)
+        val expectedCasingExpressionContents = Value.valueOf(0.2638437072304186)
 
         val route = loadNavigationRoute("short_route.json")
         val lineString = LineString.fromPolyline(
@@ -180,40 +163,40 @@ class VanishingRouteLineRoboTest {
             .build()
             .toData()
 
-        checkExpression(
+        assertEquals(
             expectedTrafficExpressionContents,
-            getAppliedExpression(
+            getAppliedValue(
                 result!!.trafficLineExpressionCommandHolder,
                 viewOptions,
-                "line-trim-offset",
+                "line-trim-end",
             ),
         )
-        checkExpression(
+        assertEquals(
             expectedRouteLineExpressionContents,
-            getAppliedExpression(
-                result!!.routeLineExpressionCommandHolder,
+            getAppliedValue(
+                result!!.routeLineValueCommandHolder,
                 viewOptions,
-                "line-trim-offset",
+                "line-trim-end",
             ),
         )
-        checkExpression(
+        assertEquals(
             expectedCasingExpressionContents,
-            getAppliedExpression(
+            getAppliedValue(
                 result!!.routeLineCasingExpressionCommandHolder,
                 viewOptions,
-                "line-trim-offset",
+                "line-trim-end",
             ),
         )
 
         assertTrue(
-            result.routeLineExpressionCommandHolder.provider is LightRouteLineExpressionProvider,
+            result.routeLineValueCommandHolder.provider is LightRouteLineValueProvider,
         )
         assertTrue(
-            result.trafficLineExpressionCommandHolder.provider is LightRouteLineExpressionProvider,
+            result.trafficLineExpressionCommandHolder.provider is LightRouteLineValueProvider,
         )
         assertTrue(
             result.routeLineCasingExpressionCommandHolder.provider
-            is LightRouteLineExpressionProvider,
+            is LightRouteLineValueProvider,
         )
     }
 }

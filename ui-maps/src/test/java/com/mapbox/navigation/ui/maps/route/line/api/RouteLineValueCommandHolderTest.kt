@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
+import com.mapbox.bindgen.Value
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineNoOpExpressionEventData
@@ -15,36 +16,36 @@ import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-internal class RouteLineExpressionCommandHolderTest {
+internal class RouteLineValueCommandHolderTest {
 
     @Test
     fun toRouteLineExpressionEventData_ok() = runBlocking {
         val exp = mockk<Expression>(relaxed = true)
         val viewData = mockk<RouteLineViewOptionsData>(relaxed = true)
-        val provider = mockk<RouteLineExpressionProvider>(relaxed = true) {
+        val provider = mockk<RouteLineValueProvider>(relaxed = true) {
             coEvery { generateCommand(viewData) } returns exp
         }
-        val applier = mockk<RouteLineCommandApplier<Expression>>(relaxed = true) {
+        val applier = mockk<RouteLineCommandApplier<Value>>(relaxed = true) {
             every { getProperty() } returns "some-property"
         }
-        val data = RouteLineExpressionCommandHolder(provider, applier)
+        val data = RouteLineValueCommandHolder(provider, applier)
 
         val actual = data.toRouteLineExpressionEventData(viewData)
         assertTrue(actual is RouteLineProviderBasedExpressionEventData)
-        assertEquals(exp, (actual as RouteLineProviderBasedExpressionEventData).expression)
+        assertEquals(exp, (actual as RouteLineProviderBasedExpressionEventData).value)
         assertEquals("some-property", actual.property)
     }
 
     @Test
     fun toRouteLineExpressionEventData_throws() = runBlocking {
         val viewData = mockk<RouteLineViewOptionsData>(relaxed = true)
-        val provider = mockk<RouteLineExpressionProvider>(relaxed = true) {
+        val provider = mockk<RouteLineValueProvider>(relaxed = true) {
             coEvery { generateCommand(viewData) } throws UnsupportedOperationException()
         }
-        val applier = mockk<RouteLineCommandApplier<Expression>>(relaxed = true) {
+        val applier = mockk<RouteLineCommandApplier<Value>>(relaxed = true) {
             every { getProperty() } returns "some-property"
         }
-        val data = RouteLineExpressionCommandHolder(provider, applier)
+        val data = RouteLineValueCommandHolder(provider, applier)
 
         val actual = data.toRouteLineExpressionEventData(viewData)
         assertTrue(actual is RouteLineNoOpExpressionEventData)

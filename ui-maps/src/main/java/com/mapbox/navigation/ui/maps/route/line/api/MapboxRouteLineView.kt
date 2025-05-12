@@ -1325,7 +1325,7 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
     private fun chooseCommandHolder(
         layerId: String,
         routeLineDynamicData: RouteLineDynamicData,
-    ): RouteLineExpressionCommandHolder? {
+    ): RouteLineValueCommandHolder? {
         return when (layerId) {
             in trailCasingLayerIds -> {
                 routeLineDynamicData.trailCasingExpressionCommandHolder
@@ -1476,7 +1476,7 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
     }
 
     private suspend fun getGenerateCommand(
-        holder: RouteLineExpressionCommandHolder,
+        holder: RouteLineValueCommandHolder,
         style: Style,
         layerId: String,
         options: RouteLineViewOptionsData,

@@ -7,6 +7,7 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.Value
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
@@ -426,45 +427,45 @@ class MapboxRouteLineApiRoboTest {
                     val primaryLineData = result.primaryRouteLineData.dynamicData!!
                     assertTrue(
                         primaryLineData.trafficExpressionCommandHolder!!.provider
-                        is HeavyRouteLineExpressionProvider,
+                        is HeavyRouteLineValueProvider,
                     )
                     assertTrue(
                         primaryLineData.baseExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         primaryLineData.casingExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         primaryLineData.trailExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         primaryLineData.trailCasingExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
 
                     val maskingData = result.routeLineMaskingLayerDynamicData
                     assertTrue(
                         maskingData.trafficExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.baseExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.casingExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.trailExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.trailCasingExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
 
                     callbackCalled = true
@@ -729,45 +730,45 @@ class MapboxRouteLineApiRoboTest {
                     val routeData = result.primaryRouteLineDynamicData
                     assertTrue(
                         routeData.trafficExpressionCommandHolder!!.provider
-                        is HeavyRouteLineExpressionProvider,
+                        is HeavyRouteLineValueProvider,
                     )
                     assertTrue(
                         routeData.baseExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         routeData.casingExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         routeData.trailExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         routeData.trailCasingExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
 
                     val maskingData = result.routeLineMaskingLayerDynamicData
                     assertTrue(
                         maskingData.trafficExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.baseExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.casingExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.trailExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.trailCasingExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
 
                     callbackCalled = true
@@ -1021,45 +1022,45 @@ class MapboxRouteLineApiRoboTest {
                     val primaryLineData = result.primaryRouteLineData.dynamicData
                     assertTrue(
                         primaryLineData.trafficExpressionCommandHolder!!.provider
-                        is HeavyRouteLineExpressionProvider,
+                        is HeavyRouteLineValueProvider,
                     )
                     assertTrue(
                         primaryLineData.baseExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         primaryLineData.casingExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         primaryLineData.trailExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         primaryLineData.trailCasingExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
 
                     val maskingData = result.routeLineMaskingLayerDynamicData
                     assertTrue(
                         maskingData.trafficExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.baseExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.casingExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.trailExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.trailCasingExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
 
                     callbackCalled = true
@@ -1320,45 +1321,45 @@ class MapboxRouteLineApiRoboTest {
                     val primaryLineData = result.primaryRouteLineDynamicData!!
                     assertTrue(
                         primaryLineData.trafficExpressionCommandHolder!!.provider
-                        is HeavyRouteLineExpressionProvider,
+                        is HeavyRouteLineValueProvider,
                     )
                     assertTrue(
                         primaryLineData.baseExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         primaryLineData.casingExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         primaryLineData.trailExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         primaryLineData.trailCasingExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
 
                     val maskingData = result.routeLineMaskingLayerDynamicData
                     assertTrue(
                         maskingData.trafficExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.baseExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.casingExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.trailExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.trailCasingExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
 
                     callbackCalled = true
@@ -1614,45 +1615,45 @@ class MapboxRouteLineApiRoboTest {
                     val primaryLineData = result.primaryRouteLineData.dynamicData
                     assertTrue(
                         primaryLineData.trafficExpressionCommandHolder!!.provider
-                        is HeavyRouteLineExpressionProvider,
+                        is HeavyRouteLineValueProvider,
                     )
                     assertTrue(
                         primaryLineData.baseExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         primaryLineData.casingExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         primaryLineData.trailExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         primaryLineData.trailCasingExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
 
                     val maskingData = result.routeLineMaskingLayerDynamicData
                     assertTrue(
                         maskingData.trafficExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.baseExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.casingExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.trailExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.trailCasingExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
 
                     callbackCalled = true
@@ -1911,45 +1912,45 @@ class MapboxRouteLineApiRoboTest {
                     val primaryLineData = result.primaryRouteLineData.dynamicData
                     assertTrue(
                         primaryLineData.trafficExpressionCommandHolder!!.provider
-                        is HeavyRouteLineExpressionProvider,
+                        is HeavyRouteLineValueProvider,
                     )
                     assertTrue(
                         primaryLineData.baseExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         primaryLineData.casingExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         primaryLineData.trailExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         primaryLineData.trailCasingExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
 
                     val maskingData = result.routeLineMaskingLayerDynamicData
                     assertTrue(
                         maskingData.trafficExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.baseExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.casingExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.trailExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.trailCasingExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
 
                     callbackCalled = true
@@ -2213,45 +2214,45 @@ class MapboxRouteLineApiRoboTest {
                     val primaryLineData = result.primaryRouteLineDynamicData
                     assertTrue(
                         primaryLineData.trafficExpressionCommandHolder!!.provider
-                        is HeavyRouteLineExpressionProvider,
+                        is HeavyRouteLineValueProvider,
                     )
                     assertTrue(
                         primaryLineData.baseExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         primaryLineData.casingExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         primaryLineData.trailExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         primaryLineData.trailCasingExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
 
                     val maskingData = result.routeLineMaskingLayerDynamicData
                     assertTrue(
                         maskingData.trafficExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.baseExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.casingExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.trailExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.trailCasingExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
 
                     callbackCalled = true
@@ -2392,21 +2393,21 @@ class MapboxRouteLineApiRoboTest {
                     val primaryLineData = result.primaryRouteLineDynamicData
                     assertTrue(
                         primaryLineData.trailExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         primaryLineData.trailCasingExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
 
                     val maskingData = result.routeLineMaskingLayerDynamicData
                     assertTrue(
                         maskingData.trailExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.trailCasingExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
 
                     callbackCalled = true
@@ -2547,21 +2548,21 @@ class MapboxRouteLineApiRoboTest {
                     val primaryLineData = result.primaryRouteLineDynamicData
                     assertTrue(
                         primaryLineData.trailExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         primaryLineData.trailCasingExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
 
                     val maskingData = result.routeLineMaskingLayerDynamicData
                     assertTrue(
                         maskingData.trailExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.trailCasingExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
 
                     callbackCalled = true
@@ -2691,21 +2692,21 @@ class MapboxRouteLineApiRoboTest {
                     val primaryLineData = result.primaryRouteLineData
                     assertTrue(
                         primaryLineData.dynamicData!!.trailExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         primaryLineData.dynamicData.trailCasingExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
 
                     val maskingData = result.routeLineMaskingLayerDynamicData
                     assertTrue(
                         maskingData.trailExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.trailCasingExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
 
                     callbackCalled = true
@@ -2814,11 +2815,11 @@ class MapboxRouteLineApiRoboTest {
                     val maskingData = result.routeLineMaskingLayerDynamicData
                     assertTrue(
                         maskingData.trailExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.trailCasingExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
 
                     callbackCalled = true
@@ -2977,34 +2978,34 @@ class MapboxRouteLineApiRoboTest {
         val primaryLineData = result.value!!.primaryRouteLineData.dynamicData!!
         assertTrue(
             primaryLineData.trafficExpressionCommandHolder!!.provider
-            is HeavyRouteLineExpressionProvider,
+            is HeavyRouteLineValueProvider,
         )
         assertTrue(
             primaryLineData.baseExpressionCommandHolder.provider
-            is LightRouteLineExpressionProvider,
+            is LightRouteLineValueProvider,
         )
         assertTrue(
             primaryLineData.casingExpressionCommandHolder.provider
-            is LightRouteLineExpressionProvider,
+            is LightRouteLineValueProvider,
         )
 
         val maskingData = result.value!!.routeLineMaskingLayerDynamicData!!
         assertTrue(
             maskingData.trafficExpressionCommandHolder!!.provider
-            is LightRouteLineExpressionProvider,
+            is LightRouteLineValueProvider,
         )
         assertTrue(
-            maskingData.baseExpressionCommandHolder.provider is LightRouteLineExpressionProvider,
+            maskingData.baseExpressionCommandHolder.provider is LightRouteLineValueProvider,
         )
         assertTrue(
-            maskingData.casingExpressionCommandHolder.provider is LightRouteLineExpressionProvider,
+            maskingData.casingExpressionCommandHolder.provider is LightRouteLineValueProvider,
         )
         assertTrue(
-            maskingData.trailExpressionCommandHolder!!.provider is LightRouteLineExpressionProvider,
+            maskingData.trailExpressionCommandHolder!!.provider is LightRouteLineValueProvider,
         )
         assertTrue(
             maskingData.trailCasingExpressionCommandHolder!!.provider
-            is LightRouteLineExpressionProvider,
+            is LightRouteLineValueProvider,
         )
     }
 
@@ -3130,20 +3131,20 @@ class MapboxRouteLineApiRoboTest {
         val maskingData = result.value!!.routeLineMaskingLayerDynamicData!!
         assertTrue(
             maskingData.trafficExpressionCommandHolder!!.provider
-            is LightRouteLineExpressionProvider,
+            is LightRouteLineValueProvider,
         )
         assertTrue(
-            maskingData.baseExpressionCommandHolder.provider is LightRouteLineExpressionProvider,
+            maskingData.baseExpressionCommandHolder.provider is LightRouteLineValueProvider,
         )
         assertTrue(
-            maskingData.casingExpressionCommandHolder.provider is LightRouteLineExpressionProvider,
+            maskingData.casingExpressionCommandHolder.provider is LightRouteLineValueProvider,
         )
         assertTrue(
-            maskingData.trailExpressionCommandHolder!!.provider is LightRouteLineExpressionProvider,
+            maskingData.trailExpressionCommandHolder!!.provider is LightRouteLineValueProvider,
         )
         assertTrue(
             maskingData.trailCasingExpressionCommandHolder!!.provider
-            is LightRouteLineExpressionProvider,
+            is LightRouteLineValueProvider,
         )
     }
 
@@ -3301,20 +3302,20 @@ class MapboxRouteLineApiRoboTest {
         val primaryLineData = result.value!!.primaryRouteLineData.dynamicData!!
         assertTrue(
             primaryLineData.trafficExpressionCommandHolder!!.provider
-            is HeavyRouteLineExpressionProvider,
+            is HeavyRouteLineValueProvider,
         )
         assertTrue(
             primaryLineData.trailExpressionCommandHolder!!.provider
-            is LightRouteLineExpressionProvider,
+            is LightRouteLineValueProvider,
         )
 
         val maskingData = result.value!!.routeLineMaskingLayerDynamicData!!
         assertTrue(
             maskingData.trafficExpressionCommandHolder!!.provider
-            is LightRouteLineExpressionProvider,
+            is LightRouteLineValueProvider,
         )
         assertTrue(
-            maskingData.trailExpressionCommandHolder!!.provider is LightRouteLineExpressionProvider,
+            maskingData.trailExpressionCommandHolder!!.provider is LightRouteLineValueProvider,
         )
     }
 
@@ -3404,15 +3405,15 @@ class MapboxRouteLineApiRoboTest {
         val primaryLineData = result!!.primaryRouteLineData.dynamicData!!
         assertTrue(
             primaryLineData.trafficExpressionCommandHolder!!.provider
-            is HeavyRouteLineExpressionProvider,
+            is HeavyRouteLineValueProvider,
         )
         assertTrue(
             primaryLineData.baseExpressionCommandHolder!!.provider
-            is LightRouteLineExpressionProvider,
+            is LightRouteLineValueProvider,
         )
         assertTrue(
             primaryLineData.casingExpressionCommandHolder!!.provider
-            is LightRouteLineExpressionProvider,
+            is LightRouteLineValueProvider,
         )
 
         assertEquals(
@@ -3488,7 +3489,7 @@ class MapboxRouteLineApiRoboTest {
         assertTrue(
             result.value!!.primaryRouteLineData.dynamicData!!
                 .restrictedSectionExpressionCommandHolder?.provider
-            is HeavyRouteLineExpressionProvider,
+            is HeavyRouteLineValueProvider,
         )
         checkExpression(
             expectedMaskingRestrictedExpressionContents,
@@ -3502,7 +3503,7 @@ class MapboxRouteLineApiRoboTest {
         assertTrue(
             result.value!!.routeLineMaskingLayerDynamicData!!
                 .restrictedSectionExpressionCommandHolder?.provider
-            is LightRouteLineExpressionProvider,
+            is LightRouteLineValueProvider,
         )
     }
 
@@ -3573,11 +3574,11 @@ class MapboxRouteLineApiRoboTest {
 
             assertTrue(
                 result.primaryRouteLineData.dynamicData!!.restrictedSectionExpressionCommandHolder!!
-                    .provider is HeavyRouteLineExpressionProvider,
+                    .provider is HeavyRouteLineValueProvider,
             )
             assertTrue(
                 result.routeLineMaskingLayerDynamicData.restrictedSectionExpressionCommandHolder!!
-                    .provider is LightRouteLineExpressionProvider,
+                    .provider is LightRouteLineValueProvider,
             )
         }
 
@@ -3648,11 +3649,11 @@ class MapboxRouteLineApiRoboTest {
 
             assertTrue(
                 result.primaryRouteLineData.dynamicData.restrictedSectionExpressionCommandHolder!!
-                    .provider is HeavyRouteLineExpressionProvider,
+                    .provider is HeavyRouteLineValueProvider,
             )
             assertTrue(
                 result.routeLineMaskingLayerDynamicData.restrictedSectionExpressionCommandHolder!!
-                    .provider is LightRouteLineExpressionProvider,
+                    .provider is LightRouteLineValueProvider,
             )
         }
 
@@ -3774,7 +3775,7 @@ class MapboxRouteLineApiRoboTest {
                 assertTrue(
                     result.value!!.primaryRouteLineDynamicData!!
                         .trafficExpressionCommandHolder!!.provider
-                    is HeavyRouteLineExpressionProvider,
+                    is HeavyRouteLineValueProvider,
                 )
                 checkExpression(
                     expectedMaskingTrafficExpressionContents,
@@ -3788,7 +3789,7 @@ class MapboxRouteLineApiRoboTest {
                 assertTrue(
                     result.value!!.routeLineMaskingLayerDynamicData!!
                         .trafficExpressionCommandHolder!!.provider
-                    is LightRouteLineExpressionProvider,
+                    is LightRouteLineValueProvider,
                 )
 
                 callbackCalled = true
@@ -3870,12 +3871,12 @@ class MapboxRouteLineApiRoboTest {
                     assertTrue(
                         result.primaryRouteLineDynamicData
                             .restrictedSectionExpressionCommandHolder!!.provider
-                        is HeavyRouteLineExpressionProvider,
+                        is HeavyRouteLineValueProvider,
                     )
                     assertTrue(
                         result.routeLineMaskingLayerDynamicData
                             .restrictedSectionExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     callbackCalled = true
                 }
@@ -3956,12 +3957,12 @@ class MapboxRouteLineApiRoboTest {
                     val dynamicData = result.primaryRouteLineDynamicData
                     assertTrue(
                         dynamicData.restrictedSectionExpressionCommandHolder!!.provider
-                        is HeavyRouteLineExpressionProvider,
+                        is HeavyRouteLineValueProvider,
                     )
                     val maskingData = result.routeLineMaskingLayerDynamicData
                     assertTrue(
                         maskingData.restrictedSectionExpressionCommandHolder!!.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     callbackCalled = true
                 }
@@ -3988,32 +3989,26 @@ class MapboxRouteLineApiRoboTest {
                 .vanishingRouteLineEnabled(true)
                 .build()
             val api = MapboxRouteLineApi(apiOptions)
-            val expectedRestrictedExpressionContents = listOf(
-                StringChecker("literal"),
-                ListChecker(
-                    DoubleChecker(0.0),
-                    DoubleChecker(0.0),
-                ),
-            )
+            val expectedRestrictedExpressionContents = Value.valueOf(0.0)
             val route = loadNavigationRoute("multileg_route_two_legs_with_restrictions.json")
 
             api.setNavigationRoutes(listOf(route), activeLegIndex = 0)
             val result = api.setVanishingOffset(0.0).value!!
-            val actual = getAppliedExpression(
+            val actual = getAppliedValue(
                 result
                     .primaryRouteLineDynamicData!!
                     .restrictedSectionExpressionCommandHolder!!,
                 viewOptions,
-                "line-trim-offset",
+                "line-trim-end",
             )
 
-            checkExpression(
+            assertEquals(
                 expectedRestrictedExpressionContents,
                 actual,
             )
             assertTrue(
                 result.primaryRouteLineDynamicData.restrictedSectionExpressionCommandHolder!!
-                    .provider is LightRouteLineExpressionProvider,
+                    .provider is LightRouteLineValueProvider,
             )
         }
 
@@ -4036,32 +4031,26 @@ class MapboxRouteLineApiRoboTest {
                 .vanishingRouteLineEnabled(true)
                 .build()
             val api = MapboxRouteLineApi(apiOptions)
-            val expectedRestrictedExpressionContents = listOf(
-                StringChecker("literal"),
-                ListChecker(
-                    DoubleChecker(0.0),
-                    DoubleChecker(0.0),
-                ),
-            )
+            val expectedRestrictedExpressionContents = Value.valueOf(0.0)
             val route = loadNavigationRoute("multileg_route_two_legs_with_restrictions.json")
 
             api.setNavigationRoutes(listOf(route), activeLegIndex = 1)
             val result = api.setVanishingOffset(0.0).value!!
-            val actual = getAppliedExpression(
+            val actual = getAppliedValue(
                 result
                     .primaryRouteLineDynamicData!!
                     .restrictedSectionExpressionCommandHolder!!,
                 viewOptions,
-                "line-trim-offset",
+                "line-trim-end",
             )
 
-            checkExpression(
+            assertEquals(
                 expectedRestrictedExpressionContents,
                 actual,
             )
             assertTrue(
                 result.primaryRouteLineDynamicData.restrictedSectionExpressionCommandHolder!!
-                    .provider is LightRouteLineExpressionProvider,
+                    .provider is LightRouteLineValueProvider,
             )
         }
 
@@ -4149,7 +4138,7 @@ class MapboxRouteLineApiRoboTest {
         )
         assertTrue(
             result.value!!.alternativeRouteLinesData[0].dynamicData!!.trafficExpressionCommandHolder
-                ?.provider is HeavyRouteLineExpressionProvider,
+                ?.provider is HeavyRouteLineValueProvider,
         )
         checkExpression(
             expectedAlternative2TrafficLineExpressionContents,
@@ -4162,7 +4151,7 @@ class MapboxRouteLineApiRoboTest {
         )
         assertTrue(
             result.value!!.alternativeRouteLinesData[1].dynamicData!!
-                .trafficExpressionCommandHolder?.provider is HeavyRouteLineExpressionProvider,
+                .trafficExpressionCommandHolder?.provider is HeavyRouteLineValueProvider,
         )
     }
 
@@ -4403,15 +4392,15 @@ class MapboxRouteLineApiRoboTest {
 
         assertTrue(
             result.value!!.primaryRouteLineData.dynamicData!!.casingExpressionCommandHolder
-                .provider is LightRouteLineExpressionProvider,
+                .provider is LightRouteLineValueProvider,
         )
         assertTrue(
             result.value!!.primaryRouteLineData.dynamicData!!.baseExpressionCommandHolder
-                .provider is LightRouteLineExpressionProvider,
+                .provider is LightRouteLineValueProvider,
         )
         assertTrue(
             result.value!!.primaryRouteLineData.dynamicData!!.trafficExpressionCommandHolder!!
-                .provider is HeavyRouteLineExpressionProvider,
+                .provider is HeavyRouteLineValueProvider,
         )
 
         assertEquals(
@@ -4447,22 +4436,10 @@ class MapboxRouteLineApiRoboTest {
             .vanishingRouteLineUpdateIntervalNano(0)
             .build()
         val api = MapboxRouteLineApi(apiOptions)
-        val expectedCasingExpressionContents = listOf(
-            StringChecker("literal"),
-            ListChecker(DoubleChecker(0.0), DoubleChecker(0.2638437072304186)),
-        )
-        val expectedRouteExpressionContents = listOf(
-            StringChecker("literal"),
-            ListChecker(DoubleChecker(0.0), DoubleChecker(0.2638437072304186)),
-        )
-        val expectedTrafficExpressionContents = listOf(
-            StringChecker("literal"),
-            ListChecker(DoubleChecker(0.0), DoubleChecker(0.26384370723041864)),
-        )
-        val expectedRestrictedExpressionContents = listOf(
-            StringChecker("literal"),
-            ListChecker(DoubleChecker(0.0), DoubleChecker(0.2638437072304186)),
-        )
+        val expectedCasingExpressionContents = Value.valueOf(0.2638437072304186)
+        val expectedRouteExpressionContents = Value.valueOf(0.2638437072304186)
+        val expectedTrafficExpressionContents = Value.valueOf(0.2638437072304186)
+        val expectedRestrictedExpressionContents = Value.valueOf(0.2638437072304186)
         val route = shortRoute.navigationRoute
         val lineString = LineString.fromPolyline(
             route.directionsRoute.geometry() ?: "",
@@ -4476,58 +4453,58 @@ class MapboxRouteLineApiRoboTest {
 
         val result = api.updateTraveledRouteLine(lineString.coordinates()[1])
 
-        checkExpression(
+        assertEquals(
             expectedCasingExpressionContents,
-            getAppliedExpression(
+            getAppliedValue(
                 result.value!!.primaryRouteLineDynamicData!!
                     .casingExpressionCommandHolder,
                 viewOptions,
-                "line-trim-offset",
+                "line-trim-end",
             ),
         )
-        checkExpression(
+        assertEquals(
             expectedRouteExpressionContents,
-            getAppliedExpression(
+            getAppliedValue(
                 result.value!!.primaryRouteLineDynamicData!!
                     .baseExpressionCommandHolder,
                 viewOptions,
-                "line-trim-offset",
+                "line-trim-end",
             ),
         )
-        checkExpression(
+        assertEquals(
             expectedTrafficExpressionContents,
-            getAppliedExpression(
+            getAppliedValue(
                 result.value!!
                     .primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!,
                 viewOptions,
-                "line-trim-offset",
+                "line-trim-end",
             ),
         )
-        checkExpression(
+        assertEquals(
             expectedRestrictedExpressionContents,
-            getAppliedExpression(
+            getAppliedValue(
                 result.value!!
                     .primaryRouteLineDynamicData!!.restrictedSectionExpressionCommandHolder!!,
                 viewOptions,
-                "line-trim-offset",
+                "line-trim-end",
             ),
         )
 
         assertTrue(
             result.value!!.primaryRouteLineDynamicData!!.casingExpressionCommandHolder
-                .provider is LightRouteLineExpressionProvider,
+                .provider is LightRouteLineValueProvider,
         )
         assertTrue(
             result.value!!.primaryRouteLineDynamicData!!.baseExpressionCommandHolder
-                .provider is LightRouteLineExpressionProvider,
+                .provider is LightRouteLineValueProvider,
         )
         assertTrue(
             result.value!!.primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!
-                .provider is LightRouteLineExpressionProvider,
+                .provider is LightRouteLineValueProvider,
         )
         assertTrue(
             result.value!!.primaryRouteLineDynamicData!!.restrictedSectionExpressionCommandHolder!!
-                .provider is LightRouteLineExpressionProvider,
+                .provider is LightRouteLineValueProvider,
         )
     }
 
@@ -4569,35 +4546,23 @@ class MapboxRouteLineApiRoboTest {
         api.updateVanishingPointState(routeProgress.currentState)
         val result = api.updateTraveledRouteLine(lineString.coordinates()[16])
 
-        val expectedTrafficExpressionContents = listOf(
-            StringChecker("literal"),
-            ListChecker(
-                DoubleChecker(0.0),
-                DoubleChecker(0.3775848671550963),
-            ),
-        )
-        val expectedMaskingTrafficExpressionContents = listOf(
-            StringChecker("literal"),
-            ListChecker(
-                DoubleChecker(0.0),
-                DoubleChecker(0.3775848671550963),
-            ),
-        )
+        val expectedTrafficExpressionContents = Value.valueOf(0.3775848671550963)
+        val expectedMaskingTrafficExpressionContents = Value.valueOf(0.3775848671550963)
 
-        checkExpression(
+        assertEquals(
             expectedTrafficExpressionContents,
-            getAppliedExpression(
+            getAppliedValue(
                 result.value!!.primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!,
                 viewOptions,
-                "line-trim-offset",
+                "line-trim-end",
             ),
         )
-        checkExpression(
+        assertEquals(
             expectedMaskingTrafficExpressionContents,
-            getAppliedExpression(
+            getAppliedValue(
                 result.value!!.routeLineMaskingLayerDynamicData!!.trafficExpressionCommandHolder!!,
                 viewOptions,
-                "line-trim-offset",
+                "line-trim-end",
             ),
         )
         assertNull(result.value!!.routeLineMaskingLayerDynamicData!!.trailExpressionCommandHolder)
@@ -4607,11 +4572,11 @@ class MapboxRouteLineApiRoboTest {
 
         assertTrue(
             result.value!!.primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!
-                .provider is LightRouteLineExpressionProvider,
+                .provider is LightRouteLineValueProvider,
         )
         assertTrue(
             result.value!!.routeLineMaskingLayerDynamicData!!.trafficExpressionCommandHolder!!
-                .provider is LightRouteLineExpressionProvider,
+                .provider is LightRouteLineValueProvider,
         )
     }
 
@@ -4697,10 +4662,7 @@ class MapboxRouteLineApiRoboTest {
                 .build()
                 .toData()
             val api = MapboxRouteLineApi(apiOptions)
-            val expectedRestrictedExpressionContents = listOf(
-                StringChecker("literal"),
-                ListChecker(DoubleChecker(0.0), DoubleChecker(0.017526274708172696)),
-            )
+            val expectedRestrictedExpressionContents = Value.valueOf(0.017526274708172696)
             val route = routeWithRestrictions.navigationRoute
             val lineString = LineString.fromPolyline(
                 route.directionsRoute.geometry() ?: "",
@@ -4715,20 +4677,20 @@ class MapboxRouteLineApiRoboTest {
             mockkObject(MapboxRouteLineUtils)
             val result = api.updateTraveledRouteLine(lineString.coordinates()[1])
 
-            checkExpression(
+            assertEquals(
                 expectedRestrictedExpressionContents,
-                getAppliedExpression(
+                getAppliedValue(
                     result.value!!.primaryRouteLineDynamicData!!
                         .restrictedSectionExpressionCommandHolder!!,
                     viewOptions,
-                    "line-trim-offset",
+                    "line-trim-end",
                 ),
             )
 
             assertTrue(
                 result.value!!.primaryRouteLineDynamicData!!
                     .restrictedSectionExpressionCommandHolder!!.provider
-                is LightRouteLineExpressionProvider,
+                is LightRouteLineValueProvider,
             )
 
             verify(exactly = 0) {
@@ -4742,22 +4704,10 @@ class MapboxRouteLineApiRoboTest {
     @Test
     fun updateTraveledRouteLine_whenRouteRestrictionsEnabledButHasNone() =
         coroutineRule.runBlockingTest {
-            val expectedCasingExpressionContents = listOf(
-                StringChecker("literal"),
-                ListChecker(DoubleChecker(0.0), DoubleChecker(0.2638437072304186)),
-            )
-            val expectedRouteExpressionContents = listOf(
-                StringChecker("literal"),
-                ListChecker(DoubleChecker(0.0), DoubleChecker(0.2638437072304186)),
-            )
-            val expectedTrafficExpressionContents = listOf(
-                StringChecker("literal"),
-                ListChecker(DoubleChecker(0.0), DoubleChecker(0.2638437072304186)),
-            )
-            val restrictedTrafficExpressionContents = listOf(
-                StringChecker("literal"),
-                ListChecker(DoubleChecker(0.0), DoubleChecker(0.2638437072304186)),
-            )
+            val expectedCasingExpressionContents = Value.valueOf(0.2638437072304186)
+            val expectedRouteExpressionContents = Value.valueOf(0.2638437072304186)
+            val expectedTrafficExpressionContents = Value.valueOf(0.2638437072304186)
+            val restrictedTrafficExpressionContents = Value.valueOf(0.2638437072304186)
             val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
                 .displayRestrictedRoadSections(true)
                 .build()
@@ -4781,72 +4731,66 @@ class MapboxRouteLineApiRoboTest {
 
             val result = api.updateTraveledRouteLine(lineString.coordinates()[1])
 
-            checkExpression(
+            assertEquals(
                 expectedCasingExpressionContents,
-                getAppliedExpression(
+                getAppliedValue(
                     result.value!!.primaryRouteLineDynamicData!!
                         .casingExpressionCommandHolder,
                     viewOptions,
-                    "line-trim-offset",
+                    "line-trim-end",
                 ),
             )
-            checkExpression(
+            assertEquals(
                 expectedRouteExpressionContents,
-                getAppliedExpression(
+                getAppliedValue(
                     result.value!!.primaryRouteLineDynamicData!!
                         .baseExpressionCommandHolder,
                     viewOptions,
-                    "line-trim-offset",
+                    "line-trim-end",
                 ),
             )
-            checkExpression(
+            assertEquals(
                 expectedTrafficExpressionContents,
-                getAppliedExpression(
+                getAppliedValue(
                     result.value!!
                         .primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!,
                     viewOptions,
-                    "line-trim-offset",
+                    "line-trim-end",
                 ),
             )
-            checkExpression(
+            assertEquals(
                 restrictedTrafficExpressionContents,
-                getAppliedExpression(
+                getAppliedValue(
                     result.value!!
                         .primaryRouteLineDynamicData!!.restrictedSectionExpressionCommandHolder!!,
                     viewOptions,
-                    "line-trim-offset",
+                    "line-trim-end",
                 ),
             )
 
             assertTrue(
                 result.value!!.primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!
-                    .provider is LightRouteLineExpressionProvider,
+                    .provider is LightRouteLineValueProvider,
             )
             assertTrue(
                 result.value!!.primaryRouteLineDynamicData!!.baseExpressionCommandHolder!!
-                    .provider is LightRouteLineExpressionProvider,
+                    .provider is LightRouteLineValueProvider,
             )
             assertTrue(
                 result.value!!.primaryRouteLineDynamicData!!.casingExpressionCommandHolder!!
-                    .provider is LightRouteLineExpressionProvider,
+                    .provider is LightRouteLineValueProvider,
             )
             assertTrue(
                 result.value!!.primaryRouteLineDynamicData!!
                     .restrictedSectionExpressionCommandHolder!!.provider
-                is LightRouteLineExpressionProvider,
+                is LightRouteLineValueProvider,
             )
         }
 
     @Test
     fun updateWithRouteProgress_whenDeEmphasizeInactiveLegSegments() =
         coroutineRule.runBlockingTest {
-            val expectedTrafficExpContents = listOf(
-                StringChecker("literal"),
-                ListChecker(
-                    DoubleChecker(0.0),
-                    DoubleChecker(0.0),
-                ),
-            )
+            val expectedTrafficExpContents = Value.valueOf(0.0)
             val route = multiLegRouteTwoLegs.navigationRoute
             val apiOptions = MapboxRouteLineApiOptions.Builder()
                 .styleInactiveRouteLegsIndependently(true)
@@ -4867,18 +4811,18 @@ class MapboxRouteLineApiRoboTest {
 
             val result = api.setVanishingOffset(0.0).value!!
 
-            checkExpression(
+            assertEquals(
                 expectedTrafficExpContents,
-                getAppliedExpression(
+                getAppliedValue(
                     result.primaryRouteLineDynamicData!!
                         .trafficExpressionCommandHolder!!,
                     viewOptions,
-                    "line-trim-offset",
+                    "line-trim-end",
                 ),
             )
             assertTrue(
                 result.primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!
-                    .provider is LightRouteLineExpressionProvider,
+                    .provider is LightRouteLineValueProvider,
             )
         }
 
@@ -4888,71 +4832,53 @@ class MapboxRouteLineApiRoboTest {
             .vanishingRouteLineEnabled(true)
             .build()
         val viewOptions = MapboxRouteLineViewOptions.Builder(ctx).build().toData()
-        val trafficExpressionContents = listOf(
-            StringChecker("literal"),
-            ListChecker(
-                DoubleChecker(0.0),
-                DoubleChecker(0.5),
-            ),
-        )
-        val routeLineExpressionContents = listOf(
-            StringChecker("literal"),
-            ListChecker(
-                DoubleChecker(0.0),
-                DoubleChecker(0.5),
-            ),
-        )
-        val casingExpressionContents = listOf(
-            StringChecker("literal"),
-            ListChecker(
-                DoubleChecker(0.0),
-                DoubleChecker(0.5),
-            ),
-        )
+        val trafficExpressionContents = Value.valueOf(0.5)
+        val routeLineExpressionContents = Value.valueOf(0.5)
+        val casingExpressionContents = Value.valueOf(0.5)
         val api = MapboxRouteLineApi(apiOptions)
 
         api.setNavigationRoutes(listOf(shortRoute.navigationRoute))
 
         val result = api.setVanishingOffset(.5)
 
-        checkExpression(
+        assertEquals(
             trafficExpressionContents,
-            getAppliedExpression(
+            getAppliedValue(
                 result.value!!.primaryRouteLineDynamicData!!
                     .trafficExpressionCommandHolder!!,
                 viewOptions,
-                "line-trim-offset",
+                "line-trim-end",
             ),
         )
-        checkExpression(
+        assertEquals(
             routeLineExpressionContents,
-            getAppliedExpression(
+            getAppliedValue(
                 result.value!!.primaryRouteLineDynamicData!!
                     .baseExpressionCommandHolder,
                 viewOptions,
-                "line-trim-offset",
+                "line-trim-end",
             ),
         )
-        checkExpression(
+        assertEquals(
             casingExpressionContents,
-            getAppliedExpression(
+            getAppliedValue(
                 result.value!!.primaryRouteLineDynamicData!!
                     .casingExpressionCommandHolder,
                 viewOptions,
-                "line-trim-offset",
+                "line-trim-end",
             ),
         )
         assertTrue(
             result.value!!.primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!
-                .provider is LightRouteLineExpressionProvider,
+                .provider is LightRouteLineValueProvider,
         )
         assertTrue(
             result.value!!.primaryRouteLineDynamicData!!.baseExpressionCommandHolder!!
-                .provider is LightRouteLineExpressionProvider,
+                .provider is LightRouteLineValueProvider,
         )
         assertTrue(
             result.value!!.primaryRouteLineDynamicData!!.casingExpressionCommandHolder!!
-                .provider is LightRouteLineExpressionProvider,
+                .provider is LightRouteLineValueProvider,
         )
     }
 
@@ -4986,44 +4912,32 @@ class MapboxRouteLineApiRoboTest {
         api.setNavigationRoutes(listOf(route))
         val result = api.setVanishingOffset(.4)
 
-        val expectedTrafficExpressionContents = listOf(
-            StringChecker("literal"),
-            ListChecker(
-                DoubleChecker(0.0),
-                DoubleChecker(0.4),
-            ),
-        )
-        val expectedMaskingTrafficExpressionContents = listOf(
-            StringChecker("literal"),
-            ListChecker(
-                DoubleChecker(0.0),
-                DoubleChecker(0.4),
-            ),
-        )
+        val expectedTrafficExpressionContents = Value.valueOf(0.4)
+        val expectedMaskingTrafficExpressionContents = Value.valueOf(0.4)
 
-        checkExpression(
+        assertEquals(
             expectedTrafficExpressionContents,
-            getAppliedExpression(
+            getAppliedValue(
                 result.value!!.primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!,
                 viewOptions,
-                "line-trim-offset",
+                "line-trim-end",
             ),
         )
-        checkExpression(
+        assertEquals(
             expectedMaskingTrafficExpressionContents,
-            getAppliedExpression(
+            getAppliedValue(
                 result.value!!.routeLineMaskingLayerDynamicData!!.trafficExpressionCommandHolder!!,
                 viewOptions,
-                "line-trim-offset",
+                "line-trim-end",
             ),
         )
         assertTrue(
             result.value!!.primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!
-                .provider is LightRouteLineExpressionProvider,
+                .provider is LightRouteLineValueProvider,
         )
         assertTrue(
             result.value!!.routeLineMaskingLayerDynamicData!!.trafficExpressionCommandHolder!!
-                .provider is LightRouteLineExpressionProvider,
+                .provider is LightRouteLineValueProvider,
         )
         assertNull(result.value!!.routeLineMaskingLayerDynamicData!!.trailExpressionCommandHolder)
         assertNull(
@@ -5054,34 +4968,10 @@ class MapboxRouteLineApiRoboTest {
             .vanishingRouteLineEnabled(true)
             .calculateRestrictedRoadSections(true)
             .build()
-        val trafficExpressionContents = listOf(
-            StringChecker("literal"),
-            ListChecker(
-                DoubleChecker(0.0),
-                DoubleChecker(0.5),
-            ),
-        )
-        val routeLineExpressionContents = listOf(
-            StringChecker("literal"),
-            ListChecker(
-                DoubleChecker(0.0),
-                DoubleChecker(0.5),
-            ),
-        )
-        val casingExpressionContents = listOf(
-            StringChecker("literal"),
-            ListChecker(
-                DoubleChecker(0.0),
-                DoubleChecker(0.5),
-            ),
-        )
-        val restrictedExpressionContents = listOf(
-            StringChecker("literal"),
-            ListChecker(
-                DoubleChecker(0.0),
-                DoubleChecker(0.5),
-            ),
-        )
+        val trafficExpressionContents = Value.valueOf(0.5)
+        val routeLineExpressionContents = Value.valueOf(0.5)
+        val casingExpressionContents = Value.valueOf(0.5)
+        val restrictedExpressionContents = Value.valueOf(0.5)
         val route = loadNavigationRoute("route-with-restrictions.json")
 
         val api = MapboxRouteLineApi(apiOptions)
@@ -5089,58 +4979,58 @@ class MapboxRouteLineApiRoboTest {
 
         val result = api.setVanishingOffset(.5)
 
-        checkExpression(
+        assertEquals(
             trafficExpressionContents,
-            getAppliedExpression(
+            getAppliedValue(
                 result.value!!.primaryRouteLineDynamicData!!
                     .trafficExpressionCommandHolder!!,
                 viewOptions,
-                "line-trim-offset",
+                "line-trim-end",
             ),
         )
-        checkExpression(
+        assertEquals(
             routeLineExpressionContents,
-            getAppliedExpression(
+            getAppliedValue(
                 result.value!!.primaryRouteLineDynamicData!!
                     .baseExpressionCommandHolder,
                 viewOptions,
-                "line-trim-offset",
+                "line-trim-end",
             ),
         )
-        checkExpression(
+        assertEquals(
             casingExpressionContents,
-            getAppliedExpression(
+            getAppliedValue(
                 result.value!!.primaryRouteLineDynamicData!!
                     .casingExpressionCommandHolder,
                 viewOptions,
-                "line-trim-offset",
+                "line-trim-end",
             ),
         )
-        checkExpression(
+        assertEquals(
             restrictedExpressionContents,
-            getAppliedExpression(
+            getAppliedValue(
                 result.value!!.primaryRouteLineDynamicData!!
                     .restrictedSectionExpressionCommandHolder!!,
                 viewOptions,
-                "line-trim-offset",
+                "line-trim-end",
             ),
         )
 
         assertTrue(
             result.value!!.primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!
-                .provider is LightRouteLineExpressionProvider,
+                .provider is LightRouteLineValueProvider,
         )
         assertTrue(
             result.value!!.primaryRouteLineDynamicData!!.baseExpressionCommandHolder!!
-                .provider is LightRouteLineExpressionProvider,
+                .provider is LightRouteLineValueProvider,
         )
         assertTrue(
             result.value!!.primaryRouteLineDynamicData!!.casingExpressionCommandHolder!!
-                .provider is LightRouteLineExpressionProvider,
+                .provider is LightRouteLineValueProvider,
         )
         assertTrue(
             result.value!!.primaryRouteLineDynamicData!!.restrictedSectionExpressionCommandHolder!!
-                .provider is LightRouteLineExpressionProvider,
+                .provider is LightRouteLineValueProvider,
         )
     }
 
@@ -5154,34 +5044,10 @@ class MapboxRouteLineApiRoboTest {
             .vanishingRouteLineEnabled(true)
             .calculateRestrictedRoadSections(false)
             .build()
-        val trafficExpressionContents = listOf(
-            StringChecker("literal"),
-            ListChecker(
-                DoubleChecker(0.0),
-                DoubleChecker(0.5),
-            ),
-        )
-        val routeLineExpressionContents = listOf(
-            StringChecker("literal"),
-            ListChecker(
-                DoubleChecker(0.0),
-                DoubleChecker(0.5),
-            ),
-        )
-        val casingExpressionContents = listOf(
-            StringChecker("literal"),
-            ListChecker(
-                DoubleChecker(0.0),
-                DoubleChecker(0.5),
-            ),
-        )
-        val restrictedExpressionContents = listOf(
-            StringChecker("literal"),
-            ListChecker(
-                DoubleChecker(0.0),
-                DoubleChecker(0.5),
-            ),
-        )
+        val trafficExpressionContents = Value.valueOf(0.5)
+        val routeLineExpressionContents = Value.valueOf(0.5)
+        val casingExpressionContents = Value.valueOf(0.5)
+        val restrictedExpressionContents = Value.valueOf(0.5)
         val route = loadNavigationRoute("route-with-restrictions.json")
 
         val api = MapboxRouteLineApi(apiOptions)
@@ -5189,40 +5055,40 @@ class MapboxRouteLineApiRoboTest {
 
         val result = api.setVanishingOffset(.5)
 
-        checkExpression(
+        assertEquals(
             trafficExpressionContents,
-            getAppliedExpression(
+            getAppliedValue(
                 result.value!!.primaryRouteLineDynamicData!!
                     .trafficExpressionCommandHolder!!,
                 viewOptions,
-                "line-trim-offset",
+                "line-trim-end",
             ),
         )
-        checkExpression(
+        assertEquals(
             routeLineExpressionContents,
-            getAppliedExpression(
+            getAppliedValue(
                 result.value!!.primaryRouteLineDynamicData!!
                     .baseExpressionCommandHolder,
                 viewOptions,
-                "line-trim-offset",
+                "line-trim-end",
             ),
         )
-        checkExpression(
+        assertEquals(
             casingExpressionContents,
-            getAppliedExpression(
+            getAppliedValue(
                 result.value!!.primaryRouteLineDynamicData!!
                     .casingExpressionCommandHolder,
                 viewOptions,
-                "line-trim-offset",
+                "line-trim-end",
             ),
         )
-        checkExpression(
+        assertEquals(
             restrictedExpressionContents,
-            getAppliedExpression(
+            getAppliedValue(
                 result.value!!.primaryRouteLineDynamicData!!
                     .restrictedSectionExpressionCommandHolder!!,
                 viewOptions,
-                "line-trim-offset",
+                "line-trim-end",
             ),
         )
     }
@@ -5396,7 +5262,7 @@ class MapboxRouteLineApiRoboTest {
             )
             assertTrue(
                 result.primaryRouteLineData.dynamicData.trafficExpressionCommandHolder!!
-                    .provider is HeavyRouteLineExpressionProvider,
+                    .provider is HeavyRouteLineValueProvider,
             )
             checkExpression(
                 expectedBaseExpressionContents,
@@ -5411,7 +5277,7 @@ class MapboxRouteLineApiRoboTest {
             )
             assertTrue(
                 result.alternativeRouteLinesData[0].dynamicData!!.baseExpressionCommandHolder
-                    .provider is LightRouteLineExpressionProvider,
+                    .provider is LightRouteLineValueProvider,
             )
             checkExpression(
                 expectedCasingExpressionContents,
@@ -5426,7 +5292,7 @@ class MapboxRouteLineApiRoboTest {
             )
             assertTrue(
                 result.alternativeRouteLinesData[0].dynamicData!!.casingExpressionCommandHolder
-                    .provider is LightRouteLineExpressionProvider,
+                    .provider is LightRouteLineValueProvider,
             )
             checkExpression(
                 expectedAlternativeTrafficExpressionContents,
@@ -5441,7 +5307,7 @@ class MapboxRouteLineApiRoboTest {
             )
             assertTrue(
                 result.alternativeRouteLinesData[0].dynamicData!!.trafficExpressionCommandHolder!!
-                    .provider is HeavyRouteLineExpressionProvider,
+                    .provider is HeavyRouteLineValueProvider,
             )
         }
 

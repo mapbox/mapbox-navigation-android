@@ -1,12 +1,12 @@
 package com.mapbox.navigation.ui.maps.route.line.model
 
-import com.mapbox.navigation.ui.maps.route.line.api.RouteLineExpressionCommandHolder
+import com.mapbox.navigation.ui.maps.route.line.api.RouteLineValueCommandHolder
 
 internal data class VanishingRouteLineExpressions(
-    val trafficLineExpressionCommandHolder: RouteLineExpressionCommandHolder,
-    val routeLineExpressionCommandHolder: RouteLineExpressionCommandHolder,
-    val routeLineCasingExpressionCommandHolder: RouteLineExpressionCommandHolder,
-    val restrictedRoadExpressionCommandHolder: RouteLineExpressionCommandHolder?,
-    val trailExpressionCommandHolder: RouteLineExpressionCommandHolder? = null,
-    val trailCasingExpressionCommandHolder: RouteLineExpressionCommandHolder? = null,
+    val trafficLineExpressionCommandHolder: RouteLineValueCommandHolder,
+    val routeLineValueCommandHolder: RouteLineValueCommandHolder,
+    val routeLineCasingExpressionCommandHolder: RouteLineValueCommandHolder,
+    val restrictedRoadExpressionCommandHolder: RouteLineValueCommandHolder?,
+    val trailExpressionCommandHolder: RouteLineValueCommandHolder? = null,
+    val trailCasingExpressionCommandHolder: RouteLineValueCommandHolder? = null,
 )

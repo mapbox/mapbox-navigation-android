@@ -1,11 +1,14 @@
 package com.mapbox.navigation.ui.maps.internal.route.line
 
 import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.Value
+import com.mapbox.maps.Style
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.ui.maps.route.line.api.LightRouteLineExpressionProvider
+import com.mapbox.navigation.ui.maps.route.line.api.LightRouteLineValueProvider
 import com.mapbox.navigation.ui.maps.route.line.api.LineGradientCommandApplier
 import com.mapbox.navigation.ui.maps.route.line.api.LineTrimCommandApplier
-import com.mapbox.navigation.ui.maps.route.line.api.RouteLineExpressionCommandHolder
+import com.mapbox.navigation.ui.maps.route.line.api.RouteLineCommandApplier
+import com.mapbox.navigation.ui.maps.route.line.api.RouteLineValueCommandHolder
 import com.mapbox.navigation.ui.maps.route.line.api.unsupportedRouteLineCommandHolder
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
@@ -130,22 +133,45 @@ private suspend fun RouteLineDynamicData.toData(
     )
 }
 
-private fun RouteLineExpressionEventData.toHolder(): RouteLineExpressionCommandHolder {
+private fun RouteLineExpressionEventData.toHolder(): RouteLineValueCommandHolder {
     return when (this) {
         is RouteLineNoOpExpressionEventData -> unsupportedRouteLineCommandHolder()
         is RouteLineProviderBasedExpressionEventData -> {
-            val provider = LightRouteLineExpressionProvider { expression }
             when (property) {
+                // deprecated
                 "line-trim-offset" -> {
-                    RouteLineExpressionCommandHolder(
-                        provider,
+                    RouteLineValueCommandHolder(
+                        LightRouteLineValueProvider { expression!! },
+                        object : RouteLineCommandApplier<Value>() {
+                            override fun applyCommand(
+                                style: Style,
+                                layerId: String,
+                                command: Value,
+                            ) {
+                                style.setStyleLayerProperty(layerId, getProperty(), command)
+                            }
+
+                            override fun getProperty(): String {
+                                return "line-trim-offset"
+                            }
+                        },
+                    )
+                }
+
+                "line-trim-end" -> {
+                    RouteLineValueCommandHolder(
+                        LightRouteLineValueProvider { value!! },
                         LineTrimCommandApplier(),
                     )
                 }
 
                 "line-gradient" -> {
-                    RouteLineExpressionCommandHolder(
-                        provider,
+                    RouteLineValueCommandHolder(
+                        if (value != null) {
+                            LightRouteLineValueProvider { value!! }
+                        } else {
+                            LightRouteLineValueProvider { expression!! }
+                        },
                         LineGradientCommandApplier(),
                     )
                 }

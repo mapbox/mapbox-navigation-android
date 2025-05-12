@@ -8,6 +8,7 @@ import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.bindgen.Value
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
@@ -404,13 +405,7 @@ class MapboxRouteLineApiTest {
     @Test
     fun updateWithRouteProgress_whenDeEmphasizeInactiveLegSegments_vanishingRouteLineDisabled() =
         coroutineRule.runBlockingTest {
-            val expectedTrafficExpContents = listOf(
-                StringChecker("literal"),
-                ListChecker(
-                    DoubleChecker(0.0),
-                    DoubleChecker(0.5),
-                ),
-            )
+            val expectedTrafficExpContents = Value.valueOf(0.5)
             val route = loadNavigationRoute("multileg-route-two-legs.json")
             val options = MapboxRouteLineApiOptions.Builder()
                 .vanishingRouteLineEnabled(false)
@@ -426,15 +421,17 @@ class MapboxRouteLineApiTest {
 
             val result = api.setVanishingOffset(0.5).value!!
 
-            checkAppliedExpression(
+            assertEquals(
                 expectedTrafficExpContents,
-                result.primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!,
-                viewData,
-                "line-trim-offset",
+                getAppliedValue(
+                    result.primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!,
+                    viewData,
+                    "line-trim-end",
+                ),
             )
             assertTrue(
                 result.primaryRouteLineDynamicData.trafficExpressionCommandHolder!!.provider
-                is LightRouteLineExpressionProvider,
+                is LightRouteLineValueProvider,
             )
             assertTrue(
                 result.primaryRouteLineDynamicData.trafficExpressionCommandHolder.applier
@@ -979,7 +976,7 @@ class MapboxRouteLineApiTest {
 
                     assertTrue(
                         maskingData.trafficExpressionCommandHolder
-                            .provider is LightRouteLineExpressionProvider,
+                            .provider is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.trafficExpressionCommandHolder.applier
@@ -988,7 +985,7 @@ class MapboxRouteLineApiTest {
 
                     assertTrue(
                         maskingData.baseExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.baseExpressionCommandHolder.applier
@@ -996,7 +993,7 @@ class MapboxRouteLineApiTest {
                     )
                     assertTrue(
                         maskingData.casingExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.casingExpressionCommandHolder.applier
@@ -1004,7 +1001,7 @@ class MapboxRouteLineApiTest {
                     )
                     assertTrue(
                         maskingData.trailExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.trafficExpressionCommandHolder.applier
@@ -1012,7 +1009,7 @@ class MapboxRouteLineApiTest {
                     )
                     assertTrue(
                         maskingData.trailCasingExpressionCommandHolder
-                            .provider is LightRouteLineExpressionProvider,
+                            .provider is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.trailCasingExpressionCommandHolder
@@ -1154,7 +1151,7 @@ class MapboxRouteLineApiTest {
 
                     assertTrue(
                         maskingData.trafficExpressionCommandHolder
-                            .provider is LightRouteLineExpressionProvider,
+                            .provider is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.trafficExpressionCommandHolder.applier
@@ -1163,7 +1160,7 @@ class MapboxRouteLineApiTest {
 
                     assertTrue(
                         maskingData.baseExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.baseExpressionCommandHolder.applier
@@ -1171,7 +1168,7 @@ class MapboxRouteLineApiTest {
                     )
                     assertTrue(
                         maskingData.casingExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.casingExpressionCommandHolder.applier
@@ -1179,7 +1176,7 @@ class MapboxRouteLineApiTest {
                     )
                     assertTrue(
                         maskingData.trailExpressionCommandHolder.provider
-                        is LightRouteLineExpressionProvider,
+                        is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.trafficExpressionCommandHolder.applier
@@ -1187,7 +1184,7 @@ class MapboxRouteLineApiTest {
                     )
                     assertTrue(
                         maskingData.trailCasingExpressionCommandHolder
-                            .provider is LightRouteLineExpressionProvider,
+                            .provider is LightRouteLineValueProvider,
                     )
                     assertTrue(
                         maskingData.trailCasingExpressionCommandHolder
@@ -1389,39 +1386,39 @@ class MapboxRouteLineApiTest {
         )
 
         assertTrue(
-            result.trafficExpressionCommandHolder.provider is LightRouteLineExpressionProvider,
+            result.trafficExpressionCommandHolder.provider is LightRouteLineValueProvider,
         )
         assertTrue(
             result.trafficExpressionCommandHolder.applier is LineGradientCommandApplier,
         )
 
         assertTrue(
-            result.baseExpressionCommandHolder.provider is LightRouteLineExpressionProvider,
+            result.baseExpressionCommandHolder.provider is LightRouteLineValueProvider,
         )
         assertTrue(
             result.baseExpressionCommandHolder.applier is LineGradientCommandApplier,
         )
         assertTrue(
-            result.casingExpressionCommandHolder.provider is LightRouteLineExpressionProvider,
+            result.casingExpressionCommandHolder.provider is LightRouteLineValueProvider,
         )
         assertTrue(
             result.casingExpressionCommandHolder.applier is LineGradientCommandApplier,
         )
         assertTrue(
-            result.trailExpressionCommandHolder.provider is LightRouteLineExpressionProvider,
+            result.trailExpressionCommandHolder.provider is LightRouteLineValueProvider,
         )
         assertTrue(
             result.trafficExpressionCommandHolder.applier is LineGradientCommandApplier,
         )
         assertTrue(
-            result.trailCasingExpressionCommandHolder.provider is LightRouteLineExpressionProvider,
+            result.trailCasingExpressionCommandHolder.provider is LightRouteLineValueProvider,
         )
         assertTrue(
             result.trailCasingExpressionCommandHolder.applier is LineGradientCommandApplier,
         )
         assertTrue(
             result.restrictedSectionExpressionCommandHolder.provider
-            is LightRouteLineExpressionProvider,
+            is LightRouteLineValueProvider,
         )
         assertTrue(
             result.restrictedSectionExpressionCommandHolder.applier is LineGradientCommandApplier,
@@ -1571,40 +1568,40 @@ class MapboxRouteLineApiTest {
             )
 
             assertTrue(
-                result.trafficExpressionCommandHolder.provider is LightRouteLineExpressionProvider,
+                result.trafficExpressionCommandHolder.provider is LightRouteLineValueProvider,
             )
             assertTrue(
                 result.trafficExpressionCommandHolder.applier is LineGradientCommandApplier,
             )
 
             assertTrue(
-                result.baseExpressionCommandHolder.provider is LightRouteLineExpressionProvider,
+                result.baseExpressionCommandHolder.provider is LightRouteLineValueProvider,
             )
             assertTrue(
                 result.baseExpressionCommandHolder.applier is LineGradientCommandApplier,
             )
             assertTrue(
-                result.casingExpressionCommandHolder.provider is LightRouteLineExpressionProvider,
+                result.casingExpressionCommandHolder.provider is LightRouteLineValueProvider,
             )
             assertTrue(
                 result.casingExpressionCommandHolder.applier is LineGradientCommandApplier,
             )
             assertTrue(
-                result.trailExpressionCommandHolder.provider is LightRouteLineExpressionProvider,
+                result.trailExpressionCommandHolder.provider is LightRouteLineValueProvider,
             )
             assertTrue(
                 result.trafficExpressionCommandHolder.applier is LineGradientCommandApplier,
             )
             assertTrue(
                 result.trailCasingExpressionCommandHolder.provider
-                is LightRouteLineExpressionProvider,
+                is LightRouteLineValueProvider,
             )
             assertTrue(
                 result.trailCasingExpressionCommandHolder.applier is LineGradientCommandApplier,
             )
             assertTrue(
                 result.restrictedSectionExpressionCommandHolder.provider
-                is LightRouteLineExpressionProvider,
+                is LightRouteLineValueProvider,
             )
             assertTrue(
                 result.restrictedSectionExpressionCommandHolder.applier
