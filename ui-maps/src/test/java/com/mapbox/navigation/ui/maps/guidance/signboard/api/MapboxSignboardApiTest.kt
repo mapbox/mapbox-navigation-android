@@ -21,6 +21,8 @@ import com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOpt
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardError
 import com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardValue
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
+import com.mapbox.navigation.utils.internal.InternalJobControlFactory
+import com.mapbox.navigation.utils.internal.JobControl
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -31,6 +33,7 @@ import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.job
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
@@ -66,6 +69,13 @@ class MapboxSignboardApiTest {
         mockkObject(ResourceLoaderFactory)
         mockkStatic(MapboxOptionsUtil::class)
         every { MapboxOptionsUtil.getTokenForService(MapboxServices.DIRECTIONS) } returns "pk.1234"
+        mockkObject(InternalJobControlFactory)
+        every {
+            InternalJobControlFactory.createDefaultScopeJobControl()
+        } answers {
+            val defaultScope = coroutineRule.createTestScope()
+            JobControl(defaultScope.coroutineContext.job, defaultScope)
+        }
 
         mockResourceLoader = mockk(relaxed = true)
         every { ResourceLoaderFactory.getInstance() } returns mockResourceLoader

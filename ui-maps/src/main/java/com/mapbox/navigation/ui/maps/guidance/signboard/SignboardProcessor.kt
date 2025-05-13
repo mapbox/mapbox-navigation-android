@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maps.guidance.signboard
 
+import androidx.annotation.WorkerThread
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.bindgen.DataRef
@@ -17,10 +18,13 @@ import com.mapbox.navigation.utils.internal.isNotEmpty
 internal object SignboardProcessor {
 
     /**
-     * The function takes [SignboardAction] performs business logic and returns [SignboardResult]
+     * The function takes [SignboardAction] performs business logic and returns [SignboardResult].
+     * Some of the actions (e.g. processing SVG) can block the calling thread, so it is
+     * recommended to call this from a background thread.
      * @param action SignboardAction user specific commands
-     * @return SignboardResult
+     * @return [SignboardResult]
      */
+    @WorkerThread
     fun process(action: SignboardAction): SignboardResult {
         return when (action) {
             is SignboardAction.CheckSignboardAvailability -> {
