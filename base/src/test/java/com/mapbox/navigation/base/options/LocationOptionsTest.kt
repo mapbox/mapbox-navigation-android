@@ -67,4 +67,46 @@ class LocationOptionsTest {
             LocationOptions.LocationProviderType.acceptedValues.size,
         )
     }
+
+    @Test
+    fun throwsWhenCustomFactorySetAfterDefaultSourceSet() {
+        val customFactory = mockk<DeviceLocationProviderFactory>()
+        assertThrows(IllegalArgumentException::class.java) {
+            LocationOptions.Builder()
+                .defaultLocationProviderSource(LocationOptions.LocationProviderSource.BEST)
+                .locationProviderFactory(customFactory, LocationOptions.LocationProviderType.REAL)
+                .build()
+        }
+    }
+
+    @Test
+    fun throwsWhenDefaultSourceSetAfterCustomFactorySet() {
+        val customFactory = mockk<DeviceLocationProviderFactory>()
+        assertThrows(IllegalArgumentException::class.java) {
+            LocationOptions.Builder()
+                .locationProviderFactory(customFactory, LocationOptions.LocationProviderType.REAL)
+                .defaultLocationProviderSource(LocationOptions.LocationProviderSource.BEST)
+                .build()
+        }
+    }
+
+    @Test
+    fun sourceDefaultsToBest() {
+        val options = LocationOptions.Builder().build()
+        assertEquals(LocationOptions.LocationProviderSource.BEST, options.locationProviderSource)
+    }
+
+    @Test
+    fun sourceIsSet() {
+        val sources = LocationOptions.LocationProviderSource.Companion::class.java.declaredFields
+            .filter { it.type == LocationOptions.LocationProviderSource::class.java }
+            .map { it.isAccessible = true; it.get(null) as LocationOptions.LocationProviderSource }
+
+        sources.forEach { source ->
+            val options = LocationOptions.Builder()
+                .defaultLocationProviderSource(source)
+                .build()
+            assertEquals(source, options.locationProviderSource)
+        }
+    }
 }

@@ -1,9 +1,12 @@
 package com.mapbox.navigation.core.trip.session
 
 import android.annotation.SuppressLint
+import android.location.LocationManager
 import android.os.SystemClock
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.Cancelable
+import com.mapbox.common.location.DeviceLocationProviderType
+import com.mapbox.common.location.ExtendedLocationProviderParameters
 import com.mapbox.common.location.GetLocationCallback
 import com.mapbox.common.location.Location
 import com.mapbox.common.location.LocationError
@@ -12,6 +15,9 @@ import com.mapbox.common.location.LocationObserver
 import com.mapbox.common.location.LocationProvider
 import com.mapbox.common.location.LocationServiceFactory
 import com.mapbox.navigation.base.options.LocationOptions
+import com.mapbox.navigation.base.options.LocationOptions.LocationProviderSource.Companion.BEST
+import com.mapbox.navigation.base.options.LocationOptions.LocationProviderSource.Companion.FUSED
+import com.mapbox.navigation.base.options.LocationOptions.LocationProviderSource.Companion.GPS
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationProvider
@@ -68,7 +74,6 @@ internal class TripSessionLocationEngine constructor(
     init {
         val customFactory = locationOptions.locationProviderFactory
         if (customFactory != null) {
-            // TODO remove this if in favour of setting location provider type: CORESDK-2290
             if (locationOptions.locationProviderType == LocationOptions.LocationProviderType.REAL) {
                 LocationServiceFactory.getOrCreate()
                     .setUserDefinedDeviceLocationProviderFactory(customFactory)
@@ -76,8 +81,18 @@ internal class TripSessionLocationEngine constructor(
         }
         val deviceLocationProviderExpected =
             if (locationOptions.locationProviderType == LocationOptions.LocationProviderType.REAL) {
-                LocationServiceFactory.getOrCreate()
-                    .getDeviceLocationProvider(locationOptions.request)
+                val commonType = locationOptions.locationProviderSource.toCommon()
+                LocationServiceFactory.getOrCreate().getDeviceLocationProvider(
+                    extendedParameters = ExtendedLocationProviderParameters.Builder()
+                        .deviceLocationProviderType(commonType)
+                        .apply {
+                            if (commonType == DeviceLocationProviderType.ANDROID) {
+                                locationProviderName(LocationManager.GPS_PROVIDER)
+                            }
+                        }
+                        .build(),
+                    request = locationOptions.request,
+                )
             } else {
                 locationOptions.locationProviderFactory?.build(locationOptions.request)
                     ?: ExpectedFactory.createError(
@@ -154,6 +169,15 @@ internal class TripSessionLocationEngine constructor(
             locationAgeMilliseconds > DELAYED_LOCATION_WARNING_THRESHOLD_MS
         ) {
             logW("Got an obsolete location: age = $locationAgeMilliseconds ms", LOG_CATEGORY)
+        }
+    }
+
+    private fun LocationOptions.LocationProviderSource.toCommon() = when (this) {
+        BEST -> DeviceLocationProviderType.BEST
+        GPS -> DeviceLocationProviderType.ANDROID
+        FUSED -> DeviceLocationProviderType.GOOGLE_PLAY_SERVICES
+        else -> {
+            throw IllegalArgumentException("Unknown location provider source: $this")
         }
     }
 

@@ -1,10 +1,13 @@
 package com.mapbox.navigation.core.trip.session
 
+import android.location.LocationManager
 import android.os.Looper
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.Cancelable
 import com.mapbox.common.location.DeviceLocationProvider
 import com.mapbox.common.location.DeviceLocationProviderFactory
+import com.mapbox.common.location.DeviceLocationProviderType
+import com.mapbox.common.location.ExtendedLocationProviderParameters
 import com.mapbox.common.location.Location
 import com.mapbox.common.location.LocationError
 import com.mapbox.common.location.LocationErrorCode
@@ -16,6 +19,7 @@ import com.mapbox.navigation.base.options.LocationOptions
 import com.mapbox.navigation.core.replay.ReplayLocationProvider
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.utils.internal.LoggerFrontend
+import io.mockk.CapturingSlot
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -25,6 +29,7 @@ import io.mockk.unmockkStatic
 import io.mockk.verify
 import io.mockk.verifyOrder
 import org.junit.After
+import org.junit.Assert
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -52,7 +57,10 @@ class TripSessionLocationEngineTest {
     private val locationOptions = LocationOptions.Builder().build()
     private val locationService = mockk<LocationService>(relaxUnitFun = true) {
         every {
-            getDeviceLocationProvider(any<LocationProviderRequest>())
+            getDeviceLocationProvider(
+                any<ExtendedLocationProviderParameters>(),
+                any<LocationProviderRequest>(),
+            )
         } returns ExpectedFactory.createValue(defaultDeviceLocationProvider)
     }
 
@@ -90,7 +98,10 @@ class TripSessionLocationEngineTest {
     fun `should not request location updates from navigation options when error is returned`() {
         every { LocationServiceFactory.getOrCreate() } returns mockk {
             every {
-                getDeviceLocationProvider(any<LocationProviderRequest>())
+                getDeviceLocationProvider(
+                    any<ExtendedLocationProviderParameters>(),
+                    any<LocationProviderRequest>(),
+                )
             } returns ExpectedFactory.createError(
                 LocationError(LocationErrorCode.FAILED_TO_DETECT_LOCATION, "Some error"),
             )
@@ -126,7 +137,10 @@ class TripSessionLocationEngineTest {
             ExpectedFactory.createValue(customLocationProvider)
         }
         every {
-            locationService.getDeviceLocationProvider(any<LocationProviderRequest>())
+            locationService.getDeviceLocationProvider(
+                any<ExtendedLocationProviderParameters>(),
+                any<LocationProviderRequest>(),
+            )
         } returns ExpectedFactory.createValue(customLocationProvider)
         val locationOptions = LocationOptions.Builder()
             .locationProviderFactory(
@@ -145,7 +159,10 @@ class TripSessionLocationEngineTest {
             locationService.setUserDefinedDeviceLocationProviderFactory(
                 customLocationProviderFactory,
             )
-            locationService.getDeviceLocationProvider(any<LocationProviderRequest>())
+            locationService.getDeviceLocationProvider(
+                any<ExtendedLocationProviderParameters>(),
+                any<LocationProviderRequest>(),
+            )
         }
         verify(exactly = 1) {
             customLocationProvider.addLocationObserver(any(), not(Looper.getMainLooper()))
@@ -173,7 +190,10 @@ class TripSessionLocationEngineTest {
 
         verify(exactly = 0) {
             locationService.setUserDefinedDeviceLocationProviderFactory(any())
-            locationService.getDeviceLocationProvider(any<LocationProviderRequest>())
+            locationService.getDeviceLocationProvider(
+                any<ExtendedLocationProviderParameters>(),
+                any<LocationProviderRequest>(),
+            )
         }
         verify(exactly = 1) {
             customLocationProvider.addLocationObserver(any(), not(Looper.getMainLooper()))
@@ -414,6 +434,78 @@ class TripSessionLocationEngineTest {
         verify(exactly = 1) {
             locationService.setUserDefinedDeviceLocationProviderFactory(null)
         }
+    }
+
+    private fun verifyCreationOfLocationProvider(
+        locationOptionsProviderSource: LocationOptions.LocationProviderSource,
+    ): CapturingSlot<ExtendedLocationProviderParameters> {
+        val extendedParamsSlot = slot<ExtendedLocationProviderParameters>()
+        every {
+            locationService.getDeviceLocationProvider(
+                extendedParameters = capture(extendedParamsSlot),
+                request = any<LocationProviderRequest>(),
+            )
+        } returns ExpectedFactory.createValue(defaultDeviceLocationProvider)
+
+        val locationOptions = LocationOptions.Builder()
+            .defaultLocationProviderSource(locationOptionsProviderSource)
+            .build()
+
+        sut = TripSessionLocationEngine(locationOptions)
+
+        verify(exactly = 1) {
+            locationService.getDeviceLocationProvider(
+                any<ExtendedLocationProviderParameters>(),
+                any<LocationProviderRequest>(),
+            )
+        }
+
+        verify(exactly = 0) {
+            locationService.setUserDefinedDeviceLocationProviderFactory(null)
+        }
+
+        return extendedParamsSlot
+    }
+
+    @Test
+    fun `should create Android's GPS device location provider`() {
+        val extendedParamsSlot = verifyCreationOfLocationProvider(
+            LocationOptions.LocationProviderSource.GPS,
+        )
+
+        Assert.assertEquals(
+            DeviceLocationProviderType.ANDROID,
+            extendedParamsSlot.captured.deviceLocationProviderType,
+        )
+
+        Assert.assertEquals(
+            LocationManager.GPS_PROVIDER,
+            extendedParamsSlot.captured.locationProviderName,
+        )
+    }
+
+    @Test
+    fun `should create Best device location provider`() {
+        val extendedParamsSlot = verifyCreationOfLocationProvider(
+            LocationOptions.LocationProviderSource.BEST,
+        )
+
+        Assert.assertEquals(
+            DeviceLocationProviderType.BEST,
+            extendedParamsSlot.captured.deviceLocationProviderType,
+        )
+    }
+
+    @Test
+    fun `should create Fused device location provider`() {
+        val extendedParamsSlot = verifyCreationOfLocationProvider(
+            LocationOptions.LocationProviderSource.FUSED,
+        )
+
+        Assert.assertEquals(
+            DeviceLocationProviderType.GOOGLE_PLAY_SERVICES,
+            extendedParamsSlot.captured.deviceLocationProviderType,
+        )
     }
 
     private fun mockLocationProvider(locationProvider: LocationProvider) {

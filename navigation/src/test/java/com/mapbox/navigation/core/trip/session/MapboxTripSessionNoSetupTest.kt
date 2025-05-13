@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Looper
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.location.DeviceLocationProvider
+import com.mapbox.common.location.ExtendedLocationProviderParameters
 import com.mapbox.common.location.Location
 import com.mapbox.common.location.LocationProvider
 import com.mapbox.common.location.LocationProviderRequest
@@ -78,7 +79,10 @@ class MapboxTripSessionNoSetupTest {
         mockkStatic(LocationServiceFactory::class)
         every { LocationServiceFactory.getOrCreate() } returns mockk {
             every {
-                getDeviceLocationProvider(any<LocationProviderRequest>())
+                getDeviceLocationProvider(
+                    extendedParameters = any<ExtendedLocationProviderParameters>(),
+                    request = any<LocationProviderRequest>(),
+                )
             } returns ExpectedFactory.createValue(mockk(relaxed = true))
             every { setUserDefinedDeviceLocationProviderFactory(any()) } answers {}
         }
@@ -575,7 +579,10 @@ private fun buildTripSession(
 
     every { LocationServiceFactory.getOrCreate() } returns mockk {
         every {
-            getDeviceLocationProvider(any<LocationProviderRequest>())
+            getDeviceLocationProvider(
+                extendedParameters = any<ExtendedLocationProviderParameters>(),
+                request = any<LocationProviderRequest>(),
+            )
         } returns ExpectedFactory.createValue(locationProvider)
     }
     return MapboxTripSession(
