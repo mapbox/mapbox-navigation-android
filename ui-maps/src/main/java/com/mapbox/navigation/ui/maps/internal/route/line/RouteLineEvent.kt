@@ -7,6 +7,7 @@ import com.mapbox.bindgen.Value
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.PointAsCoordinatesTypeAdapter
+import com.mapbox.maps.StylePropertyValue
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment
@@ -301,7 +302,7 @@ data class RouteLineProviderBasedExpressionEventData(
     val property: String,
     @Deprecated("Used for backwards compatibility")
     val expression: Expression? = null,
-    val value: Value? = null,
+    val value: StylePropertyValue? = null,
 ) : RouteLineExpressionEventData(Keys.TYPE_PROVIDER_BASED)
 
 object Keys {

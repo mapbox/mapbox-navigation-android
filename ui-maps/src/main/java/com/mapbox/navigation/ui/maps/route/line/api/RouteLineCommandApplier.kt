@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.maps.route.line.api
 import androidx.annotation.MainThread
 import com.mapbox.bindgen.Value
 import com.mapbox.maps.Style
+import com.mapbox.maps.StylePropertyValue
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 
 internal abstract class RouteLineCommandApplier<T> {
@@ -17,15 +18,15 @@ internal abstract class RouteLineCommandApplier<T> {
     abstract fun getProperty(): String
 }
 
-internal class LineGradientCommandApplier : RouteLineCommandApplier<Value>() {
+internal class LineGradientCommandApplier : RouteLineCommandApplier<StylePropertyValue>() {
 
     @MainThread
     override fun applyCommand(
         style: Style,
         layerId: String,
-        command: Value,
+        command: StylePropertyValue,
     ) {
-        style.setStyleLayerProperty(layerId, getProperty(), command)
+        style.setStyleLayerProperty(layerId, getProperty(), command.value)
     }
 
     override fun getProperty(): String {
@@ -45,18 +46,18 @@ internal class LineGradientCommandApplier : RouteLineCommandApplier<Value>() {
  * The line's color would be represented in the other sections of the line.  See the Map API documentation
  * regarding lineTrimOffset for more information.
  */
-internal class LineTrimCommandApplier : RouteLineCommandApplier<Value>() {
+internal class LineTrimCommandApplier : RouteLineCommandApplier<StylePropertyValue>() {
 
     @MainThread
     override fun applyCommand(
         style: Style,
         layerId: String,
-        command: Value,
+        command: StylePropertyValue,
     ) {
         style.setStyleLayerProperty(
             layerId,
             getProperty(),
-            command,
+            command.value,
         )
     }
 

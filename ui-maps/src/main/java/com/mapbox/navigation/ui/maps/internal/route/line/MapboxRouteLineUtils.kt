@@ -16,6 +16,8 @@ import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.Style
 import com.mapbox.maps.StyleObjectInfo
+import com.mapbox.maps.StylePropertyValue
+import com.mapbox.maps.StylePropertyValueKind
 import com.mapbox.maps.extension.style.expressions.dsl.generated.color
 import com.mapbox.maps.extension.style.expressions.dsl.generated.interpolate
 import com.mapbox.maps.extension.style.expressions.dsl.generated.match
@@ -354,7 +356,7 @@ internal object MapboxRouteLineUtils {
         defaultColor: Int,
         substitutionColor: Int,
         shouldSubstituteColor: (Int) -> Boolean,
-    ): Expression {
+    ): StylePropertyValue {
         var lastColor = Int.MAX_VALUE
         val expressionBuilder = Expression.ExpressionBuilder("step")
         expressionBuilder.lineProgress()
@@ -389,7 +391,7 @@ internal object MapboxRouteLineUtils {
                 }
             }
         }
-        return expressionBuilder.build()
+        return StylePropertyValue(expressionBuilder.build(), StylePropertyValueKind.EXPRESSION)
     }
 
     /**
@@ -409,7 +411,7 @@ internal object MapboxRouteLineUtils {
         offset: Double,
         traveledColor: Int,
         lineBaseColor: Int,
-    ): Expression {
+    ): StylePropertyValue {
         val expressionBuilder = Expression.ExpressionBuilder("step")
         expressionBuilder.lineProgress()
         expressionBuilder.color(traveledColor)
@@ -417,7 +419,7 @@ internal object MapboxRouteLineUtils {
             literal(offset)
             color(lineBaseColor)
         }
-        return expressionBuilder.build()
+        return StylePropertyValue(expressionBuilder.build(), StylePropertyValueKind.EXPRESSION)
     }
 
     /**
@@ -2779,7 +2781,7 @@ internal object MapboxRouteLineUtils {
         vanishingPointOffset: Double,
         legIndex: Int,
     ): RouteLineDynamicData {
-        val trafficExpressionProvider: (RouteLineViewOptionsData) -> Expression = { options ->
+        val trafficExpressionProvider: (RouteLineViewOptionsData) -> StylePropertyValue = { options ->
             getTrafficLineExpression(
                 options,
                 vanishingPointOffset,
@@ -2978,7 +2980,7 @@ internal object MapboxRouteLineUtils {
         )
     }
 
-    fun getSingleColorExpression(@ColorInt colorInt: Int): Expression {
+    fun getSingleColorExpression(@ColorInt colorInt: Int): StylePropertyValue {
         return getRouteLineExpression(0.0, colorInt, colorInt)
     }
 }
