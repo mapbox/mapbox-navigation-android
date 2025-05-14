@@ -2,6 +2,8 @@ package com.mapbox.navigation.ui.maps.route.line.api
 
 import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Point
+import com.mapbox.maps.StylePropertyValue
+import com.mapbox.maps.StylePropertyValueKind
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
@@ -132,29 +134,21 @@ internal class VanishingRouteLine() {
         offset: Double,
     ): VanishingRouteLineExpressions {
         vanishPointOffset = offset
-        val trimmedOffsetValue = Value.valueOf(offset)
+        val value = StylePropertyValue(Value.valueOf(offset), StylePropertyValueKind.CONSTANT)
         val trafficLineExpressionCommandHolder = RouteLineValueCommandHolder(
-            LightRouteLineValueProvider {
-                trimmedOffsetValue
-            },
+            LightRouteLineValueProvider { value },
             LineTrimCommandApplier(),
         )
         val routeLineValueCommandHolder = RouteLineValueCommandHolder(
-            LightRouteLineValueProvider {
-                trimmedOffsetValue
-            },
+            LightRouteLineValueProvider { value },
             LineTrimCommandApplier(),
         )
         val routeLineCasingExpressionCommandHolder = RouteLineValueCommandHolder(
-            LightRouteLineValueProvider {
-                trimmedOffsetValue
-            },
+            LightRouteLineValueProvider { value },
             LineTrimCommandApplier(),
         )
         val restrictedRoadExpressionCommandHolder = RouteLineValueCommandHolder(
-            LightRouteLineValueProvider {
-                trimmedOffsetValue
-            },
+            LightRouteLineValueProvider { value },
             LineTrimCommandApplier(),
         )
         return VanishingRouteLineExpressions(

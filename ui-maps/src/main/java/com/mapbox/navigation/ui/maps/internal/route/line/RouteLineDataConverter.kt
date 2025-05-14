@@ -1,8 +1,9 @@
 package com.mapbox.navigation.ui.maps.internal.route.line
 
 import com.mapbox.bindgen.Expected
-import com.mapbox.bindgen.Value
 import com.mapbox.maps.Style
+import com.mapbox.maps.StylePropertyValue
+import com.mapbox.maps.StylePropertyValueKind
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.maps.route.line.api.LightRouteLineValueProvider
 import com.mapbox.navigation.ui.maps.route.line.api.LineGradientCommandApplier
@@ -141,14 +142,16 @@ private fun RouteLineExpressionEventData.toHolder(): RouteLineValueCommandHolder
                 // deprecated
                 "line-trim-offset" -> {
                     RouteLineValueCommandHolder(
-                        LightRouteLineValueProvider { expression!! },
-                        object : RouteLineCommandApplier<Value>() {
+                        LightRouteLineValueProvider {
+                            StylePropertyValue(expression!!, StylePropertyValueKind.EXPRESSION)
+                        },
+                        object : RouteLineCommandApplier<StylePropertyValue>() {
                             override fun applyCommand(
                                 style: Style,
                                 layerId: String,
-                                command: Value,
+                                command: StylePropertyValue,
                             ) {
-                                style.setStyleLayerProperty(layerId, getProperty(), command)
+                                style.setStyleLayerProperty(layerId, getProperty(), command.value)
                             }
 
                             override fun getProperty(): String {
@@ -170,7 +173,9 @@ private fun RouteLineExpressionEventData.toHolder(): RouteLineValueCommandHolder
                         if (value != null) {
                             LightRouteLineValueProvider { value!! }
                         } else {
-                            LightRouteLineValueProvider { expression!! }
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(expression!!, StylePropertyValueKind.EXPRESSION)
+                            }
                         },
                         LineGradientCommandApplier(),
                     )
