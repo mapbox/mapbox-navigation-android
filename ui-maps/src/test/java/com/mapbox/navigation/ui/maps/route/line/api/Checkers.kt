@@ -1,6 +1,8 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
 import com.mapbox.bindgen.Value
+import com.mapbox.maps.StylePropertyValue
+import com.mapbox.maps.StylePropertyValueKind
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import org.junit.Assert.assertEquals
 import java.lang.AssertionError
@@ -55,5 +57,12 @@ fun checkExpression(expected: List<(Value) -> Unit>, actual: Expression) {
             """.trimIndent(),
         )
         throw ex
+    }
+}
+
+fun StylePropertyValue.toExpression(): Expression {
+    return when (kind) {
+        StylePropertyValueKind.EXPRESSION -> value as Expression
+        else -> throw IllegalArgumentException("$this is not an expression")
     }
 }

@@ -5,6 +5,7 @@ import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.Style
+import com.mapbox.maps.StylePropertyValue
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment
@@ -281,25 +282,25 @@ internal class RouteLineDataConverterTest {
 
     @Test
     fun toInputRouteSetValueFilled() = runBlocking {
-        val exp1 = mockk<Expression>(relaxed = true)
-        val exp2 = mockk<Expression>(relaxed = true)
-        val exp3 = mockk<Expression>(relaxed = true)
-        val exp4 = mockk<Expression>(relaxed = true)
-        val exp5 = mockk<Expression>(relaxed = true)
-        val exp6 = mockk<Expression>(relaxed = true)
-        val exp7 = mockk<Expression>(relaxed = true)
-        val exp8 = mockk<Expression>(relaxed = true)
-        val exp9 = mockk<Expression>(relaxed = true)
-        val exp10 = mockk<Expression>(relaxed = true)
-        val exp11 = mockk<Expression>(relaxed = true)
-        val exp12 = mockk<Expression>(relaxed = true)
-        val exp13 = mockk<Expression>(relaxed = true)
-        val exp14 = mockk<Expression>(relaxed = true)
-        val exp15 = mockk<Expression>(relaxed = true)
-        val exp16 = mockk<Expression>(relaxed = true)
-        val exp17 = mockk<Expression>(relaxed = true)
-        val exp18 = mockk<Expression>(relaxed = true)
-        val exp19 = mockk<Expression>(relaxed = true)
+        val exp1 = mockk<StylePropertyValue>(relaxed = true)
+        val exp2 = mockk<StylePropertyValue>(relaxed = true)
+        val exp3 = mockk<StylePropertyValue>(relaxed = true)
+        val exp4 = mockk<StylePropertyValue>(relaxed = true)
+        val exp5 = mockk<StylePropertyValue>(relaxed = true)
+        val exp6 = mockk<StylePropertyValue>(relaxed = true)
+        val exp7 = mockk<StylePropertyValue>(relaxed = true)
+        val exp8 = mockk<StylePropertyValue>(relaxed = true)
+        val exp9 = mockk<StylePropertyValue>(relaxed = true)
+        val exp10 = mockk<StylePropertyValue>(relaxed = true)
+        val exp11 = mockk<StylePropertyValue>(relaxed = true)
+        val exp12 = mockk<StylePropertyValue>(relaxed = true)
+        val exp13 = mockk<StylePropertyValue>(relaxed = true)
+        val exp14 = mockk<StylePropertyValue>(relaxed = true)
+        val exp15 = mockk<StylePropertyValue>(relaxed = true)
+        val exp16 = mockk<StylePropertyValue>(relaxed = true)
+        val exp17 = mockk<StylePropertyValue>(relaxed = true)
+        val exp18 = mockk<StylePropertyValue>(relaxed = true)
+        val exp19 = mockk<StylePropertyValue>(relaxed = true)
         val primaryFc = mockk<FeatureCollection>()
         val alt1Fc = mockk<FeatureCollection>()
         val waypointSource = mockk<FeatureCollection>()
@@ -461,24 +462,24 @@ internal class RouteLineDataConverterTest {
 
     @Test
     fun toInputRouteLineUpdateValueFilled() = runBlocking {
-        val exp1 = mockk<Expression>(relaxed = true)
-        val exp2 = mockk<Expression>(relaxed = true)
-        val exp3 = mockk<Expression>(relaxed = true)
-        val exp4 = mockk<Expression>(relaxed = true)
-        val exp5 = mockk<Expression>(relaxed = true)
-        val exp6 = mockk<Expression>(relaxed = true)
-        val exp7 = mockk<Expression>(relaxed = true)
-        val exp8 = mockk<Expression>(relaxed = true)
-        val exp9 = mockk<Expression>(relaxed = true)
-        val exp10 = mockk<Expression>(relaxed = true)
-        val exp11 = mockk<Expression>(relaxed = true)
-        val exp12 = mockk<Expression>(relaxed = true)
-        val exp13 = mockk<Expression>(relaxed = true)
-        val exp14 = mockk<Expression>(relaxed = true)
-        val exp15 = mockk<Expression>(relaxed = true)
-        val exp16 = mockk<Expression>(relaxed = true)
-        val exp17 = mockk<Expression>(relaxed = true)
-        val exp18 = mockk<Expression>(relaxed = true)
+        val exp1 = mockk<StylePropertyValue>(relaxed = true)
+        val exp2 = mockk<StylePropertyValue>(relaxed = true)
+        val exp3 = mockk<StylePropertyValue>(relaxed = true)
+        val exp4 = mockk<StylePropertyValue>(relaxed = true)
+        val exp5 = mockk<StylePropertyValue>(relaxed = true)
+        val exp6 = mockk<StylePropertyValue>(relaxed = true)
+        val exp7 = mockk<StylePropertyValue>(relaxed = true)
+        val exp8 = mockk<StylePropertyValue>(relaxed = true)
+        val exp9 = mockk<StylePropertyValue>(relaxed = true)
+        val exp10 = mockk<StylePropertyValue>(relaxed = true)
+        val exp11 = mockk<StylePropertyValue>(relaxed = true)
+        val exp12 = mockk<StylePropertyValue>(relaxed = true)
+        val exp13 = mockk<StylePropertyValue>(relaxed = true)
+        val exp14 = mockk<StylePropertyValue>(relaxed = true)
+        val exp15 = mockk<StylePropertyValue>(relaxed = true)
+        val exp16 = mockk<StylePropertyValue>(relaxed = true)
+        val exp17 = mockk<StylePropertyValue>(relaxed = true)
+        val exp18 = mockk<StylePropertyValue>(relaxed = true)
         val primaryDynamicData = RouteLineDynamicData(
             RouteLineValueCommandHolder(
                 { exp1 },

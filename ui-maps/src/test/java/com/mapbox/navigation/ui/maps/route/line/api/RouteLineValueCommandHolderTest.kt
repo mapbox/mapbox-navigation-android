@@ -1,8 +1,7 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
-import com.mapbox.bindgen.Value
 import com.mapbox.maps.Style
-import com.mapbox.maps.extension.style.expressions.generated.Expression
+import com.mapbox.maps.StylePropertyValue
 import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineNoOpExpressionEventData
 import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineProviderBasedExpressionEventData
 import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineViewOptionsData
@@ -20,12 +19,12 @@ internal class RouteLineValueCommandHolderTest {
 
     @Test
     fun toRouteLineExpressionEventData_ok() = runBlocking {
-        val exp = mockk<Expression>(relaxed = true)
+        val exp = mockk<StylePropertyValue>(relaxed = true)
         val viewData = mockk<RouteLineViewOptionsData>(relaxed = true)
         val provider = mockk<RouteLineValueProvider>(relaxed = true) {
             coEvery { generateCommand(viewData) } returns exp
         }
-        val applier = mockk<RouteLineCommandApplier<Value>>(relaxed = true) {
+        val applier = mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true) {
             every { getProperty() } returns "some-property"
         }
         val data = RouteLineValueCommandHolder(provider, applier)
@@ -42,7 +41,7 @@ internal class RouteLineValueCommandHolderTest {
         val provider = mockk<RouteLineValueProvider>(relaxed = true) {
             coEvery { generateCommand(viewData) } throws UnsupportedOperationException()
         }
-        val applier = mockk<RouteLineCommandApplier<Value>>(relaxed = true) {
+        val applier = mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true) {
             every { getProperty() } returns "some-property"
         }
         val data = RouteLineValueCommandHolder(provider, applier)

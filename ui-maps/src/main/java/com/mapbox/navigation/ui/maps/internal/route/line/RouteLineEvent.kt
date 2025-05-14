@@ -3,7 +3,6 @@ package com.mapbox.navigation.ui.maps.internal.route.line
 import androidx.annotation.Keep
 import com.google.gson.GsonBuilder
 import com.google.gson.annotations.SerializedName
-import com.mapbox.bindgen.Value
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.PointAsCoordinatesTypeAdapter

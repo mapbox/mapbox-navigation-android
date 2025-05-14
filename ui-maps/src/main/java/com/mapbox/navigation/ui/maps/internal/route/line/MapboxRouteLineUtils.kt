@@ -2509,7 +2509,7 @@ internal object MapboxRouteLineUtils {
         vanishingPointOffset: Double,
         activeLegIndex: Int,
         staticOptions: MapboxRouteLineApiOptions,
-    ): (data: RouteLineViewOptionsData) -> Expression {
+    ): (data: RouteLineViewOptionsData) -> StylePropertyValue {
         return {
             val colorResources = it.routeLineColorResources
             val inactiveColor = if (staticOptions.styleInactiveRouteLegsIndependently) {
@@ -2524,7 +2524,7 @@ internal object MapboxRouteLineUtils {
                 staticOptions.calculateRestrictedRoadSections,
                 activeColor = colorResources.restrictedRoadColor,
                 inactiveColor = inactiveColor,
-            )
+            ).toStylePropertyValue()
         }
     }
 
@@ -2534,7 +2534,7 @@ internal object MapboxRouteLineUtils {
         vanishingPointOffset: Double,
         activeLegIndex: Int,
         inactiveColorType: SegmentColorType,
-    ): (data: RouteLineViewOptionsData) -> Expression = {
+    ): (data: RouteLineViewOptionsData) -> StylePropertyValue = {
         getRestrictedLineExpression(
             routeData,
             vanishingPointOffset,
@@ -2542,7 +2542,7 @@ internal object MapboxRouteLineUtils {
             staticOptions.calculateRestrictedRoadSections,
             it.routeLineColorResources.restrictedRoadColor,
             inactiveColorType.getColor(it),
-        )
+        ).toStylePropertyValue()
     }
 
     private fun getRestrictedLineExpression(
@@ -2781,16 +2781,17 @@ internal object MapboxRouteLineUtils {
         vanishingPointOffset: Double,
         legIndex: Int,
     ): RouteLineDynamicData {
-        val trafficExpressionProvider: (RouteLineViewOptionsData) -> StylePropertyValue = { options ->
-            getTrafficLineExpression(
-                options,
-                vanishingPointOffset,
-                Color.TRANSPARENT,
-                SegmentColorType.PRIMARY_UNKNOWN_CONGESTION,
-                routeLineExpressionData,
-                primaryRouteDistance,
-            )
-        }
+        val trafficExpressionProvider: (RouteLineViewOptionsData) -> StylePropertyValue =
+            { options ->
+                getTrafficLineExpression(
+                    options,
+                    vanishingPointOffset,
+                    Color.TRANSPARENT,
+                    SegmentColorType.PRIMARY_UNKNOWN_CONGESTION,
+                    routeLineExpressionData,
+                    primaryRouteDistance,
+                ).toStylePropertyValue()
+            }
         val primaryRouteTrafficLineExpressionCommandHolder =
             RouteLineValueCommandHolder(
                 HeavyRouteLineValueProvider(calculationsScope) {
@@ -3011,3 +3012,6 @@ private fun MapboxRouteLineViewOptions.restrictedRoadsOpacityExpression(): Expre
             stop { literal(it.finishFadingZoom); literal(0.0) }
         }
     } ?: Expression.Companion.literal(restrictedRoadOpacity)
+
+internal fun Expression.toStylePropertyValue(): StylePropertyValue =
+    StylePropertyValue(this, StylePropertyValueKind.EXPRESSION)

@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
 import androidx.annotation.MainThread
-import com.mapbox.bindgen.Value
 import com.mapbox.maps.Style
 import com.mapbox.maps.StylePropertyValue
 import com.mapbox.maps.extension.style.expressions.generated.Expression

@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
 import androidx.annotation.AnyThread
-import com.mapbox.bindgen.Value
 import com.mapbox.maps.StylePropertyValue
 import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineViewOptionsData
 import kotlinx.coroutines.CoroutineScope

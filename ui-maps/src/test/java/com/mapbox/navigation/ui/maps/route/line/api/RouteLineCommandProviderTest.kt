@@ -1,5 +1,7 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
+import com.mapbox.maps.StylePropertyValue
+import com.mapbox.maps.StylePropertyValueKind
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineViewOptionsData
@@ -34,9 +36,9 @@ class RouteLineCommandProviderTest {
         val deferred = testScope.async(Dispatchers.Main) {
             val mainThreadId = Thread.currentThread().id
             val invocationThreadId = AtomicLong()
-            val block: (RouteLineViewOptionsData) -> Expression = {
+            val block: (RouteLineViewOptionsData) -> StylePropertyValue = {
                 invocationThreadId.set(Thread.currentThread().id)
-                expression
+                StylePropertyValue(expression, StylePropertyValueKind.EXPRESSION)
             }
             val provider = LightRouteLineValueProvider(block)
 
@@ -47,7 +49,7 @@ class RouteLineCommandProviderTest {
 
             assertNotNull(invocationThreadId.get())
             assertEquals(mainThreadId, invocationThreadId.get())
-            assertEquals(expression, result)
+            assertEquals(expression, result.toExpression())
         }
 
         deferred.await()
@@ -60,9 +62,9 @@ class RouteLineCommandProviderTest {
         val deferred = testScope.async(Dispatchers.Main) {
             val mainThreadId = Thread.currentThread().id
             val invocationThreadId = AtomicLong()
-            val block: (RouteLineViewOptionsData) -> Expression = {
+            val block: (RouteLineViewOptionsData) -> StylePropertyValue = {
                 invocationThreadId.set(Thread.currentThread().id)
-                expression
+                StylePropertyValue(expression, StylePropertyValueKind.EXPRESSION)
             }
             val provider = HeavyRouteLineValueProvider(testScope, block)
 
@@ -70,7 +72,7 @@ class RouteLineCommandProviderTest {
 
             assertNotNull(invocationThreadId.get())
             assertNotEquals(mainThreadId, invocationThreadId.get())
-            assertEquals(expression, result)
+            assertEquals(expression, result.toExpression())
         }
 
         deferred.await()

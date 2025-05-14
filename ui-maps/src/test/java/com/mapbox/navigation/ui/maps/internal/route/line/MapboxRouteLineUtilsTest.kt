@@ -73,6 +73,7 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_SOURCE_I
 import com.mapbox.navigation.ui.maps.route.line.api.DoubleChecker
 import com.mapbox.navigation.ui.maps.route.line.api.StringChecker
 import com.mapbox.navigation.ui.maps.route.line.api.checkExpression
+import com.mapbox.navigation.ui.maps.route.line.api.toExpression
 import com.mapbox.navigation.ui.maps.route.line.model.InactiveRouteColors
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions
@@ -327,7 +328,7 @@ class MapboxRouteLineUtilsTest {
             inactiveColorType = SegmentColorType.PRIMARY_LOW_CONGESTION,
         )(dynamicData)
 
-        checkExpression(expectedExpressionContents, expression)
+        checkExpression(expectedExpressionContents, expression.toExpression())
     }
 
     @Test
@@ -358,7 +359,7 @@ class MapboxRouteLineUtilsTest {
                 .toData(),
         )
 
-        assertEquals(expectedExpression, expression.toString())
+        assertEquals(expectedExpression, expression.value.toString())
     }
 
     @Test
@@ -389,7 +390,7 @@ class MapboxRouteLineUtilsTest {
 
         val result = MapboxRouteLineUtils.getRouteLineExpression(3.0, -45747, -11097861)
 
-        assertEquals(expectedExpression, result.toString())
+        assertEquals(expectedExpression, result.value.toString())
     }
 
     @Test
@@ -2255,7 +2256,7 @@ class MapboxRouteLineUtilsTest {
             apiOptions,
         )
 
-        checkExpression(expectedExpression, result(viewData))
+        checkExpression(expectedExpression, result(viewData).toExpression())
     }
 
     @Test
@@ -2298,7 +2299,7 @@ class MapboxRouteLineUtilsTest {
             apiOptions,
         )
 
-        checkExpression(expectedExpression, result(viewData))
+        checkExpression(expectedExpression, result(viewData).toExpression())
     }
 
     @Test

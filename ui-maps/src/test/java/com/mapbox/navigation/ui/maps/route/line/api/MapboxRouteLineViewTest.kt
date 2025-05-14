@@ -12,6 +12,8 @@ import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
 import com.mapbox.maps.StyleObjectInfo
+import com.mapbox.maps.StylePropertyValue
+import com.mapbox.maps.StylePropertyValueKind
 import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.generated.BackgroundLayer
@@ -28,6 +30,7 @@ import com.mapbox.navigation.ui.maps.internal.extensions.getStyleId
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.buildScalingExpression
 import com.mapbox.navigation.ui.maps.internal.route.line.toData
+import com.mapbox.navigation.ui.maps.internal.route.line.toStylePropertyValue
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_BLUR
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.LAYER_GROUP_1_CASING
@@ -473,27 +476,31 @@ class MapboxRouteLineViewTest {
                 RouteLineUpdateValue(
                     primaryRouteLineDynamicData = RouteLineDynamicData(
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { routeLineExp },
+                            LightRouteLineValueProvider { routeLineExp.toStylePropertyValue() },
                             LineGradientCommandApplier(),
                         ),
                         casingExpressionCommandHolder = RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { casingLineEx },
+                            LightRouteLineValueProvider { casingLineEx.toStylePropertyValue() },
                             LineGradientCommandApplier(),
                         ),
                         trafficExpressionCommandHolder = RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { trafficLineExp },
+                            LightRouteLineValueProvider { trafficLineExp.toStylePropertyValue() },
                             LineGradientCommandApplier(),
                         ),
                         restrictedSectionExpressionCommandHolder = RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { restrictedRoadExp },
+                            LightRouteLineValueProvider {
+                                restrictedRoadExp.toStylePropertyValue()
+                            },
                             LineGradientCommandApplier(),
                         ),
                         trailExpressionCommandHolder = RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { trailExpression },
+                            LightRouteLineValueProvider { trailExpression.toStylePropertyValue() },
                             LineGradientCommandApplier(),
                         ),
                         trailCasingExpressionCommandHolder = RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { trailCasingExpression },
+                            LightRouteLineValueProvider {
+                                trailCasingExpression.toStylePropertyValue()
+                            },
                             LineGradientCommandApplier(),
                         ),
                     ),
@@ -513,27 +520,31 @@ class MapboxRouteLineViewTest {
                     ),
                     routeLineMaskingLayerDynamicData = RouteLineDynamicData(
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { routeLineExp },
+                            LightRouteLineValueProvider { routeLineExp.toStylePropertyValue() },
                             LineGradientCommandApplier(),
                         ),
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { casingLineEx },
+                            LightRouteLineValueProvider { casingLineEx.toStylePropertyValue() },
                             LineGradientCommandApplier(),
                         ),
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { trafficLineExp },
+                            LightRouteLineValueProvider { trafficLineExp.toStylePropertyValue() },
                             LineGradientCommandApplier(),
                         ),
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { restrictedRoadExp },
+                            LightRouteLineValueProvider {
+                                restrictedRoadExp.toStylePropertyValue()
+                            },
                             LineGradientCommandApplier(),
                         ),
                         trailExpressionCommandHolder = RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { trailExpression },
+                            LightRouteLineValueProvider { trailExpression.toStylePropertyValue() },
                             LineGradientCommandApplier(),
                         ),
                         trailCasingExpressionCommandHolder = RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { trailCasingExpression },
+                            LightRouteLineValueProvider {
+                                trailCasingExpression.toStylePropertyValue()
+                            },
                             LineGradientCommandApplier(),
                         ),
                     ),
@@ -640,60 +651,92 @@ class MapboxRouteLineViewTest {
         val trailExpression = mockk<Expression>()
         val trailCasingExpression = mockk<Expression>()
         val primaryBaseExpressionProvider = mockk<RouteLineValueProvider>(relaxed = true) {
-            coEvery { generateCommand(any()) } returns routeLineExp
+            coEvery {
+                generateCommand(any())
+            } returns StylePropertyValue(routeLineExp, StylePropertyValueKind.EXPRESSION)
         }
         val primaryTrafficExpressionProvider = mockk<RouteLineValueProvider>(relaxed = true) {
-            coEvery { generateCommand(any()) } returns trafficLineExp
+            coEvery {
+                generateCommand(any())
+            } returns StylePropertyValue(trafficLineExp, StylePropertyValueKind.EXPRESSION)
         }
         val primaryCasingExpressionProvider = mockk<RouteLineValueProvider>(relaxed = true) {
-            coEvery { generateCommand(any()) } returns casingLineEx
+            coEvery {
+                generateCommand(any())
+            } returns StylePropertyValue(casingLineEx, StylePropertyValueKind.EXPRESSION)
         }
         val primaryRestrictedExpressionProvider =
             mockk<RouteLineValueProvider>(relaxed = true) {
-                coEvery { generateCommand(any()) } returns restrictedRoadExp
+                coEvery {
+                    generateCommand(any())
+                } returns StylePropertyValue(restrictedRoadExp, StylePropertyValueKind.EXPRESSION)
             }
         val primaryTrailExpressionProvider = mockk<RouteLineValueProvider>(relaxed = true) {
-            coEvery { generateCommand(any()) } returns trailExpression
+            coEvery {
+                generateCommand(any())
+            } returns StylePropertyValue(trailExpression, StylePropertyValueKind.EXPRESSION)
         }
         val primaryTrailCasingExpressionProvider = mockk<RouteLineValueProvider>(
             relaxed = true,
         ) {
-            coEvery { generateCommand(any()) } returns trailCasingExpression
+            coEvery {
+                generateCommand(any())
+            } returns StylePropertyValue(trailCasingExpression, StylePropertyValueKind.EXPRESSION)
         }
-        val primaryBaseApplier = mockk<RouteLineCommandApplier<Value>>(relaxed = true)
-        val primaryTrafficApplier = mockk<RouteLineCommandApplier<Value>>(relaxed = true)
-        val primaryCasingApplier = mockk<RouteLineCommandApplier<Value>>(relaxed = true)
-        val primaryRestrictedApplier = mockk<RouteLineCommandApplier<Value>>(relaxed = true)
-        val primaryTrailApplier = mockk<RouteLineCommandApplier<Value>>(relaxed = true)
-        val primaryTrailCasingApplier = mockk<RouteLineCommandApplier<Value>>(relaxed = true)
+        val primaryBaseApplier = mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true)
+        val primaryTrafficApplier =
+            mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true)
+        val primaryCasingApplier =
+            mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true)
+        val primaryRestrictedApplier =
+            mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true)
+        val primaryTrailApplier = mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true)
+        val primaryTrailCasingApplier =
+            mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true)
 
         val maskingBaseExpressionProvider = mockk<RouteLineValueProvider>(relaxed = true) {
-            coEvery { generateCommand(any()) } returns routeLineExp
+            coEvery {
+                generateCommand(any())
+            } returns StylePropertyValue(routeLineExp, StylePropertyValueKind.EXPRESSION)
         }
         val maskingTrafficExpressionProvider = mockk<RouteLineValueProvider>(relaxed = true) {
-            coEvery { generateCommand(any()) } returns trafficLineExp
+            coEvery {
+                generateCommand(any())
+            } returns StylePropertyValue(trafficLineExp, StylePropertyValueKind.EXPRESSION)
         }
         val maskingCasingExpressionProvider = mockk<RouteLineValueProvider>(relaxed = true) {
-            coEvery { generateCommand(any()) } returns casingLineEx
+            coEvery {
+                generateCommand(any())
+            } returns StylePropertyValue(casingLineEx, StylePropertyValueKind.EXPRESSION)
         }
         val maskingRestrictedExpressionProvider =
             mockk<RouteLineValueProvider>(relaxed = true) {
-                coEvery { generateCommand(any()) } returns restrictedRoadExp
+                coEvery {
+                    generateCommand(any())
+                } returns StylePropertyValue(restrictedRoadExp, StylePropertyValueKind.EXPRESSION)
             }
         val maskingTrailExpressionProvider = mockk<RouteLineValueProvider>(relaxed = true) {
-            coEvery { generateCommand(any()) } returns trailExpression
+            coEvery {
+                generateCommand(any())
+            } returns StylePropertyValue(trailExpression, StylePropertyValueKind.EXPRESSION)
         }
         val maskingTrailCasingExpressionProvider = mockk<RouteLineValueProvider>(
             relaxed = true,
         ) {
-            coEvery { generateCommand(any()) } returns trailCasingExpression
+            coEvery {
+                generateCommand(any())
+            } returns StylePropertyValue(trailCasingExpression, StylePropertyValueKind.EXPRESSION)
         }
-        val maskingBaseApplier = mockk<RouteLineCommandApplier<Value>>(relaxed = true)
-        val maskingTrafficApplier = mockk<RouteLineCommandApplier<Value>>(relaxed = true)
-        val maskingCasingApplier = mockk<RouteLineCommandApplier<Value>>(relaxed = true)
-        val maskingRestrictedApplier = mockk<RouteLineCommandApplier<Value>>(relaxed = true)
-        val maskingTrailApplier = mockk<RouteLineCommandApplier<Value>>(relaxed = true)
-        val maskingTrailCasingApplier = mockk<RouteLineCommandApplier<Value>>(relaxed = true)
+        val maskingBaseApplier = mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true)
+        val maskingTrafficApplier =
+            mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true)
+        val maskingCasingApplier =
+            mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true)
+        val maskingRestrictedApplier =
+            mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true)
+        val maskingTrailApplier = mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true)
+        val maskingTrailCasingApplier =
+            mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true)
         val state: Expected<RouteLineError, RouteLineUpdateValue> =
             ExpectedFactory.createValue(
                 RouteLineUpdateValue(
@@ -837,27 +880,51 @@ class MapboxRouteLineViewTest {
                     ),
                     routeLineMaskingLayerDynamicData = RouteLineDynamicData(
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { routeLineExp },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(routeLineExp, StylePropertyValueKind.EXPRESSION)
+                            },
                             LineGradientCommandApplier(),
                         ),
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { casingLineEx },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(casingLineEx, StylePropertyValueKind.EXPRESSION)
+                            },
                             LineGradientCommandApplier(),
                         ),
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { trafficLineExp },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    trafficLineExp,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineGradientCommandApplier(),
                         ),
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { restrictedRoadExp },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    restrictedRoadExp,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineGradientCommandApplier(),
                         ),
                         trailExpressionCommandHolder = RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { trailExpression },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    trailExpression,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineGradientCommandApplier(),
                         ),
                         trailCasingExpressionCommandHolder = RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { trailCasingExpression },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    trailCasingExpression,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineGradientCommandApplier(),
                         ),
                     ),
@@ -968,28 +1035,49 @@ class MapboxRouteLineViewTest {
                 RouteLineUpdateValue(
                     primaryRouteLineDynamicData = RouteLineDynamicData(
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { routeLineExp },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(routeLineExp, StylePropertyValueKind.EXPRESSION)
+                            },
                             LineTrimCommandApplier(),
                         ),
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { casingLineEx },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(casingLineEx, StylePropertyValueKind.EXPRESSION)
+                            },
                             LineTrimCommandApplier(),
                         ),
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { trafficLineExp },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    trafficLineExp,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineTrimCommandApplier(),
                         ),
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { restrictedRoadExp },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    restrictedRoadExp,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineTrimCommandApplier(),
                         ),
                         RouteLineTrimOffset(.5),
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { trailExp },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(trailExp, StylePropertyValueKind.EXPRESSION)
+                            },
                             LineTrimCommandApplier(),
                         ),
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { trailCasingExp },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    trailCasingExp,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineTrimCommandApplier(),
                         ),
                     ),
@@ -1009,27 +1097,48 @@ class MapboxRouteLineViewTest {
                     ),
                     routeLineMaskingLayerDynamicData = RouteLineDynamicData(
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { routeLineExp },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(routeLineExp, StylePropertyValueKind.EXPRESSION)
+                            },
                             LineGradientCommandApplier(),
                         ),
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { casingLineEx },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(casingLineEx, StylePropertyValueKind.EXPRESSION)
+                            },
                             LineGradientCommandApplier(),
                         ),
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { trafficLineExp },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    trafficLineExp,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineGradientCommandApplier(),
                         ),
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { restrictedRoadExp },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    restrictedRoadExp,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineGradientCommandApplier(),
                         ),
                         trailExpressionCommandHolder = RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { trailExp },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(trailExp, StylePropertyValueKind.EXPRESSION)
+                            },
                             LineGradientCommandApplier(),
                         ),
                         trailCasingExpressionCommandHolder = RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { trailCasingExp },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    trailCasingExp,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineGradientCommandApplier(),
                         ),
                     ),
@@ -1139,27 +1248,51 @@ class MapboxRouteLineViewTest {
                 RouteLineUpdateValue(
                     primaryRouteLineDynamicData = RouteLineDynamicData(
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { routeLineExp },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(routeLineExp, StylePropertyValueKind.EXPRESSION)
+                            },
                             LineGradientCommandApplier(),
                         ),
                         casingExpressionCommandHolder = RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { casingLineEx },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(casingLineEx, StylePropertyValueKind.EXPRESSION)
+                            },
                             LineGradientCommandApplier(),
                         ),
                         trafficExpressionCommandHolder = RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { trafficLineExp },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    trafficLineExp,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineGradientCommandApplier(),
                         ),
                         restrictedSectionExpressionCommandHolder = RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { restrictedRoadExp },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    restrictedRoadExp,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineGradientCommandApplier(),
                         ),
                         trailExpressionCommandHolder = RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { trailExpression },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    trailExpression,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineGradientCommandApplier(),
                         ),
                         trailCasingExpressionCommandHolder = RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { trailCasingExpression },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    trailCasingExpression,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineGradientCommandApplier(),
                         ),
                     ),
@@ -1317,28 +1450,58 @@ class MapboxRouteLineViewTest {
                     primaryRouteFeatureCollection,
                     RouteLineDynamicData(
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { layerGroup1Expression },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    layerGroup1Expression,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineGradientCommandApplier(),
                         ),
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { layerGroup1Expression },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    layerGroup1Expression,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineGradientCommandApplier(),
                         ),
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { layerGroup1Expression },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    layerGroup1Expression,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineGradientCommandApplier(),
                         ),
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { layerGroup1Expression },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    layerGroup1Expression,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineGradientCommandApplier(),
                         ),
                         RouteLineTrimOffset(9.9),
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { layerGroup1Expression },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    layerGroup1Expression,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineGradientCommandApplier(),
                         ),
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { layerGroup1Expression },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    layerGroup1Expression,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineGradientCommandApplier(),
                         ),
                     ),
@@ -1348,28 +1511,58 @@ class MapboxRouteLineViewTest {
                         alternativeRoute1FeatureCollection,
                         RouteLineDynamicData(
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup2Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup2Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup2Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup2Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup2Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup2Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup2Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup2Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineTrimOffset(0.0),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup2Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup2Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup2Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup2Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                         ),
@@ -1378,28 +1571,58 @@ class MapboxRouteLineViewTest {
                         alternativeRoute2FeatureCollection,
                         RouteLineDynamicData(
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup3Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup3Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup3Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup3Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup3Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup3Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup3Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup3Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineTrimOffset(0.1),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup3Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup3Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup3Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup3Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                         ),
@@ -1408,28 +1631,58 @@ class MapboxRouteLineViewTest {
                 waypointsFeatureCollection,
                 routeLineMaskingLayerDynamicData = RouteLineDynamicData(
                     RouteLineValueCommandHolder(
-                        LightRouteLineValueProvider { maskingExpression },
+                        LightRouteLineValueProvider {
+                            StylePropertyValue(
+                                maskingExpression,
+                                StylePropertyValueKind.EXPRESSION,
+                            )
+                        },
                         LineGradientCommandApplier(),
                     ),
                     RouteLineValueCommandHolder(
-                        LightRouteLineValueProvider { maskingExpression },
+                        LightRouteLineValueProvider {
+                            StylePropertyValue(
+                                maskingExpression,
+                                StylePropertyValueKind.EXPRESSION,
+                            )
+                        },
                         LineGradientCommandApplier(),
                     ),
                     RouteLineValueCommandHolder(
-                        LightRouteLineValueProvider { maskingExpression },
+                        LightRouteLineValueProvider {
+                            StylePropertyValue(
+                                maskingExpression,
+                                StylePropertyValueKind.EXPRESSION,
+                            )
+                        },
                         LineGradientCommandApplier(),
                     ),
                     RouteLineValueCommandHolder(
-                        LightRouteLineValueProvider { maskingExpression },
+                        LightRouteLineValueProvider {
+                            StylePropertyValue(
+                                maskingExpression,
+                                StylePropertyValueKind.EXPRESSION,
+                            )
+                        },
                         LineGradientCommandApplier(),
                     ),
                     RouteLineTrimOffset(9.9),
                     RouteLineValueCommandHolder(
-                        LightRouteLineValueProvider { maskingExpression },
+                        LightRouteLineValueProvider {
+                            StylePropertyValue(
+                                maskingExpression,
+                                StylePropertyValueKind.EXPRESSION,
+                            )
+                        },
                         LineGradientCommandApplier(),
                     ),
                     RouteLineValueCommandHolder(
-                        LightRouteLineValueProvider { maskingExpression },
+                        LightRouteLineValueProvider {
+                            StylePropertyValue(
+                                maskingExpression,
+                                StylePropertyValueKind.EXPRESSION,
+                            )
+                        },
                         LineGradientCommandApplier(),
                     ),
                 ),
@@ -2086,14 +2339,18 @@ class MapboxRouteLineViewTest {
         ) {
             coEvery { generateCommand(any()) } returns mockk(relaxed = true)
         }
-        val primaryBaseApplier = mockk<RouteLineCommandApplier<Value>>(relaxUnitFun = true)
-        val primaryTrafficApplier = mockk<RouteLineCommandApplier<Value>>(relaxUnitFun = true)
-        val primaryCasingApplier = mockk<RouteLineCommandApplier<Value>>(relaxUnitFun = true)
+        val primaryBaseApplier =
+            mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxUnitFun = true)
+        val primaryTrafficApplier =
+            mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxUnitFun = true)
+        val primaryCasingApplier =
+            mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxUnitFun = true)
         val primaryRestrictedApplier =
-            mockk<RouteLineCommandApplier<Value>>(relaxUnitFun = true)
-        val primaryTrailApplier = mockk<RouteLineCommandApplier<Value>>(relaxUnitFun = true)
+            mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxUnitFun = true)
+        val primaryTrailApplier =
+            mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxUnitFun = true)
         val primaryTrailCasingApplier =
-            mockk<RouteLineCommandApplier<Value>>(relaxUnitFun = true)
+            mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxUnitFun = true)
 
         val alt1BaseExpressionProvider = mockk<RouteLineValueProvider>(relaxUnitFun = true) {
             coEvery { generateCommand(any()) } returns mockk(relaxed = true)
@@ -2116,12 +2373,14 @@ class MapboxRouteLineViewTest {
             mockk<RouteLineValueProvider>(relaxUnitFun = true) {
                 coEvery { generateCommand(any()) } returns mockk(relaxed = true)
             }
-        val alt1BaseApplier = mockk<RouteLineCommandApplier<Value>>(relaxed = true)
-        val alt1TrafficApplier = mockk<RouteLineCommandApplier<Value>>(relaxed = true)
-        val alt1CasingApplier = mockk<RouteLineCommandApplier<Value>>(relaxed = true)
-        val alt1RestrictedApplier = mockk<RouteLineCommandApplier<Value>>(relaxed = true)
-        val alt1TrailApplier = mockk<RouteLineCommandApplier<Value>>(relaxed = true)
-        val alt1TrailCasingApplier = mockk<RouteLineCommandApplier<Value>>(relaxed = true)
+        val alt1BaseApplier = mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true)
+        val alt1TrafficApplier = mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true)
+        val alt1CasingApplier = mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true)
+        val alt1RestrictedApplier =
+            mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true)
+        val alt1TrailApplier = mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true)
+        val alt1TrailCasingApplier =
+            mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true)
 
         val alt2BaseExpressionProvider = mockk<RouteLineValueProvider>(relaxUnitFun = true) {
             coEvery { generateCommand(any()) } returns mockk(relaxed = true)
@@ -2146,12 +2405,14 @@ class MapboxRouteLineViewTest {
                 coEvery { generateCommand(any()) } returns mockk(relaxed = true)
             }
 
-        val alt2BaseApplier = mockk<RouteLineCommandApplier<Value>>(relaxed = true)
-        val alt2TrafficApplier = mockk<RouteLineCommandApplier<Value>>(relaxed = true)
-        val alt2CasingApplier = mockk<RouteLineCommandApplier<Value>>(relaxed = true)
-        val alt2RestrictedApplier = mockk<RouteLineCommandApplier<Value>>(relaxed = true)
-        val alt2TrailApplier = mockk<RouteLineCommandApplier<Value>>(relaxed = true)
-        val alt2TrailCasingApplier = mockk<RouteLineCommandApplier<Value>>(relaxed = true)
+        val alt2BaseApplier = mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true)
+        val alt2TrafficApplier = mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true)
+        val alt2CasingApplier = mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true)
+        val alt2RestrictedApplier =
+            mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true)
+        val alt2TrailApplier = mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true)
+        val alt2TrailCasingApplier =
+            mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true)
 
         val maskingBaseExpressionProvider =
             mockk<RouteLineValueProvider>(relaxUnitFun = true) {
@@ -2178,12 +2439,17 @@ class MapboxRouteLineViewTest {
         ) {
             coEvery { generateCommand(any()) } returns mockk(relaxed = true)
         }
-        val maskingBaseApplier = mockk<RouteLineCommandApplier<Value>>(relaxed = true)
-        val maskingTrafficApplier = mockk<RouteLineCommandApplier<Value>>(relaxed = true)
-        val maskingCasingApplier = mockk<RouteLineCommandApplier<Value>>(relaxed = true)
-        val maskingRestrictedApplier = mockk<RouteLineCommandApplier<Value>>(relaxed = true)
-        val maskingTrailApplier = mockk<RouteLineCommandApplier<Value>>(relaxed = true)
-        val maskingTrailCasingApplier = mockk<RouteLineCommandApplier<Value>>(relaxed = true)
+        val maskingBaseApplier =
+            mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true)
+        val maskingTrafficApplier =
+            mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true)
+        val maskingCasingApplier =
+            mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true)
+        val maskingRestrictedApplier =
+            mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true)
+        val maskingTrailApplier = mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true)
+        val maskingTrailCasingApplier =
+            mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true)
 
         val state: Expected<RouteLineError, RouteSetValue> = ExpectedFactory.createValue(
             RouteSetValue(
@@ -2562,28 +2828,58 @@ class MapboxRouteLineViewTest {
                     primaryRouteFeatureCollection,
                     RouteLineDynamicData(
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { layerGroup1Expression },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    layerGroup1Expression,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineGradientCommandApplier(),
                         ),
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { layerGroup1Expression },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    layerGroup1Expression,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineGradientCommandApplier(),
                         ),
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { layerGroup1Expression },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    layerGroup1Expression,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineGradientCommandApplier(),
                         ),
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { layerGroup1Expression },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    layerGroup1Expression,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineGradientCommandApplier(),
                         ),
                         RouteLineTrimOffset(9.9),
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { layerGroup1Expression },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    layerGroup1Expression,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineGradientCommandApplier(),
                         ),
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { layerGroup1Expression },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    layerGroup1Expression,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineGradientCommandApplier(),
                         ),
                     ),
@@ -2593,28 +2889,58 @@ class MapboxRouteLineViewTest {
                         alternativeRoute1FeatureCollection,
                         RouteLineDynamicData(
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup2Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup2Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup2Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup2Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup2Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup2Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup2Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup2Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineTrimOffset(0.0),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup2Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup2Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup2Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup2Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                         ),
@@ -2623,28 +2949,58 @@ class MapboxRouteLineViewTest {
                         alternativeRoute2FeatureCollection,
                         RouteLineDynamicData(
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup3Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup3Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup3Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup3Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup3Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup3Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup3Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup3Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineTrimOffset(0.1),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup3Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup3Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup3Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup3Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                         ),
@@ -2653,28 +3009,58 @@ class MapboxRouteLineViewTest {
                 waypointsFeatureCollection,
                 routeLineMaskingLayerDynamicData = RouteLineDynamicData(
                     RouteLineValueCommandHolder(
-                        LightRouteLineValueProvider { maskingExpression },
+                        LightRouteLineValueProvider {
+                            StylePropertyValue(
+                                maskingExpression,
+                                StylePropertyValueKind.EXPRESSION,
+                            )
+                        },
                         LineGradientCommandApplier(),
                     ),
                     RouteLineValueCommandHolder(
-                        LightRouteLineValueProvider { maskingExpression },
+                        LightRouteLineValueProvider {
+                            StylePropertyValue(
+                                maskingExpression,
+                                StylePropertyValueKind.EXPRESSION,
+                            )
+                        },
                         LineGradientCommandApplier(),
                     ),
                     RouteLineValueCommandHolder(
-                        LightRouteLineValueProvider { maskingExpression },
+                        LightRouteLineValueProvider {
+                            StylePropertyValue(
+                                maskingExpression,
+                                StylePropertyValueKind.EXPRESSION,
+                            )
+                        },
                         LineGradientCommandApplier(),
                     ),
                     RouteLineValueCommandHolder(
-                        LightRouteLineValueProvider { maskingExpression },
+                        LightRouteLineValueProvider {
+                            StylePropertyValue(
+                                maskingExpression,
+                                StylePropertyValueKind.EXPRESSION,
+                            )
+                        },
                         LineGradientCommandApplier(),
                     ),
                     RouteLineTrimOffset(9.9),
                     RouteLineValueCommandHolder(
-                        LightRouteLineValueProvider { maskingExpression },
+                        LightRouteLineValueProvider {
+                            StylePropertyValue(
+                                maskingExpression,
+                                StylePropertyValueKind.EXPRESSION,
+                            )
+                        },
                         LineGradientCommandApplier(),
                     ),
                     RouteLineValueCommandHolder(
-                        LightRouteLineValueProvider { maskingExpression },
+                        LightRouteLineValueProvider {
+                            StylePropertyValue(
+                                maskingExpression,
+                                StylePropertyValueKind.EXPRESSION,
+                            )
+                        },
                         LineGradientCommandApplier(),
                     ),
                 ),
@@ -2937,28 +3323,58 @@ class MapboxRouteLineViewTest {
             primaryRouteFeatureCollection,
             RouteLineDynamicData(
                 RouteLineValueCommandHolder(
-                    LightRouteLineValueProvider { layerGroup1Expression },
+                    LightRouteLineValueProvider {
+                        StylePropertyValue(
+                            layerGroup1Expression,
+                            StylePropertyValueKind.EXPRESSION,
+                        )
+                    },
                     LineGradientCommandApplier(),
                 ),
                 RouteLineValueCommandHolder(
-                    LightRouteLineValueProvider { layerGroup1Expression },
+                    LightRouteLineValueProvider {
+                        StylePropertyValue(
+                            layerGroup1Expression,
+                            StylePropertyValueKind.EXPRESSION,
+                        )
+                    },
                     LineGradientCommandApplier(),
                 ),
                 RouteLineValueCommandHolder(
-                    LightRouteLineValueProvider { layerGroup1Expression },
+                    LightRouteLineValueProvider {
+                        StylePropertyValue(
+                            layerGroup1Expression,
+                            StylePropertyValueKind.EXPRESSION,
+                        )
+                    },
                     LineGradientCommandApplier(),
                 ),
                 RouteLineValueCommandHolder(
-                    LightRouteLineValueProvider { layerGroup1Expression },
+                    LightRouteLineValueProvider {
+                        StylePropertyValue(
+                            layerGroup1Expression,
+                            StylePropertyValueKind.EXPRESSION,
+                        )
+                    },
                     LineGradientCommandApplier(),
                 ),
                 RouteLineTrimOffset(9.9),
                 RouteLineValueCommandHolder(
-                    LightRouteLineValueProvider { layerGroup1Expression },
+                    LightRouteLineValueProvider {
+                        StylePropertyValue(
+                            layerGroup1Expression,
+                            StylePropertyValueKind.EXPRESSION,
+                        )
+                    },
                     LineGradientCommandApplier(),
                 ),
                 RouteLineValueCommandHolder(
-                    LightRouteLineValueProvider { layerGroup1Expression },
+                    LightRouteLineValueProvider {
+                        StylePropertyValue(
+                            layerGroup1Expression,
+                            StylePropertyValueKind.EXPRESSION,
+                        )
+                    },
                     LineGradientCommandApplier(),
                 ),
             ),
@@ -2967,28 +3383,58 @@ class MapboxRouteLineViewTest {
             alternativeRoute1FeatureCollection,
             RouteLineDynamicData(
                 RouteLineValueCommandHolder(
-                    LightRouteLineValueProvider { layerGroup2Expression },
+                    LightRouteLineValueProvider {
+                        StylePropertyValue(
+                            layerGroup2Expression,
+                            StylePropertyValueKind.EXPRESSION,
+                        )
+                    },
                     LineGradientCommandApplier(),
                 ),
                 RouteLineValueCommandHolder(
-                    LightRouteLineValueProvider { layerGroup2Expression },
+                    LightRouteLineValueProvider {
+                        StylePropertyValue(
+                            layerGroup2Expression,
+                            StylePropertyValueKind.EXPRESSION,
+                        )
+                    },
                     LineGradientCommandApplier(),
                 ),
                 RouteLineValueCommandHolder(
-                    LightRouteLineValueProvider { layerGroup2Expression },
+                    LightRouteLineValueProvider {
+                        StylePropertyValue(
+                            layerGroup2Expression,
+                            StylePropertyValueKind.EXPRESSION,
+                        )
+                    },
                     LineGradientCommandApplier(),
                 ),
                 RouteLineValueCommandHolder(
-                    LightRouteLineValueProvider { layerGroup2Expression },
+                    LightRouteLineValueProvider {
+                        StylePropertyValue(
+                            layerGroup2Expression,
+                            StylePropertyValueKind.EXPRESSION,
+                        )
+                    },
                     LineGradientCommandApplier(),
                 ),
                 RouteLineTrimOffset(0.0),
                 RouteLineValueCommandHolder(
-                    LightRouteLineValueProvider { layerGroup2Expression },
+                    LightRouteLineValueProvider {
+                        StylePropertyValue(
+                            layerGroup2Expression,
+                            StylePropertyValueKind.EXPRESSION,
+                        )
+                    },
                     LineGradientCommandApplier(),
                 ),
                 RouteLineValueCommandHolder(
-                    LightRouteLineValueProvider { layerGroup2Expression },
+                    LightRouteLineValueProvider {
+                        StylePropertyValue(
+                            layerGroup2Expression,
+                            StylePropertyValueKind.EXPRESSION,
+                        )
+                    },
                     LineGradientCommandApplier(),
                 ),
             ),
@@ -2997,28 +3443,58 @@ class MapboxRouteLineViewTest {
             alternativeRoute2FeatureCollection,
             RouteLineDynamicData(
                 RouteLineValueCommandHolder(
-                    LightRouteLineValueProvider { layerGroup3Expression },
+                    LightRouteLineValueProvider {
+                        StylePropertyValue(
+                            layerGroup3Expression,
+                            StylePropertyValueKind.EXPRESSION,
+                        )
+                    },
                     LineGradientCommandApplier(),
                 ),
                 RouteLineValueCommandHolder(
-                    LightRouteLineValueProvider { layerGroup3Expression },
+                    LightRouteLineValueProvider {
+                        StylePropertyValue(
+                            layerGroup3Expression,
+                            StylePropertyValueKind.EXPRESSION,
+                        )
+                    },
                     LineGradientCommandApplier(),
                 ),
                 RouteLineValueCommandHolder(
-                    LightRouteLineValueProvider { layerGroup3Expression },
+                    LightRouteLineValueProvider {
+                        StylePropertyValue(
+                            layerGroup3Expression,
+                            StylePropertyValueKind.EXPRESSION,
+                        )
+                    },
                     LineGradientCommandApplier(),
                 ),
                 RouteLineValueCommandHolder(
-                    LightRouteLineValueProvider { layerGroup3Expression },
+                    LightRouteLineValueProvider {
+                        StylePropertyValue(
+                            layerGroup3Expression,
+                            StylePropertyValueKind.EXPRESSION,
+                        )
+                    },
                     LineGradientCommandApplier(),
                 ),
                 RouteLineTrimOffset(0.1),
                 RouteLineValueCommandHolder(
-                    LightRouteLineValueProvider { layerGroup3Expression },
+                    LightRouteLineValueProvider {
+                        StylePropertyValue(
+                            layerGroup3Expression,
+                            StylePropertyValueKind.EXPRESSION,
+                        )
+                    },
                     LineGradientCommandApplier(),
                 ),
                 RouteLineValueCommandHolder(
-                    LightRouteLineValueProvider { layerGroup3Expression },
+                    LightRouteLineValueProvider {
+                        StylePropertyValue(
+                            layerGroup3Expression,
+                            StylePropertyValueKind.EXPRESSION,
+                        )
+                    },
                     LineGradientCommandApplier(),
                 ),
             ),
@@ -4384,28 +4860,28 @@ class MapboxRouteLineViewTest {
                         FeatureCollection.fromFeatures(listOf(getEmptyFeature("1"))),
                         RouteLineDynamicData(
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { mockk() },
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { mockk() },
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { mockk() },
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { mockk() },
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineTrimOffset(9.9),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { mockk() },
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { mockk() },
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
                                 LineGradientCommandApplier(),
                             ),
                         ),
@@ -4749,28 +5225,58 @@ class MapboxRouteLineViewTest {
                     primaryRouteFeatureCollection,
                     RouteLineDynamicData(
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { layerGroup1Expression },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    layerGroup1Expression,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineGradientCommandApplier(),
                         ),
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { layerGroup1Expression },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    layerGroup1Expression,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineGradientCommandApplier(),
                         ),
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { layerGroup1Expression },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    layerGroup1Expression,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineGradientCommandApplier(),
                         ),
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { layerGroup1Expression },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    layerGroup1Expression,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineGradientCommandApplier(),
                         ),
                         RouteLineTrimOffset(9.9),
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { layerGroup1Expression },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    layerGroup1Expression,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineGradientCommandApplier(),
                         ),
                         RouteLineValueCommandHolder(
-                            LightRouteLineValueProvider { layerGroup1Expression },
+                            LightRouteLineValueProvider {
+                                StylePropertyValue(
+                                    layerGroup1Expression,
+                                    StylePropertyValueKind.EXPRESSION,
+                                )
+                            },
                             LineGradientCommandApplier(),
                         ),
                     ),
@@ -4780,28 +5286,58 @@ class MapboxRouteLineViewTest {
                         alternativeRoute1FeatureCollection,
                         RouteLineDynamicData(
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup2Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup2Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup2Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup2Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup2Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup2Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup2Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup2Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineTrimOffset(0.0),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup2Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup2Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup2Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup2Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                         ),
@@ -4810,28 +5346,58 @@ class MapboxRouteLineViewTest {
                         alternativeRoute2FeatureCollection,
                         RouteLineDynamicData(
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup3Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup3Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup3Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup3Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup3Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup3Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup3Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup3Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineTrimOffset(0.1),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup3Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup3Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                             RouteLineValueCommandHolder(
-                                LightRouteLineValueProvider { layerGroup3Expression },
+                                LightRouteLineValueProvider {
+                                    StylePropertyValue(
+                                        layerGroup3Expression,
+                                        StylePropertyValueKind.EXPRESSION,
+                                    )
+                                },
                                 LineGradientCommandApplier(),
                             ),
                         ),
@@ -4840,28 +5406,58 @@ class MapboxRouteLineViewTest {
                 waypointsFeatureCollection,
                 routeLineMaskingLayerDynamicData = RouteLineDynamicData(
                     RouteLineValueCommandHolder(
-                        LightRouteLineValueProvider { maskingExpression },
+                        LightRouteLineValueProvider {
+                            StylePropertyValue(
+                                maskingExpression,
+                                StylePropertyValueKind.EXPRESSION,
+                            )
+                        },
                         LineGradientCommandApplier(),
                     ),
                     RouteLineValueCommandHolder(
-                        LightRouteLineValueProvider { maskingExpression },
+                        LightRouteLineValueProvider {
+                            StylePropertyValue(
+                                maskingExpression,
+                                StylePropertyValueKind.EXPRESSION,
+                            )
+                        },
                         LineGradientCommandApplier(),
                     ),
                     RouteLineValueCommandHolder(
-                        LightRouteLineValueProvider { maskingExpression },
+                        LightRouteLineValueProvider {
+                            StylePropertyValue(
+                                maskingExpression,
+                                StylePropertyValueKind.EXPRESSION,
+                            )
+                        },
                         LineGradientCommandApplier(),
                     ),
                     RouteLineValueCommandHolder(
-                        LightRouteLineValueProvider { maskingExpression },
+                        LightRouteLineValueProvider {
+                            StylePropertyValue(
+                                maskingExpression,
+                                StylePropertyValueKind.EXPRESSION,
+                            )
+                        },
                         LineGradientCommandApplier(),
                     ),
                     RouteLineTrimOffset(9.9),
                     RouteLineValueCommandHolder(
-                        LightRouteLineValueProvider { maskingExpression },
+                        LightRouteLineValueProvider {
+                            StylePropertyValue(
+                                maskingExpression,
+                                StylePropertyValueKind.EXPRESSION,
+                            )
+                        },
                         LineGradientCommandApplier(),
                     ),
                     RouteLineValueCommandHolder(
-                        LightRouteLineValueProvider { maskingExpression },
+                        LightRouteLineValueProvider {
+                            StylePropertyValue(
+                                maskingExpression,
+                                StylePropertyValueKind.EXPRESSION,
+                            )
+                        },
                         LineGradientCommandApplier(),
                     ),
                 ),

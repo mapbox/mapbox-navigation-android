@@ -76,6 +76,7 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_SOURCE_I
 import com.mapbox.navigation.ui.maps.route.line.api.DoubleChecker
 import com.mapbox.navigation.ui.maps.route.line.api.StringChecker
 import com.mapbox.navigation.ui.maps.route.line.api.checkExpression
+import com.mapbox.navigation.ui.maps.route.line.api.toExpression
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
@@ -1220,7 +1221,7 @@ class MapboxRouteLineUtilsRoboTest {
             0,
         )
 
-        checkExpression(expectedExpression, result)
+        checkExpression(expectedExpression, result.toExpression())
     }
 
     @Test

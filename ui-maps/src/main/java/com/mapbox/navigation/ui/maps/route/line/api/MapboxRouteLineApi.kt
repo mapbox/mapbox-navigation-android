@@ -35,6 +35,7 @@ import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.gr
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup1SourceLayerIds
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup2SourceLayerIds
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup3SourceLayerIds
+import com.mapbox.navigation.ui.maps.internal.route.line.toStylePropertyValue
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.callout.api.MapboxRouteCalloutApi
 import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData
@@ -825,7 +826,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                     SegmentColorType.PRIMARY_UNKNOWN_CONGESTION,
                     alteredSegments,
                     distance,
-                )
+                ).toStylePropertyValue()
             },
             LineGradientCommandApplier(),
         )
@@ -1214,7 +1215,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                             vanishingPointOffset = alternativesDeviationOffset[route.id] ?: 0.0,
                             Color.TRANSPARENT,
                             SegmentColorType.ALTERNATIVE_UNKNOWN_CONGESTION,
-                        )
+                        ).toStylePropertyValue()
                     },
                     LineGradientCommandApplier(),
                 )
@@ -1233,7 +1234,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                             alternativesDeviationOffset[alternativeRoute2.route.id] ?: 0.0,
                             Color.TRANSPARENT,
                             SegmentColorType.ALTERNATIVE_UNKNOWN_CONGESTION,
-                        )
+                        ).toStylePropertyValue()
                     },
                     LineGradientCommandApplier(),
                 )

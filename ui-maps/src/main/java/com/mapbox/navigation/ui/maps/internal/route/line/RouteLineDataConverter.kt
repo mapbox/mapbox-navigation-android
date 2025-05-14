@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.maps.internal.route.line
 
 import com.mapbox.bindgen.Expected
-import com.mapbox.bindgen.Value
 import com.mapbox.maps.Style
 import com.mapbox.maps.StylePropertyValue
 import com.mapbox.maps.StylePropertyValueKind
