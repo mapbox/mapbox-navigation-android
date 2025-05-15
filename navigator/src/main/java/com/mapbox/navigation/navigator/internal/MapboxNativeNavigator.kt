@@ -37,6 +37,7 @@ import com.mapbox.navigator.SensorData
 import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.SetRoutesResult
 import com.mapbox.navigator.Telemetry
+import com.mapbox.navigator.TestingContext
 import com.mapbox.navigator.TilesConfig
 import com.mapbox.navigator.UpdateExternalSensorDataCallback
 
@@ -215,6 +216,8 @@ interface MapboxNativeNavigator : RerouteEventsProvider {
     fun triggerResetOfEhProvider()
 
     fun setUserLanguages(languages: List<String>)
+
+    fun setTestingContext(testingContext: TestingContext)
 
     fun reset(callback: ResetCallback?)
 

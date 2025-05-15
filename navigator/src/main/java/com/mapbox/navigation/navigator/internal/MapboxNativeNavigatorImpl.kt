@@ -57,6 +57,7 @@ import com.mapbox.navigator.SetRoutesParams
 import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.SetRoutesResult
 import com.mapbox.navigator.Telemetry
+import com.mapbox.navigator.TestingContext
 import com.mapbox.navigator.TilesConfig
 import com.mapbox.navigator.UpdateExternalSensorDataCallback
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -515,6 +516,10 @@ class MapboxNativeNavigatorImpl(
         navigator.config().mutableSettings().setUserLanguages(languages)
     }
 
+    override fun setTestingContext(testingContext: TestingContext) {
+        navigator.config().mutableSettings().setTestingContext(testingContext)
+    }
+
     override fun reset(callback: ResetCallback?) {
         navigator.reset(callback)
     }
@@ -528,6 +533,7 @@ class MapboxNativeNavigatorImpl(
     }
 
     private companion object {
+
         const val LOG_CATEGORY = "MapboxNativeNavigatorImpl"
     }
 }

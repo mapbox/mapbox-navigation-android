@@ -90,6 +90,7 @@ package com.mapbox.navigation.core {
     method public void setRerouteOptionsAdapter(com.mapbox.navigation.core.reroute.RerouteOptionsAdapter? rerouteOptionsAdapter);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void setRoutesPreview(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes, int primaryRouteIndex = 0);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void setRoutesPreview(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void setTestingContext(com.mapbox.navigation.core.history.TestingContext testingContext);
     method public void setTripNotificationInterceptor(com.mapbox.navigation.base.trip.notification.TripNotificationInterceptor? interceptor);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void startReplayTripSession(boolean withForegroundService = true);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void startReplayTripSessionWithPermissionCheck(boolean withForegroundService = true);
@@ -394,6 +395,20 @@ package com.mapbox.navigation.core.history {
 
   public fun interface SaveHistoryCallback {
     method public void onSaved(String? filepath);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class TestingContext {
+    method public String getProjectName();
+    method public String getVehicleName();
+    method public com.mapbox.navigation.core.history.TestingContext.Builder toBuilder();
+    property public final String projectName;
+    property public final String vehicleName;
+  }
+
+  public static final class TestingContext.Builder {
+    ctor public TestingContext.Builder();
+    method public com.mapbox.navigation.core.history.TestingContext build();
+    method public com.mapbox.navigation.core.history.TestingContext.Builder projectAndVehicleName(String projectName, String vehicleName);
   }
 
 }

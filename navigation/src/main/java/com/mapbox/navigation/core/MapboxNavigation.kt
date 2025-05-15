@@ -58,6 +58,8 @@ import com.mapbox.navigation.core.directions.session.Utils
 import com.mapbox.navigation.core.directions.session.routesPlusIgnored
 import com.mapbox.navigation.core.history.MapboxHistoryReader
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
+import com.mapbox.navigation.core.history.TestingContext
+import com.mapbox.navigation.core.history.TestingContext.Companion.toNativeObject
 import com.mapbox.navigation.core.internal.LowMemoryManager
 import com.mapbox.navigation.core.internal.MapboxNavigationSDKInitializerImpl
 import com.mapbox.navigation.core.internal.ReachabilityService
@@ -2097,6 +2099,22 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             },
             timeoutSeconds,
         )
+    }
+
+    /**
+     * Updates the testing context and writes "SetTestingContext" event to history if it is changed.
+     *
+     * The [TestingContext] structure is designed to provide runtime information
+     * about the test vehicle and project for testing purposes.
+     * This structure is intended strictly for testing and debugging purposes.
+     *
+     * @param testingContext Setting this value to empty optional clears the current testing context
+     * and records an "empty" "SetTestingContext" event in the history.
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun setTestingContext(testingContext: TestingContext) {
+        val nativeTestingContext = toNativeObject(testingContext)
+        navigator.setTestingContext(nativeTestingContext)
     }
 
     /**
