@@ -1,5 +1,22 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.8.6 - 16 May, 2025
+#### Features
+- Added experimental `NavigationPerformance#performanceInfoLoggingEnabled` which allows applications to enable info level logging of performance information. 
+
+#### Bug fixes and improvements
+- Fixed a crash that could happen when the app enters background and the view is destroyed. 
+- Fixed a crash in the route alternatives controller when the current route is a postfix of an incoming alternative. 
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.11.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.11.1))
+- Mapbox Navigation Native `v324.0.4`
+- Mapbox Core Common `v24.11.4`
+- Mapbox Java `v7.3.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.3.1))
+
+
 ## Navigation SDK Core Framework 3.8.5 - 23 April, 2025
 #### Features
 
