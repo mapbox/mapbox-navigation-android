@@ -1,33 +1,31 @@
 package com.mapbox.navigation.base.internal.performance
 
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
 import org.junit.Test
-import kotlin.time.Duration
 
 class PerformanceTrackerTest {
 
     @Test
     fun `tracking section performance`() {
-        val testObserver = TestPerformanceObserver()
+        val testObserver = mockk<PerformanceObserver>(relaxed = true)
         PerformanceTracker.addObserver(testObserver)
+        val sectionId = slot<Int>()
 
         val result = PerformanceTracker.trackPerformance("test-section") {
-            assertEquals("test-section", testObserver.latestSectionStartedName)
-            assertNull(testObserver.latestSectionCompletedName)
-            assertNull(testObserver.latestDuration)
+            verify { testObserver.sectionStarted("test-section", capture(sectionId)) }
             "test-result"
         }
 
-        assertEquals("test-section", testObserver.latestSectionCompletedName)
-        assertNotNull(testObserver.latestDuration)
+        verify { testObserver.sectionCompleted("test-section", sectionId.captured, any()) }
         assertEquals("test-result", result)
     }
 
     @Test
     fun `exception during tracking`() {
-        val testObserver = TestPerformanceObserver()
+        val testObserver = mockk<PerformanceObserver>(relaxed = true)
         PerformanceTracker.addObserver(testObserver)
 
         val result: Throwable = try {
@@ -38,28 +36,9 @@ class PerformanceTrackerTest {
             t
         }
 
-        assertEquals("test-section", testObserver.latestSectionStartedName)
-        assertEquals("test-section", testObserver.latestSectionCompletedName)
-        assertNull(testObserver.latestDuration)
+        val sectionId = slot<Int>()
+        verify { testObserver.sectionStarted("test-section", capture(sectionId)) }
+        verify { testObserver.sectionCompleted("test-section", capture(sectionId), null) }
         assertEquals("test error", result.message)
-    }
-}
-
-class TestPerformanceObserver : PerformanceObserver {
-
-    var latestSectionStartedName: String? = null
-        private set
-    var latestSectionCompletedName: String? = null
-        private set
-    var latestDuration: Duration? = null
-        private set
-
-    override fun sectionStarted(name: String) {
-        latestSectionStartedName = name
-    }
-
-    override fun sectionCompleted(name: String, duration: Duration?) {
-        latestSectionCompletedName = name
-        latestDuration = duration
     }
 }
