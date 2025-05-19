@@ -14,6 +14,7 @@ import com.mapbox.navigation.base.internal.route.routeOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.RoutesSetSuccess
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.instrumentation_tests.R
@@ -26,6 +27,7 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
 import com.mapbox.navigation.testing.ui.utils.coroutines.switchToAlternativeAsync
+import com.mapbox.navigation.testing.utils.assertions.assertIs
 import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.testing.utils.http.MockDynamicDirectionsRefreshHandler
@@ -421,7 +423,7 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
-    fun switch_from_multi_leg_primary_to_single_leg_alternative_and_back() = sdkTest {
+    fun switch_from_single_leg_primary_to_multi_leg_alternative() = sdkTest {
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
         ) { mapboxNavigation ->
@@ -451,7 +453,8 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
                 }
                 .first()
 
-            mapboxNavigation.switchToAlternativeRoute(routes[1])
+            val result = mapboxNavigation.switchToAlternativeAsync(routes[1])
+            assertIs<RoutesSetSuccess>(result.value)
 
             val routeProgress = mapboxNavigation.routeProgressUpdates()
                 .first {

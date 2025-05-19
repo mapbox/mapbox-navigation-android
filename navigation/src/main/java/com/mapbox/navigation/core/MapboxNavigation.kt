@@ -1115,7 +1115,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             remove(alternativeSwitchTo)
             add(0, alternativeSwitchTo)
         }
-        setNavigationRoutes(newRoutes, alternativeIndices.legIndex)
+        setNavigationRoutes(newRoutes, alternativeIndices.legIndex, callback)
     }
 
     /***
