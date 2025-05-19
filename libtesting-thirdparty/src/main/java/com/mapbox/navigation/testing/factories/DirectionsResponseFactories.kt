@@ -285,7 +285,7 @@ fun createStepIntersection(
         .build()
 }
 
-fun createEvWaypoint(isServer: Boolean = true) =
+fun createEvWaypoint(stationId: String = "testChargingStationId", isServer: Boolean = true) =
     createWaypoint(
         unrecognizedProperties = mapOf(
             "metadata" to JsonObject().apply {
@@ -294,6 +294,7 @@ fun createEvWaypoint(isServer: Boolean = true) =
                     JsonPrimitive(
                         if (isServer) "charging-station" else "user-provided-charging-station" )
                 )
+                add("station_id", JsonPrimitive(stationId))
             },
         ),
     )
