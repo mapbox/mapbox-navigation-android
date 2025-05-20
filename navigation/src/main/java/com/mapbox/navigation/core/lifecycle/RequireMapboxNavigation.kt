@@ -42,7 +42,6 @@ import kotlin.reflect.KProperty
  * ) {
  *   MapboxNavigationApp.setup(
  *       NavigationOptions.Builder(this)
- *           .accessToken(accessToken)
  *           .build()
  *     )
  * }

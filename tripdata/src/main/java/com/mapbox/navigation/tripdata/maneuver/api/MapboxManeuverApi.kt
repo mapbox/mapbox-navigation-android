@@ -6,7 +6,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.common.MapboxOptions
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
@@ -195,7 +194,6 @@ class MapboxManeuverApi internal constructor(
         maneuvers: List<Maneuver>,
         shieldCallback: RouteShieldCallback,
     ) {
-        val accessToken = MapboxOptions.accessToken
         mainJobController.scope.launch {
             val shields = mutableListOf<Expected<RouteShieldError, RouteShieldResult>>()
             maneuvers.forEach { maneuver ->
@@ -203,7 +201,6 @@ class MapboxManeuverApi internal constructor(
                     maneuver.primary.componentList.findShieldsToDownload(
                         userId = userId,
                         styleId = styleId,
-                        accessToken = accessToken,
                     ),
                 ).let { results ->
                     shields.addAll(results)
@@ -213,7 +210,6 @@ class MapboxManeuverApi internal constructor(
                         secondary.componentList.findShieldsToDownload(
                             userId = userId,
                             styleId = styleId,
-                            accessToken = accessToken,
                         ),
                     ).let { results ->
                         shields.addAll(results)
@@ -224,7 +220,6 @@ class MapboxManeuverApi internal constructor(
                         sub.componentList.findShieldsToDownload(
                             userId = userId,
                             styleId = styleId,
-                            accessToken = accessToken,
                         ),
                     ).let { results ->
                         shields.addAll(results)
@@ -243,7 +238,6 @@ class MapboxManeuverApi internal constructor(
     }
 
     private fun List<Component>.findShieldsToDownload(
-        accessToken: String,
         userId: String? = null,
         styleId: String? = null,
     ): List<RouteShieldToDownload> {
@@ -262,7 +256,6 @@ class MapboxManeuverApi internal constructor(
                             userId = userId,
                             styleId = styleId,
                         ),
-                        accessToken = accessToken,
                         mapboxShield = mapboxShield,
                         legacyFallback = legacy,
                     )

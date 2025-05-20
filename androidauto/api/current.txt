@@ -91,7 +91,8 @@ package com.mapbox.navigation.ui.androidauto.action {
 package com.mapbox.navigation.ui.androidauto.deeplink {
 
   public final class GeoDeeplinkGeocoding {
-    ctor public GeoDeeplinkGeocoding(String accessToken);
+    ctor @Deprecated public GeoDeeplinkGeocoding(String accessToken);
+    ctor public GeoDeeplinkGeocoding();
     method public void cancel();
     method public com.mapbox.api.geocoding.v5.MapboxGeocoding? getCurrentMapboxGeocoding();
     method public suspend Object? requestPlaces(com.mapbox.navigation.core.geodeeplink.GeoDeeplink geoDeeplink, com.mapbox.geojson.Point origin, kotlin.coroutines.Continuation<? super com.mapbox.api.geocoding.v5.models.GeocodingResponse>);
@@ -843,14 +844,14 @@ package com.mapbox.navigation.ui.androidauto.screenmanager.factories {
 package com.mapbox.navigation.ui.androidauto.search {
 
   public final class CarPlaceSearchOptions {
-    method public String? getAccessToken();
+    method @Deprecated public String? getAccessToken();
     method public com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions.Builder toBuilder();
-    property public final String? accessToken;
+    property @Deprecated public final String? accessToken;
   }
 
   public static final class CarPlaceSearchOptions.Builder {
     ctor public CarPlaceSearchOptions.Builder();
-    method public com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions.Builder accessToken(String? accessToken);
+    method @Deprecated public com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions.Builder accessToken(String? accessToken);
     method public com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions build();
   }
 

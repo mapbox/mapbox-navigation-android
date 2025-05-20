@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.androidauto.deeplink
 
 import android.content.Intent
-import com.mapbox.common.MapboxOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.geodeeplink.GeoDeeplink
 import com.mapbox.navigation.core.geodeeplink.GeoDeeplinkParser
@@ -23,7 +22,7 @@ class GeoDeeplinkNavigateAction(val mapboxCarContext: MapboxCarContext) {
     ): Boolean {
         logAndroidAuto("GeoDeeplinkNavigateAction preparePlacesListOnMapScreen")
         mapboxCarContext.geoDeeplinkPlacesProvider = GeoDeeplinkPlacesListOnMapProvider(
-            GeoDeeplinkGeocoding(MapboxOptions.accessToken),
+            GeoDeeplinkGeocoding(),
             geoDeeplink,
         )
         MapboxScreenManager.push(MapboxScreen.GEO_DEEPLINK)

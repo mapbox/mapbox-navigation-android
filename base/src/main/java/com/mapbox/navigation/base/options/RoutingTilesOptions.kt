@@ -1,7 +1,6 @@
 package com.mapbox.navigation.base.options
 
 import com.mapbox.common.TileStore
-import com.mapbox.common.TileStoreOptions
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import java.net.URI
 
@@ -24,9 +23,7 @@ import java.net.URI
  * @param tileStore tile store instance. It manages downloads and storage for requests to
  * tile-related API endpoints. For offline/predictive-caching use cases this instance should be
  * the same that is passed to map resource options, see [MapboxMapsOptions.tileStore].
- * When creating the [TileStore] make sure to call [TileStore.setOption] with
- * [TileStoreOptions.MAPBOX_ACCESS_TOKEN] and your token. By default (if `null` is provided here),
- * the [TileStore] will be created with a [filePath] and [NavigationOptions.accessToken].
+ * By default (if `null` is provided here), the [TileStore] will be created with a [filePath].
  * @param minDaysBetweenServerAndLocalTilesVersion is the minimum time in days between local version of tiles
  * and latest on the server to consider using the latest version of routing tiles from the server.
  * **As updating tiles frequently consumes considerably energy and bandwidth**.

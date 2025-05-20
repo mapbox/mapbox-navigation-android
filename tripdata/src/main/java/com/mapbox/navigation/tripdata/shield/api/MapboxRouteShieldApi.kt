@@ -3,7 +3,6 @@ package com.mapbox.navigation.tripdata.shield.api
 import android.graphics.Bitmap
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.MapboxShield
-import com.mapbox.common.MapboxOptions
 import com.mapbox.navigation.base.road.model.Road
 import com.mapbox.navigation.base.road.model.RoadComponent
 import com.mapbox.navigation.tripdata.shield.RoadShieldContentManagerContainer
@@ -94,11 +93,9 @@ class MapboxRouteShieldApi {
         styleId: String?,
         callback: RouteShieldCallback,
     ) {
-        val accessToken = MapboxOptions.accessToken
         val routeShieldToDownload = mutableListOf<RouteShieldToDownload>()
         routeShieldToDownload.addAll(
             bannerComponents?.findShieldsToDownload(
-                accessToken = accessToken,
                 userId = userId,
                 styleId = styleId,
             ) ?: emptyList(),
@@ -189,7 +186,6 @@ class MapboxRouteShieldApi {
         val routeShieldToDownload = roadComponents.findShieldsToDownloadFromRoadComponent(
             userId = userId,
             styleId = styleId,
-            accessToken = MapboxOptions.accessToken,
         )
         getRouteShieldsInternal(routeShieldToDownload, callback)
     }
@@ -217,7 +213,6 @@ class MapboxRouteShieldApi {
     private fun List<BannerComponents>.findShieldsToDownload(
         userId: String?,
         styleId: String?,
-        accessToken: String,
     ): List<RouteShieldToDownload> {
         return this.mapNotNull { component ->
             if (component.type() == BannerComponents.ICON) {
@@ -237,7 +232,6 @@ class MapboxRouteShieldApi {
                             userId = userId,
                             styleId = styleId,
                         ),
-                        accessToken = accessToken,
                         mapboxShield = mapboxShield,
                         legacyFallback = legacy,
                     )
@@ -253,7 +247,6 @@ class MapboxRouteShieldApi {
     }
 
     private fun List<RoadComponent>.findShieldsToDownloadFromRoadComponent(
-        accessToken: String,
         userId: String?,
         styleId: String?,
     ): List<RouteShieldToDownload> {
@@ -272,7 +265,6 @@ class MapboxRouteShieldApi {
                         userId = userId,
                         styleId = styleId,
                     ),
-                    accessToken = accessToken,
                     mapboxShield = roadComponent.shield!!,
                     legacyFallback = legacy,
                 )

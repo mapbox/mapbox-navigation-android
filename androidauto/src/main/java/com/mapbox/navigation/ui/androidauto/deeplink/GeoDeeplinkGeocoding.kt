@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.androidauto.deeplink
 import com.mapbox.api.geocoding.v5.GeocodingCriteria
 import com.mapbox.api.geocoding.v5.MapboxGeocoding
 import com.mapbox.api.geocoding.v5.models.GeocodingResponse
+import com.mapbox.common.MapboxOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.core.geodeeplink.GeoDeeplink
 import kotlinx.coroutines.Dispatchers
@@ -15,10 +16,16 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class GeoDeeplinkGeocoding(
-    private val accessToken: String,
+class GeoDeeplinkGeocoding private constructor(
+    private val accessTokenWrapper: AccessTokenWrapper,
 ) {
+
     var currentMapboxGeocoding: MapboxGeocoding? = null
+
+    @Deprecated("Access Token should not be cached. Use constructor without parameters")
+    constructor(accessToken: String) : this(AccessTokenWrapper.Predefined(accessToken))
+
+    constructor() : this(AccessTokenWrapper.Default)
 
     suspend fun requestPlaces(
         geoDeeplink: GeoDeeplink,
@@ -30,7 +37,7 @@ class GeoDeeplinkGeocoding(
         currentMapboxGeocoding = when {
             point != null -> {
                 MapboxGeocoding.builder()
-                    .accessToken(accessToken)
+                    .accessToken(accessTokenWrapper.getLatestToken())
                     .query(point)
                     .proximity(origin)
                     .geocodingTypes(GeocodingCriteria.TYPE_ADDRESS)
@@ -38,7 +45,7 @@ class GeoDeeplinkGeocoding(
             }
             placeQuery != null -> {
                 MapboxGeocoding.builder()
-                    .accessToken(accessToken)
+                    .accessToken(accessTokenWrapper.getLatestToken())
                     .query(placeQuery)
                     .proximity(origin)
                     .build()
@@ -76,5 +83,18 @@ class GeoDeeplinkGeocoding(
         awaitClose {
             cancelCall()
         }
+    }
+
+    private sealed class AccessTokenWrapper {
+
+        fun getLatestToken(): String {
+            return when (this) {
+                is Predefined -> accessToken
+                is Default -> MapboxOptions.accessToken
+            }
+        }
+
+        data class Predefined(val accessToken: String) : AccessTokenWrapper()
+        object Default : AccessTokenWrapper()
     }
 }

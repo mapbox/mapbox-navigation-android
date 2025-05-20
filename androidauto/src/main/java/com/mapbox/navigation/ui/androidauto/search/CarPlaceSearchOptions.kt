@@ -1,13 +1,15 @@
 package com.mapbox.navigation.ui.androidauto.search
 
-import com.mapbox.navigation.base.options.NavigationOptions
-
 /**
  * Options for the Car Mapbox Place Search.
  *
- * @param accessToken place search access token. If null the navigation access token is used.
+ * @param accessToken place search access token.
+ * No longer in use. The search component now uses the default MapboxOptions.accessToken
  */
 class CarPlaceSearchOptions private constructor(
+    @Deprecated(
+        "No longer in use. The search component now uses the default MapboxOptions.accessToken",
+    )
     val accessToken: String?,
 ) {
     /**
@@ -52,9 +54,12 @@ class CarPlaceSearchOptions private constructor(
         private var accessToken: String? = null
 
         /**
-         * Override the Mapbox Search access token. If null, the access token provided to
-         * [NavigationOptions.accessToken] will be used.
+         * Override the Mapbox Search access token.
+         * No longer in use. The search component now uses the default MapboxOptions.accessToken
          */
+        @Deprecated(
+            "No longer in use. The search component now uses the default MapboxOptions.accessToken",
+        )
         fun accessToken(accessToken: String?) = apply {
             this.accessToken = accessToken
         }

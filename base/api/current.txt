@@ -537,9 +537,11 @@ package com.mapbox.navigation.base.options {
 
   public final class LocationOptions {
     method public com.mapbox.common.location.DeviceLocationProviderFactory? getLocationProviderFactory();
+    method public String getLocationProviderSource();
     method public String getLocationProviderType();
     method public com.mapbox.common.location.LocationProviderRequest getRequest();
     property public final com.mapbox.common.location.DeviceLocationProviderFactory? locationProviderFactory;
+    property public final String locationProviderSource;
     property public final String locationProviderType;
     property public final com.mapbox.common.location.LocationProviderRequest request;
     field public static final com.mapbox.navigation.base.options.LocationOptions.Companion Companion;
@@ -548,6 +550,7 @@ package com.mapbox.navigation.base.options {
   public static final class LocationOptions.Builder {
     ctor public LocationOptions.Builder();
     method public com.mapbox.navigation.base.options.LocationOptions build();
+    method public com.mapbox.navigation.base.options.LocationOptions.Builder defaultLocationProviderSource(String locationProviderSource);
     method public com.mapbox.navigation.base.options.LocationOptions.Builder locationProviderFactory(com.mapbox.common.location.DeviceLocationProviderFactory locationProviderFactory, @com.mapbox.navigation.base.options.LocationOptions.LocationProviderType.Type String locationProviderType);
     method public com.mapbox.navigation.base.options.LocationOptions.Builder request(com.mapbox.common.location.LocationProviderRequest request);
   }
@@ -555,6 +558,19 @@ package com.mapbox.navigation.base.options {
   public static final class LocationOptions.Companion {
     method public com.mapbox.common.location.LocationProviderRequest! getDEFAULT_REQUEST();
     property public final com.mapbox.common.location.LocationProviderRequest! DEFAULT_REQUEST;
+  }
+
+  @kotlin.jvm.JvmInline public static final value class LocationOptions.LocationProviderSource {
+    field public static final com.mapbox.navigation.base.options.LocationOptions.LocationProviderSource.Companion Companion;
+  }
+
+  public static final class LocationOptions.LocationProviderSource.Companion {
+    method public String getBEST();
+    method public String getFUSED();
+    method public String getGPS();
+    property public final String BEST;
+    property public final String FUSED;
+    property public final String GPS;
   }
 
   public static final class LocationOptions.LocationProviderType {

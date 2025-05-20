@@ -2,6 +2,7 @@ package com.mapbox.navigation.tripdata.shield.internal.model
 
 import com.mapbox.api.directions.v5.models.MapboxShield
 import com.mapbox.api.directions.v5.models.ShieldSprite
+import com.mapbox.common.MapboxOptions
 
 private const val SPRITE = "/sprite"
 private const val SPRITE_BASE_URL = "https://api.mapbox.com/styles/v1/"
@@ -13,7 +14,6 @@ sealed class RouteShieldToDownload {
 
     data class MapboxDesign(
         val shieldSpriteToDownload: ShieldSpriteToDownload,
-        val accessToken: String,
         val mapboxShield: MapboxShield,
         val legacyFallback: MapboxLegacy? = null,
     ) : RouteShieldToDownload() {
@@ -24,7 +24,7 @@ sealed class RouteShieldToDownload {
             .plus(SPRITE)
             .plus("/${sprite.spriteName()}")
             .plus(REQUEST_ACCESS_TOKEN)
-            .plus(accessToken)
+            .plus(MapboxOptions.accessToken)
     }
 
     /**
@@ -44,7 +44,7 @@ internal fun RouteShieldToDownload.MapboxDesign.generateSpriteSheetUrl(): String
         .plus("${this.shieldSpriteToDownload.styleId}/")
         .plus(SPRITE_JSON)
         .plus(REQUEST_ACCESS_TOKEN)
-        .plus(accessToken)
+        .plus(MapboxOptions.accessToken)
 }
 
 internal data class SizeSpecificSpriteInfo(
