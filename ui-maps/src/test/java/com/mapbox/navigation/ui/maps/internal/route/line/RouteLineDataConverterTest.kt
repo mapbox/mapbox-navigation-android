@@ -13,6 +13,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.route.line.api.LineGradientCommandApplier
 import com.mapbox.navigation.ui.maps.route.line.api.LineTrimCommandApplier
+import com.mapbox.navigation.ui.maps.route.line.api.RouteLineExpressionValueProvider
 import com.mapbox.navigation.ui.maps.route.line.api.RouteLineValueCommandHolder
 import com.mapbox.navigation.ui.maps.route.line.api.unsupportedRouteLineCommandHolder
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions
@@ -35,6 +36,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
 import org.junit.Test
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.coroutineContext
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class RouteLineDataConverterTest {
@@ -229,7 +232,7 @@ internal class RouteLineDataConverterTest {
         )
         val expected = RouteLineViewDataError("some error")
 
-        val actual = input.toInput { toEventValue(mockk()) }
+        val actual = input.toInput { toEventValue(coroutineContext, mockk()) }
 
         assertEquals(expected, actual)
     }
@@ -275,7 +278,7 @@ internal class RouteLineDataConverterTest {
             null,
         )
 
-        val actual = input.toInput { toEventValue(mockk()) }
+        val actual = input.toInput { toEventValue(coroutineContext, mockk()) }
 
         assertEquals(expected, actual)
     }
@@ -306,86 +309,86 @@ internal class RouteLineDataConverterTest {
         val waypointSource = mockk<FeatureCollection>()
         val primaryDynamicData = RouteLineDynamicData(
             RouteLineValueCommandHolder(
-                { exp1 },
+                { _, _ -> exp1 },
                 LineGradientCommandApplier(),
             ),
             RouteLineValueCommandHolder(
-                { exp2 },
+                { _, _ -> exp2 },
                 LineGradientCommandApplier(),
             ),
             RouteLineValueCommandHolder(
-                { exp3 },
+                { _, _ -> exp3 },
                 LineTrimCommandApplier(),
             ),
             RouteLineValueCommandHolder(
-                { exp4 },
+                { _, _ -> exp4 },
                 LineTrimCommandApplier(),
             ),
             RouteLineTrimOffset(0.2),
             RouteLineValueCommandHolder(
-                { exp5 },
+                { _, _ -> exp5 },
                 LineGradientCommandApplier(),
             ),
             RouteLineValueCommandHolder(
-                { exp6 },
+                { _, _ -> exp6 },
                 LineGradientCommandApplier(),
             ),
             RouteLineValueCommandHolder(
-                { exp19 },
+                { _, _ -> exp19 },
                 LineGradientCommandApplier(),
             ),
         )
         val alt1DynamicData = RouteLineDynamicData(
             RouteLineValueCommandHolder(
-                { exp7 },
+                { _, _ -> exp7 },
                 LineTrimCommandApplier(),
             ),
             RouteLineValueCommandHolder(
-                { exp8 },
+                { _, _ -> exp8 },
                 LineGradientCommandApplier(),
             ),
             RouteLineValueCommandHolder(
-                { exp9 },
+                { _, _ -> exp9 },
                 LineGradientCommandApplier(),
             ),
             RouteLineValueCommandHolder(
-                { exp10 },
+                { _, _ -> exp10 },
                 LineTrimCommandApplier(),
             ),
             RouteLineTrimOffset(0.3),
             RouteLineValueCommandHolder(
-                { exp11 },
+                { _, _ -> exp11 },
                 LineGradientCommandApplier(),
             ),
             RouteLineValueCommandHolder(
-                { exp12 },
+                { _, _ -> exp12 },
                 LineGradientCommandApplier(),
             ),
         )
         val maskingDynamicData = RouteLineDynamicData(
             RouteLineValueCommandHolder(
-                { exp13 },
+                { _, _ -> exp13 },
                 LineGradientCommandApplier(),
             ),
             RouteLineValueCommandHolder(
-                { exp14 },
+                { _, _ -> exp14 },
                 LineTrimCommandApplier(),
             ),
             RouteLineValueCommandHolder(
-                { exp15 },
+                { _, _ -> exp15 },
                 LineTrimCommandApplier(),
             ),
             RouteLineValueCommandHolder(
-                { exp16 },
+                { _, _ -> exp16 },
                 LineGradientCommandApplier(),
             ),
             RouteLineTrimOffset(0.1),
             RouteLineValueCommandHolder(
-                { exp17 },
+                { _, _ -> exp17 },
                 LineGradientCommandApplier(),
             ),
             RouteLineValueCommandHolder(
-                { exp18 },
+                { _, _ -> exp18 },
                 LineTrimCommandApplier(),
             ),
         )
@@ -443,7 +446,7 @@ internal class RouteLineDataConverterTest {
             ),
         )
 
-        val actual = input.toInput { toEventValue(mockk()) }
+        val actual = input.toInput { toEventValue(coroutineContext, mockk()) }
 
         assertEquals(expected, actual)
     }
@@ -455,7 +458,7 @@ internal class RouteLineDataConverterTest {
         )
         val expected = RouteLineViewRenderRouteLineUpdateDataValue(null, emptyList(), null)
 
-        val actual = input.toInput { toEventValue(mockk()) }
+        val actual = input.toInput { toEventValue(coroutineContext, mockk()) }
 
         assertEquals(expected, actual)
     }
@@ -482,82 +485,82 @@ internal class RouteLineDataConverterTest {
         val exp18 = mockk<StylePropertyValue>(relaxed = true)
         val primaryDynamicData = RouteLineDynamicData(
             RouteLineValueCommandHolder(
-                { exp1 },
+                { _, _ -> exp1 },
                 LineGradientCommandApplier(),
             ),
             RouteLineValueCommandHolder(
-                { exp2 },
+                { _, _ -> exp2 },
                 LineGradientCommandApplier(),
             ),
             RouteLineValueCommandHolder(
-                { exp3 },
+                { _, _ -> exp3 },
                 LineTrimCommandApplier(),
             ),
             RouteLineValueCommandHolder(
-                { exp4 },
+                { _, _ -> exp4 },
                 LineTrimCommandApplier(),
             ),
             RouteLineTrimOffset(0.2),
             RouteLineValueCommandHolder(
-                { exp5 },
+                { _, _ -> exp5 },
                 LineGradientCommandApplier(),
             ),
             RouteLineValueCommandHolder(
-                { exp6 },
+                { _, _ -> exp6 },
                 LineGradientCommandApplier(),
             ),
         )
         val alt1DynamicData = RouteLineDynamicData(
             RouteLineValueCommandHolder(
-                { exp7 },
+                { _, _ -> exp7 },
                 LineTrimCommandApplier(),
             ),
             RouteLineValueCommandHolder(
-                { exp8 },
+                { _, _ -> exp8 },
                 LineGradientCommandApplier(),
             ),
             RouteLineValueCommandHolder(
-                { exp9 },
+                { _, _ -> exp9 },
                 LineGradientCommandApplier(),
             ),
             RouteLineValueCommandHolder(
-                { exp10 },
+                { _, _ -> exp10 },
                 LineTrimCommandApplier(),
             ),
             RouteLineTrimOffset(0.3),
             RouteLineValueCommandHolder(
-                { exp11 },
+                { _, _ -> exp11 },
                 LineGradientCommandApplier(),
             ),
             RouteLineValueCommandHolder(
-                { exp12 },
+                { _, _ -> exp12 },
                 LineGradientCommandApplier(),
             ),
         )
         val maskingDynamicData = RouteLineDynamicData(
             RouteLineValueCommandHolder(
-                { exp13 },
+                { _, _ -> exp13 },
                 LineGradientCommandApplier(),
             ),
             RouteLineValueCommandHolder(
-                { exp14 },
+                { _, _ -> exp14 },
                 LineTrimCommandApplier(),
             ),
             RouteLineValueCommandHolder(
-                { exp15 },
+                { _, _ -> exp15 },
                 LineTrimCommandApplier(),
             ),
             RouteLineValueCommandHolder(
-                { exp16 },
+                { _, _ -> exp16 },
                 LineGradientCommandApplier(),
             ),
             RouteLineTrimOffset(0.1),
             RouteLineValueCommandHolder(
-                { exp17 },
+                { _, _ -> exp17 },
                 LineGradientCommandApplier(),
             ),
             RouteLineValueCommandHolder(
-                { exp18 },
+                { _, _ -> exp18 },
                 LineTrimCommandApplier(),
             ),
         )
@@ -600,7 +603,7 @@ internal class RouteLineDataConverterTest {
             ),
         )
 
-        val actual = input.toInput { toEventValue(mockk()) }
+        val actual = input.toInput { toEventValue(coroutineContext, mockk()) }
 
         assertEquals(expected, actual)
     }
@@ -698,7 +701,7 @@ internal class RouteLineDataConverterTest {
     private fun checkNoOp(holder: RouteLineValueCommandHolder) {
         assertThrows(UnsupportedOperationException::class.java) {
             runBlocking {
-                holder.provider.generateCommand(eventData)
+                holder.provider.generateCommand(coroutineContext, eventData)
             }
         }
         holder.applier.applyCommand(style, layerId, mockk())
@@ -708,14 +711,14 @@ internal class RouteLineDataConverterTest {
     }
 
     private suspend fun checkGradient(holder: RouteLineValueCommandHolder, exp: Expression) {
-        holder.applier.applyCommand(style, layerId, holder.provider.generateCommand(eventData))
+        holder.applier.applyCommand(style, layerId, holder.provider.generateCommand(coroutineContext, eventData))
         verify(exactly = 1) {
             style.setStyleLayerProperty(layerId, "line-gradient", exp)
         }
     }
 
     private suspend fun checkTrimOffset(holder: RouteLineValueCommandHolder, exp: Expression) {
-        holder.applier.applyCommand(style, layerId, holder.provider.generateCommand(eventData))
+        holder.applier.applyCommand(style, layerId, holder.provider.generateCommand(coroutineContext, eventData))
         verify(exactly = 1) {
             style.setStyleLayerProperty(layerId, "line-trim-offset", exp)
         }

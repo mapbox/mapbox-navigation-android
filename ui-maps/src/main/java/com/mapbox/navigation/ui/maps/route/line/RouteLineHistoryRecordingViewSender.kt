@@ -75,7 +75,7 @@ internal class RouteLineHistoryRecordingViewSender : RouteLineHistoryRecordingIn
                             if (data == null) {
                                 RouteLineViewDataError("NoOptions")
                             } else {
-                                toEventValue(data)
+                                toEventValue(it, data)
                             }
                         },
                     ),
@@ -99,7 +99,7 @@ internal class RouteLineHistoryRecordingViewSender : RouteLineHistoryRecordingIn
                                 if (data == null) {
                                     RouteLineViewDataError("NoOptions")
                                 } else {
-                                    toEventValue(data)
+                                    toEventValue(it, data)
                                 }
                             },
                         ),

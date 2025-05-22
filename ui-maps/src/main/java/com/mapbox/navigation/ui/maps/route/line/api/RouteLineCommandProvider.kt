@@ -1,38 +1,51 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
-import androidx.annotation.AnyThread
+import android.util.Log
 import com.mapbox.maps.StylePropertyValue
 import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineViewOptionsData
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 internal fun interface RouteLineCommandProvider<T, R> {
 
-    suspend fun generateCommand(input: R): T
+    /**
+     * Generates a style expression for lines.
+     * Please note that this can be a heavy task and [workerCoroutineContext] might be used to
+     * generate the command.
+     */
+    suspend fun generateCommand(workerCoroutineContext: CoroutineContext, input: R): T
 }
 
-internal abstract class RouteLineValueProvider :
-    RouteLineCommandProvider<StylePropertyValue, RouteLineViewOptionsData>
+internal abstract class RouteLineExpressionValueProvider : RouteLineCommandProvider<StylePropertyValue, RouteLineViewOptionsData>
 
-internal class LightRouteLineValueProvider(
+internal class LightRouteLineExpressionValueProvider(
     private val anyThreadExpressionGenerator: (RouteLineViewOptionsData) -> StylePropertyValue,
-) : RouteLineValueProvider() {
+) : RouteLineExpressionValueProvider() {
 
-    @AnyThread
-    override suspend fun generateCommand(input: RouteLineViewOptionsData): StylePropertyValue {
+    override suspend fun generateCommand(
+        workerCoroutineContext: CoroutineContext,
+        input: RouteLineViewOptionsData,
+    ): StylePropertyValue {
         return anyThreadExpressionGenerator(input)
     }
 }
 
-internal class HeavyRouteLineValueProvider(
-    private val calculationScope: CoroutineScope,
+internal class HeavyRouteLineExpressionValueProvider(
     private val workerThreadExpressionGenerator: (RouteLineViewOptionsData) -> StylePropertyValue,
-) : RouteLineValueProvider() {
-
-    @AnyThread
-    override suspend fun generateCommand(input: RouteLineViewOptionsData): StylePropertyValue {
-        return withContext(calculationScope.coroutineContext) {
-            workerThreadExpressionGenerator(input)
+) : RouteLineExpressionValueProvider() {
+    private val TAG = "MbxRouteLineView"
+    override suspend fun generateCommand(
+        workerCoroutineContext: CoroutineContext,
+        input: RouteLineViewOptionsData,
+    ): StylePropertyValue {
+        return withContext(workerCoroutineContext) {
+            Log.d(TAG, "generateCommand() called")
+            workerThreadExpressionGenerator(input).also {
+                Log.d(TAG, "generateCommand() delaying...")
+                delay(1000L)
+                Log.d(TAG, "generateCommand() done")
+            }
         }
     }
 }

@@ -80,10 +80,12 @@ import com.mapbox.navigation.ui.maps.util.sdkStyleManager
 import com.mapbox.navigation.ui.maps.util.toDelayedRoutesRenderedCallback
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.coroutineScope
 import org.jetbrains.annotations.TestOnly
 
@@ -202,6 +204,8 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
     private val scope = MutexBasedScope(
         InternalJobControlFactory.createImmediateMainScopeJobControl().scope,
     )
+
+    private val calculationScope = InternalJobControlFactory.createDefaultScopeJobControl().scope
 
     init {
         sender.sendInitialOptionsEvent(optionsHolder.data)
@@ -1041,6 +1045,7 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         clearCalloutAdapter()
         sender.sendCancelEvent()
         scope.cancelChildren()
+        calculationScope.coroutineContext.cancelChildren()
     }
 
     private fun adjustLayerVisibility(style: Style, layerId: String, visibility: Visibility) {
@@ -1154,10 +1159,18 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
                 in blurLayerIds -> Pair(it, routeLineData.blurExpressionCommandHolder)
                 else -> null
             }
-        }.filter { it?.second != null }.map {
+        }.filter { it?.second != null }.map { pair ->
             coroutineScope {
                 async {
-                    getGenerateCommand(it!!.second!!, style, it.first, options)()
+                    val generateCommand: suspend () -> () -> Unit =
+                        getGenerateCommand(pair!!.second!!, style, pair.first, options)
+                    generateCommand().also {
+                        logD(TAG) {
+                            "(${pair?.first} Done executing getGenerateCommand"
+                        }
+                    }
+                }.also {
+                    logD(TAG) {"${pair?.first} Done creating async task for getGradientUpdateCommands"}
                 }
             }
         }
@@ -1475,14 +1488,14 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         add(coroutineScope { async { block() } })
     }
 
-    private suspend fun getGenerateCommand(
+    private fun getGenerateCommand(
         holder: RouteLineValueCommandHolder,
         style: Style,
         layerId: String,
         options: RouteLineViewOptionsData,
     ): suspend () -> (() -> Unit) {
         return {
-            val exp = holder.provider.generateCommand(options)
+            val exp = holder.provider.generateCommand(calculationScope.coroutineContext, options)
             val result: () -> Unit = {
                 holder.applier.applyCommand(
                     style,
