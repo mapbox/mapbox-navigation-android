@@ -13,7 +13,6 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.route.line.api.LineGradientCommandApplier
 import com.mapbox.navigation.ui.maps.route.line.api.LineTrimCommandApplier
-import com.mapbox.navigation.ui.maps.route.line.api.RouteLineExpressionValueProvider
 import com.mapbox.navigation.ui.maps.route.line.api.RouteLineValueCommandHolder
 import com.mapbox.navigation.ui.maps.route.line.api.unsupportedRouteLineCommandHolder
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions
@@ -36,7 +35,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
 import org.junit.Test
-import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
