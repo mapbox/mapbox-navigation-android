@@ -6,6 +6,7 @@ import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineExpressionEven
 import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineNoOpExpressionEventData
 import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineProviderBasedExpressionEventData
 import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineViewOptionsData
+import kotlin.coroutines.CoroutineContext
 
 internal class RouteLineValueCommandHolder(
     val provider: RouteLineCommandProvider<StylePropertyValue, RouteLineViewOptionsData>,
@@ -13,10 +14,11 @@ internal class RouteLineValueCommandHolder(
 ) {
 
     suspend fun toRouteLineExpressionEventData(
+        workerCoroutineContext: CoroutineContext,
         data: RouteLineViewOptionsData,
     ): RouteLineExpressionEventData {
         return try {
-            val value = provider.generateCommand(data)
+            val value = provider.generateCommand(workerCoroutineContext, data)
             val property = applier.getProperty()
             RouteLineProviderBasedExpressionEventData(property, value = value)
         } catch (ex: Throwable) {
@@ -27,7 +29,7 @@ internal class RouteLineValueCommandHolder(
 
 internal fun unsupportedRouteLineCommandHolder(): RouteLineValueCommandHolder {
     return RouteLineValueCommandHolder(
-        LightRouteLineValueProvider { throw UnsupportedOperationException() },
+        LightRouteLineExpressionValueProvider { throw UnsupportedOperationException() },
         object : RouteLineCommandApplier<StylePropertyValue>() {
             override fun applyCommand(style: Style, layerId: String, command: StylePropertyValue) {
                 // no-op

@@ -136,19 +136,19 @@ internal class VanishingRouteLine() {
         vanishPointOffset = offset
         val value = StylePropertyValue(Value.valueOf(offset), StylePropertyValueKind.CONSTANT)
         val trafficLineExpressionCommandHolder = RouteLineValueCommandHolder(
-            LightRouteLineValueProvider { value },
+            LightRouteLineExpressionValueProvider { value },
             LineTrimCommandApplier(),
         )
         val routeLineValueCommandHolder = RouteLineValueCommandHolder(
-            LightRouteLineValueProvider { value },
+            LightRouteLineExpressionValueProvider { value },
             LineTrimCommandApplier(),
         )
         val routeLineCasingExpressionCommandHolder = RouteLineValueCommandHolder(
-            LightRouteLineValueProvider { value },
+            LightRouteLineExpressionValueProvider { value },
             LineTrimCommandApplier(),
         )
         val restrictedRoadExpressionCommandHolder = RouteLineValueCommandHolder(
-            LightRouteLineValueProvider { value },
+            LightRouteLineExpressionValueProvider { value },
             LineTrimCommandApplier(),
         )
         return VanishingRouteLineExpressions(

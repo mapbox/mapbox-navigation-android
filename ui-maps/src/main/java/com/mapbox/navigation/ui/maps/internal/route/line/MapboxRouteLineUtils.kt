@@ -40,8 +40,8 @@ import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToLineString
 import com.mapbox.navigation.base.utils.DecodeUtils.stepsGeometryToPoints
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
-import com.mapbox.navigation.ui.maps.route.line.api.HeavyRouteLineValueProvider
-import com.mapbox.navigation.ui.maps.route.line.api.LightRouteLineValueProvider
+import com.mapbox.navigation.ui.maps.route.line.api.HeavyRouteLineExpressionValueProvider
+import com.mapbox.navigation.ui.maps.route.line.api.LightRouteLineExpressionValueProvider
 import com.mapbox.navigation.ui.maps.route.line.api.LineGradientCommandApplier
 import com.mapbox.navigation.ui.maps.route.line.api.RouteLineValueCommandHolder
 import com.mapbox.navigation.ui.maps.route.line.model.ExpressionOffsetData
@@ -2794,7 +2794,7 @@ internal object MapboxRouteLineUtils {
             }
         val primaryRouteTrafficLineExpressionCommandHolder =
             RouteLineValueCommandHolder(
-                HeavyRouteLineValueProvider(calculationsScope) {
+                HeavyRouteLineExpressionValueProvider {
                     trafficExpressionProvider(it)
                 },
                 LineGradientCommandApplier(),
@@ -2802,7 +2802,7 @@ internal object MapboxRouteLineUtils {
 
         val primaryRouteBaseExpressionCommandHolder =
             RouteLineValueCommandHolder(
-                LightRouteLineValueProvider {
+                LightRouteLineExpressionValueProvider {
                     // TODO why are we changing traveled portion to traveled color instead of
                     //  making it transparent to show trail layers?
                     if (routeLineOptions.styleInactiveRouteLegsIndependently) {
@@ -2828,7 +2828,7 @@ internal object MapboxRouteLineUtils {
         val primaryRouteCasingExpressionCommandHolder = RouteLineValueCommandHolder(
             // TODO why are we changing traveled portion to traveled color instead of
             //  making it transparent to show trail layers?
-            LightRouteLineValueProvider {
+            LightRouteLineExpressionValueProvider {
                 if (routeLineOptions.styleInactiveRouteLegsIndependently) {
                     getExpressionSubstitutingColorForInactiveLegs(
                         vanishingPointOffset,
@@ -2854,7 +2854,7 @@ internal object MapboxRouteLineUtils {
         //  However, all layers are initialized to grey right now,
         //  and they should be initialized as transparent instead.
         val primaryRouteTrailExpressionCommandHolder = RouteLineValueCommandHolder(
-            LightRouteLineValueProvider {
+            LightRouteLineExpressionValueProvider {
                 if (routeLineOptions.styleInactiveRouteLegsIndependently &&
                     routeLineOptions.vanishingRouteLineEnabled
                 ) {
@@ -2896,7 +2896,7 @@ internal object MapboxRouteLineUtils {
         )
         // the same conditions apply for the trail casing as do for the trail layers
         val primaryRouteTrailCasingExpressionCommandHolder = RouteLineValueCommandHolder(
-            LightRouteLineValueProvider {
+            LightRouteLineExpressionValueProvider {
                 if (routeLineOptions.styleInactiveRouteLegsIndependently &&
                     routeLineOptions.vanishingRouteLineEnabled
                 ) {
@@ -2931,8 +2931,7 @@ internal object MapboxRouteLineUtils {
         // If false produce a gradient for the restricted line layer that is completely transparent.
         val primaryRouteRestrictedSectionsExpressionProducer =
             RouteLineValueCommandHolder(
-                HeavyRouteLineValueProvider(
-                    calculationsScope,
+                HeavyRouteLineExpressionValueProvider(
                     getNonMaskingRestrictedLineExpressionProducer(
                         restrictedExpressionData,
                         0.0,
@@ -2944,7 +2943,7 @@ internal object MapboxRouteLineUtils {
             )
 
         val blurLineHolder = RouteLineValueCommandHolder(
-            HeavyRouteLineValueProvider(calculationsScope) { options ->
+            HeavyRouteLineExpressionValueProvider { options ->
                 if (options.routeLineBlurEnabled) {
                     if (options.applyTrafficColorsToRouteLineBlur) {
                         trafficExpressionProvider(options)
