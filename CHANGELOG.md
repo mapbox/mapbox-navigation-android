@@ -1,5 +1,23 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.10.0-beta.1 - 22 May, 2025
+#### Features
+- ⚠️ Breaking changes in Experimental API. `MapboxEvSearchClientFactory.#getInstance()` no longer accepts access token as a parameter. The default `MapboxOptions.accessToken` will be used. 
+- `CarPlaceSearchOptions.accessToken` and corresponding builder function has been deprecated because `accessToken` is no longer in use as the search component now uses the default `MapboxOptions.accessToken`. 
+- Used legacy/custom date primitives in EV modules to support older Android API levels. 
+- Added `DriverNotification`, `DriverNotificationProvider` interfaces with `EvBetterRouteNotificationProvider` and `SlowTrafficNotificationProvider` implementations. Add new `DriverNotificationManager` API to attach or detach providers and `DriverNotificationManager.observeDriverNotification()` to handle the flow of driver notifications. 
+- Added default location providers. 
+- Added `EvBusyChargingStationNotificationProvider` to notify when the EV is charging station is busy and propose alternative route. 
+- Added experimental `NavigationPerformance#performanceTracingEnabled` which enables/disables internal performance trace sections. 
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.13.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.13.0-beta.1))
+- Mapbox Navigation Native `v324.13.0-beta.1`
+- Mapbox Core Common `v24.13.0-beta.1`
+- Mapbox Java `v7.4.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.4.0))
+
+
 ## Navigation SDK Core Framework 3.7.0-beta.1 - 22 January, 2025
 #### Features
 - Add `MapboxRoadCamera::inOnRoute` flag which indicates if the roiad camera is on the current route. 
