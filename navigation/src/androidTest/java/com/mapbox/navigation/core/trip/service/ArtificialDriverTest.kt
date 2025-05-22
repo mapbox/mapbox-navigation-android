@@ -14,6 +14,7 @@ import com.mapbox.navigation.core.replay.history.mapToLocation
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.test.R
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
+import com.mapbox.navigator.AlternativeRoutesChangeReason
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigationStatusOrigin
 import com.mapbox.navigator.NavigatorObserver
@@ -126,6 +127,7 @@ fun MapboxNativeNavigator.statusUpdates(): Flow<OnStatusUpdateParameters> {
 
             override fun onAlternativeRoutesChanged(
                 alternativeRoutes: MutableList<RouteAlternative>,
+                reason: AlternativeRoutesChangeReason,
             ) {
                 // no-op
             }

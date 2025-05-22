@@ -17,6 +17,7 @@ import com.mapbox.navigation.core.test.R
 import com.mapbox.navigation.core.tests.activity.TripServiceActivity
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
+import com.mapbox.navigator.AlternativeRoutesChangeReason
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigationStatusOrigin
@@ -134,6 +135,7 @@ internal class NativeNavigatorCallbackOrderTest :
 
                 override fun onAlternativeRoutesChanged(
                     alternativeRoutes: MutableList<RouteAlternative>,
+                    reason: AlternativeRoutesChangeReason,
                 ) {
                     // no-op
                 }
@@ -168,6 +170,7 @@ internal class NativeNavigatorCallbackOrderTest :
 
                 override fun onAlternativeRoutesChanged(
                     alternativeRoutes: MutableList<RouteAlternative>,
+                    reason: AlternativeRoutesChangeReason,
                 ) {
                     // no-op
                 }
@@ -211,6 +214,7 @@ internal class NativeNavigatorCallbackOrderTest :
 
                 override fun onAlternativeRoutesChanged(
                     alternativeRoutes: MutableList<RouteAlternative>,
+                    reason: AlternativeRoutesChangeReason,
                 ) {
                     // no-op
                 }
@@ -259,6 +263,7 @@ internal class NativeNavigatorCallbackOrderTest :
 
                 override fun onAlternativeRoutesChanged(
                     alternativeRoutes: MutableList<RouteAlternative>,
+                    reason: AlternativeRoutesChangeReason,
                 ) {
                     // no-op
                 }
@@ -294,6 +299,7 @@ internal class NativeNavigatorCallbackOrderTest :
 
                 override fun onAlternativeRoutesChanged(
                     alternativeRoutes: MutableList<RouteAlternative>,
+                    reason: AlternativeRoutesChangeReason,
                 ) {
                     // no-op
                 }

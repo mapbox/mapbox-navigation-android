@@ -39,6 +39,7 @@ import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.logW
+import com.mapbox.navigator.AlternativeRoutesChangeReason
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigationStatusOrigin
@@ -372,7 +373,10 @@ internal class MapboxTripSession(
             // no-op NAVAND-5180
         }
 
-        override fun onAlternativeRoutesChanged(alternativeRoutes: MutableList<RouteAlternative>) {
+        override fun onAlternativeRoutesChanged(
+            alternativeRoutes: MutableList<RouteAlternative>,
+            reason: AlternativeRoutesChangeReason,
+        ) {
             // no-op NAVAND-5180
         }
     }
