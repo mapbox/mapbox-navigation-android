@@ -40,7 +40,7 @@ class RouteLineCommandProviderTest {
                 invocationThreadId.set(Thread.currentThread().id)
                 StylePropertyValue(expression, StylePropertyValueKind.EXPRESSION)
             }
-            val provider = LightRouteLineExpressionValueProvider(block)
+            val provider = LightRouteLineValueProvider(block)
 
             val resultDeferred = async {
                 provider.generateCommand(testScope.coroutineContext, viewData)
@@ -66,7 +66,7 @@ class RouteLineCommandProviderTest {
                 invocationThreadId.set(Thread.currentThread().id)
                 StylePropertyValue(expression, StylePropertyValueKind.EXPRESSION)
             }
-            val provider = HeavyRouteLineExpressionValueProvider(block)
+            val provider = HeavyRouteLineValueProvider(block)
 
             val result = provider.generateCommand(testScope.coroutineContext, viewData)
 

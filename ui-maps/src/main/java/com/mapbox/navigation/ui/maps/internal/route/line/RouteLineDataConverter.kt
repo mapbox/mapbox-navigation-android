@@ -5,7 +5,7 @@ import com.mapbox.maps.Style
 import com.mapbox.maps.StylePropertyValue
 import com.mapbox.maps.StylePropertyValueKind
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.ui.maps.route.line.api.LightRouteLineExpressionValueProvider
+import com.mapbox.navigation.ui.maps.route.line.api.LightRouteLineValueProvider
 import com.mapbox.navigation.ui.maps.route.line.api.LineGradientCommandApplier
 import com.mapbox.navigation.ui.maps.route.line.api.LineTrimCommandApplier
 import com.mapbox.navigation.ui.maps.route.line.api.RouteLineCommandApplier
@@ -147,7 +147,7 @@ private fun RouteLineExpressionEventData.toHolder(): RouteLineValueCommandHolder
                 // deprecated
                 "line-trim-offset" -> {
                     RouteLineValueCommandHolder(
-                        LightRouteLineExpressionValueProvider {
+                        LightRouteLineValueProvider {
                             StylePropertyValue(expression!!, StylePropertyValueKind.EXPRESSION)
                         },
                         object : RouteLineCommandApplier<StylePropertyValue>() {
@@ -168,7 +168,7 @@ private fun RouteLineExpressionEventData.toHolder(): RouteLineValueCommandHolder
 
                 "line-trim-end" -> {
                     RouteLineValueCommandHolder(
-                        LightRouteLineExpressionValueProvider { value!! },
+                        LightRouteLineValueProvider { value!! },
                         LineTrimCommandApplier(),
                     )
                 }
@@ -176,9 +176,9 @@ private fun RouteLineExpressionEventData.toHolder(): RouteLineValueCommandHolder
                 "line-gradient" -> {
                     RouteLineValueCommandHolder(
                         if (value != null) {
-                            LightRouteLineExpressionValueProvider { value!! }
+                            LightRouteLineValueProvider { value!! }
                         } else {
-                            LightRouteLineExpressionValueProvider {
+                            LightRouteLineValueProvider {
                                 StylePropertyValue(expression!!, StylePropertyValueKind.EXPRESSION)
                             }
                         },

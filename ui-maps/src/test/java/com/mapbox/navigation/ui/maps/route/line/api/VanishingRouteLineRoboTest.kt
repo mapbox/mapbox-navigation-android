@@ -124,14 +124,14 @@ class VanishingRouteLineRoboTest {
         )
 
         assertTrue(
-            result.routeLineValueCommandHolder.provider is LightRouteLineExpressionValueProvider,
+            result.routeLineValueCommandHolder.provider is LightRouteLineValueProvider,
         )
         assertTrue(
-            result.trafficLineExpressionCommandHolder.provider is LightRouteLineExpressionValueProvider,
+            result.trafficLineExpressionCommandHolder.provider is LightRouteLineValueProvider,
         )
         assertTrue(
             result.routeLineCasingExpressionCommandHolder.provider
-            is LightRouteLineExpressionValueProvider,
+            is LightRouteLineValueProvider,
         )
     }
 
@@ -189,14 +189,14 @@ class VanishingRouteLineRoboTest {
         )
 
         assertTrue(
-            result.routeLineValueCommandHolder.provider is LightRouteLineExpressionValueProvider,
+            result.routeLineValueCommandHolder.provider is LightRouteLineValueProvider,
         )
         assertTrue(
-            result.trafficLineExpressionCommandHolder.provider is LightRouteLineExpressionValueProvider,
+            result.trafficLineExpressionCommandHolder.provider is LightRouteLineValueProvider,
         )
         assertTrue(
             result.routeLineCasingExpressionCommandHolder.provider
-            is LightRouteLineExpressionValueProvider,
+            is LightRouteLineValueProvider,
         )
     }
 }
