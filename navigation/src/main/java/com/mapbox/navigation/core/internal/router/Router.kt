@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.internal.router
 
+import androidx.annotation.MainThread
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
@@ -12,6 +13,7 @@ import com.mapbox.navigation.base.route.NavigationRouterCallback
  * Provides ability for refreshing routes partially
  * using state snapshot stored in [RouteRefreshRequestData].
  */
+@MainThread // Router is not thread safe: in theory it doesn't have to be main thread
 internal interface Router {
 
     /**

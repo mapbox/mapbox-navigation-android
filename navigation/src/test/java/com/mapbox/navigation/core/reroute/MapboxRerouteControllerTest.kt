@@ -859,9 +859,9 @@ class MapboxRerouteControllerTest {
             // in an incorrect order
             mockRouteOptionsResult(updaterSuccess2)
             rerouteController.rerouteOnDeviation(internalRouteCallback)
-            verify(exactly = 1) { directionsSession.cancelRouteRequest(1L) }
             routeRequestCallback1.captured.onCanceled(routeOptions1, RouterOrigin.ONLINE)
         }
+        verify(exactly = 1) { directionsSession.cancelRouteRequest(1L) }
 
         routeRequestCallback2.captured.onRoutesReady(
             listOf(mockk(relaxed = true)),
