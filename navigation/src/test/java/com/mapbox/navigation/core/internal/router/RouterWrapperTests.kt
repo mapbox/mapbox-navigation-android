@@ -39,12 +39,14 @@ import com.mapbox.navigation.testing.factories.toDataRef
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.GetRouteOptions
 import com.mapbox.navigator.RouteRefreshOptions
+import com.mapbox.navigator.RouterDataRefCallback
 import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.RouterErrorType
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.RouterOrigin
 import com.mapbox.navigator.RouterRefreshCallback
 import com.mapbox.navigator.RoutingProfile
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -69,6 +71,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
 
 @InternalCoroutinesApi
@@ -598,6 +601,25 @@ class RouterWrapperTests {
     }
 
     @Test
+    fun `check cancel and NN callback afterwards - invoke only cancel`() {
+        every { router.getRoute(any(), any(), any(), capture(getRouteSlot)) } returns REQUEST_ID
+        every { router.cancelRouteRequest(any()) } answers {}
+
+        routerWrapper.getRoute(routerOptions, signature, navigationRouterCallback)
+        routerWrapper.cancelRouteRequest(REQUEST_ID)
+
+        verify(exactly = 1) { navigationRouterCallback.onCanceled(routerOptions, OFFLINE) }
+
+        clearMocks(navigationRouterCallback, answers = false)
+
+        getRouteSlot.captured.run(routerResultSuccess, nativeOriginOnline)
+
+        verify(exactly = 0) { navigationRouterCallback.onCanceled(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback.onRoutesReady(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback.onFailure(any(), any()) }
+    }
+
+    @Test
     fun `check callback called on cancelAll`() = coroutineRule.runBlockingTest {
         every { router.cancelAll() } answers {
             getRouteSlot.captured.run(routerResultCancelled, nativeOriginOnline)
@@ -606,7 +628,26 @@ class RouterWrapperTests {
         routerWrapper.getRoute(routerOptions, signature, navigationRouterCallback)
         routerWrapper.cancelAll()
 
-        verify { navigationRouterCallback.onCanceled(routerOptions, ONLINE) }
+        verify { navigationRouterCallback.onCanceled(routerOptions, OFFLINE) }
+    }
+
+    @Test
+    fun `check cancelAll and NN callback afterwards - invoke only cancel`() {
+        every { router.getRoute(any(), any(), any(), capture(getRouteSlot)) } returns REQUEST_ID
+        every { router.cancelAll() } answers {}
+
+        routerWrapper.getRoute(routerOptions, signature, navigationRouterCallback)
+        routerWrapper.cancelAll()
+
+        verify(exactly = 1) { navigationRouterCallback.onCanceled(routerOptions, OFFLINE) }
+
+        clearMocks(navigationRouterCallback, answers = false)
+
+        getRouteSlot.captured.run(routerResultSuccess, nativeOriginOnline)
+
+        verify(exactly = 0) { navigationRouterCallback.onCanceled(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback.onRoutesReady(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback.onFailure(any(), any()) }
     }
 
     @Test
@@ -627,6 +668,331 @@ class RouterWrapperTests {
         verify(exactly = 1) { router.cancelRouteRequest(requestIdTwo) }
         verify(exactly = 1) { router.cancelRouteRequest(refreshIdOne) }
         verify(exactly = 1) { router.cancelRouteRequest(refreshIdTwo) }
+    }
+
+    @Test
+    fun `check refresh cancel and NN callback afterwards - invoke only cancel`() {
+        val options = RouteOptions.builder()
+            .applyDefaultNavigationOptions()
+            .coordinatesList(
+                listOf(
+                    Point.fromLngLat(17.035958238636283, 51.123073179658476),
+                    Point.fromLngLat(17.033342297413395, 51.11608871549779),
+                    Point.fromLngLat(17.030364743939824, 51.11309150868635),
+                    Point.fromLngLat(17.032132688234814, 51.10720758039439),
+                ),
+            )
+            .build()
+        val route = createNavigationRoutes(
+            DirectionsResponse.fromJson(
+                testRouteFixtures.loadMultiLegRouteForRefresh(),
+                options,
+            ),
+            options,
+            ONLINE,
+        ).first()
+
+        every { router.getRouteRefresh(any(), capture(refreshRouteSlot)) } returns REQUEST_ID
+        every { router.cancelRouteRequest(any()) } answers {}
+
+        routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
+        routerWrapper.cancelRouteRefreshRequest(REQUEST_ID)
+
+        verify(exactly = 1) {
+            routerRefreshCallback.onFailure(any())
+        }
+
+        clearMocks(routerRefreshCallback, answers = false)
+
+        refreshRouteSlot.captured.run(routerRefreshSuccess, nativeOriginOnline, hashMapOf())
+
+        verify(exactly = 0) { routerRefreshCallback.onFailure(any()) }
+        verify(exactly = 0) { routerRefreshCallback.onRefreshReady(any()) }
+    }
+
+    @Test
+    fun `check refresh cancelAll and NN callback afterwards - invoke only cancel`() {
+        val options = RouteOptions.builder()
+            .applyDefaultNavigationOptions()
+            .coordinatesList(
+                listOf(
+                    Point.fromLngLat(17.035958238636283, 51.123073179658476),
+                    Point.fromLngLat(17.033342297413395, 51.11608871549779),
+                    Point.fromLngLat(17.030364743939824, 51.11309150868635),
+                    Point.fromLngLat(17.032132688234814, 51.10720758039439),
+                ),
+            )
+            .build()
+        val route = createNavigationRoutes(
+            DirectionsResponse.fromJson(
+                testRouteFixtures.loadMultiLegRouteForRefresh(),
+                options,
+            ),
+            options,
+            ONLINE,
+        ).first()
+
+        every { router.getRouteRefresh(any(), capture(refreshRouteSlot)) } returns REQUEST_ID
+        every { router.cancelAll() } answers {}
+
+        routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
+        routerWrapper.cancelAll()
+
+        verify(exactly = 1) { routerRefreshCallback.onFailure(any()) }
+
+        clearMocks(routerRefreshCallback, answers = false)
+
+        refreshRouteSlot.captured.run(routerRefreshSuccess, nativeOriginOnline, hashMapOf())
+
+        verify(exactly = 0) { routerRefreshCallback.onFailure(any()) }
+        verify(exactly = 0) { routerRefreshCallback.onRefreshReady(any()) }
+    }
+
+    @Test
+    fun `check cancel route request if has running refresh with the same id`() {
+        val options = RouteOptions.builder()
+            .applyDefaultNavigationOptions()
+            .coordinatesList(
+                listOf(
+                    Point.fromLngLat(17.035958238636283, 51.123073179658476),
+                    Point.fromLngLat(17.033342297413395, 51.11608871549779),
+                    Point.fromLngLat(17.030364743939824, 51.11309150868635),
+                    Point.fromLngLat(17.032132688234814, 51.10720758039439),
+                ),
+            )
+            .build()
+        val route = createNavigationRoutes(
+            DirectionsResponse.fromJson(
+                testRouteFixtures.loadMultiLegRouteForRefresh(),
+                options,
+            ),
+            options,
+            ONLINE,
+        ).first()
+
+        every { router.getRoute(any(), any(), any(), capture(getRouteSlot)) } returns REQUEST_ID
+        every { router.getRouteRefresh(any(), capture(refreshRouteSlot)) } returns REQUEST_ID
+        every { router.cancelRouteRequest(any()) } answers {}
+        every { router.cancelRouteRefreshRequest(any()) } answers {}
+
+        routerWrapper.getRoute(routerOptions, signature, navigationRouterCallback)
+        routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
+        routerWrapper.cancelRouteRequest(REQUEST_ID)
+
+        verify(exactly = 0) { routerRefreshCallback.onFailure(any()) }
+        verify(exactly = 1) { navigationRouterCallback.onCanceled(routerOptions, OFFLINE) }
+
+        clearMocks(routerRefreshCallback, navigationRouterCallback, answers = false)
+
+        getRouteSlot.captured.run(routerResultSuccess, nativeOriginOnline)
+
+        verify(exactly = 0) { routerRefreshCallback.onRefreshReady(any()) }
+        verify(exactly = 0) { routerRefreshCallback.onFailure(any()) }
+        verify(exactly = 0) { navigationRouterCallback.onCanceled(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback.onFailure(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback.onRoutesReady(any(), any()) }
+
+        clearMocks(routerRefreshCallback, navigationRouterCallback, answers = false)
+
+        refreshRouteSlot.captured.run(routerRefreshSuccess, nativeOriginOnline, hashMapOf())
+
+        verify(exactly = 1) { routerRefreshCallback.onRefreshReady(any()) }
+        verify(exactly = 0) { routerRefreshCallback.onFailure(any()) }
+        verify(exactly = 0) { navigationRouterCallback.onCanceled(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback.onFailure(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback.onRoutesReady(any(), any()) }
+    }
+
+    @Test
+    fun `check cancel route refresh request if has running route with the same id`() {
+        val options = RouteOptions.builder()
+            .applyDefaultNavigationOptions()
+            .coordinatesList(
+                listOf(
+                    Point.fromLngLat(17.035958238636283, 51.123073179658476),
+                    Point.fromLngLat(17.033342297413395, 51.11608871549779),
+                    Point.fromLngLat(17.030364743939824, 51.11309150868635),
+                    Point.fromLngLat(17.032132688234814, 51.10720758039439),
+                ),
+            )
+            .build()
+        val route = createNavigationRoutes(
+            DirectionsResponse.fromJson(
+                testRouteFixtures.loadMultiLegRouteForRefresh(),
+                options,
+            ),
+            options,
+            ONLINE,
+        ).first()
+
+        every { router.getRoute(any(), any(), any(), capture(getRouteSlot)) } returns REQUEST_ID
+        every { router.getRouteRefresh(any(), capture(refreshRouteSlot)) } returns REQUEST_ID
+        every { router.cancelRouteRequest(any()) } answers {}
+        every { router.cancelRouteRefreshRequest(any()) } answers {}
+
+        routerWrapper.getRoute(routerOptions, signature, navigationRouterCallback)
+        routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
+        routerWrapper.cancelRouteRefreshRequest(REQUEST_ID)
+
+        verify(exactly = 1) { routerRefreshCallback.onFailure(any()) }
+        verify(exactly = 0) { navigationRouterCallback.onCanceled(any(), any()) }
+
+        clearMocks(routerRefreshCallback, navigationRouterCallback, answers = false)
+        refreshRouteSlot.captured.run(routerRefreshSuccess, nativeOriginOnline, hashMapOf())
+
+        verify(exactly = 0) { routerRefreshCallback.onRefreshReady(any()) }
+        verify(exactly = 0) { routerRefreshCallback.onFailure(any()) }
+        verify(exactly = 0) { navigationRouterCallback.onCanceled(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback.onFailure(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback.onRoutesReady(any(), any()) }
+
+        clearMocks(routerRefreshCallback, navigationRouterCallback, answers = false)
+
+        getRouteSlot.captured.run(routerResultSuccess, nativeOriginOnline)
+
+        verify(exactly = 0) { routerRefreshCallback.onRefreshReady(any()) }
+        verify(exactly = 0) { routerRefreshCallback.onFailure(any()) }
+        verify(exactly = 0) { navigationRouterCallback.onCanceled(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback.onFailure(any(), any()) }
+        verify(exactly = 1) { navigationRouterCallback.onRoutesReady(any(), any()) }
+    }
+
+    @Test
+    fun `cancelAll for multiple running requests of different types`() {
+        val options = RouteOptions.builder()
+            .applyDefaultNavigationOptions()
+            .coordinatesList(
+                listOf(
+                    Point.fromLngLat(17.035958238636283, 51.123073179658476),
+                    Point.fromLngLat(17.033342297413395, 51.11608871549779),
+                    Point.fromLngLat(17.030364743939824, 51.11309150868635),
+                    Point.fromLngLat(17.032132688234814, 51.10720758039439),
+                ),
+            )
+            .build()
+        val route = createNavigationRoutes(
+            DirectionsResponse.fromJson(
+                testRouteFixtures.loadMultiLegRouteForRefresh(),
+                options,
+            ),
+            options,
+            ONLINE,
+        ).first()
+        val navigationRouterCallback2: NavigationRouterCallback = mockk(relaxed = true)
+        val routerRefreshCallback2: NavigationRouterRefreshCallback = mockk(relaxed = true)
+
+        val getRouteSlots = mutableListOf<RouterDataRefCallback>()
+        val refreshRouteSlots = mutableListOf<RouterRefreshCallback>()
+        every {
+            router.getRoute(
+                any(),
+                any(),
+                any(),
+                capture(getRouteSlots),
+            )
+        } answers { Random.nextLong() }
+        every {
+            router.getRouteRefresh(
+                any(),
+                capture(refreshRouteSlots),
+            )
+        } answers { Random.nextLong() }
+        every { router.cancelAll() } answers {}
+
+        routerWrapper.getRoute(routerOptions, signature, navigationRouterCallback)
+        routerWrapper.getRoute(routerOptions, signature, navigationRouterCallback2)
+        routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
+        routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback2)
+        routerWrapper.cancelAll()
+
+        verify(exactly = 1) { routerRefreshCallback.onFailure(any()) }
+        verify(exactly = 1) { navigationRouterCallback.onCanceled(any(), any()) }
+        verify(exactly = 1) { routerRefreshCallback2.onFailure(any()) }
+        verify(exactly = 1) { navigationRouterCallback2.onCanceled(any(), any()) }
+
+        clearMocks(
+            routerRefreshCallback,
+            navigationRouterCallback,
+            routerRefreshCallback2,
+            navigationRouterCallback2,
+            answers = false,
+        )
+
+        refreshRouteSlots[0].run(routerRefreshSuccess, nativeOriginOnline, hashMapOf())
+
+        verify(exactly = 0) { routerRefreshCallback.onRefreshReady(any()) }
+        verify(exactly = 0) { routerRefreshCallback.onFailure(any()) }
+        verify(exactly = 0) { routerRefreshCallback2.onRefreshReady(any()) }
+        verify(exactly = 0) { routerRefreshCallback2.onFailure(any()) }
+        verify(exactly = 0) { navigationRouterCallback.onCanceled(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback.onFailure(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback.onRoutesReady(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback2.onCanceled(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback2.onFailure(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback2.onRoutesReady(any(), any()) }
+
+        clearMocks(
+            routerRefreshCallback,
+            navigationRouterCallback,
+            routerRefreshCallback2,
+            navigationRouterCallback2,
+            answers = false,
+        )
+
+        getRouteSlots[0].run(routerResultSuccess, nativeOriginOnline)
+
+        verify(exactly = 0) { routerRefreshCallback.onRefreshReady(any()) }
+        verify(exactly = 0) { routerRefreshCallback.onFailure(any()) }
+        verify(exactly = 0) { routerRefreshCallback2.onRefreshReady(any()) }
+        verify(exactly = 0) { routerRefreshCallback2.onFailure(any()) }
+        verify(exactly = 0) { navigationRouterCallback.onCanceled(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback.onFailure(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback.onRoutesReady(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback2.onCanceled(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback2.onFailure(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback2.onRoutesReady(any(), any()) }
+
+        clearMocks(
+            routerRefreshCallback,
+            navigationRouterCallback,
+            routerRefreshCallback2,
+            navigationRouterCallback2,
+            answers = false,
+        )
+
+        getRouteSlots[1].run(routerResultSuccess, nativeOriginOnline)
+
+        verify(exactly = 0) { routerRefreshCallback.onRefreshReady(any()) }
+        verify(exactly = 0) { routerRefreshCallback.onFailure(any()) }
+        verify(exactly = 0) { routerRefreshCallback2.onRefreshReady(any()) }
+        verify(exactly = 0) { routerRefreshCallback2.onFailure(any()) }
+        verify(exactly = 0) { navigationRouterCallback.onCanceled(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback.onFailure(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback.onRoutesReady(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback2.onCanceled(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback2.onFailure(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback2.onRoutesReady(any(), any()) }
+
+        clearMocks(
+            routerRefreshCallback,
+            navigationRouterCallback,
+            routerRefreshCallback2,
+            navigationRouterCallback2,
+            answers = false,
+        )
+
+        refreshRouteSlots[1].run(routerRefreshSuccess, nativeOriginOnline, hashMapOf())
+
+        verify(exactly = 0) { routerRefreshCallback.onRefreshReady(any()) }
+        verify(exactly = 0) { routerRefreshCallback.onFailure(any()) }
+        verify(exactly = 0) { routerRefreshCallback2.onRefreshReady(any()) }
+        verify(exactly = 0) { routerRefreshCallback2.onFailure(any()) }
+        verify(exactly = 0) { navigationRouterCallback.onCanceled(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback.onFailure(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback.onRoutesReady(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback2.onCanceled(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback2.onFailure(any(), any()) }
+        verify(exactly = 0) { navigationRouterCallback2.onRoutesReady(any(), any()) }
     }
 
     @Test
@@ -925,7 +1291,7 @@ class RouterWrapperTests {
                     options,
                 ),
                 options,
-                com.mapbox.navigation.base.route.RouterOrigin.ONLINE,
+                ONLINE,
             ).first()
 
             routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
@@ -966,7 +1332,7 @@ class RouterWrapperTests {
                     options,
                 ),
                 options,
-                com.mapbox.navigation.base.route.RouterOrigin.ONLINE,
+                ONLINE,
                 100L,
             ).first()
 
