@@ -354,6 +354,7 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
                 }
                 val featureQueue = ArrayDeque(featuresNotOnMap)
 
+                val sourceFeaturePairingsMap = sourceToFeatureMap.toMutableMap()
                 val expectedRoutesData = ExpectedRoutesToRenderData()
                 sourcesToUpdate.forEach { sourceToUpdate ->
                     val nextFeatureId = featureQueue.removeFirstOrNull()
@@ -375,8 +376,9 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
                     expectedRoutesData.addRenderedRoute(sourceId, dataId, routeId)
                     updateSourceCommands.add {
                         updateSource(style, sourceToUpdate.key.sourceId, fc, dataId)
+                        sourceToFeatureMap[sourceToUpdate.key] = RouteLineFeatureId(routeId)
                     }
-                    sourceToFeatureMap[sourceToUpdate.key] = RouteLineFeatureId(routeId)
+                    sourceFeaturePairingsMap[sourceToUpdate.key] = RouteLineFeatureId(routeId)
                 }
                 if (callback != null) {
                     routesExpector.expectRoutes(
@@ -387,7 +389,7 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
                     )
                 }
 
-                val sourceFeaturePairings = sourceToFeatureMap.toMutableList()
+                val sourceFeaturePairings = sourceFeaturePairingsMap.toMutableList()
                 routeLineDatas.forEachIndexed { index, routeLineData ->
                     val relatedSourceKey = getRelatedSourceKey(
                         routeLineData.featureCollection.features()?.firstOrNull()?.id(),
