@@ -10,6 +10,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigator.RouteInterface
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
@@ -35,6 +36,8 @@ suspend fun parseDirectionsResponse(
             } else {
                 ExpectedFactory.createValue(response)
             }
+        } catch (cancellationException: CancellationException) {
+            throw cancellationException
         } catch (ex: Throwable) {
             logE { "Route parsing failed: ${ex.message}" }
             ExpectedFactory.createError(ex)
