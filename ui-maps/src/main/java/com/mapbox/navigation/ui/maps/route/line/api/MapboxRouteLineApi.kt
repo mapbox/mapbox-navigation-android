@@ -818,7 +818,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         val trafficExpProvider = RouteLineValueCommandHolder(
             // TODO why is this a "light" expression instead of "heavy"?
             //  Congestion generation for initial draw uses "heavy"
-            LightRouteLineValueProvider {
+            LightRouteLineExpressionValueProvider {
                 MapboxRouteLineUtils.getTrafficLineExpression(
                     it,
                     0.0,
@@ -831,7 +831,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
             LineGradientCommandApplier(),
         )
         val mainExpCommandHolder = RouteLineValueCommandHolder(
-            LightRouteLineValueProvider {
+            LightRouteLineExpressionValueProvider {
                 MapboxRouteLineUtils.getExpressionSubstitutingColorForInactiveLegs(
                     0.0,
                     segments,
@@ -844,7 +844,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
             LineGradientCommandApplier(),
         )
         val casingExpApplier = RouteLineValueCommandHolder(
-            LightRouteLineValueProvider {
+            LightRouteLineExpressionValueProvider {
                 MapboxRouteLineUtils.getExpressionSubstitutingColorForInactiveLegs(
                     0.0,
                     segments,
@@ -857,7 +857,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
             LineGradientCommandApplier(),
         )
         val trailExpCommandHolder = RouteLineValueCommandHolder(
-            LightRouteLineValueProvider {
+            LightRouteLineExpressionValueProvider {
                 MapboxRouteLineUtils.getExpressionSubstitutingColorForInactiveLegs(
                     0.0,
                     segments,
@@ -870,7 +870,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
             LineGradientCommandApplier(),
         )
         val trailCasingExpCommandHolder = RouteLineValueCommandHolder(
-            LightRouteLineValueProvider {
+            LightRouteLineExpressionValueProvider {
                 MapboxRouteLineUtils.getExpressionSubstitutingColorForInactiveLegs(
                     0.0,
                     segments,
@@ -887,7 +887,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         val restrictedExpCommandHolder = RouteLineValueCommandHolder(
             // TODO why is this a "light" expression instead of "heavy"?
             //  Congestion generation for initial draw uses "heavy"
-            LightRouteLineValueProvider(
+            LightRouteLineExpressionValueProvider(
                 getRestrictedLineExpressionProducer(
                     routeLineOptions,
                     restrictedExpressionData,
@@ -1205,7 +1205,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         val alternateRoute1TrafficExpressionCommandHolder =
             alternativeRoute1?.route?.let { route ->
                 RouteLineValueCommandHolder(
-                    HeavyRouteLineValueProvider(calculationsScope) {
+                    HeavyRouteLineExpressionValueProvider {
                         MapboxRouteLineUtils.getTrafficLineExpression(
                             route,
                             routeLineOptions,
@@ -1224,7 +1224,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         val alternateRoute2TrafficExpressionCommandHolder =
             if (partitionedRoutes.second.size > 1) {
                 RouteLineValueCommandHolder(
-                    HeavyRouteLineValueProvider(calculationsScope) {
+                    HeavyRouteLineExpressionValueProvider {
                         MapboxRouteLineUtils.getTrafficLineExpression(
                             alternativeRoute2!!.route,
                             routeLineOptions,
@@ -1251,7 +1251,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         val wayPointsFeatureCollection = wayPointsFeatureCollectionDef.await()
 
         val alternateRoute1BaseExpressionCommandHolder = RouteLineValueCommandHolder(
-            LightRouteLineValueProvider {
+            LightRouteLineExpressionValueProvider {
                 MapboxRouteLineUtils.getRouteLineExpression(
                     alternative1PercentageTraveled,
                     Color.TRANSPARENT,
@@ -1262,7 +1262,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         )
 
         val alternateRoute1CasingExpressionCommandHolder = RouteLineValueCommandHolder(
-            LightRouteLineValueProvider {
+            LightRouteLineExpressionValueProvider {
                 MapboxRouteLineUtils.getRouteLineExpression(
                     alternative1PercentageTraveled,
                     Color.TRANSPARENT,
@@ -1273,7 +1273,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         )
 
         val alternateRoute1TrailExpressionCommandHolder = RouteLineValueCommandHolder(
-            LightRouteLineValueProvider {
+            LightRouteLineExpressionValueProvider {
                 MapboxRouteLineUtils.getRouteLineExpression(
                     alternative1PercentageTraveled,
                     Color.TRANSPARENT,
@@ -1284,7 +1284,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         )
 
         val alternateRoute1TrailCasingExpressionCommandHolder = RouteLineValueCommandHolder(
-            LightRouteLineValueProvider {
+            LightRouteLineExpressionValueProvider {
                 MapboxRouteLineUtils.getRouteLineExpression(
                     alternative1PercentageTraveled,
                     Color.TRANSPARENT,
@@ -1296,7 +1296,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
 
         val alternateRoute1RestrictedSectionsExpressionCommandHolder =
             RouteLineValueCommandHolder(
-                LightRouteLineValueProvider {
+                LightRouteLineExpressionValueProvider {
                     MapboxRouteLineUtils.getRouteLineExpression(
                         alternative1PercentageTraveled,
                         Color.TRANSPARENT,
@@ -1307,14 +1307,14 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
             )
 
         val alternateRoute1BlurExpressionHolder = RouteLineValueCommandHolder(
-            LightRouteLineValueProvider {
+            LightRouteLineExpressionValueProvider {
                 getSingleColorExpression(Color.TRANSPARENT)
             },
             LineGradientCommandApplier(),
         )
 
         val alternateRoute2BaseExpressionCommandHolder = RouteLineValueCommandHolder(
-            LightRouteLineValueProvider {
+            LightRouteLineExpressionValueProvider {
                 MapboxRouteLineUtils.getRouteLineExpression(
                     alternative2PercentageTraveled,
                     Color.TRANSPARENT,
@@ -1325,7 +1325,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         )
 
         val alternateRoute2CasingExpressionCommandHolder = RouteLineValueCommandHolder(
-            LightRouteLineValueProvider {
+            LightRouteLineExpressionValueProvider {
                 MapboxRouteLineUtils.getRouteLineExpression(
                     alternative2PercentageTraveled,
                     Color.TRANSPARENT,
@@ -1336,7 +1336,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         )
 
         val alternateRoute2TrailExpressionCommandHolder = RouteLineValueCommandHolder(
-            LightRouteLineValueProvider {
+            LightRouteLineExpressionValueProvider {
                 MapboxRouteLineUtils.getRouteLineExpression(
                     alternative2PercentageTraveled,
                     Color.TRANSPARENT,
@@ -1347,7 +1347,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         )
 
         val alternateRoute2TrailCasingExpressionCommandHolder = RouteLineValueCommandHolder(
-            LightRouteLineValueProvider {
+            LightRouteLineExpressionValueProvider {
                 MapboxRouteLineUtils.getRouteLineExpression(
                     alternative2PercentageTraveled,
                     Color.TRANSPARENT,
@@ -1359,7 +1359,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
 
         val alternateRoute2RestrictedSectionsExpressionCommandHolder =
             RouteLineValueCommandHolder(
-                LightRouteLineValueProvider {
+                LightRouteLineExpressionValueProvider {
                     MapboxRouteLineUtils.getRouteLineExpression(
                         alternative2PercentageTraveled,
                         Color.TRANSPARENT,
@@ -1370,7 +1370,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
             )
 
         val alternateRoute2BlurExpressionHolder = RouteLineValueCommandHolder(
-            LightRouteLineValueProvider {
+            LightRouteLineExpressionValueProvider {
                 getSingleColorExpression(Color.TRANSPARENT)
             },
             LineGradientCommandApplier(),
@@ -1391,28 +1391,28 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
             )
             RouteLineDynamicData(
                 baseExpressionCommandHolder = RouteLineValueCommandHolder(
-                    LightRouteLineValueProvider { exp },
+                    LightRouteLineExpressionValueProvider { exp },
                     LineGradientCommandApplier(),
                 ),
                 casingExpressionCommandHolder = RouteLineValueCommandHolder(
-                    LightRouteLineValueProvider { exp },
+                    LightRouteLineExpressionValueProvider { exp },
                     LineGradientCommandApplier(),
                 ),
                 trafficExpressionCommandHolder = RouteLineValueCommandHolder(
-                    LightRouteLineValueProvider { exp },
+                    LightRouteLineExpressionValueProvider { exp },
                     LineGradientCommandApplier(),
                 ),
                 restrictedSectionExpressionCommandHolder = RouteLineValueCommandHolder(
-                    LightRouteLineValueProvider { exp },
+                    LightRouteLineExpressionValueProvider { exp },
                     LineGradientCommandApplier(),
                 ),
                 trimOffset = RouteLineTrimOffset(vanishingPointOffset),
                 trailExpressionCommandHolder = RouteLineValueCommandHolder(
-                    LightRouteLineValueProvider { exp },
+                    LightRouteLineExpressionValueProvider { exp },
                     LineGradientCommandApplier(),
                 ),
                 trailCasingExpressionCommandHolder = RouteLineValueCommandHolder(
-                    LightRouteLineValueProvider { exp },
+                    LightRouteLineExpressionValueProvider { exp },
                     LineGradientCommandApplier(),
                 ),
             )

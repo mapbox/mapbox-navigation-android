@@ -16,6 +16,7 @@ import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 private const val HISTORY_RECORDING_QUEUE_SIZE = 8
 
@@ -43,7 +44,7 @@ internal class RouteLineHistoryRecordingPusher(
         }
 
     private val eventsQueue =
-        LimitedQueue<suspend () -> RouteLineEvent>(HISTORY_RECORDING_QUEUE_SIZE)
+        LimitedQueue<suspend (CoroutineContext) -> RouteLineEvent>(HISTORY_RECORDING_QUEUE_SIZE)
     private var historyRecordingEnabledObserver: RouteLineHistoryRecordingEnabledObserver? = null
 
     init {
@@ -68,7 +69,7 @@ internal class RouteLineHistoryRecordingPusher(
         recorder = null
     }
 
-    fun pushEventOrAddToQueue(@WorkerThread eventFormer: suspend () -> RouteLineEvent) {
+    fun pushEventOrAddToQueue(@WorkerThread eventFormer: suspend (CoroutineContext) -> RouteLineEvent) {
         val recorderCopy = recorder
         if (recorderCopy == null) {
             eventsQueue.add(eventFormer)
@@ -79,12 +80,12 @@ internal class RouteLineHistoryRecordingPusher(
 
     private fun pushEvent(
         recorder: MapboxHistoryRecorder,
-        @WorkerThread eventFormer: suspend () -> RouteLineEvent,
+        @WorkerThread eventFormer: suspend (CoroutineContext) -> RouteLineEvent,
     ) {
         mutexBasedMainScope.launchWithMutex {
             val eventJson = withContext(serialisationDispatcher) {
                 try {
-                    eventFormer().toJson()
+                    eventFormer(serialisationDispatcher).toJson()
                 } catch (ex: Throwable) {
                     null
                 }
@@ -95,7 +96,7 @@ internal class RouteLineHistoryRecordingPusher(
         }
     }
 
-    fun pushEventIfEnabled(@WorkerThread eventFormer: suspend () -> RouteLineEvent) {
+    fun pushEventIfEnabled(@WorkerThread eventFormer: suspend (CoroutineContext) -> RouteLineEvent) {
         recorder?.let { pushEvent(it, eventFormer) }
     }
 }

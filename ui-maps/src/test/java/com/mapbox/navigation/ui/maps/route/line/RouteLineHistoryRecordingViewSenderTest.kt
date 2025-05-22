@@ -193,7 +193,7 @@ internal class RouteLineHistoryRecordingViewSenderTest {
         val input = ExpectedFactory.createValue<RouteLineError, RouteSetValue>(
             mockk {
                 coEvery {
-                    toEventValue(optionsData)
+                    toEventValue(any(), optionsData)
                 } returns RouteLineViewRenderRouteDrawDataInputValue(
                     RouteLineEventData(
                         getFeatureCollection("1"),
@@ -235,7 +235,7 @@ internal class RouteLineHistoryRecordingViewSenderTest {
         val input = ExpectedFactory.createValue<RouteLineError, RouteSetValue>(
             mockk {
                 coEvery {
-                    toEventValue(newOptionsData)
+                    toEventValue(any(), newOptionsData)
                 } returns RouteLineViewRenderRouteDrawDataInputValue(
                     RouteLineEventData(
                         getFeatureCollection("1"),
@@ -293,7 +293,7 @@ internal class RouteLineHistoryRecordingViewSenderTest {
         val input = ExpectedFactory.createValue<RouteLineError, RouteLineUpdateValue>(
             mockk<RouteLineUpdateValue> {
                 coEvery {
-                    toEventValue(optionsData)
+                    toEventValue(any(), optionsData)
                 } returns RouteLineViewRenderRouteLineUpdateDataValue(
                     getPrimaryRouteLineEventDynamicData(),
                     listOf(getAlternativeRouteLineEventDynamicData()),
@@ -323,7 +323,7 @@ internal class RouteLineHistoryRecordingViewSenderTest {
         val input = ExpectedFactory.createValue<RouteLineError, RouteLineUpdateValue>(
             mockk<RouteLineUpdateValue> {
                 coEvery {
-                    toEventValue(newOptions)
+                    toEventValue(any(), newOptions)
                 } returns RouteLineViewRenderRouteLineUpdateDataValue(
                     getPrimaryRouteLineEventDynamicData(),
                     listOf(getAlternativeRouteLineEventDynamicData()),

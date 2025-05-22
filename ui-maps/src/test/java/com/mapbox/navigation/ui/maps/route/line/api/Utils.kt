@@ -7,6 +7,7 @@ import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineViewOptionsDat
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import kotlin.coroutines.coroutineContext
 
 internal suspend fun checkAppliedExpression(
     expectedExpression: List<(Value) -> Unit>,
@@ -35,7 +36,7 @@ internal suspend fun getAppliedValue(
 ): Value {
     val style = mockk<Style>(relaxed = true)
     val layerId = "some-layer-id"
-    val exp = commandHolder.provider.generateCommand(viewOptions)
+    val exp = commandHolder.provider.generateCommand(coroutineContext, viewOptions)
     commandHolder.applier.applyCommand(style, layerId, exp)
     val expressionSlot = slot<Value>()
     verify {
