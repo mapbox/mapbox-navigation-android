@@ -29,7 +29,7 @@ internal class RouteLineValueCommandHolder(
 
 internal fun unsupportedRouteLineCommandHolder(): RouteLineValueCommandHolder {
     return RouteLineValueCommandHolder(
-        LightRouteLineExpressionValueProvider { throw UnsupportedOperationException() },
+        LightRouteLineValueProvider { throw UnsupportedOperationException() },
         object : RouteLineCommandApplier<StylePropertyValue>() {
             override fun applyCommand(style: Style, layerId: String, command: StylePropertyValue) {
                 // no-op
