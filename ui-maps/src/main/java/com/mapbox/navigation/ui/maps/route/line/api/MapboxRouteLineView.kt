@@ -348,6 +348,9 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
                 val featuresNotOnMap = routeLineDatas.map {
                     RouteLineFeatureId(it.featureCollection.features()?.firstOrNull()?.id())
                 }.filter { it !in sourceToFeatureMap.values }
+                // If the incoming feature IDs are already in the map. That is, they're in the
+                // sourceToFeatureMap we don't need to update them. `sourcesToUpdate` will contain
+                // the sources that are available to be replaced for the new features.
                 val sourcesToUpdate = sourceToFeatureMap.filter {
                     it.value.id() !in incomingFeatureIds
                 }
@@ -361,17 +364,24 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
                         it.featureCollection.features()?.firstOrNull()?.id() ==
                             nextFeatureId?.id()
                     }
-                    val fc: FeatureCollection =
-                        nextRouteLineData?.featureCollection
-                            ?: FeatureCollection.fromFeatures(listOf())
+                    // Either we get the next route line data or empty if there are no more.
+                    val fc: FeatureCollection = nextRouteLineData?.featureCollection
+                        ?: FeatureCollection.fromFeatures(listOf())
                     val sourceId = sourceToUpdate.key.sourceId
                     val routeId = nextFeatureId?.id()
                     val dataId = dataIdHolder.incrementDataId(sourceId)
+
+                    // We don't really clear the source but rather replace its data with the new
+                    // feature collection `fc` (which can be an empty).
+                    // We add it to the cleared route list if the previous feature collection
+                    // (`sourceToFeatureMap[sourceToUpdate.key]?.id()`) is not null.
                     expectedRoutesData.addClearedRoute(
                         sourceId,
                         dataId,
                         sourceToFeatureMap[sourceToUpdate.key]?.id(),
                     )
+                    // Finally add the new route to the rendered route list and create the command
+                    // to update the source (which can be empty geometry).
                     expectedRoutesData.addRenderedRoute(sourceId, dataId, routeId)
                     updateSourceCommands.add {
                         updateSource(style, sourceToUpdate.key.sourceId, fc, dataId)
@@ -740,24 +750,25 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
                         logE(TAG, error.message)
                         null
                     },
-                )?.also {
-                    val newDataId = dataIdHolder.incrementDataId(it.sourceId)
+                )?.also { primaryRouteLineSourceKey ->
+                    val primarySourceId = primaryRouteLineSourceKey.sourceId
+                    val newDataId = dataIdHolder.incrementDataId(primarySourceId)
                     val routeId = value.primaryRouteSource.features()?.firstOrNull()?.id()
                     expectedRoutesData.addClearedRoute(
-                        it.sourceId,
+                        primarySourceId,
                         newDataId,
-                        sourceToFeatureMap[it]?.id(),
+                        sourceToFeatureMap[primaryRouteLineSourceKey]?.id(),
                     )
-                    expectedRoutesData.addRenderedRoute(it.sourceId, newDataId, routeId)
+                    expectedRoutesData.addRenderedRoute(primarySourceId, newDataId, routeId)
                     updateSourceCommands.add {
                         updateSource(
                             style,
-                            it.sourceId,
+                            primarySourceId,
                             value.primaryRouteSource,
                             newDataId,
                         )
                     }
-                    sourceToFeatureMap[it] = RouteLineFeatureId(routeId)
+                    sourceToFeatureMap[primaryRouteLineSourceKey] = RouteLineFeatureId(routeId)
                 }
                 sourceLayerMap.keys.filter { it != primarySourceKey }
                     .forEachIndexed { index, routeLineSourceKey ->
