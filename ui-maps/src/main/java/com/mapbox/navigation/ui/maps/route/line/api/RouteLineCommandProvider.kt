@@ -17,7 +17,8 @@ internal fun interface RouteLineCommandProvider<T, R> {
     suspend fun generateCommand(workerCoroutineContext: CoroutineContext, input: R): T
 }
 
-internal abstract class RouteLineValueProvider : RouteLineCommandProvider<StylePropertyValue, RouteLineViewOptionsData>
+internal abstract class RouteLineValueProvider :
+    RouteLineCommandProvider<StylePropertyValue, RouteLineViewOptionsData>
 
 /**
  * Version of [RouteLineValueProvider] that does not use a worker context to generate the expression.
