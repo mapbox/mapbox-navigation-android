@@ -86,8 +86,8 @@ class TestingContext private constructor(
          */
         fun build(): TestingContext {
             return TestingContext(
-                vehicleName,
-                projectName,
+                projectName = projectName,
+                vehicleName = vehicleName,
             )
         }
     }
