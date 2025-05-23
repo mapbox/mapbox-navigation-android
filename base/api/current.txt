@@ -2050,6 +2050,7 @@ package com.mapbox.navigation.base.utils {
 
   public final class NavigationPerformance {
     method @MainThread @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void performanceInfoLoggingEnabled(boolean isEnabled);
+    method @MainThread @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void performanceTracingEnabled(boolean isEnabled);
     field public static final com.mapbox.navigation.base.utils.NavigationPerformance INSTANCE;
   }
 
