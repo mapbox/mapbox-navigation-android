@@ -767,14 +767,18 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
                             value.primaryRouteSource,
                             newDataId,
                         )
+                        sourceToFeatureMap[primaryRouteLineSourceKey] = RouteLineFeatureId(routeId)
                     }
-                    sourceToFeatureMap[primaryRouteLineSourceKey] = RouteLineFeatureId(routeId)
                 }
                 sourceLayerMap.keys.filter { it != primarySourceKey }
                     .forEachIndexed { index, routeLineSourceKey ->
                         if (index < value.alternativeRoutesSources.size) {
                             val newDataId = dataIdHolder
                                 .incrementDataId(routeLineSourceKey.sourceId)
+                            val routeId = value.alternativeRoutesSources[index]
+                                .features()
+                                ?.firstOrNull()
+                                ?.id()
                             updateSourceCommands.add {
                                 updateSource(
                                     style,
@@ -782,11 +786,8 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
                                     value.alternativeRoutesSources[index],
                                     newDataId,
                                 )
+                                sourceToFeatureMap[routeLineSourceKey] = RouteLineFeatureId(routeId)
                             }
-                            val routeId = value.alternativeRoutesSources[index]
-                                .features()
-                                ?.firstOrNull()
-                                ?.id()
                             expectedRoutesData.addClearedRoute(
                                 routeLineSourceKey.sourceId,
                                 newDataId,
@@ -797,7 +798,6 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
                                 newDataId,
                                 routeId,
                             )
-                            sourceToFeatureMap[routeLineSourceKey] = RouteLineFeatureId(routeId)
                         }
                     }
                 if (callback != null) {
