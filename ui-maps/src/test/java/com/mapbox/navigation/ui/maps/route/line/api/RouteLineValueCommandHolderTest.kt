@@ -39,14 +39,19 @@ internal class RouteLineValueCommandHolderTest {
     fun toRouteLineExpressionEventData_throws() = runBlocking {
         val viewData = mockk<RouteLineViewOptionsData>(relaxed = true)
         val provider = mockk<RouteLineValueProvider>(relaxed = true) {
-            coEvery { generateCommand(coroutineContext, viewData) } throws UnsupportedOperationException()
+            coEvery {
+                generateCommand(
+                    coroutineContext,
+                    viewData,
+                )
+            } throws UnsupportedOperationException()
         }
         val applier = mockk<RouteLineCommandApplier<StylePropertyValue>>(relaxed = true) {
             every { getProperty() } returns "some-property"
         }
         val data = RouteLineValueCommandHolder(provider, applier)
 
-        val actual = data.toRouteLineExpressionEventData(coroutineContext,  viewData)
+        val actual = data.toRouteLineExpressionEventData(coroutineContext, viewData)
         assertTrue(actual is RouteLineNoOpExpressionEventData)
     }
 

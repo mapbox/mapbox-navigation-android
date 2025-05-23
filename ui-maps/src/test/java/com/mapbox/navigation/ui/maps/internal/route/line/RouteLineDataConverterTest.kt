@@ -709,14 +709,22 @@ internal class RouteLineDataConverterTest {
     }
 
     private suspend fun checkGradient(holder: RouteLineValueCommandHolder, exp: Expression) {
-        holder.applier.applyCommand(style, layerId, holder.provider.generateCommand(coroutineContext, eventData))
+        holder.applier.applyCommand(
+            style,
+            layerId,
+            holder.provider.generateCommand(coroutineContext, eventData),
+        )
         verify(exactly = 1) {
             style.setStyleLayerProperty(layerId, "line-gradient", exp)
         }
     }
 
     private suspend fun checkTrimOffset(holder: RouteLineValueCommandHolder, exp: Expression) {
-        holder.applier.applyCommand(style, layerId, holder.provider.generateCommand(coroutineContext, eventData))
+        holder.applier.applyCommand(
+            style,
+            layerId,
+            holder.provider.generateCommand(coroutineContext, eventData),
+        )
         verify(exactly = 1) {
             style.setStyleLayerProperty(layerId, "line-trim-offset", exp)
         }
