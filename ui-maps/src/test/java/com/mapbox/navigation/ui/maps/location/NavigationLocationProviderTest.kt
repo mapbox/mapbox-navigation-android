@@ -77,7 +77,7 @@ class NavigationLocationProviderTest {
         verify(exactly = 1) { consumer.onLocationUpdated(*expectedPoints, options = any()) }
         val expectedBearings = doubleArrayOf(location.bearing!!)
         verify(exactly = 1) {
-            consumer.onBearingUpdated(*expectedBearings, options = bearingOptions)
+            consumer.onBearingUpdated(*expectedBearings, options = any())
         }
     }
 
@@ -141,7 +141,7 @@ class NavigationLocationProviderTest {
             location.bearing!!,
         )
         verify(exactly = 1) {
-            consumer.onBearingUpdated(*expectedBearings, options = bearingOptions)
+            consumer.onBearingUpdated(*expectedBearings, options = any())
         }
     }
 
@@ -169,6 +169,7 @@ class NavigationLocationProviderTest {
         }
         val bearingAnimator: ValueAnimator = mockk {
             every { setDuration(any()) } returns this
+            every { setInterpolator(any()) } returns Unit
         }
         every { consumer.onBearingUpdated(*anyDoubleVararg(), options = captureLambda()) } answers {
             lambda<(ValueAnimator.() -> Unit)>().captured.invoke(bearingAnimator)

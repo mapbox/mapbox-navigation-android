@@ -11,7 +11,7 @@ import com.mapbox.maps.plugin.locationcomponent.LocationProvider
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.LocationObserver
-import com.mapbox.navigation.ui.maps.internal.location.PuckAnimationEvaluator
+import com.mapbox.navigation.ui.maps.internal.location.PuckAnimationEvaluatorInterpolator
 import com.mapbox.navigation.utils.internal.ifNonNull
 import java.util.concurrent.CopyOnWriteArraySet
 
@@ -158,25 +158,26 @@ class NavigationLocationProvider : LocationProvider {
             listOf(location.bearing)
         }.filterNotNull().toDoubleArray()
 
+        val puckAnimationEvaluatorInterpolator = PuckAnimationEvaluatorInterpolator(latLngUpdates)
         this.onLocationUpdated(
             location = latLngUpdates,
-            options = locationAnimatorOptions(latLngUpdates, latLngTransitionOptions),
+            options = {
+                this.duration = LocationComponentConstants.DEFAULT_INTERVAL_MILLIS
+                this.interpolator = puckAnimationEvaluatorInterpolator
+                this.setEvaluator(puckAnimationEvaluatorInterpolator)
+                latLngTransitionOptions?.also { this.apply(it) }
+            },
         )
         if (bearingUpdates.isNotEmpty()) {
-            this.onBearingUpdated(bearing = bearingUpdates, options = bearingTransitionOptions)
-        }
-    }
-
-    private fun locationAnimatorOptions(
-        keyPoints: Array<Point>,
-        clientOptions: (ValueAnimator.() -> Unit)?,
-    ): (ValueAnimator.() -> Unit) {
-        val evaluator = PuckAnimationEvaluator(keyPoints)
-        return {
-            // TODO: Remove setDuration once patched in MapsSDK https://github.com/mapbox/mapbox-maps-android/issues/1446
-            duration = LocationComponentConstants.DEFAULT_INTERVAL_MILLIS
-            evaluator.installIn(this)
-            clientOptions?.also { apply(it) }
+            this.onBearingUpdated(
+                bearing = bearingUpdates,
+                options = {
+                    // keeping animation frames in sync between bearing and position animation
+                    this.interpolator = puckAnimationEvaluatorInterpolator
+                    this.duration = LocationComponentConstants.DEFAULT_INTERVAL_MILLIS
+                    bearingTransitionOptions?.also { this.apply(it) }
+                },
+            )
         }
     }
 }
