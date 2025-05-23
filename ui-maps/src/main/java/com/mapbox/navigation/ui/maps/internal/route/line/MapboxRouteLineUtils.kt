@@ -2638,20 +2638,21 @@ internal object MapboxRouteLineUtils {
 
     internal fun getTopRouteLineRelatedLayerId(style: Style): String? {
         return runCatching {
-            val upperRange = style.styleLayers.indexOf(
+            val styleLayers = style.styleLayers
+            val upperRange = styleLayers.indexOf(
                 StyleObjectInfo(
                     RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID,
                     "background",
                 ),
             )
-            val lowerRange = style.styleLayers.indexOf(
+            val lowerRange = styleLayers.indexOf(
                 StyleObjectInfo(
                     RouteLayerConstants.BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID,
                     "background",
                 ),
             )
 
-            style.styleLayers.subList(lowerRange, upperRange)
+            styleLayers.subList(lowerRange, upperRange)
                 .filter { it.id !in maskingLayerIds }
                 .mapIndexed { index, styleObjectInfo ->
                     Pair(index, styleObjectInfo.id)
