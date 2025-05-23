@@ -29,22 +29,38 @@ class ConstantVelocityInterpolatorTest {
         }
     }
 
+    /**
+     * [android.animation.ValueAnimator] allocates equal time for each value transition, consider
+     * default animation timeline:
+     *   |----------------|----------------|----------------|          // animation progress from 0.0 to 1.0
+     * 0.0, 0.1        0.5, 0.5          0.5, 0.5          1.0, 1.0   // location value
+     * 1/3 of the animation time, location will be 0.5 in that case.
+     * Desired timeline for constant velocity in that case is:
+     *   |------------------------|-------------------------|
+     * 0.0, 0.1                0.5, 0.5                 1.0, 1.0
+     * I.e. when animation completed on 25%, location should be (0.25, 0.25) as on the
+     * timeline bellow instead of (0.5, 0.5) as on the timeline above.
+     *
+     * To achieve desired animation timeline, we need to interpolate(remap) animation progress from:
+     * 0.25 to 1/(3*2)
+     * 0.499 (i.e. ~ 1/2) to 0.32 (i.e. ~1/3)
+     * etc
+     * so that it pointed to the right location on the top timeline.
+     */
     @Test
-    fun `should not use keypoints that are at ZERO distance from previous point`() {
+    fun `0 distance key points interpolated to happen immediate`() {
         val p0 = Point.fromLngLat(0.0, 0.0)
         val keyPoints = arrayOf(
             Point.fromLngLat(0.5, 0.5),
             Point.fromLngLat(0.5, 0.5),
             Point.fromLngLat(1.0, 1.0),
         )
-
         val sut = ConstantVelocityInterpolator(p0, keyPoints)
 
-        val path = calculatePathValues(p0, *keyPoints)
-        assertEquals(keyPoints.size - 1, path.size)
-        path.forEach { (outTime, inTime) ->
-            assertEquals(outTime, sut.getInterpolation(inTime))
-        }
+        assertEquals(0.166f, sut.getInterpolation(0.25f), 0.001f)
+        assertEquals(0.329f, sut.getInterpolation(0.499f), 0.01f)
+        assertEquals(0.667f, sut.getInterpolation(0.501f), 0.01f)
+        assertEquals(0.833f, sut.getInterpolation(0.75f), 0.01f)
     }
 
     @Test
@@ -100,10 +116,8 @@ class ConstantVelocityInterpolatorTest {
         var totalDistance = 0.0
         points.fold(p0) { a, b ->
             val d = distance(a, b)
-            if (0 < d) {
-                distances.add(d)
-                totalDistance += d
-            }
+            distances.add(d)
+            totalDistance += d
             b
         }
 

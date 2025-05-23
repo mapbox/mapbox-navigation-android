@@ -21,10 +21,8 @@ class ConstantVelocityInterpolator(
         var total = 0.0
         keyPoints.fold(startPoint) { prevPoint, point ->
             val d = distance(prevPoint, point)
-            if (0.0 < d) {
-                distances.add(d)
-                total += d
-            }
+            distances.add(d)
+            total += d
             point
         }
 
