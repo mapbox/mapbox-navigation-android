@@ -66,7 +66,7 @@ internal class RouteLineHistoryRecordingViewSender : RouteLineHistoryRecordingIn
         value: Expected<RouteLineError, RouteSetValue>,
     ) {
         options.also { data ->
-            RouteLineHistoryRecordingPusherProvider.instance.pushEventIfEnabled {
+            RouteLineHistoryRecordingPusherProvider.instance.pushEventIfEnabled { workerCoroutineContext ->
                 RouteLineViewEvent(
                     instanceId,
                     RouteLineViewRenderRouteDrawDataValue(
@@ -75,7 +75,7 @@ internal class RouteLineHistoryRecordingViewSender : RouteLineHistoryRecordingIn
                             if (data == null) {
                                 RouteLineViewDataError("NoOptions")
                             } else {
-                                toEventValue(it, data)
+                                toEventValue(workerCoroutineContext, data)
                             }
                         },
                     ),
@@ -90,7 +90,7 @@ internal class RouteLineHistoryRecordingViewSender : RouteLineHistoryRecordingIn
     ) {
         options.also { data ->
             if (value.isValue) {
-                RouteLineHistoryRecordingPusherProvider.instance.pushEventIfEnabled {
+                RouteLineHistoryRecordingPusherProvider.instance.pushEventIfEnabled { workerCoroutineContext ->
                     RouteLineViewEvent(
                         instanceId,
                         RouteLineViewRenderRouteLineUpdateValue(
@@ -99,7 +99,7 @@ internal class RouteLineHistoryRecordingViewSender : RouteLineHistoryRecordingIn
                                 if (data == null) {
                                     RouteLineViewDataError("NoOptions")
                                 } else {
-                                    toEventValue(it, data)
+                                    toEventValue(workerCoroutineContext, data)
                                 }
                             },
                         ),

@@ -80,7 +80,6 @@ import com.mapbox.navigation.ui.maps.util.sdkStyleManager
 import com.mapbox.navigation.ui.maps.util.toDelayedRoutesRenderedCallback
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.ifNonNull
-import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -1164,15 +1163,8 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         }.filter { it?.second != null }.map { pair ->
             coroutineScope {
                 async {
-                    val generateCommand: suspend () -> () -> Unit =
-                        getGenerateCommand(pair!!.second!!, style, pair.first, options)
-                    generateCommand().also {
-                        logD(TAG) {
-                            "(${pair?.first} Done executing getGenerateCommand"
-                        }
-                    }
-                }.also {
-                    logD(TAG) {"${pair?.first} Done creating async task for getGradientUpdateCommands"}
+                    val command = getGenerateCommand(pair!!.second!!, style, pair.first, options)
+                    command()
                 }
             }
         }
