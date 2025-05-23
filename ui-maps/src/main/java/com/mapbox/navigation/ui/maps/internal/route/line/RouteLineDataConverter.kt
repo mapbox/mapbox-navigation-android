@@ -130,11 +130,20 @@ private suspend fun RouteLineDynamicData.toData(
     return RouteLineDynamicEventData(
         baseExpressionCommandHolder.toRouteLineExpressionEventData(workerCoroutineContext, data),
         casingExpressionCommandHolder.toRouteLineExpressionEventData(workerCoroutineContext, data),
-        trafficExpressionCommandHolder?.toRouteLineExpressionEventData(workerCoroutineContext, data),
-        restrictedSectionExpressionCommandHolder?.toRouteLineExpressionEventData(workerCoroutineContext, data),
+        trafficExpressionCommandHolder?.toRouteLineExpressionEventData(
+            workerCoroutineContext,
+            data,
+        ),
+        restrictedSectionExpressionCommandHolder?.toRouteLineExpressionEventData(
+            workerCoroutineContext,
+            data,
+        ),
         trimOffset,
         trailExpressionCommandHolder?.toRouteLineExpressionEventData(workerCoroutineContext, data),
-        trailCasingExpressionCommandHolder?.toRouteLineExpressionEventData(workerCoroutineContext, data),
+        trailCasingExpressionCommandHolder?.toRouteLineExpressionEventData(
+            workerCoroutineContext,
+            data,
+        ),
         blurExpressionCommandHolder?.toRouteLineExpressionEventData(workerCoroutineContext, data),
     )
 }

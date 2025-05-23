@@ -69,7 +69,9 @@ internal class RouteLineHistoryRecordingPusher(
         recorder = null
     }
 
-    fun pushEventOrAddToQueue(@WorkerThread eventFormer: suspend (CoroutineContext) -> RouteLineEvent) {
+    fun pushEventOrAddToQueue(
+        @WorkerThread eventFormer: suspend (CoroutineContext) -> RouteLineEvent,
+    ) {
         val recorderCopy = recorder
         if (recorderCopy == null) {
             eventsQueue.add(eventFormer)
@@ -96,7 +98,10 @@ internal class RouteLineHistoryRecordingPusher(
         }
     }
 
-    fun pushEventIfEnabled(@WorkerThread eventFormer: suspend (CoroutineContext) -> RouteLineEvent) {
+    fun pushEventIfEnabled(
+        @WorkerThread
+        eventFormer: suspend (CoroutineContext) -> RouteLineEvent,
+    ) {
         recorder?.let { pushEvent(it, eventFormer) }
     }
 }

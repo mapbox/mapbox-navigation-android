@@ -66,34 +66,11 @@ internal class RouteLineHistoryRecordingViewSender : RouteLineHistoryRecordingIn
         value: Expected<RouteLineError, RouteSetValue>,
     ) {
         options.also { data ->
-            RouteLineHistoryRecordingPusherProvider.instance.pushEventIfEnabled { workerCoroutineContext ->
-                RouteLineViewEvent(
-                    instanceId,
-                    RouteLineViewRenderRouteDrawDataValue(
-                        styleId,
-                        value.toInput {
-                            if (data == null) {
-                                RouteLineViewDataError("NoOptions")
-                            } else {
-                                toEventValue(workerCoroutineContext, data)
-                            }
-                        },
-                    ),
-                )
-            }
-        }
-    }
-
-    fun sendRenderRouteLineUpdateEvent(
-        styleId: String?,
-        value: Expected<RouteLineError, RouteLineUpdateValue>,
-    ) {
-        options.also { data ->
-            if (value.isValue) {
-                RouteLineHistoryRecordingPusherProvider.instance.pushEventIfEnabled { workerCoroutineContext ->
+            RouteLineHistoryRecordingPusherProvider.instance
+                .pushEventIfEnabled { workerCoroutineContext ->
                     RouteLineViewEvent(
                         instanceId,
-                        RouteLineViewRenderRouteLineUpdateValue(
+                        RouteLineViewRenderRouteDrawDataValue(
                             styleId,
                             value.toInput {
                                 if (data == null) {
@@ -105,6 +82,31 @@ internal class RouteLineHistoryRecordingViewSender : RouteLineHistoryRecordingIn
                         ),
                     )
                 }
+        }
+    }
+
+    fun sendRenderRouteLineUpdateEvent(
+        styleId: String?,
+        value: Expected<RouteLineError, RouteLineUpdateValue>,
+    ) {
+        options.also { data ->
+            if (value.isValue) {
+                RouteLineHistoryRecordingPusherProvider.instance
+                    .pushEventIfEnabled { workerCoroutineContext ->
+                        RouteLineViewEvent(
+                            instanceId,
+                            RouteLineViewRenderRouteLineUpdateValue(
+                                styleId,
+                                value.toInput {
+                                    if (data == null) {
+                                        RouteLineViewDataError("NoOptions")
+                                    } else {
+                                        toEventValue(workerCoroutineContext, data)
+                                    }
+                                },
+                            ),
+                        )
+                    }
             }
         }
     }
