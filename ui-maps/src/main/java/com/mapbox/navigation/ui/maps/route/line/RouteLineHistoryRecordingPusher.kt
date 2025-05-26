@@ -15,6 +15,7 @@ import com.mapbox.navigation.ui.maps.util.MutexBasedScope
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
@@ -89,6 +90,7 @@ internal class RouteLineHistoryRecordingPusher(
                 try {
                     eventFormer(serialisationDispatcher).toJson()
                 } catch (ex: Throwable) {
+                    ensureActive()
                     null
                 }
             }
