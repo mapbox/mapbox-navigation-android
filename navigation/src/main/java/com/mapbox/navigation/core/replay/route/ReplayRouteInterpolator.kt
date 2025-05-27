@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.replay.route
 
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.core.utils.normalizeBearing
 import com.mapbox.turf.TurfMeasurement
 import kotlin.math.abs
 import kotlin.math.ceil
@@ -204,16 +205,18 @@ internal class ReplayRouteInterpolator {
     fun createBearingProfile(replayRouteLocations: List<ReplayRouteLocation>) {
         if (replayRouteLocations.size < 2) return
         val lookAhead = 2
-        var bearing = TurfMeasurement.bearing(
-            replayRouteLocations[0].point,
-            replayRouteLocations[1].point,
+        var bearing = normalizeBearing(
+            TurfMeasurement.bearing(
+                replayRouteLocations[0].point,
+                replayRouteLocations[1].point,
+            ),
         )
         replayRouteLocations.forEachIndexed { index, location ->
             val nextIndex = min(index + lookAhead, replayRouteLocations.lastIndex)
             if (index < nextIndex) {
                 val fromPoint = location.point
                 val toPoint = replayRouteLocations[nextIndex].point
-                bearing = TurfMeasurement.bearing(fromPoint, toPoint)
+                bearing = normalizeBearing(TurfMeasurement.bearing(fromPoint, toPoint))
             }
             location.bearing = bearing
         }

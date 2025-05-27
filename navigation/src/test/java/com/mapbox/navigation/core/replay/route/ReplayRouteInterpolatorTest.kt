@@ -5,6 +5,7 @@ import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
 import com.mapbox.navigation.core.testutil.replay.removeAccelerationAndBrakingSpeedUpdates
+import com.mapbox.navigation.core.utils.normalizeBearing
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.turf.TurfMeasurement
 import org.junit.Assert.assertEquals
@@ -328,7 +329,8 @@ class ReplayRouteInterpolatorTest {
             ReplayRouteLocation(1, Point.fromLngLat(11.5774440, 48.163593)),
         )
 
-        val bearing = TurfMeasurement.bearing(coordinates[0].point, coordinates[1].point)
+        val bearing =
+            normalizeBearing(TurfMeasurement.bearing(coordinates[0].point, coordinates[1].point))
         routeInterpolator.createBearingProfile(coordinates)
 
         assertEquals(bearing, coordinates[0].bearing, 0.0001)

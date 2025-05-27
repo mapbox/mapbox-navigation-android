@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.replay.route
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.core.utils.normalizeBearing
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import com.mapbox.turf.TurfMeasurement.EARTH_RADIUS
@@ -64,8 +65,8 @@ internal class ReplayRouteSmoother {
         val segmentRoute =
             segmentRoute(distinctPoints, segmentStart.routeIndex!!, segmentEnd.routeIndex!!)
         val distance = TurfMeasurement.length(segmentRoute, TurfConstants.UNIT_METERS)
-        val bearing = TurfMeasurement.bearing(segmentStart.point, segmentEnd.point)
-        val normalizedBearing = (bearing + 360.0) % 360.0
+        val normalizedBearing =
+            normalizeBearing(TurfMeasurement.bearing(segmentStart.point, segmentEnd.point))
         segmentStart.apply {
             this.bearing = normalizedBearing
             this.distance = distance
