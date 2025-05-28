@@ -56,7 +56,6 @@ import kotlinx.coroutines.flow.first
 import okhttp3.mockwebserver.MockResponse
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
-import org.junit.Assert.fail
 import org.junit.Rule
 import org.junit.Test
 
@@ -169,6 +168,7 @@ class CustomRouterTest : BaseCoreNoCleanUpTest() {
             withMapboxNavigation(
                 historyRecorderRule = historyRecorderRule,
             ) { navigation ->
+                val clientCallbackInvocationErrors = mutableListOf<String>()
                 navigation.requestRoutes(
                     testRouteOptions,
                     object : NavigationRouterCallback {
@@ -176,7 +176,7 @@ class CustomRouterTest : BaseCoreNoCleanUpTest() {
                             routes: List<NavigationRoute>,
                             @RouterOrigin routerOrigin: String,
                         ) {
-                            fail(
+                            clientCallbackInvocationErrors.add(
                                 "request shouldn't be completed successfully " +
                                     "if user doesn't call test router callback",
                             )
@@ -186,7 +186,7 @@ class CustomRouterTest : BaseCoreNoCleanUpTest() {
                             reasons: List<RouterFailure>,
                             routeOptions: RouteOptions,
                         ) {
-                            fail(
+                            clientCallbackInvocationErrors.add(
                                 "request shouldn't fail" +
                                     "if user doesn't call test router callback",
                             )
@@ -196,7 +196,7 @@ class CustomRouterTest : BaseCoreNoCleanUpTest() {
                             routeOptions: RouteOptions,
                             @RouterOrigin routerOrigin: String,
                         ) {
-                            fail(
+                            clientCallbackInvocationErrors.add(
                                 "request shouldn't be cancelled" +
                                     "if user doesn't call test router callback",
                             )
@@ -204,6 +204,7 @@ class CustomRouterTest : BaseCoreNoCleanUpTest() {
                     },
                 )
                 testRouteRequested.await()
+                assertEquals(emptyList<String>(), clientCallbackInvocationErrors)
             }
         }
     }
