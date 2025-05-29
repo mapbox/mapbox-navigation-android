@@ -17,16 +17,14 @@ import com.mapbox.navigation.core.test.R
 import com.mapbox.navigation.core.tests.activity.TripServiceActivity
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
-import com.mapbox.navigator.AlternativeRoutesChangeReason
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigationStatusOrigin
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorObserver
-import com.mapbox.navigator.PrimaryRouteChangeReason
-import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouteParser
+import com.mapbox.navigator.RoutesChangeInfo
 import com.mapbox.navigator.SetRoutesDataParams
 import com.mapbox.navigator.SetRoutesParams
 import com.mapbox.navigator.SetRoutesReason
@@ -126,17 +124,7 @@ internal class NativeNavigatorCallbackOrderTest :
                     callbackInvocations.add(CallbackInvocation.Status(origin))
                 }
 
-                override fun onPrimaryRouteChanged(
-                    primaryRoute: RouteInterface?,
-                    reason: PrimaryRouteChangeReason,
-                ) {
-                    // no-op
-                }
-
-                override fun onAlternativeRoutesChanged(
-                    alternativeRoutes: MutableList<RouteAlternative>,
-                    reason: AlternativeRoutesChangeReason,
-                ) {
+                override fun onRoutesChanged(info: RoutesChangeInfo) {
                     // no-op
                 }
             },
@@ -161,17 +149,7 @@ internal class NativeNavigatorCallbackOrderTest :
                     callbackInvocations.add(CallbackInvocation.Status(origin))
                 }
 
-                override fun onPrimaryRouteChanged(
-                    primaryRoute: RouteInterface?,
-                    reason: PrimaryRouteChangeReason,
-                ) {
-                    // no-op
-                }
-
-                override fun onAlternativeRoutesChanged(
-                    alternativeRoutes: MutableList<RouteAlternative>,
-                    reason: AlternativeRoutesChangeReason,
-                ) {
+                override fun onRoutesChanged(info: RoutesChangeInfo) {
                     // no-op
                 }
             },
@@ -205,17 +183,7 @@ internal class NativeNavigatorCallbackOrderTest :
                     callbackInvocations.add(CallbackInvocation.Status(origin))
                 }
 
-                override fun onPrimaryRouteChanged(
-                    primaryRoute: RouteInterface?,
-                    reason: PrimaryRouteChangeReason,
-                ) {
-                    // no-op
-                }
-
-                override fun onAlternativeRoutesChanged(
-                    alternativeRoutes: MutableList<RouteAlternative>,
-                    reason: AlternativeRoutesChangeReason,
-                ) {
+                override fun onRoutesChanged(info: RoutesChangeInfo) {
                     // no-op
                 }
             },
@@ -254,17 +222,7 @@ internal class NativeNavigatorCallbackOrderTest :
                     callbackInvocations.add(CallbackInvocation.Status(origin))
                 }
 
-                override fun onPrimaryRouteChanged(
-                    primaryRoute: RouteInterface?,
-                    reason: PrimaryRouteChangeReason,
-                ) {
-                    // no-op
-                }
-
-                override fun onAlternativeRoutesChanged(
-                    alternativeRoutes: MutableList<RouteAlternative>,
-                    reason: AlternativeRoutesChangeReason,
-                ) {
+                override fun onRoutesChanged(info: RoutesChangeInfo) {
                     // no-op
                 }
             },
@@ -290,17 +248,7 @@ internal class NativeNavigatorCallbackOrderTest :
                     callbackInvocations.add(CallbackInvocation.Status(origin, status.location))
                 }
 
-                override fun onPrimaryRouteChanged(
-                    primaryRoute: RouteInterface?,
-                    reason: PrimaryRouteChangeReason,
-                ) {
-                    // no-op
-                }
-
-                override fun onAlternativeRoutesChanged(
-                    alternativeRoutes: MutableList<RouteAlternative>,
-                    reason: AlternativeRoutesChangeReason,
-                ) {
+                override fun onRoutesChanged(info: RoutesChangeInfo) {
                     // no-op
                 }
             },

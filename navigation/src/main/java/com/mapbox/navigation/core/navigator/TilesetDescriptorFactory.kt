@@ -37,6 +37,7 @@ class TilesetDescriptorFactory internal constructor(
         nativeFactoryWrapper.build(
             combineDatasetWithProfile(tilesDataset, tilesProfile),
             tilesVersion ?: routingTilesOptions.tilesVersion,
+            false,
         )
 
     /**
@@ -72,7 +73,7 @@ class TilesetDescriptorFactory internal constructor(
      * @param tilesVersion TilesetDescriptor version
      */
     fun getSpecificVersion(tilesVersion: String): TilesetDescriptor =
-        nativeFactoryWrapper.getSpecificVersion(cache, tilesVersion)
+        nativeFactoryWrapper.getSpecificVersion(cache, tilesVersion, false)
 
     /**
      * Gets TilesetDescriptor which corresponds to the currently used routing tiles dataset
@@ -87,7 +88,16 @@ class TilesetDescriptorFactory internal constructor(
     /**
      * Gets TilesetDescriptor which corresponds to the latest available version of routing tiles.
      */
-    fun getLatest(): TilesetDescriptor = nativeFactoryWrapper.getLatest(cache)
+    fun getLatest(): TilesetDescriptor = nativeFactoryWrapper.getLatest(cache, false)
+
+    /**
+     * Gets TilesetDescriptor which corresponds to the latest available version of routing tiles.
+     *
+     * @param includeAdas Whether to include ADAS tiles.
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun getLatest(includeAdas: Boolean): TilesetDescriptor =
+        nativeFactoryWrapper.getLatest(cache, includeAdas)
 
     private fun combineDatasetWithProfile(tilesDataset: String?, tilesProfile: String?): String {
         val dataset: String = tilesDataset ?: routingTilesOptions.tilesDataset
@@ -105,20 +115,10 @@ class TilesetDescriptorFactory internal constructor(
         fun getSpecificVersion(
             cache: CacheHandle,
             tilesVersion: String,
-        ): TilesetDescriptor
-
-        fun getSpecificVersion(
-            cache: CacheHandle,
-            tilesVersion: String,
             includeAdas: Boolean,
         ): TilesetDescriptor
 
-        fun getLatest(cache: CacheHandle): TilesetDescriptor
-
-        fun build(
-            tilesDatasetAndProfile: String,
-            tilesVersion: String,
-        ): TilesetDescriptor
+        fun getLatest(cache: CacheHandle, includeAdas: Boolean): TilesetDescriptor
 
         fun build(
             tilesDatasetAndProfile: String,
@@ -132,16 +132,6 @@ class TilesetDescriptorFactory internal constructor(
         override fun getSpecificVersion(
             cache: CacheHandle,
             tilesVersion: String,
-        ): TilesetDescriptor {
-            return NativeTilesetDescriptorFactory.getSpecificVersion(
-                cache,
-                tilesVersion,
-            )
-        }
-
-        override fun getSpecificVersion(
-            cache: CacheHandle,
-            tilesVersion: String,
             includeAdas: Boolean,
         ): TilesetDescriptor {
             return NativeTilesetDescriptorFactory.getSpecificVersion(
@@ -151,18 +141,8 @@ class TilesetDescriptorFactory internal constructor(
             )
         }
 
-        override fun getLatest(cache: CacheHandle): TilesetDescriptor {
-            return NativeTilesetDescriptorFactory.getLatest(cache)
-        }
-
-        override fun build(
-            tilesDatasetAndProfile: String,
-            tilesVersion: String,
-        ): TilesetDescriptor {
-            return NativeTilesetDescriptorFactory.build(
-                tilesDatasetAndProfile,
-                tilesVersion,
-            )
+        override fun getLatest(cache: CacheHandle, includeAdas: Boolean): TilesetDescriptor {
+            return NativeTilesetDescriptorFactory.getLatest(cache, includeAdas)
         }
 
         override fun build(

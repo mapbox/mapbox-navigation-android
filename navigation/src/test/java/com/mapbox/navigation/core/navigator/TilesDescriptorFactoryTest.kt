@@ -84,7 +84,7 @@ class TilesDescriptorFactoryTest {
         )
 
         verify {
-            nativeFactoryWrapper.build("$DATASET/$PROFILE", VERSION)
+            nativeFactoryWrapper.build("$DATASET/$PROFILE", VERSION, false)
         }
     }
 
@@ -93,7 +93,7 @@ class TilesDescriptorFactoryTest {
         tilesetDescriptorFactory.build()
 
         verify {
-            nativeFactoryWrapper.build("$OPTIONS_DATASET/$OPTIONS_PROFILE", OPTIONS_VERSION)
+            nativeFactoryWrapper.build("$OPTIONS_DATASET/$OPTIONS_PROFILE", OPTIONS_VERSION, false)
         }
     }
 

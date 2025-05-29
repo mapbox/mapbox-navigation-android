@@ -14,14 +14,11 @@ import com.mapbox.navigation.core.replay.history.mapToLocation
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.test.R
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
-import com.mapbox.navigator.AlternativeRoutesChangeReason
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigationStatusOrigin
 import com.mapbox.navigator.NavigatorObserver
-import com.mapbox.navigator.PrimaryRouteChangeReason
-import com.mapbox.navigator.RouteAlternative
-import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouteState
+import com.mapbox.navigator.RoutesChangeInfo
 import com.mapbox.navigator.SetRoutesReason
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -118,17 +115,7 @@ fun MapboxNativeNavigator.statusUpdates(): Flow<OnStatusUpdateParameters> {
                 trySend(OnStatusUpdateParameters(origin, status))
             }
 
-            override fun onPrimaryRouteChanged(
-                primaryRoute: RouteInterface?,
-                reason: PrimaryRouteChangeReason,
-            ) {
-                // no-op
-            }
-
-            override fun onAlternativeRoutesChanged(
-                alternativeRoutes: MutableList<RouteAlternative>,
-                reason: AlternativeRoutesChangeReason,
-            ) {
+            override fun onRoutesChanged(info: RoutesChangeInfo) {
                 // no-op
             }
         }
