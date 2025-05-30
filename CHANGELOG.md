@@ -1,5 +1,30 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.10.0-beta.2 - 30 May, 2025
+#### Features
+- Now `SensorData.Weather` can be instantiated with a list of `@WeatherCondition.Type` or detailed weather information represented by `@WeatherDetail.Type`. 
+- ⚠️ Breaking changes in Experimental API. `SensorData.Weather` no longer has public property `conditionType` 
+- `RoadCamerasManager` in active guidance now relies on new `road_camera` Directions API annotation, which improves the performance of the camera data retrieval and quality of the data. 
+- Added `MapboxRoadCamera::activeGuidanceInfo`, containing information about the route id, leg index, geometry index and step intersection of the camera in active guidance. 
+- Added support of immediate update of location puck bearing in [NavigationLocationProvider] in case of overlapping key points. 
+
+#### Bug fixes and improvements
+- Fixed a bug where alternative routes from `RoutesUpdatedResult#ignoredRoutes` were set to `RoutesUpdatedResult#navigationRoutes` after the first route progress update. 
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.13.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.13.0-beta.1))
+- Mapbox Navigation Native `v324.13.0-beta.1`
+- Mapbox Core Common `v24.13.0-beta.1`
+- Mapbox Java `v7.4.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.4.0))
+
+
 ## Navigation SDK Core Framework 3.10.0-beta.1 - 22 May, 2025
 #### Features
 - ⚠️ Breaking changes in Experimental API. `MapboxEvSearchClientFactory.#getInstance()` no longer accepts access token as a parameter. The default `MapboxOptions.accessToken` will be used. 
