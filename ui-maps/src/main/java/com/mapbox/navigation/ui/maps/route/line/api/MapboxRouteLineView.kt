@@ -492,9 +492,6 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
                         mutationCommands.addAll(gradientCommands)
                     }
                 }
-
-                lastRouteCalloutData = routeSetValue.callouts
-                routeCalloutView?.renderCallouts(routeSetValue.callouts)
             }
             updateSourceCommands.forEach { it() }
             mutationCommands.forEach { mutationCommand ->
@@ -544,6 +541,11 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
                 .forEach { mutationCommand ->
                     mutationCommand()
                 }
+
+            routeDrawData.value?.let { routeSetValue ->
+                lastRouteCalloutData = routeSetValue.callouts
+                routeCalloutView?.renderCallouts(routeSetValue.callouts)
+            }
         }
         callback?.callback?.unlock()
     }
