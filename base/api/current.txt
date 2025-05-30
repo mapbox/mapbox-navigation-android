@@ -329,6 +329,87 @@ package com.mapbox.navigation.base.metrics {
 
 }
 
+package com.mapbox.navigation.base.middleware {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public class CoroutineMiddleware<C extends com.mapbox.navigation.base.middleware.MiddlewareContext> implements com.mapbox.navigation.base.middleware.Middleware<C> {
+    ctor public CoroutineMiddleware();
+    method public final void detach();
+    method protected final kotlinx.coroutines.CoroutineScope getIoScope();
+    method protected final kotlinx.coroutines.CoroutineScope getMainScope();
+    method protected final C? getMiddlewareContext();
+    method protected final kotlinx.coroutines.flow.StateFlow<C> getMiddlewareContextFlow();
+    method protected final kotlinx.coroutines.CoroutineScope getStateScope();
+    method public final boolean isAttached();
+    method public void onAttached(C middlewareContext);
+    method public void onDetached(C middlewareContext);
+    method protected final void setIoScope(kotlinx.coroutines.CoroutineScope);
+    method protected final void setMainScope(kotlinx.coroutines.CoroutineScope);
+    property protected final kotlinx.coroutines.CoroutineScope ioScope;
+    property public final boolean isAttached;
+    property protected final kotlinx.coroutines.CoroutineScope mainScope;
+    property protected final C? middlewareContext;
+    property protected final kotlinx.coroutines.flow.StateFlow<C> middlewareContextFlow;
+    property protected final kotlinx.coroutines.CoroutineScope stateScope;
+    field protected kotlinx.coroutines.CoroutineScope ioScope;
+    field protected kotlinx.coroutines.CoroutineScope mainScope;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public interface Middleware<C extends com.mapbox.navigation.base.middleware.MiddlewareContext> {
+    method public void onAttached(C middlewareContext);
+    method public void onDetached(C middlewareContext);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public interface MiddlewareContext {
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public fun interface MiddlewareContextFactory<Input extends com.mapbox.navigation.base.middleware.MiddlewareContext, Output extends com.mapbox.navigation.base.middleware.MiddlewareContext> {
+    method public Output build(Input);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class MiddlewareManager<C extends com.mapbox.navigation.base.middleware.MiddlewareContext, T extends com.mapbox.navigation.base.middleware.Middleware<C>> extends com.mapbox.navigation.base.middleware.CoroutineMiddleware<C> {
+    ctor public MiddlewareManager();
+    method protected abstract java.util.Set<com.mapbox.navigation.base.middleware.MiddlewareSwitcher<C,T>> getMiddlewareSwitchers();
+    property protected abstract java.util.Set<com.mapbox.navigation.base.middleware.MiddlewareSwitcher<C,T>> middlewareSwitchers;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public class MiddlewareProvider {
+    ctor public MiddlewareProvider(String key);
+    method public final String getKey();
+    property public final String key;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public class MiddlewareRegistry<Context extends com.mapbox.navigation.base.middleware.MiddlewareContext> extends com.mapbox.navigation.base.middleware.CoroutineMiddleware<Context> {
+    ctor public MiddlewareRegistry();
+    method public final kotlinx.coroutines.flow.Flow<Context> context();
+    method public final <R> R? execute(kotlin.jvm.functions.Function1<? super Context,? extends R> block);
+    method public final <M extends com.mapbox.navigation.base.middleware.Middleware<Context>> M? getMiddleware(kotlin.reflect.KClass<? extends M> clazz);
+    method public final kotlinx.coroutines.flow.StateFlow<java.util.Set<com.mapbox.navigation.base.middleware.Middleware<?>>> getMiddlewares();
+    method public final <M extends com.mapbox.navigation.base.middleware.Middleware<Context>> java.util.List<M> getMiddlewares(kotlin.reflect.KClass<? extends M> clazz);
+    method public final kotlinx.coroutines.Job launchOnAttached(kotlin.jvm.functions.Function2<? super Context,? super kotlin.coroutines.Continuation<? super kotlin.Unit>,?> block);
+    method public inline <reified C extends com.mapbox.navigation.base.middleware.MiddlewareContext, reified M extends com.mapbox.navigation.base.middleware.Middleware<C>> java.util.List<? extends M>! middlewares();
+    method public final <M extends com.mapbox.navigation.base.middleware.Middleware<Context>> kotlinx.coroutines.flow.Flow<java.util.Set<M>> observeMiddlewares(kotlin.reflect.KClass<? extends M> clazz);
+    method public void onAttached(Context middlewareContext);
+    method public void onDetached(Context middlewareContext);
+    method public final com.mapbox.navigation.base.middleware.MiddlewareRegistry<Context> register(com.mapbox.navigation.base.middleware.Middleware<Context> middleware);
+    method public final <C extends com.mapbox.navigation.base.middleware.MiddlewareContext> com.mapbox.navigation.base.middleware.MiddlewareRegistry<Context> register(com.mapbox.navigation.base.middleware.Middleware<C> middleware, com.mapbox.navigation.base.middleware.MiddlewareContextFactory<Context,C> factory);
+    method public final suspend Object? repeatOnAttached(kotlin.jvm.functions.Function2<? super Context,? super kotlin.coroutines.Continuation<? super kotlin.Unit>,?> block, kotlin.coroutines.Continuation<? super kotlin.Unit>);
+    method protected final Context requireContext();
+    method public final <C extends Context> com.mapbox.navigation.base.middleware.MiddlewareRegistry<Context> unregister(com.mapbox.navigation.base.middleware.Middleware<C> middleware);
+    method public final com.mapbox.navigation.base.middleware.MiddlewareRegistry<Context> unregisterAll();
+    property public final kotlinx.coroutines.flow.StateFlow<java.util.Set<com.mapbox.navigation.base.middleware.Middleware<?>>> middlewares;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class MiddlewareSwitcher<C extends com.mapbox.navigation.base.middleware.MiddlewareContext, M extends com.mapbox.navigation.base.middleware.Middleware<C>> extends com.mapbox.navigation.base.middleware.CoroutineMiddleware<C> {
+    ctor public MiddlewareSwitcher(M default);
+    method public final kotlinx.coroutines.flow.StateFlow<M> getMiddlewareState();
+    method public final void registerMiddleware(M middleware);
+    method public final <S> kotlinx.coroutines.flow.StateFlow<S> stateFlowOf(kotlinx.coroutines.flow.SharingStarted started = kotlinx.coroutines.flow.SharingStarted.Companion.Eagerly, kotlin.jvm.functions.Function1<? super M,? extends S> func);
+    method public final void unregisterMiddleware();
+    property public final kotlinx.coroutines.flow.StateFlow<M> middlewareState;
+  }
+
+}
+
 package com.mapbox.navigation.base.model {
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class VehicleType {
