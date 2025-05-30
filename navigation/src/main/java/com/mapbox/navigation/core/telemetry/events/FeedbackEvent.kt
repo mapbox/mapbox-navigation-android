@@ -84,6 +84,11 @@ object FeedbackEvent {
     const val UI = "user"
 
     /**
+     * Feedback source *voice*: the user tapped a voice feedback button and send a message
+     */
+    const val VOICE_FEEDBACK = "voice_feedback"
+
+    /**
      * Feedback description for *looks incorrect*: turn icon incorrect
      */
     const val TURN_ICON_INCORRECT = "turn_icon_incorrect"
