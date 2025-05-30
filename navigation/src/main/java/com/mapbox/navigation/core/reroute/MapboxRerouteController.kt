@@ -29,7 +29,6 @@ import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.logW
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -346,9 +345,7 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
                 },
             )
             cont.invokeOnCancellation {
-                mainJobController.scope.launch(Dispatchers.Main.immediate) {
-                    directionsSession.cancelRouteRequest(requestId)
-                }
+                directionsSession.cancelRouteRequest(requestId)
             }
         }
     }

@@ -16,17 +16,29 @@ internal class ForkPointPassedObserver(
 ) : RouteProgressObserver {
     override fun onRouteProgressChanged(routeProgress: RouteProgress) {
         val allCurrentRoutes = directionsSession.routesPlusIgnored
-
         if (allCurrentRoutes.isEmpty()) return
 
-        val needToHideAlternatives = routeProgress
+        val primary = allCurrentRoutes[0]
+        val allCurrentAlternatives = allCurrentRoutes.drop(1)
+
+        val needToHideAlternativesIndices = routeProgress
             .internalAlternativeRouteIndices()
             .filter { it.value.isForkPointPassed }
+        val alternativesToHide = allCurrentAlternatives.filter {
+            it.id in needToHideAlternativesIndices
+        }.map {
+            IgnoredRoute(it, REASON_ALTERNATIVE_FORK_POINT_PASSED)
+        }
+        val alternativesIgnoredForDifferentReason = directionsSession.ignoredRoutes.filter {
+            it.reason != REASON_ALTERNATIVE_FORK_POINT_PASSED
+        }
+        val allIgnoredRoutes = alternativesToHide + alternativesIgnoredForDifferentReason
 
         val newRoutes = DirectionsSessionRoutes(
-            acceptedRoutes = allCurrentRoutes.filter { it.id !in needToHideAlternatives },
-            ignoredRoutes = allCurrentRoutes.filter { it.id in needToHideAlternatives }
-                .map { IgnoredRoute(it, REASON_ALTERNATIVE_FORK_POINT_PASSED) },
+            acceptedRoutes = listOf(primary) + allCurrentAlternatives.filter {
+                allIgnoredRoutes.none { ignored -> ignored.navigationRoute.id == it.id }
+            },
+            ignoredRoutes = allIgnoredRoutes,
             setRoutesInfo = SetRoutes.Alternatives(currentLegIndex()),
         )
 

@@ -78,7 +78,6 @@ class RouteRefresherTest {
         evRefreshDataProvider,
         routeDiffProvider,
         routeRefresh,
-        globalScope = coroutineRule.createTestScope(),
     )
 
     @Before

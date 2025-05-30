@@ -15,13 +15,9 @@ import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshError
 import com.mapbox.navigation.core.internal.utils.CoroutineUtils.withTimeoutOrDefault
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
@@ -58,7 +54,6 @@ internal class RouteRefresher(
     private val evRefreshDataProvider: EVRefreshDataProvider,
     private val routeDiffProvider: DirectionsRouteDiffProvider,
     private val routeRefresh: RouteRefresh,
-    private val globalScope: CoroutineScope = GlobalScope,
 ) {
 
     /**
@@ -203,11 +198,7 @@ internal class RouteRefresher(
                     }
 
                     override fun onFailure(error: NavigationRouterRefreshError) {
-                        // we might get this callback when the request is cancelled
-                        // and the continuation is cancelled with it
-                        if (continuation.isActive) {
-                            continuation.resume(RouteRefreshResult.Fail(error))
-                        }
+                        continuation.resume(RouteRefreshResult.Fail(error))
                     }
                 },
             )
@@ -216,9 +207,7 @@ internal class RouteRefresher(
                     "Route refresh for route ${route.id} was cancelled after timeout",
                     RouteRefreshLog.LOG_CATEGORY,
                 )
-                globalScope.launch(Dispatchers.Main.immediate) {
-                    routeRefresh.cancelRouteRefreshRequest(requestId)
-                }
+                routeRefresh.cancelRouteRefreshRequest(requestId)
             }
         }
 
