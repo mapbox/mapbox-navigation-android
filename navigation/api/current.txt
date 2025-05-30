@@ -1444,6 +1444,13 @@ package com.mapbox.navigation.core.trip.session.location {
 
 }
 
+package com.mapbox.navigation.core.utils {
+
+  public final class TurfUtilKt {
+  }
+
+}
+
 package com.mapbox.navigation.core.utils.search {
 
   @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class SearchAlongRouteUtils {
