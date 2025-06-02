@@ -135,7 +135,7 @@ open class MiddlewareRegistry<Context : MiddlewareContext> : CoroutineMiddleware
      *
      * @param middleware a new registered middleware
      */
-    fun register(middleware: Middleware<Context>) = apply {
+    fun register(middleware: Middleware<in Context>) = apply {
         _middlewares.update { before ->
             if (before.contains(middleware)) {
                 before

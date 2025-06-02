@@ -1202,6 +1202,7 @@ package com.mapbox.navigation.core.telemetry.events {
     field public static final String TURN_ICON_INCORRECT = "turn_icon_incorrect";
     field public static final String TURN_WAS_NOT_ALLOWED = "turn_was_not_allowed";
     field public static final String UI = "user";
+    field public static final String VOICE_FEEDBACK = "voice_feedback";
   }
 
   @Deprecated @StringDef({com.mapbox.navigation.core.telemetry.events.FeedbackEvent.REROUTE, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.UI}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface FeedbackEvent.Source {

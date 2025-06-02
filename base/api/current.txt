@@ -390,7 +390,7 @@ package com.mapbox.navigation.base.middleware {
     method public final <M extends com.mapbox.navigation.base.middleware.Middleware<Context>> kotlinx.coroutines.flow.Flow<java.util.Set<M>> observeMiddlewares(kotlin.reflect.KClass<? extends M> clazz);
     method public void onAttached(Context middlewareContext);
     method public void onDetached(Context middlewareContext);
-    method public final com.mapbox.navigation.base.middleware.MiddlewareRegistry<Context> register(com.mapbox.navigation.base.middleware.Middleware<Context> middleware);
+    method public final com.mapbox.navigation.base.middleware.MiddlewareRegistry<Context> register(com.mapbox.navigation.base.middleware.Middleware<? super Context> middleware);
     method public final <C extends com.mapbox.navigation.base.middleware.MiddlewareContext> com.mapbox.navigation.base.middleware.MiddlewareRegistry<Context> register(com.mapbox.navigation.base.middleware.Middleware<C> middleware, com.mapbox.navigation.base.middleware.MiddlewareContextFactory<Context,C> factory);
     method public final suspend Object? repeatOnAttached(kotlin.jvm.functions.Function2<? super Context,? super kotlin.coroutines.Continuation<? super kotlin.Unit>,?> block, kotlin.coroutines.Continuation<? super kotlin.Unit>);
     method protected final Context requireContext();
@@ -904,6 +904,127 @@ package com.mapbox.navigation.base.options {
 
 }
 
+package com.mapbox.navigation.base.performance {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class CustomTraceValue implements com.mapbox.navigation.base.performance.Traceable {
+    ctor public CustomTraceValue(String value);
+    method public String getSnakeCase();
+    property public String snakeCase;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public sealed interface Measure {
+    method public kotlin.time.Duration? elapsedSince(String event);
+    method public String getName();
+    method public double log(kotlin.jvm.functions.Function0<java.lang.String> block);
+    method public double mark(String event, kotlin.jvm.functions.Function0<java.lang.String> block);
+    method public default double start(kotlin.jvm.functions.Function0<java.lang.String> block);
+    property public abstract String name;
+    field public static final com.mapbox.navigation.base.performance.Measure.Companion Companion;
+    field public static final String MARK_CREATED = "created";
+    field public static final String MARK_START = "start";
+  }
+
+  public static final class Measure.Companion {
+    field public static final String MARK_CREATED = "created";
+    field public static final String MARK_START = "start";
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class NoTrace implements com.mapbox.navigation.base.performance.Trace {
+    method public com.mapbox.navigation.base.performance.NoTrace attribute(com.mapbox.navigation.base.performance.TraceKey key, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.base.performance.Traceable,? extends com.mapbox.navigation.base.performance.TraceValue> block);
+    method public com.mapbox.navigation.base.performance.NoTrace attributeCustom(com.mapbox.navigation.base.performance.TraceKey key, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.base.performance.Traceable,? extends com.mapbox.navigation.base.performance.Traceable> block);
+    method public com.mapbox.navigation.base.performance.NoTrace counter(com.mapbox.navigation.base.performance.TraceKey key, kotlin.jvm.functions.Function1<? super java.lang.Long,java.lang.Long> block);
+    method public com.mapbox.navigation.base.performance.TraceName getName();
+    method public com.mapbox.navigation.base.performance.NoTrace start();
+    method public void stop();
+    property public com.mapbox.navigation.base.performance.TraceName name;
+    field public static final com.mapbox.navigation.base.performance.NoTrace INSTANCE;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class SharedPerformance {
+    method public void complete(com.mapbox.navigation.base.performance.Measure measure, kotlin.jvm.functions.Function0<java.lang.String>? block = null);
+    method public void complete(String name, kotlin.jvm.functions.Function0<java.lang.String>? block = null);
+    method public void complete(com.mapbox.navigation.base.performance.Trace trace);
+    method public void complete(com.mapbox.navigation.base.performance.TraceName traceName);
+    method public com.mapbox.navigation.base.performance.SharedPerformance disable(String prefix);
+    method public void discard(String prefix);
+    method public com.mapbox.navigation.base.performance.SharedPerformance enable(String prefixes);
+    method public com.mapbox.navigation.base.performance.SharedPerformance enableAll(java.util.Set<java.lang.String> prefixes);
+    method public com.mapbox.navigation.base.performance.Measure measure(String name);
+    method public com.mapbox.navigation.base.performance.Measure newMeasure(String name);
+    method public com.mapbox.navigation.base.performance.Trace newTrace(com.mapbox.navigation.base.performance.TraceName name);
+    method public <R> R! runMeasure(String name, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.base.performance.Measure,? extends R> block);
+    method public <R> R! runTrace(com.mapbox.navigation.base.performance.TraceName name, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.base.performance.Trace,? extends R> block);
+    method public <R> R? runWhenEnabled(String name, kotlin.jvm.functions.Function0<? extends R> block);
+    method public void setTraceFactory(com.mapbox.navigation.base.performance.TraceFactory? factory);
+    method public com.mapbox.navigation.base.performance.Trace start(com.mapbox.navigation.base.performance.TraceName name);
+    field public static final com.mapbox.navigation.base.performance.SharedPerformance INSTANCE;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public interface Trace {
+    method public com.mapbox.navigation.base.performance.Trace attribute(com.mapbox.navigation.base.performance.TraceKey key, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.base.performance.Traceable,? extends com.mapbox.navigation.base.performance.TraceValue> block);
+    method public com.mapbox.navigation.base.performance.Trace attributeCustom(com.mapbox.navigation.base.performance.TraceKey key, kotlin.jvm.functions.Function1<? super com.mapbox.navigation.base.performance.Traceable,? extends com.mapbox.navigation.base.performance.Traceable> block);
+    method public com.mapbox.navigation.base.performance.Trace counter(com.mapbox.navigation.base.performance.TraceKey key, kotlin.jvm.functions.Function1<? super java.lang.Long,java.lang.Long> block);
+    method public com.mapbox.navigation.base.performance.TraceName getName();
+    method public com.mapbox.navigation.base.performance.Trace start();
+    method public default com.mapbox.navigation.base.performance.Trace start(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.base.performance.Traceable,? extends com.mapbox.navigation.base.performance.TraceValue> source);
+    method public void stop();
+    method public default void stop(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.base.performance.Traceable,? extends com.mapbox.navigation.base.performance.TraceValue> reason);
+    property public abstract com.mapbox.navigation.base.performance.TraceName name;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public fun interface TraceFactory {
+    method public com.mapbox.navigation.base.performance.Trace create(com.mapbox.navigation.base.performance.TraceName name);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public enum TraceKey implements com.mapbox.navigation.base.performance.Traceable {
+    method public String! getSnakeCase();
+    property public String! snakeCase;
+    enum_constant public static final com.mapbox.navigation.base.performance.TraceKey PROVIDER;
+    enum_constant public static final com.mapbox.navigation.base.performance.TraceKey REASON;
+    enum_constant public static final com.mapbox.navigation.base.performance.TraceKey SOURCE;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public enum TraceName implements com.mapbox.navigation.base.performance.Traceable {
+    method public String! getSnakeCase();
+    property public String! snakeCase;
+    enum_constant public static final com.mapbox.navigation.base.performance.TraceName CONVERSATION_AI_SPEAKING;
+    enum_constant public static final com.mapbox.navigation.base.performance.TraceName CONVERSATION_AI_THINKING;
+    enum_constant public static final com.mapbox.navigation.base.performance.TraceName CONVERSATION_DISABLED;
+    enum_constant public static final com.mapbox.navigation.base.performance.TraceName CONVERSATION_ERROR;
+    enum_constant public static final com.mapbox.navigation.base.performance.TraceName CONVERSATION_GUIDANCE_SPEAKING;
+    enum_constant public static final com.mapbox.navigation.base.performance.TraceName CONVERSATION_IDLE;
+    enum_constant public static final com.mapbox.navigation.base.performance.TraceName CONVERSATION_LISTENING_TO_USER;
+    enum_constant public static final com.mapbox.navigation.base.performance.TraceName CONVERSATION_NON_CRITICAL_ERROR;
+    enum_constant public static final com.mapbox.navigation.base.performance.TraceName CONVERSATION_NO_MICROPHONE_PERMISSION;
+    enum_constant public static final com.mapbox.navigation.base.performance.TraceName CONVERSATION_SLEEPING;
+    enum_constant public static final com.mapbox.navigation.base.performance.TraceName CONVERSATION_USER_SPEAKING;
+    enum_constant public static final com.mapbox.navigation.base.performance.TraceName NONE;
+    enum_constant public static final com.mapbox.navigation.base.performance.TraceName TEXT_TO_SPEECH_STARTED;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public enum TraceValue implements com.mapbox.navigation.base.performance.Traceable {
+    method public String! getSnakeCase();
+    property public String! snakeCase;
+    enum_constant public static final com.mapbox.navigation.base.performance.TraceValue CANCELED;
+    enum_constant public static final com.mapbox.navigation.base.performance.TraceValue ERROR;
+    enum_constant public static final com.mapbox.navigation.base.performance.TraceValue LOCAL;
+    enum_constant public static final com.mapbox.navigation.base.performance.TraceValue REMOTE;
+    enum_constant public static final com.mapbox.navigation.base.performance.TraceValue SUCCESS;
+    field public static final com.mapbox.navigation.base.performance.TraceValue.Companion Companion;
+  }
+
+  public static final class TraceValue.Companion {
+    method public java.util.Map<java.lang.String,com.mapbox.navigation.base.performance.TraceValue> getValueMap();
+    property public final java.util.Map<java.lang.String,com.mapbox.navigation.base.performance.TraceValue> valueMap;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public interface Traceable {
+    method public String getSnakeCase();
+    property public abstract String snakeCase;
+  }
+
+}
+
 package com.mapbox.navigation.base.physics {
 
   public final class AngularVelocity3D {
@@ -959,6 +1080,58 @@ package com.mapbox.navigation.base.physics {
   }
 
   public final class SpeedKt {
+  }
+
+}
+
+package com.mapbox.navigation.base.reachability {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract sealed class NetworkStatus {
+  }
+
+  public static final class NetworkStatus.NotReachable extends com.mapbox.navigation.base.reachability.NetworkStatus {
+    field public static final com.mapbox.navigation.base.reachability.NetworkStatus.NotReachable INSTANCE;
+  }
+
+  public static final class NetworkStatus.ReachableViaEthernet extends com.mapbox.navigation.base.reachability.NetworkStatus {
+    field public static final com.mapbox.navigation.base.reachability.NetworkStatus.ReachableViaEthernet INSTANCE;
+  }
+
+  public static final class NetworkStatus.ReachableViaWWAN extends com.mapbox.navigation.base.reachability.NetworkStatus {
+    field public static final com.mapbox.navigation.base.reachability.NetworkStatus.ReachableViaWWAN INSTANCE;
+  }
+
+  public static final class NetworkStatus.ReachableViaWiFi extends com.mapbox.navigation.base.reachability.NetworkStatus {
+    field public static final com.mapbox.navigation.base.reachability.NetworkStatus.ReachableViaWiFi INSTANCE;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class PlatformReachability {
+    ctor public PlatformReachability(com.mapbox.common.ReachabilityInterface reachability);
+    method public void addListener(com.mapbox.navigation.base.reachability.PlatformReachabilityChanged listener);
+    method public com.mapbox.navigation.base.reachability.NetworkStatus currentNetworkStatus();
+    method public boolean isReachable();
+    method public boolean removeListener(com.mapbox.navigation.base.reachability.PlatformReachabilityChanged listener);
+    field public static final com.mapbox.navigation.base.reachability.PlatformReachability.Companion Companion;
+  }
+
+  public static final class PlatformReachability.Companion {
+    method public com.mapbox.navigation.base.reachability.PlatformReachability create(String? networkHostname);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public fun interface PlatformReachabilityChanged {
+    method public void onChanged(com.mapbox.navigation.base.reachability.NetworkStatus status);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class SharedReachability {
+    ctor public SharedReachability();
+    method public kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.base.reachability.NetworkStatus> getNetworkStatus();
+    method public kotlinx.coroutines.flow.StateFlow<java.lang.Boolean> isReachable();
+    property public final kotlinx.coroutines.flow.StateFlow<java.lang.Boolean> isReachable;
+    property public final kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.base.reachability.NetworkStatus> networkStatus;
+    field public static final com.mapbox.navigation.base.reachability.SharedReachability.Companion Companion;
+  }
+
+  public static final class SharedReachability.Companion {
   }
 
 }

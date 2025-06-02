@@ -59,6 +59,7 @@ ext {
         'applemusic-mapgpt' : new Tuple2('applemusic-mapgpt', 'navigation-core-mapgpt-applemusic'),
         'driver-notification' : new Tuple2('driver-notification', 'navigation-core-driver-notification'),
         'ev-driver-notification' : new Tuple2('ev-driver-notification', 'navigation-core-ev-driver-notification'),
+        'audio' : new Tuple2('audio', 'navigation-core-audio'),
     ]
 }
 
