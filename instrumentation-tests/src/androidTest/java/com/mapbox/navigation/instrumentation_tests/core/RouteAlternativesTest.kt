@@ -40,11 +40,14 @@ import com.mapbox.navigation.testing.utils.withMapboxNavigation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import okhttp3.mockwebserver.MockResponse
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -469,6 +472,62 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
+    fun switch_from_multi_leg_primary_to_single_leg_CA_after_intermediate_waypoint() = sdkTest {
+        val initialRouteOptions = setupMockServerForCAAfterWaypointInBerlin()
+        withMapboxNavigation(
+            historyRecorderRule = mapboxHistoryTestRule,
+        ) { mapboxNavigation ->
+            val routes = mapboxNavigation.requestRoutes(initialRouteOptions)
+                .getSuccessfulResultOrThrowException()
+                .routes
+
+            mockLocationReplayerRule.playRoute(
+                routes[0].directionsRoute,
+            )
+            mapboxNavigation.startTripSession()
+            mapboxNavigation.setNavigationRoutes(routes)
+
+            mapboxNavigation.routeProgressUpdates().first { it.remainingWaypoints == 1 }
+            val updateAfterWaypointWithCA = mapboxNavigation.routesUpdates().first {
+                it.navigationRoutes.size > 1 &&
+                    it.navigationRoutes[0].responseUUID != it.navigationRoutes[1].responseUUID
+            }
+            mapboxNavigation.routeProgressUpdates().drop(1).first()
+            val caToSwitch = updateAfterWaypointWithCA.navigationRoutes[1]
+
+            val result = mapboxNavigation.switchToAlternativeAsync(caToSwitch)
+            assertNull(result.error)
+            val switchToCA = assertIs<RoutesSetSuccess>(result.value)
+            assertEquals(
+                listOf(routes[0].id),
+                switchToCA.ignoredAlternatives.keys.toList(),
+            )
+            assertFalse(
+                "original primary route is present after being ignored",
+                mapboxNavigation.getNavigationRoutes().contains(routes[0]),
+            )
+            assertEquals(
+                caToSwitch,
+                mapboxNavigation.getNavigationRoutes().firstOrNull(),
+            )
+            // behavior bellow not strictly required ATM, testing it to highlight that it's present
+            assertEquals(
+                listOf(routes[0].id),
+                mapboxNavigation.routesUpdates().first()
+                    .ignoredRoutes.map { it.navigationRoute.id },
+            )
+
+            // making sure that addition route progress in ForkPointPassedObserver
+            // doesn't change ignored routes
+            mapboxNavigation.routeProgressUpdates().drop(1).first()
+            assertFalse(
+                "original primary route is present after being ignored",
+                mapboxNavigation.getNavigationRoutes().contains(routes[0]),
+            )
+        }
+    }
+
+    @Test
     fun switch_to_alternative_when_no_routes_are_set() = sdkTest {
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
@@ -536,6 +595,38 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
                 continueCoordinates,
             ),
         )
+    }
+
+    private fun setupMockServerForCAAfterWaypointInBerlin(): RouteOptions {
+        val initialCoordinates = listOf(
+            Point.fromLngLat(13.348583, 52.488096),
+            Point.fromLngLat(13.349895, 52.488305),
+            Point.fromLngLat(13.421766, 52.521528),
+        )
+        // Nav-native requests alternate routes, so we are only
+        // ensuring the initial route has alternatives.
+        mockWebServerRule.requestHandlers.add(
+            MockDirectionsRequestHandler(
+                "driving-traffic",
+                readRawFileText(context, R.raw.route_response_alternative_berlin_initial_route),
+                initialCoordinates,
+            ),
+        )
+        mockWebServerRule.requestHandlers.add(
+            MockDirectionsRequestHandler(
+                "driving-traffic",
+                readRawFileText(context, R.raw.route_response_alternative_berlin_ca_after_waypoint),
+                initialCoordinates.drop(1),
+            ),
+        )
+        return RouteOptions.builder()
+            .applyDefaultNavigationOptions()
+            .applyLanguageAndVoiceUnitOptions(context)
+            .baseUrl(mockWebServerRule.baseUrl)
+            .waypointsPerRoute(true)
+            .alternatives(true)
+            .coordinatesList(initialCoordinates)
+            .build()
     }
 
     private suspend fun MapboxNavigation.requestNavigationRoutes(

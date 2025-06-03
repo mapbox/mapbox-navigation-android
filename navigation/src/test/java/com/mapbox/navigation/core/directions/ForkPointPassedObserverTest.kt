@@ -39,10 +39,12 @@ class ForkPointPassedObserverTest {
             )
         }
 
-        val route1 = mockk<NavigationRoute> { every { id } returns "route1" }
-        val route2 = mockk<NavigationRoute> { every { id } returns "route2" }
-        val routes = listOf(route1, route2)
+        val primary = mockk<NavigationRoute> { every { id } returns "route0" }
+        val alternative1 = mockk<NavigationRoute> { every { id } returns "route1" }
+        val alternative2 = mockk<NavigationRoute> { every { id } returns "route2" }
+        val routes = listOf(primary, alternative1, alternative2)
 
+        every { directionsSession.ignoredRoutes } returns emptyList()
         every { directionsSession.routes } returns routes
         every { currentLegIndex.invoke() } returns 0
 
@@ -51,10 +53,10 @@ class ForkPointPassedObserverTest {
         verify {
             directionsSession.setNavigationRoutesFinished(
                 DirectionsSessionRoutes(
-                    listOf(route2),
+                    listOf(primary, alternative2),
                     listOf(
                         IgnoredRoute(
-                            route1,
+                            alternative1,
                             ForkPointPassedObserver.REASON_ALTERNATIVE_FORK_POINT_PASSED,
                         ),
                     ),
@@ -106,18 +108,38 @@ class ForkPointPassedObserverTest {
     }
 
     @Test
+    fun `nothing happens when only primary route is available`() {
+        val primaryRoute = mockk<NavigationRoute> { every { id } returns "route1" }
+        val routeProgress: RouteProgress = mockk {
+            every { internalAlternativeRouteIndices() } returns emptyMap()
+            every { navigationRoute } returns primaryRoute
+        }
+
+        every { currentLegIndex.invoke() } returns 0
+        every { directionsSession.routes } returns listOf(primaryRoute)
+
+        observer.onRouteProgressChanged(routeProgress)
+
+        verify(exactly = 0) { directionsSession.setNavigationRoutesFinished(any()) }
+    }
+
+    @Test
     fun `ignored alternative becomes available and is returned to routes list`() {
         val route1 = mockk<NavigationRoute> { every { id } returns "route1" }
         val route2 = mockk<NavigationRoute> { every { id } returns "route2" }
-        val currentRotues = listOf(route1, route2)
+        val currentRoutes = listOf(route1, route2)
 
-        val ignoredRoute = IgnoredRoute(
+        val passedAlternative = IgnoredRoute(
             navigationRoute = mockk<NavigationRoute> { every { id } returns "ignored_route" },
             reason = ForkPointPassedObserver.REASON_ALTERNATIVE_FORK_POINT_PASSED,
         )
+        val wrongRoute = IgnoredRoute(
+            navigationRoute = mockk<NavigationRoute> { every { id } returns "wrong_route" },
+            reason = "wrong route",
+        )
 
-        every { directionsSession.routes } returns currentRotues
-        every { directionsSession.ignoredRoutes } returns listOf(ignoredRoute)
+        every { directionsSession.routes } returns currentRoutes
+        every { directionsSession.ignoredRoutes } returns listOf(passedAlternative, wrongRoute)
         every { currentLegIndex.invoke() } returns 0
 
         val routeProgress: RouteProgress = mockk {
@@ -133,8 +155,8 @@ class ForkPointPassedObserverTest {
         verify {
             directionsSession.setNavigationRoutesFinished(
                 DirectionsSessionRoutes(
-                    currentRotues + ignoredRoute.navigationRoute,
-                    emptyList(),
+                    currentRoutes + passedAlternative.navigationRoute,
+                    listOf(wrongRoute),
                     SetRoutes.Alternatives(0),
                 ),
             )
