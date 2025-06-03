@@ -43,6 +43,7 @@ import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.testing.utils.http.MockMapMatchingRequestHandler
 import com.mapbox.navigation.testing.utils.http.NotAuthorizedRequestHandler
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
+import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracking
 import com.mapbox.navigation.testing.utils.location.stayOnPosition
 import com.mapbox.navigation.testing.utils.readRawFileText
 import com.mapbox.navigation.testing.utils.setTestRouteRefreshInterval
@@ -277,26 +278,22 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
             )
             assertEquals(0, setRouteResult.value!!.ignoredAlternatives.size)
 
-            val origin = directionOptions.coordinatesList().first()
-            stayOnPosition(
-                latitude = origin.latitude(),
-                longitude = origin.longitude(),
-                bearing = 131.70f,
-            ) {
-                navigation.startTripSession()
-                navigation.routeProgressUpdates().first()
+            navigation.startTripSession()
+            navigation.moveAlongTheRouteUntilTracking(
+                directionsAPIResult.routes[0],
+                mockLocationReplayerRule,
+            )
 
-                navigation.routeRefreshController.requestImmediateRouteRefresh()
-                navigation.routesUpdates()
-                    .first { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
-                assertEquals(
-                    listOf(
-                        RouteRefreshExtra.REFRESH_STATE_STARTED,
-                        RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS,
-                    ),
-                    routeRefreshStates,
-                )
-            }
+            navigation.routeRefreshController.requestImmediateRouteRefresh()
+            navigation.routesUpdates()
+                .first { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
+            assertEquals(
+                listOf(
+                    RouteRefreshExtra.REFRESH_STATE_STARTED,
+                    RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS,
+                ),
+                routeRefreshStates,
+            )
         }
     }
 
@@ -312,13 +309,18 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
             val options = setupTestMapMatchingRoute()
             val result = navigation.requestMapMatching(options).getSuccessfulOrThrowException()
             navigation.setNavigationRoutes(result.navigationRoutes)
+            navigation.startTripSession()
+            navigation.moveAlongTheRouteUntilTracking(
+                result.navigationRoutes.first(),
+                mockLocationReplayerRule,
+            )
+
             stayOnPosition(
-                latitude = 32.712702672167055,
-                longitude = -117.17290808578423,
+                latitude = 32.712997,
+                longitude = -117.172881,
                 bearing = 178.0f,
                 frequencyHz = 5,
             ) {
-                navigation.startTripSession()
                 navigation.getRerouteController()?.rerouteStates()?.first {
                     it !is RerouteState.Idle
                 }
@@ -353,13 +355,19 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
             val deserializedRoute = deserializationResult.value!!
 
             navigation.setNavigationRoutes(listOf(deserializedRoute))
+
+            navigation.startTripSession()
+            navigation.moveAlongTheRouteUntilTracking(
+                result.navigationRoutes.first(),
+                mockLocationReplayerRule,
+            )
+
             stayOnPosition(
-                latitude = 32.712702672167055,
-                longitude = -117.17290808578423,
+                latitude = 32.712997,
+                longitude = -117.172881,
                 bearing = 178.0f,
                 frequencyHz = 5,
             ) {
-                navigation.startTripSession()
                 navigation.routeProgressUpdates()
                     .filter { it.currentState == RouteProgressState.OFF_ROUTE }
                     .drop(3)
@@ -548,43 +556,39 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
             val options = setupTestMapMatchingRoute()
             val result = navigation.requestMapMatching(options).getSuccessfulOrThrowException()
             navigation.setNavigationRoutes(result.navigationRoutes)
-            stayOnPosition(
-                latitude = 32.71204,
-                longitude = -117.17282,
-                bearing = 330.0f,
-                frequencyHz = 5,
-            ) {
-                navigation.startTripSession()
-                navigation.routeProgressUpdates().first()
-                delay(2000)
-                assertEquals(
-                    "map matched routes can't be refreshed",
-                    listOf(
-                        RouteRefreshExtra.REFRESH_STATE_STARTED,
-                        RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
-                    ),
-                    routeRefreshStates,
-                )
-                delay(1000)
-                assertEquals(
-                    "No retry of refreshing happens for map matched routes",
-                    listOf(
-                        RouteRefreshExtra.REFRESH_STATE_STARTED,
-                        RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
-                    ),
-                    routeRefreshStates,
-                )
-                routeRefreshStates.clear()
-                navigation.routeRefreshController.requestImmediateRouteRefresh()
-                assertEquals(
-                    "Refresh by request should fail for map matched route",
-                    listOf(
-                        RouteRefreshExtra.REFRESH_STATE_STARTED,
-                        RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
-                    ),
-                    routeRefreshStates,
-                )
-            }
+            navigation.startTripSession()
+            navigation.moveAlongTheRouteUntilTracking(
+                result.navigationRoutes[0],
+                mockLocationReplayerRule,
+            )
+            delay(2000)
+            assertEquals(
+                "map matched routes can't be refreshed",
+                listOf(
+                    RouteRefreshExtra.REFRESH_STATE_STARTED,
+                    RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
+                ),
+                routeRefreshStates,
+            )
+            delay(1000)
+            assertEquals(
+                "No retry of refreshing happens for map matched routes",
+                listOf(
+                    RouteRefreshExtra.REFRESH_STATE_STARTED,
+                    RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
+                ),
+                routeRefreshStates,
+            )
+            routeRefreshStates.clear()
+            navigation.routeRefreshController.requestImmediateRouteRefresh()
+            assertEquals(
+                "Refresh by request should fail for map matched route",
+                listOf(
+                    RouteRefreshExtra.REFRESH_STATE_STARTED,
+                    RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
+                ),
+                routeRefreshStates,
+            )
         }
     }
 

@@ -12,7 +12,6 @@ import com.mapbox.navigation.base.options.DeviceType
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
@@ -24,13 +23,14 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.RouteRequestResult
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
 import com.mapbox.navigation.testing.ui.utils.coroutines.refreshStates
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
-import com.mapbox.navigation.testing.ui.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
 import com.mapbox.navigation.testing.utils.createTileStore
 import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
+import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
+import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracking
 import com.mapbox.navigation.testing.utils.location.stayOnPosition
 import com.mapbox.navigation.testing.utils.routes.EvRoutesProvider
 import com.mapbox.navigation.testing.utils.routes.MockedEvRouteWithSingleUserProvidedChargingStation
@@ -50,6 +50,9 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
 
     @get:Rule
     val mapboxHistoryTestRule = MapboxHistoryTestRule()
+
+    @get:Rule
+    val mockLocationReplayerRule = MockLocationReplayerRule(mockLocationUpdatesRule)
 
     override fun setupMockLocation(): Location {
         return mockLocationUpdatesRule.generateLocationUpdate {
@@ -203,16 +206,11 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                 listOf(3, 3),
                 requestResult.routes.map { it.waypoints?.size },
             )
-            stayOnPosition(
-                latitude = originalTestRoute.routeOptions.coordinatesList().first().latitude(),
-                longitude = originalTestRoute.routeOptions.coordinatesList().first().longitude(),
-                bearing = 270f,
-            ) {
-                navigation.setNavigationRoutesAsync(requestResult.routes)
-                navigation.routeProgressUpdates().first {
-                    it.currentState == RouteProgressState.TRACKING
-                }
-            }
+            navigation.setNavigationRoutesAsync(requestResult.routes)
+            navigation.moveAlongTheRouteUntilTracking(
+                requestResult.routes[0],
+                mockLocationReplayerRule,
+            )
 
             withoutInternet {
                 stayOnPosition(

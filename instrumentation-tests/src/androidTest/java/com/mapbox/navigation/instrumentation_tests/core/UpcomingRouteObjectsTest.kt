@@ -37,19 +37,25 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForUpdate
+import com.mapbox.navigation.testing.ui.utils.coroutines.stopRecording
 import com.mapbox.navigation.testing.utils.assertions.compareIdWithIncidentId
+import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.http.FailByRequestMockRequestHandler
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRefreshHandler
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
+import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracking
 import com.mapbox.navigation.testing.utils.location.stayOnPosition
 import com.mapbox.navigation.testing.utils.readRawFileText
 import com.mapbox.navigation.testing.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.utils.routes.requestMockRoutes
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -63,6 +69,9 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
     val mapboxNavigationRule = MapboxNavigationRule()
 
     @get:Rule
+    val mapboxHistoryTestRule = MapboxHistoryTestRule()
+
+    @get:Rule
     val mockLocationReplayerRule = MockLocationReplayerRule(mockLocationUpdatesRule)
     private val tolerance = 0.0001
 
@@ -71,6 +80,15 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
     override fun setupMockLocation(): Location = mockLocationUpdatesRule.generateLocationUpdate {
         latitude = 48.143406486859135
         longitude = 11.428011943347627
+    }
+
+    @After
+    fun tearDown() {
+        runBlocking(Dispatchers.Main.immediate) {
+            val path = mapboxNavigation.historyRecorder.stopRecording()
+            Log.i("Tests", "history file recorder: $path")
+            MapboxNavigationProvider.destroy()
+        }
     }
 
     @Test
@@ -97,7 +115,8 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
         assertEquals(9232.6493, upcomingRoadObjectsOnStart[5].distanceToStart!!, tolerance)
         assertEquals(9434.4270, upcomingRoadObjectsOnStart[6].distanceToStart!!, tolerance)
 
-        val distanceDiff = 1763.9070399
+        // distanceTraveled diff from RouteProgress objects received on initialLocation and on positionAlongTheRoute
+        val distanceDiff = 1766.675
         stayOnPosition(positionAlongTheRoute)
         val upcomingRoadObjectsAlongTheRoute = mapboxNavigation.routeProgressUpdates()
             .first {
@@ -219,30 +238,31 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
             oneLegMockRoute,
         )
 
-        stayOnPosition(oneLegRoute.first().waypoints!!.first().location(), 0.0f) {
-            mapboxNavigation.startTripSession()
-            mapboxNavigation.setNavigationRoutesAndWaitForUpdate(oneLegRoute)
-            val upcomingIncidentForOneLeg = mapboxNavigation.routeProgressUpdates()
-                .first { it.currentState == RouteProgressState.TRACKING }
-                .upcomingRoadObjects
-                .first { it.roadObject.compareIdWithIncidentId(incidentId) }
+        mapboxNavigation.startTripSession()
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(oneLegRoute)
+        mapboxNavigation.moveAlongTheRouteUntilTracking(oneLegRoute[0], mockLocationReplayerRule)
+        val upcomingIncidentForOneLeg = mapboxNavigation.routeProgressUpdates()
+            .first {
+                it.currentState == RouteProgressState.TRACKING
+            }
+            .upcomingRoadObjects
+            .first { it.roadObject.compareIdWithIncidentId(incidentId) }
 
-            val twoLegsRoute = mapboxNavigation.requestMockRoutes(
-                mockWebServerRule,
-                twoLegsMockRoute,
-            )
-            mapboxNavigation.setNavigationRoutesAndWaitForUpdate(twoLegsRoute)
-            val upcomingIncidentForTwoLegsRoute = mapboxNavigation.routeProgressUpdates()
-                .first { it.currentState == RouteProgressState.TRACKING }
-                .upcomingRoadObjects
-                .first { it.roadObject.compareIdWithIncidentId(incidentId) }
+        val twoLegsRoute = mapboxNavigation.requestMockRoutes(
+            mockWebServerRule,
+            twoLegsMockRoute,
+        )
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(twoLegsRoute)
+        val upcomingIncidentForTwoLegsRoute = mapboxNavigation.routeProgressUpdates()
+            .first { it.currentState == RouteProgressState.TRACKING }
+            .upcomingRoadObjects
+            .first { it.roadObject.compareIdWithIncidentId(incidentId) }
 
-            assertEquals(
-                upcomingIncidentForOneLeg.distanceToStart!!,
-                upcomingIncidentForTwoLegsRoute.distanceToStart!!,
-                0.1,
-            )
-        }
+        assertEquals(
+            upcomingIncidentForOneLeg.distanceToStart!!,
+            upcomingIncidentForTwoLegsRoute.distanceToStart!!,
+            0.1,
+        )
     }
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -333,7 +353,7 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
 
         // distance travelled ~ 4894.979, first road object passed
         val movedAlongTheRoutePosition =
-            routes.first().directionsRoute.completeGeometryToPoints()[60]
+            routes.first().directionsRoute.completeGeometryToPoints()[61]
         stayOnPosition(movedAlongTheRoutePosition)
         val updateAfterMovedAlongTheRoute = mapboxNavigation.routeProgressUpdates()
             .filter {
@@ -556,7 +576,7 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
 
         // distance traveled ~ 5222, second and third road objects are passed
         val positionAfterFirstRefresh =
-            routes.first().directionsRoute.completeGeometryToPoints()[150]
+            routes.first().directionsRoute.completeGeometryToPoints()[151]
         stayOnPosition(positionAfterFirstRefresh, 0f)
         val updateAfterRefresh = mapboxNavigation.routeProgressUpdates()
             .filter { it.currentRouteGeometryIndex == 150 }
@@ -598,7 +618,7 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
 
         assertTrue(incident2.distanceToStart!! > incident1.distanceToStart!!)
 
-        val distanceDiff = 167.55607
+        val distanceDiff = 170.4787
         stayOnPosition(positionAlongTheRoute)
         val upcomingRoadObjectsAlongTheRoute = mapboxNavigation.routeProgressUpdates()
             .first {
@@ -716,7 +736,10 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
                     .build(),
             )
             .build(),
-    )
+    ).also {
+        mapboxHistoryTestRule.historyRecorder = it.historyRecorder
+        it.historyRecorder.startRecording()
+    }
 
     private class ApproxMeters(val value: Double) {
         override fun equals(other: Any?): Boolean {

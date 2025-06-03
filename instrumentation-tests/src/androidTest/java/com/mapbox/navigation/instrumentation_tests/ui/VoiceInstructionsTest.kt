@@ -17,7 +17,7 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsyn
 import com.mapbox.navigation.testing.utils.assertions.waitUntilHasSize
 import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
-import com.mapbox.navigation.testing.utils.location.stayOnPosition
+import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracking
 import com.mapbox.navigation.testing.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.utils.routes.requestMockRoutes
 import org.junit.Assert.assertEquals
@@ -66,14 +66,10 @@ class VoiceInstructionsTest : BaseCoreNoCleanUpTest() {
             mockRoute,
         )
         mapboxNavigation.registerVoiceInstructionsObserver(voiceInstructionsObserver)
-        stayOnPosition(
-            mockRoute.routeWaypoints.first(),
-            0f,
-        ) {
-            mapboxNavigation.startTripSession()
-            mapboxNavigation.setNavigationRoutesAsync(routes)
-            voiceInstructions.waitUntilHasSize(1)
-        }
+        mapboxNavigation.startTripSession()
+        mapboxNavigation.setNavigationRoutesAsync(routes)
+        mapboxNavigation.moveAlongTheRouteUntilTracking(routes[0], mockLocationReplayerRule)
+        voiceInstructions.waitUntilHasSize(1)
         val relayRouteSession = ReplayRouteSession()
         relayRouteSession.onAttached(mapboxNavigation)
         voiceInstructions.waitUntilHasSize(3, timeoutMillis = 15000)

@@ -31,6 +31,7 @@ import com.mapbox.navigation.testing.utils.http.FailByRequestMockRequestHandler
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRefreshHandler
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
+import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracking
 import com.mapbox.navigation.testing.utils.location.stayOnPosition
 import com.mapbox.navigation.testing.utils.location.stayOnPositionAndWaitForUpdate
 import com.mapbox.navigation.testing.utils.readRawFileText
@@ -323,29 +324,28 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
         mapboxNavigation.startTripSession()
         val invalidatedResults = mutableListOf<RoutesInvalidatedParams>()
         mapboxNavigation.registerRoutesInvalidatedObserver { invalidatedResults.add(it) }
-        stayOnPosition(coordinates[0].latitude(), coordinates[0].longitude(), 190f) {
-            val routes = mapboxNavigation.requestRoutes(routeOptions)
-                .getSuccessfulResultOrThrowException().routes.take(1)
-            mockWebServerRule.requestHandlers.clear()
-            mockWebServerRule.requestHandlers.add(
-                MockDirectionsRequestHandler(
-                    "driving-traffic",
-                    readRawFileText(context, R.raw.route_response_with_large_ttl_reroute),
-                    null,
-                    relaxedExpectedCoordinates = true,
-                ),
-            )
-            mockWebServerRule.requestHandlers.add(
-                MockDirectionsRefreshHandler(
-                    "route_response_with_large_ttl_reroute",
-                    readRawFileText(context, R.raw.route_response_with_large_ttl_reroute_refresh),
-                ),
-            )
-            mapboxNavigation.setNavigationRoutes(routes)
-        }
+        val routes = mapboxNavigation.requestRoutes(routeOptions)
+            .getSuccessfulResultOrThrowException().routes.take(1)
+        mockWebServerRule.requestHandlers.clear()
+        mockWebServerRule.requestHandlers.add(
+            MockDirectionsRequestHandler(
+                "driving-traffic",
+                readRawFileText(context, R.raw.route_response_with_large_ttl_reroute),
+                null,
+                relaxedExpectedCoordinates = true,
+            ),
+        )
+        mockWebServerRule.requestHandlers.add(
+            MockDirectionsRefreshHandler(
+                "route_response_with_large_ttl_reroute",
+                readRawFileText(context, R.raw.route_response_with_large_ttl_reroute_refresh),
+            ),
+        )
+        mapboxNavigation.setNavigationRoutes(routes)
+        mapboxNavigation.moveAlongTheRouteUntilTracking(routes[0], mockLocationReplayerRule)
         val offRouteLocation = mockLocationUpdatesRule.generateLocationUpdate {
             latitude = coordinates[0].latitude()
-            longitude = coordinates[0].longitude() + 0.002
+            longitude = coordinates[0].longitude() + 0.004
         }
         stayOnPosition(offRouteLocation.latitude, offRouteLocation.longitude, 180f) {
             mapboxNavigation.routesUpdates()

@@ -51,6 +51,7 @@ import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRefreshHandler
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
+import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracking
 import com.mapbox.navigation.testing.utils.location.stayOnPosition
 import com.mapbox.navigation.testing.utils.readRawFileText
 import com.mapbox.navigation.testing.utils.routes.MockRoute
@@ -170,9 +171,9 @@ class CoreRerouteTest(
             customConfig = getTestCustomConfig(),
         ) { navigation ->
             val rerouteStates = navigation.recordRerouteStates()
-            stayOnPosition(originLocation, bearing = 0.0f) {
+            val routes = stayOnPosition(originLocation, bearing = 0.0f) {
                 navigation.startTripSession()
-                val routes = navigation.requestRoutes(
+                navigation.requestRoutes(
                     RouteOptions.builder()
                         .applyDefaultNavigationOptions()
                         .applyLanguageAndVoiceUnitOptions(context)
@@ -180,11 +181,9 @@ class CoreRerouteTest(
                         .coordinatesList(mockRoute.routeWaypoints)
                         .build(),
                 ).getSuccessfulResultOrThrowException().routes
-                navigation.setNavigationRoutesAsync(routes)
-                navigation.routeProgressUpdates().first {
-                    it.currentState == RouteProgressState.TRACKING
-                }
             }
+            navigation.setNavigationRoutesAsync(routes)
+            navigation.moveAlongTheRouteUntilTracking(routes[0], mockLocationReplayerRule)
             stayOnPosition(offRouteLocationUpdate) {
                 val routesUpdate = navigation.routesUpdates().first {
                     it.reason == ROUTES_UPDATE_REASON_REROUTE
@@ -258,7 +257,10 @@ class CoreRerouteTest(
         ).getSuccessfulResultOrThrowException().routes
         mapboxNavigation.startTripSession()
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(originalRoutes)
-
+        mapboxNavigation.moveAlongTheRouteUntilTracking(
+            originalRoutes.first(),
+            mockLocationReplayerRule,
+        )
         mockLocationReplayerRule.loopUpdate(offRouteLocationUpdate, times = 5)
         // wait for OFF_ROUTE
         mapboxNavigation.offRouteUpdates().filter { it }.first()
@@ -915,6 +917,10 @@ class CoreRerouteTest(
                 mapboxNavigation.flowLocationMatcherResult().first()
                 mapboxNavigation.setNavigationRoutesAndWaitForUpdate(originalRoutes)
             }
+            mapboxNavigation.moveAlongTheRouteUntilTracking(
+                originalRoutes[0],
+                mockLocationReplayerRule,
+            )
             withoutInternet {
                 stayOnPosition(offRouteLocationUpdate) {
                     mapboxNavigation.offRouteUpdates().filter { it }.first()

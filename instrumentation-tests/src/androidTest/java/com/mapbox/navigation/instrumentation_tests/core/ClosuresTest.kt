@@ -32,6 +32,7 @@ import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRefreshHandler
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
+import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracking
 import com.mapbox.navigation.testing.utils.location.stayOnPosition
 import com.mapbox.navigation.testing.utils.readRawFileText
 import com.mapbox.navigation.testing.utils.routes.RoutesProvider
@@ -217,15 +218,17 @@ class ClosuresTest : BaseCoreNoCleanUpTest() {
                 deserializedRouteWithClosure!!.directionsRoute.legs()!![0]
                     .closures()!!.isNotEmpty(),
             )
-            stayOnPosition(mockRoute.routeWaypoints.first(), 0.0f) {
-                navigation.startTripSession()
-                navigation.setNavigationRoutes(listOf(deserializedRouteWithClosure))
-                val routeProgress = navigation.routeProgressUpdates().first()
-                assertFalse(
-                    "all closures should be expected",
-                    routeProgress.hasUnexpectedUpcomingClosures(),
-                )
-            }
+            navigation.startTripSession()
+            navigation.setNavigationRoutes(listOf(deserializedRouteWithClosure))
+            navigation.moveAlongTheRouteUntilTracking(
+                deserializedRouteWithClosure,
+                mockLocationReplayerRule,
+            )
+            val routeProgress = navigation.routeProgressUpdates().first()
+            assertFalse(
+                "all closures should be expected",
+                routeProgress.hasUnexpectedUpcomingClosures(),
+            )
         }
     }
 

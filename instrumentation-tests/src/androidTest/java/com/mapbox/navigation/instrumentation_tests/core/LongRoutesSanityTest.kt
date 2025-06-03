@@ -21,6 +21,8 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
 import com.mapbox.navigation.testing.utils.DelayedResponseModifier
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
+import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
+import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracking
 import com.mapbox.navigation.testing.utils.location.stayOnPosition
 import com.mapbox.navigation.testing.utils.readRawFileText
 import com.mapbox.navigation.testing.utils.routes.RoutesProvider
@@ -29,6 +31,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import org.junit.Assert.assertEquals
+import org.junit.Rule
 import org.junit.Test
 
 // old devices parse long routes very slowly
@@ -36,6 +39,9 @@ private const val EXTENDED_TIMEOUT_FOR_SLOW_PARSING = 200_000L
 
 @OptIn(ExperimentalMapboxNavigationAPI::class)
 class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
+
+    @get:Rule
+    val mockLocationReplayerRule = MockLocationReplayerRule(mockLocationUpdatesRule)
 
     override fun setupMockLocation(): Location {
         return mockLocationUpdatesRule.generateLocationUpdate {
@@ -131,12 +137,17 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
         val longRoutesOptions = setupLongRoutes()
         val longRoutesRerouteOptions = setupLongRoutesReroute()
         withMapboxNavigation { navigation ->
-            navigation.setNavigationRoutesAsync(
-                navigation
-                    .requestRoutes(longRoutesOptions)
-                    .getSuccessfulResultOrThrowException().routes,
-            )
+            val routes = navigation
+                .requestRoutes(longRoutesOptions)
+                .getSuccessfulResultOrThrowException().routes
+            navigation.setNavigationRoutesAsync(routes)
             assertEquals(2, navigation.getNavigationRoutes().size)
+
+            navigation.startTripSession()
+            navigation.moveAlongTheRouteUntilTracking(
+                routes.first(),
+                mockLocationReplayerRule,
+            )
 
             val rerouteOrigin = longRoutesRerouteOptions.coordinatesList().first()
             stayOnPosition(
@@ -144,7 +155,6 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
                 longitude = rerouteOrigin.longitude(),
                 bearing = 190.0f,
             ) {
-                navigation.startTripSession()
                 navigation.flowRouteProgress().first()
                 val droppingAlternatives = navigation.routesUpdates().first {
                     it.reason == RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE

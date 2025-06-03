@@ -26,6 +26,7 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndW
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
+import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracking
 import com.mapbox.navigation.testing.utils.readRawFileText
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
@@ -76,7 +77,7 @@ class EVRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
         Point.fromLngLat(10.3406374, 49.16479),
     )
     private val offRouteLocationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
-        latitude = twoCoordinates[0].latitude() + 0.002
+        latitude = twoCoordinates[0].latitude() + 0.004
         longitude = twoCoordinates[0].longitude()
     }
     private lateinit var routeHandler: MockDirectionsRequestHandler
@@ -122,6 +123,10 @@ class EVRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
         mapboxNavigation.startTripSession()
         stayOnInitialPosition()
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
+        mapboxNavigation.moveAlongTheRouteUntilTracking(
+            requestedRoutes.first(),
+            mockLocationReplayerRule,
+        )
         stayOnPosition(offRouteLocationUpdate.latitude, offRouteLocationUpdate.longitude)
         waitForReroute()
 
@@ -145,6 +150,11 @@ class EVRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
             initialCharge = newInitialCharge,
         )
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(newRequestedRoutes)
+        mapboxNavigation.moveAlongTheRouteUntilTracking(
+            newRequestedRoutes.first(),
+            mockLocationReplayerRule,
+        )
+        stayOnPosition(offRouteLocationUpdate.latitude, offRouteLocationUpdate.longitude)
         waitForReroute()
 
         val url2 = routeHandler.handledRequests.last().requestUrl!!
@@ -180,6 +190,10 @@ class EVRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
         mapboxNavigation.startTripSession()
         stayOnInitialPosition()
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
+        mapboxNavigation.moveAlongTheRouteUntilTracking(
+            requestedRoutes.first(),
+            mockLocationReplayerRule,
+        )
         stayOnPosition(offRouteLocationUpdate.latitude, offRouteLocationUpdate.longitude)
         waitForReroute()
 
@@ -196,8 +210,13 @@ class EVRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
         val requestedRoutes = requestRoutes(twoCoordinates, electric = true)
 
         mapboxNavigation.startTripSession()
+
         stayOnInitialPosition()
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
+        mapboxNavigation.moveAlongTheRouteUntilTracking(
+            requestedRoutes.first(),
+            mockLocationReplayerRule,
+        )
         stayOnPosition(offRouteLocationUpdate.latitude, offRouteLocationUpdate.longitude)
         waitForReroute()
 
@@ -225,7 +244,11 @@ class EVRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
         )
         mapboxNavigation.onEVDataUpdated(firstEvData)
         var oldRequestsCount = routeHandler.handledRequests.size
-        stayOnInitialPosition()
+        mapboxNavigation.moveAlongTheRouteUntilTracking(
+            requestedRoutes.first(),
+            mockLocationReplayerRule,
+        )
+        stayOnPosition(offRouteLocationUpdate.latitude, offRouteLocationUpdate.longitude)
         waitForNewRequest(oldRequestsCount)
 
         val firstUrl = routeHandler.handledRequests.last().requestUrl!!
@@ -240,6 +263,10 @@ class EVRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
             mapOf(KEY_EV_INITIAL_CHARGE to newInitialCharge),
         )
         oldRequestsCount = routeHandler.handledRequests.size
+        mapboxNavigation.moveAlongTheRouteUntilTracking(
+            requestedRoutes.first(),
+            mockLocationReplayerRule,
+        )
         stayOnPosition(offRouteLocationUpdate.latitude, offRouteLocationUpdate.longitude)
         waitForNewRequest(oldRequestsCount)
 
@@ -258,7 +285,11 @@ class EVRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
 
         mapboxNavigation.onEVDataUpdated(emptyMap())
         oldRequestsCount = routeHandler.handledRequests.size
-        stayOnInitialPosition()
+        mapboxNavigation.moveAlongTheRouteUntilTracking(
+            requestedRoutes.first(),
+            mockLocationReplayerRule,
+        )
+        stayOnPosition(offRouteLocationUpdate.latitude, offRouteLocationUpdate.longitude)
         waitForNewRequest(oldRequestsCount)
 
         val urlAfterEmptyUpdate = routeHandler.handledRequests.last().requestUrl!!
@@ -307,6 +338,10 @@ class EVRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
         mapboxNavigation.startTripSession()
         stayOnPosition(threeCoordinates[0].latitude(), threeCoordinates[0].longitude(), 135f)
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
+        mapboxNavigation.moveAlongTheRouteUntilTracking(
+            requestedRoutes.first(),
+            mockLocationReplayerRule,
+        )
         stayOnPosition(offRouteLocationUpdate.latitude, offRouteLocationUpdate.longitude)
         waitForReroute()
 
@@ -485,7 +520,7 @@ class EVRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
     }
 
     private fun stayOnInitialPosition() {
-        stayOnPosition(twoCoordinates[0].latitude(), twoCoordinates[0].longitude())
+        stayOnPosition(twoCoordinates[0].latitude(), twoCoordinates[0].longitude(), 180f)
     }
 
     private fun stayOnPosition(
@@ -498,6 +533,7 @@ class EVRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
                 this.latitude = latitude
                 this.longitude = longitude
                 this.bearing = bearing
+                this.speed = 5f
             },
             times = 120,
         )

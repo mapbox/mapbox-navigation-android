@@ -47,6 +47,8 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
 import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
+import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
+import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracking
 import com.mapbox.navigation.testing.utils.location.stayOnPosition
 import com.mapbox.navigation.testing.utils.readRawFileText
 import com.mapbox.navigation.testing.utils.routes.RoutesProvider
@@ -60,6 +62,9 @@ import org.junit.Rule
 import org.junit.Test
 
 class CustomRouterTest : BaseCoreNoCleanUpTest() {
+
+    @get:Rule
+    val mockLocationReplayerRule = MockLocationReplayerRule(mockLocationUpdatesRule)
 
     @get:Rule
     val navigationRouterRule = createNavigationRouterRule()
@@ -118,30 +123,26 @@ class CustomRouterTest : BaseCoreNoCleanUpTest() {
                     mockRoute.routeResponse.uuid(),
                     initialRoutesResponse.routes.first().responseUUID,
                 )
-                stayOnPosition(
-                    latitude = mockRoute.routeWaypoints.first().latitude(),
-                    longitude = mockRoute.routeWaypoints.first().longitude(),
-                    bearing = mockRoute.routeResponse.routes().first().legs()!!.first()!!.steps()!!
-                        .first().maneuver().bearingBefore()!!.toFloat(),
-                ) {
-                    navigation.startTripSession()
-                    navigation.setNavigationRoutesAsync(initialRoutesResponse.routes)
-                    navigation.routeProgressUpdates().first()
-                    navigation.routeRefreshController.requestImmediateRouteRefresh()
-                    val update = navigation.routesUpdates().first {
-                        it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH
-                    }
-                    assertEquals(
-                        initialRoutesResponse.routes.first().directionsRoute.legs()?.first()
-                            ?.annotation(),
-                        update.navigationRoutes.first().directionsRoute.legs()?.first()
-                            ?.annotation(),
-                    )
-                    assertEquals(
-                        initialRoutesResponse.routes.first().upcomingRoadObjects,
-                        update.navigationRoutes.first().upcomingRoadObjects,
-                    )
+                navigation.startTripSession()
+                navigation.setNavigationRoutesAsync(initialRoutesResponse.routes)
+                navigation.moveAlongTheRouteUntilTracking(
+                    initialRoutesResponse.routes[0],
+                    mockLocationReplayerRule,
+                )
+                navigation.routeRefreshController.requestImmediateRouteRefresh()
+                val update = navigation.routesUpdates().first {
+                    it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH
                 }
+                assertEquals(
+                    initialRoutesResponse.routes.first().directionsRoute.legs()?.first()
+                        ?.annotation(),
+                    update.navigationRoutes.first().directionsRoute.legs()?.first()
+                        ?.annotation(),
+                )
+                assertEquals(
+                    initialRoutesResponse.routes.first().upcomingRoadObjects,
+                    update.navigationRoutes.first().upcomingRoadObjects,
+                )
             }
         }
     }
@@ -336,22 +337,29 @@ class CustomRouterTest : BaseCoreNoCleanUpTest() {
                     .legs()!!.first()!!
                     .steps()!!.let { it[it.size / 2] }
                     .maneuver()
+
+                val initialRoutesResponse = navigation.requestRoutes(testRouteOptions)
+                    .getSuccessfulResultOrThrowException()
+                assertEquals(RouterOrigin.ONLINE, initialRoutesResponse.routerOrigin)
+                assertEquals(
+                    testRouteResponse.uuid(),
+                    initialRoutesResponse.routes.first().responseUUID,
+                )
+                navigation.startTripSession()
+                navigation.setNavigationRoutesAsync(initialRoutesResponse.routes)
+                navigation.moveAlongTheRouteUntilTracking(
+                    initialRoutesResponse.routes[0],
+                    mockLocationReplayerRule,
+                )
                 stayOnPosition(
                     latitude = maneuverInTheMiddleOfTheRoute.location().latitude(),
                     longitude = maneuverInTheMiddleOfTheRoute.location().longitude(),
                     bearing = maneuverInTheMiddleOfTheRoute.bearingBefore()!!.toFloat(),
                 ) {
-                    val initialRoutesResponse = navigation.requestRoutes(testRouteOptions)
-                        .getSuccessfulResultOrThrowException()
-                    assertEquals(RouterOrigin.ONLINE, initialRoutesResponse.routerOrigin)
-                    assertEquals(
-                        testRouteResponse.uuid(),
-                        initialRoutesResponse.routes.first().responseUUID,
-                    )
-                    navigation.startTripSession()
-                    navigation.setNavigationRoutesAsync(initialRoutesResponse.routes)
                     val routeIndexAtRefresh = navigation.routeProgressUpdates()
-                        .first()
+                        .first {
+                            it.currentLegProgress!!.currentStepProgress!!.stepIndex > 0
+                        }
                         .currentLegProgress!!
                         .geometryIndex
                     navigation.routeRefreshController.requestImmediateRouteRefresh()
@@ -467,19 +475,15 @@ class CustomRouterTest : BaseCoreNoCleanUpTest() {
                     mockRoute.routeResponse.uuid(),
                     initialRoutesResponse.routes.first().responseUUID,
                 )
-                stayOnPosition(
-                    latitude = mockRoute.routeWaypoints.first().latitude(),
-                    longitude = mockRoute.routeWaypoints.first().longitude(),
-                    bearing = mockRoute.routeResponse.routes().first().legs()!!.first()!!.steps()!!
-                        .first().maneuver().bearingBefore()!!.toFloat(),
-                ) {
-                    navigation.startTripSession()
-                    navigation.setNavigationRoutesAsync(initialRoutesResponse.routes)
-                    navigation.routeProgressUpdates().first()
-                    navigation.routeRefreshController.requestImmediateRouteRefresh()
-                    navigation.refreshStates().first {
-                        it.state == RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED
-                    }
+                navigation.startTripSession()
+                navigation.setNavigationRoutesAsync(initialRoutesResponse.routes)
+                navigation.moveAlongTheRouteUntilTracking(
+                    initialRoutesResponse.routes[0],
+                    mockLocationReplayerRule,
+                )
+                navigation.routeRefreshController.requestImmediateRouteRefresh()
+                navigation.refreshStates().first {
+                    it.state == RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED
                 }
             }
         }
@@ -616,19 +620,15 @@ class CustomRouterTest : BaseCoreNoCleanUpTest() {
             ) { navigation ->
                 val initialRoutesResponse = navigation.requestRoutes(testRouteOptions)
                     .getSuccessfulResultOrThrowException()
-                stayOnPosition(
-                    latitude = mockRoute.routeWaypoints.first().latitude(),
-                    longitude = mockRoute.routeWaypoints.first().longitude(),
-                    bearing = mockRoute.routeResponse.routes().first().legs()!!.first()!!.steps()!!
-                        .first().maneuver().bearingBefore()!!.toFloat(),
-                ) {
-                    navigation.startTripSession()
-                    navigation.setNavigationRoutesAsync(initialRoutesResponse.routes)
-                    navigation.routeProgressUpdates().first()
-                    navigation.routeRefreshController.requestImmediateRouteRefresh()
-                    navigation.refreshStates().first {
-                        it.state == RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED
-                    }
+                navigation.startTripSession()
+                navigation.setNavigationRoutesAsync(initialRoutesResponse.routes)
+                navigation.moveAlongTheRouteUntilTracking(
+                    initialRoutesResponse.routes[0],
+                    mockLocationReplayerRule,
+                )
+                navigation.routeRefreshController.requestImmediateRouteRefresh()
+                navigation.refreshStates().first {
+                    it.state == RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED
                 }
             }
         }
