@@ -17,6 +17,7 @@ import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.toCameraOptions
 import com.mapbox.maps.util.isEmpty
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.utils.areSameRoutes
 import com.mapbox.navigation.base.internal.utils.isSameRoute
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -373,7 +374,9 @@ class MapboxNavigationViewportDataSource private constructor(
     fun evaluate() {
         mapsSizeReadyCancellable?.cancel()
         mapsSizeReadyCancellable = mapSizeReadyCallbackHelper.onMapSizeInitialized {
-            evaluateImpl()
+            PerformanceTracker.trackPerformance("MapboxNavigationViewportDataSource#evaluateImpl") {
+                evaluateImpl()
+            }
         }
     }
 
@@ -417,7 +420,9 @@ class MapboxNavigationViewportDataSource private constructor(
      * @see [evaluate]
      */
     fun onRouteChanged(route: NavigationRoute) {
-        onRoutesChanged(listOf(route))
+        PerformanceTracker.trackPerformance("MapboxNavigationViewportDataSource#onRouteChanged") {
+            onRoutesChanged(listOf(route))
+        }
     }
 
     internal fun onRoutesChanged(routes: List<NavigationRoute>) {
@@ -444,61 +449,10 @@ class MapboxNavigationViewportDataSource private constructor(
      * @see [evaluate]
      */
     fun onRouteProgressChanged(routeProgress: RouteProgress) {
-        this.routeProgress = routeProgress
-        val currentRoute = this.navigationRoute
-        if (currentRoute == null) {
-            logW(
-                "You're calling #onRouteProgressChanged but you didn't call #onRouteChanged.",
-                LOG_CATEGORY,
-            )
-            clearProgressData()
-            return
-        } else if (!currentRoute.directionsRoute.isSameRoute(routeProgress.route)) {
-            logE(
-                "Provided route (#onRouteChanged) and navigated route " +
-                    "(#onRouteProgressChanged) are not the same. " +
-                    "Aborting framed geometry updates based on route progress.",
-                LOG_CATEGORY,
-            )
-            clearProgressData()
-            return
-        }
-
-        ifNonNull(
-            routeProgress.currentLegProgress,
-            routeProgress.currentLegProgress?.currentStepProgress,
-        ) { currentLegProgress, currentStepProgress ->
-            isFramingManeuverProperty.fallback = isFramingManeuver(
-                routeProgress,
-                options.followingFrameOptions,
-            )
-            followingPitchProperty.fallback = if (isFramingManeuverProperty.get()) {
-                ZERO_PITCH
-            } else {
-                options.followingFrameOptions.defaultPitch
-            }
-
-            pointsToFrameOnCurrentStep = options.followingFrameOptions.framingStrategy
-                .getPointsToFrameOnCurrentStep(
-                    routeProgress,
-                    options.followingFrameOptions,
-                    averageIntersectionDistancesOnRoute,
-                )
-
-            pointsToFrameAfterCurrentStep = options.followingFrameOptions.framingStrategy
-                .getPointsToFrameAfterCurrentManeuver(
-                    routeProgress,
-                    options.followingFrameOptions,
-                    postManeuverFramingPoints,
-                )
-
-            overviewViewportDataSource.onRouteProgressChanged(routeProgress)
-        } ?: run {
-            logE(
-                "You're calling #onRouteProgressChanged with empty leg or step progress.",
-                LOG_CATEGORY,
-            )
-            clearProgressData()
+        PerformanceTracker.trackPerformance(
+            "MapboxNavigationViewportDataSource#onRouteProgressChanged",
+        ) {
+            onRouteProgressChangedInternal(routeProgress)
         }
     }
 
@@ -566,6 +520,65 @@ class MapboxNavigationViewportDataSource private constructor(
         calculateRouteData(navigationRoutes)
         routeProgress?.let { onRouteProgressChanged(it) }
         evaluate()
+    }
+
+    private fun onRouteProgressChangedInternal(routeProgress: RouteProgress) {
+        this.routeProgress = routeProgress
+        val currentRoute = this.navigationRoute
+        if (currentRoute == null) {
+            logW(
+                "You're calling #onRouteProgressChanged but you didn't call #onRouteChanged.",
+                LOG_CATEGORY,
+            )
+            clearProgressData()
+            return
+        } else if (!currentRoute.directionsRoute.isSameRoute(routeProgress.route)) {
+            logE(
+                "Provided route (#onRouteChanged) and navigated route " +
+                    "(#onRouteProgressChanged) are not the same. " +
+                    "Aborting framed geometry updates based on route progress.",
+                LOG_CATEGORY,
+            )
+            clearProgressData()
+            return
+        }
+
+        ifNonNull(
+            routeProgress.currentLegProgress,
+            routeProgress.currentLegProgress?.currentStepProgress,
+        ) { currentLegProgress, currentStepProgress ->
+            isFramingManeuverProperty.fallback = isFramingManeuver(
+                routeProgress,
+                options.followingFrameOptions,
+            )
+            followingPitchProperty.fallback = if (isFramingManeuverProperty.get()) {
+                ZERO_PITCH
+            } else {
+                options.followingFrameOptions.defaultPitch
+            }
+
+            pointsToFrameOnCurrentStep = options.followingFrameOptions.framingStrategy
+                .getPointsToFrameOnCurrentStep(
+                    routeProgress,
+                    options.followingFrameOptions,
+                    averageIntersectionDistancesOnRoute,
+                )
+
+            pointsToFrameAfterCurrentStep = options.followingFrameOptions.framingStrategy
+                .getPointsToFrameAfterCurrentManeuver(
+                    routeProgress,
+                    options.followingFrameOptions,
+                    postManeuverFramingPoints,
+                )
+
+            overviewViewportDataSource.onRouteProgressChanged(routeProgress)
+        } ?: run {
+            logE(
+                "You're calling #onRouteProgressChanged with empty leg or step progress.",
+                LOG_CATEGORY,
+            )
+            clearProgressData()
+        }
     }
 
     private fun clearProgressData() {

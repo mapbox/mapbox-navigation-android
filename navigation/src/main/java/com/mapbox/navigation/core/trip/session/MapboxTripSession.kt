@@ -717,9 +717,7 @@ internal class MapboxTripSession(
                     }
                 }
             }
-        PerformanceTracker.trackPerformance("MapboxTripSession#updateRouteProgress") {
-            updateRouteProgress(routeProgress, triggerObserver)
-        }
+        updateRouteProgress(routeProgress, triggerObserver)
         triggerVoiceInstructionEvent(routeProgress, status)
         isOffRoute = tripStatus.navigationStatus.routeState == RouteState.OFF_ROUTE
     }
