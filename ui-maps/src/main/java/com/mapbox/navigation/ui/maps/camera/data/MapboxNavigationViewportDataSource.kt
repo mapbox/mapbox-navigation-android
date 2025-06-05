@@ -16,6 +16,7 @@ import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.toCameraOptions
 import com.mapbox.maps.util.isEmpty
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.utils.isSameRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -358,7 +359,9 @@ class MapboxNavigationViewportDataSource internal constructor(
     fun evaluate() {
         mapsSizeReadyCancellable?.cancel()
         mapsSizeReadyCancellable = mapSizeReadyCallbackHelper.onMapSizeInitialized {
-            evaluateImpl()
+            PerformanceTracker.trackPerformance("MapboxNavigationViewportDataSource#evaluateImpl") {
+                evaluateImpl()
+            }
         }
     }
 
@@ -424,10 +427,12 @@ class MapboxNavigationViewportDataSource internal constructor(
      * @see [evaluate]
      */
     fun onRouteChanged(route: NavigationRoute) {
-        if (!route.directionsRoute.isSameRoute(navigationRoute?.directionsRoute)) {
-            clearRouteData()
-            this.navigationRoute = route
-            calculateRouteData(route)
+        PerformanceTracker.trackPerformance("MapboxNavigationViewportDataSource#onRouteChanged") {
+            if (!route.directionsRoute.isSameRoute(navigationRoute?.directionsRoute)) {
+                clearRouteData()
+                this.navigationRoute = route
+                calculateRouteData(route)
+            }
         }
     }
 
@@ -445,6 +450,14 @@ class MapboxNavigationViewportDataSource internal constructor(
      * @see [evaluate]
      */
     fun onRouteProgressChanged(routeProgress: RouteProgress) {
+        PerformanceTracker.trackPerformance(
+            "MapboxNavigationViewportDataSource#onRouteProgressChanged",
+        ) {
+            onRouteProgressChangedInternal(routeProgress)
+        }
+    }
+
+    private fun onRouteProgressChangedInternal(routeProgress: RouteProgress) {
         this.routeProgress = routeProgress
         val currentRoute = this.navigationRoute
         if (currentRoute == null) {

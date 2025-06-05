@@ -10,6 +10,7 @@ import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.factory.RoadFactory
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.getUpdatedObjectsAhead
 import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory.buildTripNotificationState
+import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.route.refreshNativePeer
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
@@ -350,7 +351,9 @@ internal class MapboxTripSession(
     private val navigatorObserver = object : NavigatorObserver {
         override fun onStatus(origin: NavigationStatusOrigin, status: NavigationStatus) {
             try {
-                processNativeStatus(status)
+                PerformanceTracker.trackPerformance("NavigatorObserver#onStatus") {
+                    processNativeStatus(status)
+                }
             } catch (error: Throwable) {
                 logE(LOG_CATEGORY) {
                     "Error processing native status update: origin=$origin, status=$status.\n" +
@@ -635,8 +638,10 @@ internal class MapboxTripSession(
     }
 
     private fun updateLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
-        this.locationMatcherResult = locationMatcherResult
-        locationObservers.forEach { it.onNewLocationMatcherResult(locationMatcherResult) }
+        PerformanceTracker.trackPerformance("MapboxTripSession#updateLocationMatcherResult") {
+            this.locationMatcherResult = locationMatcherResult
+            locationObservers.forEach { it.onNewLocationMatcherResult(locationMatcherResult) }
+        }
     }
 
     @OptIn(ExperimentalMapboxNavigationAPI::class)
@@ -651,12 +656,19 @@ internal class MapboxTripSession(
         }
 
         val tripStatus = status.getTripStatusFrom(primaryRoute)
-        val enhancedLocation = tripStatus.navigationStatus.location.toLocation()
-        val keyPoints = tripStatus.navigationStatus.keyPoints.toLocations()
-        val road = RoadFactory.buildRoadObject(tripStatus.navigationStatus)
-        updateLocationMatcherResult(
-            tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints, road),
-        )
+        val locationMatcherResult = PerformanceTracker.trackPerformance(
+            "MapboxTripSession#processNativeStatus-prepare-location-matcher-result",
+        ) {
+            val enhancedLocation = tripStatus.navigationStatus.location.toLocation()
+            val keyPoints = tripStatus.navigationStatus.keyPoints.toLocations()
+            val road = RoadFactory.buildRoadObject(tripStatus.navigationStatus)
+            tripStatus.getLocationMatcherResult(
+                enhancedLocation,
+                keyPoints,
+                road,
+            )
+        }
+        updateLocationMatcherResult(locationMatcherResult)
         zLevel = status.layer
 
         // we should skip RouteProgress, BannerInstructions, isOffRoute state updates while
@@ -678,31 +690,41 @@ internal class MapboxTripSession(
         }
         val remainingWaypoints = tripStatus.calculateRemainingWaypoints()
         val latestBannerInstructionsWrapper = bannerInstructionEvent.latestInstructionWrapper
-        val upcomingRoadObjects = roadObjects.getUpdatedObjectsAhead(
-            tripStatus.navigationStatus.upcomingRouteAlertUpdates,
-        )
-        val routeProgress = tripStatus.route?.let {
-            val currentLegDestination = tripStatus.getCurrentLegDestination(it)
-            getRouteProgressFrom(
-                it,
-                tripStatus.navigationStatus,
-                remainingWaypoints,
-                latestBannerInstructionsWrapper?.latestBannerInstructions,
-                latestBannerInstructionsWrapper?.latestInstructionIndex,
-                lastVoiceInstruction,
-                upcomingRoadObjects,
-                currentLegDestination,
-            ).also { routeProgress ->
-                if (routeProgress == null) {
-                    logD(
-                        "route progress update dropped - " +
-                            "currentPrimaryRoute ID: ${primaryRoute?.id}; " +
-                            "currentState: ${status.routeState}",
-                        LOG_CATEGORY,
-                    )
+        val upcomingRoadObjects =
+            PerformanceTracker.trackPerformance(
+                "MapboxTripSession#processNativeStatus-getUpdatedObjectsAhead",
+            ) {
+                roadObjects.getUpdatedObjectsAhead(
+                    tripStatus.navigationStatus.upcomingRouteAlertUpdates,
+                )
+            }
+        val routeProgress =
+            PerformanceTracker.trackPerformance(
+                "MapboxTripSession#processNativeStatus-create-route-progress",
+            ) {
+                tripStatus.route?.let {
+                    val currentLegDestination = tripStatus.getCurrentLegDestination(it)
+                    getRouteProgressFrom(
+                        it,
+                        tripStatus.navigationStatus,
+                        remainingWaypoints,
+                        latestBannerInstructionsWrapper?.latestBannerInstructions,
+                        latestBannerInstructionsWrapper?.latestInstructionIndex,
+                        lastVoiceInstruction,
+                        upcomingRoadObjects,
+                        currentLegDestination,
+                    ).also { routeProgress ->
+                        if (routeProgress == null) {
+                            logD(
+                                "route progress update dropped - " +
+                                    "currentPrimaryRoute ID: ${primaryRoute?.id}; " +
+                                    "currentState: ${status.routeState}",
+                                LOG_CATEGORY,
+                            )
+                        }
+                    }
                 }
             }
-        }
         updateRouteProgress(routeProgress, triggerObserver)
         triggerVoiceInstructionEvent(routeProgress, status)
         isOffRoute = tripStatus.navigationStatus.routeState == RouteState.OFF_ROUTE
@@ -713,17 +735,29 @@ internal class MapboxTripSession(
         shouldTriggerBannerInstructionsObserver: Boolean,
     ) {
         routeProgress = progress
-        tripService.updateNotification(buildTripNotificationState(progress))
+        PerformanceTracker.trackPerformance(
+            "MapboxTripSession#updateRouteProgress-update-notification",
+        ) {
+            tripService.updateNotification(buildTripNotificationState(progress))
+        }
         progress?.let { progress ->
             logD(
                 "dispatching progress update; state: ${progress.currentState}",
                 LOG_CATEGORY,
             )
-            routeProgressObservers.forEach { it.onRouteProgressChanged(progress) }
+            PerformanceTracker.trackPerformance(
+                "MapboxTripSession#updateRouteProgress-dispatch-route-progress-update",
+            ) {
+                routeProgressObservers.forEach { it.onRouteProgressChanged(progress) }
+            }
             if (shouldTriggerBannerInstructionsObserver) {
                 checkBannerInstructionEvent { bannerInstruction ->
-                    bannerInstructionsObservers.forEach {
-                        it.onNewBannerInstructions(bannerInstruction)
+                    PerformanceTracker.trackPerformance(
+                        "MapboxTripSession#updateRouteProgress-dispatch-banner-instruction",
+                    ) {
+                        bannerInstructionsObservers.forEach {
+                            it.onNewBannerInstructions(bannerInstruction)
+                        }
                     }
                 }
             }

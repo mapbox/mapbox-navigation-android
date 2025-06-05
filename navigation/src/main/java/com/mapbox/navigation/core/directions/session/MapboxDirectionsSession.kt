@@ -4,6 +4,7 @@ import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
+import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.route.routeOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
@@ -57,8 +58,10 @@ internal class MapboxDirectionsSession(
             routesUpdatedResult = it
         }
 
-        onSetNavigationRoutesFinishedObservers.forEach {
-            it.onRoutesChanged(result)
+        PerformanceTracker.trackPerformance("MapboxDirectionsSession-dispatch-onRoutesChanged") {
+            onSetNavigationRoutesFinishedObservers.forEach {
+                it.onRoutesChanged(result)
+            }
         }
     }
 
