@@ -1,5 +1,24 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.9.3 - 05 June, 2025
+#### Features
+- Filter inaccurate wheel speed for Dead Reckoning to reduce possible location jumps in case of wheel slippage 
+- Support strict road heading to avoid drift on turns with 1Hz by ability to disable heading interpolation for keypoints and road heading policy. 
+* Added experimental `NavigationPerformance#performanceTracingEnabled` which enables/disables internal performance trace sections.
+
+#### Bug fixes and improvements
+- Fixed a bug where alternative routes from `RoutesUpdatedResult#ignoredRoutes` were set to `RoutesUpdatedResult#navigationRoutes` after the first route progress update. 
+- Improved behavior on roundabouts: avoid cases when the vehicle position circles around the roundabout in case of matching errors 
+- Fixed incorrect route request with user added charging 
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.12.3` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.12.3))
+- Mapbox Navigation Native `v324.12.3`
+- Mapbox Core Common `v24.12.3`
+- Mapbox Java `v7.4.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.4.0))
+
+
 ## Navigation SDK Core Framework 3.9.2 - 23 May, 2025
 
 ### Mapbox dependencies
