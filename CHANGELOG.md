@@ -1,5 +1,35 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.10.0-rc.1 - 06 June, 2025
+#### Features
+- Introduced performance trace points for navigation 
+- Added filtering inaccurate wheel speed for Dead Reckoning to reduce possible location jumps in case of wheel slippage 
+- Added provide the latest tiles version when tileset descriptors requested with empty version. 
+- Added support for delta updates for routing and ADAS tiles 
+- Added reading of life-traffic-service and reporting them to ADASIS traffic events 
+- Improved heading interpolation 
+
+#### Bug fixes and improvements
+- Fixed incorrect route request with user added charging station 
+- Fixed incorrect edge expansion during simulation by teleporting 
+- Improved behavior on roundabouts: avoid cases when the vehicle position circles around the roundabout in case of matching errors 
+- Fixed re-enabling route refresh after leg change 
+- Removed caching of mapbox access token 
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.13.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.13.0-rc.1))
+- Mapbox Navigation Native `v324.13.0-rc.1`
+- Mapbox Core Common `v24.13.0-rc.1`
+- Mapbox Java `v7.4.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.4.0))
+
+
 ## Navigation SDK Core Framework 3.10.0-beta.2 - 30 May, 2025
 #### Features
 - Now `SensorData.Weather` can be instantiated with a list of `@WeatherCondition.Type` or detailed weather information represented by `@WeatherDetail.Type`. 
