@@ -7,4 +7,10 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * required by various middleware components.
  */
 @ExperimentalPreviewMapboxNavigationAPI
-interface MiddlewareContext
+interface MiddlewareContext {
+
+    @ExperimentalPreviewMapboxNavigationAPI
+    object Empty : MiddlewareContext {
+        override fun toString(): String = "MiddlewareContext.Empty"
+    }
+}

@@ -362,6 +362,10 @@ package com.mapbox.navigation.base.middleware {
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public interface MiddlewareContext {
   }
 
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static final class MiddlewareContext.Empty implements com.mapbox.navigation.base.middleware.MiddlewareContext {
+    field public static final com.mapbox.navigation.base.middleware.MiddlewareContext.Empty INSTANCE;
+  }
+
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public fun interface MiddlewareContextFactory<Input extends com.mapbox.navigation.base.middleware.MiddlewareContext, Output extends com.mapbox.navigation.base.middleware.MiddlewareContext> {
     method public Output build(Input);
   }
