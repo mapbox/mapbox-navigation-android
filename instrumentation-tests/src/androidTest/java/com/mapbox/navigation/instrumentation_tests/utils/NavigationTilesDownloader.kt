@@ -28,7 +28,12 @@ class NavigationTilesDownloader {
     }
 
     @Test
-    fun run() {
+    fun runWithAdas() = run(includeAdas = true)
+
+    @Test
+    fun runWithoutAdas() = run(includeAdas = false)
+
+    private fun run(includeAdas: Boolean) {
         val tileStoreDir = File(context.filesDir, ".mapbox/tile_store").apply {
             deleteRecursively()
             mkdirs()
@@ -38,7 +43,7 @@ class NavigationTilesDownloader {
             val region = getDownloadPolygon()
             if (region != null) {
                 try {
-                    loadRegion(navigation, region)
+                    loadRegion(navigation, region, includeAdas)
                     println("Navigation tiles have been downloaded")
                 } catch (e: Exception) {
                     System.err.println("Failed to download navigation tiles: ${e.message}")
@@ -100,8 +105,12 @@ class NavigationTilesDownloader {
         }
     }
 
-    private suspend fun loadRegion(navigation: MapboxNavigation, region: Geometry) {
-        val navTilesetDescriptor = navigation.tilesetDescriptorFactory.getLatest()
+    private suspend fun loadRegion(
+        navigation: MapboxNavigation,
+        region: Geometry,
+        includeAdas: Boolean,
+    ) {
+        val navTilesetDescriptor = navigation.tilesetDescriptorFactory.getLatest(includeAdas)
 
         val tileRegionLoadOptions = TileRegionLoadOptions.Builder()
             .geometry(region)

@@ -84,7 +84,7 @@ class TilesDescriptorFactoryTest {
         )
 
         verify {
-            nativeFactoryWrapper.build("$DATASET/$PROFILE", VERSION)
+            nativeFactoryWrapper.build("$DATASET/$PROFILE", VERSION, ADASIS)
         }
     }
 
@@ -93,7 +93,7 @@ class TilesDescriptorFactoryTest {
         tilesetDescriptorFactory.build()
 
         verify {
-            nativeFactoryWrapper.build("$OPTIONS_DATASET/$OPTIONS_PROFILE", OPTIONS_VERSION)
+            nativeFactoryWrapper.build("$OPTIONS_DATASET/$OPTIONS_PROFILE", OPTIONS_VERSION, ADASIS)
         }
     }
 
@@ -101,6 +101,7 @@ class TilesDescriptorFactoryTest {
         private const val DATASET = "dataset"
         private const val PROFILE = "profile"
         private const val VERSION = "version"
+        private const val ADASIS = false
 
         private const val OPTIONS_DATASET = "options_dataset"
         private const val OPTIONS_PROFILE = "options_profile"
