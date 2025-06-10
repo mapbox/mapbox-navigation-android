@@ -4,13 +4,12 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.Value
 import com.mapbox.common.toValue
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
-import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
-import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.Layer
 import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
@@ -442,22 +441,22 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
                             else -> {
                                 val maskingTrimCommands = if (index == 0) {
                                     listOf(
-                                        createTrimOffsetCommand(
+                                        createTrimEndCommand(
                                             routeSetValue.routeLineMaskingLayerDynamicData,
                                             MASKING_LAYER_CASING,
                                             style,
                                         ),
-                                        createTrimOffsetCommand(
+                                        createTrimEndCommand(
                                             routeSetValue.routeLineMaskingLayerDynamicData,
                                             MASKING_LAYER_MAIN,
                                             style,
                                         ),
-                                        createTrimOffsetCommand(
+                                        createTrimEndCommand(
                                             routeSetValue.routeLineMaskingLayerDynamicData,
                                             MASKING_LAYER_TRAFFIC,
                                             style,
                                         ),
-                                        createTrimOffsetCommand(
+                                        createTrimEndCommand(
                                             routeSetValue.routeLineMaskingLayerDynamicData,
                                             MASKING_LAYER_RESTRICTED,
                                             style,
@@ -466,7 +465,7 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
                                 } else {
                                     listOf()
                                 }
-                                getTrimOffsetCommands(
+                                getTrimEndCommands(
                                     style,
                                     sourceKeyFeaturePair.first,
                                     routeLineData,
@@ -1080,14 +1079,14 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         }
     }
 
-    private fun updateTrimOffset(
+    private fun updateTrimEnd(
         layerId: String,
-        expression: Expression?,
+        value: Value?,
     ): (Style) -> Unit = { style: Style ->
-        ifNonNull(expression) { expression ->
+        ifNonNull(value) { expression ->
             style.setStyleLayerProperty(
                 layerId,
-                "line-trim-offset",
+                "line-trim-end",
                 expression,
             )
         }
@@ -1128,7 +1127,7 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         }
     }
 
-    private fun getTrimOffsetCommands(
+    private fun getTrimEndCommands(
         style: Style,
         routeLineSourceKey: RouteLineSourceKey?,
         routeLineData: RouteLineData,
@@ -1137,20 +1136,20 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         val trailLayerIds = trailCasingLayerIds.plus(trailLayerIds)
         return sourceLayerMap[routeLineSourceKey]?.filter { !trailLayerIds.contains(it) }
             ?.map {
-                createTrimOffsetCommand(routeLineData.dynamicData, it, style)
+                createTrimEndCommand(routeLineData.dynamicData, it, style)
             } ?: listOf()
     }
 
-    private fun createTrimOffsetCommand(
+    private fun createTrimEndCommand(
         dynamicData: RouteLineDynamicData?,
         layerId: String,
         style: Style,
     ): () -> Unit {
-        val expression = ifNonNull(dynamicData, dynamicData?.trimOffset?.offset) { _, offset ->
-            literal(listOf(0.0, offset))
+        val value = ifNonNull(dynamicData, dynamicData?.trimOffset?.offset) { _, offset ->
+            Value.valueOf(offset)
         }
 
-        return { updateTrimOffset(layerId, expression)(style) }
+        return { updateTrimEnd(layerId, value)(style) }
     }
 
     private suspend fun getGradientUpdateCommands(

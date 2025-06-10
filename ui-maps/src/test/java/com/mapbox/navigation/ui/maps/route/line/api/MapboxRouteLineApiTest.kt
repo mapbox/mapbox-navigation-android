@@ -1331,6 +1331,7 @@ class MapboxRouteLineApiTest {
 
         val result = MapboxRouteLineApi(options).getRouteLineDynamicDataForMaskingLayers(
             segments,
+            null,
             multilegRouteWithOverlap.navigationRoute.directionsRoute.distance(),
             1,
         )
@@ -1426,6 +1427,27 @@ class MapboxRouteLineApiTest {
     }
 
     @Test
+    fun getRouteLineDynamicDataForMaskingLayersVanishingTest() = coroutineRule.runBlockingTest {
+        val options = MapboxRouteLineApiOptions.Builder()
+            .build()
+        val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
+            multilegRouteWithOverlap.navigationRoute,
+            listOf(),
+            true,
+            options,
+        )
+
+        val result = MapboxRouteLineApi(options).getRouteLineDynamicDataForMaskingLayers(
+            segments,
+            0.2,
+            multilegRouteWithOverlap.navigationRoute.directionsRoute.distance(),
+            1,
+        )
+
+        assertEquals(0.2, result.trimOffset?.offset)
+    }
+
+    @Test
     fun getRouteLineDynamicDataForMaskingLayersForRouteProgressTest() =
         coroutineRule.runBlockingTest {
             val expectedTrafficExpressionContents = listOf(
@@ -1514,6 +1536,7 @@ class MapboxRouteLineApiTest {
 
             val result = api.getRouteLineDynamicDataForMaskingLayers(
                 multilegRouteWithOverlap.navigationRoute,
+                null,
                 routeProgress.currentLegProgress!!,
             )!!
 
@@ -1610,6 +1633,26 @@ class MapboxRouteLineApiTest {
         }
 
     @Test
+    fun getRouteLineDynamicDataForMaskingLayersForRouteProgressVanishingTest() =
+        coroutineRule.runBlockingTest {
+            val options = MapboxRouteLineApiOptions.Builder()
+                .build()
+            val routeProgress = mockRouteProgress(multilegRouteWithOverlap.navigationRoute)
+            every { routeProgress.currentLegProgress!!.legIndex } returns 1
+            every { routeProgress.currentRouteGeometryIndex } returns 43
+            val api = MapboxRouteLineApi(options)
+            api.setNavigationRoutes(listOf(multilegRouteWithOverlap.navigationRoute))
+
+            val result = api.getRouteLineDynamicDataForMaskingLayers(
+                multilegRouteWithOverlap.navigationRoute,
+                0.1,
+                routeProgress.currentLegProgress!!,
+            )!!
+
+            assertEquals(0.1, result.trimOffset?.offset)
+        }
+
+    @Test
     fun getRouteLineDynamicDataForMaskingLayersForRouteProgressWhenSingleLegRouteTest() {
         val options = MapboxRouteLineApiOptions.Builder().build()
         val routeProgress = mockRouteProgress(shortRoute.navigationRoute)
@@ -1617,6 +1660,7 @@ class MapboxRouteLineApiTest {
 
         val result = MapboxRouteLineApi(options).getRouteLineDynamicDataForMaskingLayers(
             shortRoute.navigationRoute,
+            null,
             routeProgress.currentLegProgress!!,
         )
 
@@ -1631,6 +1675,7 @@ class MapboxRouteLineApiTest {
 
         val result = MapboxRouteLineApi(options).getRouteLineDynamicDataForMaskingLayers(
             shortRoute.navigationRoute,
+            null,
             routeProgress.currentLegProgress!!,
         )
 
