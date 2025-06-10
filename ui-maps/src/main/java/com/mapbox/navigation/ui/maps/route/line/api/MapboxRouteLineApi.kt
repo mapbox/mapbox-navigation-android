@@ -744,8 +744,10 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                         activeLegIndex = currentLegIndex
 
                         val (maskingLayerData, routeLineData) = if (legChange) {
+                            val vanishingOffset = vanishingRouteLine?.vanishPointOffset ?: 0.0
                             val maskingLayerData = getRouteLineDynamicDataForMaskingLayers(
                                 currentPrimaryRoute,
+                                vanishingOffset,
                                 currentLegProgress,
                             )
                             val routeLineData =
@@ -759,7 +761,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                                         primaryRouteDistance =
                                         currentPrimaryRoute.directionsRoute.distance(),
                                         vanishingPointOffset =
-                                        vanishingRouteLine?.vanishPointOffset ?: 0.0,
+                                        vanishingOffset,
                                         legIndex = activeLegIndex,
                                     )
                                 } else {
@@ -807,6 +809,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
 
     internal fun getRouteLineDynamicDataForMaskingLayers(
         segments: List<RouteLineExpressionData>,
+        vanishingOffset: Double?,
         distance: Double,
         legIndex: Int,
     ): RouteLineDynamicData {
@@ -903,6 +906,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
             mainExpCommandHolder,
             casingExpApplier,
             trafficExpProvider,
+            trimOffset = vanishingOffset?.let { RouteLineTrimOffset(it) },
             restrictedSectionExpressionCommandHolder = restrictedExpCommandHolder,
             trailExpressionCommandHolder = trailExpCommandHolder,
             trailCasingExpressionCommandHolder = trailCasingExpCommandHolder,
@@ -924,6 +928,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
      */
     internal fun getRouteLineDynamicDataForMaskingLayers(
         route: NavigationRoute,
+        vanishingOffset: Double?,
         currentLegProgress: RouteLegProgress,
     ): RouteLineDynamicData? {
         val numLegs = route.directionsRoute.legs()?.size ?: 0
@@ -931,6 +936,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         return if (route.isMultiLeg() && legIndex < numLegs) {
             getRouteLineDynamicDataForMaskingLayers(
                 routeLineExpressionData,
+                vanishingOffset,
                 route.directionsRoute.distance(),
                 legIndex,
             )
@@ -1380,6 +1386,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         val maskingLayerData = if (navigationRoute.isMultiLeg()) {
             getRouteLineDynamicDataForMaskingLayers(
                 routeLineExpressionData,
+                vanishingPointOffset,
                 navigationRoute.directionsRoute.distance(),
                 legIndex,
             )

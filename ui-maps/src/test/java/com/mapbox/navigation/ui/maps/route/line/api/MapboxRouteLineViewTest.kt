@@ -14,7 +14,6 @@ import com.mapbox.maps.Style
 import com.mapbox.maps.StyleObjectInfo
 import com.mapbox.maps.StylePropertyValue
 import com.mapbox.maps.StylePropertyValueKind
-import com.mapbox.maps.extension.style.expressions.dsl.generated.literal
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.generated.BackgroundLayer
 import com.mapbox.maps.extension.style.layers.generated.LineLayer
@@ -1399,9 +1398,9 @@ class MapboxRouteLineViewTest {
         mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
         mockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
         mockkObject(MapboxRouteLineUtils)
-        val expectedRoute1Expression = literal(listOf(0.0, 9.9))
-        val expectedRoute2Expression = literal(listOf(0.0, 0.0))
-        val expectedRoute3Expression = literal(listOf(0.0, 0.1))
+        val expectedRoute1Expression = Value.valueOf(9.9)
+        val expectedRoute2Expression = Value.valueOf(0.0)
+        val expectedRoute3Expression = Value.valueOf(0.1)
         val options = MapboxRouteLineViewOptions.Builder(ctx).build()
         val primaryRouteFeatureCollection =
             FeatureCollection.fromFeatures(listOf(getEmptyFeature("1")))
@@ -1936,42 +1935,42 @@ class MapboxRouteLineViewTest {
         verify(exactly = 0) {
             style.setStyleLayerProperty(
                 LAYER_GROUP_1_TRAIL_CASING,
-                "line-trim-offset",
+                "line-trim-end",
                 expectedRoute1Expression,
             )
         }
         verify(exactly = 0) {
             style.setStyleLayerProperty(
                 LAYER_GROUP_1_TRAIL,
-                "line-trim-offset",
+                "line-trim-end",
                 expectedRoute1Expression,
             )
         }
         verify {
             style.setStyleLayerProperty(
                 LAYER_GROUP_1_CASING,
-                "line-trim-offset",
+                "line-trim-end",
                 expectedRoute1Expression,
             )
         }
         verify {
             style.setStyleLayerProperty(
                 LAYER_GROUP_1_MAIN,
-                "line-trim-offset",
+                "line-trim-end",
                 expectedRoute1Expression,
             )
         }
         verify {
             style.setStyleLayerProperty(
                 LAYER_GROUP_1_TRAFFIC,
-                "line-trim-offset",
+                "line-trim-end",
                 expectedRoute1Expression,
             )
         }
         verify {
             style.setStyleLayerProperty(
                 LAYER_GROUP_1_RESTRICTED,
-                "line-trim-offset",
+                "line-trim-end",
                 expectedRoute1Expression,
             )
         }
@@ -1979,42 +1978,42 @@ class MapboxRouteLineViewTest {
         verify(exactly = 0) {
             style.setStyleLayerProperty(
                 LAYER_GROUP_2_TRAIL_CASING,
-                "line-trim-offset",
+                "line-trim-end",
                 expectedRoute2Expression,
             )
         }
         verify(exactly = 0) {
             style.setStyleLayerProperty(
                 LAYER_GROUP_2_TRAIL,
-                "line-trim-offset",
+                "line-trim-end",
                 expectedRoute2Expression,
             )
         }
         verify {
             style.setStyleLayerProperty(
                 LAYER_GROUP_2_CASING,
-                "line-trim-offset",
+                "line-trim-end",
                 expectedRoute2Expression,
             )
         }
         verify {
             style.setStyleLayerProperty(
                 LAYER_GROUP_2_MAIN,
-                "line-trim-offset",
+                "line-trim-end",
                 expectedRoute2Expression,
             )
         }
         verify {
             style.setStyleLayerProperty(
                 LAYER_GROUP_2_TRAFFIC,
-                "line-trim-offset",
+                "line-trim-end",
                 expectedRoute2Expression,
             )
         }
         verify {
             style.setStyleLayerProperty(
                 LAYER_GROUP_2_RESTRICTED,
-                "line-trim-offset",
+                "line-trim-end",
                 expectedRoute2Expression,
             )
         }
@@ -2022,42 +2021,42 @@ class MapboxRouteLineViewTest {
         verify(exactly = 0) {
             style.setStyleLayerProperty(
                 LAYER_GROUP_3_TRAIL_CASING,
-                "line-trim-offset",
+                "line-trim-end",
                 expectedRoute3Expression,
             )
         }
         verify(exactly = 0) {
             style.setStyleLayerProperty(
                 LAYER_GROUP_3_TRAIL,
-                "line-trim-offset",
+                "line-trim-end",
                 expectedRoute3Expression,
             )
         }
         verify {
             style.setStyleLayerProperty(
                 LAYER_GROUP_3_CASING,
-                "line-trim-offset",
+                "line-trim-end",
                 expectedRoute3Expression,
             )
         }
         verify {
             style.setStyleLayerProperty(
                 LAYER_GROUP_3_MAIN,
-                "line-trim-offset",
+                "line-trim-end",
                 expectedRoute3Expression,
             )
         }
         verify {
             style.setStyleLayerProperty(
                 LAYER_GROUP_3_TRAFFIC,
-                "line-trim-offset",
+                "line-trim-end",
                 expectedRoute3Expression,
             )
         }
         verify {
             style.setStyleLayerProperty(
                 LAYER_GROUP_3_RESTRICTED,
-                "line-trim-offset",
+                "line-trim-end",
                 expectedRoute3Expression,
             )
         }
@@ -2065,35 +2064,35 @@ class MapboxRouteLineViewTest {
         verify(exactly = 0) {
             style.setStyleLayerProperty(
                 MASKING_LAYER_TRAIL_CASING,
-                "line-trim-offset",
+                "line-trim-end",
                 expectedRoute1Expression,
             )
         }
         verify(exactly = 0) {
             style.setStyleLayerProperty(
                 MASKING_LAYER_TRAIL,
-                "line-trim-offset",
+                "line-trim-end",
                 expectedRoute1Expression,
             )
         }
         verify {
             style.setStyleLayerProperty(
                 MASKING_LAYER_CASING,
-                "line-trim-offset",
+                "line-trim-end",
                 expectedRoute1Expression,
             )
         }
         verify {
             style.setStyleLayerProperty(
                 MASKING_LAYER_MAIN,
-                "line-trim-offset",
+                "line-trim-end",
                 expectedRoute1Expression,
             )
         }
         verify {
             style.setStyleLayerProperty(
                 MASKING_LAYER_TRAFFIC,
-                "line-trim-offset",
+                "line-trim-end",
                 expectedRoute1Expression,
             )
         }
