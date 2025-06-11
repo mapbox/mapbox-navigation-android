@@ -26,4 +26,5 @@ object MapboxOptionsUtil {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 object NavSDKServices {
     const val ISOCHRONE = "ISOCHRONE"
+    const val CHM = "CHM"
 }
