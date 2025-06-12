@@ -1,5 +1,22 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.9.4 - 12 June, 2025
+#### Features
+
+
+#### Bug fixes and improvements
+- Fixed an issue where after a reroute the vanishing point on the route line might have been ahead of the actual vehicle's position. 
+- Improved road graph calibration in Dead Reckoning for more accurate localization in tunnel and urban canyon. 
+- Fixed corner cases when Dead Reckoning cannot use the road graph for correction; improved wheel speed filtering for a more accurate trajectory. 
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.12.4` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.12.4))
+- Mapbox Navigation Native `v324.12.4`
+- Mapbox Core Common `v24.12.4`
+- Mapbox Java `v7.4.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.4.0))
+
+
 ## Navigation SDK Core Framework 3.9.3 - 05 June, 2025
 #### Features
 - Filter inaccurate wheel speed for Dead Reckoning to reduce possible location jumps in case of wheel slippage 
