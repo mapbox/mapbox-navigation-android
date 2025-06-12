@@ -8,12 +8,14 @@ ext {
       carMinSdkVersion        : 23
   ]
 
+  def mapboxSdkVersionSuffix = '14.0-SNAPSHOT-06-02--04-30.git-bf394dd'
+
   // Navigation Native CI can run SDK CI downstream with forced Navigation Native version
   // in this case `FORCE_MAPBOX_NAVIGATION_NATIVE_VERSION` environment variable will contain
   // version which we should use in this build
   def mapboxNavigatorVersion = System.getenv("FORCE_MAPBOX_NAVIGATION_NATIVE_VERSION")
   if (mapboxNavigatorVersion == null || mapboxNavigatorVersion == '') {
-      mapboxNavigatorVersion = '324.14.0-SNAPSHOT-05-29--04-30.git-b874a6e'
+      mapboxNavigatorVersion = "324.${mapboxSdkVersionSuffix}"
   }
   if (!project.hasProperty("hasPrintedNavigatorVersion")) {
     println("Navigation Native version: " + mapboxNavigatorVersion)
@@ -21,11 +23,11 @@ ext {
   }
 
   version = [
-      mapboxMapSdk              : '11.14.0-SNAPSHOT-06-02--04-30.git-bf394dd',
+      mapboxMapSdk              : "11.${mapboxSdkVersionSuffix}",
       mapboxSdkServices         : '7.4.0',
       mapboxNavigator           : "${mapboxNavigatorVersion}",
-      mapboxCommonNative        : '24.14.0-SNAPSHOT-06-02--04-30.git-bf394dd',
-      mapboxNavSdkCpp           : '0.14.0-SNAPSHOT-06-02--04-30.git-bf394dd',
+      mapboxCommonNative        : "24.${mapboxSdkVersionSuffix}",
+      mapboxNavSdkCpp           : "0.${mapboxSdkVersionSuffix}",
       mapboxSearch              : '2.14.0-bf394dd-SNAPSHOT',
       mapboxBaseAndroid         : '0.11.0',
       androidXActivity          : '1.7.1',
