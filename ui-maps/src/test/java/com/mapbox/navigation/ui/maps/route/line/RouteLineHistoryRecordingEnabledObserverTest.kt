@@ -4,6 +4,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.internal.extensions.retrieveCompositeHistoryRecorder
+import com.mapbox.navigation.core.internal.extensions.retrieveCopilotHistoryRecorder
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -18,15 +19,20 @@ class RouteLineHistoryRecordingEnabledObserverTest {
 
     private val compositeRecorder = mockk<MapboxHistoryRecorder>(relaxed = true)
     private val manualRecorder = mockk<MapboxHistoryRecorder>(relaxed = true)
+    private val copilotRecorder = mockk<MapboxHistoryRecorder>(relaxed = true)
     private val recorderObserver = mockk<(MapboxHistoryRecorder?) -> Unit>(relaxed = true)
     private lateinit var observer: RouteLineHistoryRecordingEnabledObserver
 
     @Before
     fun setup() {
         every { mockMapboxNavigation.retrieveCompositeHistoryRecorder() } returns compositeRecorder
+        every { mockMapboxNavigation.retrieveCopilotHistoryRecorder() } returns copilotRecorder
         every { mockMapboxNavigation.historyRecorder } returns manualRecorder
         every { mockMapboxNavigation.navigationOptions } returns mockk {
             every { copilotOptions } returns mockk {
+                every { shouldRecordRouteLineEvents } returns false
+            }
+            every { historyRecorderOptions } returns mockk {
                 every { shouldRecordRouteLineEvents } returns false
             }
         }
@@ -35,10 +41,13 @@ class RouteLineHistoryRecordingEnabledObserverTest {
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     @Test
-    fun `onEnabled invoke recorder with composite observer if no handles enabled and copilot enabled`() {
+    fun `onEnabled invoke recorder with composite observer if no handles enabled and both enabled`() {
         val mockHandle = mockk<MapboxHistoryRecorder>()
         every { mockMapboxNavigation.navigationOptions } returns mockk {
             every { copilotOptions } returns mockk {
+                every { shouldRecordRouteLineEvents } returns true
+            }
+            every { historyRecorderOptions } returns mockk {
                 every { shouldRecordRouteLineEvents } returns true
             }
         }
@@ -49,16 +58,53 @@ class RouteLineHistoryRecordingEnabledObserverTest {
     }
 
     @Test
-    fun `onEnabled invoke recorder with manual observer if no handles enabled and copilot disabled`() {
+    fun `onEnabled invoke recorder with manual observer if no handles enabled and only manual enabled`() {
         val mockHandle = mockk<MapboxHistoryRecorder>()
         every { mockMapboxNavigation.navigationOptions } returns mockk {
             every { copilotOptions } returns mockk {
                 every { shouldRecordRouteLineEvents } returns false
             }
+            every { historyRecorderOptions } returns mockk {
+                every { shouldRecordRouteLineEvents } returns true
+            }
         }
         observer.onEnabled(mockHandle)
         verify {
             recorderObserver(manualRecorder)
+        }
+    }
+
+    @Test
+    fun `onEnabled invoke recorder with copilot observer if no handles enabled and only copilot enabled`() {
+        val mockHandle = mockk<MapboxHistoryRecorder>()
+        every { mockMapboxNavigation.navigationOptions } returns mockk {
+            every { copilotOptions } returns mockk {
+                every { shouldRecordRouteLineEvents } returns true
+            }
+            every { historyRecorderOptions } returns mockk {
+                every { shouldRecordRouteLineEvents } returns false
+            }
+        }
+        observer.onEnabled(mockHandle)
+        verify {
+            recorderObserver(copilotRecorder)
+        }
+    }
+
+    @Test
+    fun `onEnabled invoke recorder with null if no handles enabled and both disabled`() {
+        val mockHandle = mockk<MapboxHistoryRecorder>()
+        every { mockMapboxNavigation.navigationOptions } returns mockk {
+            every { copilotOptions } returns mockk {
+                every { shouldRecordRouteLineEvents } returns false
+            }
+            every { historyRecorderOptions } returns mockk {
+                every { shouldRecordRouteLineEvents } returns false
+            }
+        }
+        observer.onEnabled(mockHandle)
+        verify {
+            recorderObserver(null)
         }
     }
 

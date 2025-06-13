@@ -515,6 +515,9 @@ internal class RouteLineHistoryRecordingViewSenderTest {
                 every { copilotOptions } returns mockk {
                     every { shouldRecordRouteLineEvents } returns false
                 }
+                every { historyRecorderOptions } returns mockk {
+                    every { shouldRecordRouteLineEvents } returns true
+                }
             }
         }
         pusher.onAttached(mapboxNavigation)

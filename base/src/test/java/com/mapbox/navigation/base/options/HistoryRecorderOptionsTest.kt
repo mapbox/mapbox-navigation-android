@@ -9,6 +9,7 @@ class HistoryRecorderOptionsTest :
 
     override fun getFilledUpBuilder() = HistoryRecorderOptions.Builder()
         .fileDirectory("/history/path")
+        .shouldRecordRouteLineEvents(true)
 
     @Test
     override fun trigger() {

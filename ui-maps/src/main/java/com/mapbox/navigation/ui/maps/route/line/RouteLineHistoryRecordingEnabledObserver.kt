@@ -5,6 +5,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.internal.extensions.HistoryRecordingEnabledObserver
 import com.mapbox.navigation.core.internal.extensions.retrieveCompositeHistoryRecorder
+import com.mapbox.navigation.core.internal.extensions.retrieveCopilotHistoryRecorder
 
 internal class RouteLineHistoryRecordingEnabledObserver(
     private val mapboxNavigation: MapboxNavigation,
@@ -18,12 +19,16 @@ internal class RouteLineHistoryRecordingEnabledObserver(
         val shouldStart = enabledHandles.isEmpty()
         enabledHandles.add(historyRecorderHandle)
         if (shouldStart) {
-            val recorder = if (
-                mapboxNavigation.navigationOptions.copilotOptions.shouldRecordRouteLineEvents
-            ) {
-                mapboxNavigation.retrieveCompositeHistoryRecorder()
-            } else {
-                mapboxNavigation.historyRecorder
+            val options = mapboxNavigation.navigationOptions
+            val bothRecordersEnabled = options.copilotOptions.shouldRecordRouteLineEvents &&
+                options.historyRecorderOptions.shouldRecordRouteLineEvents
+            val recorder = when {
+                bothRecordersEnabled -> mapboxNavigation.retrieveCompositeHistoryRecorder()
+                options.copilotOptions.shouldRecordRouteLineEvents ->
+                    mapboxNavigation.retrieveCopilotHistoryRecorder()
+                options.historyRecorderOptions.shouldRecordRouteLineEvents ->
+                    mapboxNavigation.historyRecorder
+                else -> null
             }
             compositeHistoryRecorderChangedObserver(recorder)
         }

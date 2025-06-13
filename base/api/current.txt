@@ -595,14 +595,17 @@ package com.mapbox.navigation.base.options {
 
   public final class HistoryRecorderOptions {
     method public String? getFileDirectory();
+    method public boolean getShouldRecordRouteLineEvents();
     method public com.mapbox.navigation.base.options.HistoryRecorderOptions.Builder toBuilder();
     property public final String? fileDirectory;
+    property public final boolean shouldRecordRouteLineEvents;
   }
 
   public static final class HistoryRecorderOptions.Builder {
     ctor public HistoryRecorderOptions.Builder();
     method public com.mapbox.navigation.base.options.HistoryRecorderOptions build();
     method public com.mapbox.navigation.base.options.HistoryRecorderOptions.Builder fileDirectory(String? filePath);
+    method public com.mapbox.navigation.base.options.HistoryRecorderOptions.Builder shouldRecordRouteLineEvents(boolean value);
   }
 
   public final class IncidentsOptions {
