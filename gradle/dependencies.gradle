@@ -8,7 +8,7 @@ ext {
       carMinSdkVersion        : 23
   ]
 
-  def mapboxSdkVersionSuffix = '14.0-SNAPSHOT-06-02--04-30.git-bf394dd'
+  def mapboxSdkVersionSuffix = '14.0-SNAPSHOT-06-13--04-30.git-ac5e36e'
 
   // Navigation Native CI can run SDK CI downstream with forced Navigation Native version
   // in this case `FORCE_MAPBOX_NAVIGATION_NATIVE_VERSION` environment variable will contain
@@ -28,7 +28,7 @@ ext {
       mapboxNavigator           : "${mapboxNavigatorVersion}",
       mapboxCommonNative        : "24.${mapboxSdkVersionSuffix}",
       mapboxNavSdkCpp           : "0.${mapboxSdkVersionSuffix}",
-      mapboxSearch              : '2.14.0-bf394dd-SNAPSHOT',
+      mapboxSearch              : '2.14.0-ac5e36e-SNAPSHOT',
       mapboxBaseAndroid         : '0.11.0',
       androidXActivity          : '1.7.1',
       androidXActivityCompose   : '1.9.2',

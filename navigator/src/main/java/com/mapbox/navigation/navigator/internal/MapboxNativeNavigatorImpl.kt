@@ -36,6 +36,7 @@ import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.GraphAccessor
 import com.mapbox.navigator.HistoryRecorderHandle
 import com.mapbox.navigator.InputsServiceHandle
+import com.mapbox.navigator.LaneSensorInfo
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorObserver
@@ -52,14 +53,14 @@ import com.mapbox.navigator.RoadObjectsStoreObserver
 import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteAlternativesControllerInterface
 import com.mapbox.navigator.RouterInterface
-import com.mapbox.navigator.SensorData
 import com.mapbox.navigator.SetRoutesParams
 import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.SetRoutesResult
 import com.mapbox.navigator.Telemetry
 import com.mapbox.navigator.TestingContext
 import com.mapbox.navigator.TilesConfig
-import com.mapbox.navigator.UpdateExternalSensorDataCallback
+import com.mapbox.navigator.VehicleType
+import com.mapbox.navigator.WeatherData
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.util.concurrent.CopyOnWriteArraySet
@@ -490,11 +491,16 @@ class MapboxNativeNavigatorImpl(
             destinationLocationRadiusInMeters,
         )
 
-    override fun updateExternalSensorData(
-        data: SensorData,
-        callback: UpdateExternalSensorDataCallback,
-    ) {
-        navigator.updateExternalSensorData(data, callback)
+    override fun updateLaneSensorInfo(data: LaneSensorInfo) {
+        inputsService.updateLaneSensorInfo(data)
+    }
+
+    override fun updateWeatherData(data: WeatherData) {
+        inputsService.updateWeatherData(data)
+    }
+
+    override fun setVehicleType(type: VehicleType) {
+        navigator.config().mutableSettings().setVehicleType(type)
     }
 
     override fun setAdasisMessageCallback(

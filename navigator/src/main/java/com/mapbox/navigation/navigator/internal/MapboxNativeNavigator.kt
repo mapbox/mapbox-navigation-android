@@ -20,6 +20,7 @@ import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.GraphAccessorInterface
 import com.mapbox.navigator.InputsServiceHandleInterface
+import com.mapbox.navigator.LaneSensorInfo
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorObserver
@@ -33,13 +34,13 @@ import com.mapbox.navigator.RoadObjectsStoreObserver
 import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteAlternativesControllerInterface
 import com.mapbox.navigator.RouterInterface
-import com.mapbox.navigator.SensorData
 import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.SetRoutesResult
 import com.mapbox.navigator.Telemetry
 import com.mapbox.navigator.TestingContext
 import com.mapbox.navigator.TilesConfig
-import com.mapbox.navigator.UpdateExternalSensorDataCallback
+import com.mapbox.navigator.VehicleType
+import com.mapbox.navigator.WeatherData
 
 /**
  * Provides API to work with native Navigator class. Exposed for internal usage only.
@@ -196,9 +197,12 @@ interface MapboxNativeNavigator : RerouteEventsProvider {
      * The callback is scheduled using the `common::Scheduler` of the thread calling the `Navigator` constructor.
      *
      * @param data The current sensor data of user.
-     * @param callback Callback which is called when the async operation is completed
      */
-    fun updateExternalSensorData(data: SensorData, callback: UpdateExternalSensorDataCallback)
+    fun updateWeatherData(data: WeatherData)
+
+    fun updateLaneSensorInfo(data: LaneSensorInfo)
+
+    fun setVehicleType(type: VehicleType)
 
     /**
      * Sets a callback for ADASIS messages
