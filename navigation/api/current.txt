@@ -649,6 +649,7 @@ package com.mapbox.navigation.core.navigator {
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.common.TilesetDescriptor build(String? tilesDataset = null, boolean includeAdas);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.common.TilesetDescriptor build(boolean includeAdas);
     method public com.mapbox.common.TilesetDescriptor getLatest();
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.common.TilesetDescriptor getLatest(boolean includeAdas);
     method public com.mapbox.common.TilesetDescriptor getSpecificVersion(String tilesVersion);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.common.TilesetDescriptor getSpecificVersion(String tilesVersion, boolean includeAdas);
   }
