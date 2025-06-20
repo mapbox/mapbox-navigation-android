@@ -150,7 +150,7 @@ class VoiceInstructionsPlayerOptions private constructor(
         private var streamType: Int = AudioManager.STREAM_MUSIC
         private var ttsStreamType: Int = AudioManager.STREAM_MUSIC
         private var usage: Int = AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE
-        private var contentType: Int = AudioAttributes.CONTENT_TYPE_SPEECH
+        private var contentType: Int = AudioAttributes.CONTENT_TYPE_MUSIC
         private var useLegacyApi: Boolean = false
         private var checkIsLanguageAvailable: Boolean = true
         private var abandonFocusDelay: Long = 0L
