@@ -4,8 +4,8 @@ import androidx.annotation.RestrictTo
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.internal.extensions.HistoryRecordingEnabledObserver
 import com.mapbox.navigation.core.internal.history.HistoryFiles
+import com.mapbox.navigation.core.internal.history.HistoryRecordingEnabledObserver
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigator.HistoryRecorderHandleInterface
 import java.util.concurrent.CopyOnWriteArrayList

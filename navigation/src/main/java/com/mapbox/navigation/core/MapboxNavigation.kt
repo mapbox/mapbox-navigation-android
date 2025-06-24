@@ -66,7 +66,6 @@ import com.mapbox.navigation.core.internal.ReachabilityService
 import com.mapbox.navigation.core.internal.RouteProgressData
 import com.mapbox.navigation.core.internal.SdkInfoProvider
 import com.mapbox.navigation.core.internal.congestions.TrafficOverrideHandler
-import com.mapbox.navigation.core.internal.extensions.HistoryRecordingEnabledObserver
 import com.mapbox.navigation.core.internal.nativeNavigator
 import com.mapbox.navigation.core.internal.performance.RouteParsingHistoryTracker
 import com.mapbox.navigation.core.internal.router.GetRouteSignature
@@ -2135,18 +2134,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         observer: SetNavigationRoutesStartedObserver,
     ) {
         directionsSession.unregisterSetNavigationRoutesStartedObserver(observer)
-    }
-
-    internal fun registerHistoryRecordingEnabledObserver(
-        observer: HistoryRecordingEnabledObserver,
-    ) {
-        historyRecorders.forEach { it.registerHistoryRecordingEnabledObserver(observer) }
-    }
-
-    internal fun unregisterHistoryRecordingEnabledObserver(
-        observer: HistoryRecordingEnabledObserver,
-    ) {
-        historyRecorders.forEach { it.unregisterHistoryRecordingEnabledObserver(observer) }
     }
 
     private fun createHistoryRecorderHandles(

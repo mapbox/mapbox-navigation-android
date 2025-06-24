@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.core.internal.extensions.HistoryRecordingEnabledObserver
+import com.mapbox.navigation.core.internal.history.HistoryRecordingEnabledObserver
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.utils.internal.LoggerFrontend
 import com.mapbox.navigator.HistoryRecorderHandleInterface

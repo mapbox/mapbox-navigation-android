@@ -2,12 +2,12 @@ package com.mapbox.navigation.ui.maps.route.line
 
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
-import com.mapbox.navigation.core.internal.extensions.registerHistoryRecordingEnabledObserver
 import com.mapbox.navigation.core.internal.extensions.registerObserver
-import com.mapbox.navigation.core.internal.extensions.unregisterHistoryRecordingEnabledObserver
+import com.mapbox.navigation.core.internal.history.HistoryRecorderChooser
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineEvent
 import com.mapbox.navigation.ui.maps.util.LimitedQueue
@@ -26,11 +26,39 @@ internal object RouteLineHistoryRecordingPusherProvider {
 }
 
 @VisibleForTesting
+internal interface HistoryRecorderChooserFactory {
+
+    fun create(
+        mapboxNavigation: MapboxNavigation,
+        listener: (MapboxHistoryRecorder?) -> Unit,
+    ): HistoryRecorderChooser
+}
+
+internal class DefaultHistoryRecorderChooserFactory : HistoryRecorderChooserFactory {
+
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    override fun create(
+        mapboxNavigation: MapboxNavigation,
+        listener: (MapboxHistoryRecorder?) -> Unit,
+    ): HistoryRecorderChooser {
+        val options = mapboxNavigation.navigationOptions
+        return HistoryRecorderChooser(
+            historyEnabled = options.historyRecorderOptions.shouldRecordRouteLineEvents,
+            copilotEnabled = options.copilotOptions.shouldRecordRouteLineEvents,
+            mapboxNavigation,
+            listener,
+        )
+    }
+}
+
+@VisibleForTesting
 internal class RouteLineHistoryRecordingPusher(
     private val serialisationDispatcher: CoroutineDispatcher = Dispatchers.Default,
     private val mutexBasedMainScope: MutexBasedScope = MutexBasedScope(
         InternalJobControlFactory.createImmediateMainScopeJobControl().scope,
     ),
+    private val historyRecorderChooserFactory: HistoryRecorderChooserFactory =
+        DefaultHistoryRecorderChooserFactory(),
 ) : MapboxNavigationObserver {
 
     private var recorder: MapboxHistoryRecorder? = null
@@ -46,26 +74,21 @@ internal class RouteLineHistoryRecordingPusher(
 
     private val eventsQueue =
         LimitedQueue<suspend (CoroutineContext) -> RouteLineEvent>(HISTORY_RECORDING_QUEUE_SIZE)
-    private var historyRecordingEnabledObserver: RouteLineHistoryRecordingEnabledObserver? = null
+    private var historyRecordingEnabledObserver: HistoryRecorderChooser? = null
 
     init {
         MapboxNavigationProvider.registerObserver(this)
     }
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
-        historyRecordingEnabledObserver = RouteLineHistoryRecordingEnabledObserver(
+        historyRecordingEnabledObserver = historyRecorderChooserFactory.create(
             mapboxNavigation,
             { recorder = it },
-        )
-        mapboxNavigation.registerHistoryRecordingEnabledObserver(
-            historyRecordingEnabledObserver!!,
         )
     }
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
-        historyRecordingEnabledObserver?.let {
-            mapboxNavigation.unregisterHistoryRecordingEnabledObserver(it)
-        }
+        historyRecordingEnabledObserver?.destroy()
         historyRecordingEnabledObserver = null
         recorder = null
     }

@@ -9,8 +9,6 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
-import com.mapbox.navigation.core.internal.extensions.HistoryRecordingEnabledObserver
-import com.mapbox.navigation.core.internal.extensions.registerHistoryRecordingEnabledObserver
 import com.mapbox.navigation.core.internal.extensions.registerObserver
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineDynamicEventData
@@ -60,6 +58,11 @@ internal class RouteLineHistoryRecordingViewSenderTest {
 
     private lateinit var pusher: RouteLineHistoryRecordingPusher
     private lateinit var sender: RouteLineHistoryRecordingViewSender
+    private val observerSlot = slot<(MapboxHistoryRecorder?) -> Unit>()
+    private val historyRecorderChooserFactory =
+        mockk<HistoryRecorderChooserFactory>(relaxed = true) {
+            every { create(any(), any()) } returns mockk(relaxed = true)
+        }
     private val styleId = "someId"
 
     @Before
@@ -68,6 +71,7 @@ internal class RouteLineHistoryRecordingViewSenderTest {
         pusher = RouteLineHistoryRecordingPusher(
             coroutineRule.testDispatcher,
             MutexBasedScope(coroutineRule.coroutineScope),
+            historyRecorderChooserFactory,
         )
 
         mockkObject(RouteLineHistoryRecordingPusherProvider)
@@ -508,7 +512,6 @@ internal class RouteLineHistoryRecordingViewSenderTest {
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private fun onRecorderEnabled() {
-        val observerSlot = slot<HistoryRecordingEnabledObserver>()
         val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true) {
             every { historyRecorder } returns recorder
             every { navigationOptions } returns mockk {
@@ -521,8 +524,8 @@ internal class RouteLineHistoryRecordingViewSenderTest {
             }
         }
         pusher.onAttached(mapboxNavigation)
-        verify { mapboxNavigation.registerHistoryRecordingEnabledObserver(capture(observerSlot)) }
-        observerSlot.captured.onEnabled(mockk(relaxed = true))
+        verify { historyRecorderChooserFactory.create(mapboxNavigation, capture(observerSlot)) }
+        observerSlot.captured(recorder)
     }
 
     private fun checkEvent(expected: String) {

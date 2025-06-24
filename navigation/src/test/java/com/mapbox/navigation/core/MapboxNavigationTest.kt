@@ -24,7 +24,6 @@ import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.internal.HistoryRecordingStateChangeObserver
 import com.mapbox.navigation.core.internal.RouteProgressData
 import com.mapbox.navigation.core.internal.RoutesProgressData
-import com.mapbox.navigation.core.internal.extensions.HistoryRecordingEnabledObserver
 import com.mapbox.navigation.core.internal.extensions.registerHistoryRecordingStateChangeObserver
 import com.mapbox.navigation.core.internal.extensions.unregisterHistoryRecordingStateChangeObserver
 import com.mapbox.navigation.core.internal.router.GetRouteSignature
@@ -2287,32 +2286,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
         verify(exactly = 1) {
             navigator.resetAdasisMessageCallback()
-        }
-    }
-
-    @Test
-    fun registerHistoryRecordingEnabledObserver() {
-        val observer = mockk<HistoryRecordingEnabledObserver>(relaxed = true)
-        createMapboxNavigation()
-
-        mapboxNavigation.registerHistoryRecordingEnabledObserver(observer)
-
-        verify {
-            manualHistoryRecorder.registerHistoryRecordingEnabledObserver(observer)
-            copilotHistoryRecorder.registerHistoryRecordingEnabledObserver(observer)
-        }
-    }
-
-    @Test
-    fun unregisterHistoryRecordingEnabledObserver() {
-        val observer = mockk<HistoryRecordingEnabledObserver>(relaxed = true)
-        createMapboxNavigation()
-
-        mapboxNavigation.unregisterHistoryRecordingEnabledObserver(observer)
-
-        verify {
-            manualHistoryRecorder.unregisterHistoryRecordingEnabledObserver(observer)
-            copilotHistoryRecorder.unregisterHistoryRecordingEnabledObserver(observer)
         }
     }
 

@@ -186,25 +186,6 @@ internal fun MapboxNavigation.flowSetNavigationRoutesStarted(): Flow<RoutesSetSt
         awaitClose { unregisterOnRoutesSetStartedObserver(observer) }
     }
 
-interface HistoryRecordingEnabledObserver {
-
-    fun onEnabled(historyRecorderHandle: MapboxHistoryRecorder)
-
-    fun onDisabled(historyRecorderHandle: MapboxHistoryRecorder)
-}
-
-fun MapboxNavigation.registerHistoryRecordingEnabledObserver(
-    observer: HistoryRecordingEnabledObserver,
-) {
-    registerHistoryRecordingEnabledObserver(observer)
-}
-
-fun MapboxNavigation.unregisterHistoryRecordingEnabledObserver(
-    observer: HistoryRecordingEnabledObserver,
-) {
-    unregisterHistoryRecordingEnabledObserver(observer)
-}
-
 fun MapboxNavigation.flowRerouteState(
     onSubscription: () -> Unit = { },
 ): Flow<RerouteState>? {
