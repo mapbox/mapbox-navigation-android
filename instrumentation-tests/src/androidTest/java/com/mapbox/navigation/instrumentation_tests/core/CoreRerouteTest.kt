@@ -63,7 +63,6 @@ import com.mapbox.turf.TurfMeasurement
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
@@ -310,10 +309,10 @@ class CoreRerouteTest(
         mapboxNavigation.startTripSession()
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(listOf(originalRoutes.first()))
 
-        // wait for tracking status
-        mapboxNavigation.routeProgressUpdates().filter {
-            it.currentState == RouteProgressState.TRACKING
-        }.first()
+        mapboxNavigation.moveAlongTheRouteUntilTracking(
+            originalRoutes.first(),
+            mockLocationReplayerRule,
+        )
 
         // wait for OFF_ROUTE
         mockLocationReplayerRule.stopAndClearEvents()
@@ -390,11 +389,10 @@ class CoreRerouteTest(
         // start session and set original route
         mapboxNavigation.startTripSession()
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(listOf(originalRoutes.first()))
-
-        // wait for tracking status
-        mapboxNavigation.routeProgressUpdates().filter {
-            it.currentState == RouteProgressState.TRACKING
-        }.first()
+        mapboxNavigation.moveAlongTheRouteUntilTracking(
+            originalRoutes.first(),
+            mockLocationReplayerRule,
+        )
 
         // wait for OFF_ROUTE
         mockLocationReplayerRule.stopAndClearEvents()
@@ -462,20 +460,20 @@ class CoreRerouteTest(
             ) {
                 navigation.startTripSession()
                 navigation.setNavigationRoutes(routes)
-                navigation.routeProgressUpdates().first()
-                suspendCoroutine { continuation ->
-                    navigation.getRerouteController()!!.reroute { routes, _ ->
-                        navigation.setNavigationRoutes(routes) {
-                            continuation.resume(Unit)
-                        }
+            }
+            navigation.moveAlongTheRouteUntilTracking(routes[0], mockLocationReplayerRule)
+            suspendCoroutine { continuation ->
+                navigation.getRerouteController()!!.reroute { routes, _ ->
+                    navigation.setNavigationRoutes(routes) {
+                        continuation.resume(Unit)
                     }
                 }
-                val route = navigation.getNavigationRoutes().first()
-                assertEquals(
-                    DirectionsCriteria.EXCLUDE_FERRY,
-                    route.routeOptions.exclude(),
-                )
             }
+            val route = navigation.getNavigationRoutes().first()
+            assertEquals(
+                DirectionsCriteria.EXCLUDE_FERRY,
+                route.routeOptions.exclude(),
+            )
             assertSuccessfulRerouteStateTransition(rerouteStates)
         }
     }
@@ -522,17 +520,17 @@ class CoreRerouteTest(
             ) {
                 navigation.startTripSession()
                 navigation.setNavigationRoutes(routes)
-                navigation.routeProgressUpdates().first()
-                navigation.replanRoute()
-                val routeUpdate = navigation.routesUpdates()
-                    .first { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE }
-                val route = routeUpdate.navigationRoutes.first()
-                assertEquals(
-                    DirectionsCriteria.EXCLUDE_FERRY,
-                    route.routeOptions.exclude(),
-                )
-                assertSuccessfulRerouteStateTransition(rerouteStates)
             }
+            navigation.moveAlongTheRouteUntilTracking(routes[0], mockLocationReplayerRule)
+            navigation.replanRoute()
+            val routeUpdate = navigation.routesUpdates()
+                .first { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE }
+            val route = routeUpdate.navigationRoutes.first()
+            assertEquals(
+                DirectionsCriteria.EXCLUDE_FERRY,
+                route.routeOptions.exclude(),
+            )
+            assertSuccessfulRerouteStateTransition(rerouteStates)
         }
     }
 
@@ -573,6 +571,7 @@ class CoreRerouteTest(
         ).getSuccessfulResultOrThrowException().routes
         mapboxNavigation.setNavigationRoutes(routes)
 
+        mapboxNavigation.moveAlongTheRouteUntilTracking(routes[0], mockLocationReplayerRule)
         mockLocationReplayerRule.loopUpdateUntil(offRouteLocationUpdate) {
             mapboxNavigation.routeProgressUpdates()
                 .filter { it.currentState == RouteProgressState.OFF_ROUTE }
@@ -639,6 +638,7 @@ class CoreRerouteTest(
             ).getSuccessfulResultOrThrowException().routes
             mapboxNavigation.setNavigationRoutes(routes)
 
+            mapboxNavigation.moveAlongTheRouteUntilTracking(routes[0], mockLocationReplayerRule)
             mockLocationReplayerRule.loopUpdateUntil(originalLocation) {
                 mapboxNavigation.routeProgressUpdates().first()
             }
@@ -717,6 +717,7 @@ class CoreRerouteTest(
         ).getSuccessfulResultOrThrowException().routes
         mapboxNavigation.setNavigationRoutes(routes)
 
+        mapboxNavigation.moveAlongTheRouteUntilTracking(routes[0], mockLocationReplayerRule)
         mockLocationReplayerRule.loopUpdateUntil(originalLocation) {
             mapboxNavigation.routeProgressUpdates().first()
         }
