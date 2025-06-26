@@ -5,6 +5,7 @@ apply plugin: 'com.jaredsburrows.license'
 apply from: "../gradle/ktlint.gradle"
 
 android {
+    namespace 'com.mapbox.navigation.trip.notification'
     compileSdkVersion androidVersions.compileSdkVersion
 
     compileOptions {

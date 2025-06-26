@@ -8,6 +8,7 @@ apply from: file("../gradle/artifact-settings.gradle")
 group = project.ext.mapboxArtifactGroupId
 
 android {
+    namespace 'com.mapbox.navigation.utils'
     compileSdkVersion androidVersions.compileSdkVersion
 
     compileOptions {

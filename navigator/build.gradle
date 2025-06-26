@@ -8,6 +8,7 @@ version = project.ext.versionName
 group = project.ext.mapboxArtifactGroupId
 
 android {
+    namespace 'com.mapbox.navigation.navigator'
     compileSdkVersion androidVersions.compileSdkVersion
 
     compileOptions {

@@ -10,6 +10,7 @@ apply from: "../gradle/kdoc-settings.gradle"
 group = project.ext.mapboxArtifactGroupId
 
 android {
+    namespace 'com.mapbox.navigation.metrics'
     compileSdkVersion androidVersions.compileSdkVersion
 
     compileOptions {
