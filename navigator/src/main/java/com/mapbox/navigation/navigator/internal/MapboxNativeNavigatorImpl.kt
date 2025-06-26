@@ -345,6 +345,7 @@ class MapboxNativeNavigatorImpl(
             navigator.refreshRoute(
                 refreshResponseJson,
                 route.nativeRoute().routeId,
+                0,
             ) { callback(continuation, it) }
         }
     }

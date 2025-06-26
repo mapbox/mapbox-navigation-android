@@ -199,7 +199,7 @@ internal class NativeNavigatorCallbackOrderTest :
         callbackInvocations.clear()
 
         waitForStatusUpdatesToBegin()
-        navigator.refreshRoute(refreshedRouteResponse) {
+        navigator.refreshRoute(refreshedRouteResponse, route.id, 0) {
             callbackInvocations.add(CallbackInvocation.Refresh)
         }
 
