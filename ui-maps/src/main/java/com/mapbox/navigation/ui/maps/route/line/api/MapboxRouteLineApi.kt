@@ -38,6 +38,7 @@ import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.la
 import com.mapbox.navigation.ui.maps.internal.route.line.toStylePropertyValue
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.callout.api.MapboxRouteCalloutsApi
+import com.mapbox.navigation.ui.maps.route.callout.api.RoutesSetToRouteLineObserver
 import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.route.line.RouteLineHistoryRecordingApiSender
 import com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue
@@ -208,8 +209,8 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
     private val lowMemoryManager: LowMemoryManager,
 ) {
     private var primaryRoute: NavigationRoute? = null
-    private val routes: MutableList<NavigationRoute> = mutableListOf()
-    private val alternativeRoutesMetadata: MutableList<AlternativeRouteMetadata> = mutableListOf()
+    private var routes: List<NavigationRoute> = emptyList()
+    private var alternativeRoutesMetadata: List<AlternativeRouteMetadata> = emptyList()
     private var routeLineExpressionData: List<RouteLineExpressionData> = emptyList()
     private var restrictedExpressionData: List<ExtractedRouteRestrictionData> = emptyList()
     private var lastIndexUpdateTimeNano: Long = 0
@@ -264,6 +265,8 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private val calloutApi: MapboxRouteCalloutsApi?
 
+    private val routesSetToRouteLineObservers = CopyOnWriteArrayList<RoutesSetToRouteLineObserver>()
+
     companion object {
         private const val INVALID_ACTIVE_LEG_INDEX = -1
         private const val LOG_CATEGORY = "MapboxRouteLineApi"
@@ -313,6 +316,15 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
             isMemoryMonitorObserverRegistered = false
             lowMemoryManager.removeObserver(lowMemoryObserver)
         }
+    }
+
+    internal fun registerRoutesSetToRouteLineObserver(observer: RoutesSetToRouteLineObserver) {
+        routesSetToRouteLineObservers.add(observer)
+        observer.onSet(routes, alternativeRoutesMetadata)
+    }
+
+    internal fun unregisterRoutesSetToRouteLineObserver(observer: RoutesSetToRouteLineObserver) {
+        routesSetToRouteLineObservers.remove(observer)
     }
 
     /**
@@ -635,11 +647,14 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                 vanishingRouteLine?.vanishPointOffset = 0.0
                 activeLegIndex = INVALID_ACTIVE_LEG_INDEX
                 primaryRoute = null
-                routes.clear()
-                alternativeRoutesMetadata.clear()
+                routes = emptyList()
+                alternativeRoutesMetadata = emptyList()
                 routeFeatureData.clear()
                 routeLineExpressionData = emptyList()
                 resetCaches()
+                routesSetToRouteLineObservers.forEach {
+                    it.onSet(routes, alternativeRoutesMetadata)
+                }
 
                 consumer.accept(
                     ExpectedFactory.createValue(
@@ -1094,11 +1109,11 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
             }
         }
 
-        this.alternativeRoutesMetadata.clear()
-        this.alternativeRoutesMetadata.addAll(distinctAlternativeRouteMetadata)
+        this.alternativeRoutesMetadata = distinctAlternativeRouteMetadata
 
-        routes.clear()
-        routes.addAll(distinctNewRoutes)
+        routes = distinctNewRoutes
+        routesSetToRouteLineObservers.forEach { it.onSet(routes, alternativeRoutesMetadata) }
+
         primaryRoute = distinctNewRoutes.firstOrNull()
         logD(LOG_CATEGORY) {
             "trimming route data caches to size ${distinctNewRoutes.size}"
