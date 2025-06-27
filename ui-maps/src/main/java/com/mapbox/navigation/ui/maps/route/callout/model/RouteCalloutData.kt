@@ -5,7 +5,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 @ExperimentalPreviewMapboxNavigationAPI
-class RouteCalloutData internal constructor(internal val callouts: List<RouteCallout>) {
+class RouteCalloutData(val callouts: List<RouteCallout>) {
 
     /**
      * Indicates whether some other object is "equal to" this one.

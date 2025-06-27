@@ -1000,6 +1000,51 @@ package com.mapbox.navigation.ui.maps.route.callout.api {
     method public String? getLayerId(String routeId);
   }
 
+  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public interface RoutesAttachedToLayersDataProvider {
+    method public void registerRoutesAttachedToLayersObserver(com.mapbox.navigation.ui.maps.route.callout.api.RoutesAttachedToLayersObserver observer);
+    method public void unregisterRoutesAttachedToLayersObserver(com.mapbox.navigation.ui.maps.route.callout.api.RoutesAttachedToLayersObserver observer);
+  }
+
+  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public fun interface RoutesAttachedToLayersObserver {
+    method public void onAttached(java.util.Map<java.lang.String,java.lang.String> routeIdToLayer);
+  }
+
+  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public interface RoutesSetToRouteLineDataProvider {
+    method public void registerRoutesSetToRouteLineObserver(com.mapbox.navigation.ui.maps.route.callout.api.RoutesSetToRouteLineObserver observer);
+    method public void unregisterRoutesSetToRouteLineObserver(com.mapbox.navigation.ui.maps.route.callout.api.RoutesSetToRouteLineObserver observer);
+  }
+
+  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public fun interface RoutesSetToRouteLineObserver {
+    method public void onSet(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes, java.util.List<com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata> alternativeMetadata);
+  }
+
+}
+
+package com.mapbox.navigation.ui.maps.route.callout.api.compose {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class CalloutComposeUiState {
+    method public String getLayerId();
+    method public com.mapbox.navigation.ui.maps.route.callout.model.RouteCallout getRouteCallout();
+    property public final String layerId;
+    property public final com.mapbox.navigation.ui.maps.route.callout.model.RouteCallout routeCallout;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class CalloutComposeUiStateData {
+    method public java.util.List<com.mapbox.navigation.ui.maps.route.callout.api.compose.CalloutComposeUiState> getCallouts();
+    property public final java.util.List<com.mapbox.navigation.ui.maps.route.callout.api.compose.CalloutComposeUiState> callouts;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class CalloutComposeUiStateProvider {
+    method public void destroy();
+    method public kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.maps.route.callout.api.compose.CalloutComposeUiStateData> getUiStateData();
+    property public final kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.maps.route.callout.api.compose.CalloutComposeUiStateData> uiStateData;
+    field public static final com.mapbox.navigation.ui.maps.route.callout.api.compose.CalloutComposeUiStateProvider.Companion Companion;
+  }
+
+  public static final class CalloutComposeUiStateProvider.Companion {
+    method public com.mapbox.navigation.ui.maps.route.callout.api.compose.CalloutComposeUiStateProvider create(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi routeLineApi, com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView routeLineView);
+  }
+
 }
 
 package com.mapbox.navigation.ui.maps.route.callout.model {
@@ -1063,6 +1108,9 @@ package com.mapbox.navigation.ui.maps.route.callout.model {
   }
 
   @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RouteCalloutData {
+    ctor public RouteCalloutData(java.util.List<com.mapbox.navigation.ui.maps.route.callout.model.RouteCallout> callouts);
+    method public java.util.List<com.mapbox.navigation.ui.maps.route.callout.model.RouteCallout> getCallouts();
+    property public final java.util.List<com.mapbox.navigation.ui.maps.route.callout.model.RouteCallout> callouts;
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RouteCalloutType {

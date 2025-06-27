@@ -64,6 +64,7 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_TRA
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_SOURCE_ID
+import com.mapbox.navigation.ui.maps.route.callout.api.RoutesAttachedToLayersObserver
 import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.route.line.RouteLineHistoryRecordingViewSender
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions
@@ -84,6 +85,7 @@ import com.mapbox.navigation.utils.internal.JobControl
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
 import io.mockk.clearAllMocks
+import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerifyOrder
 import io.mockk.every
@@ -5103,6 +5105,575 @@ class MapboxRouteLineViewTest {
         System.gc()
 
         Assert.assertNull(weakOptions.get())
+    }
+
+    @Test
+    fun `registerRoutesAttachedToLayersObserver calls onAttached with empty data`() {
+        val options = MapboxRouteLineViewOptions.Builder(ctx).build()
+        val view = MapboxRouteLineView(options, routesExpector, dataIdHolder, sender)
+        val observer = mockk<RoutesAttachedToLayersObserver>(relaxed = true)
+
+        view.registerRoutesAttachedToLayersObserver(observer)
+
+        verify { observer.onAttached(emptyMap()) }
+    }
+
+    @Test
+    fun `multiple observers can be registered and all receive notifications`() {
+        val options = MapboxRouteLineViewOptions.Builder(ctx).build()
+        val view = MapboxRouteLineView(options, routesExpector, dataIdHolder, sender)
+        val observer1 = mockk<RoutesAttachedToLayersObserver>(relaxed = true)
+        val observer2 = mockk<RoutesAttachedToLayersObserver>(relaxed = true)
+        val observer3 = mockk<RoutesAttachedToLayersObserver>(relaxed = true)
+
+        view.registerRoutesAttachedToLayersObserver(observer1)
+        view.registerRoutesAttachedToLayersObserver(observer2)
+        view.registerRoutesAttachedToLayersObserver(observer3)
+
+        verify { observer1.onAttached(any()) }
+        verify { observer2.onAttached(any()) }
+        verify { observer3.onAttached(any()) }
+    }
+
+    @Test
+    fun `observers are not notified after unregistration`() = coroutineRule.runBlockingTest {
+        mockkObject(MapboxRouteLineUtils)
+        every { MapboxRouteLineUtils.initializeLayers(any(), any()) } answers {}
+        val options = MapboxRouteLineViewOptions.Builder(ctx).build()
+        val view = MapboxRouteLineView(options, routesExpector, dataIdHolder, sender)
+        val observer = mockk<RoutesAttachedToLayersObserver>(relaxed = true)
+
+        // Set up some routes to be rendered
+        val primaryRouteFeatureCollection = FeatureCollection.fromFeatures(
+            listOf(getEmptyFeature("route-1")),
+        )
+        val alternativeRoute1FeatureCollection = FeatureCollection.fromFeatures(
+            listOf(getEmptyFeature("route-2")),
+        )
+
+        val state: Expected<RouteLineError, RouteSetValue> = ExpectedFactory.createValue(
+            RouteSetValue(
+                primaryRouteLineData = RouteLineData(
+                    primaryRouteFeatureCollection,
+                    RouteLineDynamicData(
+                        RouteLineValueCommandHolder(
+                            LightRouteLineValueProvider { mockk(relaxed = true) },
+                            LineGradientCommandApplier(),
+                        ),
+                        RouteLineValueCommandHolder(
+                            LightRouteLineValueProvider { mockk(relaxed = true) },
+                            LineGradientCommandApplier(),
+                        ),
+                        RouteLineValueCommandHolder(
+                            LightRouteLineValueProvider { mockk(relaxed = true) },
+                            LineGradientCommandApplier(),
+                        ),
+                        RouteLineValueCommandHolder(
+                            LightRouteLineValueProvider { mockk(relaxed = true) },
+                            LineGradientCommandApplier(),
+                        ),
+                        RouteLineTrimOffset(9.9),
+                        RouteLineValueCommandHolder(
+                            LightRouteLineValueProvider { mockk(relaxed = true) },
+                            LineGradientCommandApplier(),
+                        ),
+                        RouteLineValueCommandHolder(
+                            LightRouteLineValueProvider { mockk(relaxed = true) },
+                            LineGradientCommandApplier(),
+                        ),
+                    ),
+                ),
+                alternativeRouteLinesData = listOf(
+                    RouteLineData(
+                        alternativeRoute1FeatureCollection,
+                        RouteLineDynamicData(
+                            RouteLineValueCommandHolder(
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
+                                LineGradientCommandApplier(),
+                            ),
+                            RouteLineValueCommandHolder(
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
+                                LineGradientCommandApplier(),
+                            ),
+                            RouteLineValueCommandHolder(
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
+                                LineGradientCommandApplier(),
+                            ),
+                            RouteLineValueCommandHolder(
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
+                                LineGradientCommandApplier(),
+                            ),
+                            RouteLineTrimOffset(9.9),
+                            RouteLineValueCommandHolder(
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
+                                LineGradientCommandApplier(),
+                            ),
+                            RouteLineValueCommandHolder(
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
+                                LineGradientCommandApplier(),
+                            ),
+                        ),
+                    ),
+                ),
+                FeatureCollection.fromFeatures(listOf(getEmptyFeature("1"))),
+                routeLineMaskingLayerDynamicData = null,
+                callouts = RouteCalloutData(emptyList()),
+            ),
+        )
+
+        val style = getMockedStyle()
+
+        view.registerRoutesAttachedToLayersObserver(observer)
+        clearMocks(observer, answers = false)
+
+        view.unregisterRoutesAttachedToLayersObserver(observer)
+
+        view.renderRouteDrawData(style, state)
+
+        verify(exactly = 0) {
+            observer.onAttached(any())
+        }
+
+        unmockkObject(MapboxRouteLineUtils)
+    }
+
+    @Test
+    fun `observers are notified with current route-to-layer mapping`() = coroutineRule.runBlockingTest {
+        mockkObject(MapboxRouteLineUtils)
+        every { MapboxRouteLineUtils.initializeLayers(any(), any()) } answers {}
+        val options = MapboxRouteLineViewOptions.Builder(ctx).build()
+        val view = MapboxRouteLineView(options, routesExpector, dataIdHolder, sender)
+        val observer = mockk<RoutesAttachedToLayersObserver>(relaxed = true)
+
+        // Set up some routes to be rendered
+        val primaryRouteFeatureCollection = FeatureCollection.fromFeatures(
+            listOf(getEmptyFeature("route-1")),
+        )
+        val alternativeRoute1FeatureCollection = FeatureCollection.fromFeatures(
+            listOf(getEmptyFeature("route-2")),
+        )
+
+        val state: Expected<RouteLineError, RouteSetValue> = ExpectedFactory.createValue(
+            RouteSetValue(
+                primaryRouteLineData = RouteLineData(
+                    primaryRouteFeatureCollection,
+                    RouteLineDynamicData(
+                        RouteLineValueCommandHolder(
+                            LightRouteLineValueProvider { mockk(relaxed = true) },
+                            LineGradientCommandApplier(),
+                        ),
+                        RouteLineValueCommandHolder(
+                            LightRouteLineValueProvider { mockk(relaxed = true) },
+                            LineGradientCommandApplier(),
+                        ),
+                        RouteLineValueCommandHolder(
+                            LightRouteLineValueProvider { mockk(relaxed = true) },
+                            LineGradientCommandApplier(),
+                        ),
+                        RouteLineValueCommandHolder(
+                            LightRouteLineValueProvider { mockk(relaxed = true) },
+                            LineGradientCommandApplier(),
+                        ),
+                        RouteLineTrimOffset(9.9),
+                        RouteLineValueCommandHolder(
+                            LightRouteLineValueProvider { mockk(relaxed = true) },
+                            LineGradientCommandApplier(),
+                        ),
+                        RouteLineValueCommandHolder(
+                            LightRouteLineValueProvider { mockk(relaxed = true) },
+                            LineGradientCommandApplier(),
+                        ),
+                    ),
+                ),
+                alternativeRouteLinesData = listOf(
+                    RouteLineData(
+                        alternativeRoute1FeatureCollection,
+                        RouteLineDynamicData(
+                            RouteLineValueCommandHolder(
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
+                                LineGradientCommandApplier(),
+                            ),
+                            RouteLineValueCommandHolder(
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
+                                LineGradientCommandApplier(),
+                            ),
+                            RouteLineValueCommandHolder(
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
+                                LineGradientCommandApplier(),
+                            ),
+                            RouteLineValueCommandHolder(
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
+                                LineGradientCommandApplier(),
+                            ),
+                            RouteLineTrimOffset(9.9),
+                            RouteLineValueCommandHolder(
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
+                                LineGradientCommandApplier(),
+                            ),
+                            RouteLineValueCommandHolder(
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
+                                LineGradientCommandApplier(),
+                            ),
+                        ),
+                    ),
+                ),
+                FeatureCollection.fromFeatures(listOf(getEmptyFeature("1"))),
+                routeLineMaskingLayerDynamicData = null,
+                callouts = RouteCalloutData(emptyList()),
+            ),
+        )
+
+        val style = getMockedStyle()
+
+        // Render routes first
+        view.renderRouteDrawData(style, state)
+
+        // Then register observer to see the current mapping
+        view.registerRoutesAttachedToLayersObserver(observer)
+
+        verify {
+            observer.onAttached(
+                mapOf(
+                    "route-1" to "mapbox-layerGroup-1-main",
+                    "route-2" to "mapbox-layerGroup-2-main",
+                ),
+            )
+        }
+
+        unmockkObject(MapboxRouteLineUtils)
+    }
+
+    @Test
+    fun `observers are notified with current cleared mapping`() = coroutineRule.runBlockingTest {
+        mockkObject(MapboxRouteLineUtils)
+        every { MapboxRouteLineUtils.initializeLayers(any(), any()) } answers {}
+        val options = MapboxRouteLineViewOptions.Builder(ctx).build()
+        val view = MapboxRouteLineView(options, routesExpector, dataIdHolder, sender)
+        val observer = mockk<RoutesAttachedToLayersObserver>(relaxed = true)
+
+        // Set up some routes to be rendered
+        val primaryRouteFeatureCollection = FeatureCollection.fromFeatures(
+            listOf(getEmptyFeature("route-1")),
+        )
+        val alternativeRoute1FeatureCollection = FeatureCollection.fromFeatures(
+            listOf(getEmptyFeature("route-2")),
+        )
+
+        val state: Expected<RouteLineError, RouteSetValue> = ExpectedFactory.createValue(
+            RouteSetValue(
+                primaryRouteLineData = RouteLineData(
+                    primaryRouteFeatureCollection,
+                    RouteLineDynamicData(
+                        RouteLineValueCommandHolder(
+                            LightRouteLineValueProvider { mockk(relaxed = true) },
+                            LineGradientCommandApplier(),
+                        ),
+                        RouteLineValueCommandHolder(
+                            LightRouteLineValueProvider { mockk(relaxed = true) },
+                            LineGradientCommandApplier(),
+                        ),
+                        RouteLineValueCommandHolder(
+                            LightRouteLineValueProvider { mockk(relaxed = true) },
+                            LineGradientCommandApplier(),
+                        ),
+                        RouteLineValueCommandHolder(
+                            LightRouteLineValueProvider { mockk(relaxed = true) },
+                            LineGradientCommandApplier(),
+                        ),
+                        RouteLineTrimOffset(9.9),
+                        RouteLineValueCommandHolder(
+                            LightRouteLineValueProvider { mockk(relaxed = true) },
+                            LineGradientCommandApplier(),
+                        ),
+                        RouteLineValueCommandHolder(
+                            LightRouteLineValueProvider { mockk(relaxed = true) },
+                            LineGradientCommandApplier(),
+                        ),
+                    ),
+                ),
+                alternativeRouteLinesData = listOf(
+                    RouteLineData(
+                        alternativeRoute1FeatureCollection,
+                        RouteLineDynamicData(
+                            RouteLineValueCommandHolder(
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
+                                LineGradientCommandApplier(),
+                            ),
+                            RouteLineValueCommandHolder(
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
+                                LineGradientCommandApplier(),
+                            ),
+                            RouteLineValueCommandHolder(
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
+                                LineGradientCommandApplier(),
+                            ),
+                            RouteLineValueCommandHolder(
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
+                                LineGradientCommandApplier(),
+                            ),
+                            RouteLineTrimOffset(9.9),
+                            RouteLineValueCommandHolder(
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
+                                LineGradientCommandApplier(),
+                            ),
+                            RouteLineValueCommandHolder(
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
+                                LineGradientCommandApplier(),
+                            ),
+                        ),
+                    ),
+                ),
+                FeatureCollection.fromFeatures(listOf(getEmptyFeature("1"))),
+                routeLineMaskingLayerDynamicData = null,
+                callouts = RouteCalloutData(emptyList()),
+            ),
+        )
+
+        val style = getMockedStyle()
+
+        // Render routes first
+        view.renderRouteDrawData(style, state)
+        view.renderClearRouteLineValue(
+            style,
+            ExpectedFactory.createValue(
+                RouteLineClearValue(
+                    FeatureCollection.fromFeatures(listOf()),
+                    listOf(
+                        FeatureCollection.fromFeatures(listOf()),
+                        FeatureCollection.fromFeatures(listOf()),
+                    ),
+                    FeatureCollection.fromFeatures(listOf()),
+                    RouteCalloutData(listOf()),
+                ),
+            ),
+        )
+
+        // Then register observer to see the current mapping
+        view.registerRoutesAttachedToLayersObserver(observer)
+
+        verify {
+            observer.onAttached(emptyMap())
+        }
+
+        unmockkObject(MapboxRouteLineUtils)
+    }
+
+    @Test
+    fun `observers are notified when routes are rendered`() = coroutineRule.runBlockingTest {
+        mockkObject(MapboxRouteLineUtils)
+        every { MapboxRouteLineUtils.initializeLayers(any(), any()) } answers {}
+        val options = MapboxRouteLineViewOptions.Builder(ctx).build()
+        val view = MapboxRouteLineView(options, routesExpector, dataIdHolder, sender)
+        val observer = mockk<RoutesAttachedToLayersObserver>(relaxed = true)
+
+        // Set up some routes to be rendered
+        val primaryRouteFeatureCollection = FeatureCollection.fromFeatures(
+            listOf(getEmptyFeature("route-1")),
+        )
+        val alternativeRoute1FeatureCollection = FeatureCollection.fromFeatures(
+            listOf(getEmptyFeature("route-2")),
+        )
+
+        val state: Expected<RouteLineError, RouteSetValue> = ExpectedFactory.createValue(
+            RouteSetValue(
+                primaryRouteLineData = RouteLineData(
+                    primaryRouteFeatureCollection,
+                    RouteLineDynamicData(
+                        RouteLineValueCommandHolder(
+                            LightRouteLineValueProvider { mockk(relaxed = true) },
+                            LineGradientCommandApplier(),
+                        ),
+                        RouteLineValueCommandHolder(
+                            LightRouteLineValueProvider { mockk(relaxed = true) },
+                            LineGradientCommandApplier(),
+                        ),
+                        RouteLineValueCommandHolder(
+                            LightRouteLineValueProvider { mockk(relaxed = true) },
+                            LineGradientCommandApplier(),
+                        ),
+                        RouteLineValueCommandHolder(
+                            LightRouteLineValueProvider { mockk(relaxed = true) },
+                            LineGradientCommandApplier(),
+                        ),
+                        RouteLineTrimOffset(9.9),
+                        RouteLineValueCommandHolder(
+                            LightRouteLineValueProvider { mockk(relaxed = true) },
+                            LineGradientCommandApplier(),
+                        ),
+                        RouteLineValueCommandHolder(
+                            LightRouteLineValueProvider { mockk(relaxed = true) },
+                            LineGradientCommandApplier(),
+                        ),
+                    ),
+                ),
+                alternativeRouteLinesData = listOf(
+                    RouteLineData(
+                        alternativeRoute1FeatureCollection,
+                        RouteLineDynamicData(
+                            RouteLineValueCommandHolder(
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
+                                LineGradientCommandApplier(),
+                            ),
+                            RouteLineValueCommandHolder(
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
+                                LineGradientCommandApplier(),
+                            ),
+                            RouteLineValueCommandHolder(
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
+                                LineGradientCommandApplier(),
+                            ),
+                            RouteLineValueCommandHolder(
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
+                                LineGradientCommandApplier(),
+                            ),
+                            RouteLineTrimOffset(9.9),
+                            RouteLineValueCommandHolder(
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
+                                LineGradientCommandApplier(),
+                            ),
+                            RouteLineValueCommandHolder(
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
+                                LineGradientCommandApplier(),
+                            ),
+                        ),
+                    ),
+                ),
+                FeatureCollection.fromFeatures(listOf(getEmptyFeature("1"))),
+                routeLineMaskingLayerDynamicData = null,
+                callouts = RouteCalloutData(emptyList()),
+            ),
+        )
+
+        val style = getMockedStyle()
+
+        view.registerRoutesAttachedToLayersObserver(observer)
+        view.renderRouteDrawData(style, state)
+
+        verify {
+            observer.onAttached(
+                mapOf(
+                    "route-1" to "mapbox-layerGroup-1-main",
+                    "route-2" to "mapbox-layerGroup-2-main",
+                ),
+            )
+        }
+
+        unmockkObject(MapboxRouteLineUtils)
+    }
+
+    @Test
+    fun `observers are notified when routes are cleared`() = coroutineRule.runBlockingTest {
+        mockkObject(MapboxRouteLineUtils)
+        every { MapboxRouteLineUtils.initializeLayers(any(), any()) } answers {}
+        val options = MapboxRouteLineViewOptions.Builder(ctx).build()
+        val view = MapboxRouteLineView(options, routesExpector, dataIdHolder, sender)
+        val observer = mockk<RoutesAttachedToLayersObserver>(relaxed = true)
+
+        // Set up some routes to be rendered
+        val primaryRouteFeatureCollection = FeatureCollection.fromFeatures(
+            listOf(getEmptyFeature("route-1")),
+        )
+        val alternativeRoute1FeatureCollection = FeatureCollection.fromFeatures(
+            listOf(getEmptyFeature("route-2")),
+        )
+
+        val state: Expected<RouteLineError, RouteSetValue> = ExpectedFactory.createValue(
+            RouteSetValue(
+                primaryRouteLineData = RouteLineData(
+                    primaryRouteFeatureCollection,
+                    RouteLineDynamicData(
+                        RouteLineValueCommandHolder(
+                            LightRouteLineValueProvider { mockk(relaxed = true) },
+                            LineGradientCommandApplier(),
+                        ),
+                        RouteLineValueCommandHolder(
+                            LightRouteLineValueProvider { mockk(relaxed = true) },
+                            LineGradientCommandApplier(),
+                        ),
+                        RouteLineValueCommandHolder(
+                            LightRouteLineValueProvider { mockk(relaxed = true) },
+                            LineGradientCommandApplier(),
+                        ),
+                        RouteLineValueCommandHolder(
+                            LightRouteLineValueProvider { mockk(relaxed = true) },
+                            LineGradientCommandApplier(),
+                        ),
+                        RouteLineTrimOffset(9.9),
+                        RouteLineValueCommandHolder(
+                            LightRouteLineValueProvider { mockk(relaxed = true) },
+                            LineGradientCommandApplier(),
+                        ),
+                        RouteLineValueCommandHolder(
+                            LightRouteLineValueProvider { mockk(relaxed = true) },
+                            LineGradientCommandApplier(),
+                        ),
+                    ),
+                ),
+                alternativeRouteLinesData = listOf(
+                    RouteLineData(
+                        alternativeRoute1FeatureCollection,
+                        RouteLineDynamicData(
+                            RouteLineValueCommandHolder(
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
+                                LineGradientCommandApplier(),
+                            ),
+                            RouteLineValueCommandHolder(
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
+                                LineGradientCommandApplier(),
+                            ),
+                            RouteLineValueCommandHolder(
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
+                                LineGradientCommandApplier(),
+                            ),
+                            RouteLineValueCommandHolder(
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
+                                LineGradientCommandApplier(),
+                            ),
+                            RouteLineTrimOffset(9.9),
+                            RouteLineValueCommandHolder(
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
+                                LineGradientCommandApplier(),
+                            ),
+                            RouteLineValueCommandHolder(
+                                LightRouteLineValueProvider { mockk(relaxed = true) },
+                                LineGradientCommandApplier(),
+                            ),
+                        ),
+                    ),
+                ),
+                FeatureCollection.fromFeatures(listOf(getEmptyFeature("1"))),
+                routeLineMaskingLayerDynamicData = null,
+                callouts = RouteCalloutData(emptyList()),
+            ),
+        )
+
+        val style = getMockedStyle()
+
+        view.registerRoutesAttachedToLayersObserver(observer)
+
+        view.renderRouteDrawData(style, state)
+        clearMocks(observer, answers = false)
+
+        view.renderClearRouteLineValue(
+            style,
+            ExpectedFactory.createValue(
+                RouteLineClearValue(
+                    FeatureCollection.fromFeatures(listOf()),
+                    listOf(
+                        FeatureCollection.fromFeatures(listOf()),
+                        FeatureCollection.fromFeatures(listOf()),
+                    ),
+                    FeatureCollection.fromFeatures(listOf()),
+                    RouteCalloutData(listOf()),
+                ),
+            ),
+        )
+
+        verify {
+            observer.onAttached(emptyMap())
+        }
+
+        unmockkObject(MapboxRouteLineUtils)
     }
 
     private fun matchExpectedRoutes(

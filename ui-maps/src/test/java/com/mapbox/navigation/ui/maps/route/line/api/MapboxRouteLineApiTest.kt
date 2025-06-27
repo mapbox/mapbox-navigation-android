@@ -25,6 +25,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.internal.LowMemoryManager
+import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.NativeRouteParserRule
@@ -35,6 +36,7 @@ import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.la
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup2SourceLayerIds
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup3SourceLayerIds
 import com.mapbox.navigation.ui.maps.internal.route.line.toData
+import com.mapbox.navigation.ui.maps.route.callout.api.RoutesSetToRouteLineObserver
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.clearRouteLine
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.findClosestRoute
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.setNavigationRouteLines
@@ -1925,6 +1927,171 @@ class MapboxRouteLineApiTest {
         }
 
         unmockkObject(MapboxRouteLineUtils)
+    }
+
+    @Test
+    fun `routesSetToRouteLineObservers are notified when routes are set`() = coroutineRule.runBlockingTest {
+        val api = createRouteLineApi()
+        val observer1 = mockk<RoutesSetToRouteLineObserver>(relaxed = true)
+        val observer2 = mockk<RoutesSetToRouteLineObserver>(relaxed = true)
+        val route = mockk<NavigationRoute>(relaxed = true)
+
+        api.registerRoutesSetToRouteLineObserver(observer1)
+        api.registerRoutesSetToRouteLineObserver(observer2)
+
+        api.setNavigationRoutes(listOf(route))
+
+        verify { observer1.onSet(any(), any()) }
+        verify { observer2.onSet(any(), any()) }
+    }
+
+    @Test
+    fun `removed observer is not notified when routes are set`() = coroutineRule.runBlockingTest {
+        val api = createRouteLineApi()
+        val observer = mockk<RoutesSetToRouteLineObserver>(relaxed = true)
+        val route = mockk<NavigationRoute>(relaxed = true)
+
+        api.registerRoutesSetToRouteLineObserver(observer)
+
+        clearMocks(observer, answers = false)
+
+        api.unregisterRoutesSetToRouteLineObserver(observer)
+
+        api.setNavigationRoutes(listOf(route))
+
+        verify(exactly = 0) { observer.onSet(any(), any()) }
+    }
+
+    @Test
+    fun `routesSetToRouteLineObservers are notified with correct route data`() = coroutineRule.runBlockingTest {
+        val api = createRouteLineApi()
+        val observer = mockk<RoutesSetToRouteLineObserver>(relaxed = true)
+        val routes = listOf(shortRoute.navigationRoute, multiLegRouteTwoLegs.navigationRoute)
+        val alternativeMetadata = listOf(
+            mockk<AlternativeRouteMetadata>(relaxed = true) {
+                every { navigationRoute } returns multiLegRouteTwoLegs.navigationRoute
+            },
+        )
+
+        api.registerRoutesSetToRouteLineObserver(observer)
+
+        api.setNavigationRoutes(routes, alternativeMetadata)
+
+        verify {
+            observer.onSet(
+                routes,
+                alternativeMetadata,
+            )
+        }
+    }
+
+    @Test
+    fun `routesSetToRouteLineObserver is notified on registration with filled data`() = coroutineRule.runBlockingTest {
+        val api = createRouteLineApi()
+        val observer = mockk<RoutesSetToRouteLineObserver>(relaxed = true)
+        val routes = listOf(shortRoute.navigationRoute, multiLegRouteTwoLegs.navigationRoute)
+        val alternativeMetadata = listOf(
+            mockk<AlternativeRouteMetadata>(relaxed = true) {
+                every { navigationRoute } returns multiLegRouteTwoLegs.navigationRoute
+            },
+        )
+
+        api.setNavigationRoutes(routes, alternativeMetadata)
+
+        api.registerRoutesSetToRouteLineObserver(observer)
+
+        verify {
+            observer.onSet(routes, alternativeMetadata)
+        }
+    }
+
+    @Test
+    fun `routesSetToRouteLineObserver is notified on registration with cleared data`() = coroutineRule.runBlockingTest {
+        val api = createRouteLineApi()
+        val observer = mockk<RoutesSetToRouteLineObserver>(relaxed = true)
+        val routes = listOf(shortRoute.navigationRoute, multiLegRouteTwoLegs.navigationRoute)
+        val alternativeMetadata = listOf(
+            mockk<AlternativeRouteMetadata>(relaxed = true) {
+                every { navigationRoute } returns multiLegRouteTwoLegs.navigationRoute
+            },
+        )
+
+        api.setNavigationRoutes(routes, alternativeMetadata)
+        api.clearRouteLine()
+
+        api.registerRoutesSetToRouteLineObserver(observer)
+
+        verify {
+            observer.onSet(emptyList(), emptyList())
+        }
+    }
+
+    @Test
+    fun `routesSetToRouteLineObserver is notified on registration with empty data`() = coroutineRule.runBlockingTest {
+        val api = createRouteLineApi()
+        val observer = mockk<RoutesSetToRouteLineObserver>(relaxed = true)
+        api.registerRoutesSetToRouteLineObserver(observer)
+
+        verify {
+            observer.onSet(
+                emptyList(),
+                emptyList(),
+            )
+        }
+    }
+
+    @Test
+    fun `routesSetToRouteLineObservers are notified when clearing routes`() = coroutineRule.runBlockingTest {
+        val api = createRouteLineApi()
+        val observer = mockk<RoutesSetToRouteLineObserver>(relaxed = true)
+        val route = mockk<NavigationRoute>(relaxed = true)
+
+        api.registerRoutesSetToRouteLineObserver(observer)
+
+        // First set routes
+        api.setNavigationRoutes(listOf(route))
+        clearMocks(observer) // Clear previous interactions
+
+        // Then clear routes
+        api.setNavigationRoutes(emptyList())
+
+        verify {
+            observer.onSet(
+                emptyList(),
+                emptyList(),
+            )
+        }
+    }
+
+    @Test
+    fun `routesSetToRouteLineObservers are notified when setting route lines`() = coroutineRule.runBlockingTest {
+        val api = createRouteLineApi()
+        val observer = mockk<RoutesSetToRouteLineObserver>(relaxed = true)
+        val route = mockk<NavigationRoute>(relaxed = true)
+        val routeLines = listOf(NavigationRouteLine(route, null))
+
+        api.registerRoutesSetToRouteLineObserver(observer)
+
+        api.setNavigationRouteLines(routeLines)
+
+        verify {
+            observer.onSet(
+                listOf(route),
+                emptyList(),
+            )
+        }
+    }
+
+    @Test
+    fun `observers are notified if empty routes are set`() = coroutineRule.runBlockingTest {
+        val api = createRouteLineApi()
+        val observer = mockk<RoutesSetToRouteLineObserver>(relaxed = true)
+
+        api.registerRoutesSetToRouteLineObserver(observer)
+
+        api.setNavigationRoutes(emptyList())
+
+        verify { observer.onSet(emptyList(), emptyList()) }
     }
 
     private fun mockRouteProgress(route: NavigationRoute, stepIndexValue: Int = 0): RouteProgress =

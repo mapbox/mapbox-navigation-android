@@ -62,6 +62,7 @@ import com.mapbox.navigation.ui.maps.route.callout.api.DefaultRouteCalloutAdapte
 import com.mapbox.navigation.ui.maps.route.callout.api.MapboxRouteCalloutAdapter
 import com.mapbox.navigation.ui.maps.route.callout.api.MapboxRouteCalloutsView
 import com.mapbox.navigation.ui.maps.route.callout.api.RouteLineViewBasedLayerIdProvider
+import com.mapbox.navigation.ui.maps.route.callout.api.RoutesAttachedToLayersObserver
 import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.route.line.RouteLineHistoryRecordingViewSender
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions
@@ -88,6 +89,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.coroutineScope
 import org.jetbrains.annotations.TestOnly
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * Responsible for rendering side effects produced by the [MapboxRouteLineApi]. The [MapboxRouteLineApi]
@@ -206,6 +208,9 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
     )
 
     private val calculationScope = InternalJobControlFactory.createDefaultScopeJobControl().scope
+
+    private val routesAttachedToLayersObservers =
+        CopyOnWriteArrayList<RoutesAttachedToLayersObserver>()
 
     init {
         sender.sendInitialOptionsEvent(optionsHolder.data)
@@ -543,6 +548,8 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
                     mutationCommand()
                 }
 
+            val routesToLayers = getCurrentlyAttachedRoutesToLayers()
+            routesAttachedToLayersObservers.forEach { it.onAttached(routesToLayers) }
             routeDrawData.value?.let { routeSetValue ->
                 lastRouteCalloutData = routeSetValue.callouts
                 routeCalloutView?.renderCallouts(routeSetValue.callouts)
@@ -820,6 +827,8 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
 
                 primaryRouteLineLayerGroup = setOf()
 
+                val routesToLayers = getCurrentlyAttachedRoutesToLayers()
+                routesAttachedToLayersObservers.forEach { it.onAttached(routesToLayers) }
                 lastRouteCalloutData = value.callouts
                 routeCalloutView?.renderCallouts(value.callouts)
             }
@@ -1063,6 +1072,34 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         calculationScope.coroutineContext.cancelChildren()
     }
 
+    internal fun registerRoutesAttachedToLayersObserver(observer: RoutesAttachedToLayersObserver) {
+        routesAttachedToLayersObservers.add(observer)
+        observer.onAttached(getCurrentlyAttachedRoutesToLayers())
+    }
+
+    internal fun unregisterRoutesAttachedToLayersObserver(
+        observer: RoutesAttachedToLayersObserver,
+    ) {
+        routesAttachedToLayersObservers.remove(observer)
+    }
+
+    /**
+     * Returns a map of route IDs to the layer IDs they are currently attached to.
+     */
+    private fun getCurrentlyAttachedRoutesToLayers(): Map<String, String> {
+        val result = mutableMapOf<String, String>()
+        sourceToFeatureMap.forEach { (source, feature) ->
+            val routeId = feature.id()
+            if (routeId != null) {
+                val layerId = sourceLayerMap[source]?.intersect(mainLayerIds)?.firstOrNull()
+                if (layerId != null) {
+                    result[routeId] = layerId
+                }
+            }
+        }
+        return result
+    }
+
     private fun adjustLayerVisibility(style: Style, layerId: String, visibility: Visibility) {
         if (style.styleLayerExists(layerId)) {
             style.getLayer(layerId)?.visibility(visibility)
@@ -1171,6 +1208,7 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
                     it,
                     routeLineData.restrictedSectionExpressionCommandHolder,
                 )
+
                 in blurLayerIds -> Pair(it, routeLineData.blurExpressionCommandHolder)
                 else -> null
             }
@@ -1520,12 +1558,7 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     fun getRouteMainLayerIdForFeature(featureId: String?): String? {
-        sourceToFeatureMap.forEach { (source, feature) ->
-            if (feature.id() == featureId) {
-                return sourceLayerMap[source]?.intersect(mainLayerIds)?.firstOrNull()
-            }
-        }
-        return null
+        return featureId?.let { getCurrentlyAttachedRoutesToLayers()[it] }
     }
 
     /**
