@@ -58,7 +58,9 @@ internal class MapboxDirectionsSession(
             routesUpdatedResult = it
         }
 
-        PerformanceTracker.trackPerformance("MapboxDirectionsSession-dispatch-onRoutesChanged") {
+        PerformanceTracker.trackPerformanceSync(
+            "MapboxDirectionsSession-dispatch-onRoutesChanged",
+        ) {
             onSetNavigationRoutesFinishedObservers.forEach {
                 it.onRoutesChanged(result)
             }

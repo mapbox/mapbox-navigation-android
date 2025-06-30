@@ -88,7 +88,7 @@ internal class NavigationTelemetry internal constructor(
         fun create(
             tripSession: TripSession,
             nativeNavigator: MapboxNativeNavigator,
-        ) = PerformanceTracker.trackPerformance("NavigationTelemetry#create") {
+        ) = PerformanceTracker.trackPerformanceSync("NavigationTelemetry#create") {
             NavigationTelemetry(tripSession, nativeNavigator)
         }
     }

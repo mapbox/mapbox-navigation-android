@@ -50,7 +50,7 @@ internal object NavigationComponentProvider {
         context: Context,
         lifecycleMonitor: ApplicationLifecycleMonitor,
         eventsAppMetadata: EventsAppMetadata?,
-    ): EventsMetadataInterface = PerformanceTracker.trackPerformance(
+    ): EventsMetadataInterface = PerformanceTracker.trackPerformanceSync(
         "createEventsMetadataInterface",
     ) {
         EventsMetadataInterfaceImpl(
@@ -66,7 +66,7 @@ internal object NavigationComponentProvider {
         historyRecorderComposite: HistoryRecorderHandle?,
         offlineCacheHandle: CacheHandle?,
         eventsMetadataProvider: EventsMetadataInterface,
-    ): MapboxNativeNavigator = PerformanceTracker.trackPerformance("createNativeNavigator") {
+    ): MapboxNativeNavigator = PerformanceTracker.trackPerformanceSync("createNativeNavigator") {
         MapboxNativeNavigatorImpl(
             tilesConfig,
             historyRecorderComposite,
@@ -80,7 +80,7 @@ internal object NavigationComponentProvider {
         applicationContext: Context,
         tripNotification: TripNotification,
         threadController: ThreadController,
-    ): TripService = PerformanceTracker.trackPerformance("createTripService") {
+    ): TripService = PerformanceTracker.trackPerformanceSync("createTripService") {
         MapboxTripService(
             applicationContext,
             tripNotification,
@@ -90,7 +90,7 @@ internal object NavigationComponentProvider {
 
     fun createTripSessionLocationEngine(
         locationOptions: LocationOptions,
-    ): TripSessionLocationEngine = PerformanceTracker.trackPerformance(
+    ): TripSessionLocationEngine = PerformanceTracker.trackPerformanceSync(
         "createTripSessionLocationEngine",
     ) {
         TripSessionLocationEngine(locationOptions)
@@ -101,7 +101,7 @@ internal object NavigationComponentProvider {
         tripSessionLocationEngine: TripSessionLocationEngine,
         navigator: MapboxNativeNavigator,
         threadController: ThreadController,
-    ): TripSession = PerformanceTracker.trackPerformance("createTripSession") {
+    ): TripSession = PerformanceTracker.trackPerformanceSync("createTripSession") {
         MapboxTripSession(
             tripService,
             tripSessionLocationEngine,
@@ -119,7 +119,7 @@ internal object NavigationComponentProvider {
         arrivalProgressObserver: ArrivalProgressObserver,
         skuIdProvider: SkuIdProvider,
         sdkInformation: SdkInformation,
-    ): BillingController = PerformanceTracker.trackPerformance("createBillingController") {
+    ): BillingController = PerformanceTracker.trackPerformanceSync("createBillingController") {
         BillingController(
             navigationSession,
             arrivalProgressObserver,

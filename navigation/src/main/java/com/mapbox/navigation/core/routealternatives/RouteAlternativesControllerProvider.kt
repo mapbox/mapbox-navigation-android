@@ -17,7 +17,7 @@ internal object RouteAlternativesControllerProvider {
         threadController: ThreadController,
         routeParsingManager: RouteParsingManager,
         directionsSession: DirectionsSession,
-    ) = PerformanceTracker.trackPerformance("RouteAlternativesControllerProvider#create") {
+    ) = PerformanceTracker.trackPerformanceSync("RouteAlternativesControllerProvider#create") {
         RouteAlternativesController(
             options,
             navigator,

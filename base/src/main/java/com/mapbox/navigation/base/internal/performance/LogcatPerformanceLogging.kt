@@ -8,11 +8,11 @@ import kotlin.time.Duration
 private const val TAG = "PERFORMANCE"
 
 internal class LogcatPerformanceLogging : PerformanceObserver {
-    override fun sectionStarted(name: String, id: Int) {
-        logI(TAG) { "$name($id) section started" }
+    override fun syncSectionStarted(name: String) {
+        logI(TAG) { "$name section started" }
     }
 
-    override fun sectionCompleted(name: String, id: Int, duration: Duration?) {
-        logI(TAG) { "$name($id) section completed in $duration" }
+    override fun syncSectionCompleted(name: String, duration: Duration?) {
+        logI(TAG) { "$name section completed in $duration" }
     }
 }

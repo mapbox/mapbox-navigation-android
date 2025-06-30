@@ -2,15 +2,12 @@ package com.mapbox.navigation.base.internal.performance
 
 import androidx.annotation.RestrictTo
 import java.util.concurrent.CopyOnWriteArraySet
-import java.util.concurrent.atomic.AtomicInteger
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 object PerformanceTracker {
-
-    private val sectionNumberCounter = AtomicInteger(0)
 
     internal fun addObserver(observer: PerformanceObserver) {
         performanceObservers.add(observer)
@@ -24,26 +21,28 @@ object PerformanceTracker {
 
     val trackingIsActive get() = performanceObservers.isNotEmpty()
 
-    fun sectionStarted(name: String): Int {
-        val id = sectionNumberCounter.incrementAndGet()
+    fun syncSectionStarted(name: String) {
         performanceObservers.forEach {
-            it.sectionStarted(name, id)
-        }
-        return id
-    }
-
-    fun sectionCompleted(name: String, id: Int, duration: Duration?) {
-        performanceObservers.forEach {
-            it.sectionCompleted(name, id, duration)
+            it.syncSectionStarted(name)
         }
     }
 
+    fun syncSectionCompleted(name: String, duration: Duration?) {
+        performanceObservers.forEach {
+            it.syncSectionCompleted(name, duration)
+        }
+    }
+
+    /**
+     * Tracks performance of a synchronous block of code.
+     * @param block should be a synchronous function. Suspend function might break internal logic.
+     */
     @OptIn(ExperimentalTime::class)
-    inline fun <R> trackPerformance(name: String, block: () -> R): R {
+    inline fun <R> trackPerformanceSync(name: String, block: () -> R): R {
         if (!trackingIsActive) {
             return block()
         }
-        val id = sectionStarted(name)
+        syncSectionStarted(name)
         val result: R
         var executionTime: Duration? = null
         try {
@@ -51,7 +50,7 @@ object PerformanceTracker {
                 result = block()
             }
         } finally {
-            sectionCompleted(name, id, executionTime)
+            syncSectionCompleted(name, executionTime)
         }
         return result
     }
@@ -59,6 +58,16 @@ object PerformanceTracker {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 internal interface PerformanceObserver {
-    fun sectionStarted(name: String, id: Int)
-    fun sectionCompleted(name: String, id: Int, duration: Duration?)
+    /**
+     * Notifies about new synchronous section start.
+     * @see [syncSectionCompleted]
+     */
+    fun syncSectionStarted(name: String)
+
+    /**
+     * Notifies about synchronous section end.
+     * @param name always matches last started synchronous section
+     * @see [syncSectionStarted]
+     */
+    fun syncSectionCompleted(name: String, duration: Duration?)
 }

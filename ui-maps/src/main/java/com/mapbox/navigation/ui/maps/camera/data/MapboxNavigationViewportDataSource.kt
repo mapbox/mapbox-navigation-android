@@ -374,7 +374,9 @@ class MapboxNavigationViewportDataSource private constructor(
     fun evaluate() {
         mapsSizeReadyCancellable?.cancel()
         mapsSizeReadyCancellable = mapSizeReadyCallbackHelper.onMapSizeInitialized {
-            PerformanceTracker.trackPerformance("MapboxNavigationViewportDataSource#evaluateImpl") {
+            PerformanceTracker.trackPerformanceSync(
+                "MapboxNavigationViewportDataSource#evaluateImpl",
+            ) {
                 evaluateImpl()
             }
         }
@@ -420,7 +422,9 @@ class MapboxNavigationViewportDataSource private constructor(
      * @see [evaluate]
      */
     fun onRouteChanged(route: NavigationRoute) {
-        PerformanceTracker.trackPerformance("MapboxNavigationViewportDataSource#onRouteChanged") {
+        PerformanceTracker.trackPerformanceSync(
+            "MapboxNavigationViewportDataSource#onRouteChanged",
+        ) {
             onRoutesChanged(listOf(route))
         }
     }
@@ -449,7 +453,7 @@ class MapboxNavigationViewportDataSource private constructor(
      * @see [evaluate]
      */
     fun onRouteProgressChanged(routeProgress: RouteProgress) {
-        PerformanceTracker.trackPerformance(
+        PerformanceTracker.trackPerformanceSync(
             "MapboxNavigationViewportDataSource#onRouteProgressChanged",
         ) {
             onRouteProgressChangedInternal(routeProgress)

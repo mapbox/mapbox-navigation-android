@@ -20,11 +20,11 @@ class NavigationPerformanceTest {
 
     @Test
     fun `tracking performance in different logging states`() {
-        PerformanceTracker.trackPerformance("test-section1") { }
+        PerformanceTracker.trackPerformanceSync("test-section1") { }
         NavigationPerformance.performanceInfoLoggingEnabled(true)
-        PerformanceTracker.trackPerformance("test-section2") { }
+        PerformanceTracker.trackPerformanceSync("test-section2") { }
         NavigationPerformance.performanceInfoLoggingEnabled(false)
-        PerformanceTracker.trackPerformance("test-section3") { }
+        PerformanceTracker.trackPerformanceSync("test-section3") { }
 
         verify(exactly = 0) { mockLogger.logI(match { it.contains("test-section1") }, any()) }
         verify(exactly = 2) { mockLogger.logI(match { it.contains("test-section2") }, any()) }

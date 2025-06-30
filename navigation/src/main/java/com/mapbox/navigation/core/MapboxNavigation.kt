@@ -469,7 +469,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     internal val skuIdProvider: SkuIdProvider
 
     init {
-        PerformanceTracker.trackPerformance("MapboxNavigationSDKInitializerImpl") {
+        val initSectionName = "MapboxNavigation#init-"
+        PerformanceTracker.trackPerformanceSync(
+            "${initSectionName}MapboxNavigationSDKInitializerImpl",
+        ) {
             BaseMapboxInitializer.init(MapboxNavigationSDKInitializerImpl::class.java)
         }
         if (hasInstance) {
@@ -503,7 +506,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             tilesConfig,
             config,
             historyRecorderHandles.composite,
-            PerformanceTracker.trackPerformance("createOfflineCacheHandle") {
+            PerformanceTracker.trackPerformanceSync("${initSectionName}createOfflineCacheHandle") {
                 createOfflineCacheHandle(config)
             },
             NavigationComponentProvider.createEventsMetadataInterface(
@@ -515,7 +518,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
         val routeParsingManager = createRouteParsingManager()
         routeParsingManager.setPrepareForParsingAction(this::prepareNavigationForRoutesParsing)
-        routerWrapper = PerformanceTracker.trackPerformance("RouterWrapper") {
+        routerWrapper = PerformanceTracker.trackPerformanceSync(
+            "${initSectionName}RouterWrapper",
+        ) {
             RouterWrapper(
                 navigator.getRouter(),
                 threadController,
@@ -524,7 +529,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             )
         }
 
-        etcGateAPI = PerformanceTracker.trackPerformance("etcGateAPI") {
+        etcGateAPI = PerformanceTracker.trackPerformanceSync("${initSectionName}etcGateAPI") {
             EtcGateApi(navigator.experimental)
         }
 
@@ -539,7 +544,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             historyRecordingStateHandler,
         )
 
-        val notification: TripNotification = PerformanceTracker.trackPerformance("notification") {
+        val notification: TripNotification = PerformanceTracker.trackPerformanceSync(
+            "${initSectionName}notification",
+        ) {
             MapboxModuleProvider
                 .createModule(
                     MapboxModuleType.NavigationTripNotification,
@@ -688,8 +695,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
         roadObjectsStore = RoadObjectsStore(navigator)
         graphAccessor = GraphAccessor(navigator)
-        tilesetDescriptorFactory = PerformanceTracker.trackPerformance(
-            "MapboxNavigation#init-tilesetDescriptorFactory",
+        tilesetDescriptorFactory = PerformanceTracker.trackPerformanceSync(
+            "${initSectionName}tilesetDescriptorFactory",
         ) {
             TilesetDescriptorFactory(
                 navigationOptions.routingTilesOptions,
@@ -2138,7 +2145,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private fun createHistoryRecorderHandles(
         config: ConfigHandle,
-    ) = PerformanceTracker.trackPerformance("createHistoryRecorderHandles") {
+    ) = PerformanceTracker.trackPerformanceSync("createHistoryRecorderHandles") {
         NavigatorLoader.createHistoryRecorderHandles(
             config,
             historyRecorder.fileDirectory(),

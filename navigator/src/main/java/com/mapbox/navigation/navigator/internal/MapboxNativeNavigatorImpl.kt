@@ -102,7 +102,7 @@ class MapboxNativeNavigatorImpl(
 
     private fun init(tilesConfig: TilesConfig) {
         val sectionName = "MapboxNativeNavigatorImpl#init-"
-        val cacheHandle = PerformanceTracker.trackPerformance("${sectionName}cacheHandle") {
+        val cacheHandle = PerformanceTracker.trackPerformanceSync("${sectionName}cacheHandle") {
             NavigatorLoader.createCacheHandle(
                 config,
                 tilesConfig,
@@ -110,11 +110,11 @@ class MapboxNativeNavigatorImpl(
             )
         }
 
-        adasisFacade = PerformanceTracker.trackPerformance("${sectionName}adasisFacade") {
+        adasisFacade = PerformanceTracker.trackPerformanceSync("${sectionName}adasisFacade") {
             AdasisFacadeBuilder.build(config, cacheHandle, historyRecorderComposite)
         }
 
-        navigator = PerformanceTracker.trackPerformance("${sectionName}navigator") {
+        navigator = PerformanceTracker.trackPerformanceSync("${sectionName}navigator") {
             NavigatorLoader.createNavigator(
                 cacheHandle,
                 config,
@@ -126,24 +126,28 @@ class MapboxNativeNavigatorImpl(
         }
 
         cache = cacheHandle
-        graphAccessor = PerformanceTracker.trackPerformance("${sectionName}graphAccessor") {
+        graphAccessor = PerformanceTracker.trackPerformanceSync("${sectionName}graphAccessor") {
             GraphAccessor(cacheHandle)
         }
-        roadObjectMatcher = PerformanceTracker.trackPerformance("${sectionName}roadObjectMatcher") {
+        roadObjectMatcher = PerformanceTracker.trackPerformanceSync(
+            "${sectionName}roadObjectMatcher",
+        ) {
             RoadObjectMatcher(cacheHandle)
         }
-        roadObjectsStore = PerformanceTracker.trackPerformance("${sectionName}roadObjectsStore") {
+        roadObjectsStore = PerformanceTracker.trackPerformanceSync(
+            "${sectionName}roadObjectsStore",
+        ) {
             navigator.roadObjectStore()
         }
-        experimental = PerformanceTracker.trackPerformance("${sectionName}experimental") {
+        experimental = PerformanceTracker.trackPerformanceSync("${sectionName}experimental") {
             navigator.experimental
         }
-        routeAlternativesController = PerformanceTracker.trackPerformance(
+        routeAlternativesController = PerformanceTracker.trackPerformanceSync(
             "${sectionName}routeAlternativesController",
         ) {
             navigator.routeAlternativesController
         }
-        telemetry = PerformanceTracker.trackPerformance("${sectionName}telemetry") {
+        telemetry = PerformanceTracker.trackPerformanceSync("${sectionName}telemetry") {
             navigator.getTelemetry(eventsMetadataProvider)
         }
     }

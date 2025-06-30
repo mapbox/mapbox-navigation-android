@@ -350,7 +350,7 @@ internal class MapboxTripSession(
     private val navigatorObserver = object : NavigatorObserver {
         override fun onStatus(origin: NavigationStatusOrigin, status: NavigationStatus) {
             try {
-                PerformanceTracker.trackPerformance("NavigatorObserver#onStatus") {
+                PerformanceTracker.trackPerformanceSync("NavigatorObserver#onStatus") {
                     processNativeStatus(status)
                 }
             } catch (error: Throwable) {
@@ -630,7 +630,7 @@ internal class MapboxTripSession(
     }
 
     private fun updateLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
-        PerformanceTracker.trackPerformance("MapboxTripSession#updateLocationMatcherResult") {
+        PerformanceTracker.trackPerformanceSync("MapboxTripSession#updateLocationMatcherResult") {
             this.locationMatcherResult = locationMatcherResult
             locationObservers.forEach { it.onNewLocationMatcherResult(locationMatcherResult) }
         }
@@ -648,7 +648,7 @@ internal class MapboxTripSession(
         }
 
         val tripStatus = status.getTripStatusFrom(primaryRoute)
-        val locationMatcherResult = PerformanceTracker.trackPerformance(
+        val locationMatcherResult = PerformanceTracker.trackPerformanceSync(
             "MapboxTripSession#processNativeStatus-prepare-location-matcher-result",
         ) {
             val enhancedLocation = tripStatus.navigationStatus.location.toLocation()
@@ -683,7 +683,7 @@ internal class MapboxTripSession(
         val remainingWaypoints = tripStatus.calculateRemainingWaypoints()
         val latestBannerInstructionsWrapper = bannerInstructionEvent.latestInstructionWrapper
         val upcomingRoadObjects =
-            PerformanceTracker.trackPerformance(
+            PerformanceTracker.trackPerformanceSync(
                 "MapboxTripSession#processNativeStatus-getUpdatedObjectsAhead",
             ) {
                 roadObjects.getUpdatedObjectsAhead(
@@ -691,7 +691,7 @@ internal class MapboxTripSession(
                 )
             }
         val routeProgress =
-            PerformanceTracker.trackPerformance(
+            PerformanceTracker.trackPerformanceSync(
                 "MapboxTripSession#processNativeStatus-create-route-progress",
             ) {
                 tripStatus.route?.let {
@@ -727,7 +727,7 @@ internal class MapboxTripSession(
         shouldTriggerBannerInstructionsObserver: Boolean,
     ) {
         routeProgress = progress
-        PerformanceTracker.trackPerformance(
+        PerformanceTracker.trackPerformanceSync(
             "MapboxTripSession#updateRouteProgress-update-notification",
         ) {
             tripService.updateNotification(buildTripNotificationState(progress))
@@ -737,14 +737,14 @@ internal class MapboxTripSession(
                 "dispatching progress update; state: ${progress.currentState}",
                 LOG_CATEGORY,
             )
-            PerformanceTracker.trackPerformance(
+            PerformanceTracker.trackPerformanceSync(
                 "MapboxTripSession#updateRouteProgress-dispatch-route-progress-update",
             ) {
                 routeProgressObservers.forEach { it.onRouteProgressChanged(progress) }
             }
             if (shouldTriggerBannerInstructionsObserver) {
                 checkBannerInstructionEvent { bannerInstruction ->
-                    PerformanceTracker.trackPerformance(
+                    PerformanceTracker.trackPerformanceSync(
                         "MapboxTripSession#updateRouteProgress-dispatch-banner-instruction",
                     ) {
                         bannerInstructionsObservers.forEach {
