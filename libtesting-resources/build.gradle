@@ -5,6 +5,7 @@ apply from: file("../gradle/testing-module-settings.gradle")
 group = project.ext.mapboxArtifactGroupId
 
 android {
+    namespace 'com.mapbox.navigation.testing.resources'
     compileSdkVersion androidVersions.compileSdkVersion
 
     compileOptions {

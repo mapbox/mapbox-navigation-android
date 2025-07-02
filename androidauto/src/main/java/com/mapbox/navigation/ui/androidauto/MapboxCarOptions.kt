@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 /**
  * The options available for customizing Mapbox Android Auto Navigation.
  */
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class MapboxCarOptions {
     private val speedLimitOptionsMutable = MutableStateFlow(SpeedLimitOptions.Builder().build())
 

@@ -5,6 +5,7 @@ apply plugin: 'com.mapbox.maps.token'
 apply from: "../gradle/ktlint.gradle"
 
 android {
+    namespace 'com.mapbox.navigation.instrumentation_tests'
     compileSdkVersion androidVersions.compileSdkVersion
 
     compileOptions {

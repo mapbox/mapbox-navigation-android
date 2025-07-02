@@ -6,11 +6,16 @@ apply from: file("../gradle/testing-module-settings.gradle")
 group = project.ext.mapboxArtifactGroupId
 
 android {
+    namespace 'com.mapbox.navigation.testing.ui'
     compileSdkVersion androidVersions.compileSdkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     defaultConfig {

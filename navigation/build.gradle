@@ -20,6 +20,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
         minSdkVersion androidVersions.minSdkVersion
         targetSdkVersion androidVersions.targetSdkVersion

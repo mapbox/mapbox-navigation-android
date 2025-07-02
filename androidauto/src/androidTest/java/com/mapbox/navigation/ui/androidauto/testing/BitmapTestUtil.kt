@@ -10,8 +10,8 @@ import android.hardware.display.VirtualDisplay
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
-import androidx.annotation.RequiresApi
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.filters.SdkSuppress
 import org.junit.Assert.fail
 import org.junit.rules.TestName
 import java.io.File
@@ -234,7 +234,7 @@ class BitmapTestUtil(
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
+    @SdkSuppress(minSdkVersion = Build.VERSION_CODES.Q)
     private fun mediaStoreOutputStream(filePath: String, fileName: String): OutputStream {
         val contentValues = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)

@@ -14,7 +14,6 @@ group = project.ext.mapboxArtifactGroupId
 
 android {
     namespace 'com.mapbox.navigation.ui.components'
-
     compileSdkVersion androidVersions.compileSdkVersion
 
     compileOptions {
@@ -31,6 +30,7 @@ android {
 
     buildFeatures {
         viewBinding true
+        buildConfig = true
     }
 
     testOptions {

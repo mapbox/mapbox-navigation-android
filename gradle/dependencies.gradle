@@ -60,7 +60,7 @@ ext {
       gmsLocation               : '17.0.0',
       ktlint                    : '0.47.1',
       kotlinStdLib              : kotlinVersion,
-      firebaseCrashlytics       : '17.3.1',
+      firebaseCrashlytics       : '18.6.0',
       multidex                  : '2.0.1',
       json                      : '20180813',
       coroutinesAndroid         : '1.6.4',
@@ -225,7 +225,7 @@ ext {
   pluginVersion = [
       checkstyle           : '8.2',
       pmd                  : '5.8.1',
-      gradle               : '7.4.2',
+      gradle               : '8.10.1',
       dependencyGraph      : '0.8.0',
       dependencyUpdates    : '0.29.0',
       kotlin               : kotlinVersion,
@@ -237,13 +237,13 @@ ext {
       kotlinHtmlJvm        : '0.7.2',
       jacoco               : '0.8.12',
       kover                : '0.9.1',
-      googleServices       : '4.3.3',
+      googleServices       : '4.4.2',
       mapboxSdkVersions    : '1.1.5',
       dokka                : '1.9.20',
       mapboxSdkRegistry    : '0.7.0',
       mapboxAccessToken    : '0.2.1',
       mapboxNativeDownload : '0.2.2',
-      firebaseCrashlytics  : '2.5.1'
+      firebaseCrashlytics  : '3.0.3'
   ]
 
   pluginDependencies = [

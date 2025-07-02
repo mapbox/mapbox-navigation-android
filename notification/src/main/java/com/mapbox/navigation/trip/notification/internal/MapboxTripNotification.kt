@@ -1,5 +1,6 @@
 package com.mapbox.navigation.trip.notification.internal
 
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -207,6 +208,7 @@ class MapboxTripNotification constructor(
         }
     }
 
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     private fun registerReceivers() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             applicationContext.registerReceiver(

@@ -1,3 +1,10 @@
+android {
+    publishing {
+        singleVariant("debug")
+        singleVariant("release")
+    }
+}
+
 apply plugin: 'maven-publish'
 apply plugin: 'com.mapbox.sdkRegistry'
 apply from: file("$rootDir/gradle/artifact-settings.gradle")

@@ -43,6 +43,7 @@ private data class CachedRemainingPoints(
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class OverviewViewportDataSource @VisibleForTesting internal constructor(
     private val mapboxMap: MapboxMap,
     internalOptions: InternalViewportDataSourceOptions,
@@ -71,7 +72,6 @@ class OverviewViewportDataSource @VisibleForTesting internal constructor(
     private var targetLocation: Location? = null
     private var cachedRemainingPoints: MutableMap<String, CachedRemainingPoints> = hashMapOf()
 
-    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     var debugger: MapboxNavigationViewportDataSourceDebugger? = null
 
     private val centerProperty = ViewportProperty.CenterProperty(null, NULL_ISLAND_POINT)
