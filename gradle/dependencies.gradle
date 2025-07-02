@@ -10,6 +10,12 @@ ext {
 
   def mapboxSdkVersionSuffix = '14.0-SNAPSHOT-06-26--10-31.git-32f22cd'
 
+  def ndkVersionSuffix = ""
+  if (project.hasProperty("ndkMajor")) {
+    ndkVersionSuffix = "-ndk${project.property("ndkMajor")}"
+    println("Building with NDK version suffix: " + ndkVersionSuffix)
+  }
+
   // Navigation Native CI can run SDK CI downstream with forced Navigation Native version
   // in this case `FORCE_MAPBOX_NAVIGATION_NATIVE_VERSION` environment variable will contain
   // version which we should use in this build
@@ -88,21 +94,21 @@ ext {
   ]
   dependenciesList = [
       // mapbox
-      mapboxMapSdk              : "com.mapbox.maps:android:${version.mapboxMapSdk}",
-      mapboxMapsAndroidAuto     : "com.mapbox.extension:maps-androidauto:${version.mapboxMapSdk}",
+      mapboxMapSdk              : "com.mapbox.maps:android$ndkVersionSuffix:${version.mapboxMapSdk}",
+      mapboxMapsAndroidAuto     : "com.mapbox.extension:maps-androidauto$ndkVersionSuffix:${version.mapboxMapSdk}",
       mapboxSdkServices         : "com.mapbox.mapboxsdk:mapbox-sdk-services:${version.mapboxSdkServices}",
       mapboxSdkServicesCore     : "com.mapbox.mapboxsdk:mapbox-sdk-core:${version.mapboxSdkServices}",
       mapboxSdkGeoJSON          : "com.mapbox.mapboxsdk:mapbox-sdk-geojson:${version.mapboxSdkServices}",
       mapboxSdkTurf             : "com.mapbox.mapboxsdk:mapbox-sdk-turf:${version.mapboxSdkServices}",
       mapboxSdkDirectionsModels : "com.mapbox.mapboxsdk:mapbox-sdk-directions-models:${version.mapboxSdkServices}",
       mapboxSdkRefreshModels    : "com.mapbox.mapboxsdk:mapbox-sdk-directions-refresh-models:${version.mapboxSdkServices}",
-      mapboxNavigator           : "com.mapbox.navigator:dash-native:${version.mapboxNavigator}",
-      mapboxCommonNative        : "com.mapbox.common:common:${version.mapboxCommonNative}",
-      mapboxSearch              : "com.mapbox.search:mapbox-search-android:${version.mapboxSearch}",
-      mapboxOfflineSearch       : "com.mapbox.search:offline:${version.mapboxSearch}",
-      mapboxNavSdkCpp           : "com.mapbox.navsdk:sdk:${version.mapboxNavSdkCpp}",
-      mapboxNavSdkFullHdCpp     : "com.mapbox.navsdk:navsdk-hd:${version.mapboxNavSdkCpp}",
-      mapboxMapGptExpAndroid   : "com.mapbox.mapgpt.experimental:mapgpt:${version.mapboxCommonNative}",
+      mapboxNavigator           : "com.mapbox.navigator:dash-native$ndkVersionSuffix:${version.mapboxNavigator}",
+      mapboxCommonNative        : "com.mapbox.common:common$ndkVersionSuffix:${version.mapboxCommonNative}",
+      mapboxSearch              : "com.mapbox.search:mapbox-search-android$ndkVersionSuffix:${version.mapboxSearch}",
+      mapboxOfflineSearch       : "com.mapbox.search:offline$ndkVersionSuffix:${version.mapboxSearch}",
+      mapboxNavSdkCpp           : "com.mapbox.navsdk:sdk$ndkVersionSuffix:${version.mapboxNavSdkCpp}",
+      mapboxNavSdkFullHdCpp     : "com.mapbox.navsdk:navsdk-hd$ndkVersionSuffix:${version.mapboxNavSdkCpp}",
+      mapboxMapGptExpAndroid   : "com.mapbox.mapgpt.experimental:mapgpt$ndkVersionSuffix:${version.mapboxCommonNative}",
 
       mapboxAnnotations         : "com.mapbox.base:annotations:${version.mapboxBaseAndroid}",
       mapboxAnnotationsProcessor: "com.mapbox.base:annotations-processor:${version.mapboxBaseAndroid}",
@@ -240,7 +246,7 @@ ext {
       googleServices       : '4.4.2',
       mapboxSdkVersions    : '1.1.5',
       dokka                : '1.9.20',
-      mapboxSdkRegistry    : '0.7.0',
+      mapboxSdkRegistry    : '1.4.1',
       mapboxAccessToken    : '0.2.1',
       mapboxNativeDownload : '0.2.2',
       firebaseCrashlytics  : '3.0.3'

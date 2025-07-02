@@ -197,14 +197,17 @@ prepare-ui-coverage-reports: ui-unit-tests-release-jacoco
 .PHONY: publish-local
 publish-local:
 	./gradlew publishToMavenLocal
+	./gradlew publishToMavenLocal -PndkMajor=27
 
 .PHONY: upload-to-sdk-registry-snapshot
 upload-to-sdk-registry-snapshot:
-	./gradlew mapboxSDKRegistryUpload -Psnapshot=true -PVERSION_NAME=$(VERSION_NAME);
+	./gradlew mapboxSDKRegistryUpload -Psnapshot=true -PVERSION_NAME=$(VERSION_NAME)
+	./gradlew mapboxSDKRegistryUpload -Psnapshot=true -PVERSION_NAME=$(VERSION_NAME) -PndkMajor=27
 
 .PHONY: upload-to-sdk-registry
 upload-to-sdk-registry:
-	./gradlew mapboxSDKRegistryUpload;
+	./gradlew mapboxSDKRegistryUpload
+	./gradlew mapboxSDKRegistryUpload -PndkMajor=27
 
 .PHONY: publish-to-sdk-registry
 publish-to-sdk-registry:

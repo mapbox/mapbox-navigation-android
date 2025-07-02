@@ -12,7 +12,13 @@ ext {
     snapshot = project.hasProperty("snapshot") ? project.property("snapshot").toBoolean() : false
     releaseTagPrefix = project.hasProperty('RELEASE_TAG_PREFIX') ? project.property('RELEASE_TAG_PREFIX') : 'mapbox-navigation-android_dash-core_'
     versionName = getVersionName()
-        
+
+    def ndkVersionSuffix = ""
+    if (project.hasProperty("ndkMajor")) {
+        ndkVersionSuffix = "-ndk${project.property("ndkMajor")}"
+        println("Building with NDK version suffix: " + ndkVersionSuffix)
+    }
+    
     /**
      * Properties used for artifact publishing.
      *
@@ -23,43 +29,43 @@ ext {
      *     2. The SDK name used in the SDK registry.
      */
     navSdkArtifactSettings = [
-        'libnavigation-android' : new Tuple2('android', 'navigation-core-android'),
-        'base' : new Tuple2('base', 'navigation-core-base'),
-        'navigation' : new Tuple2('navigation', 'navigation-core-navigation'),
-        'copilot' : new Tuple2('copilot', 'navigation-core-copilot'),
-        'metrics' : new Tuple2('metrics', 'navigation-core-metrics'),
-        'tripdata' : new Tuple2('tripdata', 'navigation-core-tripdata'),
-        'utils' : new Tuple2('utils', 'navigation-core-utils'),
-        'voice' : new Tuple2('voice', 'navigation-core-voice'),
-        'navigator' : new Tuple2('navigator', 'navigation-core-navigator'),
-        'ui-base' : new Tuple2('ui-base', 'navigation-core-ui-base'),
-        'ui-maps' : new Tuple2('ui-maps', 'navigation-core-ui-maps'),
-        'ui-utils' : new Tuple2('ui-utils', 'navigation-core-ui-utils'),
-        'notification' : new Tuple2('notification', 'navigation-core-notification'),
-        'search' : new Tuple2('search', 'navigation-core-search'),
-        'ui-components' : new Tuple2('ui-components', 'navigation-core-ui-components'),
-        'androidauto' : new Tuple2('android-auto-components', 'navigation-core-androidauto'),
-        'libtesting-router' : new Tuple2('test-router', 'navigation-core-testing-router'),
-        'libnavigation-custom-route' : new Tuple2('customroute', 'navigation-core-custom-route'),
-        'datainputs' : new Tuple2('datainputs', 'navigation-core-datainputs'),
-        'adasis' : new Tuple2('adasis', 'navigation-core-adasis'),
-        'ev' : new Tuple2('ev', 'navigation-core-ev'),
-        'ev-rangemap' : new Tuple2('ev-rangemap', 'navigation-core-ev-rangemap'),
-        'ev-ui' : new Tuple2('ev-ui', 'navigation-core-ev-ui'),
-        'weather' : new Tuple2('weather', 'navigation-core-weather'),
-        'roadcam' : new Tuple2('roadcam', 'navigation-core-roadcam'),
-        'roadcam-ui' : new Tuple2('roadcam-ui', 'navigation-core-roadcam-ui'),
-        'libnavigation-compose' : new Tuple2('compose', 'navigation-core-compose'),
-        'libnavigation-compose-core' : new Tuple2('compose-core', 'navigation-core-compose-core'),
-        'libnavigation-compose-foundation' : new Tuple2('compose-foundation', 'navigation-core-compose-foundation'),
-        'coordination' : new Tuple2('coordination', 'navigation-core-coordination'),
-        'coordination-full-hd' : new Tuple2('coordination-full-hd', 'navigation-core-coordination-full-hd'),
-        'core-mapgpt' : new Tuple2('core-mapgpt', 'navigation-core-mapgpt-core'),
-        'ui-mapgpt' : new Tuple2('ui-mapgpt', 'navigation-core-mapgpt-ui'),
-        'applemusic-mapgpt' : new Tuple2('applemusic-mapgpt', 'navigation-core-mapgpt-applemusic'),
-        'driver-notification' : new Tuple2('driver-notification', 'navigation-core-driver-notification'),
-        'ev-driver-notification' : new Tuple2('ev-driver-notification', 'navigation-core-ev-driver-notification'),
-        'audio' : new Tuple2('audio', 'navigation-core-audio'),
+        'libnavigation-android' : new Tuple2("android$ndkVersionSuffix", 'navigation-core-android'),
+        'base' : new Tuple2("base$ndkVersionSuffix", 'navigation-core-base'),
+        'navigation' : new Tuple2("navigation$ndkVersionSuffix", 'navigation-core-navigation'),
+        'copilot' : new Tuple2("copilot$ndkVersionSuffix", 'navigation-core-copilot'),
+        'metrics' : new Tuple2("metrics$ndkVersionSuffix", 'navigation-core-metrics'),
+        'tripdata' : new Tuple2("tripdata$ndkVersionSuffix", 'navigation-core-tripdata'),
+        'utils' : new Tuple2("utils$ndkVersionSuffix", 'navigation-core-utils'),
+        'voice' : new Tuple2("voice$ndkVersionSuffix", 'navigation-core-voice'),
+        'navigator' : new Tuple2("navigator$ndkVersionSuffix", 'navigation-core-navigator'),
+        'ui-base' : new Tuple2("ui-base$ndkVersionSuffix", 'navigation-core-ui-base'),
+        'ui-maps' : new Tuple2("ui-maps$ndkVersionSuffix", 'navigation-core-ui-maps'),
+        'ui-utils' : new Tuple2("ui-utils$ndkVersionSuffix", 'navigation-core-ui-utils'),
+        'notification' : new Tuple2("notification$ndkVersionSuffix", 'navigation-core-notification'),
+        'search' : new Tuple2("search$ndkVersionSuffix", 'navigation-core-search'),
+        'ui-components' : new Tuple2("ui-components$ndkVersionSuffix", 'navigation-core-ui-components'),
+        'androidauto' : new Tuple2("android-auto-components$ndkVersionSuffix", 'navigation-core-androidauto'),
+        'libtesting-router' : new Tuple2("test-router$ndkVersionSuffix", 'navigation-core-testing-router'),
+        'libnavigation-custom-route' : new Tuple2("customroute$ndkVersionSuffix", 'navigation-core-custom-route'),
+        'datainputs' : new Tuple2("datainputs$ndkVersionSuffix", 'navigation-core-datainputs'),
+        'adasis' : new Tuple2("adasis$ndkVersionSuffix", 'navigation-core-adasis'),
+        'ev' : new Tuple2("ev$ndkVersionSuffix", 'navigation-core-ev'),
+        'ev-rangemap' : new Tuple2("ev-rangemap$ndkVersionSuffix", 'navigation-core-ev-rangemap'),
+        'ev-ui' : new Tuple2("ev-ui$ndkVersionSuffix", 'navigation-core-ev-ui'),
+        'weather' : new Tuple2("weather$ndkVersionSuffix", 'navigation-core-weather'),
+        'roadcam' : new Tuple2("roadcam$ndkVersionSuffix", 'navigation-core-roadcam'),
+        'roadcam-ui' : new Tuple2("roadcam-ui$ndkVersionSuffix", 'navigation-core-roadcam-ui'),
+        'libnavigation-compose' : new Tuple2("compose$ndkVersionSuffix", 'navigation-core-compose'),
+        'libnavigation-compose-core' : new Tuple2("compose-core$ndkVersionSuffix", 'navigation-core-compose-core'),
+        'libnavigation-compose-foundation' : new Tuple2("compose-foundation$ndkVersionSuffix", 'navigation-core-compose-foundation'),
+        'coordination' : new Tuple2("coordination$ndkVersionSuffix", 'navigation-core-coordination'),
+        'coordination-full-hd' : new Tuple2("coordination-full-hd$ndkVersionSuffix", 'navigation-core-coordination-full-hd'),
+        'core-mapgpt' : new Tuple2("core-mapgpt$ndkVersionSuffix", 'navigation-core-mapgpt-core'),
+        'ui-mapgpt' : new Tuple2("ui-mapgpt$ndkVersionSuffix", 'navigation-core-mapgpt-ui'),
+        'applemusic-mapgpt' : new Tuple2("applemusic-mapgpt$ndkVersionSuffix", 'navigation-core-mapgpt-applemusic'),
+        'driver-notification' : new Tuple2("driver-notification$ndkVersionSuffix", 'navigation-core-driver-notification'),
+        'ev-driver-notification' : new Tuple2("ev-driver-notification$ndkVersionSuffix", 'navigation-core-ev-driver-notification'),
+        'audio' : new Tuple2("audio$ndkVersionSuffix", 'navigation-core-audio'),
     ]
 }
 
