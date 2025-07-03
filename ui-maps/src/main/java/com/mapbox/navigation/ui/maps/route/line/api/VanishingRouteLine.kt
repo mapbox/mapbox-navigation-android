@@ -59,10 +59,12 @@ internal class VanishingRouteLine() {
     internal fun getOffset(
         point: Point,
         granularDistances: RouteLineGranularDistances,
-        index: Int,
+        upcomingGeoIndex: Int,
     ): Double? {
-        val upcomingIndex = granularDistances.routeDistances.getOrNull(index)
-        if (upcomingIndex == null) {
+        val upcomingDistance = granularDistances.routeDistances.getOrNull(
+            upcomingGeoIndex,
+        )
+        if (upcomingDistance == null) {
             logD(
                 "Upcoming route line index is null.",
                 "VanishingRouteLine",
@@ -70,11 +72,11 @@ internal class VanishingRouteLine() {
             return null
         }
 
-        if (index > 0) {
+        if (upcomingGeoIndex > 0) {
             val distanceToLine = MapboxRouteLineUtils.findDistanceToNearestPointOnCurrentLine(
                 point,
                 granularDistances,
-                index,
+                upcomingGeoIndex,
             )
             if (
                 distanceToLine >
@@ -83,20 +85,13 @@ internal class VanishingRouteLine() {
                 return null
             }
         }
-
-        val closestIndex = MapboxRouteLineUtils.findClosestRouteLineDistanceIndexToPoint(
-            point,
-            granularDistances,
-            index,
-        )
-
         /**
          * Take the remaining distance from the upcoming point on the route and extends it
          * by the exact position of the puck.
          */
-        val remainingDistance = granularDistances.routeDistances[closestIndex].distanceRemaining +
+        val remainingDistance = upcomingDistance.distanceRemaining +
             MapboxRouteLineUtils.calculateDistance(
-                granularDistances.routeDistances[closestIndex].point,
+                upcomingDistance.point,
                 point,
             )
 

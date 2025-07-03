@@ -85,8 +85,6 @@ import com.mapbox.navigation.ui.maps.route.line.model.SegmentColorType
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadNavigationRoute
 import com.mapbox.navigation.ui.maps.util.CacheResultUtils
 import com.mapbox.navigation.ui.maps.util.StyleManager
-import com.mapbox.turf.TurfConstants
-import com.mapbox.turf.TurfMeasurement
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -2794,47 +2792,5 @@ class MapboxRouteLineUtilsTest {
             SegmentColorType.ALTERNATIVE_DEFAULT,
             MapboxRouteLineUtils.getRouteColorTypeForCongestion("aaa", false),
         )
-    }
-
-    @Test
-    fun findClosestRouteLineDistanceIndexToPoint() {
-        val route = loadNavigationRoute("customer_test_route.json")
-        val granularDistances = MapboxRouteLineUtils.granularDistancesProvider(route)!!
-        val point = Point.fromLngLat(11.590394230334425, 48.166546952177086)
-        val index1 = MapboxRouteLineUtils.findClosestRouteLineDistanceIndexToPoint(
-            point,
-            granularDistances,
-            8,
-        )
-        val index2 = MapboxRouteLineUtils.findClosestRouteLineDistanceIndexToPoint(
-            point,
-            granularDistances,
-            9,
-        )
-
-        assertEquals(index1, index2)
-    }
-
-    @Test
-    fun findClosestRouteLineDistanceIndexToPoint_whenPointBeyondLastGranularDistancePoint() {
-        val route = loadNavigationRoute("short_route.json")
-        val granularDistances = MapboxRouteLineUtils.granularDistancesProvider(route)!!
-        val bearing = TurfMeasurement.bearing(
-            granularDistances.routeDistances[granularDistances.routeDistances.lastIndex - 1].point,
-            granularDistances.routeDistances[granularDistances.routeDistances.lastIndex].point,
-        )
-        val point = TurfMeasurement.destination(
-            granularDistances.routeDistances[granularDistances.routeDistances.lastIndex].point,
-            1.0,
-            bearing,
-            TurfConstants.UNIT_METERS,
-        )
-        val index = MapboxRouteLineUtils.findClosestRouteLineDistanceIndexToPoint(
-            point,
-            granularDistances,
-            granularDistances.routeDistances.lastIndex,
-        )
-
-        assertEquals(index, 4)
     }
 }

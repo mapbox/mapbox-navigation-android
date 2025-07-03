@@ -9,6 +9,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.findRoute
 import com.mapbox.navigation.core.trip.session.TripSession
@@ -213,6 +214,7 @@ class RouteAlternativesControllerTest {
                     routes = listOf(createDirectionsRoute(refreshTtl = 5)),
                 ).toJson(),
                 responseUUID = "test",
+                routeGeometry = emptyList(),
             )
             nativeObserver.captured.onRouteAlternativesUpdated(
                 testOnlinePrimaryRoute,
@@ -258,6 +260,7 @@ class RouteAlternativesControllerTest {
                     routes = listOf(createDirectionsRoute(refreshTtl = null)),
                 ).toJson(),
                 responseUUID = "test",
+                routeGeometry = emptyList(),
             )
             nativeObserver.captured.onRouteAlternativesUpdated(
                 testOnlinePrimaryRoute,
@@ -1315,6 +1318,7 @@ class RouteAlternativesControllerTest {
             routerOrigin = routerOrigin,
             responseUUID = response.uuid()!!,
             routeIndex = routeIndex,
+            routeGeometry = response.routes()[0].completeGeometryToPoints(),
         )
 
         return mockk {

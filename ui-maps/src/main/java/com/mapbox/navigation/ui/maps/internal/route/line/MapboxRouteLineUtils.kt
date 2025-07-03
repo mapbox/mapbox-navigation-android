@@ -70,7 +70,6 @@ import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.turf.TurfConstants
-import com.mapbox.turf.TurfMeasurement
 import com.mapbox.turf.TurfMisc
 import kotlinx.coroutines.CoroutineScope
 import kotlin.math.abs
@@ -1043,19 +1042,11 @@ internal object MapboxRouteLineUtils {
         stepsArray.forEachIndexed { legIndex, stepDistances ->
             val legArray = mutableListOf<RouteLineDistancesIndex>()
             stepDistances.forEachIndexed { stepIndex, distances ->
-                val squashed = if (distances.size == 2) {
-                    // step with 2 coordinate might have duplicated values
-                    distances.toSet().toTypedArray()
-                } else {
-                    distances
-                }
                 legArray.addAll(
-                    if (stepIndex != 0) {
-                        // removing duplicate points for adjacent steps
-                        // Array#copyOfRange is significantly faster than Collection#drop
-                        squashed.copyOfRange(1, squashed.size)
-                    } else {
-                        squashed
+                    when (stepIndex) {
+                        0 -> distances
+                        stepDistances.lastIndex -> emptyArray()
+                        else -> distances.copyOfRange(1, distances.size)
                     } as Array<RouteLineDistancesIndex>,
                 )
             }
@@ -1074,7 +1065,7 @@ internal object MapboxRouteLineUtils {
         }
 
         return RouteLineGranularDistances(
-            distance,
+            completeDistance = distance,
             routeDistances = routeArray.toTypedArray(),
             legsDistances = legsArray.toTypedArray(),
             stepsDistances = stepsArray as Array<Array<Array<RouteLineDistancesIndex>>>,
@@ -1194,94 +1185,6 @@ internal object MapboxRouteLineUtils {
             },
             TurfConstants.UNIT_METERS,
         ).getNumberProperty("dist")?.toDouble() ?: 0.0
-    }
-
-    /**
-     * Searches for the closest [RouteLineDistanceIndex] to the point
-     * that the point hasn't passed along the route.
-     *
-     * For example if point is between index 2 and 3 of [RouteLineGranularDistances]
-     * and closest to 2 but has already past the [RouteLineGranularDistances] at index
-     * 2 along the route, the [RouteLineGranularDistances] at index 3 will be returned.
-     */
-    /*
-        Prior to this the RouteProgress.currentRouteGeometryIndex was used
-        to find the closest RouteLineGranularDistances to a point but there
-        are cases where nav. native can emit values in non-consecutive order.
-        Meaning values emitted can resemble 7-8-9-8-9-10. This would result
-        in trim-offset values that would jump in value then decrement in value.
-        The code below should resolve this issue by returning the same RouteLineGranularDistances
-        index even in cases where the upcomingIndex parameter has incremented
-        "erroneously".
-
-        In order to determine which RouteLineDistanceIndex to return the bearing of the
-        two RouteLineDistanceIndexes the point is between are compared to the bearing
-        of the point to the preliminary RouteLineDistanceIndex. If the point hasn't passed
-        the preliminary RouteLineDistanceIndex it should have a similar bearing.
-     */
-    internal fun findClosestRouteLineDistanceIndexToPoint(
-        point: Point,
-        granularDistances: RouteLineGranularDistances,
-        upcomingIndex: Int,
-    ): Int {
-        val closest = getClosestRoutLineDistanceIndex(point, granularDistances, upcomingIndex)
-        if (closest.first == 0) {
-            return 1
-        }
-
-        val baseBearing = TurfMeasurement.bearing(
-            granularDistances.routeDistances[closest.first - 1].point,
-            granularDistances.routeDistances[closest.first].point,
-        )
-        val closesPointBearing = TurfMeasurement.bearing(
-            point,
-            granularDistances.routeDistances[closest.first].point,
-        )
-        return if (isWithin30Degrees(baseBearing, closesPointBearing)) {
-            closest.first
-        } else {
-            if (closest.first < granularDistances.routeDistances.lastIndex) {
-                closest.first + 1
-            } else {
-                closest.first
-            }
-        }
-    }
-
-    private fun getClosestRoutLineDistanceIndex(
-        point: Point,
-        granularDistances: RouteLineGranularDistances,
-        upcomingIndex: Int,
-    ): Pair<Int, Double> {
-        val pointIndex = max(upcomingIndex - 10, 0)
-        val initialDistance = TurfMeasurement.distance(
-            granularDistances.routeDistances[pointIndex].point,
-            point,
-            TurfConstants.UNIT_METERS,
-        )
-        var closest = Pair(pointIndex, initialDistance)
-        for (i in pointIndex..upcomingIndex) {
-            val distance = TurfMeasurement.distance(
-                granularDistances.routeDistances[i].point,
-                point,
-                TurfConstants.UNIT_METERS,
-            )
-            if (distance < closest.second) {
-                closest = Pair(i, distance)
-            }
-        }
-        return closest
-    }
-
-    /*
-    Determines if two bearings have a range of 30 degrees or less.
-     */
-    private fun isWithin30Degrees(bearing1: Double, bearing2: Double): Boolean {
-        val normalizedBearing1 = bearing1 % 360
-        val normalizedBearing2 = bearing2 % 360
-        val difference = abs(normalizedBearing1 - normalizedBearing2)
-
-        return difference <= 30
     }
 
     internal fun buildScalingExpression(scalingValues: List<RouteLineScaleValue>): Expression {

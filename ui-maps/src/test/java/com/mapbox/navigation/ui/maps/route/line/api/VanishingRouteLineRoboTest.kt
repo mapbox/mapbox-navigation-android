@@ -137,9 +137,9 @@ class VanishingRouteLineRoboTest {
 
     @Test
     fun getTraveledRouteLineExpressionsWithNonZeroPoint() = coroutineRule.runBlockingTest {
-        val expectedTrafficExpressionContents = Value.valueOf(0.2638437072304186)
-        val expectedRouteLineExpressionContents = Value.valueOf(0.2638437072304186)
-        val expectedCasingExpressionContents = Value.valueOf(0.2638437072304186)
+        val expectedTrafficExpressionContents = Value.valueOf(0.2638444811623909)
+        val expectedRouteLineExpressionContents = Value.valueOf(0.2638444811623909)
+        val expectedCasingExpressionContents = Value.valueOf(0.2638444811623909)
 
         val route = loadNavigationRoute("short_route.json")
         val lineString = LineString.fromPolyline(

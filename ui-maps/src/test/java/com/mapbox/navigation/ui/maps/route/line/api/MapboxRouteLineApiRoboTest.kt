@@ -4436,10 +4436,10 @@ class MapboxRouteLineApiRoboTest {
             .vanishingRouteLineUpdateIntervalNano(0)
             .build()
         val api = MapboxRouteLineApi(apiOptions)
-        val expectedCasingExpressionContents = Value.valueOf(0.2638437072304186)
-        val expectedRouteExpressionContents = Value.valueOf(0.2638437072304186)
-        val expectedTrafficExpressionContents = Value.valueOf(0.2638437072304186)
-        val expectedRestrictedExpressionContents = Value.valueOf(0.2638437072304186)
+        val expectedCasingExpressionContents = Value.valueOf(0.3240769449298392)
+        val expectedRouteExpressionContents = Value.valueOf(0.3240769449298392)
+        val expectedTrafficExpressionContents = Value.valueOf(0.3240769449298392)
+        val expectedRestrictedExpressionContents = Value.valueOf(0.3240769449298392)
         val route = shortRoute.navigationRoute
         val lineString = LineString.fromPolyline(
             route.directionsRoute.geometry() ?: "",
@@ -4546,8 +4546,8 @@ class MapboxRouteLineApiRoboTest {
         api.updateVanishingPointState(routeProgress.currentState)
         val result = api.updateTraveledRouteLine(lineString.coordinates()[16])
 
-        val expectedTrafficExpressionContents = Value.valueOf(0.3775848671550963)
-        val expectedMaskingTrafficExpressionContents = Value.valueOf(0.3775848671550963)
+        val expectedTrafficExpressionContents = 0.37758486715525985
+        val expectedMaskingTrafficExpressionContents = 0.37758486715525985
 
         assertEquals(
             expectedTrafficExpressionContents,
@@ -4555,7 +4555,8 @@ class MapboxRouteLineApiRoboTest {
                 result.value!!.primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!,
                 viewOptions,
                 "line-trim-end",
-            ),
+            ).contents as Double,
+            0.0001,
         )
         assertEquals(
             expectedMaskingTrafficExpressionContents,
@@ -4563,7 +4564,8 @@ class MapboxRouteLineApiRoboTest {
                 result.value!!.routeLineMaskingLayerDynamicData!!.trafficExpressionCommandHolder!!,
                 viewOptions,
                 "line-trim-end",
-            ),
+            ).contents as Double,
+            0.0001,
         )
         assertNull(result.value!!.routeLineMaskingLayerDynamicData!!.trailExpressionCommandHolder)
         assertNull(
@@ -4662,7 +4664,7 @@ class MapboxRouteLineApiRoboTest {
                 .build()
                 .toData()
             val api = MapboxRouteLineApi(apiOptions)
-            val expectedRestrictedExpressionContents = Value.valueOf(0.017526274708172696)
+            val expectedRestrictedExpressionContents = Value.valueOf(0.04111412293617067)
             val route = routeWithRestrictions.navigationRoute
             val lineString = LineString.fromPolyline(
                 route.directionsRoute.geometry() ?: "",
@@ -4704,10 +4706,10 @@ class MapboxRouteLineApiRoboTest {
     @Test
     fun updateTraveledRouteLine_whenRouteRestrictionsEnabledButHasNone() =
         coroutineRule.runBlockingTest {
-            val expectedCasingExpressionContents = Value.valueOf(0.2638437072304186)
-            val expectedRouteExpressionContents = Value.valueOf(0.2638437072304186)
-            val expectedTrafficExpressionContents = Value.valueOf(0.2638437072304186)
-            val restrictedTrafficExpressionContents = Value.valueOf(0.2638437072304186)
+            val expectedCasingExpressionContents = Value.valueOf(0.3240769449298392)
+            val expectedRouteExpressionContents = Value.valueOf(0.3240769449298392)
+            val expectedTrafficExpressionContents = Value.valueOf(0.3240769449298392)
+            val restrictedTrafficExpressionContents = Value.valueOf(0.3240769449298392)
             val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
                 .displayRestrictedRoadSections(true)
                 .build()

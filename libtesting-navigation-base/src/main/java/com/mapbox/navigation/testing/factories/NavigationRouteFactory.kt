@@ -17,6 +17,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.ResponseOriginAPI
 import com.mapbox.navigation.base.route.ResponseOriginAPI.Companion.DIRECTIONS_API
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.Waypoint
@@ -130,7 +131,8 @@ fun createRouteInterfacesFromDirectionRequestResponse(
                 waypoints = nativeWaypointsMapper(
                     responseModel.waypoints() ?: directionsRoute.waypoints() ?: emptyList(),
                     directionsRoute.routeOptions()
-                )
+                ),
+                routeGeometry = directionsRoute.completeGeometryToPoints(),
             )
         }
 }

@@ -1,11 +1,8 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
-import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
-import com.mapbox.navigation.ui.maps.testing.TestingUtil
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl
 import io.mockk.every
@@ -25,6 +22,7 @@ class VanishingRouteLineTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()
+
     private val parentJob = SupervisorJob()
     private val testScope = CoroutineScope(parentJob + coroutineRule.testDispatcher)
     private lateinit var testJobControl: JobControl
@@ -71,26 +69,5 @@ class VanishingRouteLineTest {
         }
 
         assertEquals(VanishingPointState.DISABLED, vanishingRouteLine.vanishingPointState)
-    }
-
-    @Test
-    fun getOffsetWhenIndexVaries() {
-        val route = TestingUtil.loadNavigationRoute("customer_test_route.json")
-        val granularDistances = MapboxRouteLineUtils.granularDistancesProvider(route)!!
-        val vanishingRouteLine = VanishingRouteLine()
-
-        val offset1 = vanishingRouteLine.getOffset(
-            Point.fromLngLat(11.590394230334425, 48.166546952177086),
-            granularDistances,
-            8,
-        )
-
-        val offset2 = vanishingRouteLine.getOffset(
-            Point.fromLngLat(11.590394230334425, 48.166546952177086),
-            granularDistances,
-            9,
-        )
-
-        assertEquals(offset1, offset2)
     }
 }
