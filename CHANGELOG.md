@@ -1,5 +1,36 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.11.0-beta.1 - 04 July, 2025
+#### Features
+- Added support for Android 16 KB page-size devices. To consume SDK compatible with NDK 27 you need to add `-ndk27` suffix to the artifact name, for example, `com.mapbox.navigationcore:navigation` -> `com.mapbox.navigationcore:navigation-ndk27`. 
+- Added method overload `TilesetDescriptorFactory#getLatest(Boolean)` that allows to specify whether to include ADAS tiles. 
+- Extracted TTS functionality into a new module `audio`. 
+- DR improvements - more robust models for GNSS trust, road calibration, and wheel speed trust; 
+- Improve main thread utilization by removing unintended locks (visible on systems with overloaded CPU) 
+- Disable the defaults for collection of tunnel/bridge subgraphs in free drive. The clients will need to specify explicitly which objects to collect via AlertServiceOptions in the public SDK interface. 
+- Added support of immediate update of location puck bearing in [NavigationLocationProvider] in case of overlapping key points. 
+- `RoadCamerasManager` in active guidance now relies on new `road_camera` Directions API annotation, which improves the performance of the camera data retrieval and quality of the data. 
+- Added `MapboxRoadCamera::activeGuidanceInfo`, containing information about the route id, leg index, geometry index and step intersection of the camera in active guidance. 
+
+#### Bug fixes and improvements
+- Fixed an issue where after a reroute the vanishing point on the route line might have been ahead of the actual vehicle's position. 
+- Added `HistoryRecorderOptions#shouldRecordRouteLineEvents` property to enable/disable route line events collection for manual recording (see `CopilotOptions#shouldRecordRouteLineEvents` for the same functionality with Copilot); it is disabled by default. 
+- Fixed an issue where the Speed Camera notification would appear prematurely when the car's speed was 0. 
+- Fix Route replayer: normalize bearing values to be in the range of [0..360) degrees. 
+- Fixed a bug where alternative routes from `RoutesUpdatedResult#ignoredRoutes` were set to `RoutesUpdatedResult#navigationRoutes` after the first route progress update. 
+- Fix when already passed part of route appears behind CCP 
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Java `v7.4.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.4.0))
+
+
 ## Navigation SDK Core Framework 3.10.0-beta.1 - 22 May, 2025
 #### Features
 - ⚠️ Breaking changes in Experimental API. `MapboxEvSearchClientFactory.#getInstance()` no longer accepts access token as a parameter. The default `MapboxOptions.accessToken` will be used. 
