@@ -25,13 +25,12 @@ import com.mapbox.navigation.copilot.internal.PushStatus
 import com.mapbox.navigation.copilot.internal.PushStatusObserver
 import com.mapbox.navigation.copilot.work.HistoryUploadWorker
 import com.mapbox.navigation.copilot.work.HistoryUploadWorker.Companion.putCopilotSession
-import com.mapbox.navigation.utils.internal.logD
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import io.mockk.CapturingSlot
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
-import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkAll
 import io.mockk.verify
@@ -41,6 +40,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import java.io.File
 
@@ -48,6 +48,9 @@ import java.io.File
 @Suppress("MaximumLineLength", "MaxLineLength")
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class HistoryUploadWorkerTest {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     private lateinit var mockedContext: Context
     private lateinit var mockedUploadServiceInterface: HttpServiceInterface
@@ -74,12 +77,6 @@ class HistoryUploadWorkerTest {
 
     @Before
     fun setup() {
-        mockkStatic("com.mapbox.navigation.utils.internal.LoggerProviderKt")
-        every { logD(msg = any(), category = any()) } answers {
-            // // uncomment to verify log printout
-            // println(secondArg<String?>() + " " + firstArg())
-        }
-
         // Mock File operations
         mockkObject(HistoryAttachmentsUtils)
         coEvery { rename(any(), any()) } coAnswers {
@@ -192,25 +189,6 @@ class HistoryUploadWorkerTest {
     }
 
     @Test
-    fun `remove history file not called - FAILED`() = runBlocking {
-        givenUploadServiceAnswer(
-            uploadStatus(
-                state = TransferState.FAILED,
-                error = mockk<TransferError>(relaxed = true) {
-                    every { code } returns mockk<TransferErrorCode>()
-                },
-            ),
-        )
-
-        HistoryUploadWorker(mockedContext, workerParams(stubCopilotSession))
-            .doWork()
-
-        verify(exactly = 0) {
-            delete(any())
-        }
-    }
-
-    @Test
     fun `Result retry - FAILED`() = runBlocking {
         givenUploadServiceAnswer(
             uploadStatus(
@@ -280,7 +258,55 @@ class HistoryUploadWorkerTest {
     }
 
     @Test
-    fun `remove history file - runAttemptCount greater or equal than MAX_RUN_ATTEMPT_COUNT`() =
+    fun `remove history file not called - FAILED, runAttemptCount = 1`() = runBlocking {
+        givenUploadServiceAnswer(
+            uploadStatus(
+                state = TransferState.FAILED,
+                error = mockk<TransferError>(relaxed = true) {
+                    every { code } returns mockk<TransferErrorCode>()
+                },
+            ),
+        )
+
+        HistoryUploadWorker(mockedContext, workerParams(stubCopilotSession, runAttemptCount = 1))
+            .doWork()
+
+        verify(exactly = 0) {
+            delete(any())
+        }
+    }
+
+    @Test
+    fun `remove history file - FAILED, runAttemptCount = MAX_RUN_ATTEMPT_COUNT`() =
+        runBlocking {
+            givenUploadServiceAnswer(
+                uploadStatus(
+                    state = TransferState.FAILED,
+                    error = mockk<TransferError>(relaxed = true) {
+                        every { code } returns mockk<TransferErrorCode>()
+                    },
+                ),
+            )
+
+            HistoryUploadWorker(
+                mockedContext,
+                workerParams(
+                    stubCopilotSession,
+                    runAttemptCount = HistoryUploadWorker.MAX_RUN_ATTEMPT_COUNT,
+                ),
+            ).doWork()
+
+            val deletedFiles = mutableListOf<File>()
+            verify(exactly = 2) {
+                delete(capture(deletedFiles))
+            }
+            assertEquals(2, deletedFiles.size)
+            assertNotNull(deletedFiles.first { it.name.endsWith("pbf.gz") })
+            assertNotNull(deletedFiles.first { it.name.endsWith("metadata.json") })
+        }
+
+    @Test
+    fun `remove history file - FINISHED 204`() =
         runBlocking {
             givenUploadServiceAnswer(
                 uploadStatus(
@@ -290,7 +316,7 @@ class HistoryUploadWorkerTest {
                 ),
             )
 
-            HistoryUploadWorker(mockedContext, workerParams(stubCopilotSession, 8))
+            HistoryUploadWorker(mockedContext, workerParams(stubCopilotSession))
                 .doWork()
 
             val deletedFiles = mutableListOf<File>()
@@ -314,8 +340,10 @@ class HistoryUploadWorkerTest {
                 ),
             )
 
-            val result = HistoryUploadWorker(mockedContext, workerParams(stubCopilotSession, 8))
-                .doWork()
+            val result = HistoryUploadWorker(
+                mockedContext,
+                workerParams(stubCopilotSession, HistoryUploadWorker.MAX_RUN_ATTEMPT_COUNT),
+            ).doWork()
 
             assertTrue(result is ListenableWorker.Result.Failure)
         }

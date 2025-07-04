@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit
 /**
  * Periodic task worker that scans HISTORY_FILES_DIR and:
  * - schedules [HistoryUploadWorker] task for each .pbf.gz recording file that has
- *   matching .metadata.json session file, expect the latest one
+ *   matching .metadata.json session file, expect the latest one (active copilot session)
  * - deletes all residual .pbf.gz recording files that's missing .metadata.json session file
  *
  * IMPORTANT: This worker expects all files to be chronologically named.
@@ -103,6 +103,8 @@ internal class PeriodicHistoryCleanupWorker(
             }
     }
 
+    private fun logD(msg: String) = logD("[cleanup] [$id] $msg", LOG_CATEGORY)
+
     internal companion object {
 
         private const val HISTORY_FILES_DIR: String = "history_files_dir"
@@ -136,8 +138,6 @@ internal class PeriodicHistoryCleanupWorker(
                     workRequest,
                 )
         }
-
-        private fun logD(msg: String) = logD("[cleanup] $msg", LOG_CATEGORY)
 
         private fun logE(msg: String) = logE("[cleanup] $msg", LOG_CATEGORY)
     }

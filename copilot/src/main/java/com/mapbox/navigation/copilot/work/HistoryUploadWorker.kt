@@ -10,6 +10,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import androidx.work.WorkRequest
 import androidx.work.WorkerParameters
 import com.mapbox.common.MapboxOptions
 import com.mapbox.common.TransferState
@@ -33,6 +34,7 @@ import com.mapbox.navigation.copilot.internal.CopilotSession
 import com.mapbox.navigation.copilot.internal.PushStatus
 import com.mapbox.navigation.copilot.internal.saveFilename
 import com.mapbox.navigation.utils.internal.logD
+import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -51,6 +53,12 @@ internal class HistoryUploadWorker(
 
     /**
      * doWork
+     *
+     * TODO(NAVAND-5879) worker can be stopped if it runs longer than 10 minutes
+     *
+     * A ListenableWorker is given a maximum of ten minutes to finish its execution and return a
+     * Result. After this time has expired, the worker will be signalled to stop and its
+     * com.google.common.util.concurrent.ListenableFuture will be cancelled.
      */
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         val copilotSession = copilotSessionFrom(workerParams.inputData)
@@ -87,12 +95,17 @@ internal class HistoryUploadWorker(
         } else {
             failure(copilotSession)
             if (runAttemptCount >= MAX_RUN_ATTEMPT_COUNT) {
-                logD("Result.failure()")
+                logW("Result.failure(${recordingFile.name}|${sessionFile.name})")
                 delete(recordingFile)
                 delete(sessionFile)
                 Result.failure()
             } else {
-                logD("Result.retry()")
+                logD(
+                    "Result.retry(" +
+                        "${recordingFile.name}|${sessionFile.name}, " +
+                        "runAttemptCount = $runAttemptCount" +
+                        ")",
+                )
                 Result.retry()
             }
         }
@@ -129,7 +142,7 @@ internal class HistoryUploadWorker(
                 }
 
                 TransferState.FAILED -> {
-                    logD(
+                    logW(
                         "uploadStatus state = FAILED error = ${uploadStatus.error}; " +
                             "HttpResponseData = ${uploadStatus.httpResult?.value}",
                     )
@@ -160,7 +173,8 @@ internal class HistoryUploadWorker(
         }
     }
 
-    private fun logD(msg: String) = logD("[upload] $msg", LOG_CATEGORY)
+    private fun logD(msg: String) = logD("[upload] [$id] $msg", LOG_CATEGORY)
+    private fun logW(msg: String) = logW("[upload] [$id] $msg", LOG_CATEGORY)
 
     internal companion object {
 
@@ -179,9 +193,25 @@ internal class HistoryUploadWorker(
         private const val UPLOAD_SESSION_ID = "upload_session_id"
         private const val OWNER = "owner"
 
-        // 2^8 x 338 = 86528 / 3600 = 24.03 hours
-        private const val MAX_RUN_ATTEMPT_COUNT = 8
-        private const val DELAY_IN_SECONDS = 338L
+        /**
+         * Max backoff delay is limited by [WorkRequest.MAX_BACKOFF_MILLIS] (5 hours = 18 000 seconds).
+         * The total cumulative retry time could be approximately 20 hours
+         * (it can be more depending on system delays):
+         *
+         * 300 * 2⁰	= 300
+         * 300 * 2¹	= 600
+         * 300 * 2²	= 1200
+         * 300 * 2³	= 2400
+         * 300 * 2⁴	= 4800
+         * 300 * 2⁵	= 9600
+         * 300 * 2⁶	= 19200 -> capped to 18000
+         * 300 * 2⁷	= 38400 -> capped to 18000
+         * 300 × 2⁸	= 76800 -> caped to 18000
+         *
+         * Total delay is 72900 seconds ≈ 20 hours
+         */
+        const val MAX_RUN_ATTEMPT_COUNT = 9
+        private const val DELAY_IN_SECONDS = 300L // 5 minutes
 
         /**
          * uploadHistory
