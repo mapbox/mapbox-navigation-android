@@ -10,6 +10,7 @@ fun Map<String, String>.toEvStateData(): EvStateData {
         this["energy_consumption_curve"]?.toCurveElements() ?: emptyList(),
         this["auxiliary_consumption"]?.toIntOrNull(),
         this["ev_pre_conditioning_time"]?.toIntOrNull(),
+        this["ev_unconditioned_charging_curve"]?.toCurveElements() ?: emptyList(),
     )
 }
 

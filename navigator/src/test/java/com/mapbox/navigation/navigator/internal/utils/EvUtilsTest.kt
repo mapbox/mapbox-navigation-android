@@ -24,6 +24,7 @@ class EvUtilsTest {
             listOf(CurveElement(1.0f, 2.0f), CurveElement(3.0f, 4.0f)),
             null,
             null,
+            emptyList(),
         )
 
         assertEquals(expected, input.toEvStateData())
@@ -36,12 +37,14 @@ class EvUtilsTest {
             "energy_consumption_curve" to "1.0,2.0;3.0,4.0",
             "auxiliary_consumption" to "5",
             "ev_pre_conditioning_time" to "7",
+            "ev_unconditioned_charging_curve" to "5.0,6.0;7.0,8.0",
         )
         val expected = EvStateData(
             10,
             listOf(CurveElement(1.0f, 2.0f), CurveElement(3.0f, 4.0f)),
             5,
             7,
+            listOf(CurveElement(5.0f, 6.0f), CurveElement(7.0f, 8.0f)),
         )
 
         assertEquals(expected, input.toEvStateData())
