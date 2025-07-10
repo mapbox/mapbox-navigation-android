@@ -30,6 +30,7 @@ internal class SimplifiedFrameAnimatorsCreatorTest {
 
     private val animatorsCreator = SimplifiedFrameAnimatorsCreator(
         cameraAnimationsPlugin,
+        mockk(relaxed = true),
         stateTransition,
         simplifiedUpdateFrameTransition,
     )

@@ -4,24 +4,43 @@ import android.animation.Animator
 import android.animation.Animator.AnimatorListener
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
+import com.mapbox.maps.CameraAnimationHint
+import com.mapbox.maps.CameraState
+import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
+import com.mapbox.maps.plugin.animation.calculateCameraAnimationHint
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.mockk.slot
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import io.mockk.verifyOrder
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 
 internal class FullAnimatorSetTest {
 
     private val cameraPlugin = mockk<CameraAnimationsPlugin>(relaxed = true)
+    private val mapboxMap = mockk<MapboxMap>(relaxed = true)
     private val children = arrayListOf<Animator>(mockk<ValueAnimator>(), mockk<ValueAnimator>())
     private val originalAnimatorSet = mockk<AnimatorSet>(relaxed = true) {
         every { childAnimations } returns children
     }
 
-    private val fullAnimatorSet = FullAnimatorSet(cameraPlugin, originalAnimatorSet)
+    private val fullAnimatorSet = FullAnimatorSet(cameraPlugin, mapboxMap, originalAnimatorSet)
+
+    @Before
+    fun setUp() {
+        mockkStatic("com.mapbox.maps.plugin.animation.CameraAnimationsUtils")
+    }
+
+    @After
+    fun tearDown() {
+        unmockkStatic("com.mapbox.maps.plugin.animation.CameraAnimationsUtils")
+    }
 
     @Test
     fun addListener() {
@@ -109,10 +128,24 @@ internal class FullAnimatorSetTest {
 
     @Test
     fun start() {
+        val fractions = listOf(0.25f, 0.5f, 0.75f, 1f)
+        val cameraState = mockk<CameraState>()
+        every { mapboxMap.cameraState } returns cameraState
+
+        val mockHint = mockk<CameraAnimationHint>()
+        every {
+            originalAnimatorSet.calculateCameraAnimationHint(
+                fractions,
+                cameraState,
+            )
+        } returns mockHint
+
         fullAnimatorSet.start()
 
         verifyOrder {
             cameraPlugin.registerAnimators(*children.map { it as ValueAnimator }.toTypedArray())
+            originalAnimatorSet.calculateCameraAnimationHint(fractions, cameraState)
+            mapboxMap.setCameraAnimationHint(mockHint)
             originalAnimatorSet.start()
         }
     }

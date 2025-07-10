@@ -1,11 +1,13 @@
 package com.mapbox.navigation.ui.maps.camera.transition
 
 import com.mapbox.maps.CameraOptions
+import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.navigation.ui.maps.internal.camera.SimplifiedUpdateFrameTransitionProvider
 
 internal class SimplifiedFrameAnimatorsCreator(
     private val cameraAnimationsPlugin: CameraAnimationsPlugin,
+    private val mapboxMap: MapboxMap,
     private val stateTransition: NavigationCameraStateTransition,
     private val simplifiedUpdateFrameTransition: SimplifiedUpdateFrameTransitionProvider,
 ) : AnimatorsCreator {
@@ -16,6 +18,7 @@ internal class SimplifiedFrameAnimatorsCreator(
     ): FullAnimatorSet {
         return FullAnimatorSet(
             cameraAnimationsPlugin,
+            mapboxMap,
             stateTransition.transitionToFollowing(cameraOptions, transitionOptions),
         )
     }
@@ -26,6 +29,7 @@ internal class SimplifiedFrameAnimatorsCreator(
     ): FullAnimatorSet {
         return FullAnimatorSet(
             cameraAnimationsPlugin,
+            mapboxMap,
             stateTransition.transitionToOverview(cameraOptions, transitionOptions),
         )
     }
@@ -36,6 +40,7 @@ internal class SimplifiedFrameAnimatorsCreator(
     ): MapboxAnimatorSet {
         return SimplifiedAnimatorSet(
             cameraAnimationsPlugin,
+            mapboxMap,
             simplifiedUpdateFrameTransition.updateFollowingFrame(cameraOptions, transitionOptions),
         )
     }
@@ -46,6 +51,7 @@ internal class SimplifiedFrameAnimatorsCreator(
     ): MapboxAnimatorSet {
         return SimplifiedAnimatorSet(
             cameraAnimationsPlugin,
+            mapboxMap,
             simplifiedUpdateFrameTransition.updateOverviewFrame(cameraOptions, transitionOptions),
         )
     }

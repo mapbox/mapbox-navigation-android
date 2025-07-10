@@ -182,6 +182,7 @@ internal constructor(
         viewportDataSource,
         SimplifiedFrameAnimatorsCreator(
             cameraPlugin,
+            mapboxMap,
             stateTransition,
             simplifiedUpdateFrameTransitionProvider,
         ),
@@ -212,12 +213,13 @@ internal constructor(
                 true -> {
                     SimplifiedFrameAnimatorsCreator(
                         cameraPlugin,
+                        mapboxMap,
                         stateTransition,
                         DefaultSimplifiedUpdateFrameTransitionProvider(mapboxMap, cameraPlugin),
                     )
                 }
                 false -> {
-                    FullFrameAnimatorsCreator(stateTransition, cameraPlugin)
+                    FullFrameAnimatorsCreator(stateTransition, cameraPlugin, mapboxMap)
                 }
             }
         }
