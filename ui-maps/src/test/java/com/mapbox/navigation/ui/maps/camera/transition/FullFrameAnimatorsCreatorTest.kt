@@ -25,6 +25,7 @@ internal class FullFrameAnimatorsCreatorTest {
     private val animatorsCreator = FullFrameAnimatorsCreator(
         stateTransition,
         cameraAnimationsPlugin,
+        mockk(relaxed = true),
     )
 
     @Test

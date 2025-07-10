@@ -2,7 +2,11 @@ package com.mapbox.navigation.ui.maps.camera.transition
 
 import android.animation.Animator
 import android.animation.ValueAnimator
+import com.mapbox.maps.MapboxExperimental
+import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
+import com.mapbox.maps.plugin.animation.animator.CameraAnimator
+import com.mapbox.maps.plugin.animation.calculateCameraAnimationHint
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
@@ -13,9 +17,14 @@ import java.util.concurrent.CopyOnWriteArrayList
  * Used internal to avoid using [AnimatorSet.start] to make starting animations more performant.
  */
 internal class SimplifiedAnimatorSet(
-    val cameraPlugin: CameraAnimationsPlugin,
+    private val cameraPlugin: CameraAnimationsPlugin,
+    private val mapboxMap: MapboxMap,
     children: List<ValueAnimator>,
 ) : MapboxAnimatorSet {
+
+    // Calculate camera animation hints for the specified fractions to pre-download tiles.
+    // These values are totally based on heuristics and can be changed in the future.
+    private val fractions = listOf(0.25f, 0.5f, 0.75f, 1f)
 
     private val children = children.toTypedArray()
     private val externalEndListeners = CopyOnWriteArrayList<MapboxAnimatorSetEndListener>()
@@ -29,7 +38,7 @@ internal class SimplifiedAnimatorSet(
                 }
             },
         )
-        children.forEach { it.addListener(simplifiedAnimatorSetListener) }
+        this.children.forEach { it.addListener(simplifiedAnimatorSetListener) }
     }
 
     override fun addAnimationEndListener(listener: MapboxAnimatorSetEndListener) {
@@ -40,8 +49,15 @@ internal class SimplifiedAnimatorSet(
         children.forEach { it.duration = 0 }
     }
 
+    @OptIn(MapboxExperimental::class)
     override fun start() {
         cameraPlugin.registerAnimators(*children)
+        val cameraChildren = children.filterIsInstance<CameraAnimator<*>>()
+        if (cameraChildren.size == children.size) {
+            cameraChildren.calculateCameraAnimationHint(fractions, mapboxMap.cameraState)?.let {
+                mapboxMap.setCameraAnimationHint(it)
+            }
+        }
         children.forEach { it.start() }
     }
 

@@ -4,13 +4,21 @@ import android.animation.Animator
 import android.animation.Animator.AnimatorListener
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
+import com.mapbox.maps.MapboxExperimental
+import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
+import com.mapbox.maps.plugin.animation.calculateCameraAnimationHint
 import java.util.concurrent.CopyOnWriteArrayList
 
 internal class FullAnimatorSet(
     private val cameraPlugin: CameraAnimationsPlugin,
+    private val mapboxMap: MapboxMap,
     private val animatorSet: AnimatorSet,
 ) : MapboxAnimatorSet {
+
+    // Calculate camera animation hints for the specified fractions to pre-download tiles.
+    // These values are totally based on heuristics and can be changed in the future.
+    private val fractions = listOf(0.25f, 0.5f, 0.75f, 1f)
 
     private val children = animatorSet.childAnimations.map { it as ValueAnimator }.toTypedArray()
     private val externalEndListeners = CopyOnWriteArrayList<MapboxAnimatorSetEndListener>()
@@ -70,8 +78,12 @@ internal class FullAnimatorSet(
         animatorSet.duration = 0
     }
 
+    @OptIn(MapboxExperimental::class)
     override fun start() {
         cameraPlugin.registerAnimators(*children)
+        animatorSet.calculateCameraAnimationHint(fractions, mapboxMap.cameraState)?.let {
+            mapboxMap.setCameraAnimationHint(it)
+        }
         animatorSet.start()
     }
 
