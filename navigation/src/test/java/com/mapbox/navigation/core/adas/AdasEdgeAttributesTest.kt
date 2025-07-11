@@ -25,6 +25,8 @@ class AdasEdgeAttributesTest {
             listOf(AdasTypeFactory.NATIVE_VALUE_ON_EDGE_1),
             listOf(AdasTypeFactory.NATIVE_VALUE_ON_EDGE_2),
             true,
+            com.mapbox.navigator.FormOfWay.CAR_PARK_ENTRANCE,
+            com.mapbox.navigator.ETC2RoadType.HIGHWAY,
         )
 
         val platform = AdasEdgeAttributes.createFromNativeObject(native)
@@ -33,5 +35,7 @@ class AdasEdgeAttributesTest {
         assertEquals(listOf(AdasTypeFactory.VALUE_ON_EDGE_1), platform.slopes)
         assertEquals(listOf(AdasTypeFactory.VALUE_ON_EDGE_2), platform.curvatures)
         assertEquals(true, platform.isDividedRoad)
+        assertEquals(AdasEdgeAttributes.FormOfWay.CAR_PARK_ENTRANCE, platform.formOfWay)
+        assertEquals(AdasEdgeAttributes.Etc2Road.HIGHWAY, platform.etc2)
     }
 }
