@@ -1,10 +1,8 @@
 package com.mapbox.navigation.dropin.maneuver
 
-import android.transition.Scene
-import android.transition.TransitionManager
+import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
-import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.databinding.MapboxManeuverGuidanceLayoutBinding
 import com.mapbox.navigation.dropin.internal.extensions.reloadOnChange
 import com.mapbox.navigation.dropin.navigationview.NavigationViewContext
@@ -18,13 +16,11 @@ internal class ManeuverViewBinder(
 ) : UIBinder {
 
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
-        val scene = Scene.getSceneForLayout(
-            viewGroup,
-            R.layout.mapbox_maneuver_guidance_layout,
-            viewGroup.context
+        viewGroup.removeAllViews()
+        val binding = MapboxManeuverGuidanceLayoutBinding.inflate(
+            LayoutInflater.from(viewGroup.context),
+            viewGroup
         )
-        TransitionManager.go(scene)
-        val binding = MapboxManeuverGuidanceLayoutBinding.bind(viewGroup)
 
         return reloadOnChange(
             context.mapStyleLoader.loadedMapStyle,
