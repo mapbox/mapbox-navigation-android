@@ -42,7 +42,7 @@ import java.util.Date
  */
 class IncidentInfo internal constructor(
     val id: String,
-    @Incident.IncidentType val type: Int,
+    @IncidentType.Type val type: Int,
     @IncidentImpact.Impact val impact: String,
     val congestion: IncidentCongestion?,
     val isClosed: Boolean,
