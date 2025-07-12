@@ -147,7 +147,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
                 .getSuccessfulResultOrThrowException()
                 .routes
-                .reversed()
+                .asReversed()
 
             mapboxNavigation.setNavigationRoutes(requestedRoutes)
             mapboxNavigation.startTripSession()
@@ -888,8 +888,8 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             .first()
 
         mapboxNavigation.routesUpdates()
-            .filter {
-                (it.reason == ROUTES_UPDATE_REASON_REFRESH).also {
+            .filter { result ->
+                (result.reason == ROUTES_UPDATE_REASON_REFRESH).also {
                     if (it) {
                         assertEquals(0, mapboxNavigation.currentLegIndex())
                     }
@@ -947,8 +947,8 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         )
 
         mapboxNavigation.routesUpdates()
-            .filter {
-                (it.reason == ROUTES_UPDATE_REASON_REFRESH).also {
+            .filter { result ->
+                (result.reason == ROUTES_UPDATE_REASON_REFRESH).also {
                     if (it) {
                         assertEquals(1, mapboxNavigation.currentLegIndex())
                     }

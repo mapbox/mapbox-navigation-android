@@ -19,14 +19,12 @@ import com.mapbox.navigation.core.internal.extensions.flowRouteProgress
 import com.mapbox.navigation.core.internal.extensions.flowRoutesUpdated
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.findClosestRoute
-import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.getRouteDrawData
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewDynamicOptionsBuilderBlock
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions
 import com.mapbox.navigation.ui.utils.internal.Provider
-import com.mapbox.navigation.utils.internal.ifNonNull
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -83,12 +81,8 @@ class RouteLineComponent(
 ) : UIComponent() {
 
     private var currentRoutesProgressData: RoutesProgressData? = null
-    private val contractProvider: Provider<RouteLineComponentContract>
-
-    init {
-        this.contractProvider = contractProvider ?: Provider {
-            MapboxRouteLineComponentContract()
-        }
+    private val contractProvider = contractProvider ?: Provider {
+        MapboxRouteLineComponentContract()
     }
 
     private val routeClickPadding = Utils.dpToPx(30f)
@@ -100,7 +94,7 @@ class RouteLineComponent(
 
     private val onPositionChangedListener = OnIndicatorPositionChangedListener { point ->
         val result = routeLineApi.updateTraveledRouteLine(point)
-        mapboxMap.getStyle()?.apply {
+        mapboxMap.style?.apply {
             routeLineView.renderRouteLineUpdate(this, result)
         }
     }
@@ -149,7 +143,7 @@ class RouteLineComponent(
                         )
                     }
                 }
-                ifNonNull(mapboxMap.getStyle()) { style ->
+                mapboxMap.style?.let { style ->
                     routeLineApi.updateWithRouteProgress(routeProgress) { result ->
                         routeLineView.renderRouteLineUpdate(style, result).also {
                             result.error?.let {
@@ -186,7 +180,7 @@ class RouteLineComponent(
                     routesToLegIndex.second,
                     mapboxNavigation.getAlternativeMetadataFor(routes),
                 ) { value ->
-                    mapboxMap.getStyle()?.apply {
+                    mapboxMap.style?.apply {
                         routeLineView.renderRouteDrawData(this, value)
                     }
                 }

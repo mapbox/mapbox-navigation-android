@@ -97,14 +97,14 @@ internal object ViewportDataSourceProcessor {
         return route.legs()?.mapIndexed { legIndex, leg ->
             leg.steps()?.mapIndexed { stepIndex, step ->
                 val stepPoints = completeRoutePoints[legIndex][stepIndex]
-                val intersectionLocations =
-                    step.intersections()?.map { it.location() } ?: emptyList()
-                val list: MutableList<Point> = ArrayList()
-                list.add(stepPoints.first())
-                list.addAll(intersectionLocations)
-                list.add(stepPoints.last())
-                val comparisonList = list.toMutableList()
-                list.removeFirst()
+                val list = buildList {
+                    step.intersections()?.mapTo(destination = this) { it.location() }
+                    add(stepPoints.last())
+                }
+                val comparisonList = buildList {
+                    add(stepPoints.first())
+                    addAll(list)
+                }
                 val intersectionDistances = list.mapIndexed { index, point ->
                     TurfMeasurement.distance(point, comparisonList[index]).kilometersToMeters()
                 }

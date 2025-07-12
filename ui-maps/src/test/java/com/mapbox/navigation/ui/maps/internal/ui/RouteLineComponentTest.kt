@@ -27,7 +27,6 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.NativeRouteParserRule
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
-import com.mapbox.navigation.ui.maps.route.line.MapboxRouteLineApiExtensions.getRouteDrawData
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue
@@ -73,7 +72,6 @@ class RouteLineComponentTest {
     private val locationComponentPlugin = mockk<LocationComponentPlugin>(relaxed = true)
     private val mockStyle = mockk<Style>(relaxed = true)
     private val mockMap = mockk<MapboxMap>(relaxed = true) {
-        every { getStyle() } returns mockStyle
         every { style } returns mockStyle
     }
     private val mapPluginProvider = mockk<MapPluginProviderDelegate>(relaxed = true) {
@@ -482,7 +480,7 @@ class RouteLineComponentTest {
                     oldRoute,
                     newRoute,
                 ).apply {
-                    if (!oldRouteIsPrimary) reversed()
+                    if (!oldRouteIsPrimary) asReversed()
                 }
             }
             every { findClosestRoute(newClickPoint, any(), any(), any()) } answers {

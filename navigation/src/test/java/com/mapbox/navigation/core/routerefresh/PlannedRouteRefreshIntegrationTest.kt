@@ -3,12 +3,11 @@ package com.mapbox.navigation.core.routerefresh
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class PlannedRouteRefreshIntegrationTest : RouteRefreshIntegrationTest() {
 
     @Test
@@ -67,7 +66,7 @@ internal class PlannedRouteRefreshIntegrationTest : RouteRefreshIntegrationTest(
 
         testDispatcher.advanceTimeBy(20_000)
 
-        val routesAfterReroute = routes.reversed()
+        val routesAfterReroute = routes.asReversed()
         routeRefreshController.onRoutesChanged(
             RoutesUpdatedResult(
                 routesAfterReroute,

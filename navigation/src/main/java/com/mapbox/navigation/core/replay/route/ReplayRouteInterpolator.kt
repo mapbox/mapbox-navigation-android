@@ -130,7 +130,7 @@ internal class ReplayRouteInterpolator {
         if (distance == 0.0) return this
         val startDistance = lastOrNull()?.positionMeters ?: 0.0
         val startTime = lastOrNull()?.timeSeconds ?: 0.0
-        if (startDistance > 0.0) { removeLast() }
+        if (startDistance > 0.0) { removeAt(lastIndex) }
         val t1 = distance / speed
         val steps = ceil(t1) * frequency
         val increment = t1 / steps
@@ -155,7 +155,7 @@ internal class ReplayRouteInterpolator {
         if (distance == 0.0) return this
         val startDistance = lastOrNull()?.positionMeters ?: 0.0
         val startTime = lastOrNull()?.timeSeconds ?: 0.0
-        if (startDistance > 0.0) { removeLast() }
+        if (startDistance > 0.0) { removeAt(lastIndex) }
         val acceleration = (endSpeed.pow(2.0) - startSpeed.pow(2.0)) / (2 * distance)
         val t1 = (endSpeed - startSpeed) / acceleration
         val steps = ceil(t1) * frequency

@@ -193,10 +193,10 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         LAYER_GROUP_2_BLUR,
         LAYER_GROUP_3_BLUR,
     )
-    private val sourceToFeatureMap = mutableMapOf<RouteLineSourceKey, RouteLineFeatureId>(
-        Pair(MapboxRouteLineUtils.layerGroup1SourceKey, RouteLineFeatureId(null)),
-        Pair(MapboxRouteLineUtils.layerGroup2SourceKey, RouteLineFeatureId(null)),
-        Pair(MapboxRouteLineUtils.layerGroup3SourceKey, RouteLineFeatureId(null)),
+    private val sourceToFeatureMap = mutableMapOf(
+        MapboxRouteLineUtils.layerGroup1SourceKey to RouteLineFeatureId(featureId = null),
+        MapboxRouteLineUtils.layerGroup2SourceKey to RouteLineFeatureId(featureId = null),
+        MapboxRouteLineUtils.layerGroup3SourceKey to RouteLineFeatureId(featureId = null),
     )
 
     private val scope = MutexBasedScope(
@@ -405,25 +405,25 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
                     ).also { sourceFeaturePairings.remove(it) }
                     ifNonNull(relatedSourceKey) { sourceKeyFeaturePair ->
                         val gradientCommandsDeferreds =
-                            ifNonNull(routeLineData.dynamicData) { dynamicData ->
+                            routeLineData.dynamicData?.let { dynamicData ->
                                 getGradientUpdateCommands(
                                     style,
                                     sourceKeyFeaturePair.first,
                                     dynamicData,
                                     sourceLayerMap,
                                     holder.data,
-                                ).reversed()
-                            } ?: listOf()
+                                ).asReversed()
+                            }.orEmpty()
 
                         val maskingGradientCommandsDeferreds = when (index) {
-                            0 -> ifNonNull(routeSetValue.routeLineMaskingLayerDynamicData) {
+                            0 -> routeSetValue.routeLineMaskingLayerDynamicData?.let {
                                 getGradientUpdateCommands(
                                     style,
                                     maskingLayerIds,
                                     it,
                                     holder.data,
                                 )
-                            } ?: listOf()
+                            }.orEmpty()
 
                             else -> listOf()
                         }
@@ -1073,9 +1073,9 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         featureCollection: FeatureCollection,
         dataId: Int? = null,
     ) {
-        style.getSource(sourceId)?.let {
+        style.getSource(sourceId)?.let { source ->
             val stringDataId = dataId?.let { "$it" }.orEmpty()
-            (it as GeoJsonSource).featureCollection(featureCollection, stringDataId)
+            (source as GeoJsonSource).featureCollection(featureCollection, stringDataId)
         }
     }
 

@@ -10,7 +10,6 @@ import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.internal.utils.isSameRoute
 import com.mapbox.navigation.utils.internal.logD
-import com.mapbox.navigation.utils.internal.precision
 
 private const val LOG_TAG = "DecodeUtils"
 
@@ -172,7 +171,7 @@ object DecodeUtils {
         synchronized(stepsGeometryDecodeCache) {
             cachedRoutes.removeAll { it.route.isSameRoute(route) && it.precision == precision }
             if (cachedRoutes.size > 2) {
-                cachedRoutes.removeFirst()
+                cachedRoutes.removeAt(0)
             }
             cachedRoutes.add(CachedRouteInfo(route, precision, stepCount))
             stepsGeometryDecodeCache.resize(cachedRoutes.sumOf { it.stepCount }.coerceAtLeast(1))

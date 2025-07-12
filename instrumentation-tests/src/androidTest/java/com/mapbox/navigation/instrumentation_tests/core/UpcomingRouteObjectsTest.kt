@@ -45,7 +45,6 @@ import com.mapbox.navigation.testing.utils.http.MockDirectionsRefreshHandler
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracking
-import com.mapbox.navigation.testing.utils.location.stayOnPosition
 import com.mapbox.navigation.testing.utils.readRawFileText
 import com.mapbox.navigation.testing.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.utils.routes.requestMockRoutes
@@ -404,16 +403,14 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
 
         checkRoadObjects(expectedObjectsAfterFirstRefresh, updateAfterRefresh.upcomingRoadObjects)
 
-        mockWebServerRule.requestHandlers.removeLast()
-        mockWebServerRule.requestHandlers.add(
+        mockWebServerRule.requestHandlers[mockWebServerRule.requestHandlers.lastIndex] =
             FailByRequestMockRequestHandler(
                 MockDirectionsRefreshHandler(
                     "route_with_road_objects_europe",
                     readRawFileText(context, R.raw.route_with_road_objects_europe_refresh2),
                     acceptedGeometryIndex = 249,
                 ),
-            ),
-        )
+            )
 
         mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
         mapboxNavigation.routesUpdates()
@@ -657,8 +654,7 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
         )
 
         val incident = mapboxNavigation.getNavigationRoutes().first().upcomingRoadObjects
-            .filter { it.roadObject.objectType == RoadObjectType.INCIDENT }
-            .first()
+            .first { it.roadObject.objectType == RoadObjectType.INCIDENT }
 
         assertEquals(
             listOf("Higashikanto Expwy(Koya To Itako)"),

@@ -26,7 +26,6 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.NativeRouteParserRule
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.BOTTOM_LEVEL_ROUTE_LINE_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.CLOSURE_CONGESTION_VALUE
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.DESTINATION_MARKER_NAME
@@ -1005,18 +1004,6 @@ class MapboxRouteLineUtilsTest {
 
     @Test
     fun getTrafficExpressionWithStreetClassOverrideOnMotorwayWhenChangeOutsideOfIntersections() {
-        val colorResources = RouteLineColorResources.Builder()
-            .routeUnknownCongestionColor(-9)
-            .routeLowCongestionColor(-1)
-            .routeCasingColor(33)
-            .routeDefaultColor(33)
-            .routeHeavyCongestionColor(33)
-            .routeLineTraveledCasingColor(33)
-            .routeLineTraveledColor(33)
-            .routeModerateCongestionColor(33)
-            .routeSevereCongestionColor(-2)
-            .build()
-
         val route = loadNavigationRoute(
             "motorway-route-with-road-classes-unknown-not-on-intersection.json",
         )
@@ -1822,37 +1809,37 @@ class MapboxRouteLineUtilsTest {
         assertEquals(7, MapboxRouteLineUtils.layerGroup1SourceLayerIds.size)
         assertTrue(
             MapboxRouteLineUtils.layerGroup1SourceLayerIds.contains(
-                RouteLayerConstants.LAYER_GROUP_1_TRAIL_CASING,
+                LAYER_GROUP_1_TRAIL_CASING,
             ),
         )
         assertTrue(
             MapboxRouteLineUtils.layerGroup1SourceLayerIds.contains(
-                RouteLayerConstants.LAYER_GROUP_1_TRAIL,
+                LAYER_GROUP_1_TRAIL,
             ),
         )
         assertTrue(
             MapboxRouteLineUtils.layerGroup1SourceLayerIds.contains(
-                RouteLayerConstants.LAYER_GROUP_1_CASING,
+                LAYER_GROUP_1_CASING,
             ),
         )
         assertTrue(
             MapboxRouteLineUtils.layerGroup1SourceLayerIds.contains(
-                RouteLayerConstants.LAYER_GROUP_1_MAIN,
+                LAYER_GROUP_1_MAIN,
             ),
         )
         assertTrue(
             MapboxRouteLineUtils.layerGroup1SourceLayerIds.contains(
-                RouteLayerConstants.LAYER_GROUP_1_TRAFFIC,
+                LAYER_GROUP_1_TRAFFIC,
             ),
         )
         assertTrue(
             MapboxRouteLineUtils.layerGroup1SourceLayerIds.contains(
-                RouteLayerConstants.LAYER_GROUP_1_RESTRICTED,
+                LAYER_GROUP_1_RESTRICTED,
             ),
         )
         assertTrue(
             MapboxRouteLineUtils.layerGroup1SourceLayerIds.contains(
-                RouteLayerConstants.LAYER_GROUP_1_BLUR,
+                LAYER_GROUP_1_BLUR,
             ),
         )
     }
@@ -1862,37 +1849,37 @@ class MapboxRouteLineUtilsTest {
         assertEquals(7, MapboxRouteLineUtils.layerGroup2SourceLayerIds.size)
         assertTrue(
             MapboxRouteLineUtils.layerGroup2SourceLayerIds.contains(
-                RouteLayerConstants.LAYER_GROUP_2_TRAIL_CASING,
+                LAYER_GROUP_2_TRAIL_CASING,
             ),
         )
         assertTrue(
             MapboxRouteLineUtils.layerGroup2SourceLayerIds.contains(
-                RouteLayerConstants.LAYER_GROUP_2_TRAIL,
+                LAYER_GROUP_2_TRAIL,
             ),
         )
         assertTrue(
             MapboxRouteLineUtils.layerGroup2SourceLayerIds.contains(
-                RouteLayerConstants.LAYER_GROUP_2_CASING,
+                LAYER_GROUP_2_CASING,
             ),
         )
         assertTrue(
             MapboxRouteLineUtils.layerGroup2SourceLayerIds.contains(
-                RouteLayerConstants.LAYER_GROUP_2_MAIN,
+                LAYER_GROUP_2_MAIN,
             ),
         )
         assertTrue(
             MapboxRouteLineUtils.layerGroup2SourceLayerIds.contains(
-                RouteLayerConstants.LAYER_GROUP_2_TRAFFIC,
+                LAYER_GROUP_2_TRAFFIC,
             ),
         )
         assertTrue(
             MapboxRouteLineUtils.layerGroup2SourceLayerIds.contains(
-                RouteLayerConstants.LAYER_GROUP_2_RESTRICTED,
+                LAYER_GROUP_2_RESTRICTED,
             ),
         )
         assertTrue(
             MapboxRouteLineUtils.layerGroup2SourceLayerIds.contains(
-                RouteLayerConstants.LAYER_GROUP_2_BLUR,
+                LAYER_GROUP_2_BLUR,
             ),
         )
     }
@@ -1902,37 +1889,37 @@ class MapboxRouteLineUtilsTest {
         assertEquals(7, MapboxRouteLineUtils.layerGroup3SourceLayerIds.size)
         assertTrue(
             MapboxRouteLineUtils.layerGroup3SourceLayerIds.contains(
-                RouteLayerConstants.LAYER_GROUP_3_TRAIL_CASING,
+                LAYER_GROUP_3_TRAIL_CASING,
             ),
         )
         assertTrue(
             MapboxRouteLineUtils.layerGroup3SourceLayerIds.contains(
-                RouteLayerConstants.LAYER_GROUP_3_TRAIL,
+                LAYER_GROUP_3_TRAIL,
             ),
         )
         assertTrue(
             MapboxRouteLineUtils.layerGroup3SourceLayerIds.contains(
-                RouteLayerConstants.LAYER_GROUP_3_CASING,
+                LAYER_GROUP_3_CASING,
             ),
         )
         assertTrue(
             MapboxRouteLineUtils.layerGroup3SourceLayerIds.contains(
-                RouteLayerConstants.LAYER_GROUP_3_MAIN,
+                LAYER_GROUP_3_MAIN,
             ),
         )
         assertTrue(
             MapboxRouteLineUtils.layerGroup3SourceLayerIds.contains(
-                RouteLayerConstants.LAYER_GROUP_3_TRAFFIC,
+                LAYER_GROUP_3_TRAFFIC,
             ),
         )
         assertTrue(
             MapboxRouteLineUtils.layerGroup3SourceLayerIds.contains(
-                RouteLayerConstants.LAYER_GROUP_3_RESTRICTED,
+                LAYER_GROUP_3_RESTRICTED,
             ),
         )
         assertTrue(
             MapboxRouteLineUtils.layerGroup3SourceLayerIds.contains(
-                RouteLayerConstants.LAYER_GROUP_3_BLUR,
+                LAYER_GROUP_3_BLUR,
             ),
         )
     }
@@ -2420,7 +2407,7 @@ class MapboxRouteLineUtilsTest {
             MapboxRouteLineUtils.getRouteLegTrafficCongestionProvider
         val eqKey = CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route, trafficProvider)
         val equals =
-            CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route, trafficProvider).equals(eqKey)
+            CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route, trafficProvider) == eqKey
 
         assertTrue(equals)
     }
@@ -2436,7 +2423,7 @@ class MapboxRouteLineUtilsTest {
                         leg.toBuilder()
                             .annotation(
                                 leg.annotation()?.toBuilder()
-                                    ?.congestion(leg.annotation()?.congestion()?.reversed())
+                                    ?.congestion(leg.annotation()?.congestion()?.asReversed())
                                     ?.build(),
                             )
                             .build()
@@ -2454,7 +2441,7 @@ class MapboxRouteLineUtilsTest {
         val eqKey = CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route2, trafficProvider)
 
         val equals =
-            CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route, trafficProvider).equals(eqKey)
+            CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route, trafficProvider) == eqKey
 
         assertFalse(equals)
     }
@@ -2471,7 +2458,7 @@ class MapboxRouteLineUtilsTest {
                             .annotation(
                                 leg.annotation()?.toBuilder()
                                     ?.congestionNumeric(
-                                        leg.annotation()?.congestionNumeric()?.reversed(),
+                                        leg.annotation()?.congestionNumeric()?.asReversed(),
                                     )
                                     ?.build(),
                             )
@@ -2493,7 +2480,7 @@ class MapboxRouteLineUtilsTest {
         val eqKey = CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route2, trafficProvider)
 
         val equals =
-            CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route, trafficProvider).equals(eqKey)
+            CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route, trafficProvider) == eqKey
 
         assertFalse(equals)
     }
@@ -2517,7 +2504,7 @@ class MapboxRouteLineUtilsTest {
         val eqKey = CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route2, trafficProvider)
 
         val equals =
-            CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route, trafficProvider).equals(eqKey)
+            CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route, trafficProvider) == eqKey
 
         assertFalse(equals)
     }
@@ -2555,7 +2542,7 @@ class MapboxRouteLineUtilsTest {
         val eqKey = CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route2, trafficProvider)
 
         val equals =
-            CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route, trafficProvider).equals(eqKey)
+            CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route, trafficProvider) == eqKey
 
         assertFalse(equals)
     }
@@ -2567,7 +2554,7 @@ class MapboxRouteLineUtilsTest {
         val eqKey = CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route, trafficProvider)
 
         val equals =
-            CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route, trafficProvider).equals(eqKey)
+            CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route, trafficProvider) == eqKey
 
         assertTrue(equals)
     }
@@ -2620,7 +2607,7 @@ class MapboxRouteLineUtilsTest {
         val eqKey = CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route2, trafficProvider)
 
         val equals =
-            CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route, trafficProvider).equals(eqKey)
+            CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route, trafficProvider) == eqKey
 
         assertFalse(equals)
     }
@@ -2640,7 +2627,7 @@ class MapboxRouteLineUtilsTest {
         val eqKey = CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route, trafficProvider)
 
         val equals =
-            CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route2, trafficProvider).equals(eqKey)
+            CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route2, trafficProvider) == eqKey
 
         assertFalse(equals)
     }
@@ -2655,7 +2642,7 @@ class MapboxRouteLineUtilsTest {
         val eqKey = CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route, trafficProvider)
 
         val equals =
-            CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route2, trafficProvider).equals(eqKey)
+            CacheResultUtils.CacheResultKeyRouteTraffic<Any>(route2, trafficProvider) == eqKey
 
         assertFalse(equals)
     }

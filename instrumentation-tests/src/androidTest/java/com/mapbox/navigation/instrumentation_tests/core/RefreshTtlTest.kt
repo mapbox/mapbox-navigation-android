@@ -285,15 +285,13 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
             }.first()
             assertEquals(0, invalidatedResults.size)
 
-            mockWebServerRule.requestHandlers.removeLast()
             // refresh_ttl = 2
-            mockWebServerRule.requestHandlers.add(
+            mockWebServerRule.requestHandlers[mockWebServerRule.requestHandlers.lastIndex] =
                 MockDirectionsRefreshHandler(
                     "route_response_route_refresh_with_large_ttls",
                     readRawFileText(context, R.raw.route_response_route_refreshed_ttl_2),
                     routeIndex = 1,
-                ),
-            )
+                )
 
             val actualRoutesInvalidatedResults = mapboxNavigation
                 .routesInvalidatedResults().take(2).toList()
@@ -304,7 +302,9 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
                     // after third refresh
                     listOf("route_response_route_refresh_with_large_ttls#1"),
                 ),
-                actualRoutesInvalidatedResults.map { it.invalidatedRoutes.map { it.id } },
+                actualRoutesInvalidatedResults.map { params ->
+                    params.invalidatedRoutes.map { it.id }
+                },
             )
         }
     }

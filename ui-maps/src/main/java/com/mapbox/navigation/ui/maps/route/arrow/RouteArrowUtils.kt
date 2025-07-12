@@ -31,9 +31,9 @@ internal object RouteArrowUtils {
     private const val TAG = "RouteArrowUtils"
 
     fun obtainArrowPointsFrom(routeProgress: RouteProgress): List<Point> {
-        val reversedCurrent: List<Point> = routeProgress.currentLegProgress
-            ?.currentStepProgress?.stepPoints?.reversed()
-            ?: listOf()
+        val reversedCurrent = routeProgress.currentLegProgress
+            ?.currentStepProgress?.stepPoints?.asReversed()
+            .orEmpty()
         val arrowLineCurrent = LineString.fromLngLats(reversedCurrent)
         if (reversedCurrent.size < 2) {
             return listOf()
@@ -58,7 +58,7 @@ internal object RouteArrowUtils {
             TurfConstants.UNIT_METERS,
         )
 
-        return arrowCurrentSliced.coordinates().reversed().plus(arrowUpcomingSliced.coordinates())
+        return arrowCurrentSliced.coordinates().asReversed() + arrowUpcomingSliced.coordinates()
     }
 
     @OptIn(MapboxExperimental::class, ExperimentalPreviewMapboxNavigationAPI::class)

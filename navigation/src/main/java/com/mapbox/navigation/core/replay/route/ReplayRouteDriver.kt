@@ -145,7 +145,7 @@ internal class ReplayRouteDriver {
             segmentDistance,
         )
 
-        if (isNotEmpty()) removeLast()
+        removeLastOrNull()
         for (stepIndex in 0..segment.steps.lastIndex) {
             val step = segment.steps[stepIndex]
             val point =

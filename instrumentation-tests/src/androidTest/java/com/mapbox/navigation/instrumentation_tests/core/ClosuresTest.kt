@@ -33,7 +33,6 @@ import com.mapbox.navigation.testing.utils.http.MockDirectionsRefreshHandler
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracking
-import com.mapbox.navigation.testing.utils.location.stayOnPosition
 import com.mapbox.navigation.testing.utils.readRawFileText
 import com.mapbox.navigation.testing.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.utils.routes.requestMockRoutes
@@ -177,15 +176,13 @@ class ClosuresTest : BaseCoreNoCleanUpTest() {
 
         assertFalse(routeProgressAfterRefresh.hasUnexpectedUpcomingClosures())
 
-        mockWebServerRule.requestHandlers.removeLast()
-        mockWebServerRule.requestHandlers.add(
+        mockWebServerRule.requestHandlers[mockWebServerRule.requestHandlers.lastIndex] =
             MockDirectionsRefreshHandler(
                 "route_response_route_refresh",
                 // [1, 3] closure on leg#0 - closure moved
                 readRawFileText(context, R.raw.route_response_route_refresh_annotations),
                 acceptedGeometryIndex = 0,
-            ),
-        )
+            )
         mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
         mapboxNavigation.routesUpdates()
             .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH && it !== firstRefresh }

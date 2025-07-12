@@ -68,7 +68,7 @@ data class CopilotSession(
                 endedAt = "",
                 navSdkVersion = retrieveNavSdkVersion(),
                 navNativeSdkVersion = retrieveNavNativeSdkVersion(),
-                appVersion = applicationContext.getVersionName(),
+                appVersion = applicationContext.getVersionName().orEmpty(),
                 appUserId = copilotOptions.userId ?: eventsAppMetadata?.userId ?: "_",
                 appSessionId = eventsAppMetadata?.sessionId ?: "_",
                 recording = recording,
