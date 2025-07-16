@@ -45,6 +45,7 @@ dependencies {
     implementation dependenciesList.androidXAppCompat
     implementation dependenciesList.kotlinStdLib
     implementation dependenciesList.coroutinesAndroid
+    implementation(project(':utils'))
 
     apply from: "../gradle/unit-testing-dependencies.gradle"
     testImplementation(project(':libtesting-utils'))
