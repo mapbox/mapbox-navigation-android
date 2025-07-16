@@ -6,6 +6,7 @@ import android.util.TypedValue
 import com.mapbox.api.directions.v5.models.MapboxShield
 import com.mapbox.api.directions.v5.models.ShieldSprite
 import com.mapbox.navigation.ui.utils.internal.SvgUtil
+import com.mapbox.navigation.utils.internal.obfuscateAccessToken
 import java.io.ByteArrayInputStream
 
 /**
@@ -74,9 +75,9 @@ sealed class RouteShield(
          */
         override fun toString(): String {
             return "MapboxLegacyShield(" +
-                "url='$url', " +
+                "url='${url.obfuscateAccessToken()}', " +
                 "byteArray=${byteArray.contentToString()}, " +
-                "initialUrl=$initialUrl" +
+                "initialUrl=${initialUrl.obfuscateAccessToken()}" +
                 ")"
         }
 
@@ -155,7 +156,7 @@ sealed class RouteShield(
          */
         override fun toString(): String {
             return "MapboxDesignedShield(" +
-                "url='$url', " +
+                "url='${url.obfuscateAccessToken()}', " +
                 "byteArray=${byteArray.contentToString()}, " +
                 "mapboxShield=$mapboxShield, " +
                 "shieldSprite=$shieldSprite" +
