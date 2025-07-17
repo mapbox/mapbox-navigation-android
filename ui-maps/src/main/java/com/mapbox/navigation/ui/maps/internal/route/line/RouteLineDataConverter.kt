@@ -175,7 +175,27 @@ private fun RouteLineExpressionEventData.toHolder(): RouteLineValueCommandHolder
                     )
                 }
 
+                // deprecated
                 "line-trim-end" -> {
+                    RouteLineValueCommandHolder(
+                        LightRouteLineValueProvider { value!! },
+                        object : RouteLineCommandApplier<StylePropertyValue>() {
+                            override fun applyCommand(
+                                style: Style,
+                                layerId: String,
+                                command: StylePropertyValue,
+                            ) {
+                                style.setStyleLayerProperty(layerId, getProperty(), command.value)
+                            }
+
+                            override fun getProperty(): String {
+                                return "line-trim-end"
+                            }
+                        },
+                    )
+                }
+
+                "line-trim-start" -> {
                     RouteLineValueCommandHolder(
                         LightRouteLineValueProvider { value!! },
                         LineTrimCommandApplier(),

@@ -71,9 +71,9 @@ class VanishingRouteLineRoboTest {
 
     @Test
     fun getTraveledRouteLineExpressionsWithZeroPoint() = coroutineRule.runBlockingTest {
-        val expectedTrafficExpression = Value.valueOf(0.0)
-        val expectedRouteLineExpression = Value.valueOf(0.0)
-        val expectedCasingExpression = Value.valueOf(0.0)
+        val expectedTrafficExpression = Value.valueOf(1.0)
+        val expectedRouteLineExpression = Value.valueOf(1.0)
+        val expectedCasingExpression = Value.valueOf(1.0)
 
         val route = loadNavigationRoute("short_route.json")
         val lineString = LineString.fromPolyline(
@@ -103,7 +103,7 @@ class VanishingRouteLineRoboTest {
             getAppliedValue(
                 result!!.trafficLineExpressionCommandHolder,
                 viewOptions,
-                "line-trim-end",
+                "line-trim-start",
             ),
         )
         assertEquals(
@@ -111,7 +111,7 @@ class VanishingRouteLineRoboTest {
             getAppliedValue(
                 result!!.routeLineValueCommandHolder,
                 viewOptions,
-                "line-trim-end",
+                "line-trim-start",
             ),
         )
         assertEquals(
@@ -119,7 +119,7 @@ class VanishingRouteLineRoboTest {
             getAppliedValue(
                 result!!.routeLineCasingExpressionCommandHolder,
                 viewOptions,
-                "line-trim-end",
+                "line-trim-start",
             ),
         )
 
@@ -137,9 +137,9 @@ class VanishingRouteLineRoboTest {
 
     @Test
     fun getTraveledRouteLineExpressionsWithNonZeroPoint() = coroutineRule.runBlockingTest {
-        val expectedTrafficExpressionContents = Value.valueOf(0.2638444811623909)
-        val expectedRouteLineExpressionContents = Value.valueOf(0.2638444811623909)
-        val expectedCasingExpressionContents = Value.valueOf(0.2638444811623909)
+        val expectedTrafficExpressionContents = 0.7361555188
+        val expectedRouteLineExpressionContents = 0.7361555188
+        val expectedCasingExpressionContents = 0.7361555188
 
         val route = loadNavigationRoute("short_route.json")
         val lineString = LineString.fromPolyline(
@@ -168,24 +168,27 @@ class VanishingRouteLineRoboTest {
             getAppliedValue(
                 result!!.trafficLineExpressionCommandHolder,
                 viewOptions,
-                "line-trim-end",
-            ),
+                "line-trim-start",
+            ).contents as Double,
+            0.000000001,
         )
         assertEquals(
             expectedRouteLineExpressionContents,
             getAppliedValue(
                 result!!.routeLineValueCommandHolder,
                 viewOptions,
-                "line-trim-end",
-            ),
+                "line-trim-start",
+            ).contents as Double,
+            0.000000001,
         )
         assertEquals(
             expectedCasingExpressionContents,
             getAppliedValue(
                 result!!.routeLineCasingExpressionCommandHolder,
                 viewOptions,
-                "line-trim-end",
-            ),
+                "line-trim-start",
+            ).contents as Double,
+            0.000000001,
         )
 
         assertTrue(

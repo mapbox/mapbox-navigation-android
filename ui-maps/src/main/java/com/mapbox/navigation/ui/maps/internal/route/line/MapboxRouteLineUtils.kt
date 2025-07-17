@@ -11,6 +11,7 @@ import com.mapbox.api.directions.v5.models.StepIntersection
 import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
+import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.MapboxExperimental
@@ -36,7 +37,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.extensions.isLegWaypoint
 import com.mapbox.navigation.base.internal.utils.internalWaypoints
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToLineString
+import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
 import com.mapbox.navigation.base.utils.DecodeUtils.stepsGeometryToPoints
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
@@ -71,7 +72,6 @@ import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMisc
-import kotlinx.coroutines.CoroutineScope
 import kotlin.math.abs
 import kotlin.math.ln
 import kotlin.math.max
@@ -179,23 +179,36 @@ internal object MapboxRouteLineUtils {
         var lastColor = Int.MAX_VALUE
         val expressionBuilder = Expression.ExpressionBuilder("step")
         expressionBuilder.lineProgress()
-        expressionBuilder.color(lineStartColor)
 
-        getFilteredRouteLineExpressionData(
+        val data = getFilteredReversedRouteLineExpressionData(
             distanceOffset,
             routeLineExpressionData,
             defaultObjectCreator = {
                 RouteLineExpressionData(distanceOffset, congestionValue = "", lineColorType, 0)
             },
-        ).forEach {
-            // If the color hasn't changed there's no reason to add it to the expression. A smaller
-            // expression is less work for the map to process.
-            val segmentColor = it.segmentColorType.getColor(dynamicOptions)
-            if (segmentColor != lastColor) {
-                lastColor = segmentColor
+        )
+        data.forEachIndexed { index, item ->
+            val segmentColor = if (index == data.lastIndex) {
+                lineStartColor
+            } else {
+                item.segmentColorType.getColor(dynamicOptions)
+            }
+            if (index == 0) {
+                expressionBuilder.color(segmentColor)
                 expressionBuilder.stop {
-                    literal(it.offset)
+                    literal(0.0)
                     color(segmentColor)
+                }
+                lastColor = segmentColor
+                // If the color hasn't changed there's no reason to add it to the expression. A smaller
+                // expression is less work for the map to process.
+            } else if (item.offset < 1.0) {
+                if (segmentColor != lastColor) {
+                    lastColor = segmentColor
+                    expressionBuilder.stop {
+                        literal(item.offset)
+                        color(segmentColor)
+                    }
                 }
             }
         }
@@ -215,7 +228,6 @@ internal object MapboxRouteLineUtils {
     private fun getTrafficLineExpressionSoftGradient(
         dynamicOptions: RouteLineViewOptionsData,
         distanceOffset: Double,
-        lineStartColor: Int,
         lineColorType: SegmentColorType,
         softGradientStopGap: Double,
         routeLineExpressionData: List<RouteLineExpressionData>,
@@ -225,7 +237,7 @@ internal object MapboxRouteLineUtils {
         expressionBuilder.linear()
         expressionBuilder.lineProgress()
 
-        val filteredItems = getFilteredRouteLineExpressionData(
+        val filteredItems = getFilteredReversedRouteLineExpressionData(
             distanceOffset,
             routeLineExpressionData,
             defaultObjectCreator = {
@@ -236,53 +248,35 @@ internal object MapboxRouteLineUtils {
         for (index in filteredItems.indices) {
             val expressionData = filteredItems[index]
             if (index == 0) {
-                if (expressionData.offset > 0) {
-                    expressionBuilder.stop {
-                        literal(0.0)
-                        color(lineStartColor)
-                    }
-
-                    if (expressionData.offset > vanishPointStopGap) {
-                        expressionBuilder.stop {
-                            literal(expressionData.offset - vanishPointStopGap)
-                            color(lineStartColor)
-                        }
-                    }
-                }
-
                 expressionBuilder.stop {
                     literal(expressionData.offset)
                     color(expressionData.segmentColorType.getColor(dynamicOptions))
                 }
             } else {
                 val curColor = expressionData.segmentColorType.getColor(dynamicOptions)
-                val prevColor = filteredItems[prevIndex].segmentColorType.getColor(dynamicOptions)
-                if (prevColor != curColor) {
-                    // ignoring offset points that are at the end of a route
-                    // as that would create a gradient slope towards the last point of the route
-                    // which is not necessary
-                    if (expressionData.offset < 1.0) {
-                        val stopGapOffset = expressionData.offset - softGradientStopGap
+                val prevColor =
+                    filteredItems[prevIndex].segmentColorType.getColor(dynamicOptions)
+                // even if colours are the same, we need to finish the gradient (apply prev colour with the specified offset)
+                if (prevColor != curColor || index == filteredItems.lastIndex) {
+                    if (filteredItems[prevIndex].offset > 0) {
+                        val stopGapOffset = filteredItems[prevIndex].offset + softGradientStopGap
                         val stopGapOffsetToUse =
-                            if (stopGapOffset > filteredItems[prevIndex].offset) {
+                            if (stopGapOffset < expressionData.offset) {
                                 stopGapOffset
                             } else {
-                                filteredItems[prevIndex].offset + vanishPointStopGap
+                                expressionData.offset - vanishPointStopGap
                             }
 
                         expressionBuilder.stop {
                             literal(stopGapOffsetToUse)
-                            color(
-                                filteredItems[prevIndex].segmentColorType.getColor(dynamicOptions),
-                            )
+                            color(prevColor)
                         }
-
-                        expressionBuilder.stop {
-                            literal(expressionData.offset)
-                            color(expressionData.segmentColorType.getColor(dynamicOptions))
-                        }
-                        prevIndex = index
                     }
+                    expressionBuilder.stop {
+                        literal(expressionData.offset)
+                        color(prevColor)
+                    }
+                    prevIndex = index
                 }
             }
         }
@@ -359,9 +353,8 @@ internal object MapboxRouteLineUtils {
         var lastColor = Int.MAX_VALUE
         val expressionBuilder = Expression.ExpressionBuilder("step")
         expressionBuilder.lineProgress()
-        expressionBuilder.color(lineBaseColor)
 
-        getFilteredRouteLineExpressionData(
+        val data = getFilteredReversedRouteLineExpressionData(
             distanceOffset,
             routeLineExpressionData,
             defaultObjectCreator = {
@@ -373,20 +366,32 @@ internal object MapboxRouteLineUtils {
                     0,
                 )
             },
-        ).forEach {
-            val colorToUse = if (shouldSubstituteColor(it.legIndex)) {
-                substitutionColor
-            } else {
-                defaultColor
-            }
+        )
+        data.forEachIndexed { index, item ->
+            if (item.offset < 1.0) {
+                val colorToUse = if (index == data.lastIndex) {
+                    lineBaseColor
+                } else if (shouldSubstituteColor(item.legIndex)) {
+                    substitutionColor
+                } else {
+                    defaultColor
+                }
 
-            // If the color hasn't changed there's no reason to add it to the expression. A smaller
-            // expression is less work for the map to process.
-            if (colorToUse != lastColor) {
-                lastColor = colorToUse
-                expressionBuilder.stop {
-                    literal(it.offset)
-                    color(colorToUse)
+                if (index == 0) {
+                    expressionBuilder.color(colorToUse)
+                    expressionBuilder.stop {
+                        literal(0.0)
+                        color(colorToUse)
+                    }
+                    lastColor = colorToUse
+                    // If the color hasn't changed there's no reason to add it to the expression. A smaller
+                    // expression is less work for the map to process.
+                } else if (colorToUse != lastColor) {
+                    lastColor = colorToUse
+                    expressionBuilder.stop {
+                        literal(item.offset)
+                        color(colorToUse)
+                    }
                 }
             }
         }
@@ -411,14 +416,19 @@ internal object MapboxRouteLineUtils {
         traveledColor: Int,
         lineBaseColor: Int,
     ): StylePropertyValue {
-        val expressionBuilder = Expression.ExpressionBuilder("step")
-        expressionBuilder.lineProgress()
-        expressionBuilder.color(traveledColor)
-        expressionBuilder.stop {
-            literal(offset)
+        val expression = if (offset > 0.0) {
+            val expressionBuilder = Expression.ExpressionBuilder("step")
+            expressionBuilder.lineProgress()
+            expressionBuilder.color(lineBaseColor)
+            expressionBuilder.stop {
+                literal(1.0 - offset)
+                color(traveledColor)
+            }
+            expressionBuilder.build()
+        } else {
             color(lineBaseColor)
         }
-        return StylePropertyValue(expressionBuilder.build(), StylePropertyValueKind.EXPRESSION)
+        return StylePropertyValue(expression, StylePropertyValueKind.EXPRESSION)
     }
 
     /**
@@ -428,7 +438,7 @@ internal object MapboxRouteLineUtils {
      * that doesn't have a `restricted` road class assigned, even if it is in a restricted area, or if there are duplicate points in the route.
      * In such cases, if we were to filter the expression data by distinct first offset, we'd have a gap in the line at the point of the duplication.
      */
-    internal fun <T : ExpressionOffsetData> getFilteredRouteLineExpressionData(
+    internal fun <T : ExpressionOffsetData> getFilteredReversedRouteLineExpressionData(
         distanceOffset: Double,
         routeLineExpressionData: List<T>,
         defaultObjectCreator: () -> T,
@@ -437,7 +447,7 @@ internal object MapboxRouteLineUtils {
             restrictionData.offset > distanceOffset &&
                 restrictionData.offset != routeLineExpressionData.getOrNull(index + 1)?.offset
         }
-        return when (filteredItems.isEmpty()) {
+        val itemsWithFiller = when (filteredItems.isEmpty()) {
             true -> when (routeLineExpressionData.isEmpty()) {
                 true -> listOf(defaultObjectCreator())
                 false -> listOf(routeLineExpressionData.last().copyWithNewOffset(distanceOffset))
@@ -453,6 +463,21 @@ internal object MapboxRouteLineUtils {
                 listOf<T>(fillerItem.copyWithNewOffset(distanceOffset)).plus(filteredItems)
             }
         }
+        val reversed = itemsWithFiller.toMutableList().asReversed()
+        val lastOffset = 1.0 - reversed.last().offset
+        for (i in reversed.lastIndex downTo 1) {
+            reversed[i] = reversed[i].copyWithNewOffset(1.0 - reversed[i - 1].offset)
+        }
+        // We receive routeLineExpressionData where the last value has offset 1.0,
+        // so we should always get element #1 with offset 0.0, meaning that element #0 is not used (it's artificial anyway).
+        // However, in case this logic changes, leave a sanity check that will include an element with offset 0.
+        if (reversed.getOrNull(1)?.offset == 0.0) {
+            reversed.removeAt(0)
+        } else {
+            reversed[0] = reversed[0].copyWithNewOffset(0.0)
+        }
+        reversed.add(defaultObjectCreator().copyWithNewOffset(lastOffset))
+        return reversed
     }
 
     fun getRouteFeatureDataProvider(
@@ -1077,7 +1102,9 @@ internal object MapboxRouteLineUtils {
         route: NavigationRoute,
         identifier: String?,
     ) -> RouteFeatureData = { route: NavigationRoute, identifier: String? ->
-        val routeGeometry = route.directionsRoute.completeGeometryToLineString()
+        val routeGeometry = LineString.fromLngLats(
+            route.directionsRoute.completeGeometryToPoints().asReversed(),
+        )
         val routeFeature = when (identifier) {
             null -> Feature.fromGeometry(routeGeometry, null, route.id)
             else -> {
@@ -1090,7 +1117,7 @@ internal object MapboxRouteLineUtils {
         RouteFeatureData(
             route,
             FeatureCollection.fromFeatures(listOf(routeFeature)),
-            routeGeometry,
+            routeGeometry.coordinates().size,
         )
     }
 
@@ -2391,7 +2418,6 @@ internal object MapboxRouteLineUtils {
             getTrafficLineExpressionSoftGradient(
                 dynamicData,
                 vanishingPointOffset,
-                lineStartColor,
                 lineColorType,
                 dynamicData.softGradientTransition / routeDistance,
                 segments,
@@ -2477,33 +2503,43 @@ internal object MapboxRouteLineUtils {
         var lastColor = Int.MAX_VALUE
         val expressionBuilder = Expression.ExpressionBuilder("step")
         expressionBuilder.lineProgress()
-        expressionBuilder.color(Color.TRANSPARENT)
 
-        getFilteredRouteLineExpressionData(
+        val data = getFilteredReversedRouteLineExpressionData(
             vanishingPointOffset,
             routeLineExpressionData,
             defaultObjectCreator = {
                 ExtractedRouteRestrictionData(vanishingPointOffset)
             },
-        ).forEach {
-            val colorToUse = if (activeLegIndex >= 0 && it.legIndex != activeLegIndex) {
-                if (it.isInRestrictedSection) {
+        )
+        data.forEachIndexed { index, item ->
+            val colorToUse = if (index == data.lastIndex) {
+                // start colour
+                Color.TRANSPARENT
+            } else if (activeLegIndex >= 0 && item.legIndex != activeLegIndex) {
+                if (item.isInRestrictedSection) {
                     restrictedSectionInactiveColor
                 } else {
                     Color.TRANSPARENT
                 }
-            } else if (it.isInRestrictedSection) {
+            } else if (item.isInRestrictedSection) {
                 restrictedSectionColor
             } else {
                 Color.TRANSPARENT
             }
 
-            // If the color hasn't changed there's no reason to add it to the expression. A smaller
-            // expression is less work for the map to process.
-            if (colorToUse != lastColor) {
+            if (index == 0) {
+                expressionBuilder.color(colorToUse)
+                expressionBuilder.stop {
+                    literal(0.0)
+                    color(colorToUse)
+                }
+                lastColor = colorToUse
+                // If the color hasn't changed there's no reason to add it to the expression. A smaller
+                // expression is less work for the map to process.
+            } else if (colorToUse != lastColor) {
                 lastColor = colorToUse
                 expressionBuilder.stop {
-                    literal(it.offset)
+                    literal(item.offset)
                     color(colorToUse)
                 }
             }
@@ -2677,7 +2713,6 @@ internal object MapboxRouteLineUtils {
     }
 
     internal fun getPrimaryRouteLineDynamicData(
-        calculationsScope: CoroutineScope,
         routeLineOptions: MapboxRouteLineApiOptions,
         routeLineExpressionData: List<RouteLineExpressionData>,
         restrictedExpressionData: List<ExtractedRouteRestrictionData>,
@@ -2707,8 +2742,6 @@ internal object MapboxRouteLineUtils {
         val primaryRouteBaseExpressionCommandHolder =
             RouteLineValueCommandHolder(
                 LightRouteLineValueProvider {
-                    // TODO why are we changing traveled portion to traveled color instead of
-                    //  making it transparent to show trail layers?
                     if (routeLineOptions.styleInactiveRouteLegsIndependently) {
                         getExpressionSubstitutingColorForInactiveLegs(
                             vanishingPointOffset,
@@ -2719,19 +2752,13 @@ internal object MapboxRouteLineUtils {
                             legIndex,
                         )
                     } else {
-                        getRouteLineExpression(
-                            vanishingPointOffset,
-                            it.routeLineColorResources.routeLineTraveledColor,
-                            it.routeLineColorResources.routeDefaultColor,
-                        )
+                        getSingleColorExpression(it.routeLineColorResources.routeDefaultColor)
                     }
                 },
                 LineGradientCommandApplier(),
             )
 
         val primaryRouteCasingExpressionCommandHolder = RouteLineValueCommandHolder(
-            // TODO why are we changing traveled portion to traveled color instead of
-            //  making it transparent to show trail layers?
             LightRouteLineValueProvider {
                 if (routeLineOptions.styleInactiveRouteLegsIndependently) {
                     getExpressionSubstitutingColorForInactiveLegs(
@@ -2743,11 +2770,7 @@ internal object MapboxRouteLineUtils {
                         legIndex,
                     )
                 } else {
-                    getRouteLineExpression(
-                        vanishingPointOffset,
-                        it.routeLineColorResources.routeLineTraveledCasingColor,
-                        it.routeLineColorResources.routeCasingColor,
-                    )
+                    getSingleColorExpression(it.routeLineColorResources.routeCasingColor)
                 }
             },
             LineGradientCommandApplier(),
@@ -2789,11 +2812,7 @@ internal object MapboxRouteLineUtils {
                     // if independent styling is not enabled,
                     // we can draw the trail under the whole route,
                     // if vanishing route line is enabled it will show up, if not, it won't
-                    getRouteLineExpression(
-                        0.0,
-                        it.routeLineColorResources.routeLineTraveledColor,
-                        it.routeLineColorResources.routeLineTraveledColor,
-                    )
+                    getSingleColorExpression(it.routeLineColorResources.routeLineTraveledColor)
                 }
             },
             LineGradientCommandApplier(),
@@ -2820,9 +2839,7 @@ internal object MapboxRouteLineUtils {
                         activeLegIndex = legIndex,
                     )
                 } else {
-                    getRouteLineExpression(
-                        0.0,
-                        it.routeLineColorResources.routeLineTraveledCasingColor,
+                    getSingleColorExpression(
                         it.routeLineColorResources.routeLineTraveledCasingColor,
                     )
                 }
@@ -2885,7 +2902,7 @@ internal object MapboxRouteLineUtils {
     }
 
     fun getSingleColorExpression(@ColorInt colorInt: Int): StylePropertyValue {
-        return getRouteLineExpression(0.0, colorInt, colorInt)
+        return StylePropertyValue(color(colorInt), StylePropertyValueKind.EXPRESSION)
     }
 }
 

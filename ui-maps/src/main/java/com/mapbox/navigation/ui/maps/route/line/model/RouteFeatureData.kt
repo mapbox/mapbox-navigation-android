@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.maps.route.line.model
 
 import com.mapbox.geojson.FeatureCollection
-import com.mapbox.geojson.LineString
 import com.mapbox.navigation.base.route.NavigationRoute
 
 /**
@@ -9,11 +8,11 @@ import com.mapbox.navigation.base.route.NavigationRoute
  * and LineString.
  *
  * @param route a DirectionsRoute
- * @param featureCollection a FeatureCollection created using the route
- * @param lineString a LineString derived from the route's geometry.
+ * @param reversedFeatureCollection a FeatureCollection created using the route, reversed (ready to be rendered)
+ * @param coordinatesCount number of coordinates in geometry
  */
-internal data class RouteFeatureData constructor(
+internal data class RouteFeatureData(
     val route: NavigationRoute,
-    val featureCollection: FeatureCollection,
-    val lineString: LineString,
+    val reversedFeatureCollection: FeatureCollection,
+    val coordinatesCount: Int,
 )

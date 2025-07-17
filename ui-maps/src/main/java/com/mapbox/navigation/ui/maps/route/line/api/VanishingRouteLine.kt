@@ -129,7 +129,11 @@ internal class VanishingRouteLine() {
         offset: Double,
     ): VanishingRouteLineExpressions {
         vanishPointOffset = offset
-        val value = StylePropertyValue(Value.valueOf(offset), StylePropertyValueKind.CONSTANT)
+        // Use reversed geometry, that's why 1.0 - offset is used here.
+        val value = StylePropertyValue(
+            Value(1.0 - offset),
+            StylePropertyValueKind.CONSTANT,
+        )
         val trafficLineExpressionCommandHolder = RouteLineValueCommandHolder(
             LightRouteLineValueProvider { value },
             LineTrimCommandApplier(),

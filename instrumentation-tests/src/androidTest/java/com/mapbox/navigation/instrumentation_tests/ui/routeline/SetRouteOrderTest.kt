@@ -111,7 +111,7 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
                                         assertNotNull(property.value.contents)
                                         assertTrue(property.value.contents is ArrayList<*>)
                                         assertEquals(
-                                            9,
+                                            7,
                                             (property.value.contents as ArrayList<*>).size,
                                         )
                                         myResourceIdler.decrement()
@@ -166,7 +166,7 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
                                         assertNotNull(property.value.contents)
                                         assertTrue(property.value.contents is ArrayList<*>)
                                         assertEquals(
-                                            9,
+                                            7,
                                             (property.value.contents as ArrayList<*>).size,
                                         )
                                         myResourceIdler.decrement()

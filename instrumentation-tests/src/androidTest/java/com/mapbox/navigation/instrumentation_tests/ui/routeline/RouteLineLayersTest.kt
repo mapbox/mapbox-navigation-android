@@ -628,9 +628,14 @@ class RouteLineLayersTest : BaseTest<BasicNavigationViewActivity>(
                     )
                     assertNotNull(property.value.contents)
                     assertTrue(property.value.contents is ArrayList<*>)
-                    // the alternative route overlaps primary on ~92%
+                    // the alternative route overlaps primary on ~92% + use reverse geometry - reverse the offset
                     assertEquals(
-                        0.9263153441670023,
+                        0.07368465583,
+                        ((property.value.contents as ArrayList<*>)[0] as Value).contents as Double,
+                        0.0000000001,
+                    )
+                    assertEquals(
+                        1.0,
                         ((property.value.contents as ArrayList<*>)[1] as Value).contents as Double,
                         0.0000000001,
                     )

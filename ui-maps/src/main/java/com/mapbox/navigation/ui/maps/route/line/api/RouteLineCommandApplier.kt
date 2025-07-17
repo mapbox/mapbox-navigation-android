@@ -61,6 +61,6 @@ internal class LineTrimCommandApplier : RouteLineCommandApplier<StylePropertyVal
     }
 
     override fun getProperty(): String {
-        return "line-trim-end"
+        return "line-trim-start"
     }
 }

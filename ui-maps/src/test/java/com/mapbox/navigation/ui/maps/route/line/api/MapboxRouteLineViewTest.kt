@@ -109,6 +109,7 @@ import org.junit.Rule
 import org.junit.Test
 import java.lang.ref.WeakReference
 import java.util.UUID
+import kotlin.math.abs
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 @ExperimentalCoroutinesApi
@@ -1153,42 +1154,42 @@ class MapboxRouteLineViewTest {
         verify {
             style.setStyleLayerProperty(
                 LAYER_GROUP_1_TRAFFIC,
-                "line-trim-end",
+                "line-trim-start",
                 trafficLineExp,
             )
         }
         verify {
             style.setStyleLayerProperty(
                 LAYER_GROUP_1_MAIN,
-                "line-trim-end",
+                "line-trim-start",
                 routeLineExp,
             )
         }
         verify {
             style.setStyleLayerProperty(
                 LAYER_GROUP_1_CASING,
-                "line-trim-end",
+                "line-trim-start",
                 casingLineEx,
             )
         }
         verify {
             style.setStyleLayerProperty(
                 LAYER_GROUP_1_RESTRICTED,
-                "line-trim-end",
+                "line-trim-start",
                 restrictedRoadExp,
             )
         }
         verify {
             style.setStyleLayerProperty(
                 LAYER_GROUP_1_TRAIL,
-                "line-trim-end",
+                "line-trim-start",
                 trailExp,
             )
         }
         verify {
             style.setStyleLayerProperty(
                 LAYER_GROUP_1_TRAIL_CASING,
-                "line-trim-end",
+                "line-trim-start",
                 trailCasingExp,
             )
         }
@@ -1398,9 +1399,9 @@ class MapboxRouteLineViewTest {
         mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
         mockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
         mockkObject(MapboxRouteLineUtils)
-        val expectedRoute1Expression = Value.valueOf(9.9)
-        val expectedRoute2Expression = Value.valueOf(0.0)
-        val expectedRoute3Expression = Value.valueOf(0.1)
+        val expectedRoute1Expression = listOf(0.3, 1.0)
+        val expectedRoute2Expression = listOf(1.0, 1.0)
+        val expectedRoute3Expression = listOf(0.9, 1.0)
         val options = MapboxRouteLineViewOptions.Builder(ctx).build()
         val primaryRouteFeatureCollection =
             FeatureCollection.fromFeatures(listOf(getEmptyFeature("1")))
@@ -1484,7 +1485,7 @@ class MapboxRouteLineViewTest {
                             },
                             LineGradientCommandApplier(),
                         ),
-                        RouteLineTrimOffset(9.9),
+                        RouteLineTrimOffset(0.7),
                         RouteLineValueCommandHolder(
                             LightRouteLineValueProvider {
                                 StylePropertyValue(
@@ -1665,7 +1666,7 @@ class MapboxRouteLineViewTest {
                         },
                         LineGradientCommandApplier(),
                     ),
-                    RouteLineTrimOffset(9.9),
+                    RouteLineTrimOffset(0.7),
                     RouteLineValueCommandHolder(
                         LightRouteLineValueProvider {
                             StylePropertyValue(
@@ -1935,165 +1936,165 @@ class MapboxRouteLineViewTest {
         verify(exactly = 0) {
             style.setStyleLayerProperty(
                 LAYER_GROUP_1_TRAIL_CASING,
-                "line-trim-end",
-                expectedRoute1Expression,
+                "line-trim-offset",
+                match { eqListDouble(expectedRoute1Expression, it) },
             )
         }
         verify(exactly = 0) {
             style.setStyleLayerProperty(
                 LAYER_GROUP_1_TRAIL,
-                "line-trim-end",
-                expectedRoute1Expression,
+                "line-trim-offset",
+                match { eqListDouble(expectedRoute1Expression, it) },
             )
         }
         verify {
             style.setStyleLayerProperty(
                 LAYER_GROUP_1_CASING,
-                "line-trim-end",
-                expectedRoute1Expression,
+                "line-trim-offset",
+                match { eqListDouble(expectedRoute1Expression, it) },
             )
         }
         verify {
             style.setStyleLayerProperty(
                 LAYER_GROUP_1_MAIN,
-                "line-trim-end",
-                expectedRoute1Expression,
+                "line-trim-offset",
+                match { eqListDouble(expectedRoute1Expression, it) },
             )
         }
         verify {
             style.setStyleLayerProperty(
                 LAYER_GROUP_1_TRAFFIC,
-                "line-trim-end",
-                expectedRoute1Expression,
+                "line-trim-offset",
+                match { eqListDouble(expectedRoute1Expression, it) },
             )
         }
         verify {
             style.setStyleLayerProperty(
                 LAYER_GROUP_1_RESTRICTED,
-                "line-trim-end",
-                expectedRoute1Expression,
+                "line-trim-offset",
+                match { eqListDouble(expectedRoute1Expression, it) },
             )
         }
 
         verify(exactly = 0) {
             style.setStyleLayerProperty(
                 LAYER_GROUP_2_TRAIL_CASING,
-                "line-trim-end",
-                expectedRoute2Expression,
+                "line-trim-offset",
+                match { eqListDouble(expectedRoute2Expression, it) },
             )
         }
         verify(exactly = 0) {
             style.setStyleLayerProperty(
                 LAYER_GROUP_2_TRAIL,
-                "line-trim-end",
-                expectedRoute2Expression,
+                "line-trim-offset",
+                match { eqListDouble(expectedRoute2Expression, it) },
             )
         }
         verify {
             style.setStyleLayerProperty(
                 LAYER_GROUP_2_CASING,
-                "line-trim-end",
-                expectedRoute2Expression,
+                "line-trim-offset",
+                match { eqListDouble(expectedRoute2Expression, it) },
             )
         }
         verify {
             style.setStyleLayerProperty(
                 LAYER_GROUP_2_MAIN,
-                "line-trim-end",
-                expectedRoute2Expression,
+                "line-trim-offset",
+                match { eqListDouble(expectedRoute2Expression, it) },
             )
         }
         verify {
             style.setStyleLayerProperty(
                 LAYER_GROUP_2_TRAFFIC,
-                "line-trim-end",
-                expectedRoute2Expression,
+                "line-trim-offset",
+                match { eqListDouble(expectedRoute2Expression, it) },
             )
         }
         verify {
             style.setStyleLayerProperty(
                 LAYER_GROUP_2_RESTRICTED,
-                "line-trim-end",
-                expectedRoute2Expression,
+                "line-trim-offset",
+                match { eqListDouble(expectedRoute2Expression, it) },
             )
         }
 
         verify(exactly = 0) {
             style.setStyleLayerProperty(
                 LAYER_GROUP_3_TRAIL_CASING,
-                "line-trim-end",
-                expectedRoute3Expression,
+                "line-trim-offset",
+                match { eqListDouble(expectedRoute3Expression, it) },
             )
         }
         verify(exactly = 0) {
             style.setStyleLayerProperty(
                 LAYER_GROUP_3_TRAIL,
-                "line-trim-end",
-                expectedRoute3Expression,
+                "line-trim-offset",
+                match { eqListDouble(expectedRoute3Expression, it) },
             )
         }
         verify {
             style.setStyleLayerProperty(
                 LAYER_GROUP_3_CASING,
-                "line-trim-end",
-                expectedRoute3Expression,
+                "line-trim-offset",
+                match { eqListDouble(expectedRoute3Expression, it) },
             )
         }
         verify {
             style.setStyleLayerProperty(
                 LAYER_GROUP_3_MAIN,
-                "line-trim-end",
-                expectedRoute3Expression,
+                "line-trim-offset",
+                match { eqListDouble(expectedRoute3Expression, it) },
             )
         }
         verify {
             style.setStyleLayerProperty(
                 LAYER_GROUP_3_TRAFFIC,
-                "line-trim-end",
-                expectedRoute3Expression,
+                "line-trim-offset",
+                match { eqListDouble(expectedRoute3Expression, it) },
             )
         }
         verify {
             style.setStyleLayerProperty(
                 LAYER_GROUP_3_RESTRICTED,
-                "line-trim-end",
-                expectedRoute3Expression,
+                "line-trim-offset",
+                match { eqListDouble(expectedRoute3Expression, it) },
             )
         }
 
         verify(exactly = 0) {
             style.setStyleLayerProperty(
                 MASKING_LAYER_TRAIL_CASING,
-                "line-trim-end",
-                expectedRoute1Expression,
+                "line-trim-offset",
+                match { eqListDouble(expectedRoute1Expression, it) },
             )
         }
         verify(exactly = 0) {
             style.setStyleLayerProperty(
                 MASKING_LAYER_TRAIL,
-                "line-trim-end",
-                expectedRoute1Expression,
+                "line-trim-offset",
+                match { eqListDouble(expectedRoute1Expression, it) },
             )
         }
         verify {
             style.setStyleLayerProperty(
                 MASKING_LAYER_CASING,
-                "line-trim-end",
-                expectedRoute1Expression,
+                "line-trim-offset",
+                match { eqListDouble(expectedRoute1Expression, it) },
             )
         }
         verify {
             style.setStyleLayerProperty(
                 MASKING_LAYER_MAIN,
-                "line-trim-end",
-                expectedRoute1Expression,
+                "line-trim-offset",
+                match { eqListDouble(expectedRoute1Expression, it) },
             )
         }
         verify {
             style.setStyleLayerProperty(
                 MASKING_LAYER_TRAFFIC,
-                "line-trim-end",
-                expectedRoute1Expression,
+                "line-trim-offset",
+                match { eqListDouble(expectedRoute1Expression, it) },
             )
         }
 
@@ -5689,5 +5690,21 @@ class MapboxRouteLineViewTest {
         }.also {
             mockCheckForLayerInitialization(it)
         }
+    }
+
+    private fun eqListDouble(expected: List<Double>, actual: Value): Boolean {
+        if (actual !is Expression || actual.literalValue !is List<*>) {
+            return false
+        }
+        val actualList = actual.literalValue as List<Double>
+        if (expected.size != actualList.size) {
+            return false
+        }
+        for (i in expected.indices) {
+            if (abs(expected[i] - actualList[i]) > 0.000000001) {
+                return false
+            }
+        }
+        return true
     }
 }
