@@ -773,10 +773,16 @@ class MapboxRouteLineUtilsRoboTest {
 
     @Test
     fun getTrafficLineExpressionProducer() {
-        val expectedPrimaryTrafficLineExpression = "[step, [line-progress], " +
-            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.0, [rgba, 86.0, 168.0, 251.0, 1.0], " +
-            "0.9425498931842539, [rgba, 255.0, 149.0, 0.0, 1.0], 1.0, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0]]"
+        val expectedPrimaryTrafficLineExpression = listOf(
+            StringChecker("step"),
+            StringChecker("[line-progress]"),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.0),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.057450106815746),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+        )
+
         val route = loadNavigationRoute("short_route.json")
 
         val result = MapboxRouteLineUtils.getTrafficLineExpression(
@@ -790,9 +796,9 @@ class MapboxRouteLineUtilsRoboTest {
             SegmentColorType.PRIMARY_UNKNOWN_CONGESTION,
         )
 
-        assertEquals(
+        checkExpression(
             expectedPrimaryTrafficLineExpression,
-            result.toString(),
+            result,
         )
     }
 
@@ -815,30 +821,31 @@ class MapboxRouteLineUtilsRoboTest {
         val expectedPrimaryTrafficLineExpression = listOf(
             StringChecker("step"),
             StringChecker("[line-progress]"),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            StringChecker("0.0"),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.10373821458415478),
+            DoubleChecker(0.0),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.057699774865110785),
             StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.1240124365711821),
+            DoubleChecker(0.11325578361883003),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.2718982903427929),
+            DoubleChecker(0.4083904023623381),
             StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.32264099467350016),
+            DoubleChecker(0.4289348860509439),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.4897719974699625),
+            DoubleChecker(0.4578611756172846),
             // this is the moderate color at the start of the second leg
             // even though it's preceded by a duplicate 'severe' point which is ignored
             StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.5421388243827154),
+
+            DoubleChecker(0.5102280025300374),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.5710651139490561),
+            DoubleChecker(0.6773590053264998),
             StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.5916095976376619),
+            DoubleChecker(0.7281017096572071),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.88674421638117),
+            DoubleChecker(0.8759875634288179),
             StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.9423002251348892),
+            DoubleChecker(0.8962617854158452),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
         )
         val route = loadNavigationRoute("multileg-route-two-legs.json")
@@ -885,11 +892,15 @@ class MapboxRouteLineUtilsRoboTest {
             .routeModerateCongestionColor(33)
             .routeSevereCongestionColor(33)
             .build()
-        val expectedPrimaryTrafficLineExpression = "[step, [line-progress], " +
-            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
-            "[rgba, 255.0, 255.0, 247.0, 1.0], 0.5688813850361385, " +
-            "[rgba, 255.0, 255.0, 255.0, 1.0], 1.0, " +
-            "[rgba, 255.0, 255.0, 247.0, 1.0]]"
+        val expectedPrimaryTrafficLineExpression = listOf(
+            StringChecker("step"),
+            StringChecker("[line-progress]"),
+            StringChecker("[rgba, 255.0, 255.0, 255.0, 1.0]"),
+            DoubleChecker(0.0),
+            StringChecker("[rgba, 255.0, 255.0, 255.0, 1.0]"),
+            DoubleChecker(0.431118614963862),
+            StringChecker("[rgba, 255.0, 255.0, 247.0, 1.0]"),
+        )
         val route = loadNavigationRoute("motorway-with-road-classes-multi-leg.json")
 
         val result = MapboxRouteLineUtils.getTrafficLineExpression(
@@ -905,18 +916,27 @@ class MapboxRouteLineUtilsRoboTest {
             lineColorType = SegmentColorType.PRIMARY_UNKNOWN_CONGESTION,
         )
 
-        assertEquals(
+        checkExpression(
             expectedPrimaryTrafficLineExpression,
-            result.toString(),
+            result,
         )
     }
 
     @Test
     fun getTrafficLineExpressionProducer_whenUseSoftGradient() {
-        val expectedPrimaryTrafficLineExpression = "[interpolate, [linear], [line-progress], " +
-            "0.0, [rgba, 86.0, 168.0, 251.0, 1.0], " +
-            "0.6934838906935938, [rgba, 86.0, 168.0, 251.0, 1.0], " +
-            "0.9425498931842539, [rgba, 255.0, 149.0, 0.0, 1.0]]"
+        val expectedPrimaryTrafficLineExpression = listOf(
+            StringChecker("interpolate"),
+            StringChecker("[linear]"),
+            StringChecker("[line-progress]"),
+            DoubleChecker(0.0),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.05745010681574608),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.3065161093064062),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(1.0),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+        )
         val route = loadNavigationRoute("short_route.json")
 
         val result = MapboxRouteLineUtils.getTrafficLineExpression(
@@ -933,18 +953,17 @@ class MapboxRouteLineUtilsRoboTest {
             SegmentColorType.PRIMARY_UNKNOWN_CONGESTION,
         )
 
-        assertEquals(
+        checkExpression(
             expectedPrimaryTrafficLineExpression,
-            result.toString(),
+            result,
         )
     }
 
     @Test
     fun getTrafficLineExpression() {
-        val expectedPrimaryTrafficLineExpression = "[step, [line-progress], " +
-            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.0, [rgba, 86.0, 168.0, 251.0, 1.0], " +
-            "0.9425498931842539, [rgba, 255.0, 149.0, 0.0, 1.0], 1.0, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0]]"
+        val expectedPrimaryTrafficLineExpression = "[step, [line-progress]" +
+            ", [rgba, 255.0, 149.0, 0.0, 1.0], 0.0, [rgba, 255.0, 149.0, 0.0, 1.0], " +
+            "0.05745010681574614, [rgba, 86.0, 168.0, 251.0, 1.0]]"
 
         val result = MapboxRouteLineUtils.getTrafficLineExpression(
             MapboxRouteLineViewOptions.Builder(ctx).build().toData(),
@@ -982,21 +1001,35 @@ class MapboxRouteLineUtilsRoboTest {
 
     @Test
     fun `getTrafficLineExpression when duplicate point`() {
-        val expectedPrimaryTrafficLineExpression = "[step, [line-progress], " +
-            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.10373821458415478, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.1240124365711821, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.2718982903427929, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.32264099467350016, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.4897719974699625, " +
+        val expectedPrimaryTrafficLineExpression = listOf(
+            StringChecker("step"),
+            StringChecker("[line-progress]"),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.0),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.057699774865110785),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.11325578361882999),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.4083904023623381),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.4289348860509439),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
             // this is the moderate color at the start of the second leg
             // even though it's preceded by a duplicate 'severe' point which is ignored
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5421388243827154, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.5710651139490561, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.5916095976376619, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.88674421638117, " +
-            "[rgba, 255.0, 149.0, 0.0, 1.0], 0.9423002251348892, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0]]"
+            DoubleChecker(0.4578611756172846),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.5102280025300375),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.6773590053264998),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.7281017096572071),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.8759875634288179),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.8962617854158452),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+        )
 
         val result = MapboxRouteLineUtils.getTrafficLineExpression(
             MapboxRouteLineViewOptions.Builder(ctx).build().toData(),
@@ -1075,9 +1108,9 @@ class MapboxRouteLineUtilsRoboTest {
             1.0,
         )
 
-        assertEquals(
+        checkExpression(
             expectedPrimaryTrafficLineExpression,
-            result.toString(),
+            result,
         )
     }
 
@@ -1094,11 +1127,16 @@ class MapboxRouteLineUtilsRoboTest {
             .routeModerateCongestionColor(33)
             .routeSevereCongestionColor(33)
             .build()
-        val expectedPrimaryTrafficLineExpression = "[step, [line-progress], " +
-            "[rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
-            "[rgba, 255.0, 255.0, 247.0, 1.0], 0.5688813850361385, " +
-            "[rgba, 255.0, 255.0, 255.0, 1.0], 1.0, " +
-            "[rgba, 255.0, 255.0, 247.0, 1.0]]"
+
+        val expectedPrimaryTrafficLineExpression = listOf(
+            StringChecker("step"),
+            StringChecker("[line-progress]"),
+            StringChecker("[rgba, 255.0, 255.0, 255.0, 1.0]"),
+            DoubleChecker(0.0),
+            StringChecker("[rgba, 255.0, 255.0, 255.0, 1.0]"),
+            DoubleChecker(0.431118614963862),
+            StringChecker("[rgba, 255.0, 255.0, 247.0, 1.0]"),
+        )
 
         val result = MapboxRouteLineUtils.getTrafficLineExpression(
             MapboxRouteLineViewOptions
@@ -1138,9 +1176,9 @@ class MapboxRouteLineUtilsRoboTest {
             1.0,
         )
 
-        assertEquals(
+        checkExpression(
             expectedPrimaryTrafficLineExpression,
-            result.toString(),
+            result,
         )
     }
 
@@ -1151,11 +1189,13 @@ class MapboxRouteLineUtilsRoboTest {
             StringChecker("[linear]"),
             StringChecker("[line-progress]"),
             DoubleChecker(0.0),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.6934838906942539),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.9425498931842539),
             StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.05745010681574608),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.3065161093057461),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(1.0),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
         )
 
         val result = MapboxRouteLineUtils.getTrafficLineExpression(
@@ -1198,11 +1238,13 @@ class MapboxRouteLineUtilsRoboTest {
         val expectedExpression = listOf(
             StringChecker("step"),
             StringChecker("[line-progress]"),
-            StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
-            DoubleChecker(0.2),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.4897719974699625),
             StringChecker("[rgba, 255.0, 255.0, 0.0, 1.0]"),
+            DoubleChecker(0.0),
+            StringChecker("[rgba, 255.0, 255.0, 0.0, 1.0]"),
+            DoubleChecker(0.510228002530038),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.8),
+            StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
         )
         val route = loadNavigationRoute("multileg-route-two-legs.json")
         val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
@@ -1232,45 +1274,47 @@ class MapboxRouteLineUtilsRoboTest {
             StringChecker("[line-progress]"),
             DoubleChecker(0.0),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.08334636479867703),
+            DoubleChecker(0.057699774865110785),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.10373821458415478),
+            DoubleChecker(0.07809162465058853),
             StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.10373821459415478),
+            DoubleChecker(0.11325578361882999),
             StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.1240124365711821),
+            DoubleChecker(0.1336476334043077),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.25150644055731514),
+            DoubleChecker(0.4083904023623381),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.2718982903427929),
+            DoubleChecker(0.4287822521478158),
             StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.3022491448880224),
+            DoubleChecker(0.4289348860509439),
             StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.32264099467350016),
+            DoubleChecker(0.44932673583642163),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.4693801476844847),
+            DoubleChecker(0.4578611756172846),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.4897719974699625),
+            DoubleChecker(0.4782530254027623),
             StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.5217469745972377),
+            DoubleChecker(0.5102280025300375),
             StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.5421388243827154),
+            DoubleChecker(0.5306198523155153),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.5506732641635784),
+            DoubleChecker(0.6773590053264998),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.5710651139490561),
+            DoubleChecker(0.6977508551119776),
             StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.5712177478521842),
+            DoubleChecker(0.7281017096572071),
             StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.5916095976376619),
+            DoubleChecker(0.7484935594426849),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.8663523665956923),
+            DoubleChecker(0.8759875634288179),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.88674421638117),
+            DoubleChecker(0.8962617854058452),
             StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.9219083753494115),
+            DoubleChecker(0.8962617854158452),
             StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.9423002251348892),
+            DoubleChecker(0.9166536352013229),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(1.0),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
         )
         val route = loadNavigationRoute("multileg-route-two-legs.json")
@@ -1305,22 +1349,24 @@ class MapboxRouteLineUtilsRoboTest {
             StringChecker("[line-progress]"),
             DoubleChecker(0.0),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.4522143415383129),
+            DoubleChecker(0.10977413369872581),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            // notice this value (below) minus the stopGap value equals the previous value (above)
-            DoubleChecker(0.4677574367125704),
+            DoubleChecker(0.1253172288729834),
             StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.48662124620419406),
+            DoubleChecker(0.140879889720177),
             StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.5021643413784516),
+            DoubleChecker(0.15642298489443452),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.8435770151055655),
+            DoubleChecker(0.4978356586215484),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.859120110279823),
+            DoubleChecker(0.513378753795806),
             StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.8746827711270166),
+            // notice this value (below) plus the stopGap value equals the previous value (2 lines below)
+            DoubleChecker(0.5322425632874296),
             StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.8902258663012742),
+            DoubleChecker(0.5477856584616871),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(1.0),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
         )
         val route = loadNavigationRoute("route-with-restrictions.json")
@@ -1354,23 +1400,22 @@ class MapboxRouteLineUtilsRoboTest {
             StringChecker("[linear]"),
             StringChecker("[line-progress]"),
             DoubleChecker(0.0),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.46999999999),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.47),
-            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.48662124620419406),
-            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.5021643413784516),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.8435770151055655),
+            DoubleChecker(0.1097741336987258),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.859120110279823),
+            DoubleChecker(0.12531722887298333),
             StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.8746827711270166),
+            DoubleChecker(0.14087988972017695),
             StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.8902258663012742),
+            DoubleChecker(0.15642298489443449),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.49783565862154844),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.513378753795806),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.53),
+            // doesn't matter what comes after 0.53, as this part will be erased with line-trim-start.
+            {},
         )
         val route = loadNavigationRoute("route-with-restrictions.json")
         val segments = MapboxRouteLineUtils.calculateRouteLineSegments(
@@ -1403,20 +1448,18 @@ class MapboxRouteLineUtilsRoboTest {
             StringChecker("[linear]"),
             StringChecker("[line-progress]"),
             DoubleChecker(0.0),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.8454666619937382),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.10977413369872582),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.12531722887298343),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.140879889720177),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
             // this is the value to notice
-            DoubleChecker(0.8454666620037382),
+            DoubleChecker(0.1545333379862618),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
             // this is the value to notice
-            DoubleChecker(0.8454666620137382),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.859120110279823),
-            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.8746827711270166),
-            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.8902258663012742),
+            DoubleChecker(0.1545333379962618),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
         )
         val route = loadNavigationRoute("route-with-restrictions.json")
@@ -1450,25 +1493,25 @@ class MapboxRouteLineUtilsRoboTest {
             StringChecker("[linear]"),
             StringChecker("[line-progress]"),
             DoubleChecker(0.0),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.10977413369872581),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.1253172288729834),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.140879889720177),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.15642298489443452),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.4978356586215484),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.513378753795806),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.5322425632874296),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.5477856584616871),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
             // notice no stop added before the vanishing point
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(1.0267342531733E-12),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.4522143415383129),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.4677574367125704),
-            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.48662124620419406),
-            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.5021643413784516),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.8435770151055655),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.859120110279823),
-            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.8746827711270166),
-            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.8902258663012742),
+            DoubleChecker(0.9999999999989733),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
         )
         val route = loadNavigationRoute("route-with-restrictions.json")
@@ -1502,25 +1545,25 @@ class MapboxRouteLineUtilsRoboTest {
             StringChecker("[linear]"),
             StringChecker("[line-progress]"),
             DoubleChecker(0.0),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.10977413369872582),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.12531722887298343),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.140879889720177),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.1564229848944345),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.4978356586215484),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            DoubleChecker(0.5133787537958059),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.5322425632874296),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.5477856584616871),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
             // notice no stop added before the vanishing point
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(1.0E-11),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.4522143415383129),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.4677574367125704),
-            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.48662124620419406),
-            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.5021643413784516),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.8435770151055655),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.859120110279823),
-            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.8746827711270166),
-            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(0.8902258663012742),
+            DoubleChecker(0.99999999999),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
         )
         val route = loadNavigationRoute("route-with-restrictions.json")

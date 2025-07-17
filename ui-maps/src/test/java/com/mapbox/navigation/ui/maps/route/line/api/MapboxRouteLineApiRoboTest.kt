@@ -188,122 +188,122 @@ class MapboxRouteLineApiRoboTest {
             val expectedTrafficExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 6.0, 0.0, 1.0]"),
-                DoubleChecker(0.060643157771688605),
-                StringChecker("[rgba, 0.0, 1.0, 0.0, 1.0]"),
-                DoubleChecker(0.4342329026098529),
-                StringChecker("[rgba, 0.0, 2.0, 0.0, 1.0]"),
-                DoubleChecker(0.4546387951164155),
-                StringChecker("[rgba, 0.0, 3.0, 0.0, 1.0]"),
-                DoubleChecker(0.48220037017458817),
-                StringChecker("[rgba, 0.0, 4.0, 0.0, 1.0]"),
-                DoubleChecker(0.49222381941898674),
-                StringChecker("[rgba, 0.0, 5.0, 0.0, 1.0]"),
-                DoubleChecker(0.4978029744948492),
-                StringChecker("[rgba, 6.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.5066296528864341),
-                StringChecker("[rgba, 1.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.6029623830109523),
-                StringChecker("[rgba, 2.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.6636083502821314),
-                StringChecker("[rgba, 3.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.8651897317200945),
-                StringChecker("[rgba, 4.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.9484266125563016),
                 StringChecker("[rgba, 5.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 5.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.05157338744369842),
+                StringChecker("[rgba, 4.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.13481026827990547),
+                StringChecker("[rgba, 3.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.33639164971786856),
+                StringChecker("[rgba, 2.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.39703761698904767),
+                StringChecker("[rgba, 1.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.4933703471135659),
+                StringChecker("[rgba, 6.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.5021970255051508),
+                StringChecker("[rgba, 0.0, 5.0, 0.0, 1.0]"),
+                DoubleChecker(0.5077761805810133),
+                StringChecker("[rgba, 0.0, 4.0, 0.0, 1.0]"),
+                DoubleChecker(0.5177996298254119),
+                StringChecker("[rgba, 0.0, 3.0, 0.0, 1.0]"),
+                DoubleChecker(0.5453612048835845),
+                StringChecker("[rgba, 0.0, 2.0, 0.0, 1.0]"),
+                DoubleChecker(0.5657670973901471),
+                StringChecker("[rgba, 0.0, 1.0, 0.0, 1.0]"),
+                DoubleChecker(0.9393568422283114),
+                StringChecker("[rgba, 0.0, 6.0, 0.0, 1.0]"),
             )
             val expectedBaseExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 5.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 5.0, 1.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
             )
             val expectedCasingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 7.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 7.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
             )
             val expectedTrailExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
             )
             val expectedTrailCasingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
             )
             val expectedMaskingTrafficExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 6.0, 0.0, 1.0]"),
-                DoubleChecker(0.060643157771688605),
-                StringChecker("[rgba, 0.0, 1.0, 0.0, 1.0]"),
-                DoubleChecker(0.4342329026098529),
-                StringChecker("[rgba, 0.0, 2.0, 0.0, 1.0]"),
-                DoubleChecker(0.4546387951164155),
-                StringChecker("[rgba, 0.0, 3.0, 0.0, 1.0]"),
-                DoubleChecker(0.48220037017458817),
-                StringChecker("[rgba, 0.0, 4.0, 0.0, 1.0]"),
-                DoubleChecker(0.49222381941898674),
-                StringChecker("[rgba, 0.0, 5.0, 0.0, 1.0]"),
-                DoubleChecker(0.4978029744948492),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5021970255051508),
+                StringChecker("[rgba, 0.0, 5.0, 0.0, 1.0]"),
+                DoubleChecker(0.5077761805810133),
+                StringChecker("[rgba, 0.0, 4.0, 0.0, 1.0]"),
+                DoubleChecker(0.5177996298254119),
+                StringChecker("[rgba, 0.0, 3.0, 0.0, 1.0]"),
+                DoubleChecker(0.5453612048835845),
+                StringChecker("[rgba, 0.0, 2.0, 0.0, 1.0]"),
+                DoubleChecker(0.5657670973901471),
+                StringChecker("[rgba, 0.0, 1.0, 0.0, 1.0]"),
+                DoubleChecker(0.9393568422283114),
+                StringChecker("[rgba, 0.0, 6.0, 0.0, 1.0]"),
             )
             val expectedMaskingBaseExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
             )
             val expectedTrailMaskingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
             )
             val expectedCasingMaskingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
-                DoubleChecker(0.497802),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
             )
             val expectedTrailCasingMaskingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
             )
 
             val colors = RouteLineColorResources.Builder()
@@ -484,122 +484,122 @@ class MapboxRouteLineApiRoboTest {
             val expectedTrafficExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 6.0, 0.0, 1.0]"),
-                DoubleChecker(0.060643157771688605),
-                StringChecker("[rgba, 0.0, 1.0, 0.0, 1.0]"),
-                DoubleChecker(0.4342329026098529),
-                StringChecker("[rgba, 0.0, 2.0, 0.0, 1.0]"),
-                DoubleChecker(0.4546387951164155),
-                StringChecker("[rgba, 0.0, 3.0, 0.0, 1.0]"),
-                DoubleChecker(0.48220037017458817),
-                StringChecker("[rgba, 0.0, 4.0, 0.0, 1.0]"),
-                DoubleChecker(0.49222381941898674),
-                StringChecker("[rgba, 0.0, 5.0, 0.0, 1.0]"),
-                DoubleChecker(0.4978029744948492),
-                StringChecker("[rgba, 6.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.5066296528864341),
-                StringChecker("[rgba, 1.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.6029623830109523),
-                StringChecker("[rgba, 2.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.6636083502821314),
-                StringChecker("[rgba, 3.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.8651897317200945),
-                StringChecker("[rgba, 4.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.9484266125563016),
                 StringChecker("[rgba, 5.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 5.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.05157338744369842),
+                StringChecker("[rgba, 4.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.13481026827990547),
+                StringChecker("[rgba, 3.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.33639164971786856),
+                StringChecker("[rgba, 2.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.39703761698904767),
+                StringChecker("[rgba, 1.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.4933703471135659),
+                StringChecker("[rgba, 6.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.5021970255051508),
+                StringChecker("[rgba, 0.0, 5.0, 0.0, 1.0]"),
+                DoubleChecker(0.5077761805810133),
+                StringChecker("[rgba, 0.0, 4.0, 0.0, 1.0]"),
+                DoubleChecker(0.5177996298254119),
+                StringChecker("[rgba, 0.0, 3.0, 0.0, 1.0]"),
+                DoubleChecker(0.5453612048835845),
+                StringChecker("[rgba, 0.0, 2.0, 0.0, 1.0]"),
+                DoubleChecker(0.5657670973901471),
+                StringChecker("[rgba, 0.0, 1.0, 0.0, 1.0]"),
+                DoubleChecker(0.9393568422283114),
+                StringChecker("[rgba, 0.0, 6.0, 0.0, 1.0]"),
             )
             val expectedBaseExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 5.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 5.0, 1.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
             )
             val expectedCasingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 7.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 7.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
             )
             val expectedTrailExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
             )
             val expectedTrailCasingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
             )
             val expectedMaskingTrafficExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 6.0, 0.0, 1.0]"),
-                DoubleChecker(0.060643157771688605),
-                StringChecker("[rgba, 0.0, 1.0, 0.0, 1.0]"),
-                DoubleChecker(0.4342329026098529),
-                StringChecker("[rgba, 0.0, 2.0, 0.0, 1.0]"),
-                DoubleChecker(0.4546387951164155),
-                StringChecker("[rgba, 0.0, 3.0, 0.0, 1.0]"),
-                DoubleChecker(0.48220037017458817),
-                StringChecker("[rgba, 0.0, 4.0, 0.0, 1.0]"),
-                DoubleChecker(0.49222381941898674),
-                StringChecker("[rgba, 0.0, 5.0, 0.0, 1.0]"),
-                DoubleChecker(0.4978029744948492),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5021970255051508),
+                StringChecker("[rgba, 0.0, 5.0, 0.0, 1.0]"),
+                DoubleChecker(0.5077761805810133),
+                StringChecker("[rgba, 0.0, 4.0, 0.0, 1.0]"),
+                DoubleChecker(0.5177996298254119),
+                StringChecker("[rgba, 0.0, 3.0, 0.0, 1.0]"),
+                DoubleChecker(0.5453612048835845),
+                StringChecker("[rgba, 0.0, 2.0, 0.0, 1.0]"),
+                DoubleChecker(0.5657670973901471),
+                StringChecker("[rgba, 0.0, 1.0, 0.0, 1.0]"),
+                DoubleChecker(0.9393568422283114),
+                StringChecker("[rgba, 0.0, 6.0, 0.0, 1.0]"),
             )
             val expectedMaskingBaseExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
             )
             val expectedTrailMaskingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
             )
             val expectedCasingMaskingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
-                DoubleChecker(0.497802),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
             )
             val expectedTrailCasingMaskingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
             )
 
             val colors = RouteLineColorResources.Builder()
@@ -787,49 +787,49 @@ class MapboxRouteLineApiRoboTest {
             val expectedTrafficExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 6.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.060643157771688605),
-                StringChecker("[rgba, 1.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.4342329026098529),
-                StringChecker("[rgba, 2.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.4546387951164155),
-                StringChecker("[rgba, 3.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.48220037017458817),
-                StringChecker("[rgba, 4.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.49222381941898674),
-                StringChecker("[rgba, 5.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.4978029744948492),
-                StringChecker("[rgba, 0.0, 6.0, 0.0, 1.0]"),
-                DoubleChecker(0.5066296528864341),
-                StringChecker("[rgba, 0.0, 1.0, 0.0, 1.0]"),
-                DoubleChecker(0.6029623830109523),
-                StringChecker("[rgba, 0.0, 2.0, 0.0, 1.0]"),
-                DoubleChecker(0.6636083502821314),
-                StringChecker("[rgba, 0.0, 3.0, 0.0, 1.0]"),
-                DoubleChecker(0.8651897317200945),
-                StringChecker("[rgba, 0.0, 4.0, 0.0, 1.0]"),
-                DoubleChecker(0.9484266125563016),
                 StringChecker("[rgba, 0.0, 5.0, 0.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 5.0, 0.0, 1.0]"),
+                DoubleChecker(0.0515733874436984),
+                StringChecker("[rgba, 0.0, 4.0, 0.0, 1.0]"),
+                DoubleChecker(0.134810268279905),
+                StringChecker("[rgba, 0.0, 3.0, 0.0, 1.0]"),
+                DoubleChecker(0.336391649717869),
+                StringChecker("[rgba, 0.0, 2.0, 0.0, 1.0]"),
+                DoubleChecker(0.397037616989048),
+                StringChecker("[rgba, 0.0, 1.0, 0.0, 1.0]"),
+                DoubleChecker(0.493370347113566),
+                StringChecker("[rgba, 0.0, 6.0, 0.0, 1.0]"),
+                DoubleChecker(0.502197025505151),
+                StringChecker("[rgba, 5.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.507776180581013),
+                StringChecker("[rgba, 4.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.517799629825412),
+                StringChecker("[rgba, 3.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.545361204883585),
+                StringChecker("[rgba, 2.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.565767097390147),
+                StringChecker("[rgba, 1.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.939356842228311),
+                StringChecker("[rgba, 6.0, 0.0, 0.0, 1.0]"),
             )
             val expectedBaseExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 5.0, 1.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 5.0, 1.0]"),
             )
             val expectedCasingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 7.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 7.0, 0.0, 0.0, 1.0]"),
             )
             val expectedTrailExpressionContents = listOf(
                 StringChecker("step"),
@@ -848,57 +848,57 @@ class MapboxRouteLineApiRoboTest {
             val expectedMaskingTrafficExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.4978029744948492),
-                StringChecker("[rgba, 0.0, 6.0, 0.0, 1.0]"),
-                DoubleChecker(0.5066296528864341),
-                StringChecker("[rgba, 0.0, 1.0, 0.0, 1.0]"),
-                DoubleChecker(0.6029623830109523),
-                StringChecker("[rgba, 0.0, 2.0, 0.0, 1.0]"),
-                DoubleChecker(0.6636083502821314),
-                StringChecker("[rgba, 0.0, 3.0, 0.0, 1.0]"),
-                DoubleChecker(0.8651897317200945),
-                StringChecker("[rgba, 0.0, 4.0, 0.0, 1.0]"),
-                DoubleChecker(0.9484266125563016),
                 StringChecker("[rgba, 0.0, 5.0, 0.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 5.0, 0.0, 1.0]"),
+                DoubleChecker(0.0515733874436984),
+                StringChecker("[rgba, 0.0, 4.0, 0.0, 1.0]"),
+                DoubleChecker(0.134810268279905),
+                StringChecker("[rgba, 0.0, 3.0, 0.0, 1.0]"),
+                DoubleChecker(0.336391649717869),
+                StringChecker("[rgba, 0.0, 2.0, 0.0, 1.0]"),
+                DoubleChecker(0.397037616989048),
+                StringChecker("[rgba, 0.0, 1.0, 0.0, 1.0]"),
+                DoubleChecker(0.493370347113566),
+                StringChecker("[rgba, 0.0, 6.0, 0.0, 1.0]"),
+                DoubleChecker(0.502197025505151),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedMaskingBaseExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedTrailMaskingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedCasingMaskingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.497802),
                 StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
+                DoubleChecker(0.502198),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedTrailCasingMaskingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
 
             val colors = RouteLineColorResources.Builder()
@@ -1079,49 +1079,49 @@ class MapboxRouteLineApiRoboTest {
             val expectedTrafficExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 6.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.060643157771688605),
-                StringChecker("[rgba, 1.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.4342329026098529),
-                StringChecker("[rgba, 2.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.4546387951164155),
-                StringChecker("[rgba, 3.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.48220037017458817),
-                StringChecker("[rgba, 4.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.49222381941898674),
-                StringChecker("[rgba, 5.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.4978029744948492),
-                StringChecker("[rgba, 0.0, 6.0, 0.0, 1.0]"),
-                DoubleChecker(0.5066296528864341),
-                StringChecker("[rgba, 0.0, 1.0, 0.0, 1.0]"),
-                DoubleChecker(0.6029623830109523),
-                StringChecker("[rgba, 0.0, 2.0, 0.0, 1.0]"),
-                DoubleChecker(0.6636083502821314),
-                StringChecker("[rgba, 0.0, 3.0, 0.0, 1.0]"),
-                DoubleChecker(0.8651897317200945),
-                StringChecker("[rgba, 0.0, 4.0, 0.0, 1.0]"),
-                DoubleChecker(0.9484266125563016),
                 StringChecker("[rgba, 0.0, 5.0, 0.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 5.0, 0.0, 1.0]"),
+                DoubleChecker(0.0515733874436984),
+                StringChecker("[rgba, 0.0, 4.0, 0.0, 1.0]"),
+                DoubleChecker(0.134810268279905),
+                StringChecker("[rgba, 0.0, 3.0, 0.0, 1.0]"),
+                DoubleChecker(0.336391649717869),
+                StringChecker("[rgba, 0.0, 2.0, 0.0, 1.0]"),
+                DoubleChecker(0.397037616989048),
+                StringChecker("[rgba, 0.0, 1.0, 0.0, 1.0]"),
+                DoubleChecker(0.493370347113566),
+                StringChecker("[rgba, 0.0, 6.0, 0.0, 1.0]"),
+                DoubleChecker(0.502197025505151),
+                StringChecker("[rgba, 5.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.507776180581013),
+                StringChecker("[rgba, 4.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.517799629825412),
+                StringChecker("[rgba, 3.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.545361204883585),
+                StringChecker("[rgba, 2.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.565767097390147),
+                StringChecker("[rgba, 1.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.939356842228311),
+                StringChecker("[rgba, 6.0, 0.0, 0.0, 1.0]"),
             )
             val expectedBaseExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 5.0, 1.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 5.0, 1.0]"),
             )
             val expectedCasingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 7.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 7.0, 0.0, 0.0, 1.0]"),
             )
             val expectedTrailExpressionContents = listOf(
                 StringChecker("step"),
@@ -1140,57 +1140,57 @@ class MapboxRouteLineApiRoboTest {
             val expectedMaskingTrafficExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.4978029744948492),
-                StringChecker("[rgba, 0.0, 6.0, 0.0, 1.0]"),
-                DoubleChecker(0.5066296528864341),
-                StringChecker("[rgba, 0.0, 1.0, 0.0, 1.0]"),
-                DoubleChecker(0.6029623830109523),
-                StringChecker("[rgba, 0.0, 2.0, 0.0, 1.0]"),
-                DoubleChecker(0.6636083502821314),
-                StringChecker("[rgba, 0.0, 3.0, 0.0, 1.0]"),
-                DoubleChecker(0.8651897317200945),
-                StringChecker("[rgba, 0.0, 4.0, 0.0, 1.0]"),
-                DoubleChecker(0.9484266125563016),
                 StringChecker("[rgba, 0.0, 5.0, 0.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 5.0, 0.0, 1.0]"),
+                DoubleChecker(0.0515733874436984),
+                StringChecker("[rgba, 0.0, 4.0, 0.0, 1.0]"),
+                DoubleChecker(0.134810268279905),
+                StringChecker("[rgba, 0.0, 3.0, 0.0, 1.0]"),
+                DoubleChecker(0.336391649717869),
+                StringChecker("[rgba, 0.0, 2.0, 0.0, 1.0]"),
+                DoubleChecker(0.397037616989048),
+                StringChecker("[rgba, 0.0, 1.0, 0.0, 1.0]"),
+                DoubleChecker(0.493370347113566),
+                StringChecker("[rgba, 0.0, 6.0, 0.0, 1.0]"),
+                DoubleChecker(0.502197025505151),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedMaskingBaseExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedTrailMaskingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedCasingMaskingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.497802),
                 StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
+                DoubleChecker(0.502198),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedTrailCasingMaskingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
 
             val colors = RouteLineColorResources.Builder()
@@ -1378,122 +1378,122 @@ class MapboxRouteLineApiRoboTest {
             val expectedTrafficExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 6.0, 0.0, 1.0]"),
-                DoubleChecker(0.060643157771688605),
-                StringChecker("[rgba, 0.0, 1.0, 0.0, 1.0]"),
-                DoubleChecker(0.4342329026098529),
-                StringChecker("[rgba, 0.0, 2.0, 0.0, 1.0]"),
-                DoubleChecker(0.4546387951164155),
-                StringChecker("[rgba, 0.0, 3.0, 0.0, 1.0]"),
-                DoubleChecker(0.48220037017458817),
-                StringChecker("[rgba, 0.0, 4.0, 0.0, 1.0]"),
-                DoubleChecker(0.49222381941898674),
-                StringChecker("[rgba, 0.0, 5.0, 0.0, 1.0]"),
-                DoubleChecker(0.4978029744948492),
-                StringChecker("[rgba, 6.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.5066296528864341),
-                StringChecker("[rgba, 1.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.6029623830109523),
-                StringChecker("[rgba, 2.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.6636083502821314),
-                StringChecker("[rgba, 3.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.8651897317200945),
-                StringChecker("[rgba, 4.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.9484266125563016),
                 StringChecker("[rgba, 5.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 5.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.0515733874436984),
+                StringChecker("[rgba, 4.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.134810268279905),
+                StringChecker("[rgba, 3.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.336391649717869),
+                StringChecker("[rgba, 2.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.397037616989048),
+                StringChecker("[rgba, 1.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.493370347113566),
+                StringChecker("[rgba, 6.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.502197025505151),
+                StringChecker("[rgba, 0.0, 5.0, 0.0, 1.0]"),
+                DoubleChecker(0.507776180581013),
+                StringChecker("[rgba, 0.0, 4.0, 0.0, 1.0]"),
+                DoubleChecker(0.517799629825412),
+                StringChecker("[rgba, 0.0, 3.0, 0.0, 1.0]"),
+                DoubleChecker(0.545361204883585),
+                StringChecker("[rgba, 0.0, 2.0, 0.0, 1.0]"),
+                DoubleChecker(0.565767097390147),
+                StringChecker("[rgba, 0.0, 1.0, 0.0, 1.0]"),
+                DoubleChecker(0.939356842228311),
+                StringChecker("[rgba, 0.0, 6.0, 0.0, 1.0]"),
             )
             val expectedBaseExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 5.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 5.0, 1.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
             )
             val expectedCasingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 7.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 7.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
             )
             val expectedTrailExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
             )
             val expectedTrailCasingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
             )
             val expectedMaskingTrafficExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 6.0, 0.0, 1.0]"),
-                DoubleChecker(0.060643157771688605),
-                StringChecker("[rgba, 0.0, 1.0, 0.0, 1.0]"),
-                DoubleChecker(0.4342329026098529),
-                StringChecker("[rgba, 0.0, 2.0, 0.0, 1.0]"),
-                DoubleChecker(0.4546387951164155),
-                StringChecker("[rgba, 0.0, 3.0, 0.0, 1.0]"),
-                DoubleChecker(0.48220037017458817),
-                StringChecker("[rgba, 0.0, 4.0, 0.0, 1.0]"),
-                DoubleChecker(0.49222381941898674),
-                StringChecker("[rgba, 0.0, 5.0, 0.0, 1.0]"),
-                DoubleChecker(0.4978029744948492),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.502197025505151),
+                StringChecker("[rgba, 0.0, 5.0, 0.0, 1.0]"),
+                DoubleChecker(0.507776180581013),
+                StringChecker("[rgba, 0.0, 4.0, 0.0, 1.0]"),
+                DoubleChecker(0.517799629825412),
+                StringChecker("[rgba, 0.0, 3.0, 0.0, 1.0]"),
+                DoubleChecker(0.545361204883585),
+                StringChecker("[rgba, 0.0, 2.0, 0.0, 1.0]"),
+                DoubleChecker(0.565767097390147),
+                StringChecker("[rgba, 0.0, 1.0, 0.0, 1.0]"),
+                DoubleChecker(0.939356842228311),
+                StringChecker("[rgba, 0.0, 6.0, 0.0, 1.0]"),
             )
             val expectedMaskingBaseExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
             )
             val expectedTrailMaskingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
             )
             val expectedCasingMaskingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
-                DoubleChecker(0.497802),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.502198),
+                StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
             )
             val expectedTrailCasingMaskingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
             )
 
             val colors = RouteLineColorResources.Builder()
@@ -1672,123 +1672,123 @@ class MapboxRouteLineApiRoboTest {
             val expectedTrafficExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 6.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.060643157771688605),
-                StringChecker("[rgba, 1.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.4342329026098529),
-                StringChecker("[rgba, 2.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.4546387951164155),
-                StringChecker("[rgba, 3.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.48220037017458817),
-                StringChecker("[rgba, 4.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.49222381941898674),
-                StringChecker("[rgba, 5.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.4978029744948492),
-                StringChecker("[rgba, 0.0, 6.0, 0.0, 1.0]"),
-                DoubleChecker(0.5066296528864341),
-                StringChecker("[rgba, 0.0, 1.0, 0.0, 1.0]"),
-                DoubleChecker(0.6029623830109523),
-                StringChecker("[rgba, 0.0, 2.0, 0.0, 1.0]"),
-                DoubleChecker(0.6636083502821314),
-                StringChecker("[rgba, 0.0, 3.0, 0.0, 1.0]"),
-                DoubleChecker(0.8651897317200945),
-                StringChecker("[rgba, 0.0, 4.0, 0.0, 1.0]"),
-                DoubleChecker(0.9484266125563016),
                 StringChecker("[rgba, 0.0, 5.0, 0.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 5.0, 0.0, 1.0]"),
+                DoubleChecker(0.0515733874436984),
+                StringChecker("[rgba, 0.0, 4.0, 0.0, 1.0]"),
+                DoubleChecker(0.134810268279905),
+                StringChecker("[rgba, 0.0, 3.0, 0.0, 1.0]"),
+                DoubleChecker(0.336391649717869),
+                StringChecker("[rgba, 0.0, 2.0, 0.0, 1.0]"),
+                DoubleChecker(0.397037616989048),
+                StringChecker("[rgba, 0.0, 1.0, 0.0, 1.0]"),
+                DoubleChecker(0.493370347113566),
+                StringChecker("[rgba, 0.0, 6.0, 0.0, 1.0]"),
+                DoubleChecker(0.502197025505151),
+                StringChecker("[rgba, 5.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.507776180581013),
+                StringChecker("[rgba, 4.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.517799629825412),
+                StringChecker("[rgba, 3.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.545361204883585),
+                StringChecker("[rgba, 2.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.565767097390147),
+                StringChecker("[rgba, 1.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.939356842228311),
+                StringChecker("[rgba, 6.0, 0.0, 0.0, 1.0]"),
             )
             val expectedBaseExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 5.0, 1.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 5.0, 1.0]"),
             )
             val expectedCasingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 7.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 7.0, 0.0, 0.0, 1.0]"),
             )
             val expectedTrailExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedTrailCasingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
 
             val expectedMaskingTrafficExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.4978029744948492),
-                StringChecker("[rgba, 0.0, 6.0, 0.0, 1.0]"),
-                DoubleChecker(0.5066296528864341),
-                StringChecker("[rgba, 0.0, 1.0, 0.0, 1.0]"),
-                DoubleChecker(0.6029623830109523),
-                StringChecker("[rgba, 0.0, 2.0, 0.0, 1.0]"),
-                DoubleChecker(0.6636083502821314),
-                StringChecker("[rgba, 0.0, 3.0, 0.0, 1.0]"),
-                DoubleChecker(0.8651897317200945),
-                StringChecker("[rgba, 0.0, 4.0, 0.0, 1.0]"),
-                DoubleChecker(0.9484266125563016),
                 StringChecker("[rgba, 0.0, 5.0, 0.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 5.0, 0.0, 1.0]"),
+                DoubleChecker(0.0515733874436984),
+                StringChecker("[rgba, 0.0, 4.0, 0.0, 1.0]"),
+                DoubleChecker(0.134810268279905),
+                StringChecker("[rgba, 0.0, 3.0, 0.0, 1.0]"),
+                DoubleChecker(0.336391649717869),
+                StringChecker("[rgba, 0.0, 2.0, 0.0, 1.0]"),
+                DoubleChecker(0.397037616989048),
+                StringChecker("[rgba, 0.0, 1.0, 0.0, 1.0]"),
+                DoubleChecker(0.493370347113566),
+                StringChecker("[rgba, 0.0, 6.0, 0.0, 1.0]"),
+                DoubleChecker(0.502197025505151),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedMaskingBaseExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedTrailMaskingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedCasingMaskingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.497802),
                 StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
+                DoubleChecker(0.502198),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedTrailCasingMaskingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
 
             val colors = RouteLineColorResources.Builder()
@@ -1969,122 +1969,122 @@ class MapboxRouteLineApiRoboTest {
             val expectedTrafficExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 6.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.060643157771688605),
-                StringChecker("[rgba, 1.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.4342329026098529),
-                StringChecker("[rgba, 2.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.4546387951164155),
-                StringChecker("[rgba, 3.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.48220037017458817),
-                StringChecker("[rgba, 4.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.49222381941898674),
-                StringChecker("[rgba, 5.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.4978029744948492),
-                StringChecker("[rgba, 0.0, 6.0, 0.0, 1.0]"),
-                DoubleChecker(0.5066296528864341),
-                StringChecker("[rgba, 0.0, 1.0, 0.0, 1.0]"),
-                DoubleChecker(0.6029623830109523),
-                StringChecker("[rgba, 0.0, 2.0, 0.0, 1.0]"),
-                DoubleChecker(0.6636083502821314),
-                StringChecker("[rgba, 0.0, 3.0, 0.0, 1.0]"),
-                DoubleChecker(0.8651897317200945),
-                StringChecker("[rgba, 0.0, 4.0, 0.0, 1.0]"),
-                DoubleChecker(0.9484266125563016),
                 StringChecker("[rgba, 0.0, 5.0, 0.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 5.0, 0.0, 1.0]"),
+                DoubleChecker(0.0515733874436984),
+                StringChecker("[rgba, 0.0, 4.0, 0.0, 1.0]"),
+                DoubleChecker(0.134810268279905),
+                StringChecker("[rgba, 0.0, 3.0, 0.0, 1.0]"),
+                DoubleChecker(0.336391649717869),
+                StringChecker("[rgba, 0.0, 2.0, 0.0, 1.0]"),
+                DoubleChecker(0.397037616989048),
+                StringChecker("[rgba, 0.0, 1.0, 0.0, 1.0]"),
+                DoubleChecker(0.493370347113566),
+                StringChecker("[rgba, 0.0, 6.0, 0.0, 1.0]"),
+                DoubleChecker(0.502197025505151),
+                StringChecker("[rgba, 5.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.507776180581013),
+                StringChecker("[rgba, 4.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.517799629825412),
+                StringChecker("[rgba, 3.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.545361204883585),
+                StringChecker("[rgba, 2.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.565767097390147),
+                StringChecker("[rgba, 1.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.939356842228311),
+                StringChecker("[rgba, 6.0, 0.0, 0.0, 1.0]"),
             )
             val expectedBaseExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 5.0, 1.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 5.0, 1.0]"),
             )
             val expectedCasingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 7.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 7.0, 0.0, 0.0, 1.0]"),
             )
             val expectedTrailExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedTrailCasingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
                 StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedMaskingTrafficExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.4978029744948492),
-                StringChecker("[rgba, 0.0, 6.0, 0.0, 1.0]"),
-                DoubleChecker(0.5066296528864341),
-                StringChecker("[rgba, 0.0, 1.0, 0.0, 1.0]"),
-                DoubleChecker(0.6029623830109523),
-                StringChecker("[rgba, 0.0, 2.0, 0.0, 1.0]"),
-                DoubleChecker(0.6636083502821314),
-                StringChecker("[rgba, 0.0, 3.0, 0.0, 1.0]"),
-                DoubleChecker(0.8651897317200945),
-                StringChecker("[rgba, 0.0, 4.0, 0.0, 1.0]"),
-                DoubleChecker(0.9484266125563016),
                 StringChecker("[rgba, 0.0, 5.0, 0.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 5.0, 0.0, 1.0]"),
+                DoubleChecker(0.0515733874436984),
+                StringChecker("[rgba, 0.0, 4.0, 0.0, 1.0]"),
+                DoubleChecker(0.134810268279905),
+                StringChecker("[rgba, 0.0, 3.0, 0.0, 1.0]"),
+                DoubleChecker(0.336391649717869),
+                StringChecker("[rgba, 0.0, 2.0, 0.0, 1.0]"),
+                DoubleChecker(0.397037616989048),
+                StringChecker("[rgba, 0.0, 1.0, 0.0, 1.0]"),
+                DoubleChecker(0.493370347113566),
+                StringChecker("[rgba, 0.0, 6.0, 0.0, 1.0]"),
+                DoubleChecker(0.502197025505151),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedMaskingBaseExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 1.0, 1.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedTrailMaskingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedCasingMaskingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.497802),
                 StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 2.0, 1.0]"),
+                DoubleChecker(0.502198),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedTrailCasingMaskingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.4978029),
                 StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
+                DoubleChecker(0.5021971),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
 
             val colors = RouteLineColorResources.Builder()
@@ -2271,23 +2271,23 @@ class MapboxRouteLineApiRoboTest {
             val expectedTrailExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.5374685049002759),
+                DoubleChecker(0.223124949044229),
                 StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
-                DoubleChecker(0.7768750509557707),
+                DoubleChecker(0.462531495099724),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedTrailCasingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.5374685049002759),
+                DoubleChecker(0.223124949044229),
                 StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
-                DoubleChecker(0.7768750509557707),
+                DoubleChecker(0.462531495099724),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedTrailMaskingExpressionContents = listOf(
@@ -2296,9 +2296,9 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.5374685049002759),
+                DoubleChecker(0.223124949044229),
                 StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
-                DoubleChecker(0.7768750509557707),
+                DoubleChecker(0.462531495099724),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedTrailCasingMaskingExpressionContents = listOf(
@@ -2307,9 +2307,9 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.5374685049002759),
+                DoubleChecker(0.223124949044229),
                 StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
-                DoubleChecker(0.7768750509557707),
+                DoubleChecker(0.462531495099724),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
 
@@ -2427,20 +2427,20 @@ class MapboxRouteLineApiRoboTest {
             val expectedTrailExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
-                DoubleChecker(0.7768750509557707),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.223124949044229),
+                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
             )
             val expectedTrailCasingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
-                DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
-                DoubleChecker(0.7768750509557707),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                DoubleChecker(0.223124949044229),
+                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
             )
             val expectedTrailMaskingExpressionContents = listOf(
                 StringChecker("step"),
@@ -2448,9 +2448,9 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.5374685049002759),
+                DoubleChecker(0.223124949044229),
                 StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
-                DoubleChecker(0.7768750509557707),
+                DoubleChecker(0.462531495099724),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedTrailCasingMaskingExpressionContents = listOf(
@@ -2459,9 +2459,9 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.5374685049002759),
+                DoubleChecker(0.223124949044229),
                 StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
-                DoubleChecker(0.7768750509557707),
+                DoubleChecker(0.462531495099724),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
 
@@ -2580,18 +2580,18 @@ class MapboxRouteLineApiRoboTest {
             mockkObject(MapboxRouteLineUtils)
             var callbackCalled = false
             val expectedTrailExpressionContents = listOf(
-                StringChecker("step"),
-                StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+                StringChecker("rgba"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
+                DoubleChecker(0.0),
+                DoubleChecker(3.0),
+                DoubleChecker(1.0),
             )
             val expectedTrailCasingExpressionContents = listOf(
-                StringChecker("step"),
-                StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
+                StringChecker("rgba"),
                 DoubleChecker(0.0),
-                StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
+                DoubleChecker(0.0),
+                DoubleChecker(4.0),
+                DoubleChecker(1.0),
             )
             val expectedTrailMaskingExpressionContents = listOf(
                 StringChecker("step"),
@@ -2599,9 +2599,9 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.5374685049002759),
+                DoubleChecker(0.223124949044229),
                 StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
-                DoubleChecker(0.7768750509557707),
+                DoubleChecker(0.462531495099724),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedTrailCasingMaskingExpressionContents = listOf(
@@ -2610,9 +2610,9 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.5374685049002759),
+                DoubleChecker(0.223124949044229),
                 StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
-                DoubleChecker(0.7768750509557707),
+                DoubleChecker(0.462531495099724),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
 
@@ -2729,9 +2729,9 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.5374685049002759),
+                DoubleChecker(0.223124949044229),
                 StringChecker("[rgba, 0.0, 0.0, 3.0, 1.0]"),
-                DoubleChecker(0.7768750509557707),
+                DoubleChecker(0.462531495099724),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedTrailCasingMaskingExpressionContents = listOf(
@@ -2740,9 +2740,9 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.5374685049002759),
+                DoubleChecker(0.223124949044229),
                 StringChecker("[rgba, 0.0, 0.0, 4.0, 1.0]"),
-                DoubleChecker(0.7768750509557707),
+                DoubleChecker(0.462531495099724),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
 
@@ -2837,46 +2837,44 @@ class MapboxRouteLineApiRoboTest {
         val viewOptions = MapboxRouteLineViewOptions.Builder(ctx).build().toData()
         val api = MapboxRouteLineApi(apiOptions)
         val expectedCasingExpressionContents = listOf(
-            StringChecker("step"),
-            StringChecker("[line-progress]"),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.0),
-            StringChecker("[rgba, 47.0, 122.0, 198.0, 1.0]"),
+            StringChecker("rgba"),
+            DoubleChecker(47.0),
+            DoubleChecker(122.0),
+            DoubleChecker(198.0),
+            DoubleChecker(1.0),
         )
         val expectedRouteLineExpressionContents = listOf(
-            StringChecker("step"),
-            StringChecker("[line-progress]"),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.0),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            StringChecker("rgba"),
+            DoubleChecker(86.0),
+            DoubleChecker(168.0),
+            DoubleChecker(251.0),
+            DoubleChecker(1.0),
         )
         val expectedTrafficLineExpressionContents = listOf(
             StringChecker("step"),
             StringChecker("[line-progress]"),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.0),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.942549),
             StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(1.0),
+            DoubleChecker(0.0),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.057451),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
         )
         val expectedPrimaryRouteSourceGeometry = "LineString{type=LineString, bbox=null, " +
-            "coordinates=[Point{type=Point, bbox=null, coordinates=[-122.523671, 37.975379]}," +
-            " Point{type=Point, bbox=null, coordinates=[-122.523729, 37.975194]}, " +
+            "coordinates=[Point{type=Point, bbox=null, coordinates=[-122.523131, 37.975067]}," +
+            " Point{type=Point, bbox=null, coordinates=[-122.523117, 37.975107]}, " +
             "Point{type=Point, bbox=null, coordinates=[-122.523579, 37.975173]}, " +
-            "Point{type=Point, bbox=null, coordinates=[-122.523117, 37.975107]}, " +
-            "Point{type=Point, bbox=null, coordinates=[-122.523131, 37.975067]}]}"
+            "Point{type=Point, bbox=null, coordinates=[-122.523729, 37.975194]}, " +
+            "Point{type=Point, bbox=null, coordinates=[-122.523671, 37.975379]}]}"
         val expectedWaypointFeature0 =
             "Point{type=Point, bbox=null, coordinates=[-122.523671, 37.975379]}"
         val expectedWaypointFeature1 =
             "Point{type=Point, bbox=null, coordinates=[-122.523131, 37.975067]}"
         val expectedMaskingExpressionContents = listOf(
-            StringChecker("step"),
-            StringChecker("[line-progress]"),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(1.0),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            StringChecker("rgba"),
+            DoubleChecker(0.0),
+            DoubleChecker(0.0),
+            DoubleChecker(0.0),
+            DoubleChecker(0.0),
         )
 
         val route = loadNavigationRoute(
@@ -2981,18 +2979,15 @@ class MapboxRouteLineApiRoboTest {
             is HeavyRouteLineValueProvider,
         )
         assertTrue(
-            primaryLineData.baseExpressionCommandHolder.provider
-            is LightRouteLineValueProvider,
+            primaryLineData.baseExpressionCommandHolder.provider is LightRouteLineValueProvider,
         )
         assertTrue(
-            primaryLineData.casingExpressionCommandHolder.provider
-            is LightRouteLineValueProvider,
+            primaryLineData.casingExpressionCommandHolder.provider is LightRouteLineValueProvider,
         )
 
         val maskingData = result.value!!.routeLineMaskingLayerDynamicData!!
         assertTrue(
-            maskingData.trafficExpressionCommandHolder!!.provider
-            is LightRouteLineValueProvider,
+            maskingData.trafficExpressionCommandHolder!!.provider is LightRouteLineValueProvider,
         )
         assertTrue(
             maskingData.baseExpressionCommandHolder.provider is LightRouteLineValueProvider,
@@ -3035,53 +3030,53 @@ class MapboxRouteLineApiRoboTest {
             StringChecker("[line-progress]"),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             DoubleChecker(0.0),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.4822003),
-            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
-            DoubleChecker(0.4848101),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.490409),
-            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
-            DoubleChecker(0.4922238),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.4978029),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.5021971),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.5077762),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.509591),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.5151899),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.5177997),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
         )
         val expectedMaskingBaseExpressionContents = listOf(
             StringChecker("step"),
             StringChecker("[line-progress]"),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             DoubleChecker(0.0),
-            StringChecker("[rgba, 0.0, 0.0, 255.0, 1.0]"),
-            DoubleChecker(0.4978029),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.5021971),
+            StringChecker("[rgba, 0.0, 0.0, 255.0, 1.0]"),
         )
         val expectedMaskingCasingExpressionContents = listOf(
             StringChecker("step"),
             StringChecker("[line-progress]"),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             DoubleChecker(0.0),
-            StringChecker("[rgba, 47.0, 122.0, 198.0, 1.0]"),
-            DoubleChecker(0.4978029),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.5021971),
+            StringChecker("[rgba, 47.0, 122.0, 198.0, 1.0]"),
         )
         val expectedMaskingTrailExpressionContents = listOf(
             StringChecker("step"),
             StringChecker("[line-progress]"),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             DoubleChecker(0.0),
-            StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
-            DoubleChecker(0.4978029),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.5021971),
+            StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
         )
         val expectedMaskingTrailCasingExpressionContents = listOf(
             StringChecker("step"),
             StringChecker("[line-progress]"),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             DoubleChecker(0.0),
-            StringChecker("[rgba, 255.0, 0.0, 255.0, 1.0]"),
-            DoubleChecker(0.4978029),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.5021971),
+            StringChecker("[rgba, 255.0, 0.0, 255.0, 1.0]"),
         )
 
         val result = api.setNavigationRoutes(listOf(multiLegRouteWithOverlap.navigationRoute))
@@ -3130,8 +3125,7 @@ class MapboxRouteLineApiRoboTest {
 
         val maskingData = result.value!!.routeLineMaskingLayerDynamicData!!
         assertTrue(
-            maskingData.trafficExpressionCommandHolder!!.provider
-            is LightRouteLineValueProvider,
+            maskingData.trafficExpressionCommandHolder!!.provider is LightRouteLineValueProvider,
         )
         assertTrue(
             maskingData.baseExpressionCommandHolder.provider is LightRouteLineValueProvider,
@@ -3180,88 +3174,92 @@ class MapboxRouteLineApiRoboTest {
             StringChecker("[linear]"),
             StringChecker("[line-progress]"),
             DoubleChecker(0.0),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.46930494817835106),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.48220037017458817),
-            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
-            DoubleChecker(0.48220037018458817),
-            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
-            DoubleChecker(0.48481010101499833),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.48481010101499833),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.49040955817278464),
-            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
-            DoubleChecker(0.49040955817278464),
-            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
-            DoubleChecker(0.49222381941898674),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.49222381941898674),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.4978029744948492),
             StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
-            DoubleChecker(0.4978029744948492),
+            DoubleChecker(0.485253290658251),
             StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
-            DoubleChecker(0.503940915637458),
+            DoubleChecker(0.486808287578294),
             StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
-            DoubleChecker(0.503940915637458),
+            DoubleChecker(0.486808287578294),
             StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
-            DoubleChecker(0.5055971863970301),
+            DoubleChecker(0.49440281360297),
             StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
-            DoubleChecker(0.5055971863970301),
+            DoubleChecker(0.49440281360297),
             StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
-            DoubleChecker(0.5131917124217056),
+            DoubleChecker(0.496059084362542),
             StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
-            DoubleChecker(0.5131917124217056),
+            DoubleChecker(0.496059084362542),
             StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
-            DoubleChecker(0.5147467093417488),
+            DoubleChecker(0.502197025505151),
             StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
+            DoubleChecker(0.502197025505151),
+            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
+            DoubleChecker(0.507776180581013),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.507776180581013),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.509590441827215),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.509590441827215),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.515189898985002),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.515189898985002),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.517799629815412),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.517799629825412),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.530695051821649),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(1.0),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
         )
         val expectedTrailExpressionContents = listOf(
             StringChecker("step"),
             StringChecker("[line-progress]"),
-            StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
-            DoubleChecker(0.0),
-            StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
-            DoubleChecker(0.4978029744948492),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.0),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.502197025505151),
+            StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
         )
         val expectedMaskingTrafficExpressionContents = listOf(
             StringChecker("interpolate"),
             StringChecker("[linear]"),
             StringChecker("[line-progress]"),
             DoubleChecker(0.0),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.46930494817835106),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.48220037017458817),
-            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
-            DoubleChecker(0.48220037018458817),
-            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
-            DoubleChecker(0.48481010101499833),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.48481010101499833),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.49040955817278464),
-            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
-            DoubleChecker(0.49040955817278464),
-            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
-            DoubleChecker(0.49222381941898674),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.49222381941898674),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.4978029744948492),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.502197025505151),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.507776180581013),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.507776180581013),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.509590441827215),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.509590441827215),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.515189898985002),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.515189898985002),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.517799629815412),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.517799629825412),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.530695051821649),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(1.0),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
         )
         val expectedMaskingTrailExpressionContents = listOf(
             StringChecker("step"),
             StringChecker("[line-progress]"),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             DoubleChecker(0.0),
-            StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
-            DoubleChecker(0.4978029744948492),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.502197025505151),
+            StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
         )
 
         val result = api.setNavigationRoutes(listOf(multiLegRouteWithOverlap.navigationRoute))
@@ -3305,14 +3303,12 @@ class MapboxRouteLineApiRoboTest {
             is HeavyRouteLineValueProvider,
         )
         assertTrue(
-            primaryLineData.trailExpressionCommandHolder!!.provider
-            is LightRouteLineValueProvider,
+            primaryLineData.trailExpressionCommandHolder!!.provider is LightRouteLineValueProvider,
         )
 
         val maskingData = result.value!!.routeLineMaskingLayerDynamicData!!
         assertTrue(
-            maskingData.trafficExpressionCommandHolder!!.provider
-            is LightRouteLineValueProvider,
+            maskingData.trafficExpressionCommandHolder!!.provider is LightRouteLineValueProvider,
         )
         assertTrue(
             maskingData.trailExpressionCommandHolder!!.provider is LightRouteLineValueProvider,
@@ -3323,36 +3319,34 @@ class MapboxRouteLineApiRoboTest {
     fun setRoutesWithCallback() = coroutineRule.runBlockingTest {
         val api = MapboxRouteLineApi(MapboxRouteLineApiOptions.Builder().build())
         val expectedCasingExpressionContents = listOf(
-            StringChecker("step"),
-            StringChecker("[line-progress]"),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.0),
-            StringChecker("[rgba, 47.0, 122.0, 198.0, 1.0]"),
+            StringChecker("rgba"),
+            DoubleChecker(47.0),
+            DoubleChecker(122.0),
+            DoubleChecker(198.0),
+            DoubleChecker(1.0),
         )
         val expectedRouteLineExpressionContents = listOf(
-            StringChecker("step"),
-            StringChecker("[line-progress]"),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.0),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            StringChecker("rgba"),
+            DoubleChecker(86.0),
+            DoubleChecker(168.0),
+            DoubleChecker(251.0),
+            DoubleChecker(1.0),
         )
         val expectedTrafficLineExpressionContents = listOf(
             StringChecker("step"),
             StringChecker("[line-progress]"),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.0),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.942549),
             StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(1.0),
+            DoubleChecker(0.0),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.057451),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
         )
         val expectedPrimaryRouteSourceGeometry = "LineString{type=LineString, bbox=null, " +
-            "coordinates=[Point{type=Point, bbox=null, coordinates=[-122.523671, 37.975379]}," +
-            " Point{type=Point, bbox=null, coordinates=[-122.523729, 37.975194]}, " +
+            "coordinates=[Point{type=Point, bbox=null, coordinates=[-122.523131, 37.975067]}," +
+            " Point{type=Point, bbox=null, coordinates=[-122.523117, 37.975107]}, " +
             "Point{type=Point, bbox=null, coordinates=[-122.523579, 37.975173]}, " +
-            "Point{type=Point, bbox=null, coordinates=[-122.523117, 37.975107]}, " +
-            "Point{type=Point, bbox=null, coordinates=[-122.523131, 37.975067]}]}"
+            "Point{type=Point, bbox=null, coordinates=[-122.523729, 37.975194]}, " +
+            "Point{type=Point, bbox=null, coordinates=[-122.523671, 37.975379]}]}"
         val expectedWaypointFeature0 =
             "Point{type=Point, bbox=null, coordinates=[-122.523671, 37.975379]}"
         val expectedWaypointFeature1 =
@@ -3408,18 +3402,15 @@ class MapboxRouteLineApiRoboTest {
             is HeavyRouteLineValueProvider,
         )
         assertTrue(
-            primaryLineData.baseExpressionCommandHolder!!.provider
-            is LightRouteLineValueProvider,
+            primaryLineData.baseExpressionCommandHolder.provider is LightRouteLineValueProvider,
         )
         assertTrue(
-            primaryLineData.casingExpressionCommandHolder!!.provider
-            is LightRouteLineValueProvider,
+            primaryLineData.casingExpressionCommandHolder.provider is LightRouteLineValueProvider,
         )
 
         assertEquals(
             expectedPrimaryRouteSourceGeometry,
-            result!!.primaryRouteLineData.featureCollection.features()!![0].geometry()
-                .toString(),
+            result!!.primaryRouteLineData.featureCollection.features()!![0].geometry().toString(),
         )
         assertTrue(
             result!!.alternativeRouteLinesData[0].featureCollection.features()!!.isEmpty(),
@@ -3457,9 +3448,9 @@ class MapboxRouteLineApiRoboTest {
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             DoubleChecker(0.0),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.39564579),
+            DoubleChecker(0.4459960518654729),
             StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
-            DoubleChecker(0.5540039481345271),
+            DoubleChecker(0.60435421),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
         )
         val expectedMaskingRestrictedExpressionContents = listOf(
@@ -3468,9 +3459,9 @@ class MapboxRouteLineApiRoboTest {
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             DoubleChecker(0.0),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.39564579),
+            DoubleChecker(0.5102280025300375),
             StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
-            DoubleChecker(0.4897719974699625),
+            DoubleChecker(0.60435421),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
         )
         val route = loadNavigationRoute("multileg_route_two_legs_with_restrictions.json")
@@ -3531,11 +3522,11 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.39564579),
-                StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.4897719974699625),
+                DoubleChecker(0.445996051865473),
                 StringChecker("[rgba, 0.0, 255.0, 0.0, 1.0]"),
-                DoubleChecker(0.5540039481345271),
+                DoubleChecker(0.510228002530038),
+                StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.60435421),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedMaskingRestrictedExpressionContents = listOf(
@@ -3544,9 +3535,9 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.39564579),
+                DoubleChecker(0.510228002530038),
                 StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.4897719974699625),
+                DoubleChecker(0.60435421),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val route = loadNavigationRoute("multileg_route_two_legs_with_restrictions.json")
@@ -3606,11 +3597,11 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.39564579),
-                StringChecker("[rgba, 0.0, 255.0, 0.0, 1.0]"),
-                DoubleChecker(0.4897719974699625),
+                DoubleChecker(0.445996051865473),
                 StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.5540039481345271),
+                DoubleChecker(0.510228002530038),
+                StringChecker("[rgba, 0.0, 255.0, 0.0, 1.0]"),
+                DoubleChecker(0.60435421),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedMaskingRestrictedExpressionContents = listOf(
@@ -3619,9 +3610,9 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.4897719974699625),
+                DoubleChecker(0.445996051865473),
                 StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.5540039481345271),
+                DoubleChecker(0.510228002530038),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val route = loadNavigationRoute("multileg_route_two_legs_with_restrictions.json")
@@ -3693,43 +3684,45 @@ class MapboxRouteLineApiRoboTest {
             StringChecker("[linear]"),
             StringChecker("[line-progress]"),
             DoubleChecker(0.0),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.46930494817835106),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.48220037017458817),
-            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
-            DoubleChecker(0.48220037018458817),
-            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
-            DoubleChecker(0.48481010101499833),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.48481010101499833),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.49040955817278464),
-            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
-            DoubleChecker(0.49040955817278464),
-            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
-            DoubleChecker(0.49222381941898674),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.49222381941898674),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.4978029744948492),
             StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
-            DoubleChecker(0.4978029744948492),
+            DoubleChecker(0.485253290658251),
             StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
-            DoubleChecker(0.503940915637458),
+            DoubleChecker(0.486808287578294),
             StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
-            DoubleChecker(0.503940915637458),
+            DoubleChecker(0.486808287578294),
             StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
-            DoubleChecker(0.5055971863970301),
+            DoubleChecker(0.49440281360297),
             StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
-            DoubleChecker(0.5055971863970301),
+            DoubleChecker(0.49440281360297),
             StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
-            DoubleChecker(0.5131917124217056),
+            DoubleChecker(0.496059084362542),
             StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
-            DoubleChecker(0.5131917124217056),
+            DoubleChecker(0.496059084362542),
             StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
-            DoubleChecker(0.5147467093417488),
+            DoubleChecker(0.502197025505151),
             StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
+            DoubleChecker(0.502197025505151),
+            StringChecker("[rgba, 22.0, 99.0, 66.0, 1.0]"),
+            DoubleChecker(0.507776180581013),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.507776180581013),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.509590441827215),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.509590441827215),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.515189898985002),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.515189898985002),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.517799629815412),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.517799629825412),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.530695051821649),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(1.0),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
         )
 
         val expectedMaskingTrafficExpressionContents = listOf(
@@ -3737,27 +3730,29 @@ class MapboxRouteLineApiRoboTest {
             StringChecker("[linear]"),
             StringChecker("[line-progress]"),
             DoubleChecker(0.0),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.46930494817835106),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.48220037017458817),
-            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
-            DoubleChecker(0.48220037018458817),
-            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
-            DoubleChecker(0.48481010101499833),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.48481010101499833),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.49040955817278464),
-            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
-            DoubleChecker(0.49040955817278464),
-            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
-            DoubleChecker(0.49222381941898674),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.49222381941898674),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.4978029744948492),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.502197025505151),
+            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            DoubleChecker(0.507776180581013),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.507776180581013),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.509590441827215),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.509590441827215),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.515189898985002),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.515189898985002),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.517799629815412),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.517799629825412),
+            StringChecker("[rgba, 204.0, 204.0, 204.0, 1.0]"),
+            DoubleChecker(0.530695051821649),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(1.0),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
         )
 
         var callbackCalled = false
@@ -3822,11 +3817,11 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.39564579),
-                StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.4897719974699625),
+                DoubleChecker(0.445996051865473),
                 StringChecker("[rgba, 0.0, 255.0, 0.0, 1.0]"),
-                DoubleChecker(0.5540039481345271),
+                DoubleChecker(0.510228002530038),
+                StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
+                DoubleChecker(0.60435421),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedMaskingRestrictedExpressionContents = listOf(
@@ -3835,9 +3830,9 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.39564579),
+                DoubleChecker(0.510228002530038),
                 StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.4897719974699625),
+                DoubleChecker(0.60435421),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val route = loadNavigationRoute("multileg_route_two_legs_with_restrictions.json")
@@ -3908,11 +3903,11 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.39564579),
-                StringChecker("[rgba, 0.0, 255.0, 0.0, 1.0]"),
-                DoubleChecker(0.4897719974699625),
+                DoubleChecker(0.445996051865473),
                 StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.5540039481345271),
+                DoubleChecker(0.510228002530038),
+                StringChecker("[rgba, 0.0, 255.0, 0.0, 1.0]"),
+                DoubleChecker(0.60435421),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedMaskingRestrictedExpressionContents = listOf(
@@ -3921,9 +3916,9 @@ class MapboxRouteLineApiRoboTest {
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.4897719974699625),
+                DoubleChecker(0.445996051865473),
                 StringChecker("[rgba, 255.0, 0.0, 0.0, 1.0]"),
-                DoubleChecker(0.5540039481345271),
+                DoubleChecker(0.510228002530038),
                 StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val route = loadNavigationRoute("multileg_route_two_legs_with_restrictions.json")
@@ -3989,7 +3984,7 @@ class MapboxRouteLineApiRoboTest {
                 .vanishingRouteLineEnabled(true)
                 .build()
             val api = MapboxRouteLineApi(apiOptions)
-            val expectedRestrictedExpressionContents = Value.valueOf(0.0)
+            val expectedRestrictedExpressionContents = Value.valueOf(1.0)
             val route = loadNavigationRoute("multileg_route_two_legs_with_restrictions.json")
 
             api.setNavigationRoutes(listOf(route), activeLegIndex = 0)
@@ -3999,7 +3994,7 @@ class MapboxRouteLineApiRoboTest {
                     .primaryRouteLineDynamicData!!
                     .restrictedSectionExpressionCommandHolder!!,
                 viewOptions,
-                "line-trim-end",
+                "line-trim-start",
             )
 
             assertEquals(
@@ -4031,7 +4026,7 @@ class MapboxRouteLineApiRoboTest {
                 .vanishingRouteLineEnabled(true)
                 .build()
             val api = MapboxRouteLineApi(apiOptions)
-            val expectedRestrictedExpressionContents = Value.valueOf(0.0)
+            val expectedRestrictedExpressionContents = Value.valueOf(1.0)
             val route = loadNavigationRoute("multileg_route_two_legs_with_restrictions.json")
 
             api.setNavigationRoutes(listOf(route), activeLegIndex = 1)
@@ -4041,7 +4036,7 @@ class MapboxRouteLineApiRoboTest {
                     .primaryRouteLineDynamicData!!
                     .restrictedSectionExpressionCommandHolder!!,
                 viewOptions,
-                "line-trim-end",
+                "line-trim-start",
             )
 
             assertEquals(
@@ -4059,50 +4054,48 @@ class MapboxRouteLineApiRoboTest {
         val expectedPrimaryTrafficLineExpressionContents = listOf(
             StringChecker("step"),
             StringChecker("[line-progress]"),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.0),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.94254989),
             StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(1.0),
+            DoubleChecker(0.0),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.05745011),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
         )
         val expectedAlternative1TrafficLineExpressionContents = listOf(
             StringChecker("step"),
             StringChecker("[line-progress]"),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            StringChecker("[rgba, 134.0, 148.0, 165.0, 1.0]"),
             DoubleChecker(0.0),
             StringChecker("[rgba, 134.0, 148.0, 165.0, 1.0]"),
-            DoubleChecker(0.42786239),
+            DoubleChecker(0.5041359),
             StringChecker("[rgba, 190.0, 160.0, 135.0, 1.0]"),
-            DoubleChecker(0.4958641),
+            DoubleChecker(0.57213761),
             StringChecker("[rgba, 134.0, 148.0, 165.0, 1.0]"),
         )
         val expectedAlternative2TrafficLineExpressionContents = listOf(
             StringChecker("step"),
             StringChecker("[line-progress]"),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+            StringChecker("[rgba, 134.0, 148.0, 165.0, 1.0]"),
             DoubleChecker(0.0),
             StringChecker("[rgba, 134.0, 148.0, 165.0, 1.0]"),
-            DoubleChecker(0.09121734),
-            StringChecker("[rgba, 190.0, 160.0, 135.0, 1.0]"),
-            DoubleChecker(0.0996932),
-            StringChecker("[rgba, 134.0, 148.0, 165.0, 1.0]"),
-            DoubleChecker(0.742905),
-            StringChecker("[rgba, 190.0, 160.0, 135.0, 1.0]"),
-            DoubleChecker(0.7533370),
-            StringChecker("[rgba, 134.0, 148.0, 165.0, 1.0]"),
-            DoubleChecker(0.7911074),
-            StringChecker("[rgba, 190.0, 160.0, 135.0, 1.0]"),
-            DoubleChecker(0.8172277),
-            StringChecker("[rgba, 134.0, 148.0, 165.0, 1.0]"),
-            DoubleChecker(0.8647541),
-            StringChecker("[rgba, 190.0, 160.0, 135.0, 1.0]"),
-            DoubleChecker(0.8661804),
-            StringChecker("[rgba, 134.0, 148.0, 165.0, 1.0]"),
-            DoubleChecker(0.8880790),
+            DoubleChecker(0.07244878),
             StringChecker("[rgba, 181.0, 130.0, 129.0, 1.0]"),
-            DoubleChecker(0.92755122),
+            DoubleChecker(0.111921),
+            StringChecker("[rgba, 134.0, 148.0, 165.0, 1.0]"),
+            DoubleChecker(0.1338196),
+            StringChecker("[rgba, 190.0, 160.0, 135.0, 1.0]"),
+            DoubleChecker(0.1352459),
+            StringChecker("[rgba, 134.0, 148.0, 165.0, 1.0]"),
+            DoubleChecker(0.1827723),
+            StringChecker("[rgba, 190.0, 160.0, 135.0, 1.0]"),
+            DoubleChecker(0.2088926),
+            StringChecker("[rgba, 134.0, 148.0, 165.0, 1.0]"),
+            DoubleChecker(0.246663),
+            StringChecker("[rgba, 190.0, 160.0, 135.0, 1.0]"),
+            DoubleChecker(0.257095),
+            StringChecker("[rgba, 134.0, 148.0, 165.0, 1.0]"),
+            DoubleChecker(0.9003068),
+            StringChecker("[rgba, 190.0, 160.0, 135.0, 1.0]"),
+            DoubleChecker(0.90878266),
             StringChecker("[rgba, 134.0, 148.0, 165.0, 1.0]"),
         )
         val viewOptions = MapboxRouteLineViewOptions.Builder(ctx).build().toData()
@@ -4232,14 +4225,101 @@ class MapboxRouteLineApiRoboTest {
                     "line-gradient",
                 )
             }
-            checkEquals(allValuesToCheck) {
+
+            // trail and trailCasing expressions also depend on inactiveLegStyling,
+            // because for the case of inactive leg colours being transparent, we don't want
+            // the trail layer to show up underneath them, so we substitute some parts for transparent colour.
+            checkNotEquals(
+                setOf(
+                    independentStylingEnabledLegZeroResult,
+                    independentStylingDisabledLegZeroResult,
+                ),
+            ) {
                 getAppliedExpression(
                     it.primaryRouteLineData.dynamicData!!.trailExpressionCommandHolder!!,
                     viewOptions,
                     "line-gradient",
                 )
             }
-            checkEquals(allValuesToCheck) {
+            checkNotEquals(
+                setOf(
+                    independentStylingEnabledLegOneResult,
+                    independentStylingDisabledLegOneResult,
+                ),
+            ) {
+                getAppliedExpression(
+                    it.primaryRouteLineData.dynamicData!!.trailExpressionCommandHolder!!,
+                    viewOptions,
+                    "line-gradient",
+                )
+            }
+            checkEquals(
+                setOf(
+                    independentStylingEnabledLegZeroResult,
+                    independentStylingEnabledLegOneResult,
+                ),
+            ) {
+                getAppliedExpression(
+                    it.primaryRouteLineData.dynamicData!!.trailExpressionCommandHolder!!,
+                    viewOptions,
+                    "line-gradient",
+                )
+            }
+            checkEquals(
+                setOf(
+                    independentStylingDisabledLegZeroResult,
+                    independentStylingDisabledLegOneResult,
+                ),
+            ) {
+                getAppliedExpression(
+                    it.primaryRouteLineData.dynamicData!!.trailExpressionCommandHolder!!,
+                    viewOptions,
+                    "line-gradient",
+                )
+            }
+
+            checkNotEquals(
+                setOf(
+                    independentStylingEnabledLegZeroResult,
+                    independentStylingDisabledLegZeroResult,
+                ),
+            ) {
+                getAppliedExpression(
+                    it.primaryRouteLineData.dynamicData!!.trailCasingExpressionCommandHolder!!,
+                    viewOptions,
+                    "line-gradient",
+                )
+            }
+            checkNotEquals(
+                setOf(
+                    independentStylingEnabledLegOneResult,
+                    independentStylingDisabledLegOneResult,
+                ),
+            ) {
+                getAppliedExpression(
+                    it.primaryRouteLineData.dynamicData!!.trailCasingExpressionCommandHolder!!,
+                    viewOptions,
+                    "line-gradient",
+                )
+            }
+            checkEquals(
+                setOf(
+                    independentStylingEnabledLegZeroResult,
+                    independentStylingEnabledLegOneResult,
+                ),
+            ) {
+                getAppliedExpression(
+                    it.primaryRouteLineData.dynamicData!!.trailCasingExpressionCommandHolder!!,
+                    viewOptions,
+                    "line-gradient",
+                )
+            }
+            checkEquals(
+                setOf(
+                    independentStylingDisabledLegZeroResult,
+                    independentStylingDisabledLegOneResult,
+                ),
+            ) {
                 getAppliedExpression(
                     it.primaryRouteLineData.dynamicData!!.trailCasingExpressionCommandHolder!!,
                     viewOptions,
@@ -4319,36 +4399,34 @@ class MapboxRouteLineApiRoboTest {
         val apiOptions = MapboxRouteLineApiOptions.Builder().build()
         val api = MapboxRouteLineApi(apiOptions)
         val expectedCasingExpressionContents = listOf(
-            StringChecker("step"),
-            StringChecker("[line-progress]"),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.0),
-            StringChecker("[rgba, 47.0, 122.0, 198.0, 1.0]"),
+            StringChecker("rgba"),
+            DoubleChecker(47.0),
+            DoubleChecker(122.0),
+            DoubleChecker(198.0),
+            DoubleChecker(1.0),
         )
         val expectedRouteLineExpressionContents = listOf(
-            StringChecker("step"),
-            StringChecker("[line-progress]"),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.0),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+            StringChecker("rgba"),
+            DoubleChecker(86.0),
+            DoubleChecker(168.0),
+            DoubleChecker(251.0),
+            DoubleChecker(1.0),
         )
         val expectedTrafficLineExpressionContents = listOf(
             StringChecker("step"),
             StringChecker("[line-progress]"),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.0),
-            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
-            DoubleChecker(0.9425498),
             StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
-            DoubleChecker(1.0),
+            DoubleChecker(0.0),
+            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            DoubleChecker(0.0574502),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
         )
         val expectedPrimaryRouteSourceGeometry = "LineString{type=LineString, bbox=null, " +
-            "coordinates=[Point{type=Point, bbox=null, coordinates=[-122.523671, 37.975379]}," +
-            " Point{type=Point, bbox=null, coordinates=[-122.523729, 37.975194]}, " +
+            "coordinates=[Point{type=Point, bbox=null, coordinates=[-122.523131, 37.975067]}," +
+            " Point{type=Point, bbox=null, coordinates=[-122.523117, 37.975107]}, " +
             "Point{type=Point, bbox=null, coordinates=[-122.523579, 37.975173]}, " +
-            "Point{type=Point, bbox=null, coordinates=[-122.523117, 37.975107]}, " +
-            "Point{type=Point, bbox=null, coordinates=[-122.523131, 37.975067]}]}"
+            "Point{type=Point, bbox=null, coordinates=[-122.523729, 37.975194]}, " +
+            "Point{type=Point, bbox=null, coordinates=[-122.523671, 37.975379]}]}"
         val expectedWaypointFeature0 =
             "Point{type=Point, bbox=null, coordinates=[-122.523671, 37.975379]}"
         val expectedWaypointFeature1 =
@@ -4436,10 +4514,7 @@ class MapboxRouteLineApiRoboTest {
             .vanishingRouteLineUpdateIntervalNano(0)
             .build()
         val api = MapboxRouteLineApi(apiOptions)
-        val expectedCasingExpressionContents = Value.valueOf(0.3240769449298392)
-        val expectedRouteExpressionContents = Value.valueOf(0.3240769449298392)
-        val expectedTrafficExpressionContents = Value.valueOf(0.3240769449298392)
-        val expectedRestrictedExpressionContents = Value.valueOf(0.3240769449298392)
+        val expectedTrimStart = 0.6759230551
         val route = shortRoute.navigationRoute
         val lineString = LineString.fromPolyline(
             route.directionsRoute.geometry() ?: "",
@@ -4454,40 +4529,44 @@ class MapboxRouteLineApiRoboTest {
         val result = api.updateTraveledRouteLine(lineString.coordinates()[1])
 
         assertEquals(
-            expectedCasingExpressionContents,
+            expectedTrimStart,
             getAppliedValue(
                 result.value!!.primaryRouteLineDynamicData!!
                     .casingExpressionCommandHolder,
                 viewOptions,
-                "line-trim-end",
-            ),
+                "line-trim-start",
+            ).contents as Double,
+            0.0000000001,
         )
         assertEquals(
-            expectedRouteExpressionContents,
+            expectedTrimStart,
             getAppliedValue(
                 result.value!!.primaryRouteLineDynamicData!!
                     .baseExpressionCommandHolder,
                 viewOptions,
-                "line-trim-end",
-            ),
+                "line-trim-start",
+            ).contents as Double,
+            0.0000000001,
         )
         assertEquals(
-            expectedTrafficExpressionContents,
+            expectedTrimStart,
             getAppliedValue(
                 result.value!!
                     .primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!,
                 viewOptions,
-                "line-trim-end",
-            ),
+                "line-trim-start",
+            ).contents as Double,
+            0.0000000001,
         )
         assertEquals(
-            expectedRestrictedExpressionContents,
+            expectedTrimStart,
             getAppliedValue(
                 result.value!!
                     .primaryRouteLineDynamicData!!.restrictedSectionExpressionCommandHolder!!,
                 viewOptions,
-                "line-trim-end",
-            ),
+                "line-trim-start",
+            ).contents as Double,
+            0.0000000001,
         )
 
         assertTrue(
@@ -4546,15 +4625,15 @@ class MapboxRouteLineApiRoboTest {
         api.updateVanishingPointState(routeProgress.currentState)
         val result = api.updateTraveledRouteLine(lineString.coordinates()[16])
 
-        val expectedTrafficExpressionContents = 0.37758486715525985
-        val expectedMaskingTrafficExpressionContents = 0.37758486715525985
+        val expectedTrafficExpressionContents = 0.6224151328
+        val expectedMaskingTrafficExpressionContents = 0.6224151328
 
         assertEquals(
             expectedTrafficExpressionContents,
             getAppliedValue(
                 result.value!!.primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!,
                 viewOptions,
-                "line-trim-end",
+                "line-trim-start",
             ).contents as Double,
             0.0001,
         )
@@ -4563,7 +4642,7 @@ class MapboxRouteLineApiRoboTest {
             getAppliedValue(
                 result.value!!.routeLineMaskingLayerDynamicData!!.trafficExpressionCommandHolder!!,
                 viewOptions,
-                "line-trim-end",
+                "line-trim-start",
             ).contents as Double,
             0.0001,
         )
@@ -4664,7 +4743,7 @@ class MapboxRouteLineApiRoboTest {
                 .build()
                 .toData()
             val api = MapboxRouteLineApi(apiOptions)
-            val expectedRestrictedExpressionContents = Value.valueOf(0.04111412293617067)
+            val expectedRestrictedExpressionContents = 0.9588858771
             val route = routeWithRestrictions.navigationRoute
             val lineString = LineString.fromPolyline(
                 route.directionsRoute.geometry() ?: "",
@@ -4679,19 +4758,20 @@ class MapboxRouteLineApiRoboTest {
             mockkObject(MapboxRouteLineUtils)
             val result = api.updateTraveledRouteLine(lineString.coordinates()[1])
 
+            val data = result.value!!.primaryRouteLineDynamicData!!
+
             assertEquals(
                 expectedRestrictedExpressionContents,
                 getAppliedValue(
-                    result.value!!.primaryRouteLineDynamicData!!
-                        .restrictedSectionExpressionCommandHolder!!,
+                    data.restrictedSectionExpressionCommandHolder!!,
                     viewOptions,
-                    "line-trim-end",
-                ),
+                    "line-trim-start",
+                ).contents as Double,
+                0.00000001,
             )
 
             assertTrue(
-                result.value!!.primaryRouteLineDynamicData!!
-                    .restrictedSectionExpressionCommandHolder!!.provider
+                data.restrictedSectionExpressionCommandHolder!!.provider
                 is LightRouteLineValueProvider,
             )
 
@@ -4706,10 +4786,8 @@ class MapboxRouteLineApiRoboTest {
     @Test
     fun updateTraveledRouteLine_whenRouteRestrictionsEnabledButHasNone() =
         coroutineRule.runBlockingTest {
-            val expectedCasingExpressionContents = Value.valueOf(0.3240769449298392)
-            val expectedRouteExpressionContents = Value.valueOf(0.3240769449298392)
-            val expectedTrafficExpressionContents = Value.valueOf(0.3240769449298392)
-            val restrictedTrafficExpressionContents = Value.valueOf(0.3240769449298392)
+            val epsilon = 0.0000000001
+            val expectedLineTrimStart = 0.6759230551
             val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
                 .displayRestrictedRoadSections(true)
                 .build()
@@ -4733,58 +4811,56 @@ class MapboxRouteLineApiRoboTest {
 
             val result = api.updateTraveledRouteLine(lineString.coordinates()[1])
 
+            val data = result.value!!.primaryRouteLineDynamicData!!
+
             assertEquals(
-                expectedCasingExpressionContents,
+                expectedLineTrimStart,
                 getAppliedValue(
-                    result.value!!.primaryRouteLineDynamicData!!
-                        .casingExpressionCommandHolder,
+                    data.casingExpressionCommandHolder,
                     viewOptions,
-                    "line-trim-end",
-                ),
+                    "line-trim-start",
+                ).contents as Double,
+                epsilon,
             )
             assertEquals(
-                expectedRouteExpressionContents,
+                expectedLineTrimStart,
                 getAppliedValue(
-                    result.value!!.primaryRouteLineDynamicData!!
-                        .baseExpressionCommandHolder,
+                    data.baseExpressionCommandHolder,
                     viewOptions,
-                    "line-trim-end",
-                ),
+                    "line-trim-start",
+                ).contents as Double,
+                epsilon,
             )
             assertEquals(
-                expectedTrafficExpressionContents,
+                expectedLineTrimStart,
                 getAppliedValue(
-                    result.value!!
-                        .primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!,
+                    data.trafficExpressionCommandHolder!!,
                     viewOptions,
-                    "line-trim-end",
-                ),
+                    "line-trim-start",
+                ).contents as Double,
+                epsilon,
             )
             assertEquals(
-                restrictedTrafficExpressionContents,
+                expectedLineTrimStart,
                 getAppliedValue(
-                    result.value!!
-                        .primaryRouteLineDynamicData!!.restrictedSectionExpressionCommandHolder!!,
+                    data.restrictedSectionExpressionCommandHolder!!,
                     viewOptions,
-                    "line-trim-end",
-                ),
+                    "line-trim-start",
+                ).contents as Double,
+                epsilon,
             )
 
             assertTrue(
-                result.value!!.primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!
-                    .provider is LightRouteLineValueProvider,
+                data.trafficExpressionCommandHolder.provider is LightRouteLineValueProvider,
             )
             assertTrue(
-                result.value!!.primaryRouteLineDynamicData!!.baseExpressionCommandHolder!!
-                    .provider is LightRouteLineValueProvider,
+                data.baseExpressionCommandHolder.provider is LightRouteLineValueProvider,
             )
             assertTrue(
-                result.value!!.primaryRouteLineDynamicData!!.casingExpressionCommandHolder!!
-                    .provider is LightRouteLineValueProvider,
+                data.casingExpressionCommandHolder.provider is LightRouteLineValueProvider,
             )
             assertTrue(
-                result.value!!.primaryRouteLineDynamicData!!
-                    .restrictedSectionExpressionCommandHolder!!.provider
+                data.restrictedSectionExpressionCommandHolder.provider
                 is LightRouteLineValueProvider,
             )
         }
@@ -4792,7 +4868,7 @@ class MapboxRouteLineApiRoboTest {
     @Test
     fun updateWithRouteProgress_whenDeEmphasizeInactiveLegSegments() =
         coroutineRule.runBlockingTest {
-            val expectedTrafficExpContents = Value.valueOf(0.0)
+            val expectedTrafficExpContents = Value.valueOf(1.0)
             val route = multiLegRouteTwoLegs.navigationRoute
             val apiOptions = MapboxRouteLineApiOptions.Builder()
                 .styleInactiveRouteLegsIndependently(true)
@@ -4819,7 +4895,7 @@ class MapboxRouteLineApiRoboTest {
                     result.primaryRouteLineDynamicData!!
                         .trafficExpressionCommandHolder!!,
                     viewOptions,
-                    "line-trim-end",
+                    "line-trim-start",
                 ),
             )
             assertTrue(
@@ -4849,7 +4925,7 @@ class MapboxRouteLineApiRoboTest {
                 result.value!!.primaryRouteLineDynamicData!!
                     .trafficExpressionCommandHolder!!,
                 viewOptions,
-                "line-trim-end",
+                "line-trim-start",
             ),
         )
         assertEquals(
@@ -4858,7 +4934,7 @@ class MapboxRouteLineApiRoboTest {
                 result.value!!.primaryRouteLineDynamicData!!
                     .baseExpressionCommandHolder,
                 viewOptions,
-                "line-trim-end",
+                "line-trim-start",
             ),
         )
         assertEquals(
@@ -4867,7 +4943,7 @@ class MapboxRouteLineApiRoboTest {
                 result.value!!.primaryRouteLineDynamicData!!
                     .casingExpressionCommandHolder,
                 viewOptions,
-                "line-trim-end",
+                "line-trim-start",
             ),
         )
         assertTrue(
@@ -4914,15 +4990,15 @@ class MapboxRouteLineApiRoboTest {
         api.setNavigationRoutes(listOf(route))
         val result = api.setVanishingOffset(.4)
 
-        val expectedTrafficExpressionContents = Value.valueOf(0.4)
-        val expectedMaskingTrafficExpressionContents = Value.valueOf(0.4)
+        val expectedTrafficExpressionContents = Value.valueOf(0.6)
+        val expectedMaskingTrafficExpressionContents = Value.valueOf(0.6)
 
         assertEquals(
             expectedTrafficExpressionContents,
             getAppliedValue(
                 result.value!!.primaryRouteLineDynamicData!!.trafficExpressionCommandHolder!!,
                 viewOptions,
-                "line-trim-end",
+                "line-trim-start",
             ),
         )
         assertEquals(
@@ -4930,7 +5006,7 @@ class MapboxRouteLineApiRoboTest {
             getAppliedValue(
                 result.value!!.routeLineMaskingLayerDynamicData!!.trafficExpressionCommandHolder!!,
                 viewOptions,
-                "line-trim-end",
+                "line-trim-start",
             ),
         )
         assertTrue(
@@ -4987,7 +5063,7 @@ class MapboxRouteLineApiRoboTest {
                 result.value!!.primaryRouteLineDynamicData!!
                     .trafficExpressionCommandHolder!!,
                 viewOptions,
-                "line-trim-end",
+                "line-trim-start",
             ),
         )
         assertEquals(
@@ -4996,7 +5072,7 @@ class MapboxRouteLineApiRoboTest {
                 result.value!!.primaryRouteLineDynamicData!!
                     .baseExpressionCommandHolder,
                 viewOptions,
-                "line-trim-end",
+                "line-trim-start",
             ),
         )
         assertEquals(
@@ -5005,7 +5081,7 @@ class MapboxRouteLineApiRoboTest {
                 result.value!!.primaryRouteLineDynamicData!!
                     .casingExpressionCommandHolder,
                 viewOptions,
-                "line-trim-end",
+                "line-trim-start",
             ),
         )
         assertEquals(
@@ -5014,7 +5090,7 @@ class MapboxRouteLineApiRoboTest {
                 result.value!!.primaryRouteLineDynamicData!!
                     .restrictedSectionExpressionCommandHolder!!,
                 viewOptions,
-                "line-trim-end",
+                "line-trim-start",
             ),
         )
 
@@ -5063,7 +5139,7 @@ class MapboxRouteLineApiRoboTest {
                 result.value!!.primaryRouteLineDynamicData!!
                     .trafficExpressionCommandHolder!!,
                 viewOptions,
-                "line-trim-end",
+                "line-trim-start",
             ),
         )
         assertEquals(
@@ -5072,7 +5148,7 @@ class MapboxRouteLineApiRoboTest {
                 result.value!!.primaryRouteLineDynamicData!!
                     .baseExpressionCommandHolder,
                 viewOptions,
-                "line-trim-end",
+                "line-trim-start",
             ),
         )
         assertEquals(
@@ -5081,7 +5157,7 @@ class MapboxRouteLineApiRoboTest {
                 result.value!!.primaryRouteLineDynamicData!!
                     .casingExpressionCommandHolder,
                 viewOptions,
-                "line-trim-end",
+                "line-trim-start",
             ),
         )
         assertEquals(
@@ -5090,7 +5166,7 @@ class MapboxRouteLineApiRoboTest {
                 result.value!!.primaryRouteLineDynamicData!!
                     .restrictedSectionExpressionCommandHolder!!,
                 viewOptions,
-                "line-trim-end",
+                "line-trim-start",
             ),
         )
     }
@@ -5137,7 +5213,7 @@ class MapboxRouteLineApiRoboTest {
                 ).size
         }
 
-        assertEquals(9, shortRouteDef.await())
+        assertEquals(7, shortRouteDef.await())
         assertEquals(625, longRouteDef.await())
     }
 
@@ -5221,34 +5297,36 @@ class MapboxRouteLineApiRoboTest {
             val expectedPrimaryTrafficExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
+                StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
                 DoubleChecker(0.0),
                 StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
             )
             val expectedBaseExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.03856129),
                 StringChecker("[rgba, 134.0, 148.0, 165.0, 1.0]"),
+                DoubleChecker(0.96143871),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedCasingExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.03856129),
                 StringChecker("[rgba, 114.0, 126.0, 141.0, 1.0]"),
+                DoubleChecker(0.96143871),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
             val expectedAlternativeTrafficExpressionContents = listOf(
                 StringChecker("step"),
                 StringChecker("[line-progress]"),
-                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-                DoubleChecker(0.0385612),
                 StringChecker("[rgba, 134.0, 148.0, 165.0, 1.0]"),
-                DoubleChecker(0.6563122),
+                DoubleChecker(0.0),
+                StringChecker("[rgba, 134.0, 148.0, 165.0, 1.0]"),
+                DoubleChecker(0.26146675),
                 StringChecker("[rgba, 190.0, 160.0, 135.0, 1.0]"),
-                DoubleChecker(0.73853325),
+                DoubleChecker(0.3436878),
                 StringChecker("[rgba, 134.0, 148.0, 165.0, 1.0]"),
+                DoubleChecker(0.9614388),
+                StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             )
 
             checkExpression(

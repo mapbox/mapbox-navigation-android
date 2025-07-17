@@ -3,9 +3,11 @@ package com.mapbox.navigation.ui.maps.internal.route.line
 import android.content.Context
 import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.bindgen.Value
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.Style
 import com.mapbox.maps.StylePropertyValue
+import com.mapbox.maps.StylePropertyValueKind
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment
@@ -77,9 +79,9 @@ internal class RouteLineDataConverterTest {
         val baseExp = mockk<Expression>()
         val trafficExp = mockk<Expression>()
         val casingExp = mockk<Expression>()
-        val trailExp = mockk<Expression>()
+        val trailValue = mockk<Value>()
         val trailCasingExp = mockk<Expression>()
-        val restrictedExp = mockk<Expression>()
+        val restrictedValue = mockk<Value>()
         val blurExp = mockk<Expression>()
         val dynamicData = RouteLineDynamicEventData(
             RouteLineProviderBasedExpressionEventData(
@@ -95,13 +97,13 @@ internal class RouteLineDataConverterTest {
                 trafficExp,
             ),
             RouteLineProviderBasedExpressionEventData(
-                "line-gradient",
-                restrictedExp,
+                "line-trim-start",
+                value = StylePropertyValue(restrictedValue, StylePropertyValueKind.CONSTANT),
             ),
             RouteLineTrimOffset(0.2),
             RouteLineProviderBasedExpressionEventData(
-                "line-trim-offset",
-                trailExp,
+                "line-trim-end",
+                value = StylePropertyValue(trailValue, StylePropertyValueKind.CONSTANT),
             ),
             RouteLineProviderBasedExpressionEventData(
                 "line-gradient",
@@ -120,10 +122,18 @@ internal class RouteLineDataConverterTest {
         checkGradient(actual.dynamicData!!.baseExpressionCommandHolder, baseExp)
         checkGradient(actual.dynamicData.casingExpressionCommandHolder, casingExp)
         assertEquals(RouteLineTrimOffset(0.2), actual.dynamicData.trimOffset!!)
-        checkTrimOffset(actual.dynamicData.trafficExpressionCommandHolder!!, trafficExp)
-        checkTrimOffset(actual.dynamicData.trailExpressionCommandHolder!!, trailExp)
+        checkTrim(
+            actual.dynamicData.trafficExpressionCommandHolder!!,
+            trafficExp,
+            "line-trim-offset",
+        )
+        checkTrim(actual.dynamicData.trailExpressionCommandHolder!!, trailValue, "line-trim-end")
         checkGradient(actual.dynamicData.trailCasingExpressionCommandHolder!!, trailCasingExp)
-        checkGradient(actual.dynamicData.restrictedSectionExpressionCommandHolder!!, restrictedExp)
+        checkTrim(
+            actual.dynamicData.restrictedSectionExpressionCommandHolder!!,
+            restrictedValue,
+            "line-trim-start",
+        )
     }
 
     @Test
@@ -154,9 +164,9 @@ internal class RouteLineDataConverterTest {
         val baseExp = mockk<Expression>()
         val trafficExp = mockk<Expression>()
         val casingExp = mockk<Expression>()
-        val trailExp = mockk<Expression>()
+        val trailValue = mockk<Value>()
         val trailCasingExp = mockk<Expression>()
-        val restrictedExp = mockk<Expression>()
+        val restrictedValue = mockk<Value>()
         val blurExp = mockk<Expression>()
         val dynamicData = RouteLineDynamicEventData(
             RouteLineProviderBasedExpressionEventData(
@@ -172,13 +182,13 @@ internal class RouteLineDataConverterTest {
                 trafficExp,
             ),
             RouteLineProviderBasedExpressionEventData(
-                "line-gradient",
-                restrictedExp,
+                "line-trim-start",
+                value = StylePropertyValue(restrictedValue, StylePropertyValueKind.CONSTANT),
             ),
             RouteLineTrimOffset(0.2),
             RouteLineProviderBasedExpressionEventData(
-                "line-trim-offset",
-                trailExp,
+                "line-trim-end",
+                value = StylePropertyValue(trailValue, StylePropertyValueKind.CONSTANT),
             ),
             RouteLineProviderBasedExpressionEventData(
                 "line-gradient",
@@ -194,10 +204,14 @@ internal class RouteLineDataConverterTest {
         checkGradient(actual.baseExpressionCommandHolder, baseExp)
         checkGradient(actual.casingExpressionCommandHolder, casingExp)
         assertEquals(RouteLineTrimOffset(0.2), actual.trimOffset!!)
-        checkTrimOffset(actual.trafficExpressionCommandHolder!!, trafficExp)
-        checkTrimOffset(actual.trailExpressionCommandHolder!!, trailExp)
+        checkTrim(actual.trafficExpressionCommandHolder!!, trafficExp, "line-trim-offset")
+        checkTrim(actual.trailExpressionCommandHolder!!, trailValue, "line-trim-end")
         checkGradient(actual.trailCasingExpressionCommandHolder!!, trailCasingExp)
-        checkGradient(actual.restrictedSectionExpressionCommandHolder!!, restrictedExp)
+        checkTrim(
+            actual.restrictedSectionExpressionCommandHolder!!,
+            restrictedValue,
+            "line-trim-start",
+        )
     }
 
     @Test
@@ -408,8 +422,8 @@ internal class RouteLineDataConverterTest {
                 RouteLineDynamicEventData(
                     RouteLineProviderBasedExpressionEventData("line-gradient", value = exp1),
                     RouteLineProviderBasedExpressionEventData("line-gradient", value = exp2),
-                    RouteLineProviderBasedExpressionEventData("line-trim-end", value = exp3),
-                    RouteLineProviderBasedExpressionEventData("line-trim-end", value = exp4),
+                    RouteLineProviderBasedExpressionEventData("line-trim-start", value = exp3),
+                    RouteLineProviderBasedExpressionEventData("line-trim-start", value = exp4),
                     RouteLineTrimOffset(0.2),
                     RouteLineProviderBasedExpressionEventData("line-gradient", value = exp5),
                     RouteLineProviderBasedExpressionEventData("line-gradient", value = exp6),
@@ -420,10 +434,10 @@ internal class RouteLineDataConverterTest {
                 RouteLineEventData(
                     alt1Fc,
                     RouteLineDynamicEventData(
-                        RouteLineProviderBasedExpressionEventData("line-trim-end", value = exp7),
+                        RouteLineProviderBasedExpressionEventData("line-trim-start", value = exp7),
                         RouteLineProviderBasedExpressionEventData("line-gradient", value = exp8),
                         RouteLineProviderBasedExpressionEventData("line-gradient", value = exp9),
-                        RouteLineProviderBasedExpressionEventData("line-trim-end", value = exp10),
+                        RouteLineProviderBasedExpressionEventData("line-trim-start", value = exp10),
                         RouteLineTrimOffset(0.3),
                         RouteLineProviderBasedExpressionEventData("line-gradient", value = exp11),
                         RouteLineProviderBasedExpressionEventData("line-gradient", value = exp12),
@@ -434,12 +448,12 @@ internal class RouteLineDataConverterTest {
             waypointSource,
             RouteLineDynamicEventData(
                 RouteLineProviderBasedExpressionEventData("line-gradient", value = exp13),
-                RouteLineProviderBasedExpressionEventData("line-trim-end", value = exp14),
-                RouteLineProviderBasedExpressionEventData("line-trim-end", value = exp15),
+                RouteLineProviderBasedExpressionEventData("line-trim-start", value = exp14),
+                RouteLineProviderBasedExpressionEventData("line-trim-start", value = exp15),
                 RouteLineProviderBasedExpressionEventData("line-gradient", value = exp16),
                 RouteLineTrimOffset(0.1),
                 RouteLineProviderBasedExpressionEventData("line-gradient", value = exp17),
-                RouteLineProviderBasedExpressionEventData("line-trim-end", value = exp18),
+                RouteLineProviderBasedExpressionEventData("line-trim-start", value = exp18),
                 null,
             ),
         )
@@ -570,8 +584,8 @@ internal class RouteLineDataConverterTest {
             RouteLineDynamicEventData(
                 RouteLineProviderBasedExpressionEventData("line-gradient", value = exp1),
                 RouteLineProviderBasedExpressionEventData("line-gradient", value = exp2),
-                RouteLineProviderBasedExpressionEventData("line-trim-end", value = exp3),
-                RouteLineProviderBasedExpressionEventData("line-trim-end", value = exp4),
+                RouteLineProviderBasedExpressionEventData("line-trim-start", value = exp3),
+                RouteLineProviderBasedExpressionEventData("line-trim-start", value = exp4),
                 RouteLineTrimOffset(0.2),
                 RouteLineProviderBasedExpressionEventData("line-gradient", value = exp5),
                 RouteLineProviderBasedExpressionEventData("line-gradient", value = exp6),
@@ -579,10 +593,10 @@ internal class RouteLineDataConverterTest {
             ),
             listOf(
                 RouteLineDynamicEventData(
-                    RouteLineProviderBasedExpressionEventData("line-trim-end", value = exp7),
+                    RouteLineProviderBasedExpressionEventData("line-trim-start", value = exp7),
                     RouteLineProviderBasedExpressionEventData("line-gradient", value = exp8),
                     RouteLineProviderBasedExpressionEventData("line-gradient", value = exp9),
-                    RouteLineProviderBasedExpressionEventData("line-trim-end", value = exp10),
+                    RouteLineProviderBasedExpressionEventData("line-trim-start", value = exp10),
                     RouteLineTrimOffset(0.3),
                     RouteLineProviderBasedExpressionEventData("line-gradient", value = exp11),
                     RouteLineProviderBasedExpressionEventData("line-gradient", value = exp12),
@@ -591,12 +605,12 @@ internal class RouteLineDataConverterTest {
             ),
             RouteLineDynamicEventData(
                 RouteLineProviderBasedExpressionEventData("line-gradient", value = exp13),
-                RouteLineProviderBasedExpressionEventData("line-trim-end", value = exp14),
-                RouteLineProviderBasedExpressionEventData("line-trim-end", value = exp15),
+                RouteLineProviderBasedExpressionEventData("line-trim-start", value = exp14),
+                RouteLineProviderBasedExpressionEventData("line-trim-start", value = exp15),
                 RouteLineProviderBasedExpressionEventData("line-gradient", value = exp16),
                 RouteLineTrimOffset(0.1),
                 RouteLineProviderBasedExpressionEventData("line-gradient", value = exp17),
-                RouteLineProviderBasedExpressionEventData("line-trim-end", value = exp18),
+                RouteLineProviderBasedExpressionEventData("line-trim-start", value = exp18),
                 null,
             ),
         )
@@ -719,14 +733,18 @@ internal class RouteLineDataConverterTest {
         }
     }
 
-    private suspend fun checkTrimOffset(holder: RouteLineValueCommandHolder, exp: Expression) {
+    private suspend fun checkTrim(
+        holder: RouteLineValueCommandHolder,
+        exp: Value,
+        property: String,
+    ) {
         holder.applier.applyCommand(
             style,
             layerId,
             holder.provider.generateCommand(coroutineContext, eventData),
         )
         verify(exactly = 1) {
-            style.setStyleLayerProperty(layerId, "line-trim-offset", exp)
+            style.setStyleLayerProperty(layerId, property, exp)
         }
     }
 }

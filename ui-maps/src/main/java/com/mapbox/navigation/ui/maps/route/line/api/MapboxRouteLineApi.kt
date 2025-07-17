@@ -753,7 +753,6 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                             val routeLineData =
                                 if (routeLineOptions.styleInactiveRouteLegsIndependently) {
                                     getPrimaryRouteLineDynamicData(
-                                        calculationsScope = calculationsScope,
                                         routeLineOptions = routeLineOptions,
                                         routeLineExpressionData =
                                         routeLineActiveLegExpressionData(activeLegIndex),
@@ -1015,7 +1014,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         featuresData: List<RouteFeatureData>,
     ): Expected<RouteNotFound, ClosestRouteValue> {
         val routesAndFeatures = featuresData.toList()
-        val features = routesAndFeatures.map { it.featureCollection }
+        val features = routesAndFeatures.map { it.reversedFeatureCollection }
 
         val primaryRouteLineLayers = ifNonNull(mapboxMap.getStyle()) { style ->
             MapboxRouteLineUtils.getLayerIdsForPrimaryRoute(
@@ -1154,7 +1153,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
             featureDataProvider()
         }
         val routeFeatureDataResult = routeFeatureDataDef.await()
-        if (routeFeatureDataResult.count { it.lineString.coordinates().size < 2 } > 0) {
+        if (routeFeatureDataResult.count { it.coordinatesCount < 2 } > 0) {
             return ExpectedFactory.createError(
                 RouteLineError(
                     "The route geometry contained less than two coordinates. " +
@@ -1248,11 +1247,11 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                 null
             }
 
-        val primaryRouteSource = primaryRoute.featureCollection
+        val primaryRouteSource = primaryRoute.reversedFeatureCollection
         val alternativeRoute1FeatureCollection =
-            alternativeRoute1?.featureCollection
+            alternativeRoute1?.reversedFeatureCollection
                 ?: FeatureCollection.fromFeatures(listOf())
-        val alternativeRoute2FeatureCollection = alternativeRoute2?.featureCollection
+        val alternativeRoute2FeatureCollection = alternativeRoute2?.reversedFeatureCollection
             ?: FeatureCollection.fromFeatures(listOf())
         val wayPointsFeatureCollection = wayPointsFeatureCollectionDef.await()
 
@@ -1280,22 +1279,14 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
 
         val alternateRoute1TrailExpressionCommandHolder = RouteLineValueCommandHolder(
             LightRouteLineValueProvider {
-                MapboxRouteLineUtils.getRouteLineExpression(
-                    alternative1PercentageTraveled,
-                    Color.TRANSPARENT,
-                    Color.TRANSPARENT,
-                )
+                getSingleColorExpression(Color.TRANSPARENT)
             },
             LineGradientCommandApplier(),
         )
 
         val alternateRoute1TrailCasingExpressionCommandHolder = RouteLineValueCommandHolder(
             LightRouteLineValueProvider {
-                MapboxRouteLineUtils.getRouteLineExpression(
-                    alternative1PercentageTraveled,
-                    Color.TRANSPARENT,
-                    Color.TRANSPARENT,
-                )
+                getSingleColorExpression(Color.TRANSPARENT)
             },
             LineGradientCommandApplier(),
         )
@@ -1303,11 +1294,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         val alternateRoute1RestrictedSectionsExpressionCommandHolder =
             RouteLineValueCommandHolder(
                 LightRouteLineValueProvider {
-                    MapboxRouteLineUtils.getRouteLineExpression(
-                        alternative1PercentageTraveled,
-                        Color.TRANSPARENT,
-                        Color.TRANSPARENT,
-                    )
+                    getSingleColorExpression(Color.TRANSPARENT)
                 },
                 LineGradientCommandApplier(),
             )
@@ -1343,22 +1330,14 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
 
         val alternateRoute2TrailExpressionCommandHolder = RouteLineValueCommandHolder(
             LightRouteLineValueProvider {
-                MapboxRouteLineUtils.getRouteLineExpression(
-                    alternative2PercentageTraveled,
-                    Color.TRANSPARENT,
-                    Color.TRANSPARENT,
-                )
+                getSingleColorExpression(Color.TRANSPARENT)
             },
             LineGradientCommandApplier(),
         )
 
         val alternateRoute2TrailCasingExpressionCommandHolder = RouteLineValueCommandHolder(
             LightRouteLineValueProvider {
-                MapboxRouteLineUtils.getRouteLineExpression(
-                    alternative2PercentageTraveled,
-                    Color.TRANSPARENT,
-                    Color.TRANSPARENT,
-                )
+                getSingleColorExpression(Color.TRANSPARENT)
             },
             LineGradientCommandApplier(),
         )
@@ -1366,11 +1345,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         val alternateRoute2RestrictedSectionsExpressionCommandHolder =
             RouteLineValueCommandHolder(
                 LightRouteLineValueProvider {
-                    MapboxRouteLineUtils.getRouteLineExpression(
-                        alternative2PercentageTraveled,
-                        Color.TRANSPARENT,
-                        Color.TRANSPARENT,
-                    )
+                    getSingleColorExpression(Color.TRANSPARENT)
                 },
                 LineGradientCommandApplier(),
             )
@@ -1391,11 +1366,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                 legIndex,
             )
         } else {
-            val exp = MapboxRouteLineUtils.getRouteLineExpression(
-                1.0,
-                Color.TRANSPARENT,
-                Color.TRANSPARENT,
-            )
+            val exp = getSingleColorExpression(Color.TRANSPARENT)
             RouteLineDynamicData(
                 baseExpressionCommandHolder = RouteLineValueCommandHolder(
                     LightRouteLineValueProvider { exp },
@@ -1435,7 +1406,6 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                 primaryRouteLineData = RouteLineData(
                     primaryRouteSource,
                     getPrimaryRouteLineDynamicData(
-                        calculationsScope = calculationsScope,
                         routeLineOptions = routeLineOptions,
                         routeLineExpressionData = routeLineActiveLegExpressionData(legIndex),
                         restrictedExpressionData = restrictedExpressionData,

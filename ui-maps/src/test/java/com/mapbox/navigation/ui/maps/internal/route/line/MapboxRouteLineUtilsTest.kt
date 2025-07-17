@@ -100,6 +100,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import kotlin.math.abs
 
 @OptIn(MapboxExperimental::class)
 class MapboxRouteLineUtilsTest {
@@ -137,7 +138,7 @@ class MapboxRouteLineUtilsTest {
             )
             .build()
             .toData()
-        val expectedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
+        val expectedExpression = "[step, [line-progress], [rgba, 86.0, 168.0, 251.0, 1.0], 0.0, " +
             "[rgba, 86.0, 168.0, 251.0, 1.0]]"
 
         val expressionDatas = listOf(
@@ -164,10 +165,17 @@ class MapboxRouteLineUtilsTest {
      */
     @Test
     fun getTrafficLineExpressionDuplicateOffsetsRemoved() {
-        val expectedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
-            "[rgba, 86.0, 168.0, 251.0, 1.0], 0.7932530928525063, " +
-            "[rgba, 0.0, 255.0, 0.0, 1.0], 0.7964017663976524, " +
-            "[rgba, 0.0, 0.0, 255.0, 1.0]]"
+        val expectedExpression = listOf(
+            StringChecker("step"),
+            StringChecker("[line-progress]"),
+            StringChecker("[rgba, 0.0, 0.0, 255.0, 1.0]"),
+            DoubleChecker(0.0),
+            StringChecker("[rgba, 0.0, 0.0, 255.0, 1.0]"),
+            DoubleChecker(0.20359823360234758),
+            StringChecker("[rgba, 0.0, 255.0, 0.0, 1.0]"),
+            DoubleChecker(0.20674690714749372),
+            StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
+        )
         val dynamicData = MapboxRouteLineViewOptions.Builder(ctx)
             .routeLineColorResources(
                 RouteLineColorResources.Builder()
@@ -209,11 +217,11 @@ class MapboxRouteLineUtilsTest {
             1.0,
         )
 
-        assertEquals(expectedExpression, result.toString())
+        checkExpression(expectedExpression, result)
     }
 
     @Test
-    fun getFilteredRouteLineExpressionDataDuplicateOffsetsRemoved() {
+    fun getFilteredReversedRouteLineExpressionDataDuplicateOffsetsRemoved() {
         val expressionDatas = listOf(
             RouteLineExpressionData(0.7868200761181402, "", SegmentColorType.PRIMARY_DEFAULT, 0),
             RouteLineExpressionData(0.7930120224665551, "", SegmentColorType.PRIMARY_DEFAULT, 0),
@@ -222,7 +230,7 @@ class MapboxRouteLineUtilsTest {
             RouteLineExpressionData(0.7964017663976524, "", SegmentColorType.PRIMARY_DEFAULT, 0),
         )
 
-        val result = MapboxRouteLineUtils.getFilteredRouteLineExpressionData(
+        val result = MapboxRouteLineUtils.getFilteredReversedRouteLineExpressionData(
             0.0,
             expressionDatas,
             defaultObjectCreator = {
@@ -231,7 +239,11 @@ class MapboxRouteLineUtilsTest {
         )
 
         assertEquals(2, expressionDatas.count { it.offset == 0.7932530928525063 })
-        assertEquals(1, result.count { it.offset == 0.7932530928525063 })
+        assertEquals(
+            1,
+            // 1 - original offset
+            result.count { abs(it.offset - 0.206746907147494) < 0.0000000001 },
+        )
     }
 
     @Test
@@ -256,15 +268,15 @@ class MapboxRouteLineUtilsTest {
             StringChecker("step"),
             StringChecker("[line-progress]"),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.2),
+            DoubleChecker(0.0),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.4476941554901612),
+            DoubleChecker(0.4803554840638815),
             StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
-            DoubleChecker(0.4677574367125704),
+            DoubleChecker(0.4978356586215484),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.5021643413784516),
+            DoubleChecker(0.5322425632874296),
             StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
-            DoubleChecker(0.5196445159361185),
+            DoubleChecker(0.5523058445098388),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
         )
         val route = loadNavigationRoute("route-with-restrictions.json")
@@ -290,15 +302,15 @@ class MapboxRouteLineUtilsTest {
             StringChecker("step"),
             StringChecker("[line-progress]"),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.2),
+            DoubleChecker(0.0),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.4476941554901612),
+            DoubleChecker(0.4803554840638815),
             StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
-            DoubleChecker(0.4677574367125704),
+            DoubleChecker(0.4978356586215484),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.5021643413784516),
+            DoubleChecker(0.5322425632874296),
             StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
-            DoubleChecker(0.5196445159361185),
+            DoubleChecker(0.5523058445098388),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
         )
         val route = loadNavigationRoute("route-with-restrictions.json")
@@ -362,7 +374,7 @@ class MapboxRouteLineUtilsTest {
 
     @Test
     fun getRestrictedLineExpression_whenNoRestrictionsInRoute() {
-        val expectedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.2, " +
+        val expectedExpression = "[step, [line-progress], [rgba, 0.0, 0.0, 0.0, 0.0], 0.0, " +
             "[rgba, 0.0, 0.0, 0.0, 0.0]]"
         val route = loadNavigationRoute("short_route.json")
         val expData = MapboxRouteLineUtils.extractRouteRestrictionData(
@@ -383,10 +395,10 @@ class MapboxRouteLineUtilsTest {
 
     @Test
     fun getVanishingRouteLineExpressionTest() {
-        val expectedExpression = "[step, [line-progress], [rgba, 255.0, 77.0, 77.0, 1.0]" +
-            ", 3.0, [rgba, 86.0, 168.0, 251.0, 1.0]]"
+        val expectedExpression = "[step, [line-progress], [rgba, 86.0, 168.0, 251.0, 1.0], " +
+            "0.7, [rgba, 255.0, 77.0, 77.0, 1.0]]"
 
-        val result = MapboxRouteLineUtils.getRouteLineExpression(3.0, -45747, -11097861)
+        val result = MapboxRouteLineUtils.getRouteLineExpression(0.3, -45747, -11097861)
 
         assertEquals(expectedExpression, result.value.toString())
     }
@@ -2024,12 +2036,10 @@ class MapboxRouteLineUtilsTest {
         val expectedExpressionContents = listOf(
             StringChecker("step"),
             StringChecker("[line-progress]"),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.0),
-            StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.9963424099457971),
             StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
-            DoubleChecker(1.0),
+            DoubleChecker(0.0),
+            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
+            DoubleChecker(0.003657590054203),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
         )
         val route = loadNavigationRoute("route-with-restrictions-at-end.json")
@@ -2126,9 +2136,9 @@ class MapboxRouteLineUtilsTest {
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             DoubleChecker(0.0),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.3956457979751531),
+            DoubleChecker(0.4459960518654729),
             StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
-            DoubleChecker(0.5540039481345271),
+            DoubleChecker(0.6043542020248469),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
         )
         val route = loadNavigationRoute("multileg_route_two_legs_with_restrictions.json")
@@ -2156,11 +2166,11 @@ class MapboxRouteLineUtilsTest {
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             DoubleChecker(0.0),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.3956457979751531),
-            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
-            DoubleChecker(0.4897719974699625),
+            DoubleChecker(0.4459960518654729),
             StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.5540039481345271),
+            DoubleChecker(0.5102280025300375),
+            StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
+            DoubleChecker(0.6043542020248469),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
         )
         val route = loadNavigationRoute("multileg_route_two_legs_with_restrictions.json")
@@ -2188,11 +2198,11 @@ class MapboxRouteLineUtilsTest {
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             DoubleChecker(0.0),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.3956457979751531),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.4897719974699625),
+            DoubleChecker(0.4459960518654729),
             StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
-            DoubleChecker(0.5540039481345271),
+            DoubleChecker(0.5102280025300375),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.6043542020248469),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
         )
         val route = loadNavigationRoute("multileg_route_two_legs_with_restrictions.json")
@@ -2234,11 +2244,11 @@ class MapboxRouteLineUtilsTest {
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             DoubleChecker(0.0),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.3956457979751531),
-            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
-            DoubleChecker(0.4897719974699625),
+            DoubleChecker(0.4459960518654729),
             StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
-            DoubleChecker(0.5540039481345271),
+            DoubleChecker(0.5102280025300375),
+            StringChecker("[rgba, 136.0, 136.0, 136.0, 1.0]"),
+            DoubleChecker(0.6043542020248469),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
         )
         val route = loadNavigationRoute("multileg_route_two_legs_with_restrictions.json")
@@ -2279,9 +2289,9 @@ class MapboxRouteLineUtilsTest {
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
             DoubleChecker(0.0),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
-            DoubleChecker(0.3956457979751531),
+            DoubleChecker(0.4459960518654729),
             StringChecker("[rgba, 0.0, 255.0, 255.0, 1.0]"),
-            DoubleChecker(0.5540039481345271),
+            DoubleChecker(0.6043542020248469),
             StringChecker("[rgba, 0.0, 0.0, 0.0, 0.0]"),
         )
         val route = loadNavigationRoute("multileg_route_two_legs_with_restrictions.json")
