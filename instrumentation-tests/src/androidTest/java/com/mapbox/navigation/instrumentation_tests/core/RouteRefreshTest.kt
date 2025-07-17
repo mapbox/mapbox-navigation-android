@@ -1038,7 +1038,11 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             .coordinatesList(coordinates)
             .baseUrl(mockWebServerRule.baseUrl) // Comment out to test a real server
             .unrecognizedProperties(
-                if (isEv) { mapOf("engine" to "electric") } else null,
+                if (isEv) {
+                    mapOf("engine" to "electric")
+                } else {
+                    null
+                },
             )
             .build()
     }
@@ -1100,19 +1104,22 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                  "type": "alert",
                  "subtype": "stationUnavailable",
                  "reason": "outOfOrder",
-                 "station_id": "station1"
+                 "station_id": "station1",
+                 "refresh_type":"dynamic"
                },
                {
                  "type": "alert",
                  "subtype": "stationUnavailable",
                  "reason": "outOfOrder",
-                 "station_id": "station2"
+                 "station_id": "station2",
+                 "refresh_type":"dynamic"
                },
                {
                  "type": "alert",
                  "subtype": "stationUnavailable",
                  "reason": "outOfOrder",
-                 "station_id": "station3"
+                 "station_id": "station3",
+                 "refresh_type":"dynamic"
                },
                {
                  "type": "violation",
@@ -1121,7 +1128,8 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                    "requested_value": 30000,
                    "actual_value": 27000,
                    "unit": "Wh"
-                 }
+                 },
+                 "refresh_type":"dynamic"
                },
                {
                  "type": "violation",
@@ -1130,12 +1138,25 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                    "requested_value": 20000,
                    "actual_value": 13000,
                    "unit": "Wh"
-                 }
+                 },
+                 "refresh_type":"dynamic"
                },
                {
                  "type": "alert",
                  "subtype": "evInsufficientCharge",
-                 "geometry_index": 3
+                 "geometry_index": 3,
+                 "refresh_type":"dynamic"
+               },
+               {
+                  "type": "violation",
+                  "subtype": "stateBorderCrossing",
+                  "geometry_index_end": 6,
+                  "geometry_index_start": 3,
+                  "refresh_type": "static",
+                  "details": {
+                    "actual_value": "US-NV,US-CA",
+                    "message": "Crossing the border of the states of US-NV and US-CA."
+                  }
                }
             ]
             """,
