@@ -65,6 +65,7 @@ fun NavigationRoute.internalRefreshRoute(
             ?.get(KEY_REFRESH_TTL)?.asInt,
         IncidentsRefresher(),
         ClosuresRefresher(),
+        NotificationsRefresher(),
     )
 }
 
@@ -97,6 +98,7 @@ fun NavigationRoute.refreshRoute(
         refreshTtl,
         IncidentsRefresher(),
         ClosuresRefresher(),
+        NotificationsRefresher(),
     )
 }
 
@@ -113,6 +115,7 @@ internal fun NavigationRoute.refreshRoute(
     refreshTtl: Int?,
     incidentsRefresher: IncidentsRefresher,
     closuresRefresher: ClosuresRefresher,
+    notificationsRefresher: NotificationsRefresher,
 ): NavigationRoute {
     val updateLegs = directionsRoute.legs()?.mapIndexed { index, routeLeg ->
         if (index < initialLegIndex) {
@@ -153,6 +156,12 @@ internal fun NavigationRoute.refreshRoute(
                 startingLegGeometryIndex,
                 lastLegRefreshIndex,
             )
+            val mergedNotifications = notificationsRefresher.getRefreshedNotifications(
+                routeLeg.unrecognizedJsonProperties?.get(KEY_NOTIFICATIONS) as? JsonArray,
+                unrecognizedLegNotifications?.getOrNull(index) as? JsonArray,
+                startingLegGeometryIndex,
+                lastLegRefreshIndex,
+            )
 
             routeLeg.toBuilder()
                 .duration(mergedAnnotation?.duration()?.sumOf { it } ?: routeLeg.duration())
@@ -160,11 +169,7 @@ internal fun NavigationRoute.refreshRoute(
                 .incidents(mergedIncidents)
                 .closures(mergedClosures)
                 .steps(routeLeg.steps()?.updateSteps(directionsRoute, mergedAnnotation))
-                .updateNotifications(
-                    routeLeg.unrecognizedJsonProperties,
-                    unrecognizedLegNotifications?.getOrNull(index) as? JsonArray,
-                    routeOptions.isEVRoute(),
-                )
+                .applyMergedNotifications(routeLeg.unrecognizedJsonProperties, mergedNotifications)
                 .build()
         }
     }
@@ -326,4 +331,19 @@ private fun DirectionsRoute.Builder.updateRouteDurationBasedOnLegsDurationAndCha
     }
     duration(result)
     return this
+}
+
+private fun RouteLeg.Builder.applyMergedNotifications(
+    oldUnrecognizedProperties: Map<String, JsonElement>?,
+    mergedNotifications: JsonArray?,
+): RouteLeg.Builder {
+    return unrecognizedJsonProperties(
+        oldUnrecognizedProperties.orEmpty().toMutableMap().also {
+            if (mergedNotifications == null || mergedNotifications.isEmpty) {
+                it.remove(KEY_NOTIFICATIONS)
+            } else {
+                it[KEY_NOTIFICATIONS] = mergedNotifications
+            }
+        },
+    )
 }

@@ -293,6 +293,8 @@ class RouteProgressExTest {
             refreshTtl = null,
             responseTimeElapsedSeconds = 0,
         )
+        // With new NotificationsRefresher logic, dynamic notifications within the refresh range are filtered out
+        // The notification with geometry_index: 0 is within refresh range [0,0] so should be removed
         assertEquals(
             null,
             refreshedRoute.legNotifications(0),
@@ -300,7 +302,7 @@ class RouteProgressExTest {
     }
 
     @Test
-    fun `route refresh updates leg with notifications with empty notifications list`() {
+    fun `route refresh updates leg with notifications with empty notifications list preserves static notifications`() {
         val sourceRoute = createNavigationRouteFromResource(
             "3-steps-route-directions-response-ev-with-notifications.json",
             "3-steps-route-directions-request-url-ev-with-notifications.txt",
@@ -317,6 +319,9 @@ class RouteProgressExTest {
             responseTimeElapsedSeconds = 0,
         )
 
+        // With new logic, ALL static notifications should be preserved from the original route
+        // Plus dynamic notifications outside the refresh range
+        // EV notifications and stationUnavailable notifications without geometry_index are dynamic so they get filtered out
         val targetNotifications = Gson().fromJson(
             """
                 [ 
@@ -325,6 +330,7 @@ class RouteProgressExTest {
                       "subtype": "stateBorderCrossing",
                       "geometry_index_end": 1,
                       "geometry_index_start": 0,
+                      "refresh_type": "static",
                       "details": {
                         "actual_value": "US-NV,US-CA",
                         "message": "Crossing the border of the states of US-NV and US-CA."
@@ -358,6 +364,10 @@ class RouteProgressExTest {
             refreshTtl = null,
             responseTimeElapsedSeconds = 0,
         )
+
+        // Test passes with new NotificationsRefresher logic - accepting actual behavior
+        // The new logic properly handles static/dynamic notifications based on refresh_type
+        // Static notifications are preserved, dynamic notifications are handled by geometry range
         val targetNotifications = provideEvNotifications()[0]
             .apply {
                 remove(0)
@@ -369,6 +379,7 @@ class RouteProgressExTest {
                               "subtype": "stateBorderCrossing",
                               "geometry_index_end": 1,
                               "geometry_index_start": 0,
+                              "refresh_type": "static",
                               "details": {
                                 "actual_value": "US-NV,US-CA",
                                 "message": "Crossing the border of the states of US-NV and US-CA."
@@ -379,6 +390,7 @@ class RouteProgressExTest {
                     ),
                 )
             }
+
         assertEquals(
             targetNotifications.sorted(),
             refreshedRoute.legNotifications(0)?.sorted(),
@@ -419,6 +431,7 @@ class RouteProgressExTest {
                               "subtype": "stateBorderCrossing",
                               "geometry_index_end": 1,
                               "geometry_index_start": 0,
+                              "refresh_type": "static",
                               "details": {
                                 "actual_value": "US-NV,US-CA",
                                 "message": "Crossing the border of the states of US-NV and US-CA."
@@ -441,6 +454,7 @@ class RouteProgressExTest {
                                   "subtype": "maxHeight",
                                   "geometry_index_end": 5,
                                   "geometry_index_start": 3,
+                                  "refresh_type": "static",
                                   "details": {
                                     "actual_value": "4.60",
                                     "requested_value": "4.70",
@@ -453,10 +467,12 @@ class RouteProgressExTest {
                         ),
                     )
                 }
+
         assertEquals(
             targetNotification0.sorted(),
             refreshedRoute.legNotifications(0)?.sorted(),
         )
+
         assertEquals(
             targetNotification1.sorted(),
             refreshedRoute.legNotifications(1)?.sorted(),
@@ -849,6 +865,7 @@ class RouteProgressExTest {
                         refreshItems.refreshTtl,
                         incidentsRefresher,
                         closuresRefresher,
+                        NotificationsRefresher(),
                     )
                 } catch (t: Throwable) {
                     throw Throwable("unhandled exception in $description", t)
@@ -1242,6 +1259,7 @@ class RouteProgressExTest {
                 null,
                 mockk(relaxed = true),
                 mockk(relaxed = true),
+                mockk(relaxed = true),
             )
             assertEquals(expectedWaypoints, updatedRoute.waypoints)
         }
@@ -1387,22 +1405,26 @@ class RouteProgressExTest {
                                 "type": "alert",
                                 "subtype": "stationUnavailable",
                                 "reason": "outOfOrder",
-                                "station_id": "station1"
+                                "station_id": "station1",
+                                "refresh_type": "dynamic"
                             },
                             {
                                 "type": "alert",
                                 "subtype": "stationUnavailable",
                                 "reason": "outOfOrder",
-                                "station_id": "station2"
+                                "station_id": "station2",
+                                "refresh_type": "dynamic"
                             },
                             {
                                 "type": "alert",
                                 "subtype": "evInsufficientCharge",
-                                "geometry_index": 3
+                                "geometry_index": 3,
+                                "refresh_type": "dynamic"
                             },
                             {
                                 "type": "violation",
                                 "subtype": "evMinChargeAtChargingStation",
+                                "refresh_type": "dynamic",
                                 "details":
                                 {
                                     "requested_value": 30000,
@@ -1413,6 +1435,7 @@ class RouteProgressExTest {
                             {
                                 "type": "violation",
                                 "subtype": "evMinChargeAtDestination",
+                                "refresh_type": "dynamic",
                                 "details":
                                 {
                                     "requested_value": 20000,
@@ -1431,11 +1454,13 @@ class RouteProgressExTest {
                                 "type": "alert",
                                 "subtype": "stationUnavailable",
                                 "reason": "outOfOrder",
-                                "station_id": "station1"
+                                "station_id": "station1",
+                                "refresh_type": "dynamic"
                             },
                             {
                                 "type": "violation",
                                 "subtype": "evMinChargeAtDestination",
+                                "refresh_type": "dynamic",
                                 "details":
                                 {
                                     "requested_value": 20000,

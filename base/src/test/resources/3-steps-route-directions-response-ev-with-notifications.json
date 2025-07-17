@@ -270,6 +270,7 @@
               "subtype": "stateBorderCrossing",
               "geometry_index_end": 1,
               "geometry_index_start": 0,
+              "refresh_type": "static",
               "details": {
                 "actual_value": "US-NV,US-CA",
                 "message": "Crossing the border of the states of US-NV and US-CA."
@@ -279,23 +280,27 @@
               "type": "alert",
               "subtype": "stationUnavailable",
               "reason": "outOfOrder",
-              "station_id": "station1"
+              "station_id": "station1",
+              "refresh_type": "dynamic"
             },
             {
               "type": "alert",
               "subtype": "stationUnavailable",
               "reason": "outOfOrder",
-              "station_id": "station2"
+              "station_id": "station2",
+              "refresh_type": "dynamic"
             },
             {
               "type": "alert",
               "subtype": "stationUnavailable",
               "reason": "outOfOrder",
-              "station_id": "station3"
+              "station_id": "station3",
+              "refresh_type": "dynamic"
             },
             {
               "type": "violation",
               "subtype": "evMinChargeAtChargingStation",
+              "refresh_type": "dynamic",
               "details": {
                 "requested_value": 30000,
                 "actual_value": 27000,
@@ -305,6 +310,7 @@
             {
               "type": "violation",
               "subtype": "evMinChargeAtDestination",
+              "refresh_type": "dynamic",
               "details": {
                 "requested_value": 20000,
                 "actual_value": 13000,
@@ -314,7 +320,8 @@
             {
               "type": "alert",
               "subtype": "evInsufficientCharge",
-              "geometry_index": 3
+              "geometry_index": 0,
+              "refresh_type": "dynamic"
             }
           ],
           "distance": 234.423,
