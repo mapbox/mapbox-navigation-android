@@ -1,0 +1,217 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>ReplayRouteMapper</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>code</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageids="Core::com.mapbox.navigation.core.replay.route/ReplayRouteMapper///PointingToDeclaration//119003296">
+  <div class="breadcrumbs"><a href="../../index.html">Core</a><span class="delimiter">/</span><a href="../index.html">com.mapbox.navigation.core.replay.route</a><span class="delimiter">/</span><a href="index.html">ReplayRouteMapper</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Replay</span><wbr><span>Route</span><wbr><span><span>Mapper</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">ReplayRouteMapper</a>&nbsp;<span><span class="token annotation">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.jvm/-jvm-overloads/index.html"><span class="token annotation">JvmOverloads</span></a>&nbsp;</span><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">var </span>options<span class="token operator">: </span><a href="../-replay-route-options/index.html">ReplayRouteOptions</a><span class="token operator"> = </span>ReplayRouteOptions.Builder().build()</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">This class converts a <span data-unresolved-link="com.mapbox.api.directions.v5.models/DirectionsRoute///PointingToDeclaration/">DirectionsRoute</span> into events that can be replayed using the <a href="../../com.mapbox.navigation.core.replay/-mapbox-replayer/index.html">MapboxReplayer</a> to navigate a route.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Types">Types</button><button class="section-tab" data-togglable="Constructors">Constructors</button><button class="section-tab" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button></div>
+    <div class="tabs-section-body">
+      <h2 class="tabbedcontent">Constructors</h2>
+      <div class="table" data-togglable="Constructors"><a data-name="1489675646%2FConstructors%2F119003296" anchor-label="ReplayRouteMapper" id="1489675646%2FConstructors%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-core:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue TabbedContent">
+            <div class=""><span class="inline-flex">
+                <div><a href="-replay-route-mapper.html"><span>Replay</span><wbr><span>Route</span><wbr><span><span>Mapper</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1489675646%2FConstructors%2F119003296"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><div class="symbol monospace strikethrough"><strike><span class="token keyword"></span></strike><strike><span class="token keyword">fun </span></strike><a href="-replay-route-mapper.html"><strike><span class="token function">ReplayRouteMapper</span></strike></a><strike><span class="token punctuation">(</span></strike><span class="parameters "><span class="parameter ">options<span class="token operator">: </span><a href="../-replay-route-options/index.html">ReplayRouteOptions</a><span class="token operator"> = </span>ReplayRouteOptions.Builder().build()<span class="token punctuation">, </span></span><span class="parameter ">logger<span class="token operator">: </span><span data-unresolved-link="com.mapbox.base.common.logger/Logger///PointingToDeclaration/">Logger</span></span></span><strike><span class="token punctuation">)</span></strike><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1833571445%2FConstructors%2F119003296" anchor-label="ReplayRouteMapper" id="-1833571445%2FConstructors%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-core:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue TabbedContent">
+            <div class=""><span class="inline-flex">
+                <div><a href="-replay-route-mapper.html"><span>Replay</span><wbr><span>Route</span><wbr><span><span>Mapper</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1833571445%2FConstructors%2F119003296"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.jvm/-jvm-overloads/index.html"><span class="token annotation">JvmOverloads</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="-replay-route-mapper.html"><span class="token function">ReplayRouteMapper</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">options<span class="token operator">: </span><a href="../-replay-route-options/index.html">ReplayRouteOptions</a><span class="token operator"> = </span>ReplayRouteOptions.Builder().build()</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Types</h2>
+      <div class="table" data-togglable="Types"><a data-name="1532323510%2FClasslikes%2F119003296" anchor-label="Companion" id="1532323510%2FClasslikes%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-core:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-companion/index.html"><span><span>Companion</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1532323510%2FClasslikes%2F119003296"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="-352076522%2FFunctions%2F119003296" anchor-label="mapDirectionsRouteGeometry" id="-352076522%2FFunctions%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-core:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="map-directions-route-geometry.html"><span>map</span><wbr><span>Directions</span><wbr><span>Route</span><wbr><span><span>Geometry</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-352076522%2FFunctions%2F119003296"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="map-directions-route-geometry.html"><span class="token function">mapDirectionsRouteGeometry</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">directionsRoute<span class="token operator">: </span><span data-unresolved-link="com.mapbox.api.directions.v5.models/DirectionsRoute///PointingToDeclaration/">DirectionsRoute</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.mapbox.navigation.core.replay.history/-replay-event-base/index.html">ReplayEventBase</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Take a <span data-unresolved-link="com.mapbox.api.directions.v5.models/DirectionsRoute///PointingToDeclaration/">DirectionsRoute</span> and map it to events that can be replayed by the <a href="../../com.mapbox.navigation.core.replay/-mapbox-replayer/index.html">MapboxReplayer</a>. Uses the Directions API <span data-unresolved-link="com.mapbox.api.directions.v5.models/DirectionsRoute/geometry/#/PointingToDeclaration/">DirectionsRoute.geometry</span> to calculate the speed and position estimates for the replay locations.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="915976331%2FFunctions%2F119003296" anchor-label="mapDirectionsRouteLegAnnotation" id="915976331%2FFunctions%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-core:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="map-directions-route-leg-annotation.html"><span>map</span><wbr><span>Directions</span><wbr><span>Route</span><wbr><span>Leg</span><wbr><span><span>Annotation</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="915976331%2FFunctions%2F119003296"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="map-directions-route-leg-annotation.html"><span class="token function">mapDirectionsRouteLegAnnotation</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">directionsRoute<span class="token operator">: </span><span data-unresolved-link="com.mapbox.api.directions.v5.models/DirectionsRoute///PointingToDeclaration/">DirectionsRoute</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.mapbox.navigation.core.replay.history/-replay-event-base/index.html">ReplayEventBase</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Take a <span data-unresolved-link="com.mapbox.api.directions.v5.models/DirectionsRoute///PointingToDeclaration/">DirectionsRoute</span> and map it to events that can be replayed by the <a href="../../com.mapbox.navigation.core.replay/-mapbox-replayer/index.html">MapboxReplayer</a>. Uses the Directions API <span data-unresolved-link="com.mapbox.api.directions.v5.models/LegAnnotation///PointingToDeclaration/">LegAnnotation</span> to create the speed and position estimates for the replay locations.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-686067741%2FFunctions%2F119003296" anchor-label="mapGeometry" id="-686067741%2FFunctions%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-core:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="map-geometry.html"><span>map</span><wbr><span><span>Geometry</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-686067741%2FFunctions%2F119003296"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="map-geometry.html"><span class="token function">mapGeometry</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">geometry<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.mapbox.navigation.core.replay.history/-replay-event-base/index.html">ReplayEventBase</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Simulate a driver navigating a polyline string.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="351922444%2FFunctions%2F119003296" anchor-label="mapPointList" id="351922444%2FFunctions%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-core:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="map-point-list.html"><span>map</span><wbr><span>Point</span><wbr><span><span>List</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="351922444%2FFunctions%2F119003296"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="map-point-list.html"><span class="token function">mapPointList</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">points<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><span data-unresolved-link="com.mapbox.geojson/Point///PointingToDeclaration/">Point</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.mapbox.navigation.core.replay.history/-replay-event-base/index.html">ReplayEventBase</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Take a list of <span data-unresolved-link="com.mapbox.geojson/Point///PointingToDeclaration/">Point</span> and map it to events that can be replayed by the <a href="../../com.mapbox.navigation.core.replay/-mapbox-replayer/index.html">MapboxReplayer</a>.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1830514863%2FFunctions%2F119003296" anchor-label="mapRouteLegAnnotation" id="-1830514863%2FFunctions%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-core:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="map-route-leg-annotation.html"><span>map</span><wbr><span>Route</span><wbr><span>Leg</span><wbr><span><span>Annotation</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1830514863%2FFunctions%2F119003296"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="map-route-leg-annotation.html"><span class="token function">mapRouteLegAnnotation</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">routeLeg<span class="token operator">: </span><span data-unresolved-link="com.mapbox.api.directions.v5.models/RouteLeg///PointingToDeclaration/">RouteLeg</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.mapbox.navigation.core.replay.history/-replay-event-base/index.html">ReplayEventBase</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Given a <span data-unresolved-link="com.mapbox.api.directions.v5.models/RouteLeg///PointingToDeclaration/">RouteLeg</span>, use the <span data-unresolved-link="com.mapbox.api.directions.v5.models/LegAnnotation///PointingToDeclaration/">LegAnnotation</span> to create the speed and locations. To use this, your Directions request must include <span data-unresolved-link="com.mapbox.api.directions.v5/DirectionsCriteria/ANNOTATION_SPEED/#/PointingToDeclaration/">DirectionsCriteria.ANNOTATION_SPEED</span> and <span data-unresolved-link="com.mapbox.api.directions.v5/DirectionsCriteria/ANNOTATION_DISTANCE/#/PointingToDeclaration/">DirectionsCriteria.ANNOTATION_DISTANCE</span></p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1564449746%2FFunctions%2F119003296" anchor-label="mapRouteLegGeometry" id="-1564449746%2FFunctions%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-core:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="map-route-leg-geometry.html"><span>map</span><wbr><span>Route</span><wbr><span>Leg</span><wbr><span><span>Geometry</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1564449746%2FFunctions%2F119003296"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="map-route-leg-geometry.html"><span class="token function">mapRouteLegGeometry</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">routeLeg<span class="token operator">: </span><span data-unresolved-link="com.mapbox.api.directions.v5.models/RouteLeg///PointingToDeclaration/">RouteLeg</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.mapbox.navigation.core.replay.history/-replay-event-base/index.html">ReplayEventBase</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Take a single <span data-unresolved-link="com.mapbox.api.directions.v5.models/RouteLeg///PointingToDeclaration/">RouteLeg</span> from the <span data-unresolved-link="com.mapbox.api.directions.v5.models/DirectionsRoute///PointingToDeclaration/">DirectionsRoute</span> and map it to a drive using the <span data-unresolved-link="com.mapbox.api.directions.v5.models/LegStep/geometry/#/PointingToDeclaration/">LegStep.geometry</span> composed together.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Properties</h2>
+      <div class="table" data-togglable="Properties"><a data-name="-1270161135%2FProperties%2F119003296" anchor-label="options" id="-1270161135%2FProperties%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavigation-core:dokkaHtmlPartial/release" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="options.html">options</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1270161135%2FProperties%2F119003296"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavigation-core:dokkaHtmlPartial/release"><a data-name="-1270161135%2FProperties%2F119003296" anchor-label="options" id="-1270161135%2FProperties%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">var </span><a href="options.html">options</a><span class="token operator">: </span><a href="../-replay-route-options/index.html">ReplayRouteOptions</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-1270161135%2FProperties%2F119003296" anchor-label="options" id="-1270161135%2FProperties%2F119003296" data-filterable-set=":libnavigation-core:dokkaHtmlPartial/release"></a><p class="paragraph">Options that allow you to control the driver and car behavior</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2025 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        </div>
+    </div>
+</div>
+
+</body></html>
+
