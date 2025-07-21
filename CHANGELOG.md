@@ -1,5 +1,26 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.11.0-rc.1 - 21 July, 2025
+#### Features
+
+
+#### Bug fixes and improvements
+- Obfuscate access_token in the RoadShield logs
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.14.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.14.0-rc.1))
+- Mapbox Navigation Native `v324.14.0-rc.1`
+- Mapbox Core Common `v24.14.0-rc.1`
+- Mapbox Java `v7.4.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.4.0))
+
+
 ## Navigation SDK Core Framework 3.11.0-beta.1 - 04 July, 2025
 #### Features
 - Added support for Android 16 KB page-size devices. To consume SDK compatible with NDK 27 you need to add `-ndk27` suffix to the artifact name, for example, `com.mapbox.navigationcore:navigation` -> `com.mapbox.navigationcore:navigation-ndk27`. 
