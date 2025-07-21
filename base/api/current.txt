@@ -7,6 +7,15 @@ package com.mapbox.navigation.base {
   @kotlin.RequiresOptIn(level=kotlin.RequiresOptIn.Level.ERROR) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) @kotlin.annotation.Target(allowedTargets={kotlin.annotation.AnnotationTarget.CLASS, kotlin.annotation.AnnotationTarget.FUNCTION, kotlin.annotation.AnnotationTarget.PROPERTY, kotlin.annotation.AnnotationTarget.CONSTRUCTOR}) public @interface ExperimentalPreviewMapboxNavigationAPI {
   }
 
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class HttpException extends java.lang.Exception {
+    ctor public HttpException(int httpCode, String message, Throwable? cause = null);
+    ctor public HttpException(int httpCode, String message);
+    method public int getHttpCode();
+    property public Throwable? cause;
+    property public final int httpCode;
+    property public String message;
+  }
+
   public final class TimeFormat {
     field public static final com.mapbox.navigation.base.TimeFormat INSTANCE;
     field public static final int NONE_SPECIFIED = -1; // 0xffffffff

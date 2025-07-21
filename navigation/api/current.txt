@@ -208,13 +208,51 @@ package com.mapbox.navigation.core.adas {
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasEdgeAttributes {
     method public java.util.List<com.mapbox.navigation.core.adas.AdasValueOnEdge> getCurvatures();
+    method public int getEtc2();
+    method public Integer? getFormOfWay();
     method public java.util.List<com.mapbox.navigation.core.adas.AdasValueOnEdge> getSlopes();
     method public java.util.List<com.mapbox.navigation.core.adas.AdasSpeedLimitInfo> getSpeedLimit();
     method public Boolean? isDividedRoad();
     property public final java.util.List<com.mapbox.navigation.core.adas.AdasValueOnEdge> curvatures;
+    property public final int etc2;
+    property public final Integer? formOfWay;
     property public final Boolean? isDividedRoad;
     property public final java.util.List<com.mapbox.navigation.core.adas.AdasValueOnEdge> slopes;
     property public final java.util.List<com.mapbox.navigation.core.adas.AdasSpeedLimitInfo> speedLimit;
+  }
+
+  public static final class AdasEdgeAttributes.Etc2Road {
+    field public static final int CITY_HIGHWAY = 2; // 0x2
+    field public static final int HIGHWAY = 1; // 0x1
+    field public static final com.mapbox.navigation.core.adas.AdasEdgeAttributes.Etc2Road INSTANCE;
+    field public static final int NORMAL_ROAD = 3; // 0x3
+    field public static final int OTHER = 4; // 0x4
+    field public static final int UNKNOWN = 0; // 0x0
+  }
+
+  @IntDef({com.mapbox.navigation.core.adas.AdasEdgeAttributes.Etc2Road.UNKNOWN, com.mapbox.navigation.core.adas.AdasEdgeAttributes.Etc2Road.HIGHWAY, com.mapbox.navigation.core.adas.AdasEdgeAttributes.Etc2Road.CITY_HIGHWAY, com.mapbox.navigation.core.adas.AdasEdgeAttributes.Etc2Road.NORMAL_ROAD, com.mapbox.navigation.core.adas.AdasEdgeAttributes.Etc2Road.OTHER}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface AdasEdgeAttributes.Etc2Road.Type {
+  }
+
+  public static final class AdasEdgeAttributes.FormOfWay {
+    field public static final int CAR_PARK_ENTRANCE = 11; // 0xb
+    field public static final int FREEWAY = 1; // 0x1
+    field public static final com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay INSTANCE;
+    field public static final int MULTIPLE_CARRIAGEWAY = 2; // 0x2
+    field public static final int NA = 14; // 0xe
+    field public static final int PARALLEL_ROAD = 7; // 0x7
+    field public static final int PEDESTRIAN_ZONE = 13; // 0xd
+    field public static final int RAMP = 9; // 0x9
+    field public static final int RAMP_ON_FREEWAY = 8; // 0x8
+    field public static final int ROUNDABOUT_CIRCLE = 4; // 0x4
+    field public static final int SERVICE_ENTRANCE = 12; // 0xc
+    field public static final int SERVICE_ROAD = 10; // 0xa
+    field public static final int SINGLE_CARRIAGEWAY = 3; // 0x3
+    field public static final int SLIP_ROAD = 6; // 0x6
+    field public static final int TRAFFIC_SQUARE = 5; // 0x5
+    field public static final int UNKNOWN = 0; // 0x0
+  }
+
+  @IntDef({com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay.UNKNOWN, com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay.FREEWAY, com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay.MULTIPLE_CARRIAGEWAY, com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay.SINGLE_CARRIAGEWAY, com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay.ROUNDABOUT_CIRCLE, com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay.TRAFFIC_SQUARE, com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay.SLIP_ROAD, com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay.PARALLEL_ROAD, com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay.RAMP_ON_FREEWAY, com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay.RAMP, com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay.SERVICE_ROAD, com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay.CAR_PARK_ENTRANCE, com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay.SERVICE_ENTRANCE, com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay.PEDESTRIAN_ZONE, com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay.NA}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface AdasEdgeAttributes.FormOfWay.Type {
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasSpeedLimitInfo {
