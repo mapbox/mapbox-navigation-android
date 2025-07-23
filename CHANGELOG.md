@@ -1,5 +1,21 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.10.1 - 23 July, 2025
+#### Features
+
+
+#### Bug fixes and improvements
+- Fixed an issue where the Speed Camera notification would appear prematurely when the car's speed was 0. 
+- Improve locations simulation during signal outage in tunnels. 
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.13.4` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.13.4))
+- Mapbox Navigation Native `v324.13.4`
+- Mapbox Core Common `v24.13.4`
+- Mapbox Java `v7.4.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.4.0))
+
+
 ## Navigation SDK Core Framework 3.10.0 - 19 June, 2025
 #### Features
 - Improve road graph calibration in Dead Reckoning for more accurate localization in tunnel and urban canyon. 
