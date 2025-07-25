@@ -87,7 +87,6 @@ ext {
       toStringVerifier          : '1.4.8',
       kotlinDateTime            : '0.4.1',
       kotlinSerialization       : '1.3.1',
-      ktor                      : '2.3.0',
       coilVersion               : '2.4.0',
       microsoftCognitiveSpeech  : '1.34.0',
       lottie                    : '6.0.0'
@@ -215,15 +214,6 @@ ext {
       kotlinXDateTime           : "org.jetbrains.kotlinx:kotlinx-datetime:${version.kotlinDateTime}",
       kotlinSerialization       : "org.jetbrains.kotlinx:kotlinx-serialization-json:${version.kotlinSerialization}",
 
-      ktorClientCore            : "io.ktor:ktor-client-core:${version.ktor}",
-      ktorClientEncoding        : "io.ktor:ktor-client-encoding:${version.ktor}",
-      ktorClientAndroid         : "io.ktor:ktor-client-android:${version.ktor}",
-      ktorClientAuth            : "io.ktor:ktor-client-auth:${version.ktor}",
-      ktorClientOkHttp          : "io.ktor:ktor-client-okhttp:${version.ktor}",
-      ktorCio                   : "io.ktor:ktor-client-cio:${version.ktor}",
-      ktorClientContentNegotiation: "io.ktor:ktor-client-content-negotiation:${version.ktor}",
-      ktorSerialization         : "io.ktor:ktor-serialization-kotlinx-json:${version.ktor}",
-      ktorWebSockets            : "io.ktor:ktor-client-websockets:${version.ktor}",
       microsoftCognitiveSpeech  : "com.microsoft.cognitiveservices.speech:client-sdk:${version.microsoftCognitiveSpeech}",
       lottie                    : "com.airbnb.android:lottie-compose:${version.lottie}"
   ]

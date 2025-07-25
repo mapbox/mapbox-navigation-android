@@ -19,6 +19,7 @@ import com.mapbox.navigation.ui.base.util.resource.ResourceLoader
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
 import com.mapbox.navigation.ui.utils.internal.resource.load
 import com.mapbox.navigation.utils.internal.ByteBufferBackedInputStream
+import com.mapbox.navigation.utils.internal.UrlUtils
 import com.mapbox.navigation.voice.model.TypeAndAnnouncement
 import com.mapbox.navigation.voice.options.MapboxSpeechApiOptions
 import java.io.InputStream

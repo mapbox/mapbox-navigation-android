@@ -19,6 +19,7 @@ import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.UrlUtils
 import com.mapbox.navigation.voice.options.MapboxSpeechApiOptions
 import com.mapbox.navigation.voice.options.VoiceGender
 import com.mapbox.navigation.voice.testutils.Fixtures
