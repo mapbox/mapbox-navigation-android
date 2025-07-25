@@ -7,14 +7,15 @@
  *
  * source: https://github.com/square/okhttp/blob/b4904c65bdf38fd20ca0aacb23b474c50e5c1d06/okhttp/src/jvmMain/kotlin/okhttp3/HttpUrl.kt#L1770
  */
-package com.mapbox.navigation.voice.api
-
+package com.mapbox.navigation.utils.internal
 /* ktlint-disable */
+import androidx.annotation.RestrictTo
 import okio.Buffer
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets.UTF_8
 
-internal object UrlUtils {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+object UrlUtils {
 
     private val HEX_DIGITS =
         charArrayOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F')
