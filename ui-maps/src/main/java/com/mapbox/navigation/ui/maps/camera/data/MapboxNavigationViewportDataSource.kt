@@ -223,7 +223,7 @@ class MapboxNavigationViewportDataSource private constructor(
 
     constructor(mapboxMap: MapboxMap) : this(
         mapboxMap,
-        FollowingFramingModeHolder(),
+        null,
         OverviewViewportDataSource(
             mapboxMap,
             InternalViewportDataSourceOptions(
@@ -237,7 +237,7 @@ class MapboxNavigationViewportDataSource private constructor(
     // options and internalOptions must be the same instance in OverviewViewportDataSource and MapboxNavigationViewportDataSource
     internal constructor(
         mapboxMap: MapboxMap,
-        followingFramingModeHolder: FollowingFramingModeHolder,
+        followingFramingModeHolder: FollowingFramingModeHolder?,
         overviewViewportDataSource: OverviewViewportDataSource,
     ) : this(
         mapboxMap,
@@ -762,7 +762,6 @@ class MapboxNavigationViewportDataSource private constructor(
                 followingCenterProperty.fallback = cameraState.center
                 followingZoomProperty.fallback = max(min(cameraState.zoom, maxZoom), minZoom)
             }
-            followingFramingModeHolder?.mode = FollowingFramingMode.NONE
             // nothing to frame
             return
         }
@@ -833,7 +832,6 @@ class MapboxNavigationViewportDataSource private constructor(
 
         if (cameraFrame.isEmpty) {
             logW { "CameraOptions is empty" }
-            followingFramingModeHolder?.mode = FollowingFramingMode.NONE
             return
         }
 
