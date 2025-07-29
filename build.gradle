@@ -23,6 +23,10 @@ buildscript {
     classpath pluginDependencies.kover
     classpath pluginDependencies.googleServices
     classpath pluginDependencies.license
+    // Used by license. Add this dependency explicitly,
+    // because the version used by license has been removed from the repository.
+    // This dependency may be removed when we bump license version.
+    classpath pluginDependencies.kotlinHtmlJvm
     classpath pluginDependencies.mapboxSdkVersions
     classpath pluginDependencies.mapboxSdkRegistry
     classpath pluginDependencies.mapboxAccessToken
