@@ -26,6 +26,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.net.URI
+import kotlin.time.Duration.Companion.seconds
 
 class VoiceInstructionsTest : BaseCoreNoCleanUpTest() {
 
@@ -76,7 +77,7 @@ class VoiceInstructionsTest : BaseCoreNoCleanUpTest() {
         }
         val relayRouteSession = ReplayRouteSession()
         relayRouteSession.onAttached(mapboxNavigation)
-        voiceInstructions.waitUntilHasSize(3, timeoutMillis = 15000)
+        voiceInstructions.waitUntilHasSize(3, timeout = 15.seconds)
 
         // the first instruction is duplicated once as a result of starting replay session
         assertEquals(voiceInstructions[0], voiceInstructions[1])

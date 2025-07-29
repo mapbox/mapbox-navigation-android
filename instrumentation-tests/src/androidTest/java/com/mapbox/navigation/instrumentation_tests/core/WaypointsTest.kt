@@ -43,6 +43,7 @@ import org.junit.Rule
 import org.junit.Test
 import java.net.URI
 import kotlin.math.abs
+import kotlin.time.Duration.Companion.seconds
 
 class WaypointsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
 
@@ -198,7 +199,7 @@ class WaypointsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
             },
         )
         stayOnPosition(coordinates[1], 90f)
-        nextWaypoints.waitUntilHasSize(1)
+        nextWaypoints.waitUntilHasSize(1, timeout = 20.seconds)
         var legWaypoint = nextWaypoints[0]!!
 
         checkLocation(coordinates[1], legWaypoint.location)
