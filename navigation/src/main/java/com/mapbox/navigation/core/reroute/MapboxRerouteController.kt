@@ -56,6 +56,8 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
 
     private var runningRerouteCausedByRouteReplan = false
 
+    private var lastSignature: GetRouteSignature? = null
+
     constructor(
         directionsSession: DirectionsSession,
         tripSession: TripSession,
@@ -85,6 +87,9 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
             field = value
             if (value is RerouteState.Idle) {
                 runningRerouteCausedByRouteReplan = false
+            }
+            if (value !is RerouteState.FetchingRoute) {
+                lastSignature = null
             }
             observers.forEach { it.onRerouteStateChanged(field) }
         }
@@ -122,7 +127,10 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
     }
 
     override fun rerouteOnDeviation(callback: RoutesCallback) {
-        rerouteInternal(deviationSignature, callback)
+        // Do not reroute if we are already fetching a route for deviation
+        if (state != RerouteState.FetchingRoute || lastSignature != deviationSignature) {
+            rerouteInternal(deviationSignature, callback)
+        }
     }
 
     override fun rerouteOnParametersChange(callback: RoutesCallback) {
@@ -134,6 +142,7 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
         signature: GetRouteSignature,
         callback: RoutesCallback,
     ) {
+        this.lastSignature = signature
         val ignoreDeviationToAlternatives = runningRerouteCausedByRouteReplan
         logD(LOG_CATEGORY) {
             "Starting reroute"

@@ -861,19 +861,13 @@ class MapboxRerouteControllerTest {
             rerouteController.rerouteOnDeviation(internalRouteCallback)
             routeRequestCallback1.captured.onCanceled(routeOptions1, RouterOrigin.ONLINE)
         }
-        verify(exactly = 1) { directionsSession.cancelRouteRequest(1L) }
-
-        routeRequestCallback2.captured.onRoutesReady(
-            listOf(mockk(relaxed = true)),
-            RouterOrigin.ONLINE,
-        )
+        verify(exactly = 0) { directionsSession.cancelRouteRequest(1L) }
 
         verifyOrder {
+            primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.Interrupted)
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
-            primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
-            primaryRerouteObserver.onRerouteStateChanged(ofType<RerouteState.RouteFetched>())
         }
     }
 
@@ -1154,6 +1148,11 @@ class MapboxRerouteControllerTest {
             clearMocks(routeOptionsUpdater, answers = false)
             rerouteController.rerouteOnDeviation(internalRouteCallback)
 
+            routeRequestCallback.captured.onRoutesReady(
+                listOf(mockk(relaxed = true)),
+                RouterOrigin.ONLINE,
+            )
+
             verify(exactly = 1) {
                 routeOptionsUpdater.update(
                     mockRoute.toBuilder().avoidManeuverRadius(expectedMetersRadius).build(),
@@ -1162,11 +1161,6 @@ class MapboxRerouteControllerTest {
                 )
             }
         }
-
-        routeRequestCallback.captured.onRoutesReady(
-            listOf(mockk(relaxed = true)),
-            RouterOrigin.ONLINE,
-        )
     }
 
     @Test
@@ -1204,6 +1198,11 @@ class MapboxRerouteControllerTest {
             clearMocks(routeOptionsUpdater, answers = false)
             rerouteController.rerouteOnDeviation(internalRouteCallback)
 
+            routeRequestCallback.captured.onRoutesReady(
+                listOf(mockk(relaxed = true)),
+                RouterOrigin.ONLINE,
+            )
+
             verify(exactly = 1) {
                 routeOptionsUpdater.update(
                     mockRo.toBuilder().avoidManeuverRadius(if (result) 200.0 else null).build(),
@@ -1212,11 +1211,6 @@ class MapboxRerouteControllerTest {
                 )
             }
         }
-
-        routeRequestCallback.captured.onRoutesReady(
-            listOf(mockk(relaxed = true)),
-            RouterOrigin.ONLINE,
-        )
     }
 
     @Test
