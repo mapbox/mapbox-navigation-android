@@ -790,15 +790,22 @@ package com.mapbox.navigation.base.options {
   }
 
   public final class PredictiveCacheNavigationOptions {
+    method public boolean getIncludeAdas();
     method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions getPredictiveCacheLocationOptions();
+    method public String? getTilesDataset();
+    method public String? getTilesVersion();
     method public com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions.Builder toBuilder();
+    property public final boolean includeAdas;
     property public final com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions;
+    property public final String? tilesDataset;
+    property public final String? tilesVersion;
   }
 
   public static final class PredictiveCacheNavigationOptions.Builder {
     ctor public PredictiveCacheNavigationOptions.Builder();
     method public com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions build();
     method public com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions.Builder predictiveCacheLocationOptions(com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions.Builder tilesConfiguration(String tilesDataset, String tilesVersion, boolean includeAdas);
   }
 
   public final class PredictiveCacheOptions {

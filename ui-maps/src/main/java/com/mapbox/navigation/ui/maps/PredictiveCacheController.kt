@@ -112,8 +112,7 @@ class PredictiveCacheController @VisibleForTesting internal constructor(
 
     init {
         predictiveCache.createNavigationController(
-            predictiveCacheOptions.predictiveCacheNavigationOptions
-                .predictiveCacheLocationOptions,
+            predictiveCacheOptions.predictiveCacheNavigationOptions,
         )
         createSearchControllers()
     }

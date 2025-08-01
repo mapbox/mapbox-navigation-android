@@ -10,13 +10,13 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.TileStore
 import com.mapbox.common.TilesetDescriptor
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.route.nativeRoute
 import com.mapbox.navigation.base.internal.utils.Constants
 import com.mapbox.navigation.base.internal.utils.Constants.RouteResponse.KEY_NOTIFICATIONS
-import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
-import com.mapbox.navigation.base.options.RoutingTilesOptions
+import com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.navigator.internal.utils.toEvStateData
 import com.mapbox.navigation.utils.internal.ThreadController
@@ -26,6 +26,7 @@ import com.mapbox.navigator.ADASISv2MessageCallback
 import com.mapbox.navigator.AdasisConfig
 import com.mapbox.navigator.AdasisFacadeBuilder
 import com.mapbox.navigator.AdasisFacadeHandle
+import com.mapbox.navigator.CacheDataDomain
 import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.ElectronicHorizonObserver
@@ -41,6 +42,7 @@ import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorObserver
 import com.mapbox.navigator.PredictiveCacheController
+import com.mapbox.navigator.PredictiveCacheControllerOptions
 import com.mapbox.navigator.PredictiveLocationTrackerOptions
 import com.mapbox.navigator.RefreshRouteResult
 import com.mapbox.navigator.RerouteControllerInterface
@@ -70,6 +72,7 @@ import kotlin.coroutines.resume
 /**
  * Default implementation of [MapboxNativeNavigator] interface.
  */
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 class MapboxNativeNavigatorImpl(
     tilesConfig: TilesConfig,
@@ -475,19 +478,63 @@ class MapboxNativeNavigatorImpl(
         )
 
     /**
-     * Creates a Navigation [PredictiveCacheController]. Uses the option passed in
-     * [RoutingTilesOptions] via [NavigationOptions].
+     * Creates a Navigation [PredictiveCacheController].
      *
-     * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions]
-     *
+     * @param navigationOptions [PredictiveCacheNavigationOptions]
      * @return [PredictiveCacheController]
      */
     override fun createNavigationPredictiveCacheController(
-        predictiveCacheLocationOptions: PredictiveCacheLocationOptions,
-    ): PredictiveCacheController =
-        navigator.createPredictiveCacheController(
-            predictiveCacheLocationOptions.toPredictiveLocationTrackerOptions(),
-        )
+        navigationOptions: PredictiveCacheNavigationOptions,
+    ): List<PredictiveCacheController> {
+        val coreLocationOptions = navigationOptions.predictiveCacheLocationOptions
+            .toPredictiveLocationTrackerOptions()
+
+        val tilesDataset = navigationOptions.tilesDataset
+        val tilesVersion = navigationOptions.tilesVersion
+
+        return if (navigationOptions.includeAdas) {
+            // Temporary limitation
+            // https://mapbox.atlassian.net/browse/NN-3836
+            // https://mapbox.atlassian.net/browse/NN-3837
+            checkNotNull(tilesDataset)
+            checkNotNull(tilesVersion)
+
+            val adasOptions = PredictiveCacheControllerOptions(
+                tilesVersion,
+                tilesDataset,
+                CacheDataDomain.ADAS,
+                0,
+                0,
+            )
+
+            val navOptions = PredictiveCacheControllerOptions(
+                tilesVersion,
+                tilesDataset,
+                CacheDataDomain.NAVIGATION,
+                0,
+                0,
+            )
+
+            listOf(
+                navigator.createPredictiveCacheController(adasOptions, coreLocationOptions),
+                navigator.createPredictiveCacheController(navOptions, coreLocationOptions),
+            )
+        } else if (tilesDataset != null && tilesVersion != null) {
+            val navOptions = PredictiveCacheControllerOptions(
+                tilesVersion,
+                tilesDataset,
+                CacheDataDomain.NAVIGATION,
+                0,
+                0,
+            )
+
+            listOf(
+                navigator.createPredictiveCacheController(navOptions, coreLocationOptions),
+            )
+        } else {
+            listOf(navigator.createPredictiveCacheController(coreLocationOptions))
+        }
+    }
 
     private fun PredictiveCacheLocationOptions.toPredictiveLocationTrackerOptions() =
         PredictiveLocationTrackerOptions(

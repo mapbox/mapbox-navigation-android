@@ -75,8 +75,7 @@ class PredictiveCacheControllerTest {
         assertNull(predictiveCacheController.predictiveCacheControllerErrorHandler)
         verify(Ordering.SEQUENCE) {
             predictiveCache.createNavigationController(
-                predictiveCacheOptions.predictiveCacheNavigationOptions
-                    .predictiveCacheLocationOptions,
+                predictiveCacheOptions.predictiveCacheNavigationOptions,
             )
         }
     }

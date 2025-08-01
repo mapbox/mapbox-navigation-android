@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.internal.cache
 import com.mapbox.common.TileStore
 import com.mapbox.common.TilesetDescriptor
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
+import com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.PredictiveCache
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
@@ -127,48 +128,25 @@ class PredictiveCacheTests {
 
     @Test
     fun `controllers are recreated when navigator is recreated`() {
-        val navLocationOptions1: PredictiveCacheLocationOptions = mockk()
-        val navLocationOptions2: PredictiveCacheLocationOptions = mockk()
-        val navLocationOptions3: PredictiveCacheLocationOptions = mockk()
-        val tilesetDescriptor1 = mockk<TilesetDescriptor>()
-        val tilesetDescriptor2 = mockk<TilesetDescriptor>()
-        val tilesetDescriptor3 = mockk<TilesetDescriptor>()
+        val navOptions1: PredictiveCacheNavigationOptions = mockk()
+        val navOptions2: PredictiveCacheNavigationOptions = mockk()
+        val navOptions3: PredictiveCacheNavigationOptions = mockk()
 
-        val predictiveCacheControllerKey1 =
-            PredictiveCache.PredictiveCacheControllerKey(
-                "uri1",
-                tileStore,
-                tilesetDescriptor1,
-                navLocationOptions1,
-            )
-
-        val predictiveCacheControllerKey2 =
-            PredictiveCache.PredictiveCacheControllerKey(
-                "uri2",
-                tileStore,
-                tilesetDescriptor2,
-                navLocationOptions2,
-            )
-
-        val predictiveCacheControllerKey3 =
-            PredictiveCache.PredictiveCacheControllerKey(
-                "uri3",
-                tileStore,
-                tilesetDescriptor3,
-                navLocationOptions3,
-            )
+        val predictiveCacheControllerKey1 = createPredictiveCacheControllerKey("uri1")
+        val predictiveCacheControllerKey2 = createPredictiveCacheControllerKey("uri2")
+        val predictiveCacheControllerKey3 = createPredictiveCacheControllerKey("uri3")
 
         every {
-            navigator.createNavigationPredictiveCacheController(navLocationOptions1)
-        } returns mockk()
+            navigator.createNavigationPredictiveCacheController(navOptions1)
+        } returns listOf(mockk())
 
         every {
-            navigator.createNavigationPredictiveCacheController(navLocationOptions2)
-        } returns mockk()
+            navigator.createNavigationPredictiveCacheController(navOptions2)
+        } returns listOf(mockk(), mockk())
 
         every {
-            navigator.createNavigationPredictiveCacheController(navLocationOptions3)
-        } returns mockk()
+            navigator.createNavigationPredictiveCacheController(navOptions3)
+        } returns listOf(mockk())
 
         val map1 = mockk<Any>()
         val map2 = mockk<Any>()
@@ -182,8 +160,8 @@ class PredictiveCacheTests {
             listOf(predictiveCacheControllerKey3),
         )
 
-        predictiveCache.createNavigationController(navLocationOptions1)
-        predictiveCache.createNavigationController(navLocationOptions2)
+        predictiveCache.createNavigationController(navOptions1)
+        predictiveCache.createNavigationController(navOptions2)
 
         val callback = navigatorRecreationCallbackSlot.captured
         callback.onNativeNavigatorRecreated()
@@ -192,65 +170,76 @@ class PredictiveCacheTests {
         assertEquals(2, predictiveCache.cachedMapsPredictiveCacheControllers[map1]!!.size)
         assertEquals(1, predictiveCache.cachedMapsPredictiveCacheControllers[map2]!!.size)
 
-        assertEquals(2, predictiveCache.cachedNavigationPredictiveCacheControllers.size)
-        assertEquals(2, predictiveCache.navPredictiveCacheLocationOptions.size)
+        assertEquals(3, predictiveCache.cachedNavigationPredictiveCacheControllers.size)
+        assertEquals(2, predictiveCache.navPredictiveCacheOptions.size)
 
         verify(exactly = 2) {
             navigator.createMapsPredictiveCacheController(
                 tileStore,
-                tilesetDescriptor1,
-                navLocationOptions1,
+                predictiveCacheControllerKey1.tilesetDescriptor,
+                predictiveCacheControllerKey1.locationOptions,
             )
         }
 
         verify(exactly = 2) {
             navigator.createMapsPredictiveCacheController(
                 tileStore,
-                tilesetDescriptor2,
-                navLocationOptions2,
+                predictiveCacheControllerKey2.tilesetDescriptor,
+                predictiveCacheControllerKey2.locationOptions,
             )
         }
 
         verify(exactly = 2) {
             navigator.createMapsPredictiveCacheController(
                 tileStore,
-                tilesetDescriptor3,
-                navLocationOptions3,
+                predictiveCacheControllerKey3.tilesetDescriptor,
+                predictiveCacheControllerKey3.locationOptions,
             )
         }
 
         verify(exactly = 2) {
-            navigator.createNavigationPredictiveCacheController(navLocationOptions1)
+            navigator.createNavigationPredictiveCacheController(navOptions1)
         }
 
         verify(exactly = 2) {
-            navigator.createNavigationPredictiveCacheController(navLocationOptions2)
+            navigator.createNavigationPredictiveCacheController(navOptions2)
         }
     }
 
     @Test
     fun `caches are empty after clean`() {
-        val navLocationOptions1: PredictiveCacheLocationOptions = mockk()
-        val tilesetDescriptor1 = mockk<TilesetDescriptor>()
-
-        val predictiveCacheControllerKey1 =
-            PredictiveCache.PredictiveCacheControllerKey(
-                "uri1",
-                tileStore,
-                tilesetDescriptor1,
-                navLocationOptions1,
-            )
-
         predictiveCache.createMapsControllers(
             mockk(),
-            listOf(predictiveCacheControllerKey1),
+            listOf(createPredictiveCacheControllerKey("uri1")),
         )
+
         predictiveCache.createNavigationController(mockk())
+
+        predictiveCache.createSearchControllers(
+            mockk(),
+            listOf(
+                mockk<TilesetDescriptor>(relaxed = true) to mockk(relaxed = true),
+                mockk<TilesetDescriptor>(relaxed = true) to mockk(relaxed = true),
+            ),
+        )
 
         predictiveCache.clean()
 
         assertEquals(0, predictiveCache.cachedNavigationPredictiveCacheControllers.size)
         assertEquals(0, predictiveCache.cachedMapsPredictiveCacheControllers.size)
-        assertEquals(0, predictiveCache.navPredictiveCacheLocationOptions.size)
+        assertEquals(0, predictiveCache.navPredictiveCacheOptions.size)
+        assertEquals(0, predictiveCache.searchPredictiveCacheLocationOptions.size)
     }
+
+    private fun createPredictiveCacheControllerKey(
+        styleUri: String,
+        tileStore: TileStore = this.tileStore,
+        tilesetDescriptor: TilesetDescriptor = mockk(),
+        locationOptions: PredictiveCacheLocationOptions = mockk(),
+    ) = PredictiveCache.PredictiveCacheControllerKey(
+        styleUri,
+        tileStore,
+        tilesetDescriptor,
+        locationOptions,
+    )
 }

@@ -5,9 +5,8 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.bindgen.Expected
 import com.mapbox.common.TileStore
 import com.mapbox.common.TilesetDescriptor
-import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
-import com.mapbox.navigation.base.options.RoutingTilesOptions
+import com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigator.ADASISv2MessageCallback
 import com.mapbox.navigator.AdasisConfig
@@ -181,16 +180,14 @@ interface MapboxNativeNavigator : RerouteEventsProvider {
     ): PredictiveCacheController
 
     /**
-     * Creates a Navigation [PredictiveCacheController]. Uses the option passed in
-     * [RoutingTilesOptions] via [NavigationOptions].
+     * Creates a Navigation [PredictiveCacheController].
      *
-     * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions]
-     *
+     * @param navigationOptions [PredictiveCacheNavigationOptions]
      * @return [PredictiveCacheController]
      */
     fun createNavigationPredictiveCacheController(
-        predictiveCacheLocationOptions: PredictiveCacheLocationOptions,
-    ): PredictiveCacheController
+        navigationOptions: PredictiveCacheNavigationOptions,
+    ): List<PredictiveCacheController>
 
     /**
      * Asynchronously passes in the current sensor data of the user.
