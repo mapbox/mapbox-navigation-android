@@ -16,7 +16,6 @@ import com.mapbox.navigation.ui.maps.camera.utils.getAnimatorsFactory
 import com.mapbox.navigation.ui.maps.camera.utils.normalizeProjection
 import com.mapbox.navigation.ui.maps.camera.utils.projectedDistance
 import com.mapbox.navigation.ui.maps.internal.camera.constraintDurationTo
-import com.mapbox.navigation.ui.maps.internal.camera.normalizeBearing
 import com.mapbox.navigation.utils.internal.ifNonNull
 import kotlin.math.abs
 import kotlin.math.min
@@ -38,7 +37,7 @@ class MapboxNavigationCameraTransition @VisibleForTesting internal constructor(
     ) : this(
         mapboxMap,
         cameraPlugin,
-        DefaultSimplifiedUpdateFrameTransitionProvider(mapboxMap, cameraPlugin),
+        DefaultSimplifiedUpdateFrameTransitionProvider(cameraPlugin),
     )
 
     override fun transitionFromLowZoomToHighZoom(
@@ -62,6 +61,7 @@ class MapboxNavigationCameraTransition @VisibleForTesting internal constructor(
                 CameraAnimatorOptions.cameraAnimatorOptions(center) {
                     owner(NAVIGATION_CAMERA_OWNER)
                 },
+                useShortestPath = false,
             ) {
                 startDelay = 800
                 duration = 1000
@@ -84,9 +84,8 @@ class MapboxNavigationCameraTransition @VisibleForTesting internal constructor(
         }
 
         cameraOptions.bearing?.let { bearing ->
-            val bearingShortestRotation = normalizeBearing(currentMapCameraState.bearing, bearing)
             val bearingAnimator = cameraPlugin.createBearingAnimator(
-                CameraAnimatorOptions.cameraAnimatorOptions(bearingShortestRotation) {
+                CameraAnimatorOptions.cameraAnimatorOptions(bearing) {
                     owner(NAVIGATION_CAMERA_OWNER)
                 },
             ) {
