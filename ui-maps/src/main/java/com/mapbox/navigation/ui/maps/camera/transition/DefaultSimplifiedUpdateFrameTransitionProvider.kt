@@ -3,15 +3,12 @@ package com.mapbox.navigation.ui.maps.camera.transition
 import android.animation.ValueAnimator
 import androidx.core.view.animation.PathInterpolatorCompat
 import com.mapbox.maps.CameraOptions
-import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.CameraAnimatorOptions
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.NAVIGATION_CAMERA_OWNER
 import com.mapbox.navigation.ui.maps.internal.camera.SimplifiedUpdateFrameTransitionProvider
-import com.mapbox.navigation.ui.maps.internal.camera.normalizeBearing
 
 internal class DefaultSimplifiedUpdateFrameTransitionProvider(
-    private val mapboxMap: MapboxMap,
     private val cameraPlugin: CameraAnimationsPlugin,
 ) : SimplifiedUpdateFrameTransitionProvider {
 
@@ -43,6 +40,7 @@ internal class DefaultSimplifiedUpdateFrameTransitionProvider(
                 CameraAnimatorOptions.cameraAnimatorOptions(center) {
                     owner(NAVIGATION_CAMERA_OWNER)
                 },
+                false,
             ) {
                 duration = animationDuration
                 interpolator = LINEAR_INTERPOLATOR
@@ -63,9 +61,8 @@ internal class DefaultSimplifiedUpdateFrameTransitionProvider(
         }
 
         cameraOptions.bearing?.let { bearing ->
-            val bearingShortestRotation = normalizeBearing(mapboxMap.cameraState.bearing, bearing)
             val bearingAnimator = cameraPlugin.createBearingAnimator(
-                CameraAnimatorOptions.cameraAnimatorOptions(bearingShortestRotation) {
+                CameraAnimatorOptions.cameraAnimatorOptions(bearing) {
                     owner(NAVIGATION_CAMERA_OWNER)
                 },
             ) {

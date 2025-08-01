@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maps.camera
 
+import android.os.SystemClock
 import androidx.annotation.RestrictTo
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
@@ -37,6 +38,7 @@ import com.mapbox.navigation.ui.maps.camera.transition.SimplifiedFrameAnimatorsC
 import com.mapbox.navigation.ui.maps.camera.transition.TransitionEndListener
 import com.mapbox.navigation.ui.maps.camera.transition.UpdateFrameAnimatorsOptions
 import com.mapbox.navigation.ui.maps.internal.camera.SimplifiedUpdateFrameTransitionProvider
+import com.mapbox.navigation.utils.internal.logI
 import java.util.concurrent.CopyOnWriteArraySet
 
 /**
@@ -175,7 +177,7 @@ internal constructor(
         viewportDataSource: ViewportDataSource,
         stateTransition: NavigationCameraStateTransition,
         simplifiedUpdateFrameTransitionProvider: SimplifiedUpdateFrameTransitionProvider =
-            DefaultSimplifiedUpdateFrameTransitionProvider(mapboxMap, cameraPlugin),
+            DefaultSimplifiedUpdateFrameTransitionProvider(cameraPlugin),
     ) : this(
         mapboxMap,
         cameraPlugin,
@@ -189,6 +191,10 @@ internal constructor(
     )
 
     companion object {
+
+        private const val LOG_CATEGORY = "NavigationCamera"
+        private const val LOG_CAMERA_STATE_SAMPLING_PERIOD_MILLIS = 1000L
+
         /**
          * Constant used to recognize the owner of transitions initiated by the [NavigationCamera].
          *
@@ -215,7 +221,7 @@ internal constructor(
                         cameraPlugin,
                         mapboxMap,
                         stateTransition,
-                        DefaultSimplifiedUpdateFrameTransitionProvider(mapboxMap, cameraPlugin),
+                        DefaultSimplifiedUpdateFrameTransitionProvider(cameraPlugin),
                     )
                 }
                 false -> {
@@ -257,9 +263,18 @@ internal constructor(
             updateDebugger()
         }
 
+    private var lastCameraStateLogTime = 0L
     private val sourceUpdateObserver =
-        ViewportDataSourceUpdateObserver {
-                viewportData ->
+        ViewportDataSourceUpdateObserver { viewportData ->
+            val currentTime = SystemClock.elapsedRealtime()
+            if (currentTime - lastCameraStateLogTime >= LOG_CAMERA_STATE_SAMPLING_PERIOD_MILLIS) {
+                logI(
+                    "Current camera state = ${mapboxMap.cameraState}, " +
+                        "viewport update = $viewportData",
+                    LOG_CATEGORY,
+                )
+                lastCameraStateLogTime = currentTime
+            }
             updateFrame(viewportData, instant = false)
         }
 

@@ -4,57 +4,18 @@ import android.animation.ValueAnimator
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
-import com.mapbox.maps.plugin.animation.CameraAnimatorOptions
-import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.DEFAULT_FRAME_TRANSITION_OPT
-import com.mapbox.navigation.ui.maps.internal.camera.normalizeBearing
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
 import io.mockk.slot
-import io.mockk.unmockkStatic
 import io.mockk.verify
-import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Before
 import org.junit.Test
 
 class DefaultSimplifiedUpdateFrameTransitionProviderTest {
 
     private val mapboxMap: MapboxMap = mockk(relaxed = true)
     private val cameraPlugin: CameraAnimationsPlugin = mockk(relaxed = true)
-    private val updateFrame = DefaultSimplifiedUpdateFrameTransitionProvider(
-        mapboxMap,
-        cameraPlugin,
-    )
-
-    @Before
-    fun setUp() {
-        mockkStatic(::normalizeBearing)
-    }
-
-    @After
-    fun tearDown() {
-        unmockkStatic(::normalizeBearing)
-    }
-
-    @Test
-    fun `transitionLinear - bearing is normalized`() {
-        every { mapboxMap.cameraState } returns mockk {
-            every { bearing } returns 10.0
-        }
-        val cameraOptions = CameraOptions.Builder()
-            .bearing(350.0)
-            .build()
-
-        val valueSlot = slot<CameraAnimatorOptions<Double>>()
-        every {
-            cameraPlugin.createBearingAnimator(capture(valueSlot), any(), any())
-        } returns mockk()
-        updateFrame.updateFrame(cameraOptions, DEFAULT_FRAME_TRANSITION_OPT)
-
-        assertEquals(-10.0, valueSlot.captured.targets.last(), 0.0000000001)
-        verify { normalizeBearing(10.0, 350.0) }
-    }
+    private val updateFrame = DefaultSimplifiedUpdateFrameTransitionProvider(cameraPlugin)
 
     @Test
     fun updateFrame() {
@@ -93,7 +54,7 @@ class DefaultSimplifiedUpdateFrameTransitionProviderTest {
         val zoomAnimator = mockk<ValueAnimator>(relaxed = true)
         val paddingAnimator = mockk<ValueAnimator>(relaxed = true)
         every {
-            cameraPlugin.createCenterAnimator(any(), any<(ValueAnimator.() -> Unit)>())
+            cameraPlugin.createCenterAnimator(any(), any(), any<(ValueAnimator.() -> Unit)>())
         } returns centerAnimator
         every { cameraPlugin.createBearingAnimator(any(), any(), any()) } returns bearingAnimator
         every { cameraPlugin.createPitchAnimator(any(), any()) } returns pitchAnimator
@@ -111,6 +72,7 @@ class DefaultSimplifiedUpdateFrameTransitionProviderTest {
         verify {
             cameraPlugin.createCenterAnimator(
                 any(),
+                useShortestPath = any(),
                 capture(centerBlockSlot),
             )
         }

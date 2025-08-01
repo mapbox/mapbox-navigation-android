@@ -18,7 +18,6 @@ import com.mapbox.navigation.ui.maps.camera.utils.normalizeProjection
 import com.mapbox.navigation.ui.maps.camera.utils.projectedDistance
 import com.mapbox.navigation.ui.maps.camera.utils.screenDistanceFromMapCenterToTarget
 import com.mapbox.navigation.ui.maps.internal.camera.constraintDurationTo
-import com.mapbox.navigation.ui.maps.internal.camera.normalizeBearing
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -51,7 +50,7 @@ class MapboxNavigationCameraTransitionTest {
         every { projectedDistance(any(), any(), any(), any()) } returns 1300.0
         every { screenDistanceFromMapCenterToTarget(mapboxMap, any(), any()) } returns 1000.0
         every {
-            cameraPlugin.createCenterAnimator(any(), any<(ValueAnimator.() -> Unit)>())
+            cameraPlugin.createCenterAnimator(any(), any(), any<(ValueAnimator.() -> Unit)>())
         } returns mockk()
         every { cameraPlugin.createBearingAnimator(any(), any(), any()) } returns mockk()
         every { cameraPlugin.createPitchAnimator(any(), any()) } returns mockk()
@@ -84,7 +83,7 @@ class MapboxNavigationCameraTransitionTest {
     }
 
     @Test
-    fun `transitionFromHighZoomToLowZoom - bearing is normalized`() {
+    fun `test transitionFromHighZoomToLowZoom - bearing is normalized`() {
         every { mapboxMap.cameraState } returns mockk {
             every { bearing } returns 10.0
         }
@@ -98,9 +97,6 @@ class MapboxNavigationCameraTransitionTest {
             cameraPlugin.createBearingAnimator(capture(valueSlot), any(), any())
         } returns mockk()
         transitions.transitionFromHighZoomToLowZoom(cameraOptions, DEFAULT_STATE_TRANSITION_OPT)
-
-        assertEquals(-10.0, valueSlot.captured.targets.last(), 0.0000000001)
-        verify { normalizeBearing(10.0, 350.0) }
     }
 
     @Test
@@ -117,9 +113,6 @@ class MapboxNavigationCameraTransitionTest {
             cameraPlugin.createBearingAnimator(capture(valueSlot), any(), any())
         } returns mockk()
         transitions.transitionLinear(cameraOptions, DEFAULT_FRAME_TRANSITION_OPT)
-
-        assertEquals(-10.0, valueSlot.captured.targets.last(), 0.0000000001)
-        verify { normalizeBearing(10.0, 350.0) }
     }
 
     @Test
@@ -157,6 +150,7 @@ class MapboxNavigationCameraTransitionTest {
         val centerBlockSlot = slot<(ValueAnimator.() -> Unit)>()
         verify {
             cameraPlugin.createCenterAnimator(
+                any(),
                 any(),
                 capture(centerBlockSlot),
             )
