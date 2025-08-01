@@ -512,10 +512,9 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             it.onOffRouteStateChanged(false)
         }
 
-        verify(exactly = 1) { defaultRerouteController.interrupt() }
-        verify(ordering = Ordering.ORDERED) {
+        verify(exactly = 0) { defaultRerouteController.interrupt() }
+        verify(exactly = 1) {
             tripSession.registerOffRouteObserver(any())
-            defaultRerouteController.interrupt()
         }
     }
 
@@ -552,9 +551,12 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         val observers = mutableListOf<OffRouteObserver>()
         verify { tripSession.registerOffRouteObserver(capture(observers)) }
 
+        every { tripSession.isOffRoute } returns true
+
         observers.forEach {
             it.onOffRouteStateChanged(true)
         }
+
         coVerify(exactly = 1) {
             directionsSession.setNavigationRoutesFinished(
                 DirectionsSessionRoutes(
@@ -1468,6 +1470,8 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                 tripSession.setRoutes(newRoutes, any())
             } returns NativeSetRouteValue(newRoutes, emptyList())
             createMapboxNavigation()
+
+            every { tripSession.isOffRoute } returns true
 
             observers.forEach {
                 it.onOffRouteStateChanged(true)

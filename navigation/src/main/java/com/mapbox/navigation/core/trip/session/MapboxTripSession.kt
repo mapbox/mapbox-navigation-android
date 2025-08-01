@@ -235,8 +235,8 @@ internal class MapboxTripSession(
             stateObservers.forEach { it.onSessionStateChanged(value) }
         }
 
-    private var isOffRoute: Boolean = false
-        set(value) {
+    override var isOffRoute: Boolean = false
+        private set(value) {
             if (field == value) {
                 return
             }

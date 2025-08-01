@@ -2190,8 +2190,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private fun createInternalOffRouteObserver() = OffRouteObserver { offRoute ->
         if (offRoute) {
             rerouteOnDeviation()
-        } else {
-            rerouteController?.interrupt()
         }
     }
 
@@ -2257,10 +2255,12 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private fun rerouteOnDeviation() {
         rerouteController?.rerouteOnDeviation { result: RerouteResult ->
-            internalSetNavigationRoutes(
-                result.routes,
-                SetRoutes.Reroute(result.initialLegIndex),
-            )
+            if (tripSession.isOffRoute) {
+                internalSetNavigationRoutes(
+                    result.routes,
+                    SetRoutes.Reroute(result.initialLegIndex),
+                )
+            }
         }
     }
 
