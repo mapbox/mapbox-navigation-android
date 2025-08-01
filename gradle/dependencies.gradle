@@ -8,7 +8,7 @@ ext {
       carMinSdkVersion        : 23
   ]
 
-  def mapboxSdkVersionSuffix = '14.0-SNAPSHOT-07-17--09-27.git-cc3646e'
+  def mapboxSdkVersionSuffix = '14.0'
 
   def ndkVersionSuffix = ""
   if (project.hasProperty("ndkMajor")) {
@@ -30,11 +30,11 @@ ext {
 
   version = [
       mapboxMapSdk              : "11.${mapboxSdkVersionSuffix}",
-      mapboxSdkServices         : '7.4.0',
+      mapboxSdkServices         : '7.6.0',
       mapboxNavigator           : "${mapboxNavigatorVersion}",
       mapboxCommonNative        : "24.${mapboxSdkVersionSuffix}",
       mapboxNavSdkCpp           : "0.${mapboxSdkVersionSuffix}",
-      mapboxSearch              : '2.14.0-cc3646e-SNAPSHOT',
+      mapboxSearch              : '2.14.0',
       mapboxBaseAndroid         : '0.11.0',
       androidXActivity          : '1.7.1',
       androidXActivityCompose   : '1.9.2',
