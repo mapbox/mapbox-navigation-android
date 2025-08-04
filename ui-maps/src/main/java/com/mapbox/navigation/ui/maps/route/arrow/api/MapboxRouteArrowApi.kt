@@ -237,9 +237,7 @@ class MapboxRouteArrowApi {
 
     private fun getShaftFeatureCollection(): FeatureCollection {
         val shaftFeatures = arrows.map {
-            LineString.fromLngLats(it.points)
-        }.map {
-            Feature.fromGeometry(it)
+            Feature.fromGeometry(LineString.fromLngLats(it.points))
         }
         return FeatureCollection.fromFeatures(shaftFeatures)
     }

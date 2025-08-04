@@ -49,6 +49,12 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
     }
 
     /**
+     * Keep a map of current sources (either [Feature] or [FeatureCollection]) per source id
+     * (usually [RouteLayerConstants.ARROW_SHAFT_SOURCE_ID] or [RouteLayerConstants.ARROW_HEAD_SOURCE_ID]).
+     */
+    private val currentSourceHashes = mutableMapOf<String, Int>()
+
+    /**
      * Renders an [ArrowVisibilityChangeValue] applying view side effects based on the data
      * it contains.
      *
@@ -195,14 +201,26 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
     }
 
     private fun updateSource(style: Style, sourceId: String, feature: Feature) {
-        if (style.styleSourceExists(sourceId)) {
-            style.getSourceAs<GeoJsonSource>(sourceId)?.feature(feature)
+        val newFeatureHash = feature.hashCode()
+        // Only update the sources if it has changed
+        if (currentSourceHashes[sourceId] != newFeatureHash) {
+            val geoJsonSource = style.getSourceAs<GeoJsonSource>(sourceId)
+            if (geoJsonSource != null) {
+                geoJsonSource.feature(feature)
+                currentSourceHashes[sourceId] = newFeatureHash
+            }
         }
     }
 
     private fun updateSource(style: Style, sourceId: String, featureCollection: FeatureCollection) {
-        if (style.styleSourceExists(sourceId)) {
-            style.getSourceAs<GeoJsonSource>(sourceId)?.featureCollection(featureCollection)
+        val newFeatureCollectionHash = featureCollection.hashCode()
+        // Only update the sources if it has changed
+        if (currentSourceHashes[sourceId] != newFeatureCollectionHash) {
+            val geoJsonSource = style.getSourceAs<GeoJsonSource>(sourceId)
+            if (geoJsonSource != null) {
+                geoJsonSource.featureCollection(featureCollection)
+                currentSourceHashes[sourceId] = newFeatureCollectionHash
+            }
         }
     }
 
