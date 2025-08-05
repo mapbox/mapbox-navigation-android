@@ -1568,6 +1568,11 @@ License: [Chromium and built-in dependencies](https://storage.cloud.google.com/c
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the error-prone annotations.
+License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Experimental annotation (Java annotation for use on unstable Android API surfaces. When used in conjunction with the Experimental annotation lint checks, this annotation provides functional parity with Kotlin's Experimental annotation.).
 URL: [https://developer.android.com/jetpack/androidx/releases/annotation#1.3.0](https://developer.android.com/jetpack/androidx/releases/annotation#1.3.0)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -1581,7 +1586,7 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 ===========================================================================
 
 Mapbox Navigation uses portions of the Gson.
-License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+License: [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
