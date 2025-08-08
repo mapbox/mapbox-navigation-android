@@ -1,5 +1,19 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.11.1 - 08 August, 2025
+#### Features
+
+
+#### Bug fixes and improvements
+- Avoid unnecessary navigation arrow GeoJSON updates 
+- Optimize the `MapboxRouteArrowView` to skip re-rendering arrows that have not changed. 
+- Use the `enhancedLocation` in the RoadCamerasManager class to get a more accurate current speed for the vehicle. 
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Java `v7.6.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.6.0))
+
+
 ## Navigation SDK Core Framework 3.11.0 - 01 August, 2025
 #### Features
 - Added `MapboxSpeedZoneInfo` class to represent speed zone information. Available through `UpcomingCamerasObserver::onSpeedZoneProgress` and `RoadCamerasMapCallback::onSpeedZoneProgress` callbacks. 
