@@ -163,8 +163,16 @@ class MapboxRouteArrowViewTest {
             ExpectedFactory.createValue(state),
         )
 
-        verify { arrowShaftSource.feature(state.arrowShaftFeature!!) }
-        verify { arrowHeadSource.feature(state.arrowHeadFeature!!) }
+        verify {
+            arrowShaftSource.featureCollection(
+                FeatureCollection.fromFeature(state.arrowShaftFeature!!),
+            )
+        }
+        verify {
+            arrowHeadSource.featureCollection(
+                FeatureCollection.fromFeature(state.arrowHeadFeature!!),
+            )
+        }
         verify { arrowLayer.visibility(Visibility.NONE) }
         verify { RouteArrowUtils.initializeLayers(style, options) }
         unmockkObject(RouteArrowUtils)
@@ -211,8 +219,16 @@ class MapboxRouteArrowViewTest {
             ExpectedFactory.createValue(state),
         )
 
-        verify { arrowShaftSource.feature(state.arrowShaftFeature!!) }
-        verify { arrowHeadSource.feature(state.arrowHeadFeature!!) }
+        verify {
+            arrowShaftSource.featureCollection(
+                FeatureCollection.fromFeature(state.arrowShaftFeature!!),
+            )
+        }
+        verify {
+            arrowHeadSource.featureCollection(
+                FeatureCollection.fromFeature(state.arrowHeadFeature!!),
+            )
+        }
         verify { arrowLayer.visibility(Visibility.NONE) }
         verify(exactly = 1) { RouteArrowUtils.initializeLayers(style, options) }
         unmockkObject(RouteArrowUtils)

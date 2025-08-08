@@ -11,4 +11,29 @@ import com.mapbox.geojson.FeatureCollection
 class ArrowAddedValue internal constructor(
     val arrowShaftFeatureCollection: FeatureCollection,
     val arrowHeadFeatureCollection: FeatureCollection,
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ArrowAddedValue
+
+        if (arrowShaftFeatureCollection != other.arrowShaftFeatureCollection) return false
+        if (arrowHeadFeatureCollection != other.arrowHeadFeatureCollection) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = arrowShaftFeatureCollection.hashCode()
+        result = 31 * result + arrowHeadFeatureCollection.hashCode()
+        return result
+    }
+
+    override fun toString(): String {
+        return "ArrowAddedValue(" +
+            "arrowShaftFeatureCollection=$arrowShaftFeatureCollection, " +
+            "arrowHeadFeatureCollection=$arrowHeadFeatureCollection" +
+            ")"
+    }
+}
