@@ -10,4 +10,25 @@ import com.mapbox.geojson.Point
  *
  * @param points a collection of points defining the arrow
  */
-class ManeuverArrow(val points: List<Point>)
+class ManeuverArrow(val points: List<Point>) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ManeuverArrow
+
+        if (points != other.points) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return points.hashCode()
+    }
+
+    override fun toString(): String {
+        return "ManeuverArrow(" +
+            "points=$points" +
+            ")"
+    }
+}

@@ -11,4 +11,29 @@ import com.mapbox.geojson.FeatureCollection
 class ClearArrowsValue internal constructor(
     val arrowShaftFeatureCollection: FeatureCollection,
     val arrowHeadFeatureCollection: FeatureCollection,
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ClearArrowsValue
+
+        if (arrowShaftFeatureCollection != other.arrowShaftFeatureCollection) return false
+        if (arrowHeadFeatureCollection != other.arrowHeadFeatureCollection) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = arrowShaftFeatureCollection.hashCode()
+        result = 31 * result + arrowHeadFeatureCollection.hashCode()
+        return result
+    }
+
+    override fun toString(): String {
+        return "ClearArrowsValue(" +
+            "arrowShaftFeatureCollection=$arrowShaftFeatureCollection, " +
+            "arrowHeadFeatureCollection=$arrowHeadFeatureCollection" +
+            ")"
+    }
+}
