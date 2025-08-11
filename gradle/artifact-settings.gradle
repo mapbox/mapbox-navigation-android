@@ -14,8 +14,14 @@ ext {
     versionName = getVersionName()
 
     def ndkVersionSuffix = ""
-    if (project.hasProperty("ndkMajor")) {
-        ndkVersionSuffix = "-ndk${project.property("ndkMajor")}"
+    def ndkMajorVersion = project.findProperty("ndkMajor")
+    def parentGradle = gradle.parent
+    while (ndkMajorVersion == null && parentGradle != null) {
+        ndkMajorVersion = parentGradle.rootProject.findProperty("ndkMajor")
+        parentGradle = parentGradle.parent
+    }
+    if (ndkMajorVersion != null) {
+        ndkVersionSuffix = "-ndk$ndkMajorVersion"
         println("Building with NDK version suffix: " + ndkVersionSuffix)
     }
     
