@@ -11,6 +11,9 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * @param slopes List of slope values with their positions on the edge.
  * Position is a shape index, where integer part in an index of geometry segment is
  * and fractional part is a position on the segment. Value is a slope in degrees
+ * @param elevations List of elevation values with their positions on the edge.
+ * Position is a shape index, where integer part in an index of geometry segment is
+ * and fractional part is a position on the segment. Value is an elevation in meters above sea level.
  * @param curvatures List of curvature values with their positions on the edge.
  * Position is a shape index, where integer part in an index of geometry segment is
  * and fractional part is a position on the segment
@@ -23,6 +26,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 class AdasEdgeAttributes private constructor(
     val speedLimit: List<AdasSpeedLimitInfo>,
     val slopes: List<AdasValueOnEdge>,
+    val elevations: List<AdasValueOnEdge>,
     val curvatures: List<AdasValueOnEdge>,
     val isDividedRoad: Boolean?,
     @FormOfWay.Type val formOfWay: Int?,
@@ -41,6 +45,7 @@ class AdasEdgeAttributes private constructor(
         if (speedLimit != other.speedLimit) return false
         if (slopes != other.slopes) return false
         if (curvatures != other.curvatures) return false
+        if (elevations != other.elevations) return false
         if (isDividedRoad != other.isDividedRoad) return false
         if (formOfWay != other.formOfWay) return false
         if (etc2 != other.etc2) return false
@@ -53,6 +58,7 @@ class AdasEdgeAttributes private constructor(
     override fun hashCode(): Int {
         var result = speedLimit.hashCode()
         result = 31 * result + slopes.hashCode()
+        result = 31 * result + elevations.hashCode()
         result = 31 * result + curvatures.hashCode()
         result = 31 * result + isDividedRoad.hashCode()
         result = 31 * result + formOfWay.hashCode()
@@ -67,6 +73,7 @@ class AdasEdgeAttributes private constructor(
         return "EdgeAdasAttributes(" +
             "speedLimit=$speedLimit, " +
             "slopes=$slopes, " +
+            "elevations=$elevations, " +
             "curvatures=$curvatures, " +
             "isDividedRoad=$isDividedRoad, " +
             "formOfWay=$formOfWay, " +
@@ -266,6 +273,9 @@ class AdasEdgeAttributes private constructor(
                     AdasSpeedLimitInfo.createFromNativeObject(it)
                 },
                 slopes = nativeObj.slopes.map {
+                    AdasValueOnEdge.createFromNativeObject(it)
+                },
+                elevations = nativeObj.elevations.map {
                     AdasValueOnEdge.createFromNativeObject(it)
                 },
                 curvatures = nativeObj.curvatures.map {

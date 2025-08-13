@@ -24,6 +24,7 @@ class AdasEdgeAttributesTest {
             listOf(AdasTypeFactory.NATIVE_SPEED_LIMIT_INFO),
             listOf(AdasTypeFactory.NATIVE_VALUE_ON_EDGE_1),
             listOf(AdasTypeFactory.NATIVE_VALUE_ON_EDGE_2),
+            listOf(AdasTypeFactory.NATIVE_VALUE_ON_EDGE_3),
             true,
             com.mapbox.navigator.FormOfWay.CAR_PARK_ENTRANCE,
             com.mapbox.navigator.ETC2RoadType.HIGHWAY,
@@ -33,7 +34,8 @@ class AdasEdgeAttributesTest {
 
         assertEquals(listOf(AdasTypeFactory.SPEED_LIMIT_INFO), platform.speedLimit)
         assertEquals(listOf(AdasTypeFactory.VALUE_ON_EDGE_1), platform.slopes)
-        assertEquals(listOf(AdasTypeFactory.VALUE_ON_EDGE_2), platform.curvatures)
+        assertEquals(listOf(AdasTypeFactory.VALUE_ON_EDGE_2), platform.elevations)
+        assertEquals(listOf(AdasTypeFactory.VALUE_ON_EDGE_3), platform.curvatures)
         assertEquals(true, platform.isDividedRoad)
         assertEquals(AdasEdgeAttributes.FormOfWay.CAR_PARK_ENTRANCE, platform.formOfWay)
         assertEquals(AdasEdgeAttributes.Etc2Road.HIGHWAY, platform.etc2)

@@ -14,6 +14,9 @@ internal object AdasTypeFactory {
     val NATIVE_VALUE_ON_EDGE_2 = com.mapbox.navigator.ValueOnEdge(0.4f, 0.5, 0.6)
     val VALUE_ON_EDGE_2 = AdasValueOnEdge.createFromNativeObject(NATIVE_VALUE_ON_EDGE_2)
 
+    val NATIVE_VALUE_ON_EDGE_3 = com.mapbox.navigator.ValueOnEdge(0.7f, 0.8, 0.9)
+    val VALUE_ON_EDGE_3 = AdasValueOnEdge.createFromNativeObject(NATIVE_VALUE_ON_EDGE_3)
+
     val NATIVE_SPEED_LIMIT_RESTRICTION = com.mapbox.navigator.SpeedLimitRestriction(
         listOf(Weather.WET_ROAD, Weather.RAIN),
         "test-dateTimeCondition",
