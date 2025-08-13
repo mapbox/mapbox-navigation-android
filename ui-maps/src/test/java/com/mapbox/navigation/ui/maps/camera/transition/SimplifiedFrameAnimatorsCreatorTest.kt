@@ -23,7 +23,8 @@ internal class SimplifiedFrameAnimatorsCreatorTest {
     }
     private val cameraOptions = mockk<CameraOptions>()
     private val transitionOptions = mockk<NavigationCameraTransitionOptions>()
-    private val stateTransition = mockk<NavigationCameraStateTransition>(relaxed = true)
+    private val stateTransitionProvider =
+        mockk<NavigationCameraStateTransitionProvider>(relaxed = true)
     private val cameraAnimationsPlugin = mockk<CameraAnimationsPlugin>(relaxed = true)
     private val simplifiedUpdateFrameTransition =
         mockk<DefaultSimplifiedUpdateFrameTransitionProvider>(relaxed = true)
@@ -31,14 +32,14 @@ internal class SimplifiedFrameAnimatorsCreatorTest {
     private val animatorsCreator = SimplifiedFrameAnimatorsCreator(
         cameraAnimationsPlugin,
         mockk(relaxed = true),
-        stateTransition,
+        stateTransitionProvider,
         simplifiedUpdateFrameTransition,
     )
 
     @Test
     fun transitionToFollowing() {
         every {
-            stateTransition.transitionToFollowing(cameraOptions, transitionOptions)
+            stateTransitionProvider.transitionToFollowing(cameraOptions, transitionOptions)
         } returns animatorSet
 
         val actual = animatorsCreator.transitionToFollowing(cameraOptions, transitionOptions)
@@ -50,7 +51,7 @@ internal class SimplifiedFrameAnimatorsCreatorTest {
     @Test
     fun transitionToOverview() {
         every {
-            stateTransition.transitionToOverview(cameraOptions, transitionOptions)
+            stateTransitionProvider.transitionToOverview(cameraOptions, transitionOptions)
         } returns animatorSet
 
         val actual = animatorsCreator.transitionToOverview(cameraOptions, transitionOptions)

@@ -154,7 +154,7 @@ package com.mapbox.navigation.ui.maps.camera {
   @UiThread public final class NavigationCamera {
     ctor public NavigationCamera(com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.animation.CameraAnimationsPlugin cameraPlugin, com.mapbox.navigation.ui.maps.camera.data.ViewportDataSource viewportDataSource, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraStateTransition stateTransition = com.mapbox.navigation.ui.maps.camera.transition.MapboxNavigationCameraStateTransition(mapboxMap, cameraPlugin));
     ctor @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public NavigationCamera(com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.animation.CameraAnimationsPlugin cameraPlugin, com.mapbox.navigation.ui.maps.camera.data.ViewportDataSource viewportDataSource, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraStateTransition stateTransition = com.mapbox.navigation.ui.maps.camera.transition.MapboxNavigationCameraStateTransition(mapboxMap, cameraPlugin), com.mapbox.navigation.ui.maps.camera.transition.UpdateFrameAnimatorsOptions updateFrameAnimatorsOptions);
-    ctor @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public NavigationCamera(com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.animation.CameraAnimationsPlugin cameraPlugin, com.mapbox.navigation.ui.maps.camera.data.ViewportDataSource viewportDataSource, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraStateTransition stateTransition, com.mapbox.navigation.ui.maps.internal.camera.SimplifiedUpdateFrameTransitionProvider simplifiedUpdateFrameTransitionProvider = com.mapbox.navigation.ui.maps.camera.transition.DefaultSimplifiedUpdateFrameTransitionProvider(mapboxMap, cameraPlugin));
+    ctor @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public NavigationCamera(com.mapbox.maps.MapboxMap mapboxMap, com.mapbox.maps.plugin.animation.CameraAnimationsPlugin cameraPlugin, com.mapbox.navigation.ui.maps.camera.data.ViewportDataSource viewportDataSource, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraStateTransitionProvider transitionProvider, com.mapbox.navigation.ui.maps.internal.camera.SimplifiedUpdateFrameTransitionProvider simplifiedUpdateFrameTransitionProvider = com.mapbox.navigation.ui.maps.camera.transition.DefaultSimplifiedUpdateFrameTransitionProvider(cameraPlugin));
     method public com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger? getDebugger();
     method public com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState getState();
     method public void registerNavigationCameraStateChangeObserver(com.mapbox.navigation.ui.maps.camera.state.NavigationCameraStateChangedObserver navigationCameraStateChangedObserver);
@@ -510,6 +510,11 @@ package com.mapbox.navigation.ui.maps.camera.transition {
     method public android.animation.AnimatorSet updateFrameForOverview(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
   }
 
+  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public interface NavigationCameraStateTransitionProvider {
+    method public android.animation.AnimatorSet transitionToFollowing(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
+    method public android.animation.AnimatorSet transitionToOverview(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
+  }
+
   @UiThread public interface NavigationCameraTransition {
     method public android.animation.AnimatorSet transitionFromHighZoomToLowZoom(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
     method public android.animation.AnimatorSet transitionFromLowZoomToHighZoom(com.mapbox.maps.CameraOptions cameraOptions, com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions transitionOptions);
@@ -707,7 +712,7 @@ package com.mapbox.navigation.ui.maps.guidance.signboard.api {
     ctor public MapboxSignboardApi(com.mapbox.navigation.ui.maps.guidance.signboard.api.SvgToBitmapParser parser);
     ctor public MapboxSignboardApi(android.content.Context applicationContext, com.mapbox.navigation.ui.maps.guidance.signboard.model.MapboxSignboardOptions options = MapboxSignboardOptions.<init>().build());
     method public void cancelAll();
-    method public void generateSignboard(com.mapbox.api.directions.v5.models.BannerInstructions instructions, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardError,com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardValue>> consumer);
+    method @AnyThread public void generateSignboard(com.mapbox.api.directions.v5.models.BannerInstructions instructions, com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer<com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardError,com.mapbox.navigation.ui.maps.guidance.signboard.model.SignboardValue>> consumer);
   }
 
   public final class MapboxSvgToBitmapParser implements com.mapbox.navigation.ui.maps.guidance.signboard.api.SvgToBitmapParser {

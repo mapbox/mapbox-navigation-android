@@ -8,7 +8,7 @@ import com.mapbox.navigation.ui.maps.internal.camera.SimplifiedUpdateFrameTransi
 internal class SimplifiedFrameAnimatorsCreator(
     private val cameraAnimationsPlugin: CameraAnimationsPlugin,
     private val mapboxMap: MapboxMap,
-    private val stateTransition: NavigationCameraStateTransition,
+    private val stateTransitionProvider: NavigationCameraStateTransitionProvider,
     private val simplifiedUpdateFrameTransition: SimplifiedUpdateFrameTransitionProvider,
 ) : AnimatorsCreator {
 
@@ -19,7 +19,7 @@ internal class SimplifiedFrameAnimatorsCreator(
         return FullAnimatorSet(
             cameraAnimationsPlugin,
             mapboxMap,
-            stateTransition.transitionToFollowing(cameraOptions, transitionOptions),
+            stateTransitionProvider.transitionToFollowing(cameraOptions, transitionOptions),
         )
     }
 
@@ -30,7 +30,7 @@ internal class SimplifiedFrameAnimatorsCreator(
         return FullAnimatorSet(
             cameraAnimationsPlugin,
             mapboxMap,
-            stateTransition.transitionToOverview(cameraOptions, transitionOptions),
+            stateTransitionProvider.transitionToOverview(cameraOptions, transitionOptions),
         )
     }
 

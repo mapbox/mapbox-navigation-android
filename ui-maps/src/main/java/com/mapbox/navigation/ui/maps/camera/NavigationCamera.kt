@@ -33,6 +33,8 @@ import com.mapbox.navigation.ui.maps.camera.transition.MapboxAnimatorSet
 import com.mapbox.navigation.ui.maps.camera.transition.MapboxAnimatorSetListener
 import com.mapbox.navigation.ui.maps.camera.transition.MapboxNavigationCameraStateTransition
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraStateTransition
+import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraStateTransitionProvider
+import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraStateTransitionWrapper
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
 import com.mapbox.navigation.ui.maps.camera.transition.SimplifiedFrameAnimatorsCreator
 import com.mapbox.navigation.ui.maps.camera.transition.TransitionEndListener
@@ -175,7 +177,7 @@ internal constructor(
         mapboxMap: MapboxMap,
         cameraPlugin: CameraAnimationsPlugin,
         viewportDataSource: ViewportDataSource,
-        stateTransition: NavigationCameraStateTransition,
+        transitionProvider: NavigationCameraStateTransitionProvider,
         simplifiedUpdateFrameTransitionProvider: SimplifiedUpdateFrameTransitionProvider =
             DefaultSimplifiedUpdateFrameTransitionProvider(cameraPlugin),
     ) : this(
@@ -185,7 +187,7 @@ internal constructor(
         SimplifiedFrameAnimatorsCreator(
             cameraPlugin,
             mapboxMap,
-            stateTransition,
+            transitionProvider,
             simplifiedUpdateFrameTransitionProvider,
         ),
     )
@@ -220,7 +222,7 @@ internal constructor(
                     SimplifiedFrameAnimatorsCreator(
                         cameraPlugin,
                         mapboxMap,
-                        stateTransition,
+                        NavigationCameraStateTransitionWrapper(stateTransition),
                         DefaultSimplifiedUpdateFrameTransitionProvider(cameraPlugin),
                     )
                 }
