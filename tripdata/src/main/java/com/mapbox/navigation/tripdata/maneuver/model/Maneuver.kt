@@ -59,4 +59,15 @@ class Maneuver internal constructor(
         laneGuidance: Lane? = this.laneGuidance,
         maneuverPoint: Point = this.maneuverPoint,
     ) = Maneuver(primary, stepDistance, secondary, sub, laneGuidance, maneuverPoint)
+
+    override fun toString(): String {
+        return "Maneuver(" +
+            "primary=$primary, " +
+            "stepDistance=$stepDistance, " +
+            "secondary=$secondary, " +
+            "sub=$sub, " +
+            "laneGuidance=$laneGuidance, " +
+            "maneuverPoint=$maneuverPoint" +
+            ")"
+    }
 }
