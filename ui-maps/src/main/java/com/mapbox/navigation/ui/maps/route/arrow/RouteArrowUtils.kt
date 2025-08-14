@@ -99,6 +99,7 @@ internal object RouteArrowUtils {
             geoJsonSource(RouteLayerConstants.ARROW_SHAFT_SOURCE_ID) {
                 maxzoom(16)
                 tolerance(options.tolerance)
+                buffer(32)
             }.bindTo(style)
         }
 
@@ -106,6 +107,7 @@ internal object RouteArrowUtils {
             geoJsonSource(RouteLayerConstants.ARROW_HEAD_SOURCE_ID) {
                 maxzoom(16)
                 tolerance(options.tolerance)
+                buffer(32)
             }.bindTo(style)
         }
 

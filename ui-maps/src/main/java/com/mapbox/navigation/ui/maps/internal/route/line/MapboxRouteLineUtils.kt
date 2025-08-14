@@ -1273,6 +1273,7 @@ internal object MapboxRouteLineUtils {
             "maxzoom" to Value(16),
             "lineMetrics" to Value(useLineMetrics),
             "tolerance" to Value(tolerance),
+            "buffer" to Value(32L),
         )
         val recreateSource = source == null || !sourcePropertiesCompatible(id, expectedProperties)
         if (recreateSource) {

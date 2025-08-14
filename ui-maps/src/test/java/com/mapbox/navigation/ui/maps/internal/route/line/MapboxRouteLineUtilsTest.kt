@@ -556,6 +556,7 @@ class MapboxRouteLineUtilsTest {
             "maxzoom" to Value(16),
             "lineMetrics" to Value(true),
             "tolerance" to Value(options.tolerance),
+            "buffer" to Value(32L),
         )
         val expectedWaypointSourceProperties = hashMapOf(
             "type" to Value("geojson"),
@@ -563,6 +564,7 @@ class MapboxRouteLineUtilsTest {
             "maxzoom" to Value(16),
             "lineMetrics" to Value(false),
             "tolerance" to Value(options.tolerance),
+            "buffer" to Value(32L),
         )
         val style = mockk<Style> {
             every { styleSourceExists(any()) } returns true
@@ -597,6 +599,8 @@ class MapboxRouteLineUtilsTest {
                 "lineMetrics" to Value(false),
                 "tolerance" to Value(options.tolerance),
                 "data" to Value("{}"),
+                "buffer" to Value(32L),
+
             )
             val expectedLineSourceProperties = hashMapOf(
                 "type" to Value("geojson"),
@@ -605,6 +609,7 @@ class MapboxRouteLineUtilsTest {
                 "lineMetrics" to Value(true),
                 "tolerance" to Value(options.tolerance),
                 "data" to Value("{}"),
+                "buffer" to Value(32L),
             )
             listOf(
                 hashMapOf(
@@ -614,6 +619,7 @@ class MapboxRouteLineUtilsTest {
                     "lineMetrics" to Value(true),
                     "tolerance" to Value(options.tolerance),
                     "data" to Value("{}"),
+                    "buffer" to Value(32L),
                 ),
                 hashMapOf(
                     "type" to Value("geojson"),
@@ -622,6 +628,7 @@ class MapboxRouteLineUtilsTest {
                     "lineMetrics" to Value(true),
                     "tolerance" to Value(options.tolerance),
                     "data" to Value("{}"),
+                    "buffer" to Value(32L),
                 ),
                 hashMapOf(
                     "type" to Value("geojson"),
@@ -630,6 +637,7 @@ class MapboxRouteLineUtilsTest {
                     "lineMetrics" to Value(false),
                     "tolerance" to Value(options.tolerance),
                     "data" to Value("{}"),
+                    "buffer" to Value(32L),
                 ),
                 hashMapOf(
                     "type" to Value("geojson"),
@@ -638,6 +646,7 @@ class MapboxRouteLineUtilsTest {
                     "lineMetrics" to Value(true),
                     "tolerance" to Value(options.tolerance + 0.5),
                     "data" to Value("{}"),
+                    "buffer" to Value(32L),
                 ),
             ).forEach { existingLineSourceProperties ->
                 val style = mockk<Style> {
@@ -690,6 +699,7 @@ class MapboxRouteLineUtilsTest {
                 "lineMetrics" to Value(true),
                 "tolerance" to Value(options.tolerance),
                 "data" to Value("{}"),
+                "buffer" to Value(32L),
             )
             val expectedWaypointSourceProperties = hashMapOf(
                 "type" to Value("geojson"),
@@ -698,6 +708,7 @@ class MapboxRouteLineUtilsTest {
                 "lineMetrics" to Value(false),
                 "tolerance" to Value(options.tolerance),
                 "data" to Value("{}"),
+                "buffer" to Value(32L),
             )
             listOf(
                 hashMapOf(
@@ -707,6 +718,7 @@ class MapboxRouteLineUtilsTest {
                     "lineMetrics" to Value(false),
                     "tolerance" to Value(options.tolerance + 0.5),
                     "data" to Value("{}"),
+                    "buffer" to Value(32L),
                 ),
             ).forEach { existingWaypointSourceProperties ->
                 val style = mockk<Style> {
