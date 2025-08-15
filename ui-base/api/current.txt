@@ -73,3 +73,13 @@ package com.mapbox.navigation.ui.base.util {
   }
 
 }
+
+package com.mapbox.navigation.ui.base.util.internal.resource {
+
+  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public final class ResourceLoaderFactory {
+    method public com.mapbox.navigation.ui.utils.internal.resource.ResourceLoader getInstance();
+    field public static final com.mapbox.navigation.ui.base.util.internal.resource.ResourceLoaderFactory INSTANCE;
+  }
+
+}
+

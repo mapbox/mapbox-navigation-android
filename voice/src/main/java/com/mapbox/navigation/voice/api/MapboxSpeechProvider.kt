@@ -15,8 +15,8 @@ import com.mapbox.common.ResourceLoadFlags
 import com.mapbox.common.ResourceLoadResult
 import com.mapbox.common.ResourceLoadStatus
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
-import com.mapbox.navigation.ui.base.util.resource.ResourceLoader
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoader
 import com.mapbox.navigation.ui.utils.internal.resource.load
 import com.mapbox.navigation.utils.internal.ByteBufferBackedInputStream
 import com.mapbox.navigation.utils.internal.UrlUtils

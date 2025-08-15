@@ -15,9 +15,6 @@ import com.mapbox.common.ResourceLoadResult
 import com.mapbox.common.ResourceLoadResultCallback
 import com.mapbox.common.TileDataDomain
 import com.mapbox.common.TileStore
-import com.mapbox.navigation.ui.base.util.resource.ResourceLoadCallback
-import com.mapbox.navigation.ui.base.util.resource.ResourceLoadObserver
-import com.mapbox.navigation.ui.base.util.resource.ResourceLoader
 import com.mapbox.navigation.utils.internal.NavigationTileStore
 import java.util.Queue
 import java.util.concurrent.ConcurrentHashMap

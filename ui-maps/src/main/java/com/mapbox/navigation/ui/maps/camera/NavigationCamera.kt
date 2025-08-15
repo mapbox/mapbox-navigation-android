@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.maps.camera
 
 import android.os.SystemClock
-import androidx.annotation.RestrictTo
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import com.mapbox.geojson.Point
@@ -172,14 +171,12 @@ internal constructor(
     )
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-    constructor(
+    internal constructor(
         mapboxMap: MapboxMap,
         cameraPlugin: CameraAnimationsPlugin,
         viewportDataSource: ViewportDataSource,
         transitionProvider: NavigationCameraStateTransitionProvider,
-        simplifiedUpdateFrameTransitionProvider: SimplifiedUpdateFrameTransitionProvider =
-            DefaultSimplifiedUpdateFrameTransitionProvider(cameraPlugin),
+        simplifiedUpdateFrameTransitionProvider: SimplifiedUpdateFrameTransitionProvider,
     ) : this(
         mapboxMap,
         cameraPlugin,

@@ -18,15 +18,15 @@ import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.toDataRef
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.base.util.internal.resource.ResourceLoaderFactory
-import com.mapbox.navigation.ui.base.util.resource.ResourceLoadCallback
-import com.mapbox.navigation.ui.base.util.resource.ResourceLoader
 import com.mapbox.navigation.ui.maps.guidance.restarea.RestAreaAction
 import com.mapbox.navigation.ui.maps.guidance.restarea.RestAreaProcessor
 import com.mapbox.navigation.ui.maps.guidance.restarea.RestAreaResult
 import com.mapbox.navigation.ui.maps.guidance.restarea.model.RestAreaGuideMapError
 import com.mapbox.navigation.ui.maps.guidance.restarea.model.RestAreaGuideMapValue
 import com.mapbox.navigation.ui.utils.internal.SvgUtil
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadCallback
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoader
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk

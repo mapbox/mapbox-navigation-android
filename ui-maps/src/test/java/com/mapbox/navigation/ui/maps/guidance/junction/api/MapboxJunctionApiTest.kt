@@ -17,8 +17,6 @@ import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.toDataRef
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.base.util.internal.resource.ResourceLoaderFactory
-import com.mapbox.navigation.ui.base.util.resource.ResourceLoadCallback
-import com.mapbox.navigation.ui.base.util.resource.ResourceLoader
 import com.mapbox.navigation.ui.maps.guidance.junction.JunctionAction
 import com.mapbox.navigation.ui.maps.guidance.junction.JunctionProcessor
 import com.mapbox.navigation.ui.maps.guidance.junction.JunctionResult
@@ -26,7 +24,9 @@ import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionError
 import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionValue
 import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionViewData
 import com.mapbox.navigation.ui.maps.guidance.junction.model.JunctionViewFormat
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadCallback
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoader
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk

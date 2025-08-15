@@ -6,8 +6,8 @@ import com.mapbox.bindgen.ExpectedFactory.createValue
 import com.mapbox.common.ResourceLoadStatus
 import com.mapbox.navigation.base.internal.utils.toByteArray
 import com.mapbox.navigation.ui.base.util.internal.resource.ResourceLoaderFactory
-import com.mapbox.navigation.ui.base.util.resource.ResourceLoader
 import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoadRequest
+import com.mapbox.navigation.ui.utils.internal.resource.ResourceLoader
 import com.mapbox.navigation.ui.utils.internal.resource.load
 
 internal object RoadShieldDownloader {

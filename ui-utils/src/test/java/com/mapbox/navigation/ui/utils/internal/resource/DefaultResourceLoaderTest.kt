@@ -19,9 +19,6 @@ import com.mapbox.common.ResourceLoadStatus
 import com.mapbox.common.TileDataDomain
 import com.mapbox.common.TileStore
 import com.mapbox.navigation.testing.toDataRef
-import com.mapbox.navigation.ui.base.util.resource.ResourceLoadCallback
-import com.mapbox.navigation.ui.base.util.resource.ResourceLoadObserver
-import com.mapbox.navigation.ui.base.util.resource.ResourceLoader
 import com.mapbox.navigation.utils.internal.NavigationTileStore
 import io.mockk.every
 import io.mockk.mockk
