@@ -1,5 +1,20 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.11.2 - 15 August, 2025
+#### Features
+
+
+#### Bug fixes and improvements
+- Decrased excessively high GeoJSON buffer size from 128 to 32 to improve the memory footprint. 
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Java `v7.6.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.6.0))
+- Search SDK `2.14.2`
+- Common SDK `24.14.2`
+- Maps SDK `11.14.2`
+
+
 ## Navigation SDK Core Framework 3.11.1 - 08 August, 2025
 #### Features
 
