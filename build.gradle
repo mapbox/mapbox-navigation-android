@@ -122,3 +122,5 @@ kover {
 task clean(type: Delete) {
   delete rootProject.buildDir
 }
+
+apply from: "${rootDir}/gradle/dependencies-changelog.gradle"
