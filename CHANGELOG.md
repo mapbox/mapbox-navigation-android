@@ -1,5 +1,28 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.12.0-beta.1 - 15 August, 2025
+#### Features
+- Added ability to filter by data source in EV charging station search operations. 
+- Added `MapboxSpeedZoneInfo` class to represent speed zone information. Available through `UpcomingCamerasObserver::onSpeedZoneInfo` and `RoadCamerasMapCallback::onSpeedZoneInfo` callbacks. 
+- Added experimental support for ADAS tiles in the predictive cache. See `PredictiveCacheNavigationOptions` for more information. 
+
+#### Bug fixes and improvements
+- Optimize the `MapboxRouteArrowView` to skip re-rendering arrows that have not changed. 
+- Decrased excessively high GeoJSON buffer size from 128 to 32 to improve the memory footprint. 
+- Avoid unnecessary navigation arrow GeoJSON updates 
+- Optimized camera animations that involve significant zoom change. 
+- Fixed an issue where the closer part of route line might have been overlapped by a farther part in case they covered the same space within a single leg (e. g. U-turns on narrow roads).  
+- Don't reset the re-route request when on-route/off-route events are flaky. 
+- Use the `enhancedLocation` in the RoadCamerasManager class to get a more accurate current speed for the vehicle. 
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Navigation-native `324.15.0-beta.2`
+- Common SDK `24.15.0-beta.2`
+- Maps SDK `11.15.0-beta.2`
+- Android Search SDK `2.15.0-beta.2`
+
 ## Navigation SDK Core Framework 3.11.0-beta.1 - 04 July, 2025
 #### Features
 - Added support for Android 16 KB page-size devices. To consume SDK compatible with NDK 27 you need to add `-ndk27` suffix to the artifact name, for example, `com.mapbox.navigationcore:navigation` -> `com.mapbox.navigationcore:navigation-ndk27`. 
