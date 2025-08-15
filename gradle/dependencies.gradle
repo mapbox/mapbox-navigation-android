@@ -30,7 +30,7 @@ ext {
 
   version = [
       mapboxMapSdk              : "11.${mapboxSdkVersionSuffix}",
-      mapboxSdkServices         : '7.6.0',
+      mapboxSdkServices         : "7.7.0",
       mapboxNavigator           : "${mapboxNavigatorVersion}",
       mapboxCommonNative        : "24.${mapboxSdkVersionSuffix}",
       mapboxNavSdkCpp           : "0.${mapboxSdkVersionSuffix}",

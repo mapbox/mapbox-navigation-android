@@ -2,10 +2,6 @@
 
 package com.mapbox.navigation.base.internal.route
 
-import com.google.gson.Gson
-import com.google.gson.JsonArray
-import com.google.gson.JsonElement
-import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.Closure
@@ -14,12 +10,13 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.Incident
 import com.mapbox.api.directions.v5.models.LegAnnotation
+import com.mapbox.api.directions.v5.models.Notification
+import com.mapbox.api.directions.v5.models.NotificationDetails
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
-import com.mapbox.navigation.base.internal.utils.Constants.RouteResponse.KEY_NOTIFICATIONS
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.testing.FileUtils
@@ -89,8 +86,8 @@ class RouteProgressExTest {
             ),
             incidents = null,
             closures = null,
+            notifications = null,
             waypoints = null,
-            unrecognizedLegNotifications = null,
             refreshTtl = null,
             responseTimeElapsedSeconds = 0,
         )
@@ -163,8 +160,8 @@ class RouteProgressExTest {
             ),
             incidents = null,
             closures = null,
+            notifications = null,
             waypoints = null,
-            unrecognizedLegNotifications = null,
             refreshTtl = null,
             responseTimeElapsedSeconds = 0,
         )
@@ -218,8 +215,8 @@ class RouteProgressExTest {
             ),
             incidents = null,
             closures = null,
+            notifications = null,
             waypoints = null,
-            unrecognizedLegNotifications = null,
             refreshTtl = null,
             responseTimeElapsedSeconds = 0,
         )
@@ -265,8 +262,8 @@ class RouteProgressExTest {
             legAnnotations = null,
             incidents = null,
             closures = null,
+            notifications = provideEvNotifications(),
             waypoints = null,
-            unrecognizedLegNotifications = provideEvNotifications(),
             refreshTtl = null,
             responseTimeElapsedSeconds = 0,
         )
@@ -288,8 +285,8 @@ class RouteProgressExTest {
             legAnnotations = null,
             incidents = null,
             closures = null,
+            notifications = null,
             waypoints = null,
-            unrecognizedLegNotifications = listOf(null),
             refreshTtl = null,
             responseTimeElapsedSeconds = 0,
         )
@@ -313,8 +310,8 @@ class RouteProgressExTest {
             legAnnotations = null,
             incidents = null,
             closures = null,
+            notifications = null,
             waypoints = null,
-            unrecognizedLegNotifications = listOf(null),
             refreshTtl = null,
             responseTimeElapsedSeconds = 0,
         )
@@ -322,23 +319,20 @@ class RouteProgressExTest {
         // With new logic, ALL static notifications should be preserved from the original route
         // Plus dynamic notifications outside the refresh range
         // EV notifications and stationUnavailable notifications without geometry_index are dynamic so they get filtered out
-        val targetNotifications = Gson().fromJson(
-            """
-                [ 
-                    {
-                      "type": "violation",
-                      "subtype": "stateBorderCrossing",
-                      "geometry_index_end": 1,
-                      "geometry_index_start": 0,
-                      "refresh_type": "static",
-                      "details": {
-                        "actual_value": "US-NV,US-CA",
-                        "message": "Crossing the border of the states of US-NV and US-CA."
-                      }
-                    }
-                ]
-            """.trimIndent(),
-            JsonArray::class.java,
+        val targetNotifications = listOf(
+            Notification.builder()
+                .type("violation")
+                .subtype("stateBorderCrossing")
+                .geometryIndexEnd(1)
+                .geometryIndexStart(0)
+                .refreshType("static")
+                .details(
+                    NotificationDetails.builder()
+                        .actualValue("US-NV,US-CA")
+                        .message("Crossing the border of the states of US-NV and US-CA.")
+                        .build(),
+                )
+                .build(),
         )
         assertEquals(
             targetNotifications?.sorted(),
@@ -352,15 +346,15 @@ class RouteProgressExTest {
             "3-steps-route-directions-response-ev-with-notifications.json",
             "3-steps-route-directions-request-url-ev-with-notifications.txt",
         )
-        val sourceNotifications = listOf((provideEvNotifications()[0]).apply { remove(0) })
+        val sourceNotifications = listOf(provideEvNotifications()[0].drop(1))
         val refreshedRoute = sourceRoute.refreshRoute(
             initialLegIndex = 0,
             currentLegGeometryIndex = 0,
             legAnnotations = null,
             incidents = null,
             closures = null,
+            notifications = sourceNotifications,
             waypoints = null,
-            unrecognizedLegNotifications = sourceNotifications,
             refreshTtl = null,
             responseTimeElapsedSeconds = 0,
         )
@@ -370,24 +364,21 @@ class RouteProgressExTest {
         // Static notifications are preserved, dynamic notifications are handled by geometry range
         val targetNotifications = provideEvNotifications()[0]
             .apply {
-                remove(0)
+                removeAt(0)
                 add(
-                    Gson().fromJson(
-                        """
-                            {
-                              "type": "violation",
-                              "subtype": "stateBorderCrossing",
-                              "geometry_index_end": 1,
-                              "geometry_index_start": 0,
-                              "refresh_type": "static",
-                              "details": {
-                                "actual_value": "US-NV,US-CA",
-                                "message": "Crossing the border of the states of US-NV and US-CA."
-                              }
-                            }
-                        """.trimIndent(),
-                        JsonObject::class.java,
-                    ),
+                    Notification.builder()
+                        .type("violation")
+                        .subtype("stateBorderCrossing")
+                        .geometryIndexEnd(1)
+                        .geometryIndexStart(0)
+                        .refreshType("static")
+                        .details(
+                            NotificationDetails.builder()
+                                .actualValue("US-NV,US-CA")
+                                .message("Crossing the border of the states of US-NV and US-CA.")
+                                .build(),
+                        )
+                        .build(),
                 )
             }
 
@@ -405,7 +396,7 @@ class RouteProgressExTest {
         )
         val sourceNotifications =
             listOf(
-                (provideEvNotifications()[0]).apply { remove(0) },
+                (provideEvNotifications()[0]).apply { removeAt(0) },
                 (provideEvNotifications()[1]),
             )
         val refreshedRoute = sourceRoute.refreshRoute(
@@ -414,32 +405,29 @@ class RouteProgressExTest {
             legAnnotations = null,
             incidents = null,
             closures = null,
+            notifications = sourceNotifications,
             waypoints = null,
-            unrecognizedLegNotifications = sourceNotifications,
             refreshTtl = null,
             responseTimeElapsedSeconds = 0,
         )
 
         val targetNotification0 = provideEvNotifications()[0]
             .apply {
-                remove(0)
+                removeAt(0)
                 add(
-                    Gson().fromJson(
-                        """
-                            {
-                              "type": "violation",
-                              "subtype": "stateBorderCrossing",
-                              "geometry_index_end": 1,
-                              "geometry_index_start": 0,
-                              "refresh_type": "static",
-                              "details": {
-                                "actual_value": "US-NV,US-CA",
-                                "message": "Crossing the border of the states of US-NV and US-CA."
-                              }
-                            }
-                        """.trimIndent(),
-                        JsonObject::class.java,
-                    ),
+                    Notification.builder()
+                        .type("violation")
+                        .subtype("stateBorderCrossing")
+                        .geometryIndexEnd(1)
+                        .geometryIndexStart(0)
+                        .refreshType("static")
+                        .details(
+                            NotificationDetails.builder()
+                                .actualValue("US-NV,US-CA")
+                                .message("Crossing the border of the states of US-NV and US-CA.")
+                                .build(),
+                        )
+                        .build(),
                 )
             }
 
@@ -447,24 +435,25 @@ class RouteProgressExTest {
             provideEvNotifications()[1]
                 .apply {
                     add(
-                        Gson().fromJson(
-                            """
-                               {
-                                  "type": "violation",
-                                  "subtype": "maxHeight",
-                                  "geometry_index_end": 5,
-                                  "geometry_index_start": 3,
-                                  "refresh_type": "static",
-                                  "details": {
-                                    "actual_value": "4.60",
-                                    "requested_value": "4.70",
-                                    "unit": "meters",
-                                    "message": "The height of the vehicle (4.7 meters) is more than the permissible height of travel on the road (4.6 meters) by 0.10 meters."
-                                  }
-                               }
-                            """.trimIndent(),
-                            JsonObject::class.java,
-                        ),
+                        Notification.builder()
+                            .type("violation")
+                            .subtype("maxHeight")
+                            .geometryIndexEnd(5)
+                            .geometryIndexStart(3)
+                            .refreshType("static")
+                            .details(
+                                NotificationDetails.builder()
+                                    .actualValue("4.60")
+                                    .requestedValue("4.70")
+                                    .unit("meters")
+                                    .message(
+                                        "The height of the vehicle (4.7 meters) is more than the " +
+                                            "permissible height of travel on the road " +
+                                            "(4.6 meters) by 0.10 meters.",
+                                    )
+                                    .build(),
+                            )
+                            .build(),
                     )
                 }
 
@@ -859,8 +848,8 @@ class RouteProgressExTest {
                         refreshItems.legAnnotation,
                         refreshItems.incidents,
                         refreshItems.closures,
+                        notifications = null,
                         refreshItems.waypoints,
-                        null,
                         refreshItems.responseTime,
                         refreshItems.refreshTtl,
                         incidentsRefresher,
@@ -1253,8 +1242,8 @@ class RouteProgressExTest {
                 null,
                 null,
                 null,
+                null,
                 refreshedWaypoints,
-                unrecognizedLegNotifications = null,
                 0,
                 null,
                 mockk(relaxed = true),
@@ -1277,8 +1266,8 @@ class RouteProgressExTest {
                 null,
                 null,
                 null,
-                refreshedWaypoints,
                 null,
+                refreshedWaypoints,
                 0,
                 null,
             )
@@ -1396,91 +1385,84 @@ class RouteProgressExTest {
             ),
         )
 
-        private fun provideEvNotifications(): List<JsonArray> {
-            return listOf(
-                Gson().fromJson(
-                    """
-                        [
-                            {
-                                "type": "alert",
-                                "subtype": "stationUnavailable",
-                                "reason": "outOfOrder",
-                                "station_id": "station1",
-                                "refresh_type": "dynamic"
-                            },
-                            {
-                                "type": "alert",
-                                "subtype": "stationUnavailable",
-                                "reason": "outOfOrder",
-                                "station_id": "station2",
-                                "refresh_type": "dynamic"
-                            },
-                            {
-                                "type": "alert",
-                                "subtype": "evInsufficientCharge",
-                                "geometry_index": 3,
-                                "refresh_type": "dynamic"
-                            },
-                            {
-                                "type": "violation",
-                                "subtype": "evMinChargeAtChargingStation",
-                                "refresh_type": "dynamic",
-                                "details":
-                                {
-                                    "requested_value": 30000,
-                                    "actual_value": 27000,
-                                    "unit": "Wh"
-                                }
-                            },
-                            {
-                                "type": "violation",
-                                "subtype": "evMinChargeAtDestination",
-                                "refresh_type": "dynamic",
-                                "details":
-                                {
-                                    "requested_value": 20000,
-                                    "actual_value": 13000,
-                                    "unit": "Wh"
-                                }
-                            }
-                        ]
-                    """.trimIndent(),
-                    JsonArray::class.java,
+        private fun provideEvNotifications(): MutableList<MutableList<Notification>> {
+            return mutableListOf(
+                mutableListOf(
+                    Notification.builder()
+                        .type("alert")
+                        .subtype("stationUnavailable")
+                        .refreshType("dynamic")
+                        .reason("outOfOrder")
+                        .chargingStationId("station1")
+                        .build(),
+                    Notification.builder()
+                        .type("alert")
+                        .subtype("stationUnavailable")
+                        .refreshType("dynamic")
+                        .reason("outOfOrder")
+                        .chargingStationId("station2")
+                        .build(),
+                    Notification.builder()
+                        .type("alert")
+                        .subtype("evInsufficientCharge")
+                        .geometryIndex(3)
+                        .refreshType("dynamic")
+                        .build(),
+                    Notification.builder()
+                        .type("violation")
+                        .subtype("evMinChargeAtChargingStation")
+                        .refreshType("dynamic")
+                        .details(
+                            NotificationDetails.builder()
+                                .requestedValue("30000")
+                                .actualValue("27000")
+                                .unit("Wh")
+                                .build(),
+                        )
+                        .build(),
+                    Notification.builder()
+                        .type("violation")
+                        .subtype("evMinChargeAtDestination")
+                        .refreshType("dynamic")
+                        .details(
+                            NotificationDetails.builder()
+                                .requestedValue("20000")
+                                .actualValue("13000")
+                                .unit("Wh")
+                                .build(),
+                        )
+                        .build(),
                 ),
-                Gson().fromJson(
-                    """
-                        [
-                            {
-                                "type": "alert",
-                                "subtype": "stationUnavailable",
-                                "reason": "outOfOrder",
-                                "station_id": "station1",
-                                "refresh_type": "dynamic"
-                            },
-                            {
-                                "type": "violation",
-                                "subtype": "evMinChargeAtDestination",
-                                "refresh_type": "dynamic",
-                                "details":
-                                {
-                                    "requested_value": 20000,
-                                    "actual_value": 13000,
-                                    "unit": "Wh"
-                                }
-                            }
-                        ]
-                    """.trimIndent(),
-                    JsonArray::class.java,
+                mutableListOf(
+                    Notification.builder()
+                        .type("alert")
+                        .subtype("stationUnavailable")
+                        .refreshType("dynamic")
+                        .reason("outOfOrder")
+                        .chargingStationId("station1")
+                        .build(),
+                    Notification.builder()
+                        .type("violation")
+                        .subtype("evMinChargeAtDestination")
+                        .refreshType("dynamic")
+                        .details(
+                            NotificationDetails.builder()
+                                .requestedValue("20000")
+                                .actualValue("13000")
+                                .unit("Wh")
+                                .build(),
+                        )
+                        .build(),
                 ),
             )
         }
     }
 
-    private fun NavigationRoute.legNotifications(index: Int): JsonElement? =
-        directionsRoute.legs()?.get(index)?.unrecognizedJsonProperties?.get(KEY_NOTIFICATIONS)
+    private fun NavigationRoute.legNotifications(index: Int): List<Notification>? =
+        directionsRoute.legs()?.get(index)?.notifications()
 
-    private fun JsonElement.sorted(): List<JsonElement>? =
-        this.asJsonArray?.sortedBy { it.toString() }
+    private fun List<Notification>.sorted(): List<Notification>? =
+        this.sortedBy { it.toString() }
 
     /**
      * Wrapper of test case

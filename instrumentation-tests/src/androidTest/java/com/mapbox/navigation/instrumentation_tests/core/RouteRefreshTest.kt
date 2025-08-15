@@ -5,18 +5,17 @@ package com.mapbox.navigation.instrumentation_tests.core
 import android.content.Context
 import android.location.Location
 import androidx.annotation.IntegerRes
-import com.google.gson.Gson
-import com.google.gson.JsonArray
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.Closure
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.Incident
+import com.mapbox.api.directions.v5.models.Notification
+import com.mapbox.api.directions.v5.models.NotificationDetails
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
-import com.mapbox.navigation.base.internal.utils.Constants.RouteResponse.KEY_NOTIFICATIONS
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshOptions
@@ -141,169 +140,230 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
     }
 
     @Test
-    fun route_refresh_to_update_traffic_annotations_incidents_closures_notifications_for_all() =
-        sdkTest {
-            val routeOptions = generateRouteOptions(twoCoordinates, isEv = true)
-            val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
-                .getSuccessfulResultOrThrowException()
-                .routes
-                .asReversed()
+    fun route_refresh_update_traffic_annotations_incidents_closures_notifications_all() = sdkTest {
+        val routeOptions = generateRouteOptions(twoCoordinates, isEv = true)
+        val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
+            .getSuccessfulResultOrThrowException()
+            .routes
+            .asReversed()
 
-            mapboxNavigation.setNavigationRoutes(requestedRoutes)
-            mapboxNavigation.startTripSession()
-            stayOnInitialPosition()
-            val routeUpdates = mapboxNavigation.routesUpdates()
-                .take(2)
-                .map { it.navigationRoutes }
-                .toList()
-            val initialRoutes = routeUpdates[0]
-            val refreshedRoutes = routeUpdates[1]
+        mapboxNavigation.setNavigationRoutes(requestedRoutes)
+        mapboxNavigation.startTripSession()
+        stayOnInitialPosition()
+        val routeUpdates = mapboxNavigation.routesUpdates()
+            .take(2)
+            .map { it.navigationRoutes }
+            .toList()
+        val initialRoutes = routeUpdates[0]
+        val refreshedRoutes = routeUpdates[1]
 
-            val roadObjectsFromProgressAfterRefresh = mapboxNavigation.routeProgressUpdates()
-                .map { it.upcomingRoadObjects }
-                .filter { upcomingRoadObjects ->
-                    upcomingRoadObjects.size == 2 &&
-                        listOf("11589180127444257", "14158569638505033").all { incidentId ->
-                            upcomingRoadObjects.any {
-                                it.roadObject.compareIdWithIncidentId(incidentId)
-                            }
+        val roadObjectsFromProgressAfterRefresh = mapboxNavigation.routeProgressUpdates()
+            .map { it.upcomingRoadObjects }
+            .filter { upcomingRoadObjects ->
+                upcomingRoadObjects.size == 2 &&
+                    listOf("11589180127444257", "14158569638505033").all { incidentId ->
+                        upcomingRoadObjects.any {
+                            it.roadObject.compareIdWithIncidentId(incidentId)
                         }
-                }
-                .first()
-
-            val roadObjectsFromRefreshedPrimaryRoute = refreshedRoutes.first().upcomingRoadObjects
-            assertEquals(
-                roadObjectsFromProgressAfterRefresh.map { it.roadObject },
-                roadObjectsFromRefreshedPrimaryRoute.map { it.roadObject },
-            )
-            roadObjectsFromProgressAfterRefresh.forEachIndexed { index, upcomingRoadObject ->
-                assertEquals(
-                    upcomingRoadObject.distanceToStart!!,
-                    roadObjectsFromRefreshedPrimaryRoute[index].distanceToStart!!,
-                    0.1,
-                )
+                    }
             }
-            assertEquals(
-                "the test works only with 2 routes",
-                2,
-                requestedRoutes.size,
-            )
-            // incidents
-            assertEquals(
-                listOf("11589180127444257"),
-                initialRoutes[0].getIncidentsIdFromTheRoute(0),
-            )
-            assertEquals(
-                listOf("11589180127444257", "14158569638505033").sorted(),
-                refreshedRoutes[0].getIncidentsIdFromTheRoute(0)?.sorted(),
-            )
-            assertEquals(
-                listOf("11589180127444257"),
-                initialRoutes[1].getIncidentsIdFromTheRoute(0),
-            )
-            assertEquals(
-                listOf("11589180127444257", "14158569638505033").sorted(),
-                refreshedRoutes[1].getIncidentsIdFromTheRoute(0)?.sorted(),
-            )
-            // closures
-            assertEquals(
-                listOf(
-                    Closure.builder()
-                        .geometryIndexStart(5)
-                        .geometryIndexEnd(6)
-                        .build(),
-                ),
-                initialRoutes[0].directionsRoute.legs()!![0].closures(),
-            )
-            assertEquals(
-                null,
-                initialRoutes[1].directionsRoute.legs()!![0].closures(),
-            )
-            assertEquals(
-                listOf(
-                    Closure.builder()
-                        .geometryIndexStart(1)
-                        .geometryIndexEnd(3)
-                        .build(),
-                ),
-                refreshedRoutes[0].directionsRoute.legs()!![0].closures(),
-            )
-            assertEquals(
-                listOf(
-                    Closure.builder()
-                        .geometryIndexStart(1)
-                        .geometryIndexEnd(3)
-                        .build(),
-                ),
-                refreshedRoutes[1].directionsRoute.legs()!![0].closures(),
-            )
+            .first()
 
+        val roadObjectsFromRefreshedPrimaryRoute = refreshedRoutes.first().upcomingRoadObjects
+        assertEquals(
+            roadObjectsFromProgressAfterRefresh.map { it.roadObject },
+            roadObjectsFromRefreshedPrimaryRoute.map { it.roadObject },
+        )
+        roadObjectsFromProgressAfterRefresh.forEachIndexed { index, upcomingRoadObject ->
             assertEquals(
-                "initial should be the same as requested",
-                requestedRoutes[0].getDurationAnnotationsFromLeg(0),
-                initialRoutes[0].getDurationAnnotationsFromLeg(0),
-            )
-            assertEquals(
-                227.918,
-                initialRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
-                0.0001,
-            )
-            assertEquals(
-                287.063,
-                refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
-                0.0001,
-            )
-            assertEquals(
-                287.063,
-                refreshedRoutes[0].directionsRoute.duration(),
-                0.0001,
-            )
-            assertEquals(
-                287.063,
-                refreshedRoutes[0].directionsRoute.legs()!!.first().duration()!!,
-                0.0001,
-            )
-
-            assertEquals(
-                requestedRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
-                initialRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
-                0.0,
-            )
-            assertEquals(
-                224.2239,
-                initialRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
-                0.0001,
-            )
-            assertEquals(
-                258.767,
-                refreshedRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
-                0.0001,
-            )
-            assertEquals(258.767, refreshedRoutes[1].directionsRoute.duration(), 0.0001)
-            assertEquals(
-                258.767,
-                refreshedRoutes[1].directionsRoute.legs()!!.first().duration()!!,
-                0.0001,
-            )
-            assertEquals(
-                JSON_NOTIFICATIONS_ARRAY.sortedBy { it.toString() },
-                refreshedRoutes[1].directionsRoute.legs()?.get(0)?.unrecognizedJsonProperties?.get(
-                    KEY_NOTIFICATIONS,
-                )?.asJsonArray?.sortedBy { it.toString() },
-            )
-            assertEquals(
-                requestedRoutes[0].waypoints,
-                refreshedRoutes[0].waypoints,
-            )
-            assertEquals(
-                requestedRoutes[1].waypoints,
-                refreshedRoutes[1].waypoints,
-            )
-            assertEquals(
-                listOf(true, true),
-                refreshedRoutes.map { it.routeRefreshMetadata?.isUpToDate },
+                upcomingRoadObject.distanceToStart!!,
+                roadObjectsFromRefreshedPrimaryRoute[index].distanceToStart!!,
+                0.1,
             )
         }
+        assertEquals(
+            "the test works only with 2 routes",
+            2,
+            requestedRoutes.size,
+        )
+        // incidents
+        assertEquals(
+            listOf("11589180127444257"),
+            initialRoutes[0].getIncidentsIdFromTheRoute(0),
+        )
+        assertEquals(
+            listOf("11589180127444257", "14158569638505033").sorted(),
+            refreshedRoutes[0].getIncidentsIdFromTheRoute(0)?.sorted(),
+        )
+        assertEquals(
+            listOf("11589180127444257"),
+            initialRoutes[1].getIncidentsIdFromTheRoute(0),
+        )
+        assertEquals(
+            listOf("11589180127444257", "14158569638505033").sorted(),
+            refreshedRoutes[1].getIncidentsIdFromTheRoute(0)?.sorted(),
+        )
+        // closures
+        assertEquals(
+            listOf(
+                Closure.builder()
+                    .geometryIndexStart(5)
+                    .geometryIndexEnd(6)
+                    .build(),
+            ),
+            initialRoutes[0].directionsRoute.legs()!![0].closures(),
+        )
+        assertEquals(
+            null,
+            initialRoutes[1].directionsRoute.legs()!![0].closures(),
+        )
+        assertEquals(
+            listOf(
+                Closure.builder()
+                    .geometryIndexStart(1)
+                    .geometryIndexEnd(3)
+                    .build(),
+            ),
+            refreshedRoutes[0].directionsRoute.legs()!![0].closures(),
+        )
+        assertEquals(
+            listOf(
+                Closure.builder()
+                    .geometryIndexStart(1)
+                    .geometryIndexEnd(3)
+                    .build(),
+            ),
+            refreshedRoutes[1].directionsRoute.legs()!![0].closures(),
+        )
+
+        assertEquals(
+            "initial should be the same as requested",
+            requestedRoutes[0].getDurationAnnotationsFromLeg(0),
+            initialRoutes[0].getDurationAnnotationsFromLeg(0),
+        )
+        assertEquals(
+            227.918,
+            initialRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
+            0.0001,
+        )
+        assertEquals(
+            287.063,
+            refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
+            0.0001,
+        )
+        assertEquals(
+            287.063,
+            refreshedRoutes[0].directionsRoute.duration(),
+            0.0001,
+        )
+        assertEquals(
+            287.063,
+            refreshedRoutes[0].directionsRoute.legs()!!.first().duration()!!,
+            0.0001,
+        )
+
+        assertEquals(
+            requestedRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
+            initialRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
+            0.0,
+        )
+        assertEquals(
+            224.2239,
+            initialRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
+            0.0001,
+        )
+        assertEquals(
+            258.767,
+            refreshedRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
+            0.0001,
+        )
+        assertEquals(258.767, refreshedRoutes[1].directionsRoute.duration(), 0.0001)
+        assertEquals(
+            258.767,
+            refreshedRoutes[1].directionsRoute.legs()!!.first().duration()!!,
+            0.0001,
+        )
+        // Verify notifications are properly refreshed and match expected content
+        val actualNotifications = refreshedRoutes[1].directionsRoute.legs()?.get(0)?.notifications()
+            ?.sortedBy { "${it.type()}_${it.subtype()}" }
+        val expectedNotifications = EXPECTED_NOTIFICATIONS_LIST
+            .sortedBy { "${it.type()}_${it.subtype()}" }
+
+        assertEquals(
+            expectedNotifications.size,
+            actualNotifications?.size,
+        )
+
+        // Compare key properties of each notification
+        expectedNotifications.zip(actualNotifications ?: emptyList())
+            .forEach { (expected, actual) ->
+                assertEquals(
+                    "Notification type mismatch",
+                    expected.type(),
+                    actual.type(),
+                )
+                assertEquals(
+                    "Notification subtype mismatch",
+                    expected.subtype(),
+                    actual.subtype(),
+                )
+                assertEquals(
+                    "Notification refresh type mismatch",
+                    expected.refreshType(),
+                    actual.refreshType(),
+                )
+
+                // Compare details if present
+                if (expected.details() != null) {
+                    assertNotNull(
+                        "Expected details but got null",
+                        actual.details(),
+                    )
+                    assertEquals(
+                        "Details mismatch",
+                        expected.details()?.toString(),
+                        actual.details()?.toString(),
+                    )
+                }
+
+                // Compare geometry indices if present
+                assertEquals(
+                    "Geometry index mismatch",
+                    expected.geometryIndex(),
+                    actual.geometryIndex(),
+                )
+                assertEquals(
+                    "Geometry index start mismatch",
+                    expected.geometryIndexStart(),
+                    actual.geometryIndexStart(),
+                )
+                assertEquals(
+                    "Geometry index end mismatch",
+                    expected.geometryIndexEnd(),
+                    actual.geometryIndexEnd(),
+                )
+
+                // Compare other properties
+                assertEquals("Reason mismatch", expected.reason(), actual.reason())
+                assertEquals(
+                    "Charging station ID mismatch",
+                    expected.chargingStationId(),
+                    actual.chargingStationId(),
+                )
+            }
+        assertEquals(
+            requestedRoutes[0].waypoints,
+            refreshedRoutes[0].waypoints,
+        )
+        assertEquals(
+            requestedRoutes[1].waypoints,
+            refreshedRoutes[1].waypoints,
+        )
+        assertEquals(
+            listOf(true, true),
+            refreshedRoutes.map { it.routeRefreshMetadata?.isUpToDate },
+        )
+    }
 
     @Test
     fun routeRefreshesWorksAfterSettingsNewRoutes() = sdkTest {
@@ -1097,70 +1157,71 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
 
     private companion object {
 
-        private val JSON_NOTIFICATIONS_ARRAY = Gson().fromJson(
-            """
-            [
-               {
-                 "type": "alert",
-                 "subtype": "stationUnavailable",
-                 "reason": "outOfOrder",
-                 "station_id": "station1",
-                 "refresh_type":"dynamic"
-               },
-               {
-                 "type": "alert",
-                 "subtype": "stationUnavailable",
-                 "reason": "outOfOrder",
-                 "station_id": "station2",
-                 "refresh_type":"dynamic"
-               },
-               {
-                 "type": "alert",
-                 "subtype": "stationUnavailable",
-                 "reason": "outOfOrder",
-                 "station_id": "station3",
-                 "refresh_type":"dynamic"
-               },
-               {
-                 "type": "violation",
-                 "subtype": "evMinChargeAtChargingStation",
-                 "details": {
-                   "requested_value": 30000,
-                   "actual_value": 27000,
-                   "unit": "Wh"
-                 },
-                 "refresh_type":"dynamic"
-               },
-               {
-                 "type": "violation",
-                 "subtype": "evMinChargeAtDestination",
-                 "details": {
-                   "requested_value": 20000,
-                   "actual_value": 13000,
-                   "unit": "Wh"
-                 },
-                 "refresh_type":"dynamic"
-               },
-               {
-                 "type": "alert",
-                 "subtype": "evInsufficientCharge",
-                 "geometry_index": 3,
-                 "refresh_type":"dynamic"
-               },
-               {
-                  "type": "violation",
-                  "subtype": "stateBorderCrossing",
-                  "geometry_index_end": 6,
-                  "geometry_index_start": 3,
-                  "refresh_type": "static",
-                  "details": {
-                    "actual_value": "US-NV,US-CA",
-                    "message": "Crossing the border of the states of US-NV and US-CA."
-                  }
-               }
-            ]
-            """,
-            JsonArray::class.java,
+        private val EXPECTED_NOTIFICATIONS_LIST = listOf(
+            Notification.builder()
+                .type("alert")
+                .subtype("stationUnavailable")
+                .reason("outOfOrder")
+                .chargingStationId("station1")
+                .refreshType("dynamic")
+                .build(),
+            Notification.builder()
+                .type("alert")
+                .subtype("stationUnavailable")
+                .reason("outOfOrder")
+                .chargingStationId("station2")
+                .refreshType("dynamic")
+                .build(),
+            Notification.builder()
+                .type("alert")
+                .subtype("stationUnavailable")
+                .reason("outOfOrder")
+                .chargingStationId("station3")
+                .refreshType("dynamic")
+                .build(),
+            Notification.builder()
+                .type("violation")
+                .subtype("evMinChargeAtChargingStation")
+                .details(
+                    NotificationDetails.builder()
+                        .requestedValue("30000")
+                        .actualValue("27000")
+                        .unit("Wh")
+                        .build(),
+                )
+                .refreshType("dynamic")
+                .build(),
+            Notification.builder()
+                .type("violation")
+                .subtype("evMinChargeAtDestination")
+                .details(
+                    NotificationDetails.builder()
+                        .requestedValue("20000")
+                        .actualValue("13000")
+                        .unit("Wh")
+                        .build(),
+                )
+                .refreshType("dynamic")
+                .build(),
+            Notification.builder()
+                .type("alert")
+                .subtype("evInsufficientCharge")
+                .geometryIndex(3)
+                .refreshType("dynamic")
+                .build(),
+            Notification.builder()
+                .type("violation")
+                .subtype("stateBorderCrossing")
+                .geometryIndexEnd(6)
+                .geometryIndexStart(3)
+                .refreshType("static")
+                .details(
+                    NotificationDetails.builder()
+                        .actualValue("US-NV,US-CA")
+                        .message("Crossing the border of the states of US-NV and US-CA.")
+                        .build(),
+                )
+                .build(),
         )
     }
 }

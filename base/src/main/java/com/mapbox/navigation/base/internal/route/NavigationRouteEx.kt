@@ -5,7 +5,6 @@ package com.mapbox.navigation.base.internal.route
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.WorkerThread
-import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonPrimitive
 import com.mapbox.api.directions.v5.models.Closure
@@ -15,12 +14,12 @@ import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.Incident
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.LegStep
+import com.mapbox.api.directions.v5.models.Notification
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directionsrefresh.v1.models.DirectionsRouteRefresh
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.CongestionNumericOverride
 import com.mapbox.navigation.base.internal.utils.Constants
-import com.mapbox.navigation.base.internal.utils.Constants.RouteResponse.KEY_NOTIFICATIONS
 import com.mapbox.navigation.base.internal.utils.Constants.RouteResponse.KEY_REFRESH_TTL
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshMetadata
@@ -58,8 +57,8 @@ fun NavigationRoute.internalRefreshRoute(
         routeRefresh.legs()?.map { it.annotation() },
         routeRefresh.legs()?.map { it.incidents() },
         routeRefresh.legs()?.map { it.closures() },
+        routeRefresh.legs()?.map { it.notifications() },
         updatedWaypoints,
-        routeRefresh.legs()?.map { it.unrecognizedJsonProperties?.get(KEY_NOTIFICATIONS) },
         responseTimeElapsedSeconds,
         routeRefresh.unrecognizedJsonProperties
             ?.get(KEY_REFRESH_TTL)?.asInt,
@@ -81,8 +80,8 @@ fun NavigationRoute.refreshRoute(
     legAnnotations: List<LegAnnotation?>?,
     incidents: List<List<Incident>?>?,
     closures: List<List<Closure>?>?,
+    notifications: List<List<Notification>?>?,
     waypoints: List<DirectionsWaypoint?>?,
-    unrecognizedLegNotifications: List<JsonElement?>?,
     responseTimeElapsedSeconds: Long,
     refreshTtl: Int?,
 ): NavigationRoute {
@@ -92,8 +91,8 @@ fun NavigationRoute.refreshRoute(
         legAnnotations,
         incidents,
         closures,
+        notifications,
         waypoints,
-        unrecognizedLegNotifications,
         responseTimeElapsedSeconds,
         refreshTtl,
         IncidentsRefresher(),
@@ -109,8 +108,8 @@ internal fun NavigationRoute.refreshRoute(
     legAnnotations: List<LegAnnotation?>?,
     incidents: List<List<Incident>?>?,
     closures: List<List<Closure>?>?,
+    notifications: List<List<Notification>?>?,
     waypoints: List<DirectionsWaypoint?>?,
-    unrecognizedLegNotifications: List<JsonElement?>?,
     responseTimeElapsedSeconds: Long,
     refreshTtl: Int?,
     incidentsRefresher: IncidentsRefresher,
@@ -156,9 +155,10 @@ internal fun NavigationRoute.refreshRoute(
                 startingLegGeometryIndex,
                 lastLegRefreshIndex,
             )
+
             val mergedNotifications = notificationsRefresher.getRefreshedNotifications(
-                routeLeg.unrecognizedJsonProperties?.get(KEY_NOTIFICATIONS) as? JsonArray,
-                unrecognizedLegNotifications?.getOrNull(index) as? JsonArray,
+                routeLeg.notifications(),
+                notifications?.getOrNull(index),
                 startingLegGeometryIndex,
                 lastLegRefreshIndex,
             )
@@ -168,8 +168,8 @@ internal fun NavigationRoute.refreshRoute(
                 .annotation(mergedAnnotation)
                 .incidents(mergedIncidents)
                 .closures(mergedClosures)
+                .notifications(mergedNotifications)
                 .steps(routeLeg.steps()?.updateSteps(directionsRoute, mergedAnnotation))
-                .applyMergedNotifications(routeLeg.unrecognizedJsonProperties, mergedNotifications)
                 .build()
         }
     }
@@ -331,19 +331,4 @@ private fun DirectionsRoute.Builder.updateRouteDurationBasedOnLegsDurationAndCha
     }
     duration(result)
     return this
-}
-
-private fun RouteLeg.Builder.applyMergedNotifications(
-    oldUnrecognizedProperties: Map<String, JsonElement>?,
-    mergedNotifications: JsonArray?,
-): RouteLeg.Builder {
-    return unrecognizedJsonProperties(
-        oldUnrecognizedProperties.orEmpty().toMutableMap().also {
-            if (mergedNotifications == null || mergedNotifications.isEmpty) {
-                it.remove(KEY_NOTIFICATIONS)
-            } else {
-                it[KEY_NOTIFICATIONS] = mergedNotifications
-            }
-        },
-    )
 }

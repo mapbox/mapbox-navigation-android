@@ -14,7 +14,6 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.route.nativeRoute
 import com.mapbox.navigation.base.internal.utils.Constants
-import com.mapbox.navigation.base.internal.utils.Constants.RouteResponse.KEY_NOTIFICATIONS
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -284,11 +283,10 @@ class MapboxNativeNavigatorImpl(
         route: NavigationRoute,
     ): Expected<String, List<RouteAlternative>> {
         val refreshedLegs = route.directionsRoute.legs()?.map { routeLeg ->
-            val notifications = routeLeg.unrecognizedJsonProperties?.get(KEY_NOTIFICATIONS)
             RouteLegRefresh.builder()
                 .annotation(routeLeg.annotation())
                 .incidents(routeLeg.incidents())
-                .unrecognizedJsonProperties(notifications?.let { mapOf(KEY_NOTIFICATIONS to it) })
+                .notifications(routeLeg.notifications())
                 .build()
         }
         val refreshedWaypoints = route.waypoints

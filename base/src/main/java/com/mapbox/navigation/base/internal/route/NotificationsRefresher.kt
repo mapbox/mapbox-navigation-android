@@ -1,28 +1,29 @@
 package com.mapbox.navigation.base.internal.route
 
-import com.google.gson.JsonArray
-import com.google.gson.JsonElement
-import com.mapbox.navigation.base.internal.utils.Constants.NotificationRefreshType.DYNAMIC
+import com.mapbox.api.directions.v5.DirectionsCriteria.NOTIFICATION_REFRESH_TYPE_DYNAMIC
+import com.mapbox.api.directions.v5.models.Notification
 
 internal class NotificationsRefresher {
 
     fun getRefreshedNotifications(
-        oldNotifications: JsonArray?,
-        newNotifications: JsonArray?,
+        oldNotifications: List<Notification>?,
+        newNotifications: List<Notification>?,
         startingLegGeometryIndex: Int,
         lastRefreshLegGeometryIndex: Int,
-    ): JsonArray? {
-        return when {
+    ): List<Notification>? {
+        val result = when {
             oldNotifications == null && newNotifications == null -> null
             oldNotifications == null -> adjustNotificationIndices(
-                newNotifications,
+                newNotifications.orEmpty(),
                 startingLegGeometryIndex,
             )
+
             newNotifications == null -> filterNotificationsByGeometryRange(
                 oldNotifications,
                 startingLegGeometryIndex,
                 lastRefreshLegGeometryIndex,
             )
+
             else -> mergeNotifications(
                 oldNotifications,
                 newNotifications,
@@ -30,121 +31,87 @@ internal class NotificationsRefresher {
                 lastRefreshLegGeometryIndex,
             )
         }
+
+        return result?.takeIf { it.isNotEmpty() }
     }
 
     private fun mergeNotifications(
-        oldNotifications: JsonArray,
-        newNotifications: JsonArray,
+        oldNotifications: List<Notification>,
+        newNotifications: List<Notification>,
         startingLegGeometryIndex: Int,
         lastRefreshLegGeometryIndex: Int,
-    ): JsonArray {
+    ): List<Notification> {
         // Filter old notifications to keep static and dynamic notifications outside refresh range
-        val result = filterNotificationsByGeometryRange(
+        val oldFiltered = filterNotificationsByGeometryRange(
             oldNotifications,
             startingLegGeometryIndex,
             lastRefreshLegGeometryIndex,
         )
 
         // Add new dynamic notifications with adjusted indices
-        result.addAll(
-            adjustNotificationIndices(
-                newNotifications,
-                startingLegGeometryIndex,
-            ),
+        val newAdjusted = adjustNotificationIndices(
+            newNotifications,
+            startingLegGeometryIndex,
         )
 
-        return result
+        return oldFiltered + newAdjusted
     }
 
     private fun filterNotificationsByGeometryRange(
-        notifications: JsonArray,
+        notifications: List<Notification>,
         startingLegGeometryIndex: Int,
         lastRefreshLegGeometryIndex: Int,
-    ): JsonArray {
-        val result = JsonArray()
-
-        notifications.forEach { notification ->
-            if (notification.isDynamicNotification()) {
+    ): List<Notification> =
+        notifications.mapNotNull { notification ->
+            if (notification.isDynamic) {
                 // Dynamic notifications: only keep those outside the refresh range
-                val geometryIndex = notification.getGeometryIndex()
+                val geometryIndex = notification.geometryIndex()
                 if (geometryIndex != null) {
                     val isOutsideRange = geometryIndex < startingLegGeometryIndex ||
                         geometryIndex > lastRefreshLegGeometryIndex
                     if (isOutsideRange) {
-                        result.add(notification)
+                        return@mapNotNull notification
                     }
                 }
                 // Dynamic notifications without geometry_index are filtered out
+                null
             } else {
                 // Static notifications: always keep them
-                result.add(notification)
+                notification
             }
         }
-
-        return result
-    }
 
     /**
      * Adjusts geometry indices for new notifications using the provided starting leg geometry index.
      */
     private fun adjustNotificationIndices(
-        notifications: JsonArray?,
+        notifications: List<Notification>,
         startingLegGeometryIndex: Int,
-    ): JsonArray? {
-        if (notifications == null || notifications.isEmpty) {
-            return notifications
-        }
-
-        val result = JsonArray()
-        notifications.forEach { notification ->
-            val adjustedNotification = adjustNotificationIndex(
+    ): List<Notification> =
+        notifications.map { notification ->
+            adjustNotificationIndex(
                 notification,
                 startingLegGeometryIndex,
             )
-            result.add(adjustedNotification)
         }
-        return result
-    }
 
     private fun adjustNotificationIndex(
-        notification: JsonElement,
+        notification: Notification,
         startingLegGeometryIndex: Int,
-    ): JsonElement {
-        if (!notification.isJsonObject) {
-            return notification
-        }
-
-        val notificationObject = notification.asJsonObject
-        val geometryIndex = notificationObject.get("geometry_index")?.asInt
-
-        if (geometryIndex != null) {
-            val adjustedNotification = notificationObject.deepCopy()
-            adjustedNotification.addProperty(
-                "geometry_index",
-                startingLegGeometryIndex + geometryIndex,
-            )
-            return adjustedNotification
-        }
-
-        return notification
+    ): Notification {
+        return notification.toBuilder().apply {
+            notification.geometryIndex()?.let {
+                geometryIndex(it + startingLegGeometryIndex)
+            }
+            notification.geometryIndexStart()?.let {
+                geometryIndexStart(it + startingLegGeometryIndex)
+            }
+            notification.geometryIndexEnd()?.let {
+                geometryIndexEnd(it + startingLegGeometryIndex)
+            }
+        }.build()
     }
 
-    private fun JsonElement.getGeometryIndex(): Int? {
-        return if (isJsonObject) {
-            asJsonObject.get("geometry_index")?.asInt
-        } else {
-            null
-        }
-    }
-
-    /**
-     * Determines if a notification should be treated as dynamic (refreshable)
-     * based on the refresh_type field
-     */
-    private fun JsonElement.isDynamicNotification(): Boolean {
-        if (!isJsonObject) return false
-
-        val refreshType = asJsonObject.get("refresh_type")?.asJsonPrimitive?.asString
-        return refreshType == DYNAMIC
-    }
+    private val Notification.isDynamic: Boolean
+        get() = refreshType() == NOTIFICATION_REFRESH_TYPE_DYNAMIC
 }

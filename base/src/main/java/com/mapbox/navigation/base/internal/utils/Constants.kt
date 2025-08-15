@@ -4,7 +4,6 @@ class Constants {
     object RouteResponse {
         const val KEY_WAYPOINTS = "waypoints"
         const val KEY_REFRESH_TTL = "refresh_ttl"
-        const val KEY_NOTIFICATIONS = "notifications"
     }
 
     object CongestionRange {
@@ -12,10 +11,5 @@ class Constants {
         val MODERATE_CONGESTION_RANGE = 40..59
         val HEAVY_CONGESTION_RANGE = 60..79
         val SEVERE_CONGESTION_RANGE = 80..100
-    }
-
-    internal object NotificationRefreshType {
-        const val STATIC = "static"
-        const val DYNAMIC = "dynamic"
     }
 }
