@@ -1,5 +1,17 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.11.3 - 18 August, 2025
+#### Features
+- Added a new notification alert `OfflineManeuver:NotificationAlert`. 
+
+#### Bug fixes and improvements
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Java `v7.6.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.6.0))
+
+
 ## Navigation SDK Core Framework 3.11.2 - 15 August, 2025
 #### Features
 
