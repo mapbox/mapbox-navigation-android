@@ -17,7 +17,7 @@ class MapboxRouteCalloutApiTest {
     @Test
     fun `generate a single callout when there is only one route`() {
         val routes = createMockRoutes(routeCount = 1)
-        val result = MapboxRouteCalloutApi().setNavigationRoutes(routes, emptyList())
+        val result = MapboxRouteCalloutsApi().setNavigationRoutes(routes, emptyList())
 
         assertTrue(result.callouts.first().isPrimary)
         assertEquals(1, result.callouts.size)
@@ -27,7 +27,7 @@ class MapboxRouteCalloutApiTest {
     fun `generate eta callouts for each route`() {
         val routes = createMockRoutes(routeCount = 5)
 
-        val result = MapboxRouteCalloutApi().setNavigationRoutes(routes, emptyList())
+        val result = MapboxRouteCalloutsApi().setNavigationRoutes(routes, emptyList())
 
         assertEquals(5, result.callouts.size)
     }
@@ -36,7 +36,7 @@ class MapboxRouteCalloutApiTest {
     fun `only one eta callouts should be primary`() {
         val routes = createMockRoutes(routeCount = 5)
 
-        val result = MapboxRouteCalloutApi().setNavigationRoutes(routes, emptyList())
+        val result = MapboxRouteCalloutsApi().setNavigationRoutes(routes, emptyList())
 
         assertEquals(1, result.callouts.count { it.isPrimary })
     }
@@ -45,7 +45,7 @@ class MapboxRouteCalloutApiTest {
     fun `first route callout should have duration difference 0`() {
         val routes = createMockRoutes(routeCount = 5)
 
-        val result = MapboxRouteCalloutApi().setNavigationRoutes(routes, emptyList())
+        val result = MapboxRouteCalloutsApi().setNavigationRoutes(routes, emptyList())
 
         assertEquals(0.seconds, result.callouts.first().durationDifferenceWithPrimary)
     }
@@ -57,7 +57,7 @@ class MapboxRouteCalloutApiTest {
             durationList = listOf(120.0, 60.0, 180.0),
         )
 
-        val callouts = MapboxRouteCalloutApi().setNavigationRoutes(routes, emptyList()).callouts
+        val callouts = MapboxRouteCalloutsApi().setNavigationRoutes(routes, emptyList()).callouts
         val actualDuration = callouts.map { it.durationDifferenceWithPrimary }
 
         assertEquals(listOf(0.seconds, 60.seconds, (-60).seconds), actualDuration)

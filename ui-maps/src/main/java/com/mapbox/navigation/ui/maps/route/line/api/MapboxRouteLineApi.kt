@@ -37,7 +37,7 @@ import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.la
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.layerGroup3SourceLayerIds
 import com.mapbox.navigation.ui.maps.internal.route.line.toStylePropertyValue
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
-import com.mapbox.navigation.ui.maps.route.callout.api.MapboxRouteCalloutApi
+import com.mapbox.navigation.ui.maps.route.callout.api.MapboxRouteCalloutsApi
 import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.route.line.RouteLineHistoryRecordingApiSender
 import com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue
@@ -262,7 +262,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
     private var lastLocationPoint: Point? = null
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-    private val calloutApi: MapboxRouteCalloutApi?
+    private val calloutApi: MapboxRouteCalloutsApi?
 
     companion object {
         private const val INVALID_ACTIVE_LEG_INDEX = -1
@@ -293,7 +293,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         )
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         calloutApi = if (routeLineOptions.isRouteCalloutsEnabled) {
-            MapboxRouteCalloutApi()
+            MapboxRouteCalloutsApi()
         } else {
             null
         }
