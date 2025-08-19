@@ -60,7 +60,8 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_TRA
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_TRAIL_CASING
 import com.mapbox.navigation.ui.maps.route.callout.api.DefaultRouteCalloutAdapter
 import com.mapbox.navigation.ui.maps.route.callout.api.MapboxRouteCalloutAdapter
-import com.mapbox.navigation.ui.maps.route.callout.api.MapboxRouteCalloutView
+import com.mapbox.navigation.ui.maps.route.callout.api.MapboxRouteCalloutsView
+import com.mapbox.navigation.ui.maps.route.callout.api.RouteLineViewBasedLayerIdProvider
 import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.route.line.RouteLineHistoryRecordingViewSender
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions
@@ -139,7 +140,7 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         RouteLineHistoryRecordingViewSender(),
     )
 
-    private var routeCalloutView: MapboxRouteCalloutView? = null
+    private var routeCalloutView: MapboxRouteCalloutsView? = null
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private var lastRouteCalloutData: RouteCalloutData? = null
@@ -708,10 +709,10 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
             routeCalloutView?.release()
         }
 
-        routeCalloutView = MapboxRouteCalloutView(
+        routeCalloutView = MapboxRouteCalloutsView(
             viewAnnotationManager,
             adapter,
-            routeLineView = this,
+            layerIdProvider = RouteLineViewBasedLayerIdProvider(this),
         )
 
         lastRouteCalloutData?.let { data -> routeCalloutView?.renderCallouts(data) }

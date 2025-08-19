@@ -7,7 +7,6 @@ import com.mapbox.maps.AnnotatedLayerFeature
 import com.mapbox.maps.viewannotation.ViewAnnotationManager
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData
-import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import io.mockk.Called
 import io.mockk.Runs
 import io.mockk.confirmVerified
@@ -29,7 +28,7 @@ class MapboxRouteCalloutViewTest {
     private lateinit var mockContext: Context
     private lateinit var mockViewAnnotationManager: ViewAnnotationManager
     private lateinit var viewsSlot: MutableList<View>
-    private lateinit var mockRouteLineView: MapboxRouteLineView
+    private val layerIdProvider = mockk<RouteLayerIdProvider>(relaxed = true)
 
     @Before
     fun setUp() {
@@ -48,16 +47,15 @@ class MapboxRouteCalloutViewTest {
         excludeRecords { mockViewAnnotationManager.getViewAnnotationOptions(any<View>()) }
         excludeRecords { mockViewAnnotationManager.viewAnnotationAvoidLayers }
         excludeRecords { mockViewAnnotationManager.viewAnnotationAvoidLayers = any() }
-        mockRouteLineView = mockk()
     }
 
     @Test
     fun `render empty callout should not call ViewAnnotationManager`() {
         val defaultAdapter = DefaultRouteCalloutAdapter(mockContext)
-        val calloutView = MapboxRouteCalloutView(
+        val calloutView = MapboxRouteCalloutsView(
             mockViewAnnotationManager,
             defaultAdapter,
-            mockRouteLineView,
+            layerIdProvider,
         )
         excludeRecords { mockViewAnnotationManager.getViewAnnotation(any<AnnotatedLayerFeature>()) }
 

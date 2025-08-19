@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.route.callout.model
 
 import android.view.View
+import androidx.annotation.RestrictTo
 import com.mapbox.maps.ViewAnnotationOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
@@ -12,7 +13,7 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class CalloutViewHolder private constructor(
-    internal val view: View,
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX) val view: View,
     internal val options: ViewAnnotationOptions,
 ) {
 

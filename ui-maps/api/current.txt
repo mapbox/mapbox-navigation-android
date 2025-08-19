@@ -984,8 +984,19 @@ package com.mapbox.navigation.ui.maps.route.callout.api {
     method public abstract void onUpdateAnchor(android.view.View view, com.mapbox.maps.ViewAnnotationAnchorConfig anchor);
   }
 
-  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapboxRouteCalloutApi {
+  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapboxRouteCalloutsApi {
+    ctor public MapboxRouteCalloutsApi();
     method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData setNavigationRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> newRoutes, java.util.List<com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata> alternativeRoutesMetadata);
+  }
+
+  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public final class MapboxRouteCalloutsView {
+    ctor public MapboxRouteCalloutsView(com.mapbox.maps.viewannotation.ViewAnnotationManager viewAnnotationManager, com.mapbox.navigation.ui.maps.route.callout.api.MapboxRouteCalloutAdapter routeCalloutAdapter, com.mapbox.navigation.ui.maps.route.callout.api.RouteLayerIdProvider layerIdProvider);
+    method public void release();
+    method public void renderCallouts(com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData routeCalloutResult);
+  }
+
+  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public fun interface RouteLayerIdProvider {
+    method public String? getLayerId(String routeId);
   }
 
 }
@@ -993,7 +1004,9 @@ package com.mapbox.navigation.ui.maps.route.callout.api {
 package com.mapbox.navigation.ui.maps.route.callout.model {
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class CalloutViewHolder {
+    method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public android.view.View getView();
     method public com.mapbox.navigation.ui.maps.route.callout.model.CalloutViewHolder.Builder toBuilder();
+    property @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public final android.view.View view;
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static final class CalloutViewHolder.Builder {

@@ -15,26 +15,26 @@ import kotlin.time.DurationUnit
  * Responsible for generating route line annotation data which can be rendered on the map
  * to visualize a callout.
  * The callout is calculated based on the routes and the data returned should
- * be rendered on the map using the [MapboxRouteCalloutView] class. Generally this class should be
+ * be rendered on the map using the [MapboxRouteCalloutsView] class. Generally this class should be
  * called once new route (or set of routes) is available
  *
- * The two principal classes for the route callouts are the [MapboxRouteCalloutApi] and the
- * [MapboxRouteCalloutView].
+ * The two principal classes for the route callouts are the [MapboxRouteCalloutsApi] and the
+ * [MapboxRouteCalloutsView].
  *
- * Like the route line components the [MapboxRouteCalloutApi] consumes data from the Navigation SDK,
+ * Like the route line components the [MapboxRouteCalloutsApi] consumes data from the Navigation SDK,
  * specifically the [NavigationRoute], and produces data for rendering on the map by the
- * [MapboxRouteCalloutView].
+ * [MapboxRouteCalloutsView].
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 @ExperimentalPreviewMapboxNavigationAPI
-class MapboxRouteCalloutApi internal constructor() {
+class MapboxRouteCalloutsApi {
 
     /**
      * Sets the routes that will be operated on.
      *
      * @param newRoutes one or more routes. The first route in the collection will be considered
      * the primary route and any additional routes will be alternate routes.
-     * @param alternativeRoutesMetadata if available, helps [MapboxRouteCalloutApi] find
+     * @param alternativeRoutesMetadata if available, helps [MapboxRouteCalloutsApi] find
      * the deviation point to extract different geometry segment the callout should be attaching to.
      * See [MapboxNavigation.getAlternativeMetadataFor].
      */
@@ -75,6 +75,8 @@ class MapboxRouteCalloutApi internal constructor() {
             )
 
             alternativeRoutes.mapTo(destination = this) { alternativeRoute ->
+                // Query AlternativeMetadata first, because for CAs it will contain full duration (from start of primary route),
+                // while in Directions it will be the "cut" duration from the point where it was requested.
                 val altRouteDuration =
                     alternativeRouteMetadata.firstOrNull {
                         it.navigationRoute.id == alternativeRoute.id
