@@ -125,7 +125,7 @@ class SystemLocaleWatcherTest {
     fun setsUserLanguageProviderOnNavigationRecreationEvent() {
         val navRecreationObserverSlot = slot<NativeNavigatorRecreationObserver>()
         every {
-            navigator.setNativeNavigatorRecreationObserver(capture(navRecreationObserverSlot))
+            navigator.addNativeNavigatorRecreationObserver(capture(navRecreationObserverSlot))
         } just Runs
 
         createWatcher()

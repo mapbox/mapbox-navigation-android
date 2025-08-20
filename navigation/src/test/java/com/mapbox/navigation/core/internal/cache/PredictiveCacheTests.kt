@@ -28,7 +28,7 @@ class PredictiveCacheTests {
     @Before
     fun setUp() {
         every {
-            navigator.setNativeNavigatorRecreationObserver(
+            navigator.addNativeNavigatorRecreationObserver(
                 capture(navigatorRecreationCallbackSlot),
             )
         } just Runs

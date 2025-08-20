@@ -22,7 +22,7 @@ class PredictiveCache(private val mapboxNavigation: MapboxNavigation) {
 
     init {
         // recreate controllers with the same options but with a new navigator instance
-        mapboxNavigation.navigator.setNativeNavigatorRecreationObserver {
+        mapboxNavigation.navigator.addNativeNavigatorRecreationObserver {
             val navOptions = navPredictiveCacheOptions.toSet()
             val mapControllersData = cachedMapsPredictiveCacheControllers
                 .map { (mapboxMap, predictiveCacheControllersMap) ->
