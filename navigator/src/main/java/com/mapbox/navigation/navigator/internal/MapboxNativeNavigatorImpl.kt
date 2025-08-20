@@ -402,10 +402,16 @@ class MapboxNativeNavigatorImpl(
         navigator.setFallbackVersionsObserver(fallbackVersionsObserver)
     }
 
-    override fun setNativeNavigatorRecreationObserver(
+    override fun addNativeNavigatorRecreationObserver(
         nativeNavigatorRecreationObserver: NativeNavigatorRecreationObserver,
     ) {
         nativeNavigatorRecreationObservers.add(nativeNavigatorRecreationObserver)
+    }
+
+    override fun removeNativeNavigatorRecreationObserver(
+        nativeNavigatorRecreationObserver: NativeNavigatorRecreationObserver,
+    ) {
+        nativeNavigatorRecreationObservers.remove(nativeNavigatorRecreationObserver)
     }
 
     private fun unregisterAllNativeNavigatorObservers() {

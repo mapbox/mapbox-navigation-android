@@ -34,7 +34,7 @@ internal class SystemLocaleWatcher private constructor(
             ContextCompat.RECEIVER_NOT_EXPORTED,
         )
 
-        navigator.setNativeNavigatorRecreationObserver {
+        navigator.addNativeNavigatorRecreationObserver {
             navigator.setUserLanguages(context.deviceLanguageTags)
         }
         navigator.setUserLanguages(context.deviceLanguageTags)

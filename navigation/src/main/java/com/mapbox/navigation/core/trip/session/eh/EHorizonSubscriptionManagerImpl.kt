@@ -87,7 +87,7 @@ internal class EHorizonSubscriptionManagerImpl(
         }
 
     init {
-        navigator.setNativeNavigatorRecreationObserver {
+        navigator.addNativeNavigatorRecreationObserver {
             if (eHorizonObservers.isNotEmpty()) {
                 setNavigatorObservers()
             }

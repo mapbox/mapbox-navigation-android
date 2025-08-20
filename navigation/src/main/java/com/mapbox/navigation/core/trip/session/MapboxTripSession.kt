@@ -299,7 +299,7 @@ internal class MapboxTripSession(
     }
 
     init {
-        navigator.setNativeNavigatorRecreationObserver {
+        navigator.addNativeNavigatorRecreationObserver {
             if (fallbackVersionsObservers.isNotEmpty()) {
                 navigator.setFallbackVersionsObserver(nativeFallbackVersionsObserver)
             }

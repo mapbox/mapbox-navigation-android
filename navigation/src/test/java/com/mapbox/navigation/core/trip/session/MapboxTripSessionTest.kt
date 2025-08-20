@@ -200,7 +200,7 @@ class MapboxTripSessionTest {
             navigator.addNavigatorObserver(capture(navigatorObserverImplSlot))
         } answers {}
         every {
-            navigator.setNativeNavigatorRecreationObserver(
+            navigator.addNativeNavigatorRecreationObserver(
                 capture(navigatorRecreationObserverImplSlot),
             )
         } answers {}

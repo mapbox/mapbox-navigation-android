@@ -32,7 +32,7 @@ class RoadObjectMatcher internal constructor(
     private val roadObjectMatcherObservers = CopyOnWriteArraySet<RoadObjectMatcherObserver>()
 
     init {
-        navigator.setNativeNavigatorRecreationObserver {
+        navigator.addNativeNavigatorRecreationObserver {
             if (roadObjectMatcherObservers.isNotEmpty()) {
                 navigator.roadObjectMatcher.setListener(roadObjectMatcherListener)
             }
