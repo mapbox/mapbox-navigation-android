@@ -5,13 +5,13 @@ import com.mapbox.navigation.ui.maps.route.callout.model.RouteCallout
 
 /**
  * Represents UI data required to attach a DVA with this callout for a specified route.
- * See [CalloutComposeUiStateData] for more details and supported use cases.
+ * See [CalloutUiStateData] for more details and supported use cases.
  *
  * @param routeCallout route callout data, see [RouteCallout] for details.
  * @param layerId use this layerId to attach the DVA to.
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class CalloutComposeUiState internal constructor(
+class CalloutUiState internal constructor(
     val routeCallout: RouteCallout,
     val layerId: String,
 ) {
@@ -23,7 +23,7 @@ class CalloutComposeUiState internal constructor(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as CalloutComposeUiState
+        other as CalloutUiState
 
         if (routeCallout != other.routeCallout) return false
         if (layerId != other.layerId) return false
@@ -44,6 +44,6 @@ class CalloutComposeUiState internal constructor(
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "CalloutComposeUiState(routeCallout=$routeCallout, layerId='$layerId')"
+        return "CalloutUiState(routeCallout=$routeCallout, layerId='$layerId')"
     }
 }

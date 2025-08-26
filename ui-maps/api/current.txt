@@ -1022,27 +1022,27 @@ package com.mapbox.navigation.ui.maps.route.callout.api {
 
 package com.mapbox.navigation.ui.maps.route.callout.api.compose {
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class CalloutComposeUiState {
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class CalloutUiState {
     method public String getLayerId();
     method public com.mapbox.navigation.ui.maps.route.callout.model.RouteCallout getRouteCallout();
     property public final String layerId;
     property public final com.mapbox.navigation.ui.maps.route.callout.model.RouteCallout routeCallout;
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class CalloutComposeUiStateData {
-    method public java.util.List<com.mapbox.navigation.ui.maps.route.callout.api.compose.CalloutComposeUiState> getCallouts();
-    property public final java.util.List<com.mapbox.navigation.ui.maps.route.callout.api.compose.CalloutComposeUiState> callouts;
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class CalloutUiStateData {
+    method public java.util.List<com.mapbox.navigation.ui.maps.route.callout.api.compose.CalloutUiState> getCallouts();
+    property public final java.util.List<com.mapbox.navigation.ui.maps.route.callout.api.compose.CalloutUiState> callouts;
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class CalloutComposeUiStateProvider {
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class CalloutUiStateProvider {
     method public void destroy();
-    method public kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.maps.route.callout.api.compose.CalloutComposeUiStateData> getUiStateData();
-    property public final kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.maps.route.callout.api.compose.CalloutComposeUiStateData> uiStateData;
-    field public static final com.mapbox.navigation.ui.maps.route.callout.api.compose.CalloutComposeUiStateProvider.Companion Companion;
+    method public kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.maps.route.callout.api.compose.CalloutUiStateData> getUiStateData();
+    property public final kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.maps.route.callout.api.compose.CalloutUiStateData> uiStateData;
+    field public static final com.mapbox.navigation.ui.maps.route.callout.api.compose.CalloutUiStateProvider.Companion Companion;
   }
 
-  public static final class CalloutComposeUiStateProvider.Companion {
-    method public com.mapbox.navigation.ui.maps.route.callout.api.compose.CalloutComposeUiStateProvider create(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi routeLineApi, com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView routeLineView);
+  public static final class CalloutUiStateProvider.Companion {
+    method public com.mapbox.navigation.ui.maps.route.callout.api.compose.CalloutUiStateProvider create(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi routeLineApi, com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView routeLineView);
   }
 
 }

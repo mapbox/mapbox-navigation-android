@@ -5,9 +5,9 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.ui.maps.route.callout.api.RoutesAttachedToLayersDataProvider
 import com.mapbox.navigation.ui.maps.route.callout.api.RoutesSetToRouteLineDataProvider
-import com.mapbox.navigation.ui.maps.route.callout.api.compose.CalloutComposeUiState
-import com.mapbox.navigation.ui.maps.route.callout.api.compose.CalloutComposeUiStateData
-import com.mapbox.navigation.ui.maps.route.callout.api.compose.CalloutComposeUiStateProvider
+import com.mapbox.navigation.ui.maps.route.callout.api.compose.CalloutUiState
+import com.mapbox.navigation.ui.maps.route.callout.api.compose.CalloutUiStateData
+import com.mapbox.navigation.ui.maps.route.callout.api.compose.CalloutUiStateProvider
 import com.mapbox.navigation.ui.maps.route.callout.model.RouteCallout
 import kotlin.time.Duration
 
@@ -15,17 +15,17 @@ import kotlin.time.Duration
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 object RouteCalloutObjectsFactory {
 
-    fun createCalloutComposeUiStateData(
-        callouts: List<CalloutComposeUiState>,
-    ): CalloutComposeUiStateData {
-        return CalloutComposeUiStateData(callouts)
+    fun createCalloutUiStateData(
+        callouts: List<CalloutUiState>,
+    ): CalloutUiStateData {
+        return CalloutUiStateData(callouts)
     }
 
-    fun createCalloutComposeUiState(
+    fun createCalloutUiState(
         routeCallout: RouteCallout,
         layerId: String,
-    ): CalloutComposeUiState {
-        return CalloutComposeUiState(routeCallout, layerId)
+    ): CalloutUiState {
+        return CalloutUiState(routeCallout, layerId)
     }
 
     fun createRouteCallout(
@@ -36,11 +36,11 @@ object RouteCalloutObjectsFactory {
         return RouteCallout(route, isPrimary, durationDifferenceWithPrimary)
     }
 
-    fun createCalloutComposeUiStateProvider(
+    fun createCalloutUiStateProvider(
         routesSetToRouteLineDataProvider: RoutesSetToRouteLineDataProvider,
         routesAttachedToLayersDataProvider: RoutesAttachedToLayersDataProvider,
-    ): CalloutComposeUiStateProvider {
-        return CalloutComposeUiStateProvider(
+    ): CalloutUiStateProvider {
+        return CalloutUiStateProvider(
             routesSetToRouteLineDataProvider,
             routesAttachedToLayersDataProvider,
         )

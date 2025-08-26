@@ -10,14 +10,14 @@ import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions
  * An example of such a case is using Mapbox Maps SDK Compose extensions: attaching a DVA for
  * Compose MapboxMap is done via [compose-specific API](https://docs.mapbox.com/android/maps/examples/compose/dynamic-view-annotations/),
  * which is not currently supported by NavSDK.
- * In this case you may listen to [CalloutComposeUiStateData] updates and use its information by attach a DVA.
- * See [CalloutComposeUiStateProvider] for details on how to subscribe.
+ * In this case you may listen to [CalloutUiStateData] updates and use its information by attach a DVA.
+ * See [CalloutUiStateProvider] for details on how to subscribe.
  *
- * @param callouts a list of currently relevant route callouts, see [CalloutComposeUiState] for details.
+ * @param callouts a list of currently relevant route callouts, see [CalloutUiState] for details.
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class CalloutComposeUiStateData internal constructor(
-    val callouts: List<CalloutComposeUiState>,
+class CalloutUiStateData internal constructor(
+    val callouts: List<CalloutUiState>,
 ) {
 
     /**
@@ -27,7 +27,7 @@ class CalloutComposeUiStateData internal constructor(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as CalloutComposeUiStateData
+        other as CalloutUiStateData
 
         return callouts == other.callouts
     }
@@ -43,6 +43,6 @@ class CalloutComposeUiStateData internal constructor(
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "CalloutComposeUiStateData(callouts=$callouts)"
+        return "CalloutUiStateData(callouts=$callouts)"
     }
 }
