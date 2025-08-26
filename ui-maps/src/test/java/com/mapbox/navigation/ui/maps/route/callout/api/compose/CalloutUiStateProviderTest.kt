@@ -15,11 +15,14 @@ import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Before
+import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
 
@@ -47,51 +50,8 @@ class CalloutUiStateProviderTest {
     private val routesSetObserverSlot = slot<RoutesSetToRouteLineObserver>()
     private val routesAttachedObserverSlot = slot<RoutesAttachedToLayersObserver>()
 
-    @Before
-    fun setUp() {
-        every {
-            mockRoutesSetToRouteLineDataProvider.registerRoutesSetToRouteLineObserver(
-                capture(routesSetObserverSlot),
-            )
-        } returns Unit
-        every {
-            mockRoutesAttachedToLayersDataProvider.registerRoutesAttachedToLayersObserver(
-                capture(routesAttachedObserverSlot),
-            )
-        } returns Unit
-    }
-
     @Test
-    fun `constructor registers observers`() {
-        CalloutUiStateProvider(
-            mockRoutesSetToRouteLineDataProvider,
-            mockRoutesAttachedToLayersDataProvider,
-            mockRouteCalloutsApi,
-        )
-
-        verify {
-            mockRoutesSetToRouteLineDataProvider.registerRoutesSetToRouteLineObserver(any())
-        }
-        verify {
-            mockRoutesAttachedToLayersDataProvider.registerRoutesAttachedToLayersObserver(any())
-        }
-    }
-
-    @Test
-    fun `uiStateData initially contains empty list`() {
-        val provider = CalloutUiStateProvider(
-            mockRoutesSetToRouteLineDataProvider,
-            mockRoutesAttachedToLayersDataProvider,
-            mockRouteCalloutsApi,
-        )
-
-        val initialState = provider.uiStateData.value
-
-        assertTrue("Initial state should be empty", initialState.callouts.isEmpty())
-    }
-
-    @Test
-    fun `routesSetToRouteLineObserver updates callouts data`() {
+    fun `ui state is not set when we only have callouts data`() = runTest {
         val mockCallout1 = mockk<RouteCallout> {
             every { route } returns mockRoute1
         }
@@ -117,17 +77,24 @@ class CalloutUiStateProviderTest {
         val routes = listOf(mockRoute1, mockRoute2)
         val alternativeMetadata = emptyList<AlternativeRouteMetadata>()
 
-        // Get the registered observer and call it
-        val observer = routesSetObserverSlot.captured
-        observer.onSet(routes, alternativeMetadata)
+        every {
+            mockRoutesSetToRouteLineDataProvider.registerRoutesSetToRouteLineObserver(
+                capture(routesSetObserverSlot),
+            )
+        } answers {
+            routesSetObserverSlot.captured.onSet(routes, alternativeMetadata)
+        }
+
+        val currentState = withTimeoutOrNull(500) {
+            provider.uiStateData.first()
+        }
 
         // The uiStateData should still be empty until routes are attached to layers
-        val currentState = provider.uiStateData.value
-        assertTrue("State should be empty until routes attached", currentState.callouts.isEmpty())
+        assertNull(currentState)
     }
 
     @Test
-    fun `routesAttachedToLayersObserver updates ui state`() {
+    fun `routesAttachedToLayersObserver updates ui state`() = runTest {
         val mockCallout1 = mockk<RouteCallout> {
             every { route } returns mockRoute1
         }
@@ -148,20 +115,28 @@ class CalloutUiStateProviderTest {
             mockRouteCalloutsApi,
         )
 
-        // First set the callouts data via routes set observer
-        val routesSetObserver = routesSetObserverSlot.captured
-        routesSetObserver.onSet(listOf(mockRoute1, mockRoute2), emptyList())
-
         // Then simulate routes being attached to layers
         val routesToLayers = mapOf(
             "route-1" to "layer-1",
             "route-2" to "layer-2",
         )
 
-        val routesAttachedObserver = routesAttachedObserverSlot.captured
-        routesAttachedObserver.onAttached(routesToLayers)
+        every {
+            mockRoutesSetToRouteLineDataProvider.registerRoutesSetToRouteLineObserver(
+                capture(routesSetObserverSlot),
+            )
+        } answers {
+            routesSetObserverSlot.captured.onSet(listOf(mockRoute1, mockRoute2), emptyList())
+        }
+        every {
+            mockRoutesAttachedToLayersDataProvider.registerRoutesAttachedToLayersObserver(
+                capture(routesAttachedObserverSlot),
+            )
+        } answers {
+            routesAttachedObserverSlot.captured.onAttached(routesToLayers)
+        }
 
-        val currentState = provider.uiStateData.value
+        val currentState = provider.uiStateData.first()
 
         assertEquals(
             listOf(
@@ -173,7 +148,7 @@ class CalloutUiStateProviderTest {
     }
 
     @Test
-    fun `only routes with matching layers are included in ui state`() {
+    fun `only routes with matching layers are included in ui state`() = runTest {
         val mockCallout1 = mockk<RouteCallout> {
             every { route } returns mockRoute1
         }
@@ -196,26 +171,34 @@ class CalloutUiStateProviderTest {
             mockRouteCalloutsApi,
         )
 
-        // Set callouts data for both routes
-        val routesSetObserver = routesSetObserverSlot.captured
-        routesSetObserver.onSet(listOf(mockRoute1, mockRoute2), emptyList())
-
         // Only route-1 is attached to a layer
         val routesToLayers = mapOf("route-1" to "layer-1", "route-2" to "layer-2")
 
-        val routesAttachedObserver = routesAttachedObserverSlot.captured
-        routesAttachedObserver.onAttached(routesToLayers)
+        every {
+            mockRoutesSetToRouteLineDataProvider.registerRoutesSetToRouteLineObserver(
+                capture(routesSetObserverSlot),
+            )
+        } answers {
+            routesSetObserverSlot.captured.onSet(listOf(mockRoute1, mockRoute2), emptyList())
+        }
+        every {
+            mockRoutesAttachedToLayersDataProvider.registerRoutesAttachedToLayersObserver(
+                capture(routesAttachedObserverSlot),
+            )
+        } answers {
+            routesAttachedObserverSlot.captured.onAttached(routesToLayers)
+        }
 
         assertEquals(
             listOf(
                 CalloutUiState(mockCallout1, "layer-1"),
             ),
-            provider.uiStateData.value.callouts,
+            provider.uiStateData.first().callouts,
         )
     }
 
     @Test
-    fun `empty routes to layers map results in empty ui state`() {
+    fun `empty routes to layers map results in empty ui state`() = runTest {
         val mockCallout1 = mockk<RouteCallout> {
             every { route } returns mockRoute1
         }
@@ -233,42 +216,32 @@ class CalloutUiStateProviderTest {
             mockRouteCalloutsApi,
         )
 
-        // Set callouts data
-        val routesSetObserver = routesSetObserverSlot.captured
-        routesSetObserver.onSet(listOf(mockRoute1, mockRoute2), emptyList())
-
         // Empty routes to layers map
         val routesToLayers = emptyMap<String, String>()
 
-        val routesAttachedObserver = routesAttachedObserverSlot.captured
-        routesAttachedObserver.onAttached(routesToLayers)
+        every {
+            mockRoutesSetToRouteLineDataProvider.registerRoutesSetToRouteLineObserver(
+                capture(routesSetObserverSlot),
+            )
+        } answers {
+            routesSetObserverSlot.captured.onSet(listOf(mockRoute1, mockRoute2), emptyList())
+        }
+        every {
+            mockRoutesAttachedToLayersDataProvider.registerRoutesAttachedToLayersObserver(
+                capture(routesAttachedObserverSlot),
+            )
+        } answers {
+            routesAttachedObserverSlot.captured.onAttached(routesToLayers)
+        }
 
         assertEquals(
             emptyList<CalloutUiState>(),
-            provider.uiStateData.value.callouts,
+            provider.uiStateData.first().callouts,
         )
     }
 
     @Test
-    fun `destroy unregisters observers`() {
-        val provider = CalloutUiStateProvider(
-            mockRoutesSetToRouteLineDataProvider,
-            mockRoutesAttachedToLayersDataProvider,
-            mockRouteCalloutsApi,
-        )
-
-        provider.destroy()
-
-        verify {
-            mockRoutesSetToRouteLineDataProvider.unregisterRoutesSetToRouteLineObserver(any())
-        }
-        verify {
-            mockRoutesAttachedToLayersDataProvider.unregisterRoutesAttachedToLayersObserver(any())
-        }
-    }
-
-    @Test
-    fun `multiple updates to routes attached to layers work correctly`() {
+    fun `multiple updates to routes attached to layers work correctly`() = runTest {
         val mockCallout1 = mockk<RouteCallout> {
             every { route } returns mockRoute1
         }
@@ -296,45 +269,51 @@ class CalloutUiStateProviderTest {
             mockRouteCalloutsApi,
         )
 
-        // Set callouts data
-        val routesSetObserver = routesSetObserverSlot.captured
-        routesSetObserver.onSet(listOf(mockRoute1, mockRoute2), emptyList())
+        every {
+            mockRoutesSetToRouteLineDataProvider.registerRoutesSetToRouteLineObserver(
+                capture(routesSetObserverSlot),
+            )
+        } answers {
+            routesSetObserverSlot.captured.onSet(listOf(mockRoute1, mockRoute2), emptyList())
+        }
+        every {
+            mockRoutesAttachedToLayersDataProvider.registerRoutesAttachedToLayersObserver(
+                capture(routesAttachedObserverSlot),
+            )
+        } answers {
+            routesAttachedObserverSlot.captured.onAttached(mapOf("route-1" to "layer-1"))
+            routesAttachedObserverSlot.captured.onAttached(
+                mapOf("route-1" to "layer-1", "route-2" to "layer-2"),
+            )
+            routesAttachedObserverSlot.captured.onAttached(emptyMap())
+        }
 
-        val routesAttachedObserver = routesAttachedObserverSlot.captured
+        val currentStates = provider.uiStateData.take(3).toList()
 
         // First update - only route-1 attached
-        routesAttachedObserver.onAttached(mapOf("route-1" to "layer-1"))
-        var currentState = provider.uiStateData.value
         assertEquals(
             listOf(CalloutUiState(mockCallout1, "layer-1")),
-            currentState.callouts,
+            currentStates[0].callouts,
         )
 
         // Second update - both routes attached
-        routesAttachedObserver.onAttached(
-            mapOf("route-1" to "layer-1", "route-2" to "layer-2"),
-        )
-
-        currentState = provider.uiStateData.value
         assertEquals(
             listOf(
                 CalloutUiState(mockCallout1, "layer-1"),
                 CalloutUiState(mockCallout2, "layer-2"),
             ),
-            currentState.callouts,
+            currentStates[1].callouts,
         )
 
         // Third update - no routes attached
-        routesAttachedObserver.onAttached(emptyMap())
-        currentState = provider.uiStateData.value
         assertEquals(
             emptyList<CalloutUiState>(),
-            currentState.callouts,
+            currentStates[2].callouts,
         )
     }
 
     @Test
-    fun `ui state updates correctly when callouts data changes`() {
+    fun `ui state updates correctly when callouts data changes`() = runTest {
         val mockCallout1 = mockk<RouteCallout> {
             every { route } returns mockRoute1
         }
@@ -355,59 +334,66 @@ class CalloutUiStateProviderTest {
             mockRouteCalloutsApi,
         )
 
-        val routesSetObserver = routesSetObserverSlot.captured
-        val routesAttachedObserver = routesAttachedObserverSlot.captured
+        every {
+            mockRoutesSetToRouteLineDataProvider.registerRoutesSetToRouteLineObserver(
+                capture(routesSetObserverSlot),
+            )
+        } answers {
+            routesSetObserverSlot.captured.onSet(listOf(mockRoute1), emptyList())
+            routesSetObserverSlot.captured.onSet(
+                listOf(mockRoute1, mockRoute2),
+                emptyList(),
+            )
+        }
+        every {
+            mockRoutesAttachedToLayersDataProvider.registerRoutesAttachedToLayersObserver(
+                capture(routesAttachedObserverSlot),
+            )
+        } answers {
+            routesAttachedObserverSlot.captured.onAttached(mapOf("route-1" to "layer-1"))
+            routesAttachedObserverSlot.captured.onAttached(
+                mapOf(
+                    "route-1" to "layer-1",
+                    "route-2" to "layer-2",
+                ),
+            )
+        }
 
-        // Set initial callouts data and layer mapping
-        routesSetObserver.onSet(listOf(mockRoute1), emptyList())
-        routesAttachedObserver.onAttached(mapOf("route-1" to "layer-1"))
-
-        var currentState = provider.uiStateData.value
+        val currentStates = provider.uiStateData.take(2).toList()
         assertEquals(
             listOf(
                 CalloutUiState(mockCallout1, "layer-1"),
             ),
-            currentState.callouts,
+            currentStates[0].callouts,
         )
 
-        // Update callouts data with new route
-        routesSetObserver.onSet(
-            listOf(mockRoute1, mockRoute2),
-            emptyList(),
-        )
-        routesAttachedObserver.onAttached(
-            mapOf(
-                "route-1" to "layer-1",
-                "route-2" to "layer-2",
-            ),
-        )
-
-        currentState = provider.uiStateData.value
         assertEquals(
             listOf(
                 CalloutUiState(mockCallout1, "layer-1"),
                 CalloutUiState(mockCallout2, "layer-2"),
             ),
-            currentState.callouts,
+            currentStates[1].callouts,
         )
     }
 
     @Test
-    fun `ui state is empty when no callouts data is set`() {
+    fun `ui state is not set when no callouts data is set`() = runTest {
         val provider = CalloutUiStateProvider(
             mockRoutesSetToRouteLineDataProvider,
             mockRoutesAttachedToLayersDataProvider,
         )
 
-        val routesAttachedObserver = routesAttachedObserverSlot.captured
+        every {
+            mockRoutesAttachedToLayersDataProvider.registerRoutesAttachedToLayersObserver(
+                capture(routesAttachedObserverSlot),
+            )
+        } answers {
+            routesAttachedObserverSlot.captured.onAttached(mapOf("route-1" to "layer-1"))
+        }
 
-        // Only update routes to layers without setting callouts data
-        routesAttachedObserver.onAttached(mapOf("route-1" to "layer-1"))
-
-        val currentState = provider.uiStateData.value
-        assertEquals(
-            emptyList<CalloutUiState>(),
-            currentState.callouts,
-        )
+        val currentState = withTimeoutOrNull(500) {
+            provider.uiStateData.first()
+        }
+        assertNull(currentState)
     }
 }
