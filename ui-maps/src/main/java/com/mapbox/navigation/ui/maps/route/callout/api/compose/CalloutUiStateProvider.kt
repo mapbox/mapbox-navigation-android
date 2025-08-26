@@ -6,14 +6,15 @@ import com.mapbox.navigation.ui.maps.route.callout.api.RoutesAttachedToLayersDat
 import com.mapbox.navigation.ui.maps.route.callout.api.RoutesAttachedToLayersObserver
 import com.mapbox.navigation.ui.maps.route.callout.api.RoutesSetToRouteLineDataProvider
 import com.mapbox.navigation.ui.maps.route.callout.api.RoutesSetToRouteLineObserver
-import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions
 import com.mapbox.navigation.utils.internal.logI
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 
 /**
  * Provider of UI state for route callouts.
@@ -35,58 +36,54 @@ class CalloutUiStateProvider internal constructor(
     private val routesCalloutsApi: MapboxRouteCalloutsApi = MapboxRouteCalloutsApi(),
 ) {
 
-    private var calloutsData: RouteCalloutData = RouteCalloutData(emptyList())
-
-    private val routesSetToRouteLineObserver =
-        RoutesSetToRouteLineObserver { routes, alternativeMetadata ->
-            logI(TAG) { "Routes set to route line: ${routes.map { it.id }}" }
-            // The fact that routes were set to route line does not mean they were rendered
-            // (they were set to MapboxRouteLineApi, not MapboxRouteLineView).
-            // So no need to update uiStateData here.
-            calloutsData = routesCalloutsApi.setNavigationRoutes(routes, alternativeMetadata)
-        }
-
-    private val routesAttachedToLayersObserver = RoutesAttachedToLayersObserver { routesToLayers ->
-        logI(TAG) { "Routes are attached to layers: $routesToLayers" }
-        _uiStateData.value = CalloutUiStateData(
-            calloutsData.callouts.mapNotNull { callout ->
-                routesToLayers[callout.route.id]?.let { layerId ->
-                    CalloutUiState(callout, layerId)
-                }
-            },
+    private val calloutsData = callbackFlow {
+        val routesSetToRouteLineObserver =
+            RoutesSetToRouteLineObserver { routes, alternativeMetadata ->
+                logI(TAG) { "Routes set to route line: ${routes.map { it.id }}" }
+                trySend(routesCalloutsApi.setNavigationRoutes(routes, alternativeMetadata))
+            }
+        routesSetToRouteLineDataProvider.registerRoutesSetToRouteLineObserver(
+            routesSetToRouteLineObserver,
         )
+        awaitClose {
+            routesSetToRouteLineDataProvider.unregisterRoutesSetToRouteLineObserver(
+                routesSetToRouteLineObserver,
+            )
+        }
     }
 
-    private val _uiStateData = MutableStateFlow(CalloutUiStateData(emptyList()))
+    private val routesToLayers = callbackFlow {
+        val routesAttachedToLayersObserver = RoutesAttachedToLayersObserver { routesToLayers ->
+            logI(TAG) { "Routes are attached to layers: $routesToLayers" }
+            trySend(routesToLayers)
+        }
+        routesAttachedToLayersDataProvider.registerRoutesAttachedToLayersObserver(
+            routesAttachedToLayersObserver,
+        )
+        awaitClose {
+            routesAttachedToLayersDataProvider.unregisterRoutesAttachedToLayersObserver(
+                routesAttachedToLayersObserver,
+            )
+        }
+    }
 
     /**
      * Flow of [CalloutUiStateData].
      * Subscribe to this flow to retrieve UI data for callouts in case you want to attach the DVA yourself.
      */
-    val uiStateData: StateFlow<CalloutUiStateData> = _uiStateData.asStateFlow()
-
-    init {
-        routesSetToRouteLineDataProvider.registerRoutesSetToRouteLineObserver(
-            routesSetToRouteLineObserver,
-        )
-        routesAttachedToLayersDataProvider.registerRoutesAttachedToLayersObserver(
-            routesAttachedToLayersObserver,
-        )
-    }
-
-    /**
-     * Clean up resources.
-     * Should be invoked when the object is no longer necessary.
-     * After this method has been invoked, the object cannot be used anymore: you will need to create a new instance.
-     */
-    fun destroy() {
-        logI(TAG) { "Destroy" }
-        routesSetToRouteLineDataProvider.unregisterRoutesSetToRouteLineObserver(
-            routesSetToRouteLineObserver,
-        )
-        routesAttachedToLayersDataProvider.unregisterRoutesAttachedToLayersObserver(
-            routesAttachedToLayersObserver,
-        )
+    val uiStateData: Flow<CalloutUiStateData> = calloutsData.flatMapLatest { calloutsData ->
+        // The fact that routes were set to route line does not mean they were rendered
+        // (they were set to MapboxRouteLineApi, not MapboxRouteLineView).
+        // So we don't need to take the current routesToLayers value, instead we should wait for the new one to arrive.
+        routesToLayers.map { routesToLayers ->
+            CalloutUiStateData(
+                calloutsData.callouts.mapNotNull { callout ->
+                    routesToLayers[callout.route.id]?.let { layerId ->
+                        CalloutUiState(callout, layerId)
+                    }
+                },
+            )
+        }
     }
 
     companion object {
