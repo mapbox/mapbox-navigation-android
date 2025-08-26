@@ -24,7 +24,7 @@ import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
-class CalloutComposeUiStateProviderTest {
+class CalloutUiStateProviderTest {
 
     @get:Rule
     val logRule = LoggingFrontendTestRule()
@@ -63,7 +63,7 @@ class CalloutComposeUiStateProviderTest {
 
     @Test
     fun `constructor registers observers`() {
-        CalloutComposeUiStateProvider(
+        CalloutUiStateProvider(
             mockRoutesSetToRouteLineDataProvider,
             mockRoutesAttachedToLayersDataProvider,
             mockRouteCalloutsApi,
@@ -79,7 +79,7 @@ class CalloutComposeUiStateProviderTest {
 
     @Test
     fun `uiStateData initially contains empty list`() {
-        val provider = CalloutComposeUiStateProvider(
+        val provider = CalloutUiStateProvider(
             mockRoutesSetToRouteLineDataProvider,
             mockRoutesAttachedToLayersDataProvider,
             mockRouteCalloutsApi,
@@ -107,7 +107,7 @@ class CalloutComposeUiStateProviderTest {
         } returns calloutData
 
         // Mock the MapboxRouteCalloutsApi to return our test data
-        val provider = CalloutComposeUiStateProvider(
+        val provider = CalloutUiStateProvider(
             mockRoutesSetToRouteLineDataProvider,
             mockRoutesAttachedToLayersDataProvider,
             mockRouteCalloutsApi,
@@ -142,7 +142,7 @@ class CalloutComposeUiStateProviderTest {
             mockRouteCalloutsApi.setNavigationRoutes(listOf(mockRoute1, mockRoute2), any())
         } returns calloutData
 
-        val provider = CalloutComposeUiStateProvider(
+        val provider = CalloutUiStateProvider(
             mockRoutesSetToRouteLineDataProvider,
             mockRoutesAttachedToLayersDataProvider,
             mockRouteCalloutsApi,
@@ -165,8 +165,8 @@ class CalloutComposeUiStateProviderTest {
 
         assertEquals(
             listOf(
-                CalloutComposeUiState(mockCallout1, "layer-1"),
-                CalloutComposeUiState(mockCallout2, "layer-2"),
+                CalloutUiState(mockCallout1, "layer-1"),
+                CalloutUiState(mockCallout2, "layer-2"),
             ),
             currentState.callouts,
         )
@@ -190,7 +190,7 @@ class CalloutComposeUiStateProviderTest {
             mockRouteCalloutsApi.setNavigationRoutes(listOf(mockRoute1, mockRoute2), any())
         } returns calloutData
 
-        val provider = CalloutComposeUiStateProvider(
+        val provider = CalloutUiStateProvider(
             mockRoutesSetToRouteLineDataProvider,
             mockRoutesAttachedToLayersDataProvider,
             mockRouteCalloutsApi,
@@ -208,7 +208,7 @@ class CalloutComposeUiStateProviderTest {
 
         assertEquals(
             listOf(
-                CalloutComposeUiState(mockCallout1, "layer-1"),
+                CalloutUiState(mockCallout1, "layer-1"),
             ),
             provider.uiStateData.value.callouts,
         )
@@ -227,7 +227,7 @@ class CalloutComposeUiStateProviderTest {
             mockRouteCalloutsApi.setNavigationRoutes(listOf(mockRoute1, mockRoute2), any())
         } returns RouteCalloutData(listOf(mockCallout1, mockCallout2))
 
-        val provider = CalloutComposeUiStateProvider(
+        val provider = CalloutUiStateProvider(
             mockRoutesSetToRouteLineDataProvider,
             mockRoutesAttachedToLayersDataProvider,
             mockRouteCalloutsApi,
@@ -244,14 +244,14 @@ class CalloutComposeUiStateProviderTest {
         routesAttachedObserver.onAttached(routesToLayers)
 
         assertEquals(
-            emptyList<CalloutComposeUiState>(),
+            emptyList<CalloutUiState>(),
             provider.uiStateData.value.callouts,
         )
     }
 
     @Test
     fun `destroy unregisters observers`() {
-        val provider = CalloutComposeUiStateProvider(
+        val provider = CalloutUiStateProvider(
             mockRoutesSetToRouteLineDataProvider,
             mockRoutesAttachedToLayersDataProvider,
             mockRouteCalloutsApi,
@@ -290,7 +290,7 @@ class CalloutComposeUiStateProviderTest {
             mockRouteCalloutsApi.setNavigationRoutes(listOf(mockRoute1, mockRoute2), any())
         } returns RouteCalloutData(listOf(mockCallout1, mockCallout2))
 
-        val provider = CalloutComposeUiStateProvider(
+        val provider = CalloutUiStateProvider(
             mockRoutesSetToRouteLineDataProvider,
             mockRoutesAttachedToLayersDataProvider,
             mockRouteCalloutsApi,
@@ -306,7 +306,7 @@ class CalloutComposeUiStateProviderTest {
         routesAttachedObserver.onAttached(mapOf("route-1" to "layer-1"))
         var currentState = provider.uiStateData.value
         assertEquals(
-            listOf(CalloutComposeUiState(mockCallout1, "layer-1")),
+            listOf(CalloutUiState(mockCallout1, "layer-1")),
             currentState.callouts,
         )
 
@@ -318,8 +318,8 @@ class CalloutComposeUiStateProviderTest {
         currentState = provider.uiStateData.value
         assertEquals(
             listOf(
-                CalloutComposeUiState(mockCallout1, "layer-1"),
-                CalloutComposeUiState(mockCallout2, "layer-2"),
+                CalloutUiState(mockCallout1, "layer-1"),
+                CalloutUiState(mockCallout2, "layer-2"),
             ),
             currentState.callouts,
         )
@@ -328,7 +328,7 @@ class CalloutComposeUiStateProviderTest {
         routesAttachedObserver.onAttached(emptyMap())
         currentState = provider.uiStateData.value
         assertEquals(
-            emptyList<CalloutComposeUiState>(),
+            emptyList<CalloutUiState>(),
             currentState.callouts,
         )
     }
@@ -349,7 +349,7 @@ class CalloutComposeUiStateProviderTest {
             mockRouteCalloutsApi.setNavigationRoutes(listOf(mockRoute1, mockRoute2), any())
         } returns RouteCalloutData(listOf(mockCallout1, mockCallout2))
 
-        val provider = CalloutComposeUiStateProvider(
+        val provider = CalloutUiStateProvider(
             mockRoutesSetToRouteLineDataProvider,
             mockRoutesAttachedToLayersDataProvider,
             mockRouteCalloutsApi,
@@ -365,7 +365,7 @@ class CalloutComposeUiStateProviderTest {
         var currentState = provider.uiStateData.value
         assertEquals(
             listOf(
-                CalloutComposeUiState(mockCallout1, "layer-1"),
+                CalloutUiState(mockCallout1, "layer-1"),
             ),
             currentState.callouts,
         )
@@ -385,8 +385,8 @@ class CalloutComposeUiStateProviderTest {
         currentState = provider.uiStateData.value
         assertEquals(
             listOf(
-                CalloutComposeUiState(mockCallout1, "layer-1"),
-                CalloutComposeUiState(mockCallout2, "layer-2"),
+                CalloutUiState(mockCallout1, "layer-1"),
+                CalloutUiState(mockCallout2, "layer-2"),
             ),
             currentState.callouts,
         )
@@ -394,7 +394,7 @@ class CalloutComposeUiStateProviderTest {
 
     @Test
     fun `ui state is empty when no callouts data is set`() {
-        val provider = CalloutComposeUiStateProvider(
+        val provider = CalloutUiStateProvider(
             mockRoutesSetToRouteLineDataProvider,
             mockRoutesAttachedToLayersDataProvider,
         )
@@ -406,7 +406,7 @@ class CalloutComposeUiStateProviderTest {
 
         val currentState = provider.uiStateData.value
         assertEquals(
-            emptyList<CalloutComposeUiState>(),
+            emptyList<CalloutUiState>(),
             currentState.callouts,
         )
     }
