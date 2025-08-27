@@ -1,7 +1,7 @@
-package com.mapbox.navigation.ui.maps.route.callout.api.compose
+package com.mapbox.navigation.ui.maps.route.callout.api
 
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
-import com.mapbox.navigation.ui.maps.route.callout.api.RoutesAttachedToLayersObserver
+import com.mapbox.navigation.ui.maps.internal.route.callout.api.RoutesAttachedToLayersObserver
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import io.mockk.every
 import io.mockk.just

@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.maps.route.callout.api
+package com.mapbox.navigation.ui.maps.internal.route.callout.api
 
 import androidx.annotation.RestrictTo
 import com.mapbox.navigation.base.route.NavigationRoute

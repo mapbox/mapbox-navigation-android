@@ -2,7 +2,7 @@ package com.mapbox.navigation.ui.maps.internal.route.line
 
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData
+import com.mapbox.navigation.ui.maps.internal.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue

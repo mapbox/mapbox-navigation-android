@@ -25,6 +25,8 @@ import com.mapbox.navigation.core.internal.LowMemoryManager
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
+import com.mapbox.navigation.ui.maps.internal.route.callout.api.RoutesSetToRouteLineObserver
+import com.mapbox.navigation.ui.maps.internal.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.extractRouteRestrictionData
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getCongestionColorTypeForInactiveRouteLegs
@@ -38,8 +40,6 @@ import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.la
 import com.mapbox.navigation.ui.maps.internal.route.line.toStylePropertyValue
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.callout.api.MapboxRouteCalloutsApi
-import com.mapbox.navigation.ui.maps.route.callout.api.RoutesSetToRouteLineObserver
-import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.route.line.RouteLineHistoryRecordingApiSender
 import com.mapbox.navigation.ui.maps.route.line.model.ClosestRouteValue
 import com.mapbox.navigation.ui.maps.route.line.model.ExtractedRouteRestrictionData

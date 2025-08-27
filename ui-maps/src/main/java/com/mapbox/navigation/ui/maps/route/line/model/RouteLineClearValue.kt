@@ -3,7 +3,7 @@ package com.mapbox.navigation.ui.maps.route.line.model
 import androidx.annotation.Keep
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData
+import com.mapbox.navigation.ui.maps.internal.route.callout.model.RouteCalloutData
 
 /**
  * Represents data used to remove the route line(s) from the map.

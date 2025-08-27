@@ -1,7 +1,7 @@
-package com.mapbox.navigation.ui.maps.route.callout.api.compose
+package com.mapbox.navigation.ui.maps.route.callout.api
 
-import com.mapbox.navigation.ui.maps.route.callout.api.RoutesSetToRouteLineDataProvider
-import com.mapbox.navigation.ui.maps.route.callout.api.RoutesSetToRouteLineObserver
+import com.mapbox.navigation.ui.maps.internal.route.callout.api.RoutesSetToRouteLineDataProvider
+import com.mapbox.navigation.ui.maps.internal.route.callout.api.RoutesSetToRouteLineObserver
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import java.util.concurrent.CopyOnWriteArrayList
 

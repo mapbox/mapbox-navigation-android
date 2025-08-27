@@ -1,11 +1,10 @@
-package com.mapbox.navigation.ui.maps.route.callout.api.compose
+package com.mapbox.navigation.ui.maps.route.callout.api
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.ui.maps.route.callout.api.MapboxRouteCalloutsApi
-import com.mapbox.navigation.ui.maps.route.callout.api.RoutesAttachedToLayersDataProvider
-import com.mapbox.navigation.ui.maps.route.callout.api.RoutesAttachedToLayersObserver
-import com.mapbox.navigation.ui.maps.route.callout.api.RoutesSetToRouteLineDataProvider
-import com.mapbox.navigation.ui.maps.route.callout.api.RoutesSetToRouteLineObserver
+import com.mapbox.navigation.ui.maps.internal.route.callout.api.RoutesAttachedToLayersDataProvider
+import com.mapbox.navigation.ui.maps.internal.route.callout.api.RoutesAttachedToLayersObserver
+import com.mapbox.navigation.ui.maps.internal.route.callout.api.RoutesSetToRouteLineDataProvider
+import com.mapbox.navigation.ui.maps.internal.route.callout.api.RoutesSetToRouteLineObserver
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions
@@ -24,13 +23,11 @@ import kotlinx.coroutines.flow.map
  * An example of such a case is using Mapbox Maps SDK Compose extensions: attaching a DVA for
  * Compose MapboxMap is done via [compose-specific API](https://docs.mapbox.com/android/maps/examples/compose/dynamic-view-annotations/),
  * which is not currently supported by NavSDK.
- * In this case you may listen to [CalloutUiState] updates and use its information by attach a DVA.
+ * In this case you may listen to [RouteCalloutUiState] updates and use its information by attach a DVA.
  * Use this class (specifically, [uiStateData] flow) to subscribe.
- *
- * NOTE: after you are done using this object, invoke [destroy] method to clean-up resources and avoid memory leaks.
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class CalloutUiStateProvider internal constructor(
+class RouteCalloutUiStateProvider internal constructor(
     private val routesSetToRouteLineDataProvider: RoutesSetToRouteLineDataProvider,
     private val routesAttachedToLayersDataProvider: RoutesAttachedToLayersDataProvider,
     private val routesCalloutsApi: MapboxRouteCalloutsApi = MapboxRouteCalloutsApi(),
@@ -68,18 +65,18 @@ class CalloutUiStateProvider internal constructor(
     }
 
     /**
-     * Flow of [CalloutUiStateData].
+     * Flow of [RouteCalloutUiStateData].
      * Subscribe to this flow to retrieve UI data for callouts in case you want to attach the DVA yourself.
      */
-    val uiStateData: Flow<CalloutUiStateData> = calloutsData.flatMapLatest { calloutsData ->
+    val uiStateData: Flow<RouteCalloutUiStateData> = calloutsData.flatMapLatest { calloutsData ->
         // The fact that routes were set to route line does not mean they were rendered
         // (they were set to MapboxRouteLineApi, not MapboxRouteLineView).
         // So we don't need to take the current routesToLayers value, instead we should wait for the new one to arrive.
         routesToLayers.map { routesToLayers ->
-            CalloutUiStateData(
+            RouteCalloutUiStateData(
                 calloutsData.callouts.mapNotNull { callout ->
                     routesToLayers[callout.route.id]?.let { layerId ->
-                        CalloutUiState(callout, layerId)
+                        RouteCalloutUiState(callout, layerId)
                     }
                 },
             )
@@ -88,18 +85,18 @@ class CalloutUiStateProvider internal constructor(
 
     companion object {
 
-        private const val TAG = "CalloutUiStateProvider"
+        private const val TAG = "RouteCalloutUiStateProvider"
 
         /**
-         * Create [CalloutUiStateData] for the specified route line components.
+         * Create [RouteCalloutUiStateData] for the specified route line components.
          * Note: it is important that you pass [MapboxRouteLineApi] and [MapboxRouteLineView] which will be used to draw routes you want to attach your DVAs to.
-         * In case you have multiple map instances, multiple instances of [CalloutUiStateProvider] must be created (one per each Map (and per each [MapboxRouteLineView])).
+         * In case you have multiple map instances, multiple instances of [RouteCalloutUiStateProvider] must be created (one per each Map (and per each [MapboxRouteLineView])).
          */
         fun create(
             routeLineApi: MapboxRouteLineApi,
             routeLineView: MapboxRouteLineView,
-        ): CalloutUiStateProvider =
-            CalloutUiStateProvider(
+        ): RouteCalloutUiStateProvider =
+            RouteCalloutUiStateProvider(
                 MapboxRoutesSetToRouteLineDataProvider(routeLineApi),
                 MapboxRoutesAttachedToLayersDataProvider(routeLineView),
             )

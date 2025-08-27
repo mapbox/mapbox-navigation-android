@@ -12,7 +12,7 @@ import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData
+import com.mapbox.navigation.ui.maps.internal.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.route.line.api.LineGradientCommandApplier
 import com.mapbox.navigation.ui.maps.route.line.api.LineTrimCommandApplier
 import com.mapbox.navigation.ui.maps.route.line.api.RouteLineValueCommandHolder

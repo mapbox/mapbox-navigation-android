@@ -1,17 +1,17 @@
-package com.mapbox.navigation.ui.maps.route.callout.api.compose
+package com.mapbox.navigation.ui.maps.route.callout.api
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.maps.route.callout.model.RouteCallout
 
 /**
  * Represents UI data required to attach a DVA with this callout for a specified route.
- * See [CalloutUiStateData] for more details and supported use cases.
+ * See [RouteCalloutUiStateData] for more details and supported use cases.
  *
- * @param routeCallout route callout data, see [RouteCallout] for details.
+ * @param routeCallout route callout data, see [com.mapbox.navigation.ui.maps.route.callout.model.RouteCallout] for details.
  * @param layerId use this layerId to attach the DVA to.
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class CalloutUiState internal constructor(
+class RouteCalloutUiState internal constructor(
     val routeCallout: RouteCallout,
     val layerId: String,
 ) {
@@ -23,7 +23,7 @@ class CalloutUiState internal constructor(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as CalloutUiState
+        other as RouteCalloutUiState
 
         if (routeCallout != other.routeCallout) return false
         if (layerId != other.layerId) return false
@@ -44,6 +44,6 @@ class CalloutUiState internal constructor(
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "CalloutUiState(routeCallout=$routeCallout, layerId='$layerId')"
+        return "RouteCalloutUiState(routeCallout=$routeCallout, layerId='$layerId')"
     }
 }

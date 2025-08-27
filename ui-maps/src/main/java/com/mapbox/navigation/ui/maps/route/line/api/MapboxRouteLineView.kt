@@ -19,6 +19,8 @@ import com.mapbox.maps.extension.style.sources.getSource
 import com.mapbox.maps.viewannotation.ViewAnnotationManager
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.maps.internal.extensions.getStyleId
+import com.mapbox.navigation.ui.maps.internal.route.callout.api.RoutesAttachedToLayersObserver
+import com.mapbox.navigation.ui.maps.internal.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getLayerIdsForPrimaryRoute
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.getLayerVisibility
@@ -62,8 +64,6 @@ import com.mapbox.navigation.ui.maps.route.callout.api.DefaultRouteCalloutAdapte
 import com.mapbox.navigation.ui.maps.route.callout.api.MapboxRouteCalloutAdapter
 import com.mapbox.navigation.ui.maps.route.callout.api.MapboxRouteCalloutsView
 import com.mapbox.navigation.ui.maps.route.callout.api.RouteLineViewBasedLayerIdProvider
-import com.mapbox.navigation.ui.maps.route.callout.api.RoutesAttachedToLayersObserver
-import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.route.line.RouteLineHistoryRecordingViewSender
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewDynamicOptionsBuilder
