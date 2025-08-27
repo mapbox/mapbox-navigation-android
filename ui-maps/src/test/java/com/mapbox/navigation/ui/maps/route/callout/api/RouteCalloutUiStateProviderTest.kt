@@ -7,6 +7,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.maps.internal.route.callout.api.MapboxRouteCalloutsApi
 import com.mapbox.navigation.ui.maps.internal.route.callout.api.RoutesAttachedToLayersDataProvider
 import com.mapbox.navigation.ui.maps.internal.route.callout.api.RoutesAttachedToLayersObserver
 import com.mapbox.navigation.ui.maps.internal.route.callout.api.RoutesSetToRouteLineDataProvider

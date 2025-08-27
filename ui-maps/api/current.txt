@@ -984,17 +984,6 @@ package com.mapbox.navigation.ui.maps.route.callout.api {
     method public abstract void onUpdateAnchor(android.view.View view, com.mapbox.maps.ViewAnnotationAnchorConfig anchor);
   }
 
-  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapboxRouteCalloutsApi {
-    ctor public MapboxRouteCalloutsApi();
-    method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData setNavigationRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> newRoutes, java.util.List<com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata> alternativeRoutesMetadata);
-  }
-
-  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public final class MapboxRouteCalloutsView {
-    ctor public MapboxRouteCalloutsView(com.mapbox.maps.viewannotation.ViewAnnotationManager viewAnnotationManager, com.mapbox.navigation.ui.maps.route.callout.api.MapboxRouteCalloutAdapter routeCalloutAdapter, com.mapbox.navigation.ui.maps.route.callout.api.RouteLayerIdProvider layerIdProvider);
-    method public void release();
-    method public void renderCallouts(com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData routeCalloutResult);
-  }
-
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RouteCalloutUiState {
     method public String getLayerId();
     method public com.mapbox.navigation.ui.maps.route.callout.model.RouteCallout getRouteCallout();
@@ -1081,12 +1070,6 @@ package com.mapbox.navigation.ui.maps.route.callout.model {
     property public final long durationDifferenceWithPrimary;
     property public final boolean isPrimary;
     property public final com.mapbox.navigation.base.route.NavigationRoute route;
-  }
-
-  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RouteCalloutData {
-    ctor public RouteCalloutData(java.util.List<com.mapbox.navigation.ui.maps.route.callout.model.RouteCallout> callouts);
-    method public java.util.List<com.mapbox.navigation.ui.maps.route.callout.model.RouteCallout> getCallouts();
-    property public final java.util.List<com.mapbox.navigation.ui.maps.route.callout.model.RouteCallout> callouts;
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RouteCalloutType {

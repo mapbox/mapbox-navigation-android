@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.mapbox.maps.AnnotatedLayerFeature
 import com.mapbox.maps.viewannotation.ViewAnnotationManager
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.ui.maps.internal.route.callout.api.MapboxRouteCalloutsView
 import com.mapbox.navigation.ui.maps.internal.route.callout.model.RouteCalloutData
 import io.mockk.Called
 import io.mockk.Runs
