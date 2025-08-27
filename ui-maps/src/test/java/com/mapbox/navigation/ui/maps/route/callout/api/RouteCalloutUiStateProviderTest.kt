@@ -1,17 +1,18 @@
-package com.mapbox.navigation.ui.maps.route.callout.api.compose
+@file:OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+
+package com.mapbox.navigation.ui.maps.route.callout.api
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.ui.maps.route.callout.api.MapboxRouteCalloutsApi
-import com.mapbox.navigation.ui.maps.route.callout.api.RoutesAttachedToLayersDataProvider
-import com.mapbox.navigation.ui.maps.route.callout.api.RoutesAttachedToLayersObserver
-import com.mapbox.navigation.ui.maps.route.callout.api.RoutesSetToRouteLineDataProvider
-import com.mapbox.navigation.ui.maps.route.callout.api.RoutesSetToRouteLineObserver
+import com.mapbox.navigation.ui.maps.internal.route.callout.api.RoutesAttachedToLayersDataProvider
+import com.mapbox.navigation.ui.maps.internal.route.callout.api.RoutesAttachedToLayersObserver
+import com.mapbox.navigation.ui.maps.internal.route.callout.api.RoutesSetToRouteLineDataProvider
+import com.mapbox.navigation.ui.maps.internal.route.callout.api.RoutesSetToRouteLineObserver
+import com.mapbox.navigation.ui.maps.internal.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.route.callout.model.RouteCallout
-import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -26,8 +27,8 @@ import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
-class CalloutUiStateProviderTest {
+@OptIn(ExperimentalCoroutinesApi::class, ExperimentalPreviewMapboxNavigationAPI::class)
+class RouteCalloutUiStateProviderTest {
 
     @get:Rule
     val logRule = LoggingFrontendTestRule()
@@ -35,10 +36,12 @@ class CalloutUiStateProviderTest {
     @get:Rule
     val coroutineRule = MainCoroutineRule()
 
-    private val mockRoutesSetToRouteLineDataProvider =
-        mockk<RoutesSetToRouteLineDataProvider>(relaxed = true)
-    private val mockRoutesAttachedToLayersDataProvider =
-        mockk<RoutesAttachedToLayersDataProvider>(relaxed = true)
+    private val mockRoutesSetToRouteLineDataProvider = mockk<RoutesSetToRouteLineDataProvider>(
+        relaxed = true,
+    )
+    private val mockRoutesAttachedToLayersDataProvider = mockk<RoutesAttachedToLayersDataProvider>(
+        relaxed = true,
+    )
     private val mockRouteCalloutsApi = mockk<MapboxRouteCalloutsApi>(relaxed = true)
     private val mockRoute1 = mockk<NavigationRoute> {
         every { id } returns "route-1"
@@ -52,9 +55,10 @@ class CalloutUiStateProviderTest {
 
     @Test
     fun `ui state is not set when we only have callouts data`() = runTest {
-        val mockCallout1 = mockk<RouteCallout> {
-            every { route } returns mockRoute1
-        }
+        val mockCallout1 =
+            mockk<RouteCallout> {
+                every { route } returns mockRoute1
+            }
         val mockCallout2 = mockk<RouteCallout> {
             every { route } returns mockRoute2
         }
@@ -67,7 +71,7 @@ class CalloutUiStateProviderTest {
         } returns calloutData
 
         // Mock the MapboxRouteCalloutsApi to return our test data
-        val provider = CalloutUiStateProvider(
+        val provider = RouteCalloutUiStateProvider(
             mockRoutesSetToRouteLineDataProvider,
             mockRoutesAttachedToLayersDataProvider,
             mockRouteCalloutsApi,
@@ -109,7 +113,7 @@ class CalloutUiStateProviderTest {
             mockRouteCalloutsApi.setNavigationRoutes(listOf(mockRoute1, mockRoute2), any())
         } returns calloutData
 
-        val provider = CalloutUiStateProvider(
+        val provider = RouteCalloutUiStateProvider(
             mockRoutesSetToRouteLineDataProvider,
             mockRoutesAttachedToLayersDataProvider,
             mockRouteCalloutsApi,
@@ -140,8 +144,8 @@ class CalloutUiStateProviderTest {
 
         assertEquals(
             listOf(
-                CalloutUiState(mockCallout1, "layer-1"),
-                CalloutUiState(mockCallout2, "layer-2"),
+                RouteCalloutUiState(mockCallout1, "layer-1"),
+                RouteCalloutUiState(mockCallout2, "layer-2"),
             ),
             currentState.callouts,
         )
@@ -165,7 +169,7 @@ class CalloutUiStateProviderTest {
             mockRouteCalloutsApi.setNavigationRoutes(listOf(mockRoute1, mockRoute2), any())
         } returns calloutData
 
-        val provider = CalloutUiStateProvider(
+        val provider = RouteCalloutUiStateProvider(
             mockRoutesSetToRouteLineDataProvider,
             mockRoutesAttachedToLayersDataProvider,
             mockRouteCalloutsApi,
@@ -191,7 +195,7 @@ class CalloutUiStateProviderTest {
 
         assertEquals(
             listOf(
-                CalloutUiState(mockCallout1, "layer-1"),
+                RouteCalloutUiState(mockCallout1, "layer-1"),
             ),
             provider.uiStateData.first().callouts,
         )
@@ -210,7 +214,7 @@ class CalloutUiStateProviderTest {
             mockRouteCalloutsApi.setNavigationRoutes(listOf(mockRoute1, mockRoute2), any())
         } returns RouteCalloutData(listOf(mockCallout1, mockCallout2))
 
-        val provider = CalloutUiStateProvider(
+        val provider = RouteCalloutUiStateProvider(
             mockRoutesSetToRouteLineDataProvider,
             mockRoutesAttachedToLayersDataProvider,
             mockRouteCalloutsApi,
@@ -235,7 +239,7 @@ class CalloutUiStateProviderTest {
         }
 
         assertEquals(
-            emptyList<CalloutUiState>(),
+            emptyList<RouteCalloutUiState>(),
             provider.uiStateData.first().callouts,
         )
     }
@@ -263,7 +267,7 @@ class CalloutUiStateProviderTest {
             mockRouteCalloutsApi.setNavigationRoutes(listOf(mockRoute1, mockRoute2), any())
         } returns RouteCalloutData(listOf(mockCallout1, mockCallout2))
 
-        val provider = CalloutUiStateProvider(
+        val provider = RouteCalloutUiStateProvider(
             mockRoutesSetToRouteLineDataProvider,
             mockRoutesAttachedToLayersDataProvider,
             mockRouteCalloutsApi,
@@ -292,22 +296,22 @@ class CalloutUiStateProviderTest {
 
         // First update - only route-1 attached
         assertEquals(
-            listOf(CalloutUiState(mockCallout1, "layer-1")),
+            listOf(RouteCalloutUiState(mockCallout1, "layer-1")),
             currentStates[0].callouts,
         )
 
         // Second update - both routes attached
         assertEquals(
             listOf(
-                CalloutUiState(mockCallout1, "layer-1"),
-                CalloutUiState(mockCallout2, "layer-2"),
+                RouteCalloutUiState(mockCallout1, "layer-1"),
+                RouteCalloutUiState(mockCallout2, "layer-2"),
             ),
             currentStates[1].callouts,
         )
 
         // Third update - no routes attached
         assertEquals(
-            emptyList<CalloutUiState>(),
+            emptyList<RouteCalloutUiState>(),
             currentStates[2].callouts,
         )
     }
@@ -328,7 +332,7 @@ class CalloutUiStateProviderTest {
             mockRouteCalloutsApi.setNavigationRoutes(listOf(mockRoute1, mockRoute2), any())
         } returns RouteCalloutData(listOf(mockCallout1, mockCallout2))
 
-        val provider = CalloutUiStateProvider(
+        val provider = RouteCalloutUiStateProvider(
             mockRoutesSetToRouteLineDataProvider,
             mockRoutesAttachedToLayersDataProvider,
             mockRouteCalloutsApi,
@@ -362,15 +366,15 @@ class CalloutUiStateProviderTest {
         val currentStates = provider.uiStateData.take(2).toList()
         assertEquals(
             listOf(
-                CalloutUiState(mockCallout1, "layer-1"),
+                RouteCalloutUiState(mockCallout1, "layer-1"),
             ),
             currentStates[0].callouts,
         )
 
         assertEquals(
             listOf(
-                CalloutUiState(mockCallout1, "layer-1"),
-                CalloutUiState(mockCallout2, "layer-2"),
+                RouteCalloutUiState(mockCallout1, "layer-1"),
+                RouteCalloutUiState(mockCallout2, "layer-2"),
             ),
             currentStates[1].callouts,
         )
@@ -378,7 +382,7 @@ class CalloutUiStateProviderTest {
 
     @Test
     fun `ui state is not set when no callouts data is set`() = runTest {
-        val provider = CalloutUiStateProvider(
+        val provider = RouteCalloutUiStateProvider(
             mockRoutesSetToRouteLineDataProvider,
             mockRoutesAttachedToLayersDataProvider,
         )

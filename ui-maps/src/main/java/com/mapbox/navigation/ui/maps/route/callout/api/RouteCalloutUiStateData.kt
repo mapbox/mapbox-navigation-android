@@ -1,23 +1,22 @@
-package com.mapbox.navigation.ui.maps.route.callout.api.compose
+package com.mapbox.navigation.ui.maps.route.callout.api
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions
 
 /**
  * UI state for route callout.
- * Normally, route callouts are drawn under the hood in NavSDK when this feature is enabled in [MapboxRouteLineApiOptions].
+ * Normally, route callouts are drawn under the hood in NavSDK when this feature is enabled in [com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions].
  * However, there might be cases when app wants to only get the callout data from NavSDK and attach the DVA itself.
  * An example of such a case is using Mapbox Maps SDK Compose extensions: attaching a DVA for
  * Compose MapboxMap is done via [compose-specific API](https://docs.mapbox.com/android/maps/examples/compose/dynamic-view-annotations/),
  * which is not currently supported by NavSDK.
- * In this case you may listen to [CalloutUiStateData] updates and use its information by attach a DVA.
- * See [CalloutUiStateProvider] for details on how to subscribe.
+ * In this case you may listen to [RouteCalloutUiStateData] updates and use its information by attach a DVA.
+ * See [RouteCalloutUiStateProvider] for details on how to subscribe.
  *
- * @param callouts a list of currently relevant route callouts, see [CalloutUiState] for details.
+ * @param callouts a list of currently relevant route callouts, see [RouteCalloutUiState] for details.
  */
 @ExperimentalPreviewMapboxNavigationAPI
-class CalloutUiStateData internal constructor(
-    val callouts: List<CalloutUiState>,
+class RouteCalloutUiStateData internal constructor(
+    val callouts: List<RouteCalloutUiState>,
 ) {
 
     /**
@@ -27,7 +26,7 @@ class CalloutUiStateData internal constructor(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as CalloutUiStateData
+        other as RouteCalloutUiStateData
 
         return callouts == other.callouts
     }
@@ -43,6 +42,6 @@ class CalloutUiStateData internal constructor(
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "CalloutUiStateData(callouts=$callouts)"
+        return "RouteCalloutUiStateData(callouts=$callouts)"
     }
 }

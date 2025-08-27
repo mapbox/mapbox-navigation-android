@@ -26,6 +26,8 @@ import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.maps.internal.extensions.getStyleId
+import com.mapbox.navigation.ui.maps.internal.route.callout.api.RoutesAttachedToLayersObserver
+import com.mapbox.navigation.ui.maps.internal.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.buildScalingExpression
 import com.mapbox.navigation.ui.maps.internal.route.line.toData
@@ -64,8 +66,6 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_TRA
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.WAYPOINT_SOURCE_ID
-import com.mapbox.navigation.ui.maps.route.callout.api.RoutesAttachedToLayersObserver
-import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.route.line.RouteLineHistoryRecordingViewSender
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue

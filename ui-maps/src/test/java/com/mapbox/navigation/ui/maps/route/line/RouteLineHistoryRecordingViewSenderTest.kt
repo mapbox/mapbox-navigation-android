@@ -11,6 +11,7 @@ import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.internal.extensions.registerObserver
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.maps.internal.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineDynamicEventData
 import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineEventData
 import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineProviderBasedExpressionEventData
@@ -20,7 +21,6 @@ import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineViewRenderRout
 import com.mapbox.navigation.ui.maps.internal.route.line.toData
 import com.mapbox.navigation.ui.maps.internal.route.line.toEventValue
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
-import com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError

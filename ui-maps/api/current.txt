@@ -996,53 +996,30 @@ package com.mapbox.navigation.ui.maps.route.callout.api {
     method public void renderCallouts(com.mapbox.navigation.ui.maps.route.callout.model.RouteCalloutData routeCalloutResult);
   }
 
-  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public fun interface RouteLayerIdProvider {
-    method public String? getLayerId(String routeId);
-  }
-
-  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public interface RoutesAttachedToLayersDataProvider {
-    method public void registerRoutesAttachedToLayersObserver(com.mapbox.navigation.ui.maps.route.callout.api.RoutesAttachedToLayersObserver observer);
-    method public void unregisterRoutesAttachedToLayersObserver(com.mapbox.navigation.ui.maps.route.callout.api.RoutesAttachedToLayersObserver observer);
-  }
-
-  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public fun interface RoutesAttachedToLayersObserver {
-    method public void onAttached(java.util.Map<java.lang.String,java.lang.String> routeIdToLayer);
-  }
-
-  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public interface RoutesSetToRouteLineDataProvider {
-    method public void registerRoutesSetToRouteLineObserver(com.mapbox.navigation.ui.maps.route.callout.api.RoutesSetToRouteLineObserver observer);
-    method public void unregisterRoutesSetToRouteLineObserver(com.mapbox.navigation.ui.maps.route.callout.api.RoutesSetToRouteLineObserver observer);
-  }
-
-  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public fun interface RoutesSetToRouteLineObserver {
-    method public void onSet(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes, java.util.List<com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata> alternativeMetadata);
-  }
-
-}
-
-package com.mapbox.navigation.ui.maps.route.callout.api.compose {
-
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class CalloutUiState {
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RouteCalloutUiState {
     method public String getLayerId();
     method public com.mapbox.navigation.ui.maps.route.callout.model.RouteCallout getRouteCallout();
     property public final String layerId;
     property public final com.mapbox.navigation.ui.maps.route.callout.model.RouteCallout routeCallout;
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class CalloutUiStateData {
-    method public java.util.List<com.mapbox.navigation.ui.maps.route.callout.api.compose.CalloutUiState> getCallouts();
-    property public final java.util.List<com.mapbox.navigation.ui.maps.route.callout.api.compose.CalloutUiState> callouts;
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RouteCalloutUiStateData {
+    method public java.util.List<com.mapbox.navigation.ui.maps.route.callout.api.RouteCalloutUiState> getCallouts();
+    property public final java.util.List<com.mapbox.navigation.ui.maps.route.callout.api.RouteCalloutUiState> callouts;
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class CalloutUiStateProvider {
-    method public void destroy();
-    method public kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.maps.route.callout.api.compose.CalloutUiStateData> getUiStateData();
-    property public final kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.maps.route.callout.api.compose.CalloutUiStateData> uiStateData;
-    field public static final com.mapbox.navigation.ui.maps.route.callout.api.compose.CalloutUiStateProvider.Companion Companion;
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RouteCalloutUiStateProvider {
+    method public kotlinx.coroutines.flow.Flow<com.mapbox.navigation.ui.maps.route.callout.api.RouteCalloutUiStateData> getUiStateData();
+    property public final kotlinx.coroutines.flow.Flow<com.mapbox.navigation.ui.maps.route.callout.api.RouteCalloutUiStateData> uiStateData;
+    field public static final com.mapbox.navigation.ui.maps.route.callout.api.RouteCalloutUiStateProvider.Companion Companion;
   }
 
-  public static final class CalloutUiStateProvider.Companion {
-    method public com.mapbox.navigation.ui.maps.route.callout.api.compose.CalloutUiStateProvider create(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi routeLineApi, com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView routeLineView);
+  public static final class RouteCalloutUiStateProvider.Companion {
+    method public com.mapbox.navigation.ui.maps.route.callout.api.RouteCalloutUiStateProvider create(com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi routeLineApi, com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView routeLineView);
+  }
+
+  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public fun interface RouteLayerIdProvider {
+    method public String? getLayerId(String routeId);
   }
 
 }
