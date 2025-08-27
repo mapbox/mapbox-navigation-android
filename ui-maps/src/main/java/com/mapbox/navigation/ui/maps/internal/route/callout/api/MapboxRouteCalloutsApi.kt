@@ -1,11 +1,11 @@
-package com.mapbox.navigation.ui.maps.route.callout.api
+package com.mapbox.navigation.ui.maps.internal.route.callout.api
 
 import androidx.annotation.RestrictTo
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.ui.maps.internal.route.callout.model.RouteCalloutData
+import com.mapbox.navigation.ui.maps.route.callout.api.roundUpByAbs
 import com.mapbox.navigation.ui.maps.route.callout.model.RouteCallout
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -22,7 +22,7 @@ import kotlin.time.DurationUnit
  * [MapboxRouteCalloutsView].
  *
  * Like the route line components the [MapboxRouteCalloutsApi] consumes data from the Navigation SDK,
- * specifically the [NavigationRoute], and produces data for rendering on the map by the
+ * specifically the [com.mapbox.navigation.base.route.NavigationRoute], and produces data for rendering on the map by the
  * [MapboxRouteCalloutsView].
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -36,7 +36,7 @@ class MapboxRouteCalloutsApi {
      * the primary route and any additional routes will be alternate routes.
      * @param alternativeRoutesMetadata if available, helps [MapboxRouteCalloutsApi] find
      * the deviation point to extract different geometry segment the callout should be attaching to.
-     * See [MapboxNavigation.getAlternativeMetadataFor].
+     * See [com.mapbox.navigation.core.MapboxNavigation.getAlternativeMetadataFor].
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     fun setNavigationRoutes(

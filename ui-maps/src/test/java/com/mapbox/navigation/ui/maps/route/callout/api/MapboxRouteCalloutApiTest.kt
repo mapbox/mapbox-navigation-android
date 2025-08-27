@@ -6,6 +6,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.testing.factories.createDirectionsResponse
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createNavigationRoutes
+import com.mapbox.navigation.ui.maps.internal.route.callout.api.MapboxRouteCalloutsApi
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
 import org.junit.Test
