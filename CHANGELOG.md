@@ -1,5 +1,28 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.12.0-rc.1 - 28 August, 2025
+#### Features
+- Added `RouteCalloutUiStateProvider` class that allows to listen to Route Callout UI data. 
+Normally, route callouts are drawn under the hood in NavSDK when this feature is enabled in `MapboxRouteLineApiOptions`.
+However, there might be cases when app wants to only get the callout data from NavSDK and attach the DVA itself.
+An example of such a case is using Mapbox Maps SDK Compose extensions: attaching a DVA for
+Compose MapboxMap is done via [compose-specific API](https://docs.mapbox.com/android/maps/examples/compose/dynamic-view-annotations/),
+which is not currently supported by NavSDK.
+In this case you may listen to `RouteCalloutUiStateData` updates via `RouteCalloutUiStateProvider` and use its information by attach a DVA.
+
+#### Bug fixes and improvements
+- Fixed the incorrect order of callbacks when notifying about road cameras on the route. 
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+
+
 ## Navigation SDK Core Framework 3.12.0-beta.1 - 15 August, 2025
 #### Features
 - Added ability to filter by data source in EV charging station search operations. 
