@@ -3,13 +3,20 @@ apply plugin: 'com.mapbox.sdkRegistry'
 apply from: file("../gradle/artifact-settings.gradle")
 apply from: "../gradle/kdoc-settings.gradle"
 
+def artifactName = ""
+if (project.hasProperty("ndkMajor")) {
+    artifactName = "${project.ext.mapboxArtifactId}-ndk${project.property("ndkMajor")}"
+} else {
+    artifactName = "${project.ext.mapboxArtifactId}"
+}
+
 afterEvaluate {
     publishing {
         publications {
             release(MavenPublication) {
                 from components.release
                 groupId project.ext.mapboxArtifactGroupId
-                artifactId project.ext.mapboxArtifactId
+                artifactId artifactName
                 version project.ext.versionName
 
                 artifact(androidSourcesJar)
@@ -39,7 +46,7 @@ afterEvaluate {
             debug(MavenPublication) {
                 from components.debug
                 groupId project.ext.mapboxArtifactGroupId
-                artifactId project.ext.mapboxArtifactId
+                artifactId artifactName
                 version project.ext.versionName
 
                 artifact(androidSourcesJar)
@@ -82,6 +89,7 @@ registry {
     publish = true
     publishMessage = "cc @mapbox/navigation-android"
     publications = ["release"]
+    additionalPackageSuffixes = ["-ndk27"]
 }
 
 task androidSourcesJar(type: Jar) {

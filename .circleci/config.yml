@@ -597,7 +597,6 @@ commands:
           command: |
             gcloud firebase test android run --type robo \
               --app << parameters.module_target >>/build/outputs/apk/<< parameters.variant >>/<< parameters.module_target >>-<< parameters.variant >>.apk \
-              --device model=hwALE-H,version=21,locale=es,orientation=portrait  \
               --device model=hammerhead,version=23,locale=fr,orientation=portrait \
               --device model=q2q,version=31,locale=de,orientation=landscape \
               --device model=panther,version=33,locale=it,orientation=landscape \
