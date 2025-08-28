@@ -72,6 +72,8 @@ internal class MapboxRouteCalloutView(
     }
 
     internal fun release() {
+        this.routeCalloutResult = null
+        clear()
         viewAnnotationManager.removeOnViewAnnotationUpdatedListener(onViewAnnotationUpdatedListener)
         routeCalloutAdapter.removeDataObserver(dataChangedObserver)
     }
