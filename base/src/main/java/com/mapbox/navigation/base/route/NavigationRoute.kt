@@ -28,6 +28,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.CongestionNumericOverride
 import com.mapbox.navigation.base.internal.SDKRouteParser
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.toUpcomingRoadObjects
+import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.route.RoutesResponse
 import com.mapbox.navigation.base.internal.route.Waypoint
 import com.mapbox.navigation.base.internal.route.routerOrigin
@@ -363,34 +364,42 @@ class NavigationRoute private constructor(
                     val startElapsedMillis = currentElapsedMillis()
                     val waitMillis = startElapsedMillis - responseTimeElapsedMillis
 
-                    directionsResponseJson.toDirectionsResponse().let {
-                        val parseMillis = currentElapsedMillis() - startElapsedMillis
-                        val parseThread = Thread.currentThread().name
-                        logD(
-                            "parsed directions response to java model for ${it.uuid()}, " +
-                                "parse time ${parseMillis}ms",
-                            LOG_CATEGORY,
-                        )
-                        ParseResult(it, waitMillis, parseMillis, parseThread)
+                    PerformanceTracker.trackPerformanceSync(
+                        "directionsJson#toDirectionsResponse()",
+                    ) {
+                        directionsResponseJson.toDirectionsResponse().let {
+                            val parseMillis = currentElapsedMillis() - startElapsedMillis
+                            val parseThread = Thread.currentThread().name
+                            logD(
+                                "parsed directions response to java model for ${it.uuid()}, " +
+                                    "parse time ${parseMillis}ms",
+                                LOG_CATEGORY,
+                            )
+                            ParseResult(it, waitMillis, parseMillis, parseThread)
+                        }
                     }
                 }
                 val deferredNativeParsing = async(ThreadController.DefaultDispatcher) {
                     val startElapsedMillis = currentElapsedMillis()
                     val waitMillis = startElapsedMillis - responseTimeElapsedMillis
 
-                    routeParser.parseDirectionsResponse(
-                        directionsResponseJson,
-                        routeRequestUrl,
-                        routerOrigin,
-                    ).let {
-                        val parseMillis = currentElapsedMillis() - startElapsedMillis
-                        logD(
-                            "parsed directions response to RouteInterface " +
-                                "for ${it.value?.firstOrNull()?.responseUuid}, " +
-                                "parse time ${parseMillis}ms",
-                            LOG_CATEGORY,
-                        )
-                        ParseResult(it, waitMillis, parseMillis)
+                    PerformanceTracker.trackPerformanceSync(
+                        "SDKRouteParser#parseDirectionsResponse()",
+                    ) {
+                        routeParser.parseDirectionsResponse(
+                            directionsResponseJson,
+                            routeRequestUrl,
+                            routerOrigin,
+                        ).let {
+                            val parseMillis = currentElapsedMillis() - startElapsedMillis
+                            logD(
+                                "parsed directions response to RouteInterface " +
+                                    "for ${it.value?.firstOrNull()?.responseUuid}, " +
+                                    "parse time ${parseMillis}ms",
+                                LOG_CATEGORY,
+                            )
+                            ParseResult(it, waitMillis, parseMillis)
+                        }
                     }
                 }
                 val deferredRouteOptionsParsing = async(ThreadController.DefaultDispatcher) {

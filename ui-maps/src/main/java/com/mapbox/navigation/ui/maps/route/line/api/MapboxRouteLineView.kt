@@ -18,6 +18,7 @@ import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.extension.style.sources.getSource
 import com.mapbox.maps.viewannotation.ViewAnnotationManager
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.ui.maps.internal.extensions.getStyleId
 import com.mapbox.navigation.ui.maps.internal.route.callout.api.MapboxRouteCalloutsView
 import com.mapbox.navigation.ui.maps.internal.route.callout.api.RoutesAttachedToLayersObserver
@@ -283,11 +284,13 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         map: MapboxMap,
         callback: RoutesRenderedCallback,
     ) {
-        renderRouteDrawDataInternal(
-            style,
-            routeDrawData,
-            RoutesRenderedCallbackWrapper(map, callback.toDelayedRoutesRenderedCallback()),
-        )
+        PerformanceTracker.trackPerformanceSync("MapboxRouteLineView#renderRouteDrawData") {
+            renderRouteDrawDataInternal(
+                style,
+                routeDrawData,
+                RoutesRenderedCallbackWrapper(map, callback.toDelayedRoutesRenderedCallback()),
+            )
+        }
     }
 
     /**
@@ -297,7 +300,9 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
      * @param routeDrawData a [Expected<RouteLineError, RouteSetValue>]
      */
     fun renderRouteDrawData(style: Style, routeDrawData: Expected<RouteLineError, RouteSetValue>) {
-        renderRouteDrawDataInternal(style, routeDrawData, null)
+        PerformanceTracker.trackPerformanceSync("MapboxRouteLineView#renderRouteDrawData") {
+            renderRouteDrawDataInternal(style, routeDrawData, null)
+        }
     }
 
     /**
@@ -499,9 +504,19 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
                     }
                 }
             }
-            updateSourceCommands.forEach { it() }
-            mutationCommands.forEach { mutationCommand ->
-                mutationCommand()
+            updateSourceCommands.forEachIndexed { index, cmd ->
+                PerformanceTracker.trackPerformanceSync(
+                    "MapboxRouteLineView#renderRouteDrawData#updateSourceCommands#$index",
+                ) {
+                    cmd()
+                }
+            }
+            mutationCommands.forEachIndexed { index, mutationCommand ->
+                PerformanceTracker.trackPerformanceSync(
+                    "MapboxRouteLineView#renderRouteDrawData#mutationCommands#$index",
+                ) {
+                    mutationCommand()
+                }
             }
 
             primaryRouteLineLayerGroup = getLayerIdsForPrimaryRoute(style, sourceLayerMap)
@@ -573,6 +588,15 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
      * @param update an instance of Expected<RouteLineError, RouteLineUpdateValue> received from [MapboxRouteLineApi]
      */
     fun renderRouteLineUpdate(
+        style: Style,
+        update: Expected<RouteLineError, RouteLineUpdateValue>,
+    ) {
+        PerformanceTracker.trackPerformanceSync("MapboxRouteLineView#renderRouteLineUpdate") {
+            renderRouteLineUpdateInternal(style, update)
+        }
+    }
+
+    fun renderRouteLineUpdateInternal(
         style: Style,
         update: Expected<RouteLineError, RouteLineUpdateValue>,
     ) {
@@ -674,7 +698,9 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         style: Style,
         clearRouteLineValue: Expected<RouteLineError, RouteLineClearValue>,
     ) {
-        renderClearRouteLineValueInternal(style, clearRouteLineValue, null)
+        PerformanceTracker.trackPerformanceSync("MapboxRouteLineView#renderClearRouteLineValue") {
+            renderClearRouteLineValueInternal(style, clearRouteLineValue, null)
+        }
     }
 
     /**
@@ -691,11 +717,13 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         map: MapboxMap,
         callback: RoutesRenderedCallback,
     ) {
-        renderClearRouteLineValueInternal(
-            style,
-            clearRouteLineValue,
-            RoutesRenderedCallbackWrapper(map, callback.toDelayedRoutesRenderedCallback()),
-        )
+        PerformanceTracker.trackPerformanceSync("MapboxRouteLineView#renderClearRouteLineValue") {
+            renderClearRouteLineValueInternal(
+                style,
+                clearRouteLineValue,
+                RoutesRenderedCallbackWrapper(map, callback.toDelayedRoutesRenderedCallback()),
+            )
+        }
     }
 
     /**
