@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalTime::class)
+
 package com.mapbox.navigation.ui.maps.route.line.api
 
 import android.graphics.Color
@@ -15,6 +17,7 @@ import com.mapbox.maps.extension.style.layers.Layer
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.CoalescingBlockingQueue
+import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.utils.isSameRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
@@ -76,6 +79,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.util.concurrent.CopyOnWriteArrayList
+import kotlin.time.ExperimentalTime
+import kotlin.time.TimeSource.Monotonic.markNow
 
 /**
  * Responsible for generating route line related data which can be rendered on the map to
@@ -509,6 +514,9 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         alternativeRoutesMetadata: List<AlternativeRouteMetadata>,
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>,
     ) {
+        PerformanceTracker.syncSectionStarted("MapboxRouteLineApi#setNavigationRouteLines")
+        val setNavigationRouteLinesStartMark = markNow()
+
         calculationsScope.coroutineContext.cancelChildren()
         if (newRoutes.isEmpty()) {
             clearRouteLine { clearRouteLineResult ->
@@ -526,6 +534,10 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                         waypointsSource = clearValue.waypointsSource,
                     )
                 }
+                PerformanceTracker.syncSectionCompleted(
+                    "MapboxRouteLineApi#setNavigationRouteLines",
+                    setNavigationRouteLinesStartMark.elapsedNow(),
+                )
                 consumer.accept(result)
             }
         } else {
@@ -544,6 +556,10 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                         featureDataProvider,
                         alternativeRoutesMetadata,
                         activeLegIndex,
+                    )
+                    PerformanceTracker.syncSectionCompleted(
+                        "MapboxRouteLineApi#setNavigationRouteLines",
+                        setNavigationRouteLinesStartMark.elapsedNow(),
                     )
                     consumer.accept(routeData)
                 }
@@ -638,6 +654,9 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
     fun clearRouteLine(
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteLineClearValue>>,
     ) {
+        PerformanceTracker.syncSectionStarted("MapboxRouteLineApi#clearRouteLine")
+        val clearRouteLineStartMark = markNow()
+
         stopMemoryMonitoring()
 
         calculationsScope.launch(Dispatchers.Main) {
@@ -655,6 +674,11 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                 routesSetToRouteLineObservers.forEach {
                     it.onSet(routes, alternativeRoutesMetadata)
                 }
+
+                PerformanceTracker.syncSectionCompleted(
+                    "MapboxRouteLineApi#clearRouteLine",
+                    clearRouteLineStartMark.elapsedNow(),
+                )
 
                 consumer.accept(
                     ExpectedFactory.createValue(
@@ -720,6 +744,16 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         routeProgress: RouteProgress,
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteLineUpdateValue>>,
     ) {
+        PerformanceTracker.syncSectionStarted("MapboxRouteLineApi#updateWithRouteProgress")
+        val updateWithRouteProgressStartMark = markNow()
+
+        fun perfCompletion() {
+            PerformanceTracker.syncSectionCompleted(
+                "MapboxRouteLineApi#updateWithRouteProgress",
+                updateWithRouteProgressStartMark.elapsedNow(),
+            )
+        }
+
         routeProgressUpdatesQueue.addJob(
             CoalescingBlockingQueue.Item(
                 {
@@ -728,6 +762,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                     val currentLegProgress = routeProgress.currentLegProgress
                     val currentLegIndex = routeProgress.currentLegProgress?.legIndex
                     if (currentPrimaryRoute == null) {
+                        perfCompletion()
                         val msg =
                             "You're calling #updateWithRouteProgress without any routes being set."
                         consumer.accept(
@@ -735,6 +770,8 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                         )
                         logW(msg, LOG_CATEGORY)
                     } else if (currentPrimaryRoute.id != routeProgress.navigationRoute.id) {
+                        perfCompletion()
+
                         val msg = "Provided primary route (#setNavigationRoutes, ID: " +
                             "${currentPrimaryRoute.id}) and navigated route " +
                             "(#updateWithRouteProgress, ID: ${routeProgress.navigationRoute.id}) " +
@@ -744,6 +781,8 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                         )
                         logE(msg, LOG_CATEGORY)
                     } else if (currentLegProgress == null || currentLegIndex == null) {
+                        perfCompletion()
+
                         val msg = "Provided route progress has invalid leg progress."
                         consumer.accept(
                             ExpectedFactory.createError(RouteLineError(msg, throwable = null)),
@@ -786,6 +825,9 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                             null to null
                         }
                         val alternativesCommandHolder = unsupportedRouteLineCommandHolder()
+
+                        perfCompletion()
+
                         consumer.accept(
                             ExpectedFactory.createValue(
                                 RouteLineUpdateValue(
@@ -811,6 +853,8 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                     }
                 },
                 {
+                    perfCompletion()
+
                     val msg = "Skipping #updateWithRouteProgress because a newer one is available."
                     consumer.accept(
                         ExpectedFactory.createError(RouteLineError(msg, throwable = null)),

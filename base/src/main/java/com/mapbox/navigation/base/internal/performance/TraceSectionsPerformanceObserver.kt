@@ -7,6 +7,7 @@ import androidx.annotation.RequiresApi
 import kotlin.time.Duration
 
 private const val MAPBOX_TRACE_ID = "mbx"
+private const val NAV_SDK_PREFIX = "nav-sdk"
 
 @RequiresApi(Build.VERSION_CODES.Q)
 internal class TraceSectionsPerformanceObserver : PerformanceObserver {
@@ -20,7 +21,7 @@ internal class TraceSectionsPerformanceObserver : PerformanceObserver {
         Trace.endSection()
     }
 
-    private fun wrapSectionName(name: String) = "$MAPBOX_TRACE_ID: $name"
+    private fun wrapSectionName(name: String) = "$MAPBOX_TRACE_ID: $NAV_SDK_PREFIX: $name"
 }
 
 internal fun getTraceSectionsPerformanceObserver() =

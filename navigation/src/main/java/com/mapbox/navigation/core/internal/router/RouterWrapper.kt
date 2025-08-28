@@ -12,6 +12,7 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.common.MapboxServices
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.internal.RouterFailureFactory
+import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.route.internalRefreshRoute
 import com.mapbox.navigation.base.internal.route.routeOptions
 import com.mapbox.navigation.base.internal.route.updateExpirationTime
@@ -45,12 +46,15 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.URL
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.time.ExperimentalTime
+import kotlin.time.TimeSource.Monotonic.markNow
 
 private class OngoingRequest(
     var parsingJob: Job?,
     val onCancel: () -> Unit,
 )
 
+@OptIn(ExperimentalTime::class)
 @MainThread // Router is not thread safe: in theory it doesn't have to be main thread
 internal class RouterWrapper(
     router: RouterInterface,
@@ -89,6 +93,10 @@ internal class RouterWrapper(
         val originRouter = router
         var callbackInvoked = false
         var id: Long? = null
+
+        PerformanceTracker.syncSectionStarted("RouterWrapper#getRoute()")
+        val routeRequestStartMark = markNow()
+
         id = originRouter.getRoute(
             routeUrl,
             requestOptions,
@@ -98,7 +106,13 @@ internal class RouterWrapper(
             logD(LOG_CATEGORY) {
                 "received result from router.getRoute for $urlWithoutToken; origin: $origin"
             }
+
             mainJobControl.scope.launch {
+                PerformanceTracker.syncSectionCompleted(
+                    "RouterWrapper#getRoute()",
+                    routeRequestStartMark.elapsedNow(),
+                )
+
                 endRouteRequest(
                     id,
                     routeOptions,
@@ -115,6 +129,11 @@ internal class RouterWrapper(
             activeRouteRequests[id] = OngoingRequest(
                 null,
                 {
+                    PerformanceTracker.syncSectionCompleted(
+                        "RouterWrapper#getRoute()",
+                        routeRequestStartMark.elapsedNow(),
+                    )
+
                     callback.onCanceled(
                         routeOptions,
                         com.mapbox.navigation.base.route.RouterOrigin.OFFLINE,
@@ -165,6 +184,10 @@ internal class RouterWrapper(
         val originRouter = router
         var id: Long? = null
         var callbackInvoked = false
+
+        PerformanceTracker.syncSectionStarted("RouterWrapper#getRouteRefresh()")
+        val routeRequestStartMark = markNow()
+
         id = originRouter.getRouteRefresh(
             refreshOptions,
         ) { result, _, _ ->
@@ -172,6 +195,11 @@ internal class RouterWrapper(
             logI("Received result from router.getRouteRefresh for ${route.id}", LOG_CATEGORY)
 
             mainJobControl.scope.launch {
+                PerformanceTracker.syncSectionCompleted(
+                    "RouterWrapper#getRouteRefresh()",
+                    routeRequestStartMark.elapsedNow(),
+                )
+
                 endRouteRefreshRequest(
                     id,
                     originRouter,
@@ -187,7 +215,14 @@ internal class RouterWrapper(
         if (!callbackInvoked) {
             activeRouteRefreshRequests[id] = OngoingRequest(
                 null,
-                { callback.onFailure(NavigationRouterRefreshError("Request cancelled")) },
+                {
+                    PerformanceTracker.syncSectionCompleted(
+                        "RouterWrapper#getRouteRefresh()",
+                        routeRequestStartMark.elapsedNow(),
+                    )
+
+                    callback.onFailure(NavigationRouterRefreshError("Request cancelled"))
+                },
             )
         }
         return id
