@@ -92,6 +92,7 @@ workflows:
       - assemble-old-deps-compat
       - assemble-instrumentation-test
       - assemble-instrumentation-test-internal
+      - assemble-androidauto-test
       - assemble-app-mincompile
       - changelog-verification:
           filters:
@@ -159,7 +160,9 @@ workflows:
           suite: TestSuitePart6
           requires:
             - assemble-instrumentation-test
-      - androidauto-test
+      - androidauto-test:
+          requires:
+            - assemble-androidauto-test
       - mobile-metrics-dry-run:
           type: approval
       - mobile-metrics-benchmarks:
@@ -815,6 +818,20 @@ jobs:
           module_target: "libnavigator"
       - write-workspace
 
+  assemble-androidauto-test:
+    executor: ndk-r22-latest-executor
+    resource_class: medium+
+    steps:
+      - checkout
+      - restore-gradle-cache
+      - assemble-module:
+          module_target: "app-tests-wrapper"
+          variant: "Debug"
+      - assemble-instrumentation-test:
+          module_target: "libnavui-androidauto"
+          inject_token: false
+      - write-workspace
+
   unit-tests-core:
     executor: ndk-r22-latest-executor
     resource_class: medium+
@@ -1080,10 +1097,11 @@ jobs:
           command: python3 scripts/validate_billing_e2e_sessions.py
 
   androidauto-test:
-    executor:
-      name: android/android-machine
-      resource-class: xlarge
-      tag: default
+    executor: ndk-r22-latest-executor
+    environment:
+      JVM_OPTS: -Xmx3200m
+      BUILDTYPE: Debug
+      GRADLE_OPTS: -Xmx4096m -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy=in-process
     steps:
       - when:
           condition:
@@ -1092,21 +1110,12 @@ jobs:
                 pattern: "^add-changelog.*"
                 value: << pipeline.git.branch >>
           steps:
-            - checkout
-            - android/start-emulator-and-run-tests:
-                post-emulator-launch-assemble-command: ./gradlew libnavui-androidauto:assembleDebugAndroidTest -Dorg.gradle.jvmargs=-Xmx3g
-                test-command: ./gradlew libnavui-androidauto:connectedDebugAndroidTest -Dorg.gradle.jvmargs=-Xmx3g
-                system-image: system-images;android-30;google_apis_playstore;x86
-                wait-for-emulator: false
-                save-gradle-cache: false
-            - run:
-                name: Save test results
-                command: |
-                  mkdir -p ~/mapbox_test/
-                  adb pull sdcard/Download/mapbox_test ~/mapbox_test/
-                when: on_fail
-            - store_artifacts:
-                path: ~/mapbox_test/
+            - read-workspace
+            - login-google-cloud-platform
+            - run-internal-firebase-instrumentation:
+                module_target: "libnavui-androidauto"
+                module_wrapper: "app-tests-wrapper"
+                variant: "debug"
       - run: exit 0
 
   mobile-metrics-benchmarks:
