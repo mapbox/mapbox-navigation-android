@@ -1,5 +1,19 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.11.4 - 29 August, 2025
+#### Features
+
+
+#### Bug fixes and improvements
+- Fixed the incorrect order of callbacks when notifying about road cameras on the route. 
+- Clean up CalloutView properly when it's released.
+
+### Mapbox dependencies
+- Mapbox Java v7.6.0 
+- Search SDK 2.14.2
+- Common SDK 24.14.3
+- Maps SDK 11.14.3
+
 ## Navigation SDK Core Framework 3.11.3 - 18 August, 2025
 #### Features
 - Added a new notification alert `OfflineManeuver:NotificationAlert`. 
