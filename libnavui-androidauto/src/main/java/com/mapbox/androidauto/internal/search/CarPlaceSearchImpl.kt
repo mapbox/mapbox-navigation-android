@@ -86,7 +86,7 @@ class CarPlaceSearchImpl(
 
         return suspendCancellableCoroutine { continuation ->
             val selectionCallback = object : SearchSelectionCallback {
-                override fun onCategoryResult(
+                override fun onResults(
                     suggestion: SearchSuggestion,
                     results: List<SearchResult>,
                     responseInfo: ResponseInfo
