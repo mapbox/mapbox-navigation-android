@@ -1141,7 +1141,6 @@ package com.mapbox.navigation.ui.maps.route.line.api {
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void clearCalloutAdapter();
     method public com.mapbox.maps.extension.style.layers.properties.generated.Visibility? getAlternativeRoutesVisibility(com.mapbox.maps.Style style);
     method public com.mapbox.maps.extension.style.layers.properties.generated.Visibility? getPrimaryRouteVisibility(com.mapbox.maps.Style style);
-    method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public String? getRouteMainLayerIdForFeature(String? featureId);
     method public com.mapbox.maps.extension.style.layers.properties.generated.Visibility? getTrafficVisibility(com.mapbox.maps.Style style);
     method public void hideAlternativeRoutes(com.mapbox.maps.Style style);
     method public void hideOriginAndDestinationPoints(com.mapbox.maps.Style style);

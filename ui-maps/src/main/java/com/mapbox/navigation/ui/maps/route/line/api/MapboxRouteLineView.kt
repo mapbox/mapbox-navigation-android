@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
-import androidx.annotation.RestrictTo
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import com.mapbox.bindgen.Expected
@@ -64,7 +63,8 @@ import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_TRA
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.MASKING_LAYER_TRAIL_CASING
 import com.mapbox.navigation.ui.maps.route.callout.api.DefaultRouteCalloutAdapter
 import com.mapbox.navigation.ui.maps.route.callout.api.MapboxRouteCalloutAdapter
-import com.mapbox.navigation.ui.maps.route.callout.api.RouteLineViewBasedLayerIdProvider
+import com.mapbox.navigation.ui.maps.route.callout.api.RouteCalloutUiState
+import com.mapbox.navigation.ui.maps.route.callout.api.RouteCalloutUiStateData
 import com.mapbox.navigation.ui.maps.route.line.RouteLineHistoryRecordingViewSender
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewDynamicOptionsBuilder
@@ -84,6 +84,7 @@ import com.mapbox.navigation.ui.maps.util.toDelayedRoutesRenderedCallback
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -146,7 +147,7 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
     private var routeCalloutView: MapboxRouteCalloutsView? = null
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-    private var lastRouteCalloutData: RouteCalloutData? = null
+    private var lastRouteCalloutData: RouteCalloutUiStateData? = null
 
     private var primaryRouteLineLayerGroup = setOf<String>()
     private val trailCasingLayerIds = setOf(
@@ -566,8 +567,8 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
             val routesToLayers = getCurrentlyAttachedRoutesToLayers()
             routesAttachedToLayersObservers.forEach { it.onAttached(routesToLayers) }
             routeDrawData.value?.let { routeSetValue ->
-                lastRouteCalloutData = routeSetValue.callouts
-                routeCalloutView?.renderCallouts(routeSetValue.callouts)
+                lastRouteCalloutData = routeSetValue.callouts.toRouteCalloutUiState()
+                routeCalloutView?.renderCallouts(lastRouteCalloutData!!)
             }
         }
         callback?.callback?.unlock()
@@ -596,7 +597,7 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         }
     }
 
-    fun renderRouteLineUpdateInternal(
+    private fun renderRouteLineUpdateInternal(
         style: Style,
         update: Expected<RouteLineError, RouteLineUpdateValue>,
     ) {
@@ -747,7 +748,6 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         routeCalloutView = MapboxRouteCalloutsView(
             viewAnnotationManager,
             adapter,
-            layerIdProvider = RouteLineViewBasedLayerIdProvider(this),
         )
 
         lastRouteCalloutData?.let { data -> routeCalloutView?.renderCallouts(data) }
@@ -857,8 +857,8 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
 
                 val routesToLayers = getCurrentlyAttachedRoutesToLayers()
                 routesAttachedToLayersObservers.forEach { it.onAttached(routesToLayers) }
-                lastRouteCalloutData = value.callouts
-                routeCalloutView?.renderCallouts(value.callouts)
+                lastRouteCalloutData = value.callouts.toRouteCalloutUiState()
+                routeCalloutView?.renderCallouts(lastRouteCalloutData!!)
             }
         }
         callback?.callback?.unlock()
@@ -1581,12 +1581,21 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         }
     }
 
-    /**
-     * Returns Main layer id for the Feature
-     */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-    fun getRouteMainLayerIdForFeature(featureId: String?): String? {
-        return featureId?.let { getCurrentlyAttachedRoutesToLayers()[it] }
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    private fun RouteCalloutData.toRouteCalloutUiState(): RouteCalloutUiStateData {
+        return RouteCalloutUiStateData(
+            callouts.mapNotNull {
+                val layerId = getCurrentlyAttachedRoutesToLayers()[it.route.id]
+                if (layerId == null) {
+                    logW(TAG) {
+                        "Layer for route [${it.route.id}] not found."
+                    }
+                    null
+                } else {
+                    RouteCalloutUiState(it, layerId)
+                }
+            },
+        )
     }
 
     /**
