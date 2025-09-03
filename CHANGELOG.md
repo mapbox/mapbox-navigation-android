@@ -1,5 +1,15 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.11.5 - 03 September, 2025
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+
+- Mapbox Java `v7.6.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.6.0))
+- Search SDK 2.14.2
+- Common SDK 24.14.4
+- Maps SDK 11.14.4
+
 ## Navigation SDK Core Framework 3.11.4 - 29 August, 2025
 #### Features
 
