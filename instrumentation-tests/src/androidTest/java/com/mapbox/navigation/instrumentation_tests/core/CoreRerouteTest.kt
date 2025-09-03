@@ -237,24 +237,11 @@ class CoreRerouteTest(
         mockWebServerRule.requestHandlers.add(requestHandler)
         mockWebServerRule.requestHandlers.add(rerouteRequestHandler)
 
-        // TODO This behavior should be the same for both NN and Nav SDK reroute controllers
-        // Keep the single flow when NN will apply fix
-        val rerouteStateTransitionAssertion = if (!runOptions.nativeReroute) {
-            RerouteStateTransitionAssertion(
-                mapboxNavigation.getRerouteController()!!,
-            ) {
-                requiredState(RerouteState.Idle)
-                requiredState(RerouteState.FetchingRoute)
-            }
-        } else {
-            RerouteStateTransitionAssertion(
-                mapboxNavigation.getRerouteController()!!,
-            ) {
-                requiredState(RerouteState.Idle)
-                requiredState(RerouteState.FetchingRoute)
-                requiredState(RerouteState.Interrupted)
-                requiredState(RerouteState.Idle)
-            }
+        val rerouteStateTransitionAssertion = RerouteStateTransitionAssertion(
+            mapboxNavigation.getRerouteController()!!,
+        ) {
+            requiredState(RerouteState.Idle)
+            requiredState(RerouteState.FetchingRoute)
         }
 
         val originalRoutes = mapboxNavigation.requestRoutes(
