@@ -1,5 +1,19 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.11.6 - 04 September, 2025
+- Ignore invalid place types in offline search to prevent broken addresses
+- Avoid copying of ViewAnnotationOptions on every frame
+- Enforce optimization compile flags for the rendering code
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Java `v7.6.0` 
+- Search SDK 2.14.3
+- Common SDK 24.14.4
+- Maps SDK 11.14.4
+
+
+
 ## Navigation SDK Core Framework 3.11.5 - 03 September, 2025
 
 ### Mapbox dependencies
