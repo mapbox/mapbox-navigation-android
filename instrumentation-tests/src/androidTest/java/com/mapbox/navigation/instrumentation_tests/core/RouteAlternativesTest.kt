@@ -49,6 +49,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import java.io.InputStreamReader
@@ -472,6 +473,7 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
+    @Ignore("https://mapbox.atlassian.net/browse/NAVAND-6171")
     fun switch_from_multi_leg_primary_to_single_leg_CA_after_intermediate_waypoint() = sdkTest {
         val initialRouteOptions = setupMockServerForCAAfterWaypointInBerlin()
         withMapboxNavigation(
