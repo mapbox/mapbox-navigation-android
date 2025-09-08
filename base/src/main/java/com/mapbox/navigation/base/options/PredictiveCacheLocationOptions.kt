@@ -1,16 +1,21 @@
 package com.mapbox.navigation.base.options
 
+import androidx.annotation.RestrictTo
+import com.mapbox.navigator.PredictiveLocationTrackerOptions
+
 /**
  * PredictiveCacheLocationOptions.
  *
  * @param currentLocationRadiusInMeters How far around the user's location we're going to cache, in meters. Defaults to 20000 (20 km)
  * @param routeBufferRadiusInMeters How far around the active route we're going to cache, in meters (if route is set). Defaults to 5000 (5 km)
  * @param destinationLocationRadiusInMeters How far around the destination location we're going to cache, in meters (if route is set). Defaults to 50000 (50 km)
+ * @param loadPredictiveCacheForAlternativeRoutes Whether alternative routes will be loaded for predictive cache. Defaults to false.
  */
 class PredictiveCacheLocationOptions private constructor(
     val currentLocationRadiusInMeters: Int,
     val routeBufferRadiusInMeters: Int,
     val destinationLocationRadiusInMeters: Int,
+    val loadPredictiveCacheForAlternativeRoutes: Boolean,
 ) {
 
     /**
@@ -20,6 +25,7 @@ class PredictiveCacheLocationOptions private constructor(
         currentLocationRadiusInMeters(currentLocationRadiusInMeters)
         routeBufferRadiusInMeters(routeBufferRadiusInMeters)
         destinationLocationRadiusInMeters(destinationLocationRadiusInMeters)
+        loadPredictiveCacheForAlternativeRoutes(loadPredictiveCacheForAlternativeRoutes)
     }
 
     /**
@@ -36,6 +42,11 @@ class PredictiveCacheLocationOptions private constructor(
         if (destinationLocationRadiusInMeters != other.destinationLocationRadiusInMeters) {
             return false
         }
+        if (loadPredictiveCacheForAlternativeRoutes !=
+            other.loadPredictiveCacheForAlternativeRoutes
+        ) {
+            return false
+        }
 
         return true
     }
@@ -47,6 +58,7 @@ class PredictiveCacheLocationOptions private constructor(
         var result = currentLocationRadiusInMeters.hashCode()
         result = 31 * result + routeBufferRadiusInMeters.hashCode()
         result = 31 * result + destinationLocationRadiusInMeters.hashCode()
+        result = 31 * result + loadPredictiveCacheForAlternativeRoutes.hashCode()
         return result
     }
 
@@ -58,6 +70,7 @@ class PredictiveCacheLocationOptions private constructor(
             "currentLocationRadiusInMeters=$currentLocationRadiusInMeters, " +
             "routeBufferRadiusInMeters=$routeBufferRadiusInMeters, " +
             "destinationLocationRadiusInMeters=$destinationLocationRadiusInMeters" +
+            "loadPredictiveCacheForAlternativeRoutes=$loadPredictiveCacheForAlternativeRoutes" +
             ")"
     }
 
@@ -69,6 +82,7 @@ class PredictiveCacheLocationOptions private constructor(
         private var currentLocationRadiusInMeters: Int = 20_000
         private var routeBufferRadiusInMeters: Int = 5_000
         private var destinationLocationRadiusInMeters: Int = 50_000
+        private var loadPredictiveCacheForAlternativeRoutes: Boolean = false
 
         /**
          * How far around the user's location we're going to cache, in meters. Defaults to 20000 (20 km)
@@ -89,6 +103,12 @@ class PredictiveCacheLocationOptions private constructor(
             apply { this.destinationLocationRadiusInMeters = radiusInMeters }
 
         /**
+         * Whether alternative routes will be loaded for predictive cache. Defaults to false.
+         */
+        fun loadPredictiveCacheForAlternativeRoutes(load: Boolean): Builder =
+            apply { this.loadPredictiveCacheForAlternativeRoutes = load }
+
+        /**
          * Build the [PredictiveCacheLocationOptions]
          */
         fun build(): PredictiveCacheLocationOptions {
@@ -96,7 +116,17 @@ class PredictiveCacheLocationOptions private constructor(
                 currentLocationRadiusInMeters = currentLocationRadiusInMeters,
                 routeBufferRadiusInMeters = routeBufferRadiusInMeters,
                 destinationLocationRadiusInMeters = destinationLocationRadiusInMeters,
+                loadPredictiveCacheForAlternativeRoutes = loadPredictiveCacheForAlternativeRoutes,
             )
         }
     }
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun PredictiveCacheLocationOptions.toPredictiveLocationTrackerOptions() =
+    PredictiveLocationTrackerOptions(
+        currentLocationRadiusInMeters,
+        routeBufferRadiusInMeters,
+        destinationLocationRadiusInMeters,
+        loadPredictiveCacheForAlternativeRoutes,
+    )

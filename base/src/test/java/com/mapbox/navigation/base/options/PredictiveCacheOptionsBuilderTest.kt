@@ -20,6 +20,7 @@ class PredictiveCacheOptionsBuilderTest :
                             currentLocationRadiusInMeters(300)
                             routeBufferRadiusInMeters(50)
                             destinationLocationRadiusInMeters(20)
+                            loadPredictiveCacheForAlternativeRoutes(false)
                         }.build(),
                     )
                 }.build(),

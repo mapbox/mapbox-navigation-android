@@ -12,6 +12,7 @@ class PredictiveCacheLocationOptionsTest :
         .currentLocationRadiusInMeters(25000)
         .routeBufferRadiusInMeters(15000)
         .destinationLocationRadiusInMeters(55000)
+        .loadPredictiveCacheForAlternativeRoutes(true)
 
     @Test
     override fun trigger() {

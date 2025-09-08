@@ -753,10 +753,12 @@ package com.mapbox.navigation.base.options {
   public final class PredictiveCacheLocationOptions {
     method public int getCurrentLocationRadiusInMeters();
     method public int getDestinationLocationRadiusInMeters();
+    method public boolean getLoadPredictiveCacheForAlternativeRoutes();
     method public int getRouteBufferRadiusInMeters();
     method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions.Builder toBuilder();
     property public final int currentLocationRadiusInMeters;
     property public final int destinationLocationRadiusInMeters;
+    property public final boolean loadPredictiveCacheForAlternativeRoutes;
     property public final int routeBufferRadiusInMeters;
   }
 
@@ -765,7 +767,12 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions build();
     method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions.Builder currentLocationRadiusInMeters(int radiusInMeters);
     method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions.Builder destinationLocationRadiusInMeters(int radiusInMeters);
+    method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions.Builder loadPredictiveCacheForAlternativeRoutes(boolean load);
     method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions.Builder routeBufferRadiusInMeters(int radiusInMeters);
+  }
+
+  public final class PredictiveCacheLocationOptionsKt {
+    method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP) public static com.mapbox.navigator.PredictiveLocationTrackerOptions toPredictiveLocationTrackerOptions(com.mapbox.navigation.base.options.PredictiveCacheLocationOptions);
   }
 
   public final class PredictiveCacheMapsOptions {
