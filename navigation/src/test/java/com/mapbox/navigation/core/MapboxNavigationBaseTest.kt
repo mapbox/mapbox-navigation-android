@@ -50,6 +50,7 @@ import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.core.trip.session.TripSessionLocationEngine
 import com.mapbox.navigation.core.trip.session.createSetRouteResult
+import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManager
 import com.mapbox.navigation.core.utils.PermissionsChecker
 import com.mapbox.navigation.core.utils.SystemLocaleWatcher
 import com.mapbox.navigation.metrics.internal.TelemetryUtilsDelegate
@@ -63,6 +64,7 @@ import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.HistoryRecorderHandle
+import com.mapbox.navigator.NavigatorObserver
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.Telemetry
 import io.mockk.CapturingSlot
@@ -74,6 +76,7 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.runs
+import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -129,6 +132,7 @@ internal open class MapboxNavigationBaseTest {
     val compositeHandle = mockk<HistoryRecorderHandle>(relaxed = true)
     val permissionsChecker = mockk<PermissionsChecker>(relaxed = true)
     val lowMemoryManager = mockk<LowMemoryManager>(relaxed = true)
+    val eHorizonSubscriptionManager: EHorizonSubscriptionManager = mockk(relaxed = true)
 
     val navigationTelemetry = mockk<NavigationTelemetry>(relaxed = true)
 
@@ -147,6 +151,7 @@ internal open class MapboxNavigationBaseTest {
         every { cancelAll() } just Runs
     }
     val routerWrapperSlot = CapturingSlot<RouterWrapper>()
+    val navigatorObserverSlot = slot<NavigatorObserver>()
 
     lateinit var mapboxNavigation: MapboxNavigation
 
@@ -162,8 +167,12 @@ internal open class MapboxNavigationBaseTest {
     @Before
     open fun setUp() {
         every { threadController.getMainScopeAndRootJob() } answers {
-            JobControl(mockk(), coroutineRule.createTestScope())
+            JobControl(
+                mockk { every { children } returns sequenceOf() },
+                coroutineRule.createTestScope(),
+            )
         }
+
         mockkObject(LoggerProvider)
         mockkObject(NavigatorLoader)
         every {
@@ -227,6 +236,7 @@ internal open class MapboxNavigationBaseTest {
         } returns mapMatchingAPI
 
         every { applicationContext.applicationContext } returns applicationContext
+        every { navigator.addNavigatorObserver(capture(navigatorObserverSlot)) } answers {}
 
         mockTileStore()
 
@@ -372,6 +382,7 @@ internal open class MapboxNavigationBaseTest {
                 tripSessionLocationEngine = tripSessionLocationEngine,
                 navigator = navigator,
                 threadController,
+                any(),
             )
         } returns tripSession
         every { tripSession.getRouteProgress() } returns routeProgress

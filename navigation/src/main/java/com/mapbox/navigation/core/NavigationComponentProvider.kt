@@ -101,6 +101,7 @@ internal object NavigationComponentProvider {
         tripSessionLocationEngine: TripSessionLocationEngine,
         navigator: MapboxNativeNavigator,
         threadController: ThreadController,
+        repeatRerouteAfterOffRouteDelaySeconds: Int,
     ): TripSession = PerformanceTracker.trackPerformanceSync("createTripSession") {
         MapboxTripSession(
             tripService,
@@ -108,6 +109,7 @@ internal object NavigationComponentProvider {
             navigator = navigator,
             threadController,
             EHorizonSubscriptionManagerImpl(navigator, threadController),
+            repeatRerouteAfterOffRouteDelaySeconds,
         )
     }
 

@@ -8,6 +8,7 @@ import java.io.File
 
 enum class OfflineRegion(val id: String) {
     Berlin("berlin"),
+    NearMunich("near_munich"),
 }
 
 /**

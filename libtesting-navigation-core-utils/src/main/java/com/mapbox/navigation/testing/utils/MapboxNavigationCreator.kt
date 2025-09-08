@@ -6,6 +6,8 @@ import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import com.mapbox.common.TileStore
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.reroute.setRepeatRerouteAfterOffRouteDelaySeconds
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.DeviceType
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -21,6 +23,7 @@ import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.stopRecording
 import java.net.URI
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigation(
     useRealTiles: Boolean = false,
     tileStore: TileStore? = null,
@@ -59,6 +62,7 @@ suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigation(
             rerouteOptions(
                 RerouteOptions.Builder()
                     .rerouteStrategyForMapMatchedRoutes(rerouteStrategyForMapMatchedRoutes)
+                    .setRepeatRerouteAfterOffRouteDelaySeconds(-1)
                     .build()
             )
             if (routeRefreshOptions != null) {

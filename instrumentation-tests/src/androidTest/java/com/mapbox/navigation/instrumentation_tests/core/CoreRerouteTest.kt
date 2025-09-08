@@ -6,6 +6,7 @@ import androidx.test.espresso.Espresso
 import com.adevinta.android.barista.rule.cleardata.ClearFilesRule
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.common.TileStore
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
@@ -27,6 +28,8 @@ import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.core.reroute.RerouteOptionsAdapter
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.instrumentation_tests.R
+import com.mapbox.navigation.instrumentation_tests.utils.tiles.OfflineRegion
+import com.mapbox.navigation.instrumentation_tests.utils.tiles.unpackOfflineTiles
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
@@ -40,6 +43,7 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForAlternativesUpdate
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForUpdate
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
+import com.mapbox.navigation.testing.ui.utils.coroutines.versionSwitchObserver
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigation.testing.utils.DelayedResponseModifier
 import com.mapbox.navigation.testing.utils.assertions.RerouteStateTransitionAssertion
@@ -88,6 +92,7 @@ class CoreRerouteTest(
     data class RerouteTestRunOptions(
         val nativeReroute: Boolean,
     ) {
+
         override fun toString(): String {
             return if (nativeReroute) {
                 "native reroute"
@@ -98,6 +103,7 @@ class CoreRerouteTest(
     }
 
     companion object {
+
         @JvmStatic
         @Parameterized.Parameters(name = "{0}")
         fun data() = listOf(
@@ -182,7 +188,7 @@ class CoreRerouteTest(
                 ).getSuccessfulResultOrThrowException().routes
             }
             navigation.setNavigationRoutesAsync(routes)
-            navigation.moveAlongTheRouteUntilTracking(routes[0], mockLocationReplayerRule)
+            navigation.moveAlongTheRouteUntilTracking(routes[0], mockLocationReplayerRule, 3)
             stayOnPosition(offRouteLocationUpdate) {
                 val routesUpdate = navigation.routesUpdates().first {
                     it.reason == ROUTES_UPDATE_REASON_REROUTE
@@ -194,6 +200,57 @@ class CoreRerouteTest(
                 assertEquals(mockRoute.routeWaypoints.last(), newWaypoints[1])
                 navigation.routeProgressUpdates().first {
                     it.currentState == RouteProgressState.TRACKING
+                }
+            }
+        }
+    }
+
+    /**
+     * This test could become flaky in case NN manage to download enough navigation tiles
+     * so that switching to offline pack won't be needed during navigation.
+     */
+    @Test
+    fun reroute_triggered_after_navigator_recreation_with_fallback() = sdkTest(60_000) {
+        val mockRoute = RoutesProvider.near_munich_with_waypoints(context)
+        val originLocation = mockRoute.routeWaypoints.first()
+        mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
+        val tilesVersion = context.unpackOfflineTiles(OfflineRegion.NearMunich)
+        withMapboxNavigation(
+            useRealTiles = true,
+            historyRecorderRule = mapboxHistoryTestRule,
+            customConfig = getTestCustomConfig(),
+            tileStore = TileStore.create(),
+        ) { navigation ->
+            val routes = stayOnPosition(originLocation, bearing = 0.0f) {
+                navigation.startTripSession()
+                navigation.requestRoutes(
+                    RouteOptions.builder()
+                        .applyDefaultNavigationOptions()
+                        .applyLanguageAndVoiceUnitOptions(context)
+                        .baseUrl(mockWebServerRule.baseUrl)
+                        .coordinatesList(mockRoute.routeWaypoints)
+                        .build(),
+                ).getSuccessfulResultOrThrowException().routes
+            }
+
+            navigation.setNavigationRoutesAsync(routes)
+            navigation.moveAlongTheRouteUntilTracking(
+                routes[0],
+                mockLocationReplayerRule,
+                1,
+                endReplay = false,
+            )
+            withoutInternet {
+                navigation.versionSwitchObserver().first { it == tilesVersion }
+                mockLocationReplayerRule.playRoute(
+                    RoutesProvider.near_munich_with_waypoints_for_reroute(context),
+                )
+                if (!runOptions.nativeReroute) {
+                    navigation.offRouteUpdates().first { it }
+                    navigation
+                        .getRerouteController()?.let { ctrl ->
+                            ctrl.rerouteStates().first { it == RerouteState.FetchingRoute }
+                        }
                 }
             }
         }
