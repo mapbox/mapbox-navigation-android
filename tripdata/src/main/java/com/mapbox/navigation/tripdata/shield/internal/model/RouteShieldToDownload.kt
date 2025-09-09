@@ -3,6 +3,8 @@ package com.mapbox.navigation.tripdata.shield.internal.model
 import com.mapbox.api.directions.v5.models.MapboxShield
 import com.mapbox.api.directions.v5.models.ShieldSprite
 import com.mapbox.common.MapboxOptions
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig
 
 private const val SPRITE = "/sprite"
 private const val SPRITE_BASE_URL = "https://api.mapbox.com/styles/v1/"
@@ -68,7 +70,9 @@ internal fun RouteShieldToDownload.MapboxDesign.getSpriteFrom(
     return result.originalSprite
 }
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 data class ShieldSpriteToDownload(
     val userId: String,
     val styleId: String,
+    val fontConfig: ShieldFontConfig? = null,
 )
