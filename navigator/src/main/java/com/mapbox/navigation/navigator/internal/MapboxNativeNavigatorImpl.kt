@@ -16,6 +16,7 @@ import com.mapbox.navigation.base.internal.route.nativeRoute
 import com.mapbox.navigation.base.internal.utils.Constants
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions
+import com.mapbox.navigation.base.options.toPredictiveLocationTrackerOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.navigator.internal.utils.toEvStateData
 import com.mapbox.navigation.utils.internal.ThreadController
@@ -42,7 +43,6 @@ import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorObserver
 import com.mapbox.navigator.PredictiveCacheController
 import com.mapbox.navigator.PredictiveCacheControllerOptions
-import com.mapbox.navigator.PredictiveLocationTrackerOptions
 import com.mapbox.navigator.RefreshRouteResult
 import com.mapbox.navigator.RerouteControllerInterface
 import com.mapbox.navigator.RerouteDetectorInterface
@@ -539,13 +539,6 @@ class MapboxNativeNavigatorImpl(
             listOf(navigator.createPredictiveCacheController(coreLocationOptions))
         }
     }
-
-    private fun PredictiveCacheLocationOptions.toPredictiveLocationTrackerOptions() =
-        PredictiveLocationTrackerOptions(
-            currentLocationRadiusInMeters,
-            routeBufferRadiusInMeters,
-            destinationLocationRadiusInMeters,
-        )
 
     override fun updateLaneSensorInfo(data: LaneSensorInfo) {
         inputsService.updateLaneSensorInfo(data)
