@@ -3,6 +3,7 @@ package com.mapbox.navigation.tripdata.shield.api
 import android.graphics.Bitmap
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.MapboxShield
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.road.model.Road
 import com.mapbox.navigation.base.road.model.RoadComponent
 import com.mapbox.navigation.tripdata.shield.RoadShieldContentManagerContainer
@@ -52,17 +53,11 @@ class MapboxRouteShieldApi {
      * @param callback invoked with appropriate result
      * @see RouteShield.toBitmap
      */
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     fun getRouteShields(
         bannerComponents: List<BannerComponents>?,
         callback: RouteShieldCallback,
-    ) {
-        getRouteShields(
-            bannerComponents = bannerComponents,
-            userId = null,
-            styleId = null,
-            callback = callback,
-        )
-    }
+    ) = getRouteShields(bannerComponents, null, null, null, callback)
 
     /**
      * Given a list of [BannerComponents] the function requests mapbox designed road shields (if available)
@@ -87,10 +82,45 @@ class MapboxRouteShieldApi {
      * @param callback invoked with appropriate result
      * @see RouteShield.toBitmap
      */
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     fun getRouteShields(
         bannerComponents: List<BannerComponents>?,
         userId: String?,
         styleId: String?,
+        callback: RouteShieldCallback,
+    ) = getRouteShields(bannerComponents, userId, styleId, null, callback)
+
+    /**
+     * Given a list of [BannerComponents] the function requests mapbox designed road shields (if available)
+     * using [BannerComponents.mapboxShield]. If for any reason the API is unable to download the
+     * shield, it falls back to download and return the legacy shield if available. Returns error
+     * otherwise.
+     *
+     * If you do not wish to download all of the shields at once, make sure to pass in only a
+     * list of banner components for which you'd like download the road shields.
+     *
+     * The function is safe to be called repeatably, all the results are cached in-memory
+     * and requests are managed to avoid duplicating network bandwidth usage.
+     *
+     * The function returns list of [RouteShieldResult] or [RouteShieldError] in
+     * [RouteShieldCallback.onRoadShields].
+     *
+     * To convert the returned in [RouteShield] SVG [ByteArray] to a [Bitmap] use [RouteShield.toBitmap].
+     *
+     * @param bannerComponents list of banner components
+     * @param userId Mapbox user account name
+     * @param styleId style id used to render the map
+     * @param fontConfig font configuration for [MapboxShield.displayRef] rendering. Config is
+     * ignored in case of fallback to legacy shields.
+     * @param callback invoked with appropriate result
+     * @see RouteShield.toBitmap
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun getRouteShields(
+        bannerComponents: List<BannerComponents>?,
+        userId: String?,
+        styleId: String?,
+        fontConfig: ShieldFontConfig?,
         callback: RouteShieldCallback,
     ) {
         val routeShieldToDownload = mutableListOf<RouteShieldToDownload>()
@@ -98,6 +128,7 @@ class MapboxRouteShieldApi {
             bannerComponents?.findShieldsToDownload(
                 userId = userId,
                 styleId = styleId,
+                fontConfig = fontConfig,
             ) ?: emptyList(),
         )
         getRouteShieldsInternal(routeShieldToDownload, callback)
@@ -116,17 +147,11 @@ class MapboxRouteShieldApi {
      * @param callback invoked with appropriate result
      * @see RouteShield.toBitmap
      */
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     fun getRouteShields(
         road: Road,
         callback: RouteShieldCallback,
-    ) {
-        getRouteShields(
-            road = road,
-            userId = null,
-            styleId = null,
-            callback = callback,
-        )
-    }
+    ) = getRouteShields(road, null, null, null, callback)
 
     /**
      * Given a [Road] object, the function requests mapbox designed road shields (if available)
@@ -145,17 +170,47 @@ class MapboxRouteShieldApi {
      * @param callback invoked with appropriate result
      * @see RouteShield.toBitmap
      */
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     fun getRouteShields(
         road: Road,
         userId: String?,
         styleId: String?,
         callback: RouteShieldCallback,
+    ) = getRouteShields(road, userId, styleId, null, callback)
+
+    /**
+     * Given a [Road] object, the function requests mapbox designed road shields (if available)
+     * using [RoadComponent.shield]'s [MapboxShield.baseUrl] for the current road. If for any reason the API is unable to
+     * download the shield, it falls back to download and return the legacy shield using [RoadComponent.imageBaseUrl].
+     * Returns error otherwise.
+     *
+     * The function returns list of [RouteShieldResult] or [RouteShieldError] in
+     * [RouteShieldCallback.onRoadShields].
+     *
+     * To convert the returned in [RouteShield] SVG [ByteArray] to a [Bitmap] use [RouteShield.toBitmap].
+     *
+     * @param road object representing current road
+     * @param userId Mapbox user account name
+     * @param styleId style id used to render the map
+     * @param fontConfig font configuration for [MapboxShield.displayRef] rendering. Config is
+     * ignored in case of fallback to legacy shields.
+     * @param callback invoked with appropriate result
+     * @see RouteShield.toBitmap
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun getRouteShields(
+        road: Road,
+        userId: String?,
+        styleId: String?,
+        fontConfig: ShieldFontConfig?,
+        callback: RouteShieldCallback,
     ) {
         getRoadComponentsShields(
-            roadComponents = road.components,
-            userId = userId,
-            styleId = styleId,
-            callback = callback,
+            road.components,
+            userId,
+            styleId,
+            fontConfig,
+            callback,
         )
     }
 
@@ -177,15 +232,46 @@ class MapboxRouteShieldApi {
      * @param callback invoked with appropriate result
      * @see RouteShield.toBitmap
      */
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     fun getRoadComponentsShields(
         roadComponents: List<RoadComponent>,
         userId: String?,
         styleId: String?,
         callback: RouteShieldCallback,
+    ) = getRoadComponentsShields(roadComponents, userId, styleId, null, callback)
+
+    /**
+     * The function requests mapbox designed road shields (if available) using
+     * [RoadComponent.shield]'s [MapboxShield.baseUrl] for the current road.
+     * If for any reason the API is unable to download the shield, it falls back to download
+     * and return the legacy shield using [RoadComponent.imageBaseUrl].
+     * Returns error otherwise.
+     *
+     * The function returns list of [RouteShieldResult] or [RouteShieldError] in
+     * [RouteShieldCallback.onRoadShields].
+     *
+     * To convert the returned in [RouteShield] SVG [ByteArray] to a [Bitmap] use [RouteShield.toBitmap].
+     *
+     * @param roadComponents list of [RoadComponent] objects
+     * @param userId Mapbox user account name
+     * @param styleId style id used to render the map
+     * @param fontConfig font configuration for [MapboxShield.displayRef] rendering. Config is
+     * ignored in case of fallback to legacy shields.
+     * @param callback invoked with appropriate result
+     * @see RouteShield.toBitmap
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun getRoadComponentsShields(
+        roadComponents: List<RoadComponent>,
+        userId: String?,
+        styleId: String?,
+        fontConfig: ShieldFontConfig?,
+        callback: RouteShieldCallback,
     ) {
         val routeShieldToDownload = roadComponents.findShieldsToDownloadFromRoadComponent(
             userId = userId,
             styleId = styleId,
+            fontConfig = fontConfig,
         )
         getRouteShieldsInternal(routeShieldToDownload, callback)
     }
@@ -210,9 +296,11 @@ class MapboxRouteShieldApi {
         }
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private fun List<BannerComponents>.findShieldsToDownload(
         userId: String?,
         styleId: String?,
+        fontConfig: ShieldFontConfig? = null,
     ): List<RouteShieldToDownload> {
         return this.mapNotNull { component ->
             if (component.type() == BannerComponents.ICON) {
@@ -231,6 +319,7 @@ class MapboxRouteShieldApi {
                         ShieldSpriteToDownload(
                             userId = userId,
                             styleId = styleId,
+                            fontConfig = fontConfig,
                         ),
                         mapboxShield = mapboxShield,
                         legacyFallback = legacy,
@@ -246,9 +335,11 @@ class MapboxRouteShieldApi {
         }
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private fun List<RoadComponent>.findShieldsToDownloadFromRoadComponent(
         userId: String?,
         styleId: String?,
+        fontConfig: ShieldFontConfig?,
     ): List<RouteShieldToDownload> {
         return mapNotNull { roadComponent ->
             val legacy = roadComponent.imageBaseUrl?.let {
@@ -264,6 +355,7 @@ class MapboxRouteShieldApi {
                     ShieldSpriteToDownload(
                         userId = userId,
                         styleId = styleId,
+                        fontConfig = fontConfig,
                     ),
                     mapboxShield = roadComponent.shield!!,
                     legacyFallback = legacy,

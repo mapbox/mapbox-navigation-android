@@ -3,9 +3,11 @@ package com.mapbox.navigation.tripdata.maneuver.api
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.MapboxShield
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
@@ -23,6 +25,7 @@ import com.mapbox.navigation.tripdata.maneuver.model.RoadShieldComponentNode
 import com.mapbox.navigation.tripdata.maneuver.model.SecondaryManeuver
 import com.mapbox.navigation.tripdata.maneuver.model.SubManeuver
 import com.mapbox.navigation.tripdata.shield.api.MapboxRouteShieldApi
+import com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig
 import com.mapbox.navigation.tripdata.shield.internal.api.getRouteShieldsFromModels
 import com.mapbox.navigation.tripdata.shield.internal.model.RouteShieldToDownload
 import com.mapbox.navigation.tripdata.shield.internal.model.ShieldSpriteToDownload
@@ -157,16 +160,41 @@ class MapboxManeuverApi internal constructor(
      * @param shieldCallback invoked with appropriate result
      * @see MapboxManeuverView.renderManeuverWith
      */
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     fun getRoadShields(
         maneuvers: List<Maneuver>,
         shieldCallback: RouteShieldCallback,
+    ) = getRoadShields(null, null, maneuvers, null, shieldCallback)
+
+    /**
+     * Given a list of [Maneuver] the function requests mapbox designed road shields (if available)
+     * using [BannerComponents.mapboxShield] associated in [RoadShieldComponentNode]. If for any
+     * reason the API fails to download the mapbox designed shields, it fallbacks to use legacy
+     * [BannerComponents.imageBaseUrl] if available.
+     *
+     * If you do not wish to download all of the shields at once,
+     * make sure to pass in only a list of maneuvers that you'd like download the road shields.
+     *
+     * The function is safe to be called repeatably, all the results are cached in-memory
+     * and requests are managed to avoid duplicating network bandwidth usage.
+     *
+     * The function returns list of either [RouteShieldError] or [RouteShieldResult] in
+     * [RouteShieldCallback.onRoadShields] and can be used when displaying [PrimaryManeuver],
+     * [SecondaryManeuver] and [SubManeuver].
+     *
+     * @param userId Mapbox user account name
+     * @param styleId style id used to render the map
+     * @param maneuvers list of maneuvers
+     * @param shieldCallback invoked with appropriate result
+     */
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    fun getRoadShields(
+        userId: String?,
+        styleId: String?,
+        maneuvers: List<Maneuver>,
+        shieldCallback: RouteShieldCallback,
     ) {
-        getRoadShields(
-            null,
-            null,
-            maneuvers,
-            shieldCallback,
-        )
+        getRoadShields(userId, styleId, maneuvers, null, shieldCallback)
     }
 
     /**
@@ -185,13 +213,19 @@ class MapboxManeuverApi internal constructor(
      * [RouteShieldCallback.onRoadShields] and can be used when displaying [PrimaryManeuver],
      * [SecondaryManeuver] and [SubManeuver].
      *
+     * @param userId Mapbox user account name
+     * @param styleId style id used to render the map
      * @param maneuvers list of maneuvers
+     * @param fontConfig font configuration for [MapboxShield.displayRef] rendering. Config is
+     * ignored in case of fallback to legacy shields.
      * @param shieldCallback invoked with appropriate result
      */
+    @ExperimentalPreviewMapboxNavigationAPI
     fun getRoadShields(
         userId: String?,
         styleId: String?,
         maneuvers: List<Maneuver>,
+        fontConfig: ShieldFontConfig?,
         shieldCallback: RouteShieldCallback,
     ) {
         mainJobController.scope.launch {
@@ -201,6 +235,7 @@ class MapboxManeuverApi internal constructor(
                     maneuver.primary.componentList.findShieldsToDownload(
                         userId = userId,
                         styleId = styleId,
+                        fontConfig = fontConfig,
                     ),
                 ).let { results ->
                     shields.addAll(results)
@@ -210,6 +245,7 @@ class MapboxManeuverApi internal constructor(
                         secondary.componentList.findShieldsToDownload(
                             userId = userId,
                             styleId = styleId,
+                            fontConfig = fontConfig,
                         ),
                     ).let { results ->
                         shields.addAll(results)
@@ -220,6 +256,7 @@ class MapboxManeuverApi internal constructor(
                         sub.componentList.findShieldsToDownload(
                             userId = userId,
                             styleId = styleId,
+                            fontConfig = fontConfig,
                         ),
                     ).let { results ->
                         shields.addAll(results)
@@ -237,9 +274,11 @@ class MapboxManeuverApi internal constructor(
         routeShieldApi.cancel()
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private fun List<Component>.findShieldsToDownload(
         userId: String? = null,
         styleId: String? = null,
+        fontConfig: ShieldFontConfig?,
     ): List<RouteShieldToDownload> {
         return mapNotNull { component ->
             if (component.node is RoadShieldComponentNode) {
@@ -255,6 +294,7 @@ class MapboxManeuverApi internal constructor(
                         ShieldSpriteToDownload(
                             userId = userId,
                             styleId = styleId,
+                            fontConfig = fontConfig,
                         ),
                         mapboxShield = mapboxShield,
                         legacyFallback = legacy,

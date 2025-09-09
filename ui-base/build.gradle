@@ -51,6 +51,7 @@ dependencies {
 
     apply from: "../gradle/unit-testing-dependencies.gradle"
     testImplementation(project(':libtesting-utils'))
+    testImplementation(project(':libtesting-navigation-util'))
 }
 
 dokkaHtmlPartial {

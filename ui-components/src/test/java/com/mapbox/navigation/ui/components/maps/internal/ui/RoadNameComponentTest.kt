@@ -7,6 +7,7 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.common.location.LocationProviderRequest
 import com.mapbox.common.location.LocationServiceFactory
 import com.mapbox.maps.Style
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.road.model.Road
 import com.mapbox.navigation.core.MapboxNavigation
@@ -123,13 +124,14 @@ internal class RoadNameComponentTest {
         contract.roadInfo.value = roadData
     }
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private fun givenRouteShieldsResponse(
         road: Road,
         shields: List<Expected<RouteShieldError, RouteShieldResult>>,
     ) {
         val shieldsCallbackSlot = slot<RouteShieldCallback>()
         every {
-            routeShieldApi.getRouteShields(road, any(), any(), capture(shieldsCallbackSlot))
+            routeShieldApi.getRouteShields(road, any(), any(), any(), capture(shieldsCallbackSlot))
         } answers {
             shieldsCallbackSlot.captured.onRoadShields(shields)
         }

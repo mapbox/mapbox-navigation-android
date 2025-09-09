@@ -5,10 +5,12 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
 import com.mapbox.maps.coroutine.mapLoadedEvents
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.road.model.Road
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.tripdata.shield.api.MapboxRouteShieldApi
+import com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig
 import com.mapbox.navigation.tripdata.shield.model.RouteShieldError
 import com.mapbox.navigation.tripdata.shield.model.RouteShieldResult
 import com.mapbox.navigation.ui.base.lifecycle.UIComponent
@@ -28,10 +30,12 @@ interface RoadNameComponentContract {
     val mapStyle: StateFlow<Style?>
 }
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class RoadNameComponent(
     private val roadNameView: MapboxRoadNameView,
     private val contractProvider: Provider<RoadNameComponentContract>,
     private val routeShieldApi: MapboxRouteShieldApi = MapboxRouteShieldApi(),
+    private val shieldFontConfig: ShieldFontConfig? = null,
 ) : UIComponent() {
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
@@ -53,6 +57,7 @@ class RoadNameComponent(
                     road,
                     mapStyle.getUserId(),
                     mapStyle.getStyleId(),
+                    shieldFontConfig,
                 )
                 roadNameView.renderRoadNameWith(result)
             } else {
@@ -67,9 +72,10 @@ class RoadNameComponent(
         road: Road,
         userId: String?,
         styleId: String?,
+        fontConfig: ShieldFontConfig?,
     ): List<Expected<RouteShieldError, RouteShieldResult>> =
         suspendCancellableCoroutine { cont ->
-            getRouteShields(road, userId, styleId) { result ->
+            getRouteShields(road, userId, styleId, fontConfig) { result ->
                 cont.resume(result)
             }
             cont.invokeOnCancellation {

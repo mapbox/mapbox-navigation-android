@@ -6,6 +6,8 @@ import com.mapbox.api.directions.v5.models.ShieldSprites
 import com.mapbox.api.directions.v5.models.ShieldSvg
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig
 import com.mapbox.navigation.tripdata.shield.internal.model.RouteShieldToDownload
 import com.mapbox.navigation.tripdata.shield.internal.model.SizeSpecificSpriteInfo
 import com.mapbox.navigation.tripdata.shield.internal.model.generateSpriteSheetUrl
@@ -128,6 +130,7 @@ internal abstract class ResourceCache<Argument, Value>(cacheSize: Int) {
     ): Expected<RequestError, SuccessfulResponse<Value>>
 }
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class ShieldResultCache(
     private val shieldSpritesCache: ShieldSpritesCache = ShieldSpritesCache(),
     private val shieldByteArrayCache: ShieldByteArrayCache = ShieldByteArrayCache(),
@@ -206,6 +209,7 @@ internal class ShieldResultCache(
                             shieldSvg = value,
                             textColor = toDownload.mapboxShield.textColor(),
                             placeholder = placeholder,
+                            fontConfig = toDownload.shieldSpriteToDownload.fontConfig,
                         ).toByteArray()
                         ExpectedFactory.createValue(
                             SuccessfulResponse(
@@ -229,13 +233,25 @@ internal class ShieldResultCache(
         shieldSvg: String,
         textColor: String,
         placeholder: List<Double>,
+        fontConfig: ShieldFontConfig? = null,
     ): String {
         val textTagX = placeholder[0] + placeholder[2] / 2
         val textTagY = placeholder[3]
         val textSize = placeholder[3] - placeholder[1] + 3
+
+        val fontAttributes = if (fontConfig != null) {
+            "font-family=\"${fontConfig.fontFamily}\"" +
+                " font-weight=\"${fontConfig.fontWeight}\"" +
+                " font-style=\"${fontConfig.fontStyle}\" "
+        } else {
+            "font-family=\"Arial, Helvetica, sans-serif\" " +
+                "font-weight=\"bold\" "
+        }
+
         val shieldText = "\t<text x=\"$textTagX\" y=\"$textTagY\" " +
-            "font-family=\"Arial, Helvetica, sans-serif\" font-weight=\"bold\" " +
+            fontAttributes +
             "text-anchor=\"middle\" font-size=\"$textSize\" fill=\"$textColor\">$text</text>"
+
         return shieldSvg.replace("</svg>", shieldText.plus("</svg>"))
     }
 

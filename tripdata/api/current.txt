@@ -17,6 +17,7 @@ package com.mapbox.navigation.tripdata.maneuver.api {
     method public com.mapbox.bindgen.Expected<com.mapbox.navigation.tripdata.maneuver.model.ManeuverError,java.util.List<com.mapbox.navigation.tripdata.maneuver.model.Maneuver>> getManeuvers(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
     method public void getRoadShields(java.util.List<com.mapbox.navigation.tripdata.maneuver.model.Maneuver> maneuvers, com.mapbox.navigation.tripdata.shield.model.RouteShieldCallback shieldCallback);
     method public void getRoadShields(String? userId, String? styleId, java.util.List<com.mapbox.navigation.tripdata.maneuver.model.Maneuver> maneuvers, com.mapbox.navigation.tripdata.shield.model.RouteShieldCallback shieldCallback);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void getRoadShields(String? userId, String? styleId, java.util.List<com.mapbox.navigation.tripdata.maneuver.model.Maneuver> maneuvers, com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig? fontConfig, com.mapbox.navigation.tripdata.shield.model.RouteShieldCallback shieldCallback);
   }
 
   public final class MapboxTurnIconsApi {
@@ -904,10 +905,43 @@ package com.mapbox.navigation.tripdata.shield.api {
     ctor public MapboxRouteShieldApi();
     method public void cancel();
     method public void getRoadComponentsShields(java.util.List<com.mapbox.navigation.base.road.model.RoadComponent> roadComponents, String? userId, String? styleId, com.mapbox.navigation.tripdata.shield.model.RouteShieldCallback callback);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void getRoadComponentsShields(java.util.List<com.mapbox.navigation.base.road.model.RoadComponent> roadComponents, String? userId, String? styleId, com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig? fontConfig, com.mapbox.navigation.tripdata.shield.model.RouteShieldCallback callback);
     method public void getRouteShields(java.util.List<? extends com.mapbox.api.directions.v5.models.BannerComponents>? bannerComponents, com.mapbox.navigation.tripdata.shield.model.RouteShieldCallback callback);
     method public void getRouteShields(java.util.List<? extends com.mapbox.api.directions.v5.models.BannerComponents>? bannerComponents, String? userId, String? styleId, com.mapbox.navigation.tripdata.shield.model.RouteShieldCallback callback);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void getRouteShields(java.util.List<? extends com.mapbox.api.directions.v5.models.BannerComponents>? bannerComponents, String? userId, String? styleId, com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig? fontConfig, com.mapbox.navigation.tripdata.shield.model.RouteShieldCallback callback);
     method public void getRouteShields(com.mapbox.navigation.base.road.model.Road road, com.mapbox.navigation.tripdata.shield.model.RouteShieldCallback callback);
     method public void getRouteShields(com.mapbox.navigation.base.road.model.Road road, String? userId, String? styleId, com.mapbox.navigation.tripdata.shield.model.RouteShieldCallback callback);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void getRouteShields(com.mapbox.navigation.base.road.model.Road road, String? userId, String? styleId, com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig? fontConfig, com.mapbox.navigation.tripdata.shield.model.RouteShieldCallback callback);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ShieldFontConfig {
+    method public String getFontFamily();
+    method public String? getFontStyle();
+    method public int getFontWeight();
+    method public com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig.Builder toBuilder();
+    property public final String fontFamily;
+    property public final String? fontStyle;
+    property public final int fontWeight;
+  }
+
+  public static final class ShieldFontConfig.Builder {
+    ctor public ShieldFontConfig.Builder(String fontFamily);
+    method public com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig build();
+    method public com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig.Builder fontStyle(@com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig.FontStyle String? fontStyle);
+    method public com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig.Builder fontWeight(int fontWeight);
+  }
+
+  @StringDef({com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig.FontStyle.Companion.NORMAL, com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig.FontStyle.Companion.ITALIC, com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig.FontStyle.Companion.OBLIQUE}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface ShieldFontConfig.FontStyle {
+    field public static final com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig.FontStyle.Companion Companion;
+    field public static final String ITALIC = "italic";
+    field public static final String NORMAL = "normal";
+    field public static final String OBLIQUE = "oblique";
+  }
+
+  public static final class ShieldFontConfig.FontStyle.Companion {
+    field public static final String ITALIC = "italic";
+    field public static final String NORMAL = "normal";
+    field public static final String OBLIQUE = "oblique";
   }
 
 }

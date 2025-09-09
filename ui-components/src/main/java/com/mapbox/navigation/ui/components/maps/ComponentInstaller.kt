@@ -6,6 +6,7 @@ import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.tripdata.shield.api.MapboxRouteShieldApi
+import com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig
 import com.mapbox.navigation.ui.base.installer.ComponentInstaller
 import com.mapbox.navigation.ui.base.installer.Installation
 import com.mapbox.navigation.ui.base.installer.findComponent
@@ -42,6 +43,7 @@ fun ComponentInstaller.roadName(
             roadNameView,
             { contract },
             componentConfig.routeShieldApi ?: MapboxRouteShieldApi(),
+            componentConfig.shieldFontConfig,
         ),
     )
 }
@@ -132,4 +134,10 @@ class RoadNameConfig internal constructor() {
      * A [MapboxRouteShieldApi] instance to use with this component.
      */
     var routeShieldApi: MapboxRouteShieldApi? = null
+
+    /**
+     * Font configuration for shield text rendering.
+     * If not specified, default font will be used.
+     */
+    var shieldFontConfig: ShieldFontConfig? = null
 }
