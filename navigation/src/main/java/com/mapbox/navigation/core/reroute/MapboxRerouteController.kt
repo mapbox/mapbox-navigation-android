@@ -26,7 +26,6 @@ import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
-import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.Dispatchers
@@ -144,12 +143,10 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
     ) {
         this.lastSignature = signature
         val ignoreDeviationToAlternatives = runningRerouteCausedByRouteReplan
-        logD(LOG_CATEGORY) {
-            "Starting reroute"
-        }
+        logI(LOG_CATEGORY) { "Starting reroute, signature = $signature" }
         interrupt()
         state = RerouteState.FetchingRoute
-        logD("Fetching route", LOG_CATEGORY)
+        logI("Fetching route", LOG_CATEGORY)
 
         val routeProgress = tripSession.getRouteProgress()
         val routeAlternativeId = routeProgress?.routeAlternativeId
@@ -157,20 +154,22 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
         if (!ignoreDeviationToAlternatives && routeAlternativeId != null) {
             val relevantAlternative = routes.find { it.id == routeAlternativeId }
             if (relevantAlternative != null) {
-                val alternativeLegIndex = tripSession.getRouteProgress()
-                    ?.internalAlternativeRouteIndices()?.get(routeAlternativeId)?.legIndex ?: 0
-                val newList = routes.toMutableList().apply {
-                    remove(relevantAlternative)
-                    add(0, relevantAlternative)
+                rerouteJob = mainJobController.scope.launch {
+                    val alternativeLegIndex = tripSession.getRouteProgress()
+                        ?.internalAlternativeRouteIndices()?.get(routeAlternativeId)?.legIndex ?: 0
+                    val newList = routes.toMutableList().apply {
+                        remove(relevantAlternative)
+                        add(0, relevantAlternative)
+                    }
+
+                    logI("Reroute switch to alternative", LOG_CATEGORY)
+
+                    val origin = relevantAlternative.routerOrigin.mapToSdkRouteOrigin()
+
+                    state = RerouteState.RouteFetched(origin)
+                    callback.onNewRoutes(RerouteResult(newList, alternativeLegIndex, origin))
+                    state = RerouteState.Idle
                 }
-
-                logD("Reroute switch to alternative", LOG_CATEGORY)
-
-                val origin = relevantAlternative.routerOrigin.mapToSdkRouteOrigin()
-
-                state = RerouteState.RouteFetched(origin)
-                callback.onNewRoutes(RerouteResult(newList, alternativeLegIndex, origin))
-                state = RerouteState.Idle
                 return
             }
         }

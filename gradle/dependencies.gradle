@@ -61,7 +61,7 @@ ext {
       mockkVersion              : '1.12.1',
       leakCanaryVersion         : '2.9.1',
       commonsIO                 : '2.6',
-      robolectric               : '4.7.3',
+      robolectric               : '4.15.1',
       mockwebserver             : '4.10.0',
       gmsLocation               : '17.0.0',
       ktlint                    : '0.47.1',

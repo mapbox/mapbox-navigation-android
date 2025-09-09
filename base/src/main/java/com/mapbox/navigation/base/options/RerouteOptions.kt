@@ -16,6 +16,7 @@ class RerouteOptions
 private constructor(
     val avoidManeuverSeconds: Int,
     val rerouteStrategyForMapMatchedRoutes: RerouteStrategyForMapMatchedRoutes,
+    val repeatRerouteAfterOffRouteDelaySeconds: Int,
 ) {
 
     /**
@@ -25,6 +26,7 @@ private constructor(
     fun toBuilder(): Builder = Builder().apply {
         avoidManeuverSeconds(avoidManeuverSeconds)
         rerouteStrategyForMapMatchedRoutes(rerouteStrategyForMapMatchedRoutes)
+        repeatRerouteAfterOffRouteDelaySeconds(repeatRerouteAfterOffRouteDelaySeconds)
     }
 
     /**
@@ -37,8 +39,16 @@ private constructor(
 
         other as RerouteOptions
 
-        if (avoidManeuverSeconds != other.avoidManeuverSeconds) return false
-        return rerouteStrategyForMapMatchedRoutes == other.rerouteStrategyForMapMatchedRoutes
+        if (avoidManeuverSeconds != other.avoidManeuverSeconds) {
+            return false
+        }
+
+        if (rerouteStrategyForMapMatchedRoutes != other.rerouteStrategyForMapMatchedRoutes) {
+            return false
+        }
+
+        return repeatRerouteAfterOffRouteDelaySeconds ==
+            other.repeatRerouteAfterOffRouteDelaySeconds
     }
 
     /**
@@ -48,6 +58,7 @@ private constructor(
     override fun hashCode(): Int {
         var result = avoidManeuverSeconds
         result = 31 * result + rerouteStrategyForMapMatchedRoutes.hashCode()
+        result = 31 * result + repeatRerouteAfterOffRouteDelaySeconds
         return result
     }
 
@@ -58,7 +69,8 @@ private constructor(
     override fun toString(): String {
         return "RerouteOptions(" +
             "avoidManeuverSeconds=$avoidManeuverSeconds," +
-            "rerouteStrategyForMapMatchedRoutes=$rerouteStrategyForMapMatchedRoutes" +
+            "rerouteStrategyForMapMatchedRoutes=$rerouteStrategyForMapMatchedRoutes," +
+            "repeatRerouteAfterOffRouteDelaySeconds=$repeatRerouteAfterOffRouteDelaySeconds" +
             ")"
     }
 
@@ -72,6 +84,9 @@ private constructor(
         @OptIn(ExperimentalMapboxNavigationAPI::class)
         private var rerouteStrategyForMapMatchedRoutes: RerouteStrategyForMapMatchedRoutes =
             RerouteDisabled
+
+        @OptIn(ExperimentalMapboxNavigationAPI::class)
+        private var repeatRerouteAfterOffRouteDelaySeconds = -1
 
         /**
          * Avoid maneuver second. A radius in seconds around reroute origin point where need to
@@ -104,12 +119,28 @@ private constructor(
             apply { rerouteStrategyForMapMatchedRoutes = strategy }
 
         /**
+         * Delay in seconds before repeating reroute after off-route event if reroute did not happen
+         *
+         * Default value is -1 (turn-off)
+         *
+         * @return this [Builder]
+         */
+        @OptIn(ExperimentalMapboxNavigationAPI::class)
+        internal fun repeatRerouteAfterOffRouteDelaySeconds(delaySeconds: Int): Builder = apply {
+            check(delaySeconds >= -1) {
+                "repeatRerouteAfterOffRouteDelaySeconds must be higher or equal -1"
+            }
+            this.repeatRerouteAfterOffRouteDelaySeconds = delaySeconds
+        }
+
+        /**
          * Build the [RerouteOptions]
          */
         @OptIn(ExperimentalMapboxNavigationAPI::class)
         fun build(): RerouteOptions = RerouteOptions(
             avoidManeuverSeconds,
             rerouteStrategyForMapMatchedRoutes,
+            repeatRerouteAfterOffRouteDelaySeconds,
         )
     }
 }

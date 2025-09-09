@@ -153,6 +153,7 @@ class EVRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
         mapboxNavigation.moveAlongTheRouteUntilTracking(
             newRequestedRoutes.first(),
             mockLocationReplayerRule,
+            minEventsCount = 1,
         )
         stayOnPosition(offRouteLocationUpdate.latitude, offRouteLocationUpdate.longitude)
         waitForReroute()

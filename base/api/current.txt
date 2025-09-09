@@ -853,9 +853,11 @@ package com.mapbox.navigation.base.options {
 
   public final class RerouteOptions {
     method public int getAvoidManeuverSeconds();
+    method public int getRepeatRerouteAfterOffRouteDelaySeconds();
     method public com.mapbox.navigation.base.options.RerouteStrategyForMapMatchedRoutes getRerouteStrategyForMapMatchedRoutes();
     method public com.mapbox.navigation.base.options.RerouteOptions.Builder toBuilder();
     property public final int avoidManeuverSeconds;
+    property public final int repeatRerouteAfterOffRouteDelaySeconds;
     property public final com.mapbox.navigation.base.options.RerouteStrategyForMapMatchedRoutes rerouteStrategyForMapMatchedRoutes;
   }
 

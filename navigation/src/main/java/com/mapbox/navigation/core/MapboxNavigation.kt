@@ -27,6 +27,7 @@ import com.mapbox.navigation.base.internal.accounts.SkuIdProviderImpl
 import com.mapbox.navigation.base.internal.clearCache
 import com.mapbox.navigation.base.internal.extensions.internalAlternativeRouteIndices
 import com.mapbox.navigation.base.internal.performance.PerformanceTracker
+import com.mapbox.navigation.base.internal.reroute.getRepeatRerouteAfterOffRouteDelaySeconds
 import com.mapbox.navigation.base.internal.tilestore.NavigationTileStoreOwner
 import com.mapbox.navigation.base.internal.trip.notification.TripNotificationInterceptorOwner
 import com.mapbox.navigation.base.internal.utils.createRouteParsingManager
@@ -579,6 +580,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             tripSessionLocationEngine = tripSessionLocationEngine,
             navigator = navigator,
             threadController,
+            navigationOptions.rerouteOptions.getRepeatRerouteAfterOffRouteDelaySeconds(),
         )
 
         tripSession.registerRouteProgressObserver(routesProgressDataProvider)
@@ -687,8 +689,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         internalRoutesObserver = createInternalRoutesObserver()
         internalOffRouteObserver = createInternalOffRouteObserver()
         internalFallbackVersionsObserver = createInternalFallbackVersionsObserver()
-        tripSession.registerOffRouteObserver(internalOffRouteObserver)
         tripSession.registerFallbackVersionsObserver(internalFallbackVersionsObserver)
+        rerouteController?.let {
+            tripSession.setOffRouteObserverForReroute(internalOffRouteObserver, it)
+        }
         registerRoutesObserver(internalRoutesObserver)
         registerRoutesObserver(routeRefreshController::onRoutesChanged)
         setUpRouteCacheClearer()
@@ -1275,7 +1279,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         setRoutesInfo: SetRoutes,
         callback: RoutesSetCallback? = null,
     ) {
-        logD(LOG_CATEGORY) {
+        logI(LOG_CATEGORY) {
             "setting routes; reason: ${setRoutesInfo.mapToReason()}; IDs: ${routes.map { it.id }}"
         }
         directionsSession.setNavigationRoutesStarted(RoutesSetStartedParams(routes))
@@ -1418,6 +1422,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         tripSession.unregisterAllVoiceInstructionsObservers()
         tripSession.unregisterAllEHorizonObservers()
         tripSession.unregisterAllFallbackVersionsObservers()
+        tripSession.resetOffRouteObserverForReroute()
         tripSessionLocationEngine.destroy()
         routeAlternativesController.unregisterAll()
         navigationTelemetry.clearObservers()
@@ -1655,6 +1660,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      */
     // TODO: support enable/disable for native reroute: https://mapbox.atlassian.net/browse/NAVAND-4492
     fun setRerouteEnabled(enabled: Boolean) {
+        logI("Set reroute enabled = $enabled")
         if (enabled) {
             if (rerouteController == null) {
                 rerouteController = defaultRerouteController
@@ -2195,6 +2201,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private fun createInternalFallbackVersionsObserver() = object : FallbackVersionsObserver {
         override fun onFallbackVersionsFound(versions: List<String>) {
+            logI(
+                "FallbackVersionsObserver.onFallbackVersionsFound called with versions = $versions",
+                LOG_CATEGORY,
+            )
             if (versions.isNotEmpty()) {
                 // the last version in the list is the latest one
                 val tilesVersion = versions.last()
@@ -2202,16 +2212,14 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 navigationVersionSwitchObservers.forEach {
                     it.onSwitchToFallbackVersion(tilesVersion)
                 }
-            } else {
-                logD(
-                    "FallbackVersionsObserver.onFallbackVersionsFound called with an empty " +
-                        "versions list, navigator can't be recreated.",
-                    LOG_CATEGORY,
-                )
             }
         }
 
         override fun onCanReturnToLatest(version: String) {
+            logI(
+                "FallbackVersionsObserver.onCanReturnToLatest called with version = $version",
+                LOG_CATEGORY,
+            )
             recreateNavigatorInstance(
                 isFallback = false,
                 tilesVersion = navigationOptions.routingTilesOptions.tilesVersion,
@@ -2255,6 +2263,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private fun rerouteOnDeviation() {
         rerouteController?.rerouteOnDeviation { result: RerouteResult ->
+            logI(LOG_CATEGORY) {
+                "Reroute on deviation: $result, " +
+                    "tripSession.isOffRoute = ${tripSession.isOffRoute}"
+            }
             if (tripSession.isOffRoute) {
                 internalSetNavigationRoutes(
                     result.routes,

@@ -1,0 +1,1140 @@
+{
+  "code": "Ok",
+  "routes": [
+    {
+      "duration": 155.787,
+      "distance": 537.08,
+      "legs": [
+        {
+          "distance": 537.08,
+          "duration": 35.787,
+          "annotation": {
+            "state_of_charge": [
+              64.04,
+              64.04,
+              64.03,
+              64.03,
+              64.03,
+              64.02,
+              64.01,
+              64.01,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              64,
+              63.99,
+              63.99,
+              63.99,
+              63.99,
+              63.99,
+              63.99,
+              63.99,
+              63.99,
+              63.99,
+              63.99,
+              63.99,
+              63.96,
+              63.96,
+              63.96,
+              63.96,
+              63.91,
+              63.91,
+              63.91,
+              63.91,
+              63.91
+            ],
+            "duration": [
+              0.268,
+              1.608,
+              0.248,
+              1.261,
+              1.567,
+              0.936,
+              2.643,
+              0.9,
+              0.574,
+              0.688,
+              0.822,
+              0.957,
+              0.496,
+              0.42,
+              0.477,
+              1.532,
+              0.103,
+              0.182,
+              0.637,
+              0.916,
+              0.592,
+              0.916,
+              0.497,
+              0.371,
+              0.629,
+              0.535,
+              0.352,
+              0.901,
+              1.18,
+              0.722,
+              2.848,
+              2.864,
+              3.801,
+              1.202,
+              1.118
+            ],
+            "distance": [
+              6.2,
+              37.6,
+              5.8,
+              29.4,
+              36.6,
+              21.8,
+              61.7,
+              21,
+              13.3,
+              16.1,
+              19.2,
+              22.3,
+              11.6,
+              9.8,
+              11.1,
+              22.1,
+              1.5,
+              2.6,
+              2.5,
+              4.6,
+              3,
+              4.6,
+              2.4,
+              1.9,
+              3.1,
+              2.7,
+              1.1,
+              10,
+              13.1,
+              8.1,
+              30.4,
+              31.9,
+              42.2,
+              13.4,
+              12.4
+            ],
+            "speed": [
+              23.3,
+              23.3,
+              23.3,
+              23.3,
+              23.3,
+              23.3,
+              23.3,
+              23.3,
+              23.3,
+              23.3,
+              23.3,
+              23.3,
+              23.3,
+              23.3,
+              23.3,
+              14.4,
+              14.4,
+              14.4,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              11.1,
+              11.1,
+              11.1,
+              11.1,
+              11.1,
+              11.1,
+              11.1,
+              11.1,
+              11.1
+            ],
+            "current_speed": [
+              84,
+              84,
+              84,
+              84,
+              84,
+              84,
+              84,
+              84,
+              84,
+              84,
+              84,
+              84,
+              84,
+              84,
+              84,
+              52,
+              52,
+              52,
+              18,
+              18,
+              18,
+              18,
+              18,
+              18,
+              18,
+              18,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            "freeflow_speed": [
+              94,
+              94,
+              91,
+              91,
+              87,
+              86,
+              80,
+              80,
+              67,
+              67,
+              67,
+              67,
+              51,
+              51,
+              51,
+              37,
+              37,
+              37,
+              20,
+              20,
+              20,
+              20,
+              20,
+              20,
+              20,
+              20,
+              40,
+              40,
+              40,
+              40,
+              40,
+              40,
+              40,
+              40,
+              40
+            ],
+            "congestion_numeric": [
+              9,
+              9,
+              9,
+              9,
+              9,
+              9,
+              9,
+              9,
+              9,
+              9,
+              9,
+              9,
+              9,
+              9,
+              9,
+              9,
+              32,
+              32,
+              32,
+              32,
+              32,
+              32,
+              32,
+              32,
+              32,
+              32,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          "steps": [
+            {
+              "driving_side": "right",
+              "bannerInstructions": [
+                {
+                  "sub": {
+                    "components": [
+                      {
+                        "type": "icon",
+                        "text": "A94"
+                      },
+                      {
+                        "type": "delimiter",
+                        "text": "/"
+                      },
+                      {
+                        "type": "icon",
+                        "text": "B588"
+                      },
+                      {
+                        "type": "delimiter",
+                        "text": "/"
+                      },
+                      {
+                        "type": "text",
+                        "text": "Oberthal"
+                      },
+                      {
+                        "type": "text",
+                        "text": "/"
+                      },
+                      {
+                        "type": "text",
+                        "text": "München"
+                      }
+                    ],
+                    "degrees": 52,
+                    "driving_side": "right",
+                    "type": "roundabout",
+                    "modifier": "right",
+                    "text": "A94 / B588 / Oberthal / München"
+                  },
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "icon",
+                        "text": "A94"
+                      },
+                      {
+                        "type": "delimiter",
+                        "text": "/"
+                      },
+                      {
+                        "type": "icon",
+                        "text": "B588"
+                      },
+                      {
+                        "type": "delimiter",
+                        "text": "/"
+                      },
+                      {
+                        "type": "text",
+                        "text": "Oberthal"
+                      },
+                      {
+                        "type": "text",
+                        "text": "/"
+                      },
+                      {
+                        "type": "text",
+                        "text": "München"
+                      }
+                    ],
+                    "degrees": 88,
+                    "driving_side": "right",
+                    "type": "roundabout",
+                    "modifier": "right",
+                    "text": "A94 / B588 / Oberthal / München"
+                  },
+                  "distanceAlongGeometry": 349.743
+                }
+              ],
+              "geometry": "e{_c{Aw}ahWtAjBrNfTnAbBnKfOrN~RjHzJrX~a@vGzJrDnFzEvGbGrIjHnK~CfEjC~C~CrD~H`JTVd@h@",
+              "maneuver": {
+                "type": "depart",
+                "instruction": "Auf B588 Richtung Südwesten fahren.",
+                "bearing_after": 221,
+                "bearing_before": 0,
+                "location": [
+                  12.731884,
+                  48.300483
+                ]
+              },
+              "voiceInstructions": [
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Auf <phoneme alphabet='nt-sampa' ph='&quot;be: %fYnf|hUn|d6t|%?axt|?Un|&quot;?ax|tsIC'>B588</phoneme> Richtung Südwesten fahren. Dann Im Kreisverkehr die erste Ausfahrt in Richtung <say-as interpret-as=\"address\">A94</say-as> nehmen.<mark name=\"wipecache_v2\"/></prosody></amazon:effect></speak>",
+                  "announcement": "Auf B588 Richtung Südwesten fahren. Dann Im Kreisverkehr die erste Ausfahrt in Richtung A94 nehmen.",
+                  "distanceAlongGeometry": 349.743
+                }
+              ],
+              "intersections": [
+                {
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "entry": [
+                    true
+                  ],
+                  "bearings": [
+                    221
+                  ],
+                  "duration": 1.883,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 1.883,
+                  "geometry_index": 0,
+                  "location": [
+                    12.731884,
+                    48.300483
+                  ]
+                },
+                {
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    42,
+                    221
+                  ],
+                  "duration": 1.51,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 1.51,
+                  "geometry_index": 2,
+                  "location": [
+                    12.73149,
+                    48.30019
+                  ]
+                },
+                {
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    41,
+                    220
+                  ],
+                  "duration": 1.567,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 1.567,
+                  "geometry_index": 4,
+                  "location": [
+                    12.73118,
+                    48.29995
+                  ]
+                },
+                {
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    40,
+                    220
+                  ],
+                  "duration": 0.936,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 0.936,
+                  "geometry_index": 5,
+                  "location": [
+                    12.73086,
+                    48.2997
+                  ]
+                },
+                {
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    40,
+                    222
+                  ],
+                  "duration": 3.543,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 3.543,
+                  "geometry_index": 6,
+                  "location": [
+                    12.73067,
+                    48.29955
+                  ]
+                },
+                {
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    42,
+                    221
+                  ],
+                  "duration": 3.04,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 3.04,
+                  "geometry_index": 8,
+                  "location": [
+                    12.72992,
+                    48.299
+                  ]
+                },
+                {
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    42,
+                    219
+                  ],
+                  "duration": 1.393,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 1.393,
+                  "geometry_index": 12,
+                  "location": [
+                    12.72929,
+                    48.29852
+                  ]
+                },
+                {
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "bearings": [
+                    37,
+                    216
+                  ],
+                  "entry": [
+                    false,
+                    true
+                  ],
+                  "in": 0,
+                  "admin_index": 0,
+                  "out": 1,
+                  "geometry_index": 15,
+                  "location": [
+                    12.72902,
+                    48.29829
+                  ]
+                }
+              ],
+              "speedLimitUnit": "km/h",
+              "speedLimitSign": "vienna",
+              "name": "",
+              "weight_typical": 24.16,
+              "duration_typical": 24.16,
+              "duration": 15.689,
+              "distance": 349.743,
+              "weight": 15.689,
+              "mode": "driving",
+              "ref": "B588"
+            },
+            {
+              "driving_side": "right",
+              "bannerInstructions": [
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "icon",
+                        "text": "A94"
+                      },
+                      {
+                        "type": "delimiter",
+                        "text": "/"
+                      },
+                      {
+                        "type": "icon",
+                        "text": "B588"
+                      },
+                      {
+                        "type": "delimiter",
+                        "text": "/"
+                      },
+                      {
+                        "type": "text",
+                        "text": "Oberthal"
+                      },
+                      {
+                        "type": "text",
+                        "text": "/"
+                      },
+                      {
+                        "type": "text",
+                        "text": "München"
+                      }
+                    ],
+                    "degrees": 88,
+                    "driving_side": "right",
+                    "type": "roundabout",
+                    "modifier": "right",
+                    "text": "A94 / B588 / Oberthal / München"
+                  },
+                  "distanceAlongGeometry": 24.766
+                }
+              ],
+              "geometry": "gf{b{As}{gWSz@SvB?nARvBRz@Rf@f@z@f@f@",
+              "maneuver": {
+                "type": "roundabout",
+                "exit": 1,
+                "instruction": "Im Kreisverkehr die erste Ausfahrt in Richtung A94/B588/Oberthal/München nehmen.",
+                "modifier": "right",
+                "bearing_after": 262,
+                "bearing_before": 216,
+                "location": [
+                  12.72881,
+                  48.2981
+                ]
+              },
+              "voiceInstructions": [],
+              "intersections": [
+                {
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "bearings": [
+                    36,
+                    158,
+                    262
+                  ],
+                  "entry": [
+                    false,
+                    false,
+                    true
+                  ],
+                  "turn_weight": 1,
+                  "turn_duration": 0.14,
+                  "in": 0,
+                  "yield_sign": true,
+                  "admin_index": 0,
+                  "out": 2,
+                  "geometry_index": 18,
+                  "location": [
+                    12.72881,
+                    48.2981
+                  ]
+                }
+              ],
+              "destinations": "A94, B588: Oberthal, München, Unterthal, Altötting, Fuchshub, Gewerbegebiet Fuchshub, Reischach",
+              "speedLimitUnit": "km/h",
+              "speedLimitSign": "vienna",
+              "pronunciation": "\"fUks|hu:p",
+              "name": "Fuchshub",
+              "weight_typical": 5.458,
+              "duration_typical": 4.598,
+              "duration": 5.093,
+              "distance": 24.766,
+              "weight": 5.953,
+              "mode": "driving"
+            },
+            {
+              "driving_side": "right",
+              "bannerInstructions": [
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "Das Ziel befindet sich auf der linken Seite"
+                      }
+                    ],
+                    "type": "arrive",
+                    "modifier": "left",
+                    "text": "Das Ziel befindet sich auf der linken Seite"
+                  },
+                  "distanceAlongGeometry": 162.571
+                },
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "Das Ziel befindet sich auf der linken Seite"
+                      }
+                    ],
+                    "type": "arrive",
+                    "modifier": "left",
+                    "text": "Das Ziel befindet sich auf der linken Seite"
+                  },
+                  "distanceAlongGeometry": 138.889
+                }
+              ],
+              "geometry": "cc{b{Aok{gWIXyAhF_DbGwBvBoFbVoFjWwGb`@oArIcBjH",
+              "maneuver": {
+                "type": "exit roundabout",
+                "instruction": "Aus dem Kreisverkehr in Richtung A94/B588/Oberthal/München ausfahren.",
+                "modifier": "right",
+                "bearing_after": 303,
+                "bearing_before": 249,
+                "location": [
+                  12.72852,
+                  48.29805
+                ]
+              },
+              "voiceInstructions": [
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Das Ziel befindet sich auf der linken Seite.<mark name=\"wipecache_v2\"/></prosody></amazon:effect></speak>",
+                  "announcement": "Das Ziel befindet sich auf der linken Seite.",
+                  "distanceAlongGeometry": 138.889
+                }
+              ],
+              "intersections": [
+                {
+                  "mapbox_streets_v8": {
+                    "class": "street"
+                  },
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    69,
+                    173,
+                    303
+                  ],
+                  "duration": 3.155,
+                  "turn_weight": 6,
+                  "turn_duration": 0.252,
+                  "admin_index": 0,
+                  "out": 2,
+                  "weight": 8.903,
+                  "geometry_index": 26,
+                  "location": [
+                    12.72852,
+                    48.29805
+                  ]
+                },
+                {
+                  "mapbox_streets_v8": {
+                    "class": "street"
+                  },
+                  "bearings": [
+                    1,
+                    140,
+                    296
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    true
+                  ],
+                  "in": 1,
+                  "turn_weight": 3,
+                  "turn_duration": 0.104,
+                  "admin_index": 0,
+                  "out": 2,
+                  "geometry_index": 30,
+                  "location": [
+                    12.7282,
+                    48.29824
+                  ]
+                }
+              ],
+              "destinations": "A94, B588: Oberthal, München, Unterthal, Altötting, Fuchshub, Gewerbegebiet Fuchshub, Reischach",
+              "speedLimitUnit": "km/h",
+              "speedLimitSign": "vienna",
+              "pronunciation": "\"fUks|hu:p",
+              "name": "Fuchshub",
+              "weight_typical": 23.65,
+              "duration_typical": 15.006,
+              "duration": 15.006,
+              "distance": 162.571,
+              "weight": 23.65,
+              "mode": "driving"
+            },
+            {
+              "driving_side": "right",
+              "bannerInstructions": [],
+              "geometry": "kl|b{A{rwgW??",
+              "maneuver": {
+                "type": "arrive",
+                "instruction": "Das Ziel befindet sich auf der linken Seite.",
+                "modifier": "left",
+                "bearing_after": 0,
+                "bearing_before": 295,
+                "location": [
+                  12.72659,
+                  48.29871
+                ]
+              },
+              "voiceInstructions": [],
+              "intersections": [
+                {
+                  "bearings": [
+                    115
+                  ],
+                  "entry": [
+                    true
+                  ],
+                  "in": 0,
+                  "admin_index": 0,
+                  "geometry_index": 35,
+                  "location": [
+                    12.72659,
+                    48.29871
+                  ]
+                }
+              ],
+              "speedLimitUnit": "km/h",
+              "speedLimitSign": "vienna",
+              "pronunciation": "\"fUks|hu:p",
+              "name": "Fuchshub",
+              "weight_typical": 0,
+              "duration_typical": 0,
+              "duration": 0,
+              "distance": 0,
+              "weight": 0,
+              "mode": "driving"
+            }
+          ],
+          "ev_route_factors": {
+            "ev_search_algorithm_used": "EVPathfindingNotUsed",
+            "ev_is_ca_request": false,
+            "corresponding_non_ev_route_distance": 537.08,
+            "estimated_leg_distances": [],
+            "num_astar_expansions": null,
+            "path_astar_cost": null,
+            "route_cost_after_finalization": 156,
+            "ev_penalties": {
+              "energy_violation_penalty": 0,
+              "non_sapa_penalty": 0,
+              "non_preferred_payment_type_penalty": 0,
+              "non_preferred_provider_penalty": 0,
+              "non_preferred_amenity_penalty": 0
+            }
+          },
+          "admins": [
+            {
+              "iso_3166_1_alpha3": "DEU",
+              "iso_3166_1": "DE"
+            }
+          ],
+          "weight_typical": 53.267,
+          "duration_typical": 43.763,
+          "via_waypoints": [],
+          "route_factors": {
+            "dive_bombs": 0,
+            "connection_info": {
+              "location": [
+                12.72852,
+                48.29805
+              ],
+              "path_idx": 0,
+              "path_distance": 375,
+              "connection_idx": 0
+            },
+            "hierarchy": 4.093,
+            "raw_maneuvers": 2,
+            "continuity": 3,
+            "turn_counts": {
+              "roundabouts": 1
+            },
+            "maneuvers": 0,
+            "absolute ppe": 4057.1966,
+            "normalized ppe": 4057.1966,
+            "road_class_info": {
+              "unclassified": 162.314,
+              "primary": 374.779
+            },
+            "traffic_lights": 0,
+            "has_ferry": false,
+            "base_cost_maneuvers": 2,
+            "path_integral": 0.028093,
+            "path_integral_normalized": 0.142832
+          },
+          "weight": 45.291,
+          "summary": "B588, Fuchshub"
+        },
+        {
+          "distance": 0,
+          "duration": 0,
+          "annotation": {
+            "state_of_charge": [
+              63.91
+            ],
+            "duration": [
+              0
+            ],
+            "distance": [
+              0
+            ],
+            "speed": [
+              0
+            ],
+            "current_speed": [
+              null
+            ],
+            "freeflow_speed": [
+              40
+            ],
+            "congestion_numeric": [
+              null
+            ]
+          },
+          "steps": [
+            {
+              "driving_side": "right",
+              "bannerInstructions": [
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "BMW Allee befindet sich auf der linken Seite"
+                      }
+                    ],
+                    "type": "arrive",
+                    "modifier": "left",
+                    "text": "BMW Allee befindet sich auf der linken Seite"
+                  },
+                  "distanceAlongGeometry": 0
+                }
+              ],
+              "geometry": "kl|b{A{rwgW??",
+              "maneuver": {
+                "type": "depart",
+                "instruction": "Auf Fuchshub Richtung Norden fahren.",
+                "bearing_after": 0,
+                "bearing_before": 0,
+                "location": [
+                  12.72659,
+                  48.29871
+                ]
+              },
+              "voiceInstructions": [
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Auf <phoneme alphabet='nt-sampa' ph='&quot;fUks|hu:p'>Fuchshub</phoneme> Richtung Norden fahren. Dann befindet sich BMW Allee auf der linken Seite.<mark name=\"wipecache_v2\"/></prosody></amazon:effect></speak>",
+                  "announcement": "Auf Fuchshub Richtung Norden fahren. Dann befindet sich BMW Allee auf der linken Seite.",
+                  "distanceAlongGeometry": 0
+                }
+              ],
+              "intersections": [
+                {
+                  "mapbox_streets_v8": {
+                    "class": "street"
+                  },
+                  "bearings": [
+                    0
+                  ],
+                  "entry": [
+                    true
+                  ],
+                  "admin_index": 0,
+                  "out": 0,
+                  "geometry_index": 0,
+                  "location": [
+                    12.72659,
+                    48.29871
+                  ]
+                }
+              ],
+              "speedLimitUnit": "km/h",
+              "speedLimitSign": "vienna",
+              "pronunciation": "\"fUks|hu:p",
+              "name": "Fuchshub",
+              "weight_typical": 0,
+              "duration_typical": 0,
+              "duration": 0,
+              "distance": 0,
+              "weight": 0,
+              "mode": "driving"
+            },
+            {
+              "driving_side": "right",
+              "bannerInstructions": [],
+              "geometry": "kl|b{A{rwgW??",
+              "maneuver": {
+                "type": "arrive",
+                "instruction": "BMW Allee befindet sich auf der linken Seite.",
+                "modifier": "left",
+                "bearing_after": 0,
+                "bearing_before": 0,
+                "location": [
+                  12.72659,
+                  48.29871
+                ]
+              },
+              "voiceInstructions": [],
+              "intersections": [
+                {
+                  "bearings": [
+                    180
+                  ],
+                  "entry": [
+                    true
+                  ],
+                  "in": 0,
+                  "admin_index": 0,
+                  "geometry_index": 1,
+                  "location": [
+                    12.72659,
+                    48.29871
+                  ]
+                }
+              ],
+              "speedLimitUnit": "km/h",
+              "speedLimitSign": "vienna",
+              "pronunciation": "\"fUks|hu:p",
+              "name": "Fuchshub",
+              "weight_typical": 0,
+              "duration_typical": 0,
+              "duration": 0,
+              "distance": 0,
+              "weight": 0,
+              "mode": "driving"
+            }
+          ],
+          "ev_route_factors": {
+            "ev_search_algorithm_used": "EVPathfindingNotUsed",
+            "ev_is_ca_request": false,
+            "corresponding_non_ev_route_distance": 537.08,
+            "estimated_leg_distances": [],
+            "num_astar_expansions": null,
+            "path_astar_cost": null,
+            "route_cost_after_finalization": 156,
+            "ev_penalties": {
+              "energy_violation_penalty": 0,
+              "non_sapa_penalty": 0,
+              "non_preferred_payment_type_penalty": 0,
+              "non_preferred_provider_penalty": 0,
+              "non_preferred_amenity_penalty": 0
+            }
+          },
+          "admins": [
+            {
+              "iso_3166_1_alpha3": "DEU",
+              "iso_3166_1": "DE"
+            }
+          ],
+          "weight_typical": 0,
+          "duration_typical": 0,
+          "via_waypoints": [],
+          "route_factors": {
+            "dive_bombs": 0,
+            "hierarchy": 0,
+            "raw_maneuvers": 0,
+            "continuity": 0,
+            "turn_counts": {},
+            "maneuvers": 0,
+            "absolute ppe": 0,
+            "normalized ppe": 0,
+            "road_class_info": {
+              "unclassified": 0
+            },
+            "traffic_lights": 0,
+            "has_ferry": false,
+            "base_cost_maneuvers": 0,
+            "path_integral": 0,
+            "path_integral_normalized": 0
+          },
+          "weight": 0,
+          "summary": "Fuchshub"
+        }
+      ],
+      "geometry": "e{_c{Aw}ahWtAjBrNfTnAbBnKfOrN~RjHzJrX~a@vGzJrDnFzEvGbGrIjHnK~CfEjC~C~CrD~H`JTVd@h@Sz@SvB?nARvBRz@Rf@f@z@f@f@IXyAhF_DbGwBvBoFbVoFjWwGb`@oArIcBjH??",
+      "waypoints": [
+        {
+          "name": "B588",
+          "location": [
+            12.731884,
+            48.300483
+          ],
+          "distance": 2.989,
+          "metadata": null,
+          "time_zone": {
+            "abbreviation": "CEST",
+            "identifier": "Europe/Berlin",
+            "offset": "+02:00"
+          }
+        },
+        {
+          "name": "Fuchshub",
+          "location": [
+            12.72659,
+            48.29871
+          ],
+          "distance": 3.877,
+          "metadata": {
+            "name": "charging station",
+            "station_id": "unknown-id",
+            "provider_names": [],
+            "type": "user-provided-charging-station",
+            "charge_time": 120,
+            "charge_to": 70137,
+            "charge_at_arrival": 70137,
+            "plug_type": "ccs_combo_type2",
+            "current_type": "three_phase_ac",
+            "power_kw": 22
+          },
+          "time_zone": {
+            "abbreviation": "CEST",
+            "identifier": "Europe/Berlin",
+            "offset": "+02:00"
+          }
+        },
+        {
+          "name": "Fuchshub",
+          "location": [
+            12.72659,
+            48.29871
+          ],
+          "distance": 3.877,
+          "metadata": null,
+          "time_zone": {
+            "abbreviation": "CEST",
+            "identifier": "Europe/Berlin",
+            "offset": "+02:00"
+          }
+        }
+      ],
+      "weight_typical": 53.267,
+      "duration_typical": 43.763,
+      "weight_name": "auto",
+      "weight": 45.291,
+      "voiceLocale": "de-DE",
+      "refresh_ttl": 21600
+    }
+  ],
+  "ev_planner_factors": {
+    "alt_filters_trimmed_routes_count": 0,
+    "enrichment_error_energy_inadequate_count": 0,
+    "enrichment_error_surplus_of_stops_count": 0,
+    "num_route_reqs": 1,
+    "latency": 0.01
+  },
+  "uuid": "UizBhCCllXNLf-IBtJcToSOW6x9T2yjV7M-8MB1bD1adeG8FuQicdg==_eu-west-1"
+}
