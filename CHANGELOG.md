@@ -1,5 +1,21 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.11.7 - 10 September, 2025
+#### Features
+
+
+#### Bug fixes and improvements
+- Limit raster image decoding to single worker thread
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+
+- Mapbox Java v7.6.0
+- Search SDK 2.14.3
+- Common SDK 24.14.5
+- Maps SDK 11.14.5
+
+
 ## Navigation SDK Core Framework 3.11.6 - 04 September, 2025
 - Ignore invalid place types in offline search to prevent broken addresses
 - Avoid copying of ViewAnnotationOptions on every frame
