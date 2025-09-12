@@ -2853,9 +2853,9 @@ class MapboxRouteLineApiRoboTest {
         val expectedTrafficLineExpressionContents = listOf(
             StringChecker("step"),
             StringChecker("[line-progress]"),
-            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            StringChecker("[rgba, 245.0, 195.0, 46.0, 1.0]"),
             DoubleChecker(0.0),
-            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            StringChecker("[rgba, 245.0, 195.0, 46.0, 1.0]"),
             DoubleChecker(0.057451),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
         )
@@ -3335,9 +3335,9 @@ class MapboxRouteLineApiRoboTest {
         val expectedTrafficLineExpressionContents = listOf(
             StringChecker("step"),
             StringChecker("[line-progress]"),
-            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            StringChecker("[rgba, 245.0, 195.0, 46.0, 1.0]"),
             DoubleChecker(0.0),
-            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            StringChecker("[rgba, 245.0, 195.0, 46.0, 1.0]"),
             DoubleChecker(0.057451),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
         )
@@ -4054,9 +4054,9 @@ class MapboxRouteLineApiRoboTest {
         val expectedPrimaryTrafficLineExpressionContents = listOf(
             StringChecker("step"),
             StringChecker("[line-progress]"),
-            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            StringChecker("[rgba, 245.0, 195.0, 46.0, 1.0]"),
             DoubleChecker(0.0),
-            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            StringChecker("[rgba, 245.0, 195.0, 46.0, 1.0]"),
             DoubleChecker(0.05745011),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
         )
@@ -4415,9 +4415,9 @@ class MapboxRouteLineApiRoboTest {
         val expectedTrafficLineExpressionContents = listOf(
             StringChecker("step"),
             StringChecker("[line-progress]"),
-            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            StringChecker("[rgba, 245.0, 195.0, 46.0, 1.0]"),
             DoubleChecker(0.0),
-            StringChecker("[rgba, 255.0, 149.0, 0.0, 1.0]"),
+            StringChecker("[rgba, 245.0, 195.0, 46.0, 1.0]"),
             DoubleChecker(0.0574502),
             StringChecker("[rgba, 86.0, 168.0, 251.0, 1.0]"),
         )
