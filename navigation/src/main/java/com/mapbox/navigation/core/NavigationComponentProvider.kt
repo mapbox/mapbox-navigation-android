@@ -2,11 +2,14 @@ package com.mapbox.navigation.core
 
 import android.content.Context
 import com.mapbox.common.SdkInformation
+import com.mapbox.common.TileStore
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.accounts.SkuIdProvider
 import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.options.EventsAppMetadata
 import com.mapbox.navigation.base.options.LocationOptions
 import com.mapbox.navigation.base.options.RerouteOptions
+import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.core.accounts.BillingController
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
@@ -15,6 +18,9 @@ import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.MapboxDirectionsSession
 import com.mapbox.navigation.core.ev.EVDynamicDataHolder
 import com.mapbox.navigation.core.internal.router.Router
+import com.mapbox.navigation.core.navigator.offline.DownloadedTilesetsFetcher
+import com.mapbox.navigation.core.navigator.offline.TilesetVersionManager
+import com.mapbox.navigation.core.navigator.offline.TilesetVersionManagerImpl
 import com.mapbox.navigation.core.preview.NativeRoutesDataParser
 import com.mapbox.navigation.core.preview.RoutesPreviewController
 import com.mapbox.navigation.core.reroute.InternalRerouteController
@@ -182,5 +188,16 @@ internal object NavigationComponentProvider {
     ): RouteProgressObserver = ForkPointPassedObserver(
         directionsSession,
         currentLegIndex,
+    )
+
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    fun createTilesetVersionManager(
+        routingTilesOptions: RoutingTilesOptions,
+        tileStore: TileStore,
+    ): TilesetVersionManager = TilesetVersionManagerImpl(
+        tilesBaseUri = routingTilesOptions.tilesBaseUri.toString(),
+        tilesDataset = routingTilesOptions.tilesDataset,
+        tilesProfile = routingTilesOptions.tilesProfile,
+        downloadedTilesetsFetcher = DownloadedTilesetsFetcher(tileStore),
     )
 }

@@ -1,9 +1,13 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
-apply plugin: 'org.jetbrains.dokka'
-apply plugin: 'com.jaredsburrows.license'
-apply plugin: 'com.mapbox.android.sdk.versions'
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.7.20'
+    id 'org.jetbrains.dokka'
+    id 'com.jaredsburrows.license'
+    id 'com.mapbox.android.sdk.versions'
+}
+
 apply from: "../gradle/ktlint.gradle"
 apply from: file("../gradle/artifact-settings.gradle")
 apply from: "../gradle/kdoc-settings.gradle"
@@ -55,6 +59,7 @@ dependencies {
     implementation dependenciesList.mapboxSdkRefreshModels
 
     implementation dependenciesList.kotlinStdLib
+    implementation dependenciesList.kotlinSerialization
     implementation dependenciesList.coroutinesAndroid
     implementation dependenciesList.androidStartup
 

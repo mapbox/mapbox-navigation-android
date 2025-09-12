@@ -928,10 +928,10 @@ package com.mapbox.navigation.tripdata.shield.api {
     ctor public ShieldFontConfig.Builder(String fontFamily);
     method public com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig build();
     method public com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig.Builder fontStyle(@com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig.FontStyle String? fontStyle);
-    method public com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig.Builder fontWeight(int fontWeight);
+    method public com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig.Builder fontWeight(@com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig.FontWeight int fontWeight);
   }
 
-  @StringDef({com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig.FontStyle.Companion.NORMAL, com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig.FontStyle.Companion.ITALIC, com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig.FontStyle.Companion.OBLIQUE}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface ShieldFontConfig.FontStyle {
+  @StringDef({com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig.FontStyle.Companion.NORMAL, com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig.FontStyle.Companion.ITALIC, com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig.FontStyle.Companion.OBLIQUE}) @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface ShieldFontConfig.FontStyle {
     field public static final com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig.FontStyle.Companion Companion;
     field public static final String ITALIC = "italic";
     field public static final String NORMAL = "normal";
@@ -942,6 +942,31 @@ package com.mapbox.navigation.tripdata.shield.api {
     field public static final String ITALIC = "italic";
     field public static final String NORMAL = "normal";
     field public static final String OBLIQUE = "oblique";
+  }
+
+  @IntDef({com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig.FontWeight.Companion.THIN, com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig.FontWeight.Companion.EXTRA_LIGHT, com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig.FontWeight.Companion.LIGHT, com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig.FontWeight.Companion.NORMAL, com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig.FontWeight.Companion.MEDIUM, com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig.FontWeight.Companion.SEMI_BOLD, com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig.FontWeight.Companion.BOLD, com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig.FontWeight.Companion.EXTRA_BOLD, com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig.FontWeight.Companion.BLACK}) @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface ShieldFontConfig.FontWeight {
+    field public static final int BLACK = 900; // 0x384
+    field public static final int BOLD = 700; // 0x2bc
+    field public static final com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig.FontWeight.Companion Companion;
+    field public static final int EXTRA_BOLD = 800; // 0x320
+    field public static final int EXTRA_LIGHT = 200; // 0xc8
+    field public static final int LIGHT = 300; // 0x12c
+    field public static final int MEDIUM = 500; // 0x1f4
+    field public static final int NORMAL = 400; // 0x190
+    field public static final int SEMI_BOLD = 600; // 0x258
+    field public static final int THIN = 100; // 0x64
+  }
+
+  public static final class ShieldFontConfig.FontWeight.Companion {
+    field public static final int BLACK = 900; // 0x384
+    field public static final int BOLD = 700; // 0x2bc
+    field public static final int EXTRA_BOLD = 800; // 0x320
+    field public static final int EXTRA_LIGHT = 200; // 0xc8
+    field public static final int LIGHT = 300; // 0x12c
+    field public static final int MEDIUM = 500; // 0x1f4
+    field public static final int NORMAL = 400; // 0x190
+    field public static final int SEMI_BOLD = 600; // 0x258
+    field public static final int THIN = 100; // 0x64
   }
 
 }

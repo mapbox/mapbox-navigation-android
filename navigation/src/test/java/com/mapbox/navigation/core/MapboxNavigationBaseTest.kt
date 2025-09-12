@@ -282,6 +282,10 @@ internal open class MapboxNavigationBaseTest {
             )
         } returns defaultRerouteController
 
+        every {
+            NavigationComponentProvider.createTilesetVersionManager(any(), any())
+        } returns mockk(relaxed = true)
+
         mockkObject(SdkInfoProvider)
 
         mockkObject(SystemLocaleWatcher.Companion)

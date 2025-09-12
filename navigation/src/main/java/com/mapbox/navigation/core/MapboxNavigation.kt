@@ -83,6 +83,7 @@ import com.mapbox.navigation.core.mapmatching.MapMatchingOptions
 import com.mapbox.navigation.core.mapmatching.MapMatchingSuccessfulResult
 import com.mapbox.navigation.core.navigator.CacheHandleWrapper
 import com.mapbox.navigation.core.navigator.TilesetDescriptorFactory
+import com.mapbox.navigation.core.navigator.offline.TilesetVersionManager
 import com.mapbox.navigation.core.preview.RoutesPreview
 import com.mapbox.navigation.core.preview.RoutesPreviewObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
@@ -434,6 +435,17 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     @Deprecated("EtcGateApi is deprecated")
     val etcGateAPI: EtcGateApi
 
+    /**
+     * Manager for checking tileset version availability and update requirements.
+     * This manager provides functionality to:
+     * - Check available tileset versions from the server
+     * - Determine if downloaded tilesets need updates based on age or version
+     * - Identify blocked versions that should not be used
+     * @see TilesetVersionManager for detailed API documentation
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    val tilesetVersionManager: TilesetVersionManager
+
     private var reachabilityObserverId: Long? = null
 
     private var latestLegIndex: Int? = null
@@ -712,6 +724,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         systemLocaleWatcher = SystemLocaleWatcher.create(
             navigationOptions.applicationContext,
             navigator,
+        )
+
+        tilesetVersionManager = NavigationComponentProvider.createTilesetVersionManager(
+            routingTilesOptions = navigationOptions.routingTilesOptions,
+            tileStore = NavigationTileStoreOwner.invoke(),
         )
 
         registerRouteProgressObserver(
