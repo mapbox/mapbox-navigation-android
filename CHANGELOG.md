@@ -133,6 +133,10 @@ for example enabling avoid ferries.
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
+- Navigation-native `324.15.0`
+- Common SDK `24.15.0`
+- Maps SDK `11.15.0`
+- Android Search SDK `2.15.0`
 
 
 ## Navigation SDK Core Framework 3.12.0-rc.1 - 28 August, 2025
