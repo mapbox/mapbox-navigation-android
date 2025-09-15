@@ -46,6 +46,7 @@ package com.mapbox.navigation.core {
     method public com.mapbox.navigation.core.routerefresh.RouteRefreshController getRouteRefreshController();
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.core.preview.RoutesPreview? getRoutesPreview();
     method public com.mapbox.navigation.core.navigator.TilesetDescriptorFactory getTilesetDescriptorFactory();
+    method public com.mapbox.navigation.core.navigator.offline.TilesetVersionManager getTilesetVersionManager();
     method public com.mapbox.navigation.core.trip.session.TripSessionState getTripSessionState();
     method public Integer? getZLevel();
     method public boolean isDestroyed();
@@ -126,6 +127,7 @@ package com.mapbox.navigation.core {
     property public final com.mapbox.navigation.core.trip.session.eh.RoadObjectsStore roadObjectsStore;
     property public final com.mapbox.navigation.core.routerefresh.RouteRefreshController routeRefreshController;
     property public final com.mapbox.navigation.core.navigator.TilesetDescriptorFactory tilesetDescriptorFactory;
+    property public final com.mapbox.navigation.core.navigator.offline.TilesetVersionManager tilesetVersionManager;
   }
 
   public final class MapboxNavigationKt {
@@ -208,12 +210,14 @@ package com.mapbox.navigation.core.adas {
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasEdgeAttributes {
     method public java.util.List<com.mapbox.navigation.core.adas.AdasValueOnEdge> getCurvatures();
+    method public java.util.List<com.mapbox.navigation.core.adas.AdasValueOnEdge> getElevations();
     method public int getEtc2();
     method public Integer? getFormOfWay();
     method public java.util.List<com.mapbox.navigation.core.adas.AdasValueOnEdge> getSlopes();
     method public java.util.List<com.mapbox.navigation.core.adas.AdasSpeedLimitInfo> getSpeedLimit();
     method public Boolean? isDividedRoad();
     property public final java.util.List<com.mapbox.navigation.core.adas.AdasValueOnEdge> curvatures;
+    property public final java.util.List<com.mapbox.navigation.core.adas.AdasValueOnEdge> elevations;
     property public final int etc2;
     property public final Integer? formOfWay;
     property public final Boolean? isDividedRoad;
@@ -693,6 +697,69 @@ package com.mapbox.navigation.core.navigator {
   }
 
   public final class TilesetDescriptorFactoryKt {
+  }
+
+}
+
+package com.mapbox.navigation.core.navigator.offline {
+
+  public final class DownloadedTilesetsFetcherKt {
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public abstract class TilesetUpdateAvailabilityResult {
+  }
+
+  public static final class TilesetUpdateAvailabilityResult.Available extends com.mapbox.navigation.core.navigator.offline.TilesetUpdateAvailabilityResult {
+    ctor public TilesetUpdateAvailabilityResult.Available(String regionId, boolean isAsap, String currentVersion, String latestVersion);
+    method public String getCurrentVersion();
+    method public String getLatestVersion();
+    method public String getRegionId();
+    method public boolean isAsap();
+    property public final String currentVersion;
+    property public final boolean isAsap;
+    property public final String latestVersion;
+    property public final String regionId;
+  }
+
+  public static final class TilesetUpdateAvailabilityResult.NoUpdates extends com.mapbox.navigation.core.navigator.offline.TilesetUpdateAvailabilityResult {
+    field public static final com.mapbox.navigation.core.navigator.offline.TilesetUpdateAvailabilityResult.NoUpdates INSTANCE;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class TilesetVersion {
+    method public java.util.Date? getReleaseDate();
+    method public String getVersionName();
+    method public boolean isBlocked();
+    method public boolean isLatest();
+    property public final boolean isBlocked;
+    property public final boolean isLatest;
+    property public final java.util.Date? releaseDate;
+    property public final String versionName;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public interface TilesetVersionManager {
+    method public default com.mapbox.common.Cancelable getAvailableUpdate(String regionId, com.mapbox.navigation.core.navigator.offline.TilesetVersionManager.TilesetUpdatesCallback callback);
+    method public com.mapbox.common.Cancelable getAvailableUpdate(String regionId, long maxAllowedAgeDifferenceMinutes, com.mapbox.navigation.core.navigator.offline.TilesetVersionManager.TilesetUpdatesCallback callback);
+    method public suspend Object? getAvailableUpdate(String regionId, long maxAllowedAgeDifferenceMinutes = 0, kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<java.lang.Throwable,com.mapbox.navigation.core.navigator.offline.TilesetUpdateAvailabilityResult>> = 0);
+    method public default com.mapbox.common.Cancelable getAvailableUpdates(com.mapbox.navigation.core.navigator.offline.TilesetVersionManager.AllTilesetsUpdatesCallback callback);
+    method public com.mapbox.common.Cancelable getAvailableUpdates(long maxAllowedAgeDifferenceMinutes, com.mapbox.navigation.core.navigator.offline.TilesetVersionManager.AllTilesetsUpdatesCallback callback);
+    method public suspend Object? getAvailableUpdates(long maxAllowedAgeDifferenceMinutes = 0, kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<java.lang.Throwable,java.util.List<? extends com.mapbox.navigation.core.navigator.offline.TilesetUpdateAvailabilityResult.Available>>> = 0);
+    method public com.mapbox.common.Cancelable getAvailableVersions(com.mapbox.navigation.core.navigator.offline.TilesetVersionManager.TilesetVersionsCallback callback);
+    method public suspend Object? getAvailableVersions(kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<java.lang.Throwable,java.util.List<? extends com.mapbox.navigation.core.navigator.offline.TilesetVersion>>>);
+  }
+
+  public static fun interface TilesetVersionManager.AllTilesetsUpdatesCallback {
+    method public void onUpdatesResult(com.mapbox.bindgen.Expected<java.lang.Throwable,java.util.List<com.mapbox.navigation.core.navigator.offline.TilesetUpdateAvailabilityResult.Available>> result);
+  }
+
+  public static fun interface TilesetVersionManager.TilesetUpdatesCallback {
+    method public void onUpdatesResult(com.mapbox.bindgen.Expected<java.lang.Throwable,com.mapbox.navigation.core.navigator.offline.TilesetUpdateAvailabilityResult> result);
+  }
+
+  public static fun interface TilesetVersionManager.TilesetVersionsCallback {
+    method public void onVersionsResult(com.mapbox.bindgen.Expected<java.lang.Throwable,java.util.List<com.mapbox.navigation.core.navigator.offline.TilesetVersion>> versions);
+  }
+
+  public final class TilesetVersionsApiKt {
   }
 
 }
@@ -1344,6 +1411,9 @@ package com.mapbox.navigation.core.trip.session {
   @UiThread public interface LocationObserver {
     method public void onNewLocationMatcherResult(com.mapbox.navigation.core.trip.session.LocationMatcherResult locationMatcherResult);
     method public void onNewRawLocation(com.mapbox.common.location.Location rawLocation);
+  }
+
+  public final class MapboxTripSessionKt {
   }
 
   public abstract sealed class NavigationSessionState {
