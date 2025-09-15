@@ -16,7 +16,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.HttpException
 import com.mapbox.navigation.core.internal.SdkInfoProvider
 import com.mapbox.navigation.core.navigator.offline.TilesetVersionsApi.RouteTileVersionsResponse
-import com.mapbox.navigation.testing.BlockingSAMCallback
+import com.mapbox.navigation.testing.BlockingSamCallback
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import io.mockk.CapturingSlot
 import io.mockk.every
@@ -253,7 +253,7 @@ class TilesetVersionsApiTest {
             dataset: String = "test-dataset",
             profile: String = "driving",
         ): Expected<Throwable, RouteTileVersionsResponse> {
-            val callback = BlockingSAMCallback<Expected<Throwable, RouteTileVersionsResponse>>()
+            val callback = BlockingSamCallback<Expected<Throwable, RouteTileVersionsResponse>>()
             getRouteTileVersions(
                 baseUri = baseUri,
                 dataset = dataset,

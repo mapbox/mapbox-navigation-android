@@ -5,7 +5,7 @@ import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.Cancelable
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.navigator.offline.TilesetVersionManager.AllTilesetsUpdatesCallback
-import com.mapbox.navigation.testing.BlockingSAMCallback
+import com.mapbox.navigation.testing.BlockingSamCallback
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import io.mockk.CapturingSlot
 import io.mockk.every
@@ -687,7 +687,7 @@ class TilesetVersionManagerTest {
 
         fun TilesetVersionManager.getAvailableVersionsBlocking():
             Expected<Throwable, List<TilesetVersion>> {
-            val callback = BlockingSAMCallback<Expected<Throwable, List<TilesetVersion>>>()
+            val callback = BlockingSamCallback<Expected<Throwable, List<TilesetVersion>>>()
             getAvailableVersions(callback)
             return callback.getResultBlocking()
         }
@@ -758,7 +758,7 @@ class TilesetVersionManagerTest {
             regionId: String,
             maxAllowedAgeDifferenceMinutes: Long,
         ): Expected<Throwable, TilesetUpdateAvailabilityResult> {
-            val callback = BlockingSAMCallback<
+            val callback = BlockingSamCallback<
                 Expected<Throwable, TilesetUpdateAvailabilityResult>,
                 >()
             getAvailableUpdate(regionId, maxAllowedAgeDifferenceMinutes, callback)
@@ -768,7 +768,7 @@ class TilesetVersionManagerTest {
         fun TilesetVersionManager.getAvailableUpdatesBlocking(
             maxAllowedAgeDifferenceMinutes: Long,
         ): Expected<Throwable, List<TilesetUpdateAvailabilityResult.Available>> {
-            val callback = BlockingSAMCallback<
+            val callback = BlockingSamCallback<
                 Expected<Throwable, List<TilesetUpdateAvailabilityResult.Available>>,
                 >()
             getAvailableUpdates(maxAllowedAgeDifferenceMinutes, callback)

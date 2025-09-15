@@ -4,6 +4,7 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.TileStore
 import com.mapbox.navigation.utils.internal.logD
+import com.mapbox.navigation.utils.internal.logE
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -159,12 +160,12 @@ internal class DownloadedTilesetsFetcher(
                 val response = jsonParser.decodeFromString<TilesetDescriptorMetadataResponse>(json)
                 response.resolved
             } catch (e: kotlinx.serialization.SerializationException) {
-                logD(TilesetVersionManagerImpl.LOG_CATEGORY) {
+                logE(TilesetVersionManagerImpl.LOG_CATEGORY) {
                     "Downloaded tilesets metadata parsing error: $e"
                 }
                 emptyList()
             } catch (e: Exception) {
-                logD(TilesetVersionManagerImpl.LOG_CATEGORY) {
+                logE(TilesetVersionManagerImpl.LOG_CATEGORY) {
                     "Downloaded tilesets metadata error: $e"
                 }
                 emptyList()

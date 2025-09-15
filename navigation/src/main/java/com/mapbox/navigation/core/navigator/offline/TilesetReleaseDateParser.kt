@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.navigator.offline
 
+import com.mapbox.navigation.utils.internal.logE
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -11,6 +12,9 @@ internal object TilesetReleaseDateParser {
         return try {
             VERSION_NAME_DATE_FORMATTER.parse(versionName)
         } catch (e: Exception) {
+            logE(TilesetVersionManagerImpl.LOG_CATEGORY) {
+                "Unable to parse date from version name $versionName: $e"
+            }
             null
         }
     }

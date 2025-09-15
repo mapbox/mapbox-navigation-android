@@ -1,14 +1,19 @@
 package com.mapbox.navigation.core.navigator.offline
 
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Rule
 import org.junit.Test
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
 
 class TilesetReleaseDateParserTest {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     @Test
     fun `parseReleaseDate should parse valid version names correctly`() {
