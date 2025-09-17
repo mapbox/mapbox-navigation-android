@@ -13,6 +13,8 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
@@ -38,7 +40,7 @@ suspend fun <T> BaseCoreNoCleanUpTest.stayOnPosition(
     longitude: Double,
     bearing: Float,
     frequencyHz: Int = 1,
-    block: suspend () -> T
+    block: suspend () -> T,
 ): T {
     return coroutineScope {
         val updateLocations = launch(start = CoroutineStart.UNDISPATCHED) {
@@ -62,7 +64,7 @@ suspend fun <T> BaseCoreNoCleanUpTest.stayOnPosition(
 suspend fun <T> BaseCoreNoCleanUpTest.stayOnPosition(
     location: Location,
     frequencyHz: Int = 1,
-    block: suspend () -> T
+    block: suspend () -> T,
 ): T {
     return stayOnPosition(
         latitude = location.latitude,
@@ -77,7 +79,7 @@ suspend fun <T> BaseCoreNoCleanUpTest.stayOnPosition(
     point: Point,
     bearing: Float,
     frequencyHz: Int = 1,
-    block: suspend () -> T
+    block: suspend () -> T,
 ): T {
     return stayOnPosition(
         latitude = point.latitude(),
@@ -94,27 +96,33 @@ suspend fun <T> BaseCoreNoCleanUpTest.stayOnPositionAndWaitForUpdate(
     longitude: Double,
     bearing: Float,
     frequencyHz: Int = 1,
-    block: suspend () -> T
+    block: suspend () -> T,
 ) {
     return stayOnPosition(latitude, longitude, bearing, frequencyHz) {
         mapboxNavigation.flowLocationMatcherResult().filter {
             abs(
-                it.enhancedLocation.latitude - latitude
+                it.enhancedLocation.latitude - latitude,
             ) < 0.0001 && abs(
-                it.enhancedLocation.longitude - longitude
+                it.enhancedLocation.longitude - longitude,
             ) < 0.0001
         }.first()
         block()
     }
 }
 
+/**
+ * @param minEventsCount count of RouteProgress events to receive until return
+ */
 suspend fun MapboxNavigation.moveAlongTheRouteUntilTracking(
     route: NavigationRoute,
     mockLocationReplayerRule: MockLocationReplayerRule,
+    minEventsCount: Int = 1,
+    endReplay: Boolean = true,
 ) {
-    coroutineScope {
-        mockLocationReplayerRule.playRoute(route.directionsRoute)
-        flowRouteProgress().first { it.currentState == RouteProgressState.TRACKING }
-        mockLocationReplayerRule.stopAndClearEvents()
-    }
+    mockLocationReplayerRule.playRoute(route.directionsRoute)
+    flowRouteProgress()
+        .filter { it.currentState == RouteProgressState.TRACKING }
+        .take(minEventsCount).toList()
+
+    if (endReplay) mockLocationReplayerRule.stopAndClearEvents()
 }

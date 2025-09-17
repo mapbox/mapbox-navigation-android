@@ -1,0 +1,48 @@
+{
+  "name": "near-munich-nav-sdk-test",
+  "estimate-only": false,
+  "accept-expired": true,
+  "tilesets": [
+    {
+      "domain": "nav",
+      "name": "mapbox/driving-traffic",
+      "version": "2025_02_16-03_00_03"
+    }
+  ],
+  "geojson": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "coordinates": [
+            [
+              [
+                12.572716988227768,
+                48.42413217308393
+              ],
+              [
+                12.572716988227768,
+                48.23620215939408
+              ],
+              [
+                12.832467323149757,
+                48.23620215939408
+              ],
+              [
+                12.832467323149757,
+                48.42413217308393
+              ],
+              [
+                12.572716988227768,
+                48.42413217308393
+              ]
+            ]
+          ],
+          "type": "Polygon"
+        }
+      }
+    ]
+  }
+}

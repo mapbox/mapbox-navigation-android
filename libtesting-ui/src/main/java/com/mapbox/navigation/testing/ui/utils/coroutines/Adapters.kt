@@ -19,6 +19,7 @@ import com.mapbox.navigation.core.mapmatching.MapMatchingFailure
 import com.mapbox.navigation.core.mapmatching.MapMatchingOptions
 import com.mapbox.navigation.core.mapmatching.MapMatchingSuccessfulResult
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.NavigationVersionSwitchObserver
 import com.mapbox.navigation.core.RoutesInvalidatedObserver
 import com.mapbox.navigation.core.RoutesInvalidatedParams
 import com.mapbox.navigation.core.RoutesSetCallback
@@ -46,6 +47,7 @@ import com.mapbox.navigation.ui.maps.route.line.api.RoutesRenderedResult
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
+import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -332,4 +334,20 @@ suspend fun MapboxNavigation.navigateNextRouteLeg() = suspendCancellableCoroutin
         }
         cont.resume(Unit)
     }
+}
+
+fun MapboxNavigation.versionSwitchObserver(): Flow<String?> = callbackFlow {
+    val observer = object : NavigationVersionSwitchObserver {
+        override fun onSwitchToFallbackVersion(tilesVersion: String?) {
+            logD("Switch to fallback version: $tilesVersion")
+            trySend(tilesVersion)
+        }
+
+        override fun onSwitchToTargetVersion(tilesVersion: String?) {
+            logD("Switch to target version: $tilesVersion")
+            trySend(tilesVersion)
+        }
+    }
+    registerNavigationVersionSwitchObserver(observer)
+    awaitClose { unregisterNavigationVersionSwitchObserver(observer) }
 }

@@ -3,9 +3,12 @@ package com.mapbox.navigation.testing.utils.routes
 
 import android.content.Context
 import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.mapbox.api.directions.v5.DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
 import com.mapbox.api.directions.v5.models.DirectionsResponse
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.testing.R
@@ -283,6 +286,38 @@ object RoutesProvider {
             ),
             coordinates,
         )
+    }
+
+    fun near_munich_with_waypoints(context: Context): MockRoute {
+        val jsonResponse = readRawFileText(
+            context,
+            R.raw.route_response_near_munich_with_waypoints
+        )
+        val coordinates = listOf(
+            Point.fromLngLat(12.733982017085935, 48.30224175840664),
+            Point.fromLngLat(12.690353, 48.254544),
+            Point.fromLngLat(12.686236328301874, 48.251801613727025)
+        )
+        return MockRoute(
+            jsonResponse,
+            DirectionsResponse.fromJson(jsonResponse),
+            listOf(
+                MockDirectionsRequestHandler(
+                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    jsonResponse = jsonResponse,
+                    expectedCoordinates = coordinates
+                )
+            ),
+            coordinates,
+        )
+    }
+
+    fun near_munich_with_waypoints_for_reroute(context: Context): DirectionsRoute {
+        val jsonResponse = readRawFileText(
+            context,
+            R.raw.route_response_near_munich_with_waypoints_for_reroute
+        )
+        return DirectionsResponse.fromJson(jsonResponse).routes()[0]
     }
 
     fun two_routes_different_legs_count_the_same_incident(

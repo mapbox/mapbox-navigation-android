@@ -47,6 +47,7 @@ import com.mapbox.navigation.core.telemetry.UserFeedback
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
 import com.mapbox.navigation.core.testutil.createRoutesUpdatedResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
+import com.mapbox.navigation.core.trip.session.MapboxTripSession
 import com.mapbox.navigation.core.trip.session.NativeSetRouteError
 import com.mapbox.navigation.core.trip.session.NativeSetRouteValue
 import com.mapbox.navigation.core.trip.session.NavigationSession
@@ -57,10 +58,12 @@ import com.mapbox.navigation.core.trip.session.createSetRouteResult
 import com.mapbox.navigation.core.utils.SystemLocaleWatcher
 import com.mapbox.navigation.navigator.internal.NavigatorLoader
 import com.mapbox.navigation.testing.factories.createNavigationRoute
+import com.mapbox.navigation.testing.factories.createNavigationStatus
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteInterface
+import com.mapbox.navigator.RouteState
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.TileEndpointConfiguration
@@ -227,7 +230,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     @Test
     fun init_registerOffRouteObserver() {
         createMapboxNavigation()
-        verify(exactly = 1) { tripSession.registerOffRouteObserver(any()) }
+        verify(exactly = 1) { tripSession.setOffRouteObserverForReroute(any(), any()) }
     }
 
     @Test
@@ -272,7 +275,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
         createMapboxNavigation()
 
-        verify(exactly = 2) { tripSession.registerOffRouteObserver(any()) }
+        verify(exactly = 2) { tripSession.setOffRouteObserverForReroute(any(), any()) }
     }
 
     @Test
@@ -483,7 +486,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     fun offroute_lead_to_reroute() {
         createMapboxNavigation()
         val observers = mutableListOf<OffRouteObserver>()
-        verify { tripSession.registerOffRouteObserver(capture(observers)) }
+        verify { tripSession.setOffRouteObserverForReroute(capture(observers), any()) }
 
         observers.forEach {
             it.onOffRouteStateChanged(true)
@@ -494,8 +497,9 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                 any<InternalRerouteController.RoutesCallback>(),
             )
         }
+
         verify(ordering = Ordering.ORDERED) {
-            tripSession.registerOffRouteObserver(any())
+            tripSession.setOffRouteObserverForReroute(any(), any())
             defaultRerouteController.rerouteOnDeviation(
                 any<InternalRerouteController.RoutesCallback>(),
             )
@@ -506,14 +510,14 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     fun non_offroute_cancels_reroute() {
         createMapboxNavigation()
         val observers = mutableListOf<OffRouteObserver>()
-        verify { tripSession.registerOffRouteObserver(capture(observers)) }
+        verify { tripSession.setOffRouteObserverForReroute(capture(observers), any()) }
 
         observers.forEach {
             it.onOffRouteStateChanged(false)
         }
 
         verify(exactly = 0) { defaultRerouteController.interrupt() }
-        verify(exactly = 1) {
+        verify(exactly = 0) {
             tripSession.registerOffRouteObserver(any())
         }
     }
@@ -549,7 +553,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
         createMapboxNavigation()
         val observers = mutableListOf<OffRouteObserver>()
-        verify { tripSession.registerOffRouteObserver(capture(observers)) }
+        verify { tripSession.setOffRouteObserverForReroute(capture(observers), any()) }
 
         every { tripSession.isOffRoute } returns true
 
@@ -587,7 +591,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
         createMapboxNavigation()
         val observers = mutableListOf<OffRouteObserver>()
-        verify { tripSession.registerOffRouteObserver(capture(observers)) }
+        verify { tripSession.setOffRouteObserverForReroute(capture(observers), any()) }
 
         observers.forEach {
             it.onOffRouteStateChanged(true)
@@ -601,7 +605,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     fun reRoute_not_called() {
         createMapboxNavigation()
         val offRouteObserverSlot = slot<OffRouteObserver>()
-        verify { tripSession.registerOffRouteObserver(capture(offRouteObserverSlot)) }
+        verify { tripSession.setOffRouteObserverForReroute(capture(offRouteObserverSlot), any()) }
 
         offRouteObserverSlot.captured.onOffRouteStateChanged(false)
 
@@ -1462,7 +1466,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                 defaultRerouteController.rerouteOnDeviation(capture(rerouteCallbackSlot))
             } just Runs
             val observers = mutableListOf<OffRouteObserver>()
-            every { tripSession.registerOffRouteObserver(capture(observers)) } just Runs
+            every { tripSession.setOffRouteObserverForReroute(capture(observers), any()) } just Runs
             val initialRoutes = mutableListOf<NavigationRoute>(mockk(relaxed = true))
             every { directionsSession.routes } returns initialRoutes
             val newRoutes = listOf<NavigationRoute>(mockk(relaxed = true))
@@ -2532,6 +2536,95 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         } returns ExpectedFactory.createError("Error")
         createMapboxNavigation()
         mapboxNavigation.startReplayTripSessionWithPermissionCheck(withForegroundService = true)
+    }
+
+    @Test
+    fun `off-route detected after native navigator recreation`() {
+        threadController.cancelAllUICoroutines()
+
+        val offRouteObserver = mockk<OffRouteObserver> {
+            every { onOffRouteStateChanged(any()) } just Runs
+        }
+
+        every {
+            NavigationComponentProvider.createTripSession(
+                tripService = any(),
+                tripSessionLocationEngine = any(),
+                navigator = any(),
+                any(),
+                any(),
+            )
+        } returns MapboxTripSession(
+            tripService,
+            tripSessionLocationEngine,
+            navigator,
+            threadController,
+            eHorizonSubscriptionManager,
+            5,
+        )
+
+        val fallbackObserverSlot = slot<FallbackVersionsObserver>()
+        every {
+            navigator.setFallbackVersionsObserver(capture(fallbackObserverSlot))
+        } just Runs
+
+        every {
+            navigator.addNavigatorObserver(capture(navigatorObserverSlot))
+        } just Runs
+
+        every { directionsSession.routesUpdatedResult } returns createRoutesUpdatedResult(
+            emptyList(),
+            RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP,
+        )
+        every { directionsSession.initialLegIndex } returns 0
+        every { directionsSession.ignoredRoutes } returns emptyList()
+        every { navigator.recreate(any()) } just Runs
+
+        createMapboxNavigation()
+        mapboxNavigation.startTripSession()
+        mapboxNavigation.setNavigationRoutes(listOf(createNavigationRoute()))
+
+        // Verify NavigatorObserver was registered exactly once
+        verify(exactly = 1) { navigator.addNavigatorObserver(any()) }
+
+        // Create mock NavigationStatus for on-route state
+        val onRouteStatus = createNavigationStatus(routeState = RouteState.TRACKING)
+
+        // Create mock NavigationStatus for off-route state
+        val offRouteStatus = createNavigationStatus(routeState = RouteState.OFF_ROUTE)
+
+        mapboxNavigation.registerOffRouteObserver(offRouteObserver)
+
+        // Simulate NavigationStatus update causing on-route state (first invocation)
+        navigatorObserverSlot.captured.onStatus(
+            com.mapbox.navigator.NavigationStatusOrigin.LOCATION_UPDATE,
+            onRouteStatus,
+        )
+
+        // Verify OffRouteObserver was invoked with correct parameters:
+        // First call with false (on-route), second call with true (off-route)
+        verify(exactly = 1) { offRouteObserver.onOffRouteStateChanged(false) }
+
+        // Simulate navigator recreation via fallback versions
+        fallbackObserverSlot.captured.onFallbackVersionsFound(listOf("fallbackVersion"))
+
+        // Simulate NavigationStatus update causing off-route state (second invocation)
+        navigatorObserverSlot.captured.onStatus(
+            com.mapbox.navigator.NavigationStatusOrigin.LOCATION_UPDATE,
+            offRouteStatus,
+        )
+
+        // Verify navigator was recreated due to fallback
+        verify(exactly = 1) { navigator.recreate(any()) }
+
+        verify(exactly = 1) { offRouteObserver.onOffRouteStateChanged(true) }
+
+        // Additional verification that reroute was triggered on off-route
+        verify(exactly = 1) {
+            defaultRerouteController.rerouteOnDeviation(
+                any<InternalRerouteController.RoutesCallback>(),
+            )
+        }
     }
 
     private fun interceptRefreshObserver(): RouteRefreshObserver {
