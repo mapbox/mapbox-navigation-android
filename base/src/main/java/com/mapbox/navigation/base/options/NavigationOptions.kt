@@ -63,6 +63,8 @@ private constructor(
     val locationOptions: LocationOptions,
     @ExperimentalPreviewMapboxNavigationAPI
     val trafficOverrideOptions: TrafficOverrideOptions,
+    @ExperimentalPreviewMapboxNavigationAPI
+    val roadObjectMatcherOptions: RoadObjectMatcherOptions,
 ) {
 
     /**
@@ -87,6 +89,7 @@ private constructor(
         enableSensors(enableSensors)
         copilotOptions(copilotOptions)
         trafficOverrideOptions(trafficOverrideOptions)
+        roadObjectMatcherOptions(roadObjectMatcherOptions)
     }
 
     /**
@@ -117,6 +120,7 @@ private constructor(
         if (enableSensors != other.enableSensors) return false
         if (copilotOptions != other.copilotOptions) return false
         if (trafficOverrideOptions != other.trafficOverrideOptions) return false
+        if (roadObjectMatcherOptions != other.roadObjectMatcherOptions) return false
 
         return true
     }
@@ -144,6 +148,7 @@ private constructor(
         result = 31 * result + enableSensors.hashCode()
         result = 31 * result + copilotOptions.hashCode()
         result = 31 * result + trafficOverrideOptions.hashCode()
+        result = 31 * result + roadObjectMatcherOptions.hashCode()
         return result
     }
 
@@ -169,8 +174,9 @@ private constructor(
             "historyRecorderOptions=$historyRecorderOptions, " +
             "eventsAppMetadata=$eventsAppMetadata, " +
             "enableSensors=$enableSensors, " +
-            "copilotOptions=$copilotOptions" +
-            "trafficOverrideOptions=$trafficOverrideOptions" +
+            "copilotOptions=$copilotOptions, " +
+            "trafficOverrideOptions=$trafficOverrideOptions, " +
+            "roadObjectMatcherOptions=$roadObjectMatcherOptions" +
             ")"
     }
 
@@ -206,6 +212,10 @@ private constructor(
         @ExperimentalPreviewMapboxNavigationAPI
         private var trafficOverrideOptions: TrafficOverrideOptions =
             TrafficOverrideOptions.Builder().build()
+
+        @ExperimentalPreviewMapboxNavigationAPI
+        private var roadObjectMatcherOptions: RoadObjectMatcherOptions =
+            RoadObjectMatcherOptions.Builder().build()
 
         /**
          * Sets location options. See [LocationOptions] for details.
@@ -318,6 +328,13 @@ private constructor(
             apply { this.trafficOverrideOptions = trafficOverrideOptions }
 
         /**
+         * Defines configuration for traffic override
+         */
+        @ExperimentalPreviewMapboxNavigationAPI
+        fun roadObjectMatcherOptions(roadObjectMatcherOptions: RoadObjectMatcherOptions): Builder =
+            apply { this.roadObjectMatcherOptions = roadObjectMatcherOptions }
+
+        /**
          * Build a new instance of [NavigationOptions]
          * @return NavigationOptions
          */
@@ -342,6 +359,7 @@ private constructor(
                 copilotOptions = copilotOptions,
                 locationOptions = locationOptions,
                 trafficOverrideOptions = trafficOverrideOptions,
+                roadObjectMatcherOptions = roadObjectMatcherOptions,
             )
         }
     }

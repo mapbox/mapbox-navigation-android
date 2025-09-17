@@ -49,6 +49,7 @@ import com.mapbox.navigator.RerouteDetectorInterface
 import com.mapbox.navigator.RerouteObserver
 import com.mapbox.navigator.ResetCallback
 import com.mapbox.navigator.RoadObjectMatcher
+import com.mapbox.navigator.RoadObjectMatcherConfig
 import com.mapbox.navigator.RoadObjectsStore
 import com.mapbox.navigator.RoadObjectsStoreObserver
 import com.mapbox.navigator.RouteAlternative
@@ -77,6 +78,7 @@ class MapboxNativeNavigatorImpl(
     tilesConfig: TilesConfig,
     private val historyRecorderComposite: HistoryRecorderHandle?,
     private val offlineCacheHandle: CacheHandle?,
+    private val roadObjectMatcherConfig: RoadObjectMatcherConfig,
     override val config: ConfigHandle,
     override val eventsMetadataProvider: EventsMetadataInterface,
 ) : MapboxNativeNavigator {
@@ -134,7 +136,7 @@ class MapboxNativeNavigatorImpl(
         roadObjectMatcher = PerformanceTracker.trackPerformanceSync(
             "${sectionName}roadObjectMatcher",
         ) {
-            RoadObjectMatcher(cacheHandle)
+            RoadObjectMatcher(cacheHandle, roadObjectMatcherConfig)
         }
         roadObjectsStore = PerformanceTracker.trackPerformanceSync(
             "${sectionName}roadObjectsStore",

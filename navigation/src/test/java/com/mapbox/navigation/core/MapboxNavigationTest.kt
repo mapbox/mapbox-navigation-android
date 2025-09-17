@@ -3,10 +3,13 @@ package com.mapbox.navigation.core
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.MapboxOptions
+import com.mapbox.common.TileDataDomain
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.DomainTilesOptions
 import com.mapbox.navigation.base.options.IncidentsOptions
+import com.mapbox.navigation.base.options.NavigationTileDataDomain
+import com.mapbox.navigation.base.options.RoadObjectMatcherOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
@@ -61,6 +64,7 @@ import com.mapbox.navigation.testing.factories.createNavigationRoute
 import com.mapbox.navigation.testing.factories.createNavigationStatus
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.NavigatorConfig
+import com.mapbox.navigator.RoadObjectMatcherConfig
 import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouteState
@@ -714,6 +718,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                 any(),
                 any(),
                 any(),
+                any(),
             )
         } returns navigator
 
@@ -734,6 +739,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         every {
             NavigationComponentProvider.createNativeNavigator(
                 capture(slot),
+                any(),
                 any(),
                 any(),
                 any(),
@@ -760,6 +766,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         every {
             NavigationComponentProvider.createNativeNavigator(
                 capture(slot),
+                any(),
                 any(),
                 any(),
                 any(),
@@ -1022,6 +1029,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         every {
             NavigationComponentProvider.createNativeNavigator(
                 capture(slot),
+                any(),
                 any(),
                 any(),
                 any(),
@@ -1715,35 +1723,37 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
-    fun `stopping trip session it pauses routes controllers and navigator`() = coroutineRule.runBlockingTest {
-        createMapboxNavigation()
-        every { directionsSession.initialLegIndex } returns 0
-        every { tripSession.isRunningWithForegroundService() } returns true
+    fun `stopping trip session it pauses routes controllers and navigator`() =
+        coroutineRule.runBlockingTest {
+            createMapboxNavigation()
+            every { directionsSession.initialLegIndex } returns 0
+            every { tripSession.isRunningWithForegroundService() } returns true
 
-        mapboxNavigation.startTripSession()
-        mapboxNavigation.stopTripSession()
+            mapboxNavigation.startTripSession()
+            mapboxNavigation.stopTripSession()
 
-        verify(exactly = 1) {
-            routeAlternativesController.pause()
-            routeRefreshController.pauseRouteRefreshes()
-            navigator.pause()
+            verify(exactly = 1) {
+                routeAlternativesController.pause()
+                routeRefreshController.pauseRouteRefreshes()
+                navigator.pause()
+            }
         }
-    }
 
     @Test
-    fun `stopping trip session it resumes routes controllers and navigator`() = coroutineRule.runBlockingTest {
-        createMapboxNavigation()
-        every { directionsSession.initialLegIndex } returns 0
-        every { tripSession.isRunningWithForegroundService() } returns true
+    fun `stopping trip session it resumes routes controllers and navigator`() =
+        coroutineRule.runBlockingTest {
+            createMapboxNavigation()
+            every { directionsSession.initialLegIndex } returns 0
+            every { tripSession.isRunningWithForegroundService() } returns true
 
-        mapboxNavigation.startTripSession()
+            mapboxNavigation.startTripSession()
 
-        verify(exactly = 1) {
-            navigator.resume()
-            routeRefreshController.resumeRouteRefreshes()
-            routeAlternativesController.resume()
+            verify(exactly = 1) {
+                navigator.resume()
+                routeRefreshController.resumeRouteRefreshes()
+                routeAlternativesController.resume()
+            }
         }
-    }
 
     @Test
     fun `setNavigationRoutes alternative for current primary route`() =
@@ -2536,6 +2546,35 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         } returns ExpectedFactory.createError("Error")
         createMapboxNavigation()
         mapboxNavigation.startReplayTripSessionWithPermissionCheck(withForegroundService = true)
+    }
+
+    @Test
+    fun `verify roadObjectMatcherConfig values passed`() {
+        val testMatchingGraphyType = NavigationTileDataDomain.NAVIGATION_HD
+        val testMaxDistanceToNode = 10.0
+        val slot = slot<RoadObjectMatcherConfig>()
+
+        every {
+            NavigationComponentProvider.createNativeNavigator(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                capture(slot),
+            )
+        } returns navigator
+
+        every { navigationOptions.roadObjectMatcherOptions } returns
+            RoadObjectMatcherOptions.Builder()
+                .openLRMaxDistanceToNode(newMaxDistance = testMaxDistanceToNode)
+                .matchingGraphType(newType = testMatchingGraphyType)
+                .build()
+
+        createMapboxNavigation()
+
+        assertEquals(slot.captured.openlrMaxDistanceToNode, testMaxDistanceToNode)
+        assertEquals(slot.captured.matchingGraphType, TileDataDomain.NAVIGATION_HD)
     }
 
     @Test

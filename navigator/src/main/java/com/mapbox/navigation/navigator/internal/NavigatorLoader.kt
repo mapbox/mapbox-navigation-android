@@ -2,9 +2,12 @@ package com.mapbox.navigation.navigator.internal
 
 import androidx.annotation.VisibleForTesting
 import com.mapbox.common.SdkInformation
+import com.mapbox.common.TileDataDomain
 import com.mapbox.navigation.base.BuildConfig
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.DeviceType
+import com.mapbox.navigation.base.options.NavigationTileDataDomain
+import com.mapbox.navigation.base.options.RoadObjectMatcherOptions
 import com.mapbox.navigation.utils.internal.getOrPutJsonObject
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigator.AdasisFacadeHandle
@@ -19,6 +22,7 @@ import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.ProfileApplication
 import com.mapbox.navigator.ProfilePlatform
+import com.mapbox.navigator.RoadObjectMatcherConfig
 import com.mapbox.navigator.RouterFactory
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.RouterType
@@ -86,6 +90,23 @@ object NavigatorLoader {
         historyRecorder: HistoryRecorderHandle?,
     ): CacheHandle {
         return CacheFactory.build(tilesConfig, config, historyRecorder, BillingProductType.CF)
+    }
+
+    fun createRoadObjectMatcherConfig(
+        roadObjectMatcherOptions: RoadObjectMatcherOptions,
+    ): RoadObjectMatcherConfig {
+        val matchingGraphType = when (roadObjectMatcherOptions.matchingGraphType) {
+            NavigationTileDataDomain.NAVIGATION -> TileDataDomain.NAVIGATION
+            NavigationTileDataDomain.NAVIGATION_HD -> TileDataDomain.NAVIGATION_HD
+            NavigationTileDataDomain.MAPS -> TileDataDomain.MAPS
+            NavigationTileDataDomain.SEARCH -> TileDataDomain.SEARCH
+            NavigationTileDataDomain.ADAS -> TileDataDomain.ADAS
+        }
+
+        return RoadObjectMatcherConfig(
+            roadObjectMatcherOptions.openLRMaxDistanceToNode,
+            matchingGraphType,
+        )
     }
 
     fun createNativeRouterInterface(

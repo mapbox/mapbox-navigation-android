@@ -350,6 +350,7 @@ internal open class MapboxNavigationBaseTest {
                 any(),
                 any(),
                 any(),
+                any(),
             )
         } returns navigator
 

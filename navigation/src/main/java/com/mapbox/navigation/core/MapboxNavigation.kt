@@ -527,6 +527,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 appLifecycleMonitor,
                 navigationOptions.eventsAppMetadata,
             ),
+            NavigatorLoader.createRoadObjectMatcherConfig(
+                navigationOptions.roadObjectMatcherOptions,
+            ),
         )
 
         val routeParsingManager = createRouteParsingManager()

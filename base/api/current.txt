@@ -697,6 +697,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.LocationOptions getLocationOptions();
     method public long getNavigatorPredictionMillis();
     method public com.mapbox.navigation.base.options.RerouteOptions getRerouteOptions();
+    method public com.mapbox.navigation.base.options.RoadObjectMatcherOptions getRoadObjectMatcherOptions();
     method public com.mapbox.navigation.base.route.RouteAlternativesOptions getRouteAlternativesOptions();
     method public com.mapbox.navigation.base.route.RouteRefreshOptions getRouteRefreshOptions();
     method public com.mapbox.navigation.base.options.RoutingTilesOptions getRoutingTilesOptions();
@@ -717,6 +718,7 @@ package com.mapbox.navigation.base.options {
     property public final com.mapbox.navigation.base.options.LocationOptions locationOptions;
     property public final long navigatorPredictionMillis;
     property public final com.mapbox.navigation.base.options.RerouteOptions rerouteOptions;
+    property public final com.mapbox.navigation.base.options.RoadObjectMatcherOptions roadObjectMatcherOptions;
     property public final com.mapbox.navigation.base.route.RouteAlternativesOptions routeAlternativesOptions;
     property public final com.mapbox.navigation.base.route.RouteRefreshOptions routeRefreshOptions;
     property public final com.mapbox.navigation.base.options.RoutingTilesOptions routingTilesOptions;
@@ -739,6 +741,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder locationOptions(com.mapbox.navigation.base.options.LocationOptions locationOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder navigatorPredictionMillis(long predictionMillis);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder rerouteOptions(com.mapbox.navigation.base.options.RerouteOptions rerouteOptions);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.base.options.NavigationOptions.Builder roadObjectMatcherOptions(com.mapbox.navigation.base.options.RoadObjectMatcherOptions roadObjectMatcherOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder routeAlternativesOptions(com.mapbox.navigation.base.route.RouteAlternativesOptions routeAlternativesOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder routeRefreshOptions(com.mapbox.navigation.base.route.RouteRefreshOptions routeRefreshOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder routingTilesOptions(com.mapbox.navigation.base.options.RoutingTilesOptions routingTilesOptions);
@@ -748,6 +751,14 @@ package com.mapbox.navigation.base.options {
 
   public final class NavigationOptionsKt {
     field public static final long DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1000L; // 0x3e8L
+  }
+
+  public enum NavigationTileDataDomain {
+    enum_constant public static final com.mapbox.navigation.base.options.NavigationTileDataDomain ADAS;
+    enum_constant public static final com.mapbox.navigation.base.options.NavigationTileDataDomain MAPS;
+    enum_constant public static final com.mapbox.navigation.base.options.NavigationTileDataDomain NAVIGATION;
+    enum_constant public static final com.mapbox.navigation.base.options.NavigationTileDataDomain NAVIGATION_HD;
+    enum_constant public static final com.mapbox.navigation.base.options.NavigationTileDataDomain SEARCH;
   }
 
   public final class PredictiveCacheLocationOptions {
@@ -869,6 +880,21 @@ package com.mapbox.navigation.base.options {
   }
 
   @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public abstract class RerouteStrategyForMapMatchedRoutes {
+  }
+
+  public final class RoadObjectMatcherOptions {
+    method public com.mapbox.navigation.base.options.NavigationTileDataDomain getMatchingGraphType();
+    method public Double? getOpenLRMaxDistanceToNode();
+    method public com.mapbox.navigation.base.options.RoadObjectMatcherOptions.Builder toBuilder();
+    property public final com.mapbox.navigation.base.options.NavigationTileDataDomain matchingGraphType;
+    property public final Double? openLRMaxDistanceToNode;
+  }
+
+  public static final class RoadObjectMatcherOptions.Builder {
+    ctor public RoadObjectMatcherOptions.Builder();
+    method public com.mapbox.navigation.base.options.RoadObjectMatcherOptions build();
+    method public com.mapbox.navigation.base.options.RoadObjectMatcherOptions.Builder matchingGraphType(com.mapbox.navigation.base.options.NavigationTileDataDomain newType);
+    method public com.mapbox.navigation.base.options.RoadObjectMatcherOptions.Builder openLRMaxDistanceToNode(Double? newMaxDistance);
   }
 
   public final class RoutingTilesOptions {

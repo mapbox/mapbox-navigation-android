@@ -43,6 +43,7 @@ import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.EventsMetadataInterface
 import com.mapbox.navigator.HistoryRecorderHandle
+import com.mapbox.navigator.RoadObjectMatcherConfig
 import com.mapbox.navigator.TilesConfig
 import kotlinx.coroutines.CoroutineScope
 
@@ -72,11 +73,13 @@ internal object NavigationComponentProvider {
         historyRecorderComposite: HistoryRecorderHandle?,
         offlineCacheHandle: CacheHandle?,
         eventsMetadataProvider: EventsMetadataInterface,
+        roadObjectMatcherConfig: RoadObjectMatcherConfig,
     ): MapboxNativeNavigator = PerformanceTracker.trackPerformanceSync("createNativeNavigator") {
         MapboxNativeNavigatorImpl(
             tilesConfig,
             historyRecorderComposite,
             offlineCacheHandle,
+            roadObjectMatcherConfig,
             config,
             eventsMetadataProvider,
         )
