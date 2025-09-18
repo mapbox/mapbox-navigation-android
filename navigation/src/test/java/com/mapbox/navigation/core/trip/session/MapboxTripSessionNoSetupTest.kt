@@ -359,7 +359,7 @@ class MapboxTripSessionNoSetupTest {
                 createNavigationStatus(
                     primaryRouteId = "id#0",
                     nextWaypointIndex = 0,
-                    routeState = RouteState.OFF_ROUTE
+                    routeState = RouteState.OFF_ROUTE,
                 ),
             )
             // assert
