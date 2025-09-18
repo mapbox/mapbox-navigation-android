@@ -30,6 +30,7 @@ import com.mapbox.navigator.RoadObject
 import com.mapbox.navigator.RoadObjectMetadata
 import com.mapbox.navigator.RoadObjectProvider
 import com.mapbox.navigator.RouteAlertLocation
+import com.mapbox.navigator.RouteIdentifier
 import com.mapbox.navigator.RouteState
 import com.mapbox.navigator.SpeedLimitSign
 import com.mapbox.navigator.SpeedLimitUnit
@@ -37,11 +38,14 @@ import com.mapbox.navigator.UpcomingRouteAlert
 import com.mapbox.navigator.VoiceInstruction
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
 
@@ -71,7 +75,7 @@ class NavigatorMapperTest {
             voiceInstructions = navigationStatus.voiceInstruction?.mapToDirectionsApi(),
             currentState = navigationStatus.routeState.convertState(),
             currentLegProgress = RouteLegProgressFactory.buildRouteLegProgressObject(
-                legIndex = navigationStatus.legIndex,
+                legIndex = navigationStatus.primaryRouteIndices!!.legIndex,
                 routeLeg = directionsRoute.legs()!!.first(),
                 distanceRemaining = 180f,
                 durationRemaining = 2.0,
@@ -817,37 +821,71 @@ class NavigatorMapperTest {
     }
     private val routeGeometryIndex = 12
     private val legGeometryIndex = 7
-    private val navigationStatus: NavigationStatus = mockk {
-        every { intersectionIndex } returns 1
-        every { stepIndex } returns 1
-        every { legIndex } returns 0
-        every { activeGuidanceInfo?.routeProgress?.remainingDistance } returns 80.0
-        every { activeGuidanceInfo?.routeProgress?.remainingDuration } returns 1000
-        every { activeGuidanceInfo?.routeProgress?.distanceTraveled } returns 10.0
-        every { activeGuidanceInfo?.routeProgress?.fractionTraveled } returns 1.0
-        every { activeGuidanceInfo?.legProgress?.remainingDistance } returns 180.0
-        every { activeGuidanceInfo?.legProgress?.remainingDuration } returns 2000
-        every { activeGuidanceInfo?.legProgress?.distanceTraveled } returns 20.0
-        every { activeGuidanceInfo?.legProgress?.fractionTraveled } returns 2.0
-        every { activeGuidanceInfo?.stepProgress?.remainingDistance } returns 35.0
-        every { activeGuidanceInfo?.stepProgress?.remainingDuration } returns 3000
-        every { activeGuidanceInfo?.stepProgress?.distanceTraveled } returns 30.0
-        every { activeGuidanceInfo?.stepProgress?.fractionTraveled } returns 50.0
-        every { routeState } returns RouteState.TRACKING
-        every { stale } returns true
-        every { bannerInstruction } returns nativeBannerInstructions
-        every { voiceInstruction } returns nativeVoiceInstructions
-        every { inTunnel } returns true
-        every { roads } returns listOf(roadName)
-        every { locatedAlternativeRouteId } returns "alternative_id"
-        every { geometryIndex } returns routeGeometryIndex
-        every { shapeIndex } returns legGeometryIndex
-        every { inParkingAisle } returns true
-        every { alternativeRouteIndices } returns listOf(
-            com.mapbox.navigator.RouteIndices("id#2", 2, 4, 6, 8, 10),
-            com.mapbox.navigator.RouteIndices("id#3", 3, 7, 5, 11, 9),
-        )
-        every { correctedLocationData } returns null
+    private lateinit var navigationStatus: NavigationStatus
+
+    @Before
+    fun setUp() {
+        mockkStatic(RouteIdentifier::toRouteIdStringWrapped)
+        navigationStatus = mockk {
+            every { primaryRouteIndices } returns mockk {
+                every { routeId } returns mockk {
+                    every { toRouteIdStringWrapped() } returns "id#0"
+                }
+                every { intersectionIndex } returns 1
+                every { stepIndex } returns 1
+                every { legIndex } returns 0
+                every { geometryIndex } returns routeGeometryIndex
+                every { legShapeIndex } returns legGeometryIndex
+            }
+            every { activeGuidanceInfo?.routeProgress?.remainingDistance } returns 80.0
+            every { activeGuidanceInfo?.routeProgress?.remainingDuration } returns 1000
+            every { activeGuidanceInfo?.routeProgress?.distanceTraveled } returns 10.0
+            every { activeGuidanceInfo?.routeProgress?.fractionTraveled } returns 1.0
+            every { activeGuidanceInfo?.legProgress?.remainingDistance } returns 180.0
+            every { activeGuidanceInfo?.legProgress?.remainingDuration } returns 2000
+            every { activeGuidanceInfo?.legProgress?.distanceTraveled } returns 20.0
+            every { activeGuidanceInfo?.legProgress?.fractionTraveled } returns 2.0
+            every { activeGuidanceInfo?.stepProgress?.remainingDistance } returns 35.0
+            every { activeGuidanceInfo?.stepProgress?.remainingDuration } returns 3000
+            every { activeGuidanceInfo?.stepProgress?.distanceTraveled } returns 30.0
+            every { activeGuidanceInfo?.stepProgress?.fractionTraveled } returns 50.0
+            every { routeState } returns RouteState.TRACKING
+            every { stale } returns true
+            every { bannerInstruction } returns nativeBannerInstructions
+            every { voiceInstruction } returns nativeVoiceInstructions
+            every { inTunnel } returns true
+            every { roads } returns listOf(roadName)
+            every { locatedAlternativeRouteId } returns "alternative_id"
+            every { inParkingAisle } returns true
+            every { alternativeRouteIndices } returns listOf(
+                com.mapbox.navigator.RouteIndices(
+                    mockk {
+                        every { toRouteIdStringWrapped() } returns "id#2"
+                    },
+                    2,
+                    4,
+                    6,
+                    8,
+                    10,
+                ),
+                com.mapbox.navigator.RouteIndices(
+                    mockk {
+                        every { toRouteIdStringWrapped() } returns "id#3"
+                    },
+                    3,
+                    7,
+                    5,
+                    11,
+                    9,
+                ),
+            )
+            every { correctedLocationData } returns null
+        }
+    }
+
+    @After
+    fun tearDown() {
+        mockkStatic(RouteIdentifier::toRouteIdStringWrapped)
     }
 
     val routeAlertLocation: RouteAlertLocation = mockk()

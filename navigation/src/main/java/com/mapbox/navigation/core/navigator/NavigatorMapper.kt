@@ -29,6 +29,7 @@ import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
+import com.mapbox.navigator.RouteIdentifier
 import com.mapbox.navigator.RouteState
 import com.mapbox.navigator.SpeedLimitSign
 import com.mapbox.navigator.SpeedLimitUnit
@@ -84,7 +85,8 @@ private fun NavigationStatus.getRouteProgress(
     if (routeState == RouteState.INVALID) {
         return null
     }
-    val upcomingStepIndex = stepIndex + ONE_INDEX
+    val primaryRouteIndices = this.primaryRouteIndices ?: return null
+    val upcomingStepIndex = primaryRouteIndices.stepIndex + ONE_INDEX
 
     var currentLegStep: LegStep? = null
     var stepPoints: List<Point>? = null
@@ -108,8 +110,8 @@ private fun NavigationStatus.getRouteProgress(
     var routeProgressFractionTraveled = 0f
 
     ifNonNull(route.directionsRoute.legs(), activeGuidanceInfo) { legs, activeGuidanceInfo ->
-        if (legIndex < legs.size) {
-            currentLeg = legs[legIndex]
+        if (primaryRouteIndices.legIndex < legs.size) {
+            currentLeg = legs[primaryRouteIndices.legIndex]
 
             routeLegProgressDistanceTraveled =
                 activeGuidanceInfo.legProgress.distanceTraveled.toFloat()
@@ -131,8 +133,8 @@ private fun NavigationStatus.getRouteProgress(
         }
 
         ifNonNull(currentLeg?.steps()) { steps ->
-            if (stepIndex < steps.size) {
-                currentLegStep = steps[stepIndex].also { legStep ->
+            if (primaryRouteIndices.stepIndex < steps.size) {
+                currentLegStep = steps[primaryRouteIndices.stepIndex].also { legStep ->
                     stepPoints = legStep.geometry()?.let {
                         route.directionsRoute.stepGeometryToPoints(legStep)
                     }
@@ -162,8 +164,8 @@ private fun NavigationStatus.getRouteProgress(
     }
 
     val routeStepProgress = buildRouteStepProgressObject(
-        stepIndex,
-        intersectionIndex,
+        primaryRouteIndices.stepIndex,
+        primaryRouteIndices.intersectionIndex,
         instructionIndex,
         currentLegStep,
         stepPoints,
@@ -174,7 +176,7 @@ private fun NavigationStatus.getRouteProgress(
     )
 
     val routeLegProgress = buildRouteLegProgressObject(
-        legIndex,
+        primaryRouteIndices.legIndex,
         currentLeg,
         routeLegProgressDistanceTraveled,
         routeLegProgressDistanceRemaining,
@@ -182,16 +184,16 @@ private fun NavigationStatus.getRouteProgress(
         routeLegProgressFractionTraveled,
         routeStepProgress,
         routeLegProgressUpcomingStep,
-        shapeIndex,
+        primaryRouteIndices.legShapeIndex,
         currentLegDestination,
     )
 
     val alternativeRouteIndicesMap = alternativeRouteIndices.associate {
-        it.routeId to RouteIndicesFactory.buildRouteIndices(
+        it.routeId.toRouteIdStringWrapped() to RouteIndicesFactory.buildRouteIndices(
             it.legIndex,
             it.stepIndex,
             it.geometryIndex,
-            it.shapeIndex,
+            it.legShapeIndex,
             it.intersectionIndex,
             it.isForkPointPassed,
         )
@@ -213,7 +215,7 @@ private fun NavigationStatus.getRouteProgress(
         upcomingRoadObjects,
         stale,
         locatedAlternativeRouteId,
-        geometryIndex,
+        primaryRouteIndices.geometryIndex,
         inParkingAisle,
         alternativeRouteIndicesMap,
     )
@@ -222,13 +224,17 @@ private fun NavigationStatus.getRouteProgress(
 internal fun NavigationStatus.getCurrentBannerInstructions(
     currentRoute: NavigationRoute?,
 ): BannerInstructions? {
-    return ifNonNull(currentRoute, bannerInstruction) { route, nativeBanner ->
+    return ifNonNull(
+        currentRoute,
+        bannerInstruction,
+        primaryRouteIndices,
+    ) { route, nativeBanner, primaryRouteIndices ->
         route.directionsRoute.legs()?.let { legs ->
             if (legs.size > 0) {
-                val currentLeg = legs[legIndex]
+                val currentLeg = legs[primaryRouteIndices.legIndex]
                 currentLeg.steps()?.let { steps ->
                     if (steps.size > 0) {
-                        val currentStep = steps[stepIndex]
+                        val currentStep = steps[primaryRouteIndices.stepIndex]
                         currentStep.bannerInstructions()?.let { banners ->
                             banners[nativeBanner.index]
                                 .toBuilder()
@@ -322,4 +328,9 @@ private fun convertSign(
 
 private fun mphToKmph(mph: Int?): Int? {
     return mph?.let { it * 1.60934 }?.roundToInt()
+}
+
+// For testing purposes: to avoid UnsatisfiedLinkError.
+internal fun RouteIdentifier.toRouteIdStringWrapped(): String {
+    return toRouteIdString()
 }

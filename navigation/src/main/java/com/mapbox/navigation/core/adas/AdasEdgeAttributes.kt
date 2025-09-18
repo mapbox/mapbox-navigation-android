@@ -18,9 +18,11 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
  * Position is a shape index, where integer part in an index of geometry segment is
  * and fractional part is a position on the segment
  * @param isDividedRoad A flag indicating if the edge is a divided road
+ * @param isBuiltUpArea A flag indicating if the edge is a built up area
  * @param formOfWay Form Of Way information from ADAS tiles, may differ from the Valhalla value, but should be used for ADAS purposes.
  *  See [FormOfWay.Type]. If not set, then the value is not known
  * @param etc2 Road class in ETC2.0 format (Japan specific), see [Etc2Road.Type]
+ * @param roadItems Road items
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class AdasEdgeAttributes private constructor(
@@ -29,8 +31,10 @@ class AdasEdgeAttributes private constructor(
     val elevations: List<AdasValueOnEdge>,
     val curvatures: List<AdasValueOnEdge>,
     val isDividedRoad: Boolean?,
+    val isBuiltUpArea: Boolean?,
     @FormOfWay.Type val formOfWay: Int?,
     @Etc2Road.Type val etc2: Int,
+    val roadItems: List<AdasRoadItemOnEdge>,
 ) {
 
     /**
@@ -47,8 +51,10 @@ class AdasEdgeAttributes private constructor(
         if (curvatures != other.curvatures) return false
         if (elevations != other.elevations) return false
         if (isDividedRoad != other.isDividedRoad) return false
+        if (isBuiltUpArea != other.isBuiltUpArea) return false
         if (formOfWay != other.formOfWay) return false
         if (etc2 != other.etc2) return false
+        if (roadItems != other.roadItems) return false
         return true
     }
 
@@ -61,8 +67,10 @@ class AdasEdgeAttributes private constructor(
         result = 31 * result + elevations.hashCode()
         result = 31 * result + curvatures.hashCode()
         result = 31 * result + isDividedRoad.hashCode()
+        result = 31 * result + isBuiltUpArea.hashCode()
         result = 31 * result + formOfWay.hashCode()
         result = 31 * result + etc2.hashCode()
+        result = 31 * result + roadItems.hashCode()
         return result
     }
 
@@ -76,7 +84,9 @@ class AdasEdgeAttributes private constructor(
             "elevations=$elevations, " +
             "curvatures=$curvatures, " +
             "isDividedRoad=$isDividedRoad, " +
+            "isBuiltUpArea=$isBuiltUpArea, " +
             "formOfWay=$formOfWay, " +
+            "roadItems=$roadItems, " +
             "etc2=$etc2" +
             ")"
     }
@@ -282,8 +292,12 @@ class AdasEdgeAttributes private constructor(
                     AdasValueOnEdge.createFromNativeObject(it)
                 },
                 isDividedRoad = nativeObj.isDividedRoad,
+                isBuiltUpArea = nativeObj.isBuiltUpArea,
                 formOfWay = nativeObj.formOfWay?.let { FormOfWay.createFromNativeObject(it) },
                 etc2 = Etc2Road.createFromNativeObject(nativeObj.etc2),
+                roadItems = nativeObj.roadItems.map {
+                    AdasRoadItemOnEdge.createFromNativeObject(it)
+                },
             )
     }
 }

@@ -321,6 +321,7 @@ class MapboxTripSessionNoSetupTest {
             statusUpdateListeners.onStatus(
                 NavigationStatusOrigin.LOCATION_UPDATE,
                 createNavigationStatus(
+                    primaryRouteId = "id#0",
                     bannerInstruction = createBannerInstruction(
                         index = 0,
                         primary = createBannerSection(),
@@ -355,7 +356,11 @@ class MapboxTripSessionNoSetupTest {
             // act
             navigatorObservers.onStatus(
                 NavigationStatusOrigin.UNCONDITIONAL,
-                createNavigationStatus(nextWaypointIndex = 0, routeState = RouteState.OFF_ROUTE),
+                createNavigationStatus(
+                    primaryRouteId = "id#0",
+                    nextWaypointIndex = 0,
+                    routeState = RouteState.OFF_ROUTE
+                ),
             )
             // assert
             val remainingWaypoints = tripSession.getRouteProgress()?.remainingWaypoints
@@ -619,6 +624,7 @@ object StatusWithVoiceInstructionUpdateUtil {
             navigatorObservers.onStatus(
                 NavigationStatusOrigin.LOCATION_UPDATE,
                 createNavigationStatus(
+                    primaryRouteId = "id#0",
                     location = firstArg(),
                     voiceInstruction = createVoiceInstruction("1"),
                 ),
@@ -633,6 +639,7 @@ object StatusWithVoiceInstructionUpdateUtil {
             navigatorObservers.onStatus(
                 NavigationStatusOrigin.LOCATION_UPDATE,
                 createNavigationStatus(
+                    primaryRouteId = "id#0",
                     location = firstArg(),
                     voiceInstruction = null,
                 ),
@@ -647,6 +654,7 @@ object StatusWithVoiceInstructionUpdateUtil {
             navigatorObservers.onStatus(
                 NavigationStatusOrigin.LOCATION_UPDATE,
                 createNavigationStatus(
+                    primaryRouteId = "id#0",
                     location = firstArg(),
                     voiceInstruction = createVoiceInstruction("2"),
                 ),
@@ -668,6 +676,7 @@ object StatusWithOffRouteUpdateUtil {
             navigatorObservers.onStatus(
                 NavigationStatusOrigin.LOCATION_UPDATE,
                 createNavigationStatus(
+                    primaryRouteId = "id#0",
                     location = firstArg(),
                     voiceInstruction = createVoiceInstruction("1"),
                     routeState = RouteState.OFF_ROUTE,
@@ -715,6 +724,7 @@ private fun triggerStatusUpdateOnEachLocationUpdate(
         navigatorObservers.onStatus(
             NavigationStatusOrigin.LOCATION_UPDATE,
             createNavigationStatus(
+                primaryRouteId = "id#0",
                 location = firstArg(),
                 voiceInstruction = null,
             ),

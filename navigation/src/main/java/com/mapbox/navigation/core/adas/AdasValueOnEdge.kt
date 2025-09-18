@@ -10,8 +10,10 @@ import com.mapbox.navigation.base.internal.utils.safeCompareTo
  * Integer part is an index of edge segment and fraction is a position on the segment:
  * 0 - left point, 1 - right point, 0.5 - in the middle between the segment points.
  * Ex.: 3.5 means the middle of the 3rd segment on the Edge shape, shape has more than 4 points
+ * o---------------o-------------------------o-----------o -- edge
+ *  segment 0         segment 1               segment2
  * @param percentAlong Position along edge shape [0-1]
- * @param value Floating point value, e.g. curvature in 1/m or slope in degrees
+ *  @param value Floating point value, e.g. curvature in 1/m or slope in degrees
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class AdasValueOnEdge private constructor(

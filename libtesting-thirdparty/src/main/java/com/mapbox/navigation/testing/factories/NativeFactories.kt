@@ -16,6 +16,7 @@ import com.mapbox.navigator.OffRoadStateProvider
 import com.mapbox.navigator.RerouteError
 import com.mapbox.navigator.RerouteErrorType
 import com.mapbox.navigator.RoadName
+import com.mapbox.navigator.RouteIdentifier
 import com.mapbox.navigator.RouteIndices
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouteInterface
@@ -76,24 +77,27 @@ fun createNavigationStatus(
 ): NavigationStatus {
     return NavigationStatus(
         routeState,
-        locatedAlternativeId,
-        primaryRouteId,
         stale,
         location,
-        routeIndex,
-        legIndex,
-        stepIndex,
         isFallback,
         isTunnel,
         isParkingAisle,
         isRoundabout,
         predicted,
-        geometryIndex,
-        shapeIndex,
-        intersectionIndex,
         turnLanes,
-        alternativeRouteIndices,
         roads,
+        primaryRouteId?.let {
+            RouteIndices(
+                RouteIdentifier(it.substringBefore("#"), routeIndex),
+                legIndex,
+                stepIndex,
+                geometryIndex,
+                shapeIndex,
+                intersectionIndex,
+            )
+        },
+        alternativeRouteIndices,
+        locatedAlternativeId,
         voiceInstruction,
         bannerInstruction,
         speedLimit,

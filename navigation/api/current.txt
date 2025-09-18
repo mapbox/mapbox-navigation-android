@@ -213,14 +213,18 @@ package com.mapbox.navigation.core.adas {
     method public java.util.List<com.mapbox.navigation.core.adas.AdasValueOnEdge> getElevations();
     method public int getEtc2();
     method public Integer? getFormOfWay();
+    method public java.util.List<com.mapbox.navigation.core.adas.AdasRoadItemOnEdge> getRoadItems();
     method public java.util.List<com.mapbox.navigation.core.adas.AdasValueOnEdge> getSlopes();
     method public java.util.List<com.mapbox.navigation.core.adas.AdasSpeedLimitInfo> getSpeedLimit();
+    method public Boolean? isBuiltUpArea();
     method public Boolean? isDividedRoad();
     property public final java.util.List<com.mapbox.navigation.core.adas.AdasValueOnEdge> curvatures;
     property public final java.util.List<com.mapbox.navigation.core.adas.AdasValueOnEdge> elevations;
     property public final int etc2;
     property public final Integer? formOfWay;
+    property public final Boolean? isBuiltUpArea;
     property public final Boolean? isDividedRoad;
+    property public final java.util.List<com.mapbox.navigation.core.adas.AdasRoadItemOnEdge> roadItems;
     property public final java.util.List<com.mapbox.navigation.core.adas.AdasValueOnEdge> slopes;
     property public final java.util.List<com.mapbox.navigation.core.adas.AdasSpeedLimitInfo> speedLimit;
   }
@@ -257,6 +261,131 @@ package com.mapbox.navigation.core.adas {
   }
 
   @IntDef({com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay.UNKNOWN, com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay.FREEWAY, com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay.MULTIPLE_CARRIAGEWAY, com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay.SINGLE_CARRIAGEWAY, com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay.ROUNDABOUT_CIRCLE, com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay.TRAFFIC_SQUARE, com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay.SLIP_ROAD, com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay.PARALLEL_ROAD, com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay.RAMP_ON_FREEWAY, com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay.RAMP, com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay.SERVICE_ROAD, com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay.CAR_PARK_ENTRANCE, com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay.SERVICE_ENTRANCE, com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay.PEDESTRIAN_ZONE, com.mapbox.navigation.core.adas.AdasEdgeAttributes.FormOfWay.NA}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface AdasEdgeAttributes.FormOfWay.Type {
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasRoadItem {
+    method public java.util.List<java.lang.Byte> getLanes();
+    method public Integer? getLocation();
+    method public int getType();
+    method public Integer? getValue();
+    property public final java.util.List<java.lang.Byte> lanes;
+    property public final Integer? location;
+    property public final int type;
+    property public final Integer? value;
+  }
+
+  public final class AdasRoadItemLocation {
+    field public static final int ABOVE = 2; // 0x2
+    field public static final int ABOVE_LANE = 4; // 0x4
+    field public static final com.mapbox.navigation.core.adas.AdasRoadItemLocation INSTANCE;
+    field public static final int LEFT = 1; // 0x1
+    field public static final int ON_SURFACE = 3; // 0x3
+    field public static final int RIGHT = 0; // 0x0
+  }
+
+  @IntDef({com.mapbox.navigation.core.adas.AdasRoadItemLocation.RIGHT, com.mapbox.navigation.core.adas.AdasRoadItemLocation.LEFT, com.mapbox.navigation.core.adas.AdasRoadItemLocation.ABOVE, com.mapbox.navigation.core.adas.AdasRoadItemLocation.ON_SURFACE, com.mapbox.navigation.core.adas.AdasRoadItemLocation.ABOVE_LANE}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface AdasRoadItemLocation.Location {
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasRoadItemOnEdge {
+    method public double getPercentAlong();
+    method public com.mapbox.navigation.core.adas.AdasRoadItem getRoadItem();
+    method public float getShapeIndex();
+    property public final double percentAlong;
+    property public final com.mapbox.navigation.core.adas.AdasRoadItem roadItem;
+    property public final float shapeIndex;
+  }
+
+  public final class AdasRoadItemType {
+    field public static final int CARRIAGEWAY_NARROWS_LEFT_SIGN = 33; // 0x21
+    field public static final int CARRIAGEWAY_NARROWS_RIGHT_SIGN = 32; // 0x20
+    field public static final int CARRIAGEWAY_NARROWS_SIGN = 31; // 0x1f
+    field public static final int CHILDREN_SIGN = 42; // 0x2a
+    field public static final int CURVY_ROAD_SIGN = 13; // 0xd
+    field public static final int CYCLISTS_SIGN = 44; // 0x2c
+    field public static final int DANGEROUS_INTERSECTION_SIGN = 16; // 0x10
+    field public static final int DANGER_SIGN = 0; // 0x0
+    field public static final int DIP_SIGN = 61; // 0x3d
+    field public static final int DIRECTION_TO_THE_LEFT_SIGN = 30; // 0x1e
+    field public static final int DIRECTION_TO_THE_RIGHT_SIGN = 29; // 0x1d
+    field public static final int DOMESTIC_ANIMALS_CROSSING_SIGN = 4; // 0x4
+    field public static final int DOUBLE_BEND_LEFT_FIRST_SIGN = 12; // 0xc
+    field public static final int DOUBLE_BEND_RIGHT_FIRST_SIGN = 11; // 0xb
+    field public static final int END_OF_PROHIBITION_ON_OVERTAKING_FOR_GOODS_VEHICLES_SIGN = 15; // 0xf
+    field public static final int END_OF_PROHIBITION_ON_OVERTAKING_SIGN = 38; // 0x26
+    field public static final int END_OF_RESIDENTIAL_AREA_SIGN = 8; // 0x8
+    field public static final int FALLING_ROCKS_LEFT_SIGN = 51; // 0x33
+    field public static final int FALLING_ROCKS_RIGHT_SIGN = 52; // 0x34
+    field public static final int FALLING_ROCKS_SIGN = 50; // 0x32
+    field public static final int FERRY_TERMINAL_SIGN = 18; // 0x12
+    field public static final int HIGH_ACCIDENT_AREA_SIGN = 66; // 0x42
+    field public static final int HUMPBACK_BRIDGE_BRIDGE_SIGN = 20; // 0x14
+    field public static final int HUMP_SIGN = 60; // 0x3c
+    field public static final int ICY_ROAD_SIGN = 63; // 0x3f
+    field public static final com.mapbox.navigation.core.adas.AdasRoadItemType INSTANCE;
+    field public static final int INTERSECTION_SIGN = 26; // 0x1a
+    field public static final int INTERSECTION_WITH_MINOR_ROAD_SIGN = 27; // 0x1b
+    field public static final int INTERSECTION_WITH_PRIORITY_TO_THE_RIGHT_SIGN = 28; // 0x1c
+    field public static final int LANE_MERGE_CENTER_SIGN = 36; // 0x24
+    field public static final int LANE_MERGE_LEFT_SIGN = 34; // 0x22
+    field public static final int LANE_MERGE_RIGHT_SIGN = 35; // 0x23
+    field public static final int LEFT_BEND_SIGN = 10; // 0xa
+    field public static final int NARROW_BRIDGE_SIGN = 19; // 0x13
+    field public static final int OVERTAKING_BY_GOODS_VEHICLES_PROHIBITED_SIGN = 14; // 0xe
+    field public static final int OVERTAKING_PROHIBITED_SIGN = 37; // 0x25
+    field public static final int PASS_LEFT_OR_RIGHT_SIDE_SIGN = 1; // 0x1
+    field public static final int PASS_LEFT_SIDE_SIGN = 2; // 0x2
+    field public static final int PASS_RIGHT_SIDE_SIGN = 3; // 0x3
+    field public static final int PEDESTRIANS_SIGN = 40; // 0x28
+    field public static final int PEDESTRIAN_CROSSING_SIGN = 41; // 0x29
+    field public static final int PRIORITY_FOR_ONCOMING_TRAFFIC_SIGN = 69; // 0x45
+    field public static final int PRIORITY_OVER_ONCOMING_TRAFFIC_SIGN = 68; // 0x44
+    field public static final int PRIORITY_ROAD_SIGN = 25; // 0x19
+    field public static final int PROTECTIVE_OVERTAKING_SIGN = 39; // 0x27
+    field public static final int RAILROAD_CROSSING = 82; // 0x52
+    field public static final int RAILWAY_CROSSING_SIGN = 48; // 0x30
+    field public static final int RAILWAY_CROSSING_WITHOUT_GATES_SIGN = 47; // 0x2f
+    field public static final int RAILWAY_CROSSING_WITH_GATES_SIGN = 46; // 0x2e
+    field public static final int RESIDENTIAL_AREA_SIGN = 7; // 0x7
+    field public static final int RIGHT_BEND_SIGN = 9; // 0x9
+    field public static final int RIVER_BANK_LEFT_SIGN = 22; // 0x16
+    field public static final int RIVER_BANK_SIGN = 21; // 0x15
+    field public static final int ROAD_CAM_LANE_BUS = 77; // 0x4d
+    field public static final int ROAD_CAM_LANE_EMERGENCY = 76; // 0x4c
+    field public static final int ROAD_CAM_LANE_NON_MOTORIZED = 75; // 0x4b
+    field public static final int ROAD_CAM_RED_LIGHT = 79; // 0x4f
+    field public static final int ROAD_CAM_SPEED_CURRENT_SPEED = 81; // 0x51
+    field public static final int ROAD_CAM_SPEED_INTERVAL = 74; // 0x4a
+    field public static final int ROAD_CAM_SPEED_INTERVAL_END = 72; // 0x48
+    field public static final int ROAD_CAM_SPEED_INTERVAL_START = 73; // 0x49
+    field public static final int ROAD_CAM_SURVEILLANCE = 80; // 0x50
+    field public static final int ROAD_CAM_VIOLATION = 78; // 0x4e
+    field public static final int ROAD_FLOODS_SIGN = 62; // 0x3e
+    field public static final int ROAD_WORKS_SIGN = 6; // 0x6
+    field public static final int SCHOOL_ZONE_SIGN = 43; // 0x2b
+    field public static final int SIDE_WINDS_SIGN = 64; // 0x40
+    field public static final int SLIPPERY_ROAD_SIGN = 56; // 0x38
+    field public static final int SPEED_BUMP = 84; // 0x54
+    field public static final int SPEED_LIMIT_SIGN = 70; // 0x46
+    field public static final int STEEP_ASCENT_SIGN = 57; // 0x39
+    field public static final int STEEP_DESCENT_SIGN = 58; // 0x3a
+    field public static final int STEEP_DROP_LEFT_SIGN = 53; // 0x35
+    field public static final int STEEP_DROP_RIGHT_SIGN = 54; // 0x36
+    field public static final int STOP_SIGN = 24; // 0x18
+    field public static final int TOLL_BOOTH = 71; // 0x47
+    field public static final int TRAFFIC_CONGESTION_SIGN = 65; // 0x41
+    field public static final int TRAFFIC_LIGHT = 85; // 0x55
+    field public static final int TRAMWAY_SIGN = 49; // 0x31
+    field public static final int TUNNEL_SIGN = 17; // 0x11
+    field public static final int TWO_WAY_TRAFFIC_SIGN = 45; // 0x2d
+    field public static final int UNEVEN_ROAD_SIGN = 59; // 0x3b
+    field public static final int VARIABLE_SIGN_LIGHT_ELEMENTS_SIGN = 67; // 0x43
+    field public static final int VARIABLE_SIGN_MECHANIC_ELEMENTS_SIGN = 55; // 0x37
+    field public static final int WILD_ANIMALS_CROSSING_SIGN = 5; // 0x5
+    field public static final int YIELD_SIGN = 23; // 0x17
+    field public static final int ZEBRA = 83; // 0x53
+  }
+
+  @IntDef({com.mapbox.navigation.core.adas.AdasRoadItemType.DANGER_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.PASS_LEFT_OR_RIGHT_SIDE_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.PASS_LEFT_SIDE_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.PASS_RIGHT_SIDE_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.DOMESTIC_ANIMALS_CROSSING_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.WILD_ANIMALS_CROSSING_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.ROAD_WORKS_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.RESIDENTIAL_AREA_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.END_OF_RESIDENTIAL_AREA_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.RIGHT_BEND_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.LEFT_BEND_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.DOUBLE_BEND_RIGHT_FIRST_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.DOUBLE_BEND_LEFT_FIRST_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.CURVY_ROAD_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.OVERTAKING_BY_GOODS_VEHICLES_PROHIBITED_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.END_OF_PROHIBITION_ON_OVERTAKING_FOR_GOODS_VEHICLES_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.DANGEROUS_INTERSECTION_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.TUNNEL_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.FERRY_TERMINAL_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.NARROW_BRIDGE_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.HUMPBACK_BRIDGE_BRIDGE_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.RIVER_BANK_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.RIVER_BANK_LEFT_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.YIELD_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.STOP_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.PRIORITY_ROAD_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.INTERSECTION_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.INTERSECTION_WITH_MINOR_ROAD_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.INTERSECTION_WITH_PRIORITY_TO_THE_RIGHT_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.DIRECTION_TO_THE_RIGHT_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.DIRECTION_TO_THE_LEFT_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.CARRIAGEWAY_NARROWS_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.CARRIAGEWAY_NARROWS_RIGHT_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.CARRIAGEWAY_NARROWS_LEFT_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.LANE_MERGE_LEFT_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.LANE_MERGE_RIGHT_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.LANE_MERGE_CENTER_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.OVERTAKING_PROHIBITED_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.END_OF_PROHIBITION_ON_OVERTAKING_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.PROTECTIVE_OVERTAKING_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.PEDESTRIANS_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.PEDESTRIAN_CROSSING_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.CHILDREN_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.SCHOOL_ZONE_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.CYCLISTS_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.TWO_WAY_TRAFFIC_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.RAILWAY_CROSSING_WITH_GATES_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.RAILWAY_CROSSING_WITHOUT_GATES_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.RAILWAY_CROSSING_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.TRAMWAY_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.FALLING_ROCKS_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.FALLING_ROCKS_LEFT_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.FALLING_ROCKS_RIGHT_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.STEEP_DROP_LEFT_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.STEEP_DROP_RIGHT_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.VARIABLE_SIGN_MECHANIC_ELEMENTS_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.SLIPPERY_ROAD_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.STEEP_ASCENT_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.STEEP_DESCENT_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.UNEVEN_ROAD_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.HUMP_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.DIP_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.ROAD_FLOODS_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.ICY_ROAD_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.SIDE_WINDS_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.TRAFFIC_CONGESTION_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.HIGH_ACCIDENT_AREA_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.VARIABLE_SIGN_LIGHT_ELEMENTS_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.PRIORITY_OVER_ONCOMING_TRAFFIC_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.PRIORITY_FOR_ONCOMING_TRAFFIC_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.SPEED_LIMIT_SIGN, com.mapbox.navigation.core.adas.AdasRoadItemType.TOLL_BOOTH, com.mapbox.navigation.core.adas.AdasRoadItemType.ROAD_CAM_SPEED_INTERVAL_END, com.mapbox.navigation.core.adas.AdasRoadItemType.ROAD_CAM_SPEED_INTERVAL_START, com.mapbox.navigation.core.adas.AdasRoadItemType.ROAD_CAM_SPEED_INTERVAL, com.mapbox.navigation.core.adas.AdasRoadItemType.ROAD_CAM_LANE_NON_MOTORIZED, com.mapbox.navigation.core.adas.AdasRoadItemType.ROAD_CAM_LANE_EMERGENCY, com.mapbox.navigation.core.adas.AdasRoadItemType.ROAD_CAM_LANE_BUS, com.mapbox.navigation.core.adas.AdasRoadItemType.ROAD_CAM_VIOLATION, com.mapbox.navigation.core.adas.AdasRoadItemType.ROAD_CAM_RED_LIGHT, com.mapbox.navigation.core.adas.AdasRoadItemType.ROAD_CAM_SURVEILLANCE, com.mapbox.navigation.core.adas.AdasRoadItemType.ROAD_CAM_SPEED_CURRENT_SPEED, com.mapbox.navigation.core.adas.AdasRoadItemType.RAILROAD_CROSSING, com.mapbox.navigation.core.adas.AdasRoadItemType.ZEBRA, com.mapbox.navigation.core.adas.AdasRoadItemType.SPEED_BUMP, com.mapbox.navigation.core.adas.AdasRoadItemType.TRAFFIC_LIGHT}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface AdasRoadItemType.Type {
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasSpeedLimitInfo {
