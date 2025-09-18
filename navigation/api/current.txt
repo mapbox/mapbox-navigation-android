@@ -1505,7 +1505,7 @@ package com.mapbox.navigation.core.trip.session.eh {
   }
 
   public fun interface RoadObjectMatcherObserver {
-    method public void onRoadObjectMatched(com.mapbox.bindgen.Expected<com.mapbox.navigation.base.trip.model.roadobject.RoadObjectMatcherError,com.mapbox.navigation.base.trip.model.roadobject.RoadObject> result);
+    method @WorkerThread public void onRoadObjectMatched(com.mapbox.bindgen.Expected<com.mapbox.navigation.base.trip.model.roadobject.RoadObjectMatcherError,com.mapbox.navigation.base.trip.model.roadobject.RoadObject> result);
   }
 
   public final class RoadObjectsStore {
