@@ -950,7 +950,9 @@ class MapboxTripSessionTest {
 
             navigatorObserver.onStatus(
                 NavigationStatusOrigin.UNCONDITIONAL,
-                createNavigationStatus(),
+                createNavigationStatus(
+                    primaryRouteId = "id#0",
+                ),
             )
             assertTrue(routeProgresses.last().navigationRoute === originalRoute1)
 
@@ -958,7 +960,9 @@ class MapboxTripSessionTest {
 
             navigatorObserver.onStatus(
                 NavigationStatusOrigin.UNCONDITIONAL,
-                createNavigationStatus(),
+                createNavigationStatus(
+                    primaryRouteId = "id#0",
+                ),
             )
             assertTrue(routeProgresses.last().navigationRoute === originalRoute1)
 
@@ -967,7 +971,9 @@ class MapboxTripSessionTest {
 
             navigatorObserver.onStatus(
                 NavigationStatusOrigin.UNCONDITIONAL,
-                createNavigationStatus(),
+                createNavigationStatus(
+                    primaryRouteId = "id#0",
+                ),
             )
             assertTrue(routeProgresses.last().navigationRoute === refreshedRoute1)
 
