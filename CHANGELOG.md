@@ -1,5 +1,20 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.11.8 - 19 September, 2025
+
+
+#### Bug fixes and improvements
+- Fixed the issue that caused EV routes to not have any initial alternatives.
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.14.6` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.14.6))
+- Mapbox Navigation Native `v324.14.6`
+- Mapbox Core Common `v24.14.6`
+- Mapbox Java `v7.6.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.6.0))
+
+
 ## Navigation SDK Core Framework 3.11.7 - 10 September, 2025
 #### Features
 
