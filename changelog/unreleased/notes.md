@@ -1,0 +1,1 @@
+3.16.x is the next version after 3.12.x. For technical reasons, versions 3.13.x, 3.14.x and 3.15.x are skipped. Starting from 3.16.x, the Nav SDK minor version will be aligned with other Mapbox dependencies.
