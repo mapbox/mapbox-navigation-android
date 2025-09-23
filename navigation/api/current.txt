@@ -76,6 +76,7 @@ package com.mapbox.navigation.core {
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void registerRoutesPreviewObserver(com.mapbox.navigation.core.preview.RoutesPreviewObserver observer);
     method public void registerTripSessionStateObserver(com.mapbox.navigation.core.trip.session.TripSessionStateObserver tripSessionStateObserver);
     method public void registerVoiceInstructionsObserver(com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver voiceInstructionsObserver);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void replanRoute(com.mapbox.navigation.core.ReplanRoutesCallback? resultCallback = null);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void replanRoute();
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public long requestMapMatching(com.mapbox.navigation.core.mapmatching.MapMatchingOptions mapMatchingOptions, com.mapbox.navigation.core.mapmatching.MapMatchingAPICallback callback);
     method public void requestRoadGraphDataUpdate(com.mapbox.navigation.core.RoadGraphDataUpdateCallback callback);
@@ -144,6 +145,27 @@ package com.mapbox.navigation.core {
   public interface NavigationVersionSwitchObserver {
     method public void onSwitchToFallbackVersion(String? tilesVersion);
     method public void onSwitchToTargetVersion(String? tilesVersion);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class ReplanRouteError {
+    method public String getErrorType();
+    method public String getMessage();
+    property public final String errorType;
+    property public final String message;
+    field public static final com.mapbox.navigation.core.ReplanRouteError.Companion Companion;
+    field public static final String REPLAN_ROUTE_ERROR = "REPLAN_ROUTE_INTERNAL_ERROR";
+    field public static final String REPLAN_ROUTE_INTERRUPTED = "REPLAN_ROUTE_INTERRUPTED";
+  }
+
+  public static final class ReplanRouteError.Companion {
+  }
+
+  @StringDef({com.mapbox.navigation.core.ReplanRouteError.REPLAN_ROUTE_ERROR, com.mapbox.navigation.core.ReplanRouteError.REPLAN_ROUTE_INTERRUPTED}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface ReplanRouteError.ReplanRouteErrorType {
+  }
+
+  @UiThread @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public interface ReplanRoutesCallback {
+    method public void onFailure(com.mapbox.navigation.core.ReplanRouteError failure);
+    method public void onNewRoutes(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes, @com.mapbox.navigation.base.route.RouterOrigin String routerOrigin);
   }
 
   public interface RoadGraphDataUpdateCallback {
@@ -274,7 +296,7 @@ package com.mapbox.navigation.core.adas {
     property public final Integer? value;
   }
 
-  public final class AdasRoadItemLocation {
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasRoadItemLocation {
     field public static final int ABOVE = 2; // 0x2
     field public static final int ABOVE_LANE = 4; // 0x4
     field public static final com.mapbox.navigation.core.adas.AdasRoadItemLocation INSTANCE;
@@ -295,7 +317,7 @@ package com.mapbox.navigation.core.adas {
     property public final float shapeIndex;
   }
 
-  public final class AdasRoadItemType {
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasRoadItemType {
     field public static final int CARRIAGEWAY_NARROWS_LEFT_SIGN = 33; // 0x21
     field public static final int CARRIAGEWAY_NARROWS_RIGHT_SIGN = 32; // 0x20
     field public static final int CARRIAGEWAY_NARROWS_SIGN = 31; // 0x1f

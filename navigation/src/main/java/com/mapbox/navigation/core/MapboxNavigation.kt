@@ -94,6 +94,10 @@ import com.mapbox.navigation.core.reroute.RerouteController.RerouteStateObserver
 import com.mapbox.navigation.core.reroute.RerouteOptionsAdapter
 import com.mapbox.navigation.core.reroute.RerouteResult
 import com.mapbox.navigation.core.reroute.RerouteState
+import com.mapbox.navigation.core.reroute.RerouteState.Failed
+import com.mapbox.navigation.core.reroute.RerouteState.FetchingRoute
+import com.mapbox.navigation.core.reroute.RerouteState.Interrupted
+import com.mapbox.navigation.core.reroute.RerouteState.RouteFetched
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesControllerProvider
@@ -1712,6 +1716,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * In case of successful route replan, you will receive new routes in [RoutesObserver] with
      * [RoutesUpdatedResult.reason] equals to [RoutesExtra.ROUTES_UPDATE_REASON_REROUTE].
      *
+     * Alternatively, you can pass a [ReplanRoutesCallback] parameter to receive the result of the
+     * rerouting for once. Keep in mind that the callback will be called on the main thread.
+     *
      * Route options are supposed to be updated by [RerouteOptionsAdapter]. Implement
      * your [RerouteOptionsAdapter] so that it updates all route options
      * which users can modify during active guidance. Set your [RerouteOptionsAdapter]
@@ -1724,14 +1731,30 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      *
      * This method does nothing if rerouting is disabled. See [isRerouteEnabled] to check
      * if rerouting is enabled and [setRerouteEnabled] to turn off/on rerouting.
+     *
+     * @param resultCallback optional [ReplanRoutesCallback] to receive the result of the rerouting.
      */
     @ExperimentalPreviewMapboxNavigationAPI
-    fun replanRoute() {
-        rerouteController?.rerouteOnParametersChange {
-            internalSetNavigationRoutes(
-                it.routes,
-                SetRoutes.Reroute(it.initialLegIndex),
-            )
+    @JvmOverloads
+    fun replanRoute(resultCallback: ReplanRoutesCallback? = null) {
+        rerouteController?.let { controller ->
+            // Interrupt any already existing ongoing rerouting requests to prevent unexpected states.
+            if (rerouteController?.state == FetchingRoute) controller.interrupt()
+
+            val rerouteStateObserver = createSingleUseRerouteObserver(resultCallback)
+            rerouteStateObserver?.let {
+                rerouteController?.registerRerouteStateObserver(rerouteStateObserver)
+            }
+
+            controller.rerouteOnParametersChange { result ->
+                // Unregister the temporary observer if it's available.
+                rerouteStateObserver?.let { observer ->
+                    rerouteController?.unregisterRerouteStateObserver(observer)
+                }
+
+                // When the controller gets a new route, handle the result.
+                handleReplanResult(result, resultCallback)
+            }
         }
     }
 
@@ -2400,6 +2423,77 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private fun updateRoutes(suggestion: UpdateRouteSuggestion) {
         setNavigationRoutes(suggestion.newRoutes)
+    }
+
+    private fun handleReplanResult(result: RerouteResult, callback: ReplanRoutesCallback?) {
+        internalSetNavigationRoutes(
+            routes = result.routes,
+            setRoutesInfo = SetRoutes.Reroute(result.initialLegIndex),
+        ) { routesSetResult ->
+            if (callback == null) return@internalSetNavigationRoutes
+
+            routesSetResult.onValue {
+                logI(LOG_CATEGORY) {
+                    "Updating the caller of the new routes using the passed callback instance."
+                }
+                callback.onNewRoutes(result.routes, result.origin)
+            }.onError { error ->
+                logE(LOG_CATEGORY) {
+                    "Updating the caller of the error using the passed callback instance."
+                }
+                callback.onFailure(
+                    ReplanRouteError(
+                        ReplanRouteError.REPLAN_ROUTE_ERROR,
+                        error.message,
+                    ),
+                )
+            }
+        }
+    }
+
+    private fun createSingleUseRerouteObserver(
+        callback: ReplanRoutesCallback?,
+    ): RerouteStateObserver? {
+        if (isRerouteEnabled().not() || callback == null) return null
+
+        return object : RerouteStateObserver {
+            override fun onRerouteStateChanged(rerouteState: RerouteState) {
+                when (rerouteState) {
+                    Interrupted -> {
+                        // If the reroute is interrupted, notify the callback and unregister.
+                        rerouteController?.unregisterRerouteStateObserver(this)
+                        logI(LOG_CATEGORY) {
+                            "Updating the caller of the interruption using the passed callback" +
+                                " instance."
+                        }
+                        callback.onFailure(
+                            ReplanRouteError(
+                                ReplanRouteError.REPLAN_ROUTE_INTERRUPTED,
+                                "Reroute was interrupted.",
+                            ),
+                        )
+                    }
+
+                    is Failed -> {
+                        // If the reroute fails, notify the callback and unregister.
+                        rerouteController?.unregisterRerouteStateObserver(this)
+                        logE(LOG_CATEGORY) {
+                            "Updating the caller of the error using the passed callback instance."
+                        }
+                        callback.onFailure(
+                            ReplanRouteError(
+                                ReplanRouteError.REPLAN_ROUTE_ERROR,
+                                rerouteState.message,
+                            ),
+                        )
+                    }
+
+                    FetchingRoute, RerouteState.Idle, is RouteFetched -> {
+                        // No-op as these states are handled elsewhere.
+                    }
+                }
+            }
+        }
     }
 
     private companion object {

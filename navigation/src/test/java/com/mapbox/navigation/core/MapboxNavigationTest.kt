@@ -38,6 +38,7 @@ import com.mapbox.navigation.core.internal.telemetry.unregisterUserFeedbackObser
 import com.mapbox.navigation.core.navigator.CacheHandleWrapper
 import com.mapbox.navigation.core.preview.RoutesPreview
 import com.mapbox.navigation.core.reroute.InternalRerouteController
+import com.mapbox.navigation.core.reroute.InternalRerouteController.RoutesCallback
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteResult
 import com.mapbox.navigation.core.reroute.RerouteState
@@ -2089,6 +2090,152 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         verify(exactly = 0) {
             defaultRerouteController.reroute(any<RerouteController.RoutesCallback>())
         }
+    }
+
+    @Test
+    fun `receive the new replaned route inside the ReplanRoutesCallback when passed and successful routes found`() {
+        // Arrange
+        createMapboxNavigation()
+        var receivedRoutes: List<NavigationRoute>? = null
+        var receivedRoutesOrigin = ""
+        val rerouteResult =
+            RerouteResult(routes = emptyList(), initialLegIndex = 0, origin = "Online")
+        every { defaultRerouteController.rerouteOnParametersChange(any()) } answers {
+            (firstArg() as RoutesCallback).onNewRoutes(rerouteResult)
+        }
+        mapboxNavigation.setRerouteEnabled(true)
+
+        // Act
+        mapboxNavigation.replanRoute(
+            object : ReplanRoutesCallback {
+                override fun onNewRoutes(
+                    routes: List<NavigationRoute>,
+                    routerOrigin: String,
+                ) {
+                    receivedRoutes = routes
+                    receivedRoutesOrigin = routerOrigin
+                }
+
+                override fun onFailure(failure: ReplanRouteError) {
+                    // no-op
+                }
+            },
+        )
+
+        // Assert
+        verify { defaultRerouteController.rerouteOnParametersChange(any()) }
+        assertEquals(rerouteResult.routes, receivedRoutes)
+        assertEquals(rerouteResult.origin, receivedRoutesOrigin)
+    }
+
+    @Test
+    fun `receive a failure inside the ReplanRoutesCallback when passed and no routes found`() {
+        // Arrange
+        createMapboxNavigation()
+        val newRouteErrorMessage = "Failed to set routes on purpose"
+        var receivedRoutes: List<NavigationRoute>? = null
+        var receivedFailureType = ""
+        var receivedFailureReasonMessage = ""
+        val rerouteResult =
+            RerouteResult(routes = emptyList(), initialLegIndex = 0, origin = "Online")
+
+        every { defaultRerouteController.rerouteOnParametersChange(any()) } answers {
+            (firstArg() as RoutesCallback).onNewRoutes(rerouteResult)
+        }
+        coEvery { tripSession.setRoutes(any(), any()) } returns
+            NativeSetRouteError(error = newRouteErrorMessage)
+
+        mapboxNavigation.setRerouteEnabled(true)
+
+        // Act
+        mapboxNavigation.replanRoute(
+            object : ReplanRoutesCallback {
+                override fun onNewRoutes(
+                    routes: List<NavigationRoute>,
+                    routerOrigin: String,
+                ) {
+                    receivedRoutes = routes
+                }
+
+                override fun onFailure(failure: ReplanRouteError) {
+                    receivedFailureType = failure.errorType
+                    receivedFailureReasonMessage = failure.message
+                }
+            },
+        )
+
+        // Assert
+        verify { defaultRerouteController.rerouteOnParametersChange(any()) }
+        verify(exactly = 1) { defaultRerouteController.interrupt() }
+        assertNull(receivedRoutes)
+        assertEquals(newRouteErrorMessage, receivedFailureReasonMessage)
+        assertEquals(ReplanRouteError.REPLAN_ROUTE_ERROR, receivedFailureType)
+    }
+
+    @Test
+    fun `interrupt any already ongoing rerouting requests when a replanRoute call is made`() {
+        // Arrange
+        every { defaultRerouteController.state } returns RerouteState.FetchingRoute
+        createMapboxNavigation()
+        mapboxNavigation.setRerouteEnabled(true)
+
+        // Act
+        mapboxNavigation.replanRoute(
+            object : ReplanRoutesCallback {
+                override fun onNewRoutes(
+                    routes: List<NavigationRoute>,
+                    routerOrigin: String,
+                ) {
+                    // no-op
+                }
+
+                override fun onFailure(failure: ReplanRouteError) {
+                    // no-op
+                }
+            },
+        )
+
+        // Assert
+        verify(exactly = 1) { defaultRerouteController.interrupt() }
+    }
+
+    @Test
+    fun `don't create a RerouteStateObserver when setRerouteEnabled is disabled`() {
+        // Arrange
+        createMapboxNavigation()
+        val newRouteErrorMessage = "Failed to set routes on purpose"
+        var receivedRoutes: List<NavigationRoute>? = null
+        var receivedFailureReasonMessage: String? = null
+        val rerouteResult =
+            RerouteResult(routes = emptyList(), initialLegIndex = 0, origin = "Online")
+        every { defaultRerouteController.rerouteOnParametersChange(any()) } answers {
+            (firstArg() as RoutesCallback).onNewRoutes(rerouteResult)
+        }
+        coEvery { tripSession.setRoutes(any(), any()) } returns
+            NativeSetRouteError(error = newRouteErrorMessage)
+
+        mapboxNavigation.setRerouteEnabled(false)
+
+        // Act
+        mapboxNavigation.replanRoute(
+            object : ReplanRoutesCallback {
+                override fun onNewRoutes(
+                    routes: List<NavigationRoute>,
+                    routerOrigin: String,
+                ) {
+                    receivedRoutes = routes
+                }
+
+                override fun onFailure(failure: ReplanRouteError) {
+                    receivedFailureReasonMessage = failure.message
+                }
+            },
+        )
+
+        // Assert
+        verify(exactly = 0) { defaultRerouteController.rerouteOnParametersChange { any() } }
+        assertNull(receivedRoutes)
+        assertNull(receivedFailureReasonMessage)
     }
 
     @Test
