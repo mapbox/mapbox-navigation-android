@@ -117,13 +117,13 @@ object RouteLayerConstants {
     internal val ROUTE_LOW_TRAFFIC_COLOR = Color.parseColor("#56A8FB")
 
     @ColorInt
-    internal val ROUTE_MODERATE_TRAFFIC_COLOR = Color.parseColor("#ff9500")
+    internal val ROUTE_MODERATE_TRAFFIC_COLOR = Color.parseColor("#F5C32E")
 
     @ColorInt
-    internal val ROUTE_HEAVY_TRAFFIC_COLOR = Color.parseColor("#ff4d4d")
+    internal val ROUTE_HEAVY_TRAFFIC_COLOR = Color.parseColor("#F54724")
 
     @ColorInt
-    internal val ROUTE_SEVERE_TRAFFIC_COLOR = Color.parseColor("#8f2447")
+    internal val ROUTE_SEVERE_TRAFFIC_COLOR = Color.parseColor("#C32828")
 
     @ColorInt
     internal val ROUTE_LEG_INACTIVE_UNKNOWN_TRAFFIC_COLOR = Color.TRANSPARENT
