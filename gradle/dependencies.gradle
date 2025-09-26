@@ -8,7 +8,7 @@ ext {
       carMinSdkVersion        : 23
   ]
 
-  def mapboxSdkVersionSuffix = '16.0-SNAPSHOT-09-24--11-23.git-589d51c'
+  def mapboxSdkVersionSuffix = '16.0-beta.1'
 
   def ndkVersionSuffix = ""
   if (project.hasProperty("ndkMajor")) {
