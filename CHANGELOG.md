@@ -1,5 +1,35 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.16.0-beta.1 - 26 September, 2025
+#### Notes
+3.16.x is the next version after 3.12.x. For technical reasons, versions 3.13.x, 3.14.x and 3.15.x are skipped. Starting from 3.16.x, the Nav SDK minor version will be aligned with other Mapbox dependencies.
+
+#### Features
+- Added `AdasEdgeAttributes#isBuiltUpArea` and `AdasEdgeAttributes#roadItems` properties. 
+- Added a new `RoadObjectMatcherOptions` class that configures the road object matching behavior. Available through the `NavigationOptions` class. 
+- Added `RouteCalloutUiStateProvider` class that allows to listen to Route Callout UI data. 
+Normally, route callouts are drawn under the hood in NavSDK when this feature is enabled in `MapboxRouteLineApiOptions`.
+However, there might be cases when app wants to only get the callout data from NavSDK and attach the DVA itself.
+An example of such a case is using Mapbox Maps SDK Compose extensions: attaching a DVA for
+Compose MapboxMap is done via [compose-specific API](https://docs.mapbox.com/android/maps/examples/compose/dynamic-view-annotations/),
+which is not currently supported by NavSDK.
+In this case you may listen to `RouteCalloutUiStateData` updates via `RouteCalloutUiStateProvider` and use its information by attach a DVA.
+- Added experimental overloads for `MapboxManeuverApi#getRoadShields` and `MapboxRouteShieldApi#getRouteShields` that accept a `ShieldFontConfig` parameter, enabling custom font selection for route shields. 
+- Added experimental `MapboxNavigationSVGExternalFileResolver` that can resolve fonts for SVG rendering from assets or use system fonts. 
+- Updated `MapboxNavigation.replanRoute()` to now accept a new optional parameter of type `ReplanRoutesCallback`. 
+
+#### Bug fixes and improvements
+- Fix the bug that causes road cameras on alternative routes to be marked as passed but not removed from the map. 
+- Fixed the incorrect order of callbacks when notifying about road cameras on the route. 
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.16.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.16.0-beta.1))
+- Mapbox Navigation Native `v324.16.0-beta.1`
+- Mapbox Core Common `v24.16.0-beta.1`
+- Mapbox Java `v7.8.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.8.0))
+
+
 ## Navigation SDK Core Framework 3.12.0-beta.1 - 15 August, 2025
 #### Features
 - Added ability to filter by data source in EV charging station search operations. 
