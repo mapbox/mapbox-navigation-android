@@ -1,5 +1,23 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.12.1 - 29 September, 2025
+#### Features
+
+
+#### Bug fixes and improvements
+- Fix the bug that causes road cameras on alternative routes to be marked as passed but not removed from the map. 
+- Further improve DR stability (better recovery with good GNSS and less wheel speed filtering).
+- Add support of per-level routing tiles compression settings.
+- Address a bug with missing alternatives on multi-leg routes.
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.15.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.15.1))
+- Mapbox Navigation Native `v324.15.1`
+- Mapbox Core Common `v24.15.1`
+- Mapbox Java `v7.8.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.8.0))
+
+
 ## Navigation SDK Core Framework 3.12.0 - 12 September, 2025
 #### Features
 - Expose PredictiveCacheLocationOptions.loadPredictiveCacheForAlternativeRoutes property 
