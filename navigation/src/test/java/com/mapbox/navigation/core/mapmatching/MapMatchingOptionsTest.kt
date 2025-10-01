@@ -115,6 +115,9 @@ class MapMatchingOptionsTest {
         assertNull(
             httpUrl.queryParameter("openlr_format"),
         )
+        assertNull(
+            httpUrl.queryParameter("voice_units"),
+        )
     }
 
     @Test
@@ -380,6 +383,22 @@ class MapMatchingOptionsTest {
         assertEquals(
             "true",
             httpUrl.queryParameter("voice_instructions"),
+        )
+    }
+
+    @Test
+    fun `voice units metric`() {
+        val options = createOptionsBuilderWithRequiredParams()
+            .voiceInstructions(true)
+            .voiceUnits(MapMatchingExtras.VOICE_UNITS_METRIC)
+            .build()
+
+        val url = options.toURL("***")
+
+        val httpUrl = url.toHttpUrl()
+        assertEquals(
+            "metric",
+            httpUrl.queryParameter("voice_units"),
         )
     }
 

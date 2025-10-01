@@ -32,6 +32,7 @@ import java.net.URLEncoder
  * @param ignore defines defines certain routing restrictions to ignore when map matching.
  * @param openlrSpec defines the logical format for OpenLR encoded [coordinates].
  * @param openlrFormat defines binary format for OpenLR encoded coordinates.
+ * @param voiceUnits defines units for voice instructions.
  */
 @ExperimentalPreviewMapboxNavigationAPI
 class MapMatchingOptions private constructor(
@@ -54,6 +55,8 @@ class MapMatchingOptions private constructor(
     val ignore: List<String>?,
     val openlrSpec: String?,
     val openlrFormat: String?,
+    @MapMatchingVoiceUnits
+    val voiceUnits: String?,
 ) {
     /**
      * Compares if options are the same
@@ -81,6 +84,7 @@ class MapMatchingOptions private constructor(
         if (ignore != other.ignore) return false
         if (openlrSpec != other.openlrSpec) return false
         if (openlrFormat != other.openlrFormat) return false
+        if (voiceUnits != other.voiceUnits) return false
 
         return true
     }
@@ -106,6 +110,7 @@ class MapMatchingOptions private constructor(
         result = 31 * result + (ignore?.hashCode() ?: 0)
         result = 31 * result + (openlrSpec?.hashCode() ?: 0)
         result = 31 * result + (openlrFormat?.hashCode() ?: 0)
+        result = 31 * result + (voiceUnits?.hashCode() ?: 0)
         return result
     }
 
@@ -130,7 +135,8 @@ class MapMatchingOptions private constructor(
             "waypointNames=$waypointNames, " +
             "ignore=$ignore, " +
             "openlrSpec=$openlrSpec, " +
-            "openlrFormat=$openlrFormat" +
+            "openlrFormat=$openlrFormat, " +
+            "voiceUnits=$voiceUnits" +
             ")"
     }
 
@@ -155,6 +161,7 @@ class MapMatchingOptions private constructor(
         private var ignore: List<String>? = null
         private var openlrSpec: String? = null
         private var openlrFormat: String? = null
+        private var voiceUnits: String? = null
 
         /**
          * Required parameter.
@@ -353,6 +360,17 @@ class MapMatchingOptions private constructor(
         }
 
         /**
+         * Optional parameter.
+         * @param voiceUnits defines units for voice instructions.
+         * Must be used with [voiceInstructions] set to true.
+         * @return this [Builder]
+         */
+        fun voiceUnits(@MapMatchingVoiceUnits voiceUnits: String?): Builder {
+            this.voiceUnits = voiceUnits
+            return this
+        }
+
+        /**
          * Builds [MapMatchingOptions] based on provided values.
          */
         @Throws(MapMatchingRequiredParameterError::class)
@@ -378,6 +396,7 @@ class MapMatchingOptions private constructor(
                 ignore = ignore,
                 openlrSpec = openlrSpec,
                 openlrFormat = openlrFormat,
+                voiceUnits = voiceUnits,
             )
         }
 
@@ -408,6 +427,7 @@ class MapMatchingOptions private constructor(
             openlrSpec.toParam("openlr_spec"),
             openlrFormat.toParam("openlr_format"),
             tidy.toParam("tidy"),
+            voiceUnits.toParam("voice_units"),
         )
             .joinToString(
                 prefix = prefix,
