@@ -148,6 +148,9 @@ class NavigatorMapperTest {
                     every { matches } returns listOf(
                         mockk {
                             every { proba } returns 1f
+                            every { position } returns mockk {
+                                every { edgeId } returns 0L
+                            }
                         },
                     )
                 }
@@ -171,6 +174,7 @@ class NavigatorMapperTest {
                 com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD,
             ),
             roadEdgeMatchProbability = 1f,
+            roadEdgeId = 0L,
             zLevel = null,
             road = road,
             isDegradedMapMatching = false,
@@ -198,6 +202,9 @@ class NavigatorMapperTest {
                     every { matches } returns listOf(
                         mockk {
                             every { proba } returns 1f
+                            every { position } returns mockk {
+                                every { edgeId } returns 0L
+                            }
                         },
                     )
                 }
@@ -221,6 +228,7 @@ class NavigatorMapperTest {
                 com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD,
             ),
             roadEdgeMatchProbability = 1f,
+            roadEdgeId = 0L,
             zLevel = null,
             road = road,
             isDegradedMapMatching = false,
@@ -248,6 +256,9 @@ class NavigatorMapperTest {
                     every { matches } returns listOf(
                         mockk {
                             every { proba } returns 1f
+                            every { position } returns mockk {
+                                every { edgeId } returns 0L
+                            }
                         },
                     )
                 }
@@ -271,6 +282,7 @@ class NavigatorMapperTest {
                 com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD,
             ),
             roadEdgeMatchProbability = 1f,
+            roadEdgeId = 0L,
             zLevel = null,
             road = road,
             isDegradedMapMatching = true,
@@ -298,6 +310,9 @@ class NavigatorMapperTest {
                     every { matches } returns listOf(
                         mockk {
                             every { proba } returns 1f
+                            every { position } returns mockk {
+                                every { edgeId } returns 0L
+                            }
                         },
                     )
                 }
@@ -321,6 +336,7 @@ class NavigatorMapperTest {
                 com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD,
             ),
             roadEdgeMatchProbability = 1f,
+            roadEdgeId = 0L,
             zLevel = null,
             road = road,
             isDegradedMapMatching = false,
@@ -368,6 +384,7 @@ class NavigatorMapperTest {
                 com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD,
             ),
             roadEdgeMatchProbability = 0f,
+            roadEdgeId = null,
             zLevel = null,
             road = road,
             isDegradedMapMatching = false,
@@ -395,6 +412,9 @@ class NavigatorMapperTest {
                     every { matches } returns listOf(
                         mockk {
                             every { proba } returns 1f
+                            every { position } returns mockk {
+                                every { edgeId } returns 0L
+                            }
                         },
                     )
                 }
@@ -418,6 +438,7 @@ class NavigatorMapperTest {
                 com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD,
             ),
             roadEdgeMatchProbability = 1f,
+            roadEdgeId = 0L,
             zLevel = 2,
             road = road,
             isDegradedMapMatching = false,
@@ -445,6 +466,9 @@ class NavigatorMapperTest {
                     every { matches } returns listOf(
                         mockk {
                             every { proba } returns 1f
+                            every { position } returns mockk {
+                                every { edgeId } returns 0L
+                            }
                         },
                     )
                 }
@@ -468,6 +492,7 @@ class NavigatorMapperTest {
                 com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD,
             ),
             roadEdgeMatchProbability = 1f,
+            roadEdgeId = 0L,
             zLevel = null,
             road = road,
             isDegradedMapMatching = false,
@@ -504,6 +529,9 @@ class NavigatorMapperTest {
                     every { matches } returns listOf(
                         mockk {
                             every { proba } returns 1f
+                            every { position } returns mockk {
+                                every { edgeId } returns 0L
+                            }
                         },
                     )
                 }
@@ -527,6 +555,7 @@ class NavigatorMapperTest {
                 com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD,
             ),
             roadEdgeMatchProbability = 1f,
+            roadEdgeId = 0L,
             zLevel = null,
             road = road,
             isDegradedMapMatching = false,
@@ -556,6 +585,9 @@ class NavigatorMapperTest {
                     every { matches } returns listOf(
                         mockk {
                             every { proba } returns 1f
+                            every { position } returns mockk {
+                                every { edgeId } returns 0L
+                            }
                         },
                     )
                 }
@@ -579,6 +611,7 @@ class NavigatorMapperTest {
                 com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD,
             ),
             roadEdgeMatchProbability = 1f,
+            roadEdgeId = 0L,
             zLevel = null,
             road = road,
             isDegradedMapMatching = false,
@@ -590,6 +623,62 @@ class NavigatorMapperTest {
         val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints, road)
 
         assertEquals(expected, result)
+    }
+
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
+    @Test
+    fun `location matcher result with roadEdgeId`() {
+        val road: Road = RoadFactory.buildRoadObject(navigationStatus)
+        val edgeId = 123456789L
+        val tripStatus = TripStatus(
+            route,
+            mockk {
+                every { offRoadProba } returns 0f
+                every { speedLimit } returns createSpeedLimit()
+                every { mapMatcherOutput } returns mockk {
+                    every { isTeleport } returns false
+                    every { matches } returns listOf(
+                        mockk {
+                            every { proba } returns 1f
+                            every { position } returns mockk {
+                                every { this@mockk.edgeId } returns edgeId
+                            }
+                        },
+                    )
+                }
+                every { layer } returns null
+                every { roads } returns listOf(roadName)
+                every { isFallback } returns false
+                every { inTunnel } returns false
+                every { correctedLocationData } returns null
+                every { isAdasDataAvailable } returns null
+            },
+        )
+        val expected = LocationMatcherResult(
+            enhancedLocation,
+            keyPoints,
+            isOffRoad = false,
+            offRoadProbability = 0f,
+            isTeleport = false,
+            speedLimitInfo = SpeedLimitInfoFactory.createSpeedLimitInfo(
+                10,
+                SpeedUnit.KILOMETERS_PER_HOUR,
+                com.mapbox.navigation.base.speed.model.SpeedLimitSign.MUTCD,
+            ),
+            roadEdgeMatchProbability = 1f,
+            roadEdgeId = edgeId,
+            zLevel = null,
+            road = road,
+            isDegradedMapMatching = false,
+            inTunnel = false,
+            correctedLocationData = null,
+            isAdasDataAvailable = null,
+        )
+
+        val result = tripStatus.getLocationMatcherResult(enhancedLocation, keyPoints, road)
+
+        assertEquals(expected, result)
+        assertEquals(edgeId, result.roadEdgeId)
     }
 
     @Test
