@@ -62,6 +62,21 @@ object MapMatchingExtras {
      * 	Based on TomTom OpenLR location references.
      */
     const val OPENLR_FORMAT_TOMTOM = "tomtom"
+
+    /**
+     * Voice units: imperial (default)
+     */
+    const val VOICE_UNITS_IMPERIAL = "imperial"
+
+    /**
+     * Voice units: british imperial
+     */
+    const val VOICE_UNITS_BRITISH_IMPERIAL = "british_imperial"
+
+    /**
+     * Voice units: metric
+     */
+    const val VOICE_UNITS_METRIC = "metric"
 }
 
 /**
@@ -110,3 +125,15 @@ annotation class MapMatchingOpenLRSpec
     MapMatchingExtras.OPENLR_FORMAT_TOMTOM,
 )
 annotation class MapMatchingOpenLRFormat
+
+/**
+ * Supported voice units.
+ * @see [MapMatchingOptions.Builder.voiceUnits]
+ */
+@Retention(AnnotationRetention.BINARY)
+@StringDef(
+    MapMatchingExtras.VOICE_UNITS_IMPERIAL,
+    MapMatchingExtras.VOICE_UNITS_BRITISH_IMPERIAL,
+    MapMatchingExtras.VOICE_UNITS_METRIC,
+)
+annotation class MapMatchingVoiceUnits
