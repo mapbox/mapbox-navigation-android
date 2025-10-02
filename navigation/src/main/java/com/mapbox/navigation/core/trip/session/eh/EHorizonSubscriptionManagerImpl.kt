@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.trip.session.eh
 
 import com.mapbox.navigation.base.internal.factory.EHorizonFactory
+import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.trip.model.eh.EHorizonPosition
 import com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfo
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
@@ -47,17 +48,19 @@ internal class EHorizonSubscriptionManagerImpl(
             distances: MutableList<com.mapbox.navigator.RoadObjectDistance>,
         ) {
             mainJobController.scope.launch {
-                val eHorizonPosition = EHorizonFactory.buildEHorizonPosition(position)
-                val eHorizonDistances = mutableListOf<RoadObjectDistanceInfo>()
-                distances.forEach {
-                    eHorizonDistances.add(EHorizonFactory.buildRoadObjectDistance(it))
-                }
+                PerformanceTracker.trackPerformanceSync("EHorizon.onPositionUpdated") {
+                    val eHorizonPosition = EHorizonFactory.buildEHorizonPosition(position)
+                    val eHorizonDistances = mutableListOf<RoadObjectDistanceInfo>()
+                    distances.forEach {
+                        eHorizonDistances.add(EHorizonFactory.buildRoadObjectDistance(it))
+                    }
 
-                currentPosition = eHorizonPosition
-                currentDistances = eHorizonDistances
+                    currentPosition = eHorizonPosition
+                    currentDistances = eHorizonDistances
 
-                notifyAllObservers {
-                    onPositionUpdated(eHorizonPosition, eHorizonDistances)
+                    notifyAllObservers {
+                        onPositionUpdated(eHorizonPosition, eHorizonDistances)
+                    }
                 }
             }
         }
@@ -138,8 +141,10 @@ internal class EHorizonSubscriptionManagerImpl(
 
     private fun notifyAllObservers(action: suspend EHorizonObserver.() -> Unit) {
         mainJobController.scope.launch {
-            eHorizonObservers.forEach {
-                it.action()
+            PerformanceTracker.trackPerformanceSync("EHorizon.notifyAllObservers") {
+                eHorizonObservers.forEach {
+                    it.action()
+                }
             }
         }
     }
