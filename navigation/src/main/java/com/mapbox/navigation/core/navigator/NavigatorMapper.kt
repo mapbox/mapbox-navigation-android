@@ -276,6 +276,7 @@ internal fun TripStatus.getLocationMatcherResult(
     keyPoints: List<Location>,
     road: Road,
 ): LocationMatcherResult {
+    val firstMatch = navigationStatus.mapMatcherOutput.matches.firstOrNull()
     return LocationMatcherResult(
         enhancedLocation = enhancedLocation,
         keyPoints = keyPoints,
@@ -283,8 +284,8 @@ internal fun TripStatus.getLocationMatcherResult(
         offRoadProbability = navigationStatus.offRoadProba,
         isTeleport = navigationStatus.mapMatcherOutput.isTeleport,
         speedLimitInfo = navigationStatus.prepareSpeedLimitInfo(),
-        roadEdgeMatchProbability = navigationStatus.mapMatcherOutput.matches.firstOrNull()?.proba
-            ?: 0f,
+        roadEdgeMatchProbability = firstMatch?.proba ?: 0f,
+        roadEdgeId = firstMatch?.position?.edgeId,
         zLevel = navigationStatus.layer,
         road = road,
         isDegradedMapMatching = navigationStatus.isFallback,

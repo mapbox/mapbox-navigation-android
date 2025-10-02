@@ -1386,6 +1386,7 @@ package com.mapbox.navigation.core.trip.session {
     method public java.util.List<com.mapbox.common.location.Location> getKeyPoints();
     method public float getOffRoadProbability();
     method public com.mapbox.navigation.base.road.model.Road getRoad();
+    method public Long? getRoadEdgeId();
     method public float getRoadEdgeMatchProbability();
     method public com.mapbox.navigation.base.speed.model.SpeedLimitInfo getSpeedLimitInfo();
     method public Integer? getZLevel();
@@ -1403,6 +1404,7 @@ package com.mapbox.navigation.core.trip.session {
     property public final java.util.List<com.mapbox.common.location.Location> keyPoints;
     property public final float offRoadProbability;
     property public final com.mapbox.navigation.base.road.model.Road road;
+    property public final Long? roadEdgeId;
     property public final float roadEdgeMatchProbability;
     property public final com.mapbox.navigation.base.speed.model.SpeedLimitInfo speedLimitInfo;
     property public final Integer? zLevel;
