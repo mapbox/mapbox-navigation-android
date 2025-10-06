@@ -8,7 +8,10 @@ ext {
       carMinSdkVersion        : 23
   ]
 
+  // Release Train depends on these two lines below
+  // https://github.com/mapbox/release-train/blob/bd530da200d62fb45166ef91d7d892d90a453fa6/backend/model/step/navcoreandroid/PrepareChangelogNavCore.py#L122-L124
   def mapboxSdkVersionSuffix = '16.0-SNAPSHOT-10-02--08-51.git-df62a11'
+  def mapboxNavigatorVersion = "324.${mapboxSdkVersionSuffix}"
 
   def ndkVersionSuffix = ""
   if (project.hasProperty("ndkMajor")) {
@@ -16,22 +19,10 @@ ext {
     println("Building with NDK version suffix: " + ndkVersionSuffix)
   }
 
-  // Navigation Native CI can run SDK CI downstream with forced Navigation Native version
-  // in this case `FORCE_MAPBOX_NAVIGATION_NATIVE_VERSION` environment variable will contain
-  // version which we should use in this build
-  def mapboxNavigatorVersion = System.getenv("FORCE_MAPBOX_NAVIGATION_NATIVE_VERSION")
-  if (mapboxNavigatorVersion == null || mapboxNavigatorVersion == '') {
-      mapboxNavigatorVersion = "324.${mapboxSdkVersionSuffix}"
-  }
-  if (!project.hasProperty("hasPrintedNavigatorVersion")) {
-    println("Navigation Native version: " + mapboxNavigatorVersion)
-    project.ext.hasPrintedNavigatorVersion = true
-  }
-
   version = [
       mapboxMapSdk              : "11.${mapboxSdkVersionSuffix}",
       mapboxSdkServices         : "7.8.0",
-      mapboxNavigator           : "${mapboxNavigatorVersion}",
+      mapboxNavigator           : mapboxNavigatorVersion,
       mapboxCommonNative        : "24.${mapboxSdkVersionSuffix}",
       mapboxNavSdkCpp           : "0.${mapboxSdkVersionSuffix}",
       mapboxSearch              : "2.${mapboxSdkVersionSuffix}",
