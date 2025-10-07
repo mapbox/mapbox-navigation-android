@@ -1,0 +1,349 @@
+{
+  "routes": [
+    {
+      "weight_name": "bicycle",
+      "weight": 100.91,
+      "duration": 34.285,
+      "distance": 175.423,
+      "legs": [
+        {
+          "via_waypoints": [],
+          "annotation": {
+            "current_speed": [
+              22,
+              22,
+              22,
+              26,
+              26,
+              26,
+              26
+            ],
+            "congestion": [
+              "unknown",
+              "unknown",
+              "unknown",
+              "unknown",
+              "unknown",
+              "unknown",
+              "unknown"
+            ],
+            "speed": [
+              5.1,
+              5.1,
+              5.1,
+              4.9,
+              5.1,
+              6.1,
+              6.1
+            ],
+            "historical_speed": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            "duration": [
+              13.214,
+              0.433,
+              2.362,
+              4.676,
+              8.818,
+              3.98,
+              0.806
+            ]
+          },
+          "admins": [
+            {
+              "iso_3166_1_alpha3": "USA",
+              "iso_3166_1": "US"
+            }
+          ],
+          "weight": 100.91,
+          "duration": 34.285,
+          "steps": [
+            {
+              "bannerInstructions": [
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "Pennsylvania Avenue Northwest"
+                      }
+                    ],
+                    "type": "turn",
+                    "modifier": "right",
+                    "text": "Pennsylvania Avenue Northwest"
+                  },
+                  "distanceAlongGeometry": 82.269
+                }
+              ],
+              "intersections": [
+                {
+                  "entry": [
+                    true
+                  ],
+                  "bearings": [
+                    0
+                  ],
+                  "duration": 13.644,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 45.781,
+                  "geometry_index": 0,
+                  "location": [
+                    -77.031957,
+                    38.894721
+                  ]
+                },
+                {
+                  "bearings": [
+                    1,
+                    93,
+                    180,
+                    273
+                  ],
+                  "entry": [
+                    true,
+                    false,
+                    false,
+                    false
+                  ],
+                  "in": 2,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "geometry_index": 2,
+                  "location": [
+                    -77.031953,
+                    38.895351
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "depart",
+                "instruction": "Bike north on 14th Street Northwest.",
+                "bearing_after": 0,
+                "bearing_before": 0,
+                "location": [
+                  -77.031957,
+                  38.894721
+                ]
+              },
+              "name": "14th Street Northwest",
+              "duration": 16.005,
+              "distance": 82.269,
+              "driving_side": "right",
+              "weight": 53.706,
+              "mode": "cycling",
+              "geometry": "ag}diAh`t|qCce@Gg@?yEE"
+            },
+            {
+              "bannerInstructions": [
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "You will arrive at your destination"
+                      }
+                    ],
+                    "type": "arrive",
+                    "modifier": "straight",
+                    "text": "You will arrive at your destination"
+                  },
+                  "distanceAlongGeometry": 93.154
+                },
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "You have arrived at your destination"
+                      }
+                    ],
+                    "type": "arrive",
+                    "modifier": "straight",
+                    "text": "You have arrived at your destination"
+                  },
+                  "distanceAlongGeometry": 25
+                }
+              ],
+              "intersections": [
+                {
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    -77.03195,
+                    38.89546
+                  ],
+                  "geometry_index": 3,
+                  "admin_index": 0,
+                  "weight": 16.749,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 0.9,
+                  "turn_weight": 8.105,
+                  "duration": 4.676,
+                  "bearings": [
+                    0,
+                    91,
+                    181,
+                    272
+                  ],
+                  "out": 1,
+                  "in": 2,
+                  "entry": [
+                    true,
+                    true,
+                    false,
+                    false
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    false,
+                    false,
+                    false
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    90,
+                    180,
+                    271,
+                    359
+                  ],
+                  "duration": 8.818,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 19.856,
+                  "geometry_index": 4,
+                  "location": [
+                    -77.031737,
+                    38.895456
+                  ]
+                },
+                {
+                  "bearings": [
+                    89,
+                    270
+                  ],
+                  "entry": [
+                    true,
+                    false
+                  ],
+                  "in": 1,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "geometry_index": 5,
+                  "location": [
+                    -77.031214,
+                    38.895455
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "turn",
+                "instruction": "Turn right onto Pennsylvania Avenue Northwest.",
+                "modifier": "right",
+                "bearing_after": 91,
+                "bearing_before": 1,
+                "location": [
+                  -77.03195,
+                  38.89546
+                ]
+              },
+              "name": "Pennsylvania Avenue Northwest",
+              "duration": 18.28,
+              "distance": 93.154,
+              "driving_side": "right",
+              "weight": 47.204,
+              "mode": "cycling",
+              "geometry": "gu~diAz_t|qCFiL@u_@CsPVmB"
+            },
+            {
+              "bannerInstructions": [],
+              "intersections": [
+                {
+                  "bearings": [
+                    273
+                  ],
+                  "entry": [
+                    true
+                  ],
+                  "in": 0,
+                  "admin_index": 0,
+                  "geometry_index": 7,
+                  "location": [
+                    -77.030877,
+                    38.895445
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "arrive",
+                "instruction": "You have arrived at your destination.",
+                "bearing_after": 0,
+                "bearing_before": 93,
+                "location": [
+                  -77.030877,
+                  38.895445
+                ]
+              },
+              "name": "Pennsylvania Avenue Northwest",
+              "duration": 0,
+              "distance": 0,
+              "driving_side": "right",
+              "weight": 0,
+              "mode": "cycling",
+              "geometry": "it~diAx|q|qC??"
+            }
+          ],
+          "distance": 175.423,
+          "summary": "14th Street Northwest, Pennsylvania Avenue Northwest"
+        }
+      ],
+      "geometry": "ag}diAh`t|qCce@Gg@?yEEFiL@u_@CsPVmB"
+    }
+  ],
+  "waypoints": [
+    {
+      "distance": 0.031,
+      "name": "14th Street Northwest",
+      "location": [
+        -77.031957,
+        38.894721
+      ]
+    },
+    {
+      "distance": 0,
+      "name": "Pennsylvania Avenue Northwest",
+      "location": [
+        -77.030877,
+        38.895445
+      ]
+    }
+  ],
+  "code": "Ok",
+  "uuid": "5Bn_uSUL-HvHklquN5AAsLtJE5s9l-v2olcrLii-OEV_d6nJbf9p8A=="
+}

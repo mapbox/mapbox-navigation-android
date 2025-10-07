@@ -2,21 +2,21 @@
 package com.mapbox.navigation.testing.utils.routes
 
 import android.content.Context
-import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.mapbox.api.directions.v5.DirectionsCriteria.PROFILE_CYCLING
 import com.mapbox.api.directions.v5.DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
+import com.mapbox.api.directions.v5.DirectionsCriteria.PROFILE_WALKING
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.testing.R
-import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
-import com.mapbox.navigation.testing.utils.readRawFileText
 import com.mapbox.navigation.testing.ui.http.MockWebServerRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
+import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
+import com.mapbox.navigation.testing.utils.readRawFileText
 import java.net.URL
 
 object RoutesProvider {
@@ -32,10 +32,10 @@ object RoutesProvider {
             DirectionsResponse.fromJson(jsonResponse),
             listOf(
                 MockDirectionsRequestHandler(
-                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    profile = PROFILE_DRIVING_TRAFFIC,
                     jsonResponse = jsonResponse,
-                    expectedCoordinates = coordinates
-                )
+                    expectedCoordinates = coordinates,
+                ),
             ),
             coordinates,
         )
@@ -58,10 +58,10 @@ object RoutesProvider {
             DirectionsResponse.fromJson(jsonResponse),
             listOf(
                 MockDirectionsRequestHandler(
-                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    profile = PROFILE_DRIVING_TRAFFIC,
                     jsonResponse = jsonResponse,
-                    expectedCoordinates = coordinates
-                )
+                    expectedCoordinates = coordinates,
+                ),
             ),
             coordinates,
         )
@@ -78,10 +78,10 @@ object RoutesProvider {
             DirectionsResponse.fromJson(jsonResponse),
             listOf(
                 MockDirectionsRequestHandler(
-                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    profile = PROFILE_DRIVING_TRAFFIC,
                     jsonResponse = jsonResponse,
-                    expectedCoordinates = coordinates
-                )
+                    expectedCoordinates = coordinates,
+                ),
             ),
             coordinates,
         )
@@ -101,10 +101,10 @@ object RoutesProvider {
             DirectionsResponse.fromJson(jsonResponse),
             listOf(
                 MockDirectionsRequestHandler(
-                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    profile = PROFILE_DRIVING_TRAFFIC,
                     jsonResponse = jsonResponse,
-                    expectedCoordinates = coordinates
-                )
+                    expectedCoordinates = coordinates,
+                ),
             ),
             coordinates,
         )
@@ -124,10 +124,10 @@ object RoutesProvider {
             DirectionsResponse.fromJson(jsonResponse),
             listOf(
                 MockDirectionsRequestHandler(
-                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    profile = PROFILE_DRIVING_TRAFFIC,
                     jsonResponse = jsonResponse,
-                    expectedCoordinates = coordinates
-                )
+                    expectedCoordinates = coordinates,
+                ),
             ),
             coordinates,
         )
@@ -146,10 +146,10 @@ object RoutesProvider {
             DirectionsResponse.fromJson(jsonResponse),
             listOf(
                 MockDirectionsRequestHandler(
-                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    profile = PROFILE_DRIVING_TRAFFIC,
                     jsonResponse = jsonResponse,
-                    expectedCoordinates = coordinates
-                )
+                    expectedCoordinates = coordinates,
+                ),
             ),
             coordinates,
         )
@@ -168,10 +168,10 @@ object RoutesProvider {
             DirectionsResponse.fromJson(jsonResponse),
             listOf(
                 MockDirectionsRequestHandler(
-                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    profile = PROFILE_DRIVING_TRAFFIC,
                     jsonResponse = jsonResponse,
-                    expectedCoordinates = coordinates
-                )
+                    expectedCoordinates = coordinates,
+                ),
             ),
             coordinates,
         )
@@ -190,10 +190,10 @@ object RoutesProvider {
             DirectionsResponse.fromJson(jsonResponse),
             listOf(
                 MockDirectionsRequestHandler(
-                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    profile = PROFILE_DRIVING_TRAFFIC,
                     jsonResponse = jsonResponse,
-                    expectedCoordinates = coordinates
-                )
+                    expectedCoordinates = coordinates,
+                ),
             ),
             coordinates,
         )
@@ -213,7 +213,7 @@ object RoutesProvider {
             DirectionsResponse.fromJson(jsonResponse),
             listOf(
                 MockDirectionsRequestHandler(
-                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    profile = PROFILE_DRIVING_TRAFFIC,
                     jsonResponse = jsonResponse,
                     expectedCoordinates = coordinates,
                 ),
@@ -234,10 +234,10 @@ object RoutesProvider {
             DirectionsResponse.fromJson(jsonResponse),
             listOf(
                 MockDirectionsRequestHandler(
-                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    profile = PROFILE_DRIVING_TRAFFIC,
                     jsonResponse = jsonResponse,
                     expectedCoordinates = coordinates,
-                )
+                ),
             ),
             coordinates,
         )
@@ -256,10 +256,10 @@ object RoutesProvider {
             DirectionsResponse.fromJson(jsonResponse),
             listOf(
                 MockDirectionsRequestHandler(
-                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    profile = PROFILE_DRIVING_TRAFFIC,
                     jsonResponse = jsonResponse,
-                    expectedCoordinates = coordinates
-                )
+                    expectedCoordinates = coordinates,
+                ),
             ),
             coordinates,
         )
@@ -279,10 +279,10 @@ object RoutesProvider {
             DirectionsResponse.fromJson(jsonResponse),
             listOf(
                 MockDirectionsRequestHandler(
-                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    profile = PROFILE_DRIVING_TRAFFIC,
                     jsonResponse = jsonResponse,
-                    expectedCoordinates = coordinates
-                )
+                    expectedCoordinates = coordinates,
+                ),
             ),
             coordinates,
         )
@@ -303,10 +303,10 @@ object RoutesProvider {
             DirectionsResponse.fromJson(jsonResponse),
             listOf(
                 MockDirectionsRequestHandler(
-                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    profile = PROFILE_DRIVING_TRAFFIC,
                     jsonResponse = jsonResponse,
-                    expectedCoordinates = coordinates
-                )
+                    expectedCoordinates = coordinates,
+                ),
             ),
             coordinates,
         )
@@ -343,12 +343,12 @@ object RoutesProvider {
             DirectionsResponse.fromJson(oneLegRoute),
             listOf(
                 MockDirectionsRequestHandler(
-                    DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    PROFILE_DRIVING_TRAFFIC,
                     jsonResponse = oneLegRoute,
-                    expectedCoordinates = oneLegRouteOptions.coordinatesList()
-                )
+                    expectedCoordinates = oneLegRouteOptions.coordinatesList(),
+                ),
             ),
-            routeWaypoints = oneLegRouteOptions.coordinatesList()
+            routeWaypoints = oneLegRouteOptions.coordinatesList(),
         )
 
         val twoLegsRouteOptions = RouteOptions.fromUrl(
@@ -370,12 +370,12 @@ object RoutesProvider {
             DirectionsResponse.fromJson(twoLegsRouteJson),
             listOf(
                 MockDirectionsRequestHandler(
-                    DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    PROFILE_DRIVING_TRAFFIC,
                     jsonResponse = twoLegsRouteJson,
-                    expectedCoordinates = twoLegsRouteOptions.coordinatesList()
-                )
+                    expectedCoordinates = twoLegsRouteOptions.coordinatesList(),
+                ),
             ),
-            twoLegsRouteOptions.coordinatesList()
+            twoLegsRouteOptions.coordinatesList(),
         )
         val incident = oneLegMockRoute.routeResponse.routes().first()
             .legs()!!.first()
@@ -392,12 +392,12 @@ object RoutesProvider {
             routeResponseModel,
             mockRequestHandlers = listOf(
                 MockDirectionsRequestHandler(
-                    DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    PROFILE_DRIVING_TRAFFIC,
                     jsonResponse = routeResponseJson,
-                    expectedCoordinates = waypoints
-                )
+                    expectedCoordinates = waypoints,
+                ),
             ),
-            waypoints
+            waypoints,
         )
     }
 
@@ -416,6 +416,117 @@ object RoutesProvider {
             model,
             listOf(handler),
             waypoints
+        )
+    }
+
+    fun cycling_route_dc_very_short(context: Context): MockRoute {
+        val jsonResponse = readRawFileText(context, R.raw.cycling_route_response_dc_very_short)
+        val coordinates = listOf(
+            Point.fromLngLat(-77.031991, 38.894721),
+            Point.fromLngLat(-77.030923, 38.895433),
+        )
+        return MockRoute(
+            jsonResponse,
+            DirectionsResponse.fromJson(jsonResponse),
+            listOf(
+                MockDirectionsRequestHandler(
+                    profile = PROFILE_CYCLING,
+                    jsonResponse = jsonResponse,
+                    expectedCoordinates = coordinates,
+                ),
+            ),
+            coordinates,
+        )
+    }
+
+    fun cycling_dc_short_two_legs_with_alternative(context: Context): MockRoute {
+        val jsonResponse = readRawFileText(
+            context,
+            R.raw.cycling_route_response_dc_very_short_two_legs_alternative,
+        )
+        val coordinates = listOf(
+            Point.fromLngLat(-77.033625, 38.891164),
+            Point.fromLngLat(-77.03002, 38.895453),
+        )
+        return MockRoute(
+            jsonResponse,
+            DirectionsResponse.fromJson(jsonResponse),
+            listOf(
+                MockDirectionsRequestHandler(
+                    profile = PROFILE_CYCLING,
+                    jsonResponse = jsonResponse,
+                    expectedCoordinates = coordinates,
+                ),
+            ),
+            coordinates,
+        )
+    }
+
+    fun cycling_dc_very_short_two_legs(context: Context): MockRoute {
+        val jsonResponse = readRawFileText(
+            context,
+            R.raw.cycling_route_response_dc_very_short_two_legs,
+        )
+        val coordinates = listOf(
+            Point.fromLngLat(-77.031991, 38.894721),
+            Point.fromLngLat(-77.031991, 38.895433),
+            Point.fromLngLat(-77.030923, 38.895433),
+        )
+        return MockRoute(
+            jsonResponse,
+            DirectionsResponse.fromJson(jsonResponse),
+            listOf(
+                MockDirectionsRequestHandler(
+                    profile = PROFILE_CYCLING,
+                    jsonResponse = jsonResponse,
+                    expectedCoordinates = coordinates,
+                ),
+            ),
+            coordinates,
+        )
+    }
+
+    fun walking_route_dc_very_short(context: Context): MockRoute {
+        val jsonResponse = readRawFileText(context, R.raw.walking_route_response_dc_very_short)
+        val coordinates = listOf(
+            Point.fromLngLat(-77.031991, 38.894721),
+            Point.fromLngLat(-77.030923, 38.895433),
+        )
+        return MockRoute(
+            jsonResponse,
+            DirectionsResponse.fromJson(jsonResponse),
+            listOf(
+                MockDirectionsRequestHandler(
+                    profile = PROFILE_WALKING,
+                    jsonResponse = jsonResponse,
+                    expectedCoordinates = coordinates,
+                ),
+            ),
+            coordinates,
+        )
+    }
+
+    fun walking_route_dc_very_short_two_legs(context: Context): MockRoute {
+        val jsonResponse = readRawFileText(
+            context,
+            R.raw.walking_route_response_dc_very_short_two_legs,
+        )
+        val coordinates = listOf(
+            Point.fromLngLat(-77.031991, 38.894721),
+            Point.fromLngLat(-77.031991, 38.895433),
+            Point.fromLngLat(-77.030923, 38.895433),
+        )
+        return MockRoute(
+            jsonResponse,
+            DirectionsResponse.fromJson(jsonResponse),
+            listOf(
+                MockDirectionsRequestHandler(
+                    profile = PROFILE_WALKING,
+                    jsonResponse = jsonResponse,
+                    expectedCoordinates = coordinates,
+                ),
+            ),
+            coordinates,
         )
     }
 }
