@@ -11,6 +11,7 @@ import com.mapbox.navigation.base.internal.route.deserializeNavigationRouteFrom
 import com.mapbox.navigation.base.internal.route.serialize
 import com.mapbox.navigation.base.options.NavigateToFinalDestination
 import com.mapbox.navigation.base.options.RerouteDisabled
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.ResponseOriginAPI.Companion.DIRECTIONS_API
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -104,7 +105,8 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
         ) { navigation ->
             val options = setupTestMapMatchingRoute()
             val result = navigation.requestMapMatching(options).getSuccessfulOrThrowException()
-            navigation.setNavigationRoutes(result.navigationRoutes)
+            // Use only the first match as the route
+            navigation.setNavigationRoutes(listOf(result.matches.first().navigationRoute))
             mockLocationReplayerRule.playRoute(
                 result.matches.first().navigationRoute.directionsRoute,
             )
@@ -118,7 +120,7 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
                     Point.fromLngLat(-117.172877, 32.712021),
                     Point.fromLngLat(-117.173337, 32.71253),
                 ),
-                result.navigationRoutes.first().waypoints?.map { it.location() },
+                result.matches.first().navigationRoute.waypoints?.map { it.location() },
             )
         }
     }
@@ -130,8 +132,11 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
         ) { navigation ->
             val options = setupOpenLrTestRoute()
             val result = navigation.requestMapMatching(options).getSuccessfulOrThrowException()
-            navigation.setNavigationRoutes(result.navigationRoutes)
-            mockLocationReplayerRule.playRoute(result.navigationRoutes.first().directionsRoute)
+            // Use only the first match
+            navigation.setNavigationRoutes(listOf(result.matches.first().navigationRoute))
+            mockLocationReplayerRule.playRoute(
+                result.matches.first().navigationRoute.directionsRoute,
+            )
             navigation.startTripSession()
             navigation.routeProgressUpdates().first {
                 it.currentState == RouteProgressState.COMPLETE
@@ -155,7 +160,9 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
             val mapMatchingResult =
                 navigation.requestMapMatching(options).getSuccessfulOrThrowException()
             val setRouteResult = navigation.setNavigationRoutesAsync(
-                mapMatchingResult.navigationRoutes + directionsAPIResult.routes,
+                listOf(
+                    mapMatchingResult.matches.first().navigationRoute,
+                ) + directionsAPIResult.routes,
             )
 
             assertEquals(0, setRouteResult.value!!.ignoredAlternatives.size)
@@ -194,19 +201,21 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
             val mapMatchingResult =
                 navigation.requestMapMatching(options).getSuccessfulOrThrowException()
             val setRouteResult = navigation.setNavigationRoutesAsync(
-                directionsAPIResult.routes + mapMatchingResult.navigationRoutes,
+                directionsAPIResult.routes + listOf(
+                    mapMatchingResult.matches.first().navigationRoute,
+                ),
             )
 
             assertEquals(0, setRouteResult.value!!.ignoredAlternatives.size)
             mockLocationReplayerRule.playRoute(
-                mapMatchingResult.navigationRoutes.first().directionsRoute,
+                mapMatchingResult.matches.first().navigationRoute.directionsRoute,
             )
             navigation.startTripSession()
 
             val routesUpdate = navigation.routesUpdates()
                 .first { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE }
             assertEquals(
-                mapMatchingResult.navigationRoutes.single().id,
+                mapMatchingResult.matches.single().navigationRoute.id,
                 routesUpdate.navigationRoutes.first().id,
             )
             assertEquals(
@@ -234,19 +243,20 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
                 navigation.requestMapMatching(mapMatchedAlternativeOptions)
                     .getSuccessfulOrThrowException()
             val setRouteResult = navigation.setNavigationRoutesAsync(
-                mapMatchingPrimary.navigationRoutes + mapMatchingAlternative.navigationRoutes,
+                listOf(mapMatchingPrimary.matches.first().navigationRoute) +
+                    listOf(mapMatchingAlternative.matches.first().navigationRoute),
             )
 
             assertEquals(0, setRouteResult.value!!.ignoredAlternatives.size)
             mockLocationReplayerRule.playRoute(
-                mapMatchingAlternative.navigationRoutes.first().directionsRoute,
+                mapMatchingAlternative.matches.first().navigationRoute.directionsRoute,
             )
             navigation.startTripSession()
 
             val routesUpdate = navigation.routesUpdates()
                 .first { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE }
             assertEquals(
-                mapMatchingAlternative.navigationRoutes.single().id,
+                mapMatchingAlternative.matches.single().navigationRoute.id,
                 routesUpdate.navigationRoutes.first().id,
             )
             assertEquals(
@@ -274,7 +284,9 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
             val mapMatchingResult = navigation.requestMapMatching(options)
                 .getSuccessfulOrThrowException()
             val setRouteResult = navigation.setNavigationRoutesAsync(
-                directionsAPIResult.routes + mapMatchingResult.navigationRoutes,
+                directionsAPIResult.routes + listOf(
+                    mapMatchingResult.matches.first().navigationRoute,
+                ),
             )
             assertEquals(0, setRouteResult.value!!.ignoredAlternatives.size)
 
@@ -308,10 +320,10 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
             }
             val options = setupTestMapMatchingRoute()
             val result = navigation.requestMapMatching(options).getSuccessfulOrThrowException()
-            navigation.setNavigationRoutes(result.navigationRoutes)
+            navigation.setNavigationRoutes(listOf(result.matches.first().navigationRoute))
             navigation.startTripSession()
             navigation.moveAlongTheRouteUntilTracking(
-                result.navigationRoutes.first(),
+                result.matches.first().navigationRoute,
                 mockLocationReplayerRule,
             )
 
@@ -346,7 +358,7 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
 
             val deserializationResult = withContext(Dispatchers.Default) {
                 deserializeNavigationRouteFrom(
-                    result.navigationRoutes.first().serialize(),
+                    result.matches.first().navigationRoute.serialize(),
                 )
             }
             assertNull(
@@ -358,7 +370,7 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
 
             navigation.startTripSession()
             navigation.moveAlongTheRouteUntilTracking(
-                result.navigationRoutes.first(),
+                result.matches.first().navigationRoute,
                 mockLocationReplayerRule,
             )
 
@@ -394,13 +406,15 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
                 .primaryMapMatchedRouteOptions
             val mapMatchingResult =
                 navigation.requestMapMatching(options).getSuccessfulOrThrowException()
-            // use MM route as the primary
-            navigation.setNavigationRoutes(mapMatchingResult.navigationRoutes)
+            // use only the first MM route as the primary
+            navigation.setNavigationRoutes(
+                listOf(mapMatchingResult.matches.first().navigationRoute),
+            )
             // replay Directions route just to trigger off route event
             mockLocationReplayerRule.playGeometry(geometryToDeviate)
             navigation.startTripSession()
 
-            val newRoute = navigation.routesUpdates()
+            val newRoute: NavigationRoute = navigation.routesUpdates()
                 .first { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE }
                 .navigationRoutes
                 .first()
@@ -410,8 +424,9 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
             assertEquals(2, newRoute.waypoints?.size)
 
             // Directions API could slightly move destination due to snapping
-            val expectedDestination = mapMatchingResult.navigationRoutes
+            val expectedDestination = mapMatchingResult.matches
                 .first()
+                .navigationRoute
                 .waypoints!!
                 .last()
                 .location()
@@ -446,8 +461,10 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
             val options = setupTwoLegsMapMatchingRoute()
             val mapMatchingResult =
                 navigation.requestMapMatching(options).getSuccessfulOrThrowException()
-            navigation.setNavigationRoutes(mapMatchingResult.navigationRoutes)
-            val initialPrimaryRoute = mapMatchingResult.navigationRoutes.first()
+            navigation.setNavigationRoutes(
+                listOf(mapMatchingResult.matches.first().navigationRoute),
+            )
+            val initialPrimaryRoute = mapMatchingResult.matches.first().navigationRoute
             assertEquals(
                 3,
                 initialPrimaryRoute.waypoints?.size,
@@ -457,7 +474,7 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
             mockLocationReplayerRule.playGeometry(geometryToDeviate)
             navigation.startTripSession()
 
-            val newRoute = navigation.routesUpdates()
+            val newRoute: NavigationRoute = navigation.routesUpdates()
                 .first { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE }
                 .navigationRoutes
                 .first()
@@ -474,8 +491,9 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
             )
 
             // Directions API could slightly move destination due to snapping
-            val expectedDestination = mapMatchingResult.navigationRoutes
+            val expectedDestination = mapMatchingResult.matches
                 .first()
+                .navigationRoute
                 .waypoints!!
                 .last()
                 .location()
@@ -518,8 +536,9 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
                 navigation.requestRoutes(directionOptions).getSuccessfulResultOrThrowException()
             val mapMatchingResult =
                 navigation.requestMapMatching(options).getSuccessfulOrThrowException()
-            // use MM route as the primary
-            navigation.setNavigationRoutes(mapMatchingResult.navigationRoutes)
+            navigation.setNavigationRoutes(
+                listOf(mapMatchingResult.matches.first().navigationRoute),
+            )
             // replay Directions route just to trigger off route event
             mockLocationReplayerRule.playRoute(directionsAPIResult.routes.first().directionsRoute)
             navigation.startTripSession()
@@ -555,10 +574,10 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
             }
             val options = setupTestMapMatchingRoute()
             val result = navigation.requestMapMatching(options).getSuccessfulOrThrowException()
-            navigation.setNavigationRoutes(result.navigationRoutes)
+            navigation.setNavigationRoutes(listOf(result.matches.first().navigationRoute))
             navigation.startTripSession()
             navigation.moveAlongTheRouteUntilTracking(
-                result.navigationRoutes[0],
+                result.matches[0].navigationRoute,
                 mockLocationReplayerRule,
             )
             delay(2000)
@@ -614,7 +633,7 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
                 .coordinates("-71.443158%2C39.613564%3B-71.448504%2C39.596188")
                 .setupBaseUrl()
                 .build()
-            val result = navigation.requestMapMatching(options) as MapMatchingRequestResult.Failure
+            navigation.requestMapMatching(options) as MapMatchingRequestResult.Failure
         }
     }
 
@@ -625,7 +644,7 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
         ) { navigation ->
             MapboxOptions.accessToken = TEST_WRONG_TOKEN
             val options = setupTestMapMatchingRoute()
-            val result = navigation.requestMapMatching(options) as MapMatchingRequestResult.Failure
+            navigation.requestMapMatching(options) as MapMatchingRequestResult.Failure
         }
     }
 
@@ -636,7 +655,7 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
         ) { navigation ->
             val options = setupTestMapMatchingRoute()
             withoutInternet {
-                val result = navigation.requestMapMatching(options)
+                navigation.requestMapMatching(options)
                     as MapMatchingRequestResult.Failure
             }
         }

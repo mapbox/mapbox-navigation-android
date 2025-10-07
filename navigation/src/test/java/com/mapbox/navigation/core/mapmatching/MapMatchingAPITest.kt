@@ -1,4 +1,7 @@
-@file:OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+@file:OptIn(
+    ExperimentalPreviewMapboxNavigationAPI::class,
+    kotlinx.coroutines.ExperimentalCoroutinesApi::class,
+)
 
 package com.mapbox.navigation.core.mapmatching
 
@@ -81,10 +84,6 @@ class MapMatchingAPITest {
 
         // response
         val mapMatchingResult = callback.getSuccessfulResultOrThrowException()
-        assertEquals(
-            mapMatchingResult.matches.map { it.navigationRoute },
-            mapMatchingResult.navigationRoutes,
-        )
         assertEquals(1, mapMatchingResult.matches.size)
         assertEquals(
             0.927499,
@@ -277,7 +276,7 @@ class MapMatchingAPITest {
         )
 
         val mapMatchingResult = callback.getSuccessfulResultOrThrowException()
-        val waypoints = mapMatchingResult.navigationRoutes.first().waypoints!!
+        val waypoints = mapMatchingResult.matches.first().navigationRoute.waypoints!!
         assertEquals(
             listOf(
                 Point.fromLngLat(

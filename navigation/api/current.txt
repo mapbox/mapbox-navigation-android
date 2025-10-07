@@ -814,9 +814,7 @@ package com.mapbox.navigation.core.mapmatching {
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapMatchingSuccessfulResult {
     method public java.util.List<com.mapbox.navigation.base.route.MapMatchingMatch> getMatches();
-    method public java.util.List<com.mapbox.navigation.base.route.NavigationRoute> getNavigationRoutes();
     property public final java.util.List<com.mapbox.navigation.base.route.MapMatchingMatch> matches;
-    property public final java.util.List<com.mapbox.navigation.base.route.NavigationRoute> navigationRoutes;
   }
 
 }

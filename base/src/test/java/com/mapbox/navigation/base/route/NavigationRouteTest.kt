@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMapboxNavigationAPI::class)
+@file:OptIn(ExperimentalMapboxNavigationAPI::class, ExperimentalPreviewMapboxNavigationAPI::class)
 
 package com.mapbox.navigation.base.route
 
@@ -6,7 +6,9 @@ import com.google.gson.JsonPrimitive
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.internal.route.updateExpirationTime
 import com.mapbox.navigation.testing.FileUtils
@@ -218,6 +220,79 @@ class NavigationRouteTest {
             navigationRoute.all {
                 it.routeRefreshMetadata == null
             },
+        )
+    }
+
+    @Test
+    fun `map matched route`() {
+        val requestUrl = FileUtils.loadJsonFixture("kochelsee_map_matching_request.txt")
+        val responseJson = FileUtils.loadJsonFixture("kochelsee_map_matching_response.json")
+
+        val result = NavigationRoute.createMatchedRoutes(
+            responseJson,
+            requestUrl,
+        )
+
+        assertNull(result.error)
+        val matches = result.value!!
+
+        assertEquals(1, matches.size)
+        val match = matches[0]
+
+        assertEquals(
+            0.0,
+            match.confidence,
+            0.01,
+        )
+        assertEquals(
+            2,
+            match.navigationRoute.waypoints?.size,
+        )
+        assertEquals(
+            1,
+            match.navigationRoute.directionsRoute.legs()?.size,
+        )
+        assertEquals(
+            2,
+            match.navigationRoute.directionsRoute.legs()?.get(0)?.steps()?.size,
+        )
+    }
+
+    @Test
+    fun `multiple matches`() {
+        val requestUrl = FileUtils.loadJsonFixture(
+            "kochelsee_multiple_matches_map_matching_request.txt",
+        )
+        val responseJson = FileUtils.loadJsonFixture(
+            "kochelsee_multiple_matches_map_matching_response.json",
+        )
+
+        val result = NavigationRoute.createMatchedRoutes(
+            responseJson,
+            requestUrl,
+        )
+
+        assertNull(result.error)
+        val matches = result.value!!
+
+        assertEquals(2, matches.size)
+
+        val firstMatch = matches[0]
+        assertEquals(
+            listOf(
+                Point.fromLngLat(11.359198, 47.642065),
+                Point.fromLngLat(11.351706, 47.632409),
+            ),
+            firstMatch.navigationRoute.waypoints?.map { it.location() },
+        )
+
+        val secondMatch = matches[1]
+        assertEquals(
+            listOf(
+                Point.fromLngLat(11.353961, 47.631334),
+                Point.fromLngLat(11.355391, 47.628011),
+            ),
+            secondMatch.navigationRoute.waypoints?.map { it.location() },
         )
     }
 }

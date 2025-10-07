@@ -250,6 +250,23 @@ class NavigationRoute private constructor(
                         .toBuilder()
                         .routeIndex("$index")
                         .routeOptions(routeOptions)
+                        .waypoints(
+                            model.tracepoints()
+                                ?.filterNotNull()
+                                ?.filter {
+                                    it.waypointIndex() != null && it.matchingsIndex() == index
+                                }
+                                ?.map {
+                                    DirectionsWaypoint.builder()
+                                        .rawLocation(
+                                            it.location()!!.coordinates().toDoubleArray(),
+                                        )
+                                        .name(it.name() ?: "")
+                                        // TODO: NAVAND-1737 introduce distance in trace point
+                                        // .distance(it.distance)
+                                        .build()
+                                },
+                        )
                         .build()
                 }?.toMutableList()
                 val directionsResponse = DirectionsResponse.builder()
@@ -258,21 +275,6 @@ class NavigationRoute private constructor(
                     // .uuid(model.uuid())
                     .code(model.code())
                     .message(model.message())
-                    .waypoints(
-                        model.tracepoints()
-                            ?.filterNotNull()
-                            ?.filter { it.waypointIndex() != null }
-                            ?.map {
-                                DirectionsWaypoint.builder()
-                                    .rawLocation(
-                                        it.location()!!.coordinates().toDoubleArray(),
-                                    )
-                                    .name(it.name() ?: "")
-                                    // TODO: NAVAND-1737 introduce distance in trace point
-                                    // .distance(it.distance)
-                                    .build()
-                            },
-                    )
                     .build()
                 // TODO: NAVAND-1732 parse map matching response in NN without converting it
                 // to directions response
@@ -517,7 +519,7 @@ class NavigationRoute private constructor(
             },).mapIndexed { index, routeInterface ->
                 NavigationRoute(
                     getDirectionsRoute(directionsResponse, index, routeOptions),
-                    getDirectionsWaypoint(directionsResponse, index, routeOptions),
+                    getDirectionsWaypoint(directionsResponse, index),
                     routeOptions,
                     routeInterface,
                     ifNonNull(
@@ -678,7 +680,7 @@ internal fun RouteInterface.toNavigationRoute(
     return NavigationRoute(
         routeOptions = routeOptions,
         directionsRoute = getDirectionsRoute(directionsResponse, routeIndex, routeOptions),
-        waypoints = getDirectionsWaypoint(directionsResponse, routeIndex, routeOptions),
+        waypoints = getDirectionsWaypoint(directionsResponse, routeIndex),
         nativeRoute = this,
         expirationTimeElapsedSeconds = refreshTtl?.plus(responseTimeElapsedSeconds),
         // Continuous alternatives are always from Directions API
@@ -745,11 +747,6 @@ private fun getDirectionsRoute(
 private fun getDirectionsWaypoint(
     directionsResponse: DirectionsResponse,
     routeIndex: Int,
-    routeOptions: RouteOptions,
 ): List<DirectionsWaypoint>? {
-    return if (routeOptions.waypointsPerRoute() == true) {
-        directionsResponse.routes()[routeIndex].waypoints()
-    } else {
-        directionsResponse.waypoints()
-    }
+    return directionsResponse.routes()[routeIndex].waypoints() ?: directionsResponse.waypoints()
 }
