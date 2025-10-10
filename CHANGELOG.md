@@ -1,5 +1,30 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.16.0-rc.1 - 10 October, 2025
+#### Features
+- Added `MapMatchingOptions.voiceUnits` which allows applications to specify the unit system used for voice instructions in Map Matching. 
+- Delay the start of the predictive cache when tiles are requested #6684
+
+#### Bug fixes and improvements
+- Fix the bug that causes road cameras on alternative routes to not be removed from the road when its road is not active or passed during active guidance. 
+-  Fix ADAS tiles loading for ambient cache without consumer #7128
+- Improved Visual Turn Experience in Active Guidance and Free-Drive for High-Frequency Input #3863
+- The crash happens on route parsing with the steps=false #6889
+- Support settings for per-level routing tiles compression #6622
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.16.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.16.0-rc.1))
+- Mapbox Navigation Native `v324.16.0-rc.1`
+- Mapbox Core Common `v24.16.0-rc.1`
+- Mapbox Java `v7.8.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.8.0))
+
+
 ## Navigation SDK Core Framework 3.16.0-beta.1 - 26 September, 2025
 #### Notes
 3.16.x is the next version after 3.12.x. For technical reasons, versions 3.13.x, 3.14.x and 3.15.x are skipped. Starting from 3.16.x, the Nav SDK minor version will be aligned with other Mapbox dependencies.
