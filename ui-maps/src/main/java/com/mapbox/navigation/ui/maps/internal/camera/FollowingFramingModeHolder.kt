@@ -11,6 +11,8 @@ enum class FollowingFramingMode {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 class FollowingFramingModeHolder {
 
+    private val observers = mutableListOf<(FollowingFramingMode?) -> Unit>()
+
     var prevMode: FollowingFramingMode = FollowingFramingMode.LOCATION_INDICATOR
         private set
 
@@ -18,5 +20,17 @@ class FollowingFramingModeHolder {
         set(value) {
             prevMode = field
             field = value
+            if (prevMode != value) {
+                observers.forEach { it(value) }
+            }
         }
+
+    fun addObserver(observer: (FollowingFramingMode?) -> Unit) {
+        observers.add(observer)
+        observer(mode)
+    }
+
+    fun removeObserver(observer: (FollowingFramingMode?) -> Unit) {
+        observers.remove(observer)
+    }
 }
