@@ -84,6 +84,7 @@ import com.mapbox.navigation.ui.maps.util.toDelayedRoutesRenderedCallback
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -216,6 +217,8 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
 
     init {
         sender.sendInitialOptionsEvent(optionsHolder.data)
+
+        logI(TAG) { "init routeLineViewOptions: $options" }
     }
 
     /**
@@ -247,6 +250,7 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         if (this.optionsHolder != newHolder) {
             this.optionsHolder = newHolder
             MapboxRouteLineUtils.updateLayersStyling(style, newHolder.options)
+            logI(TAG) { "update routeLineViewOptions: ${optionsHolder.options}" }
         }
     }
 

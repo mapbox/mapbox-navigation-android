@@ -24,6 +24,7 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.NativeRouteParserRule
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
@@ -64,6 +65,9 @@ class RouteLineComponentTest {
 
     @get:Rule
     val nativeRouteParserRule = NativeRouteParserRule()
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     private val context = mockk<Context> {
         every { resources } returns mockk()

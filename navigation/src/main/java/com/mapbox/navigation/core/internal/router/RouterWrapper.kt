@@ -89,7 +89,7 @@ internal class RouterWrapper(
         val requestOptions = GetRouteOptions(null) // using default timeout (5 seconds)
 
         val urlWithoutToken = URL(routeUrl.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM))
-        logD(LOG_CATEGORY) { "requesting route for $urlWithoutToken" }
+        logI(LOG_CATEGORY) { "requesting route for $urlWithoutToken" }
         val originRouter = router
         var callbackInvoked = false
         var id: Long? = null

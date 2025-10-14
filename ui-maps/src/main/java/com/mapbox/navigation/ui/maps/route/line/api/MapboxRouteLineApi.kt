@@ -68,6 +68,7 @@ import com.mapbox.navigation.ui.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigation.utils.internal.parallelMap
 import kotlinx.coroutines.CoroutineScope
@@ -305,6 +306,8 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         } else {
             null
         }
+
+        logI(LOG_CATEGORY) { "init routeLineApiOptions: $routeLineOptions" }
     }
 
     private fun startMemoryMonitoring() {
