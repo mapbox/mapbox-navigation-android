@@ -1,6 +1,7 @@
 package com.mapbox.navigation.driver.notification.traffic
 
 import android.os.SystemClock
+import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -8,15 +9,13 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.flowRouteProgress
 import com.mapbox.navigation.driver.notification.DriverNotification
 import com.mapbox.navigation.driver.notification.DriverNotificationProvider
-import kotlinx.coroutines.Dispatchers
+import com.mapbox.navigation.driver.notification.internal.SlowTrafficSegmentsFinder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.withContext
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * Provides notifications for slow traffic conditions along the route.
@@ -45,6 +44,11 @@ import kotlin.time.Duration.Companion.seconds
 class SlowTrafficNotificationProvider(
     var options: SlowTrafficNotificationOptions = SlowTrafficNotificationOptions.Builder().build(),
 ) : DriverNotificationProvider() {
+
+    @VisibleForTesting
+    internal var slowTrafficSegmentsFinder: SlowTrafficSegmentsFinder = SlowTrafficSegmentsFinder()
+
+    private val minTrafficDelay get() = options.trafficDelay
 
     private var lastUpdate = 0L
     private var mapboxNavigationFlow = MutableStateFlow<MapboxNavigation?>(null)
@@ -83,66 +87,30 @@ class SlowTrafficNotificationProvider(
             options.slowTrafficPeriodCheck.inWholeMilliseconds
         ) {
             lastUpdate = SystemClock.elapsedRealtime()
-            val legProgress = routeProgress.currentLegProgress ?: return null
-            val legDistances =
-                legProgress.routeLeg?.annotation()?.distance() ?: return null
-            val legDurations =
-                legProgress.routeLeg?.annotation()?.duration() ?: return null
-            val legFreeFlowSpeeds =
-                legProgress.routeLeg?.annotation()?.freeflowSpeed() ?: return null
-            val legCongestions = legProgress.routeLeg?.annotation()?.congestionNumeric()
-                ?: return null
-            val slowTrafficRange = options.slowTrafficCongestionRange
+            val segment = slowTrafficSegmentsFinder.findSlowTrafficSegments(
+                routeProgress,
+                targetCongestionsRanges = listOf(options.slowTrafficCongestionRange),
+                legsLimit = 1,
+                segmentsLimit = 1,
+            ).firstOrNull()
+            // NOTE: because we've requested only 1 target congestion range, there
+            // can be only 1 item in `traits`.
+            val slowTrafficTraits = segment?.traits?.firstOrNull()
 
-            return withContext(Dispatchers.Default) {
-                var slowTrafficDistance = 0.0
-                var slowTrafficDurationSec = 0.0
-                var freeFlowDurationSec = 0.0
-                var i = legProgress.geometryIndex
-
-                // Check traffic only until the end of the current leg because of the waypoint
-                val minTrafficDelaySec = options.trafficDelay.inWholeSeconds
-                while (i < legDistances.size &&
-                    i < legCongestions.size &&
-                    i < legDurations.size &&
-                    i < legFreeFlowSpeeds.size &&
-                    legCongestions[i].isSlowTraffic(slowTrafficRange)
-                ) {
-                    slowTrafficDistance += legDistances[i]
-                    slowTrafficDurationSec += legDurations[i]
-
-                    val legFreeFlowSpeed = legFreeFlowSpeeds[i]
-                    freeFlowDurationSec += if (legFreeFlowSpeed != null) {
-                        // Speed is km/h, but distance is in the meters. Applying conversion of the speed from km/h -> m/s
-                        legDistances[i] * KM_PER_H_TO_M_PER_SEC_RATE / legFreeFlowSpeed
-                    } else {
-                        // Adding average duration based on the previous geometry
-                        freeFlowDurationSec / (i - legProgress.geometryIndex)
-                    }
-                    i++
-                }
-                if (slowTrafficDurationSec - freeFlowDurationSec >= minTrafficDelaySec) {
-                    SlowTrafficNotification(
-                        legProgress.legIndex,
-                        legProgress.geometryIndex..i,
-                        freeFlowDurationSec.seconds,
-                        slowTrafficDurationSec.seconds,
-                        slowTrafficDistance,
-                    )
-                } else {
-                    null
-                }
+            if (segment == null ||
+                slowTrafficTraits == null ||
+                slowTrafficTraits.duration - slowTrafficTraits.freeFlowDuration < minTrafficDelay
+            ) {
+                return null
             }
+            return SlowTrafficNotification(
+                segment.legIndex,
+                segment.geometryRange,
+                slowTrafficTraits.freeFlowDuration,
+                slowTrafficTraits.duration,
+                slowTrafficTraits.distanceMeters,
+            )
         }
         return null
-    }
-
-    private fun Int?.isSlowTraffic(range: IntRange) = range.contains(this)
-
-    private companion object {
-
-        // Calc time with seconds:
-        // dist_m / speed_km_h = dist_m / (speed_km_h * 1000 / 3600) = dist_m * 3.6 / speed_km_h = duration_sec
-        private const val KM_PER_H_TO_M_PER_SEC_RATE = 3.6
     }
 }
