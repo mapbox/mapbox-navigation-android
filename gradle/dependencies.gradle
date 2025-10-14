@@ -80,6 +80,7 @@ ext {
       viewBinding               : '7.2.1',
       glide                     : '4.13.2',
       kaspresso                 : '1.5.3',
+      microbenchmark            : '1.2.4',
       equalsVerifier            : '3.15.8',
       toStringVerifier          : '1.4.8',
       kotlinDateTime            : '0.4.1',
@@ -178,6 +179,7 @@ ext {
       testRules                 : "androidx.test:rules:${version.androidxTestRules}",
       androidxTestJunit         : "androidx.test.ext:junit:${version.androidxTestJunit}",
       barista                   : "com.adevinta.android:barista:${version.barista}",
+      microbenchmark            : "androidx.benchmark:benchmark-junit4:${version.microbenchmark}",
 
       // screenshot tests
       kaspresso                 : "com.kaspersky.android-components:kaspresso:${version.kaspresso}",
@@ -237,6 +239,7 @@ ext {
       mapboxSdkRegistry    : '1.4.1',
       mapboxAccessToken    : '0.2.1',
       mapboxNativeDownload : '0.2.2',
+      microbenchmark       : version.microbenchmark,
       firebaseCrashlytics  : '3.0.3'
   ]
 
@@ -259,6 +262,7 @@ ext {
       mapboxSdkRegistry    : "com.mapbox.gradle.plugins:sdk-registry:${pluginVersion.mapboxSdkRegistry}",
       mapboxAccessToken    : "com.mapbox.gradle.plugins:access-token:${pluginVersion.mapboxAccessToken}",
       mapboxNativeDownload : "com.mapbox.gradle.plugins:native-download:${pluginVersion.mapboxNativeDownload}",
+      microbenchmark       : "androidx.benchmark:benchmark-gradle-plugin:${pluginVersion.microbenchmark}",
       firebaseCrashlytics  : "com.google.firebase:firebase-crashlytics-gradle:${pluginVersion.firebaseCrashlytics}"
   ]
 }
