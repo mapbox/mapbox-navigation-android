@@ -32,7 +32,7 @@ ext {
       mapboxCommonNative        : "24.${mapboxSdkVersionSuffix}",
       mapboxNavSdkCpp           : "0.${mapboxSdkVersionSuffix}",
       mapboxSearch              : "2.${mapboxSdkVersionSuffix}",
-      mapboxBaseAndroid         : '0.11.0',
+      mapboxBaseAndroid         : '0.12.0',
       androidXActivity          : '1.7.1',
       androidXActivityCompose   : '1.9.2',
       androidXLifecycle         : '2.4.0',
