@@ -24,7 +24,7 @@ internal class SimplifiedAnimatorSet(
 
     // Calculate camera animation hints for the specified fractions to pre-download tiles.
     // These values are totally based on heuristics and can be changed in the future.
-    private val fractions = listOf(0.25f, 0.5f, 0.75f, 1f)
+    private val fractions = listOf(0.5f, 0.75f, 1f)
 
     private val children = children.toTypedArray()
     private val externalEndListeners = CopyOnWriteArrayList<MapboxAnimatorSetEndListener>()
@@ -52,12 +52,7 @@ internal class SimplifiedAnimatorSet(
     @OptIn(MapboxExperimental::class)
     override fun start() {
         cameraPlugin.registerAnimators(*children)
-        val cameraChildren = children.filterIsInstance<CameraAnimator<*>>()
-        if (cameraChildren.size == children.size) {
-            cameraChildren.calculateCameraAnimationHint(fractions, mapboxMap.cameraState)?.let {
-                mapboxMap.setCameraAnimationHint(it)
-            }
-        }
+        applyCameraAnimationHint(fractions)
         children.forEach { it.start() }
     }
 
@@ -73,6 +68,19 @@ internal class SimplifiedAnimatorSet(
             *children,
             cancelAnimators = true,
         )
+    }
+
+    @OptIn(MapboxExperimental::class)
+    private fun applyCameraAnimationHint(fractions: List<Float>) {
+        val cameraChildren = children.filterIsInstance<CameraAnimator<*>>()
+        if (cameraChildren.size == children.size) {
+            cameraChildren.calculateCameraAnimationHint(
+                fractions,
+                mapboxMap.cameraState,
+            )?.let {
+                mapboxMap.setCameraAnimationHint(it)
+            }
+        }
     }
 
     private inner class SimplifiedAnimatorSetEndListener(

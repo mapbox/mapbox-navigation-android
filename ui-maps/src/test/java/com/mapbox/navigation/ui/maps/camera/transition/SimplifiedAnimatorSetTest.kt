@@ -91,7 +91,7 @@ internal class SimplifiedAnimatorSetTest {
 
     @Test
     fun startWithCameraAnimators() {
-        val fractions = listOf(0.25f, 0.5f, 0.75f, 1f)
+        val fractions = listOf(0.5f, 0.75f, 1f)
         val cameraAnimator1 = mockk<CameraAnimator<*>>(relaxed = true)
         val cameraAnimator2 = mockk<CameraAnimator<*>>(relaxed = true)
         val cameraAnimators = listOf(cameraAnimator1, cameraAnimator2)

@@ -128,7 +128,7 @@ internal class FullAnimatorSetTest {
 
     @Test
     fun start() {
-        val fractions = listOf(0.25f, 0.5f, 0.75f, 1f)
+        val fractions = listOf(0.5f, 0.75f, 1f)
         val cameraState = mockk<CameraState>()
         every { mapboxMap.cameraState } returns cameraState
 
