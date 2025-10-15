@@ -66,6 +66,14 @@ package com.mapbox.navigation.ui.base.lifecycle {
 
 }
 
+package com.mapbox.navigation.ui.base.svg {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public class MapboxNavigationSVGExternalFileResolver extends com.caverock.androidsvg.SVGExternalFileResolver {
+    ctor public MapboxNavigationSVGExternalFileResolver(android.content.res.AssetManager assetManager);
+  }
+
+}
+
 package com.mapbox.navigation.ui.base.util {
 
   public fun interface MapboxNavigationConsumer<T> {

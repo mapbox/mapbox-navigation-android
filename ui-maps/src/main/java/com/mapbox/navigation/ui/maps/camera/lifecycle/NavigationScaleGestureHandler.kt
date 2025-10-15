@@ -26,7 +26,9 @@ import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSou
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraStateChangedObserver
+import com.mapbox.navigation.ui.maps.internal.camera.lifecycle.CameraStateManager
 import com.mapbox.navigation.ui.maps.internal.camera.lifecycle.UserLocationIndicatorPositionObserver
+import com.mapbox.navigation.ui.maps.internal.camera.lifecycle.UserLocationIndicatorPositionProvider
 
 /**
  * Provides support in reacting to map gesture interaction
@@ -78,19 +80,34 @@ import com.mapbox.navigation.ui.maps.internal.camera.lifecycle.UserLocationIndic
  * without impacting other camera transitions. It's important to clean up afterwards to go back
  * to the initial behavior if navigation gesture handling features are not required anymore.
  */
-class NavigationScaleGestureHandler(
+class NavigationScaleGestureHandler internal constructor(
     context: Context,
-    private val navigationCamera: NavigationCamera,
+    private val cameraStateManager: CameraStateManager,
     private val mapboxMap: MapboxMap,
     private val gesturesPlugin: GesturesPlugin,
-    locationPlugin: LocationComponentPlugin,
-    private val scaleActionListener: NavigationScaleGestureActionListener? = null,
-    private val options: NavigationScaleGestureHandlerOptions =
-        NavigationScaleGestureHandlerOptions.Builder(context).build(),
+    private val userLocationIndicatorPositionProvider: UserLocationIndicatorPositionProvider,
+    private val scaleActionListener: NavigationScaleGestureActionListener?,
+    private val options: NavigationScaleGestureHandlerOptions,
 ) : CameraAnimationsLifecycleListener {
 
-    private val userLocationIndicatorPositionProvider =
-        LocationPluginPositionProvider(locationPlugin)
+    constructor(
+        context: Context,
+        navigationCamera: NavigationCamera,
+        mapboxMap: MapboxMap,
+        gesturesPlugin: GesturesPlugin,
+        locationPlugin: LocationComponentPlugin,
+        scaleActionListener: NavigationScaleGestureActionListener? = null,
+        options: NavigationScaleGestureHandlerOptions =
+            NavigationScaleGestureHandlerOptions.Builder(context).build(),
+    ) : this(
+        context,
+        NavigationCameraStateManager(navigationCamera),
+        mapboxMap,
+        gesturesPlugin,
+        LocationPluginPositionProvider(locationPlugin),
+        scaleActionListener,
+        options,
+    )
 
     /**
      * Indicates whether the handler is initialized.
@@ -149,7 +166,7 @@ class NavigationScaleGestureHandler(
         }
         when {
             owner != NAVIGATION_CAMERA_OWNER && owner != MapAnimationOwnerRegistry.GESTURES -> {
-                navigationCamera.requestNavigationCameraToIdle()
+                cameraStateManager.deactivate()
             }
 
             owner == MapAnimationOwnerRegistry.GESTURES -> {
@@ -161,7 +178,7 @@ class NavigationScaleGestureHandler(
                         // do nothing
                     } // todo why is anchor called?
                     else -> {
-                        navigationCamera.requestNavigationCameraToIdle()
+                        cameraStateManager.deactivate()
                     }
                 }
             }
@@ -194,8 +211,10 @@ class NavigationScaleGestureHandler(
 
     private val onMoveListener: OnMoveListener = object : OnMoveListener {
         private var interrupt: Boolean = false
+
+        // TODO move some logic to Maps: MAPSAND-2378
         override fun onMoveBegin(detector: MoveGestureDetector) {
-            if (navigationCamera.state == NavigationCameraState.FOLLOWING) {
+            if (cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING) {
                 if (detector.pointersCount > 1) {
                     applyMultiFingerThresholdArea(detector)
                     applyMultiFingerMoveThreshold(detector)
@@ -203,7 +222,7 @@ class NavigationScaleGestureHandler(
                     applySingleFingerMoveThreshold(detector)
                 }
             } else {
-                navigationCamera.requestNavigationCameraToIdle()
+                cameraStateManager.deactivate()
             }
         }
 
@@ -241,17 +260,19 @@ class NavigationScaleGestureHandler(
         override fun onMove(detector: MoveGestureDetector): Boolean {
             if (interrupt) {
                 detector.interrupt()
-                return false
+                return true
             }
-            if (navigationCamera.state == NavigationCameraState.FOLLOWING) {
-                navigationCamera.requestNavigationCameraToIdle()
+            if (cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING) {
+                cameraStateManager.deactivate()
                 detector.interrupt() // todo is this needed?
             }
             return false
         }
 
         override fun onMoveEnd(detector: MoveGestureDetector) {
-            if (!interrupt && navigationCamera.state == NavigationCameraState.FOLLOWING) {
+            if (!interrupt &&
+                cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING
+            ) {
                 detector.moveThreshold = options.followingInitialMoveThreshold
                 detector.moveThresholdRect = null
             }
@@ -281,7 +302,7 @@ class NavigationScaleGestureHandler(
         moveGestureDetector: MoveGestureDetector,
         rotateGestureDetector: RotateGestureDetector,
     ) {
-        if (navigationCamera.state == NavigationCameraState.FOLLOWING) {
+        if (cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING) {
             moveGestureDetector.moveThreshold = options.followingInitialMoveThreshold
             rotateGestureDetector.angleThreshold = options.followingRotationAngleThreshold
         } else {
@@ -293,7 +314,7 @@ class NavigationScaleGestureHandler(
     }
 
     private fun adjustFocalPoint(puckPosition: Point) {
-        if (navigationCamera.state == NavigationCameraState.FOLLOWING) {
+        if (cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING) {
             val focalPoint = mapboxMap.pixelForCoordinate(puckPosition)
             gesturesPlugin.updateSettings { this.focalPoint = focalPoint }
         } else {
@@ -325,9 +346,7 @@ class NavigationScaleGestureHandler(
             onCameraChangedCallback,
         )
 
-        navigationCamera.registerNavigationCameraStateChangeObserver(
-            navigationCameraStateChangedObserver,
-        )
+        cameraStateManager.registerStateChangeObserver(navigationCameraStateChangedObserver)
 
         isInitialized = true
     }
@@ -351,9 +370,7 @@ class NavigationScaleGestureHandler(
 
         cameraChangedSubscription?.cancel()
 
-        navigationCamera.unregisterNavigationCameraStateChangeObserver(
-            navigationCameraStateChangedObserver,
-        )
+        cameraStateManager.unregisterStateChangeObserver(navigationCameraStateChangedObserver)
 
         isInitialized = false
     }

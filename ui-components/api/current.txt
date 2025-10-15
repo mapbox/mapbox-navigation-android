@@ -335,8 +335,11 @@ package com.mapbox.navigation.ui.components.maps {
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RoadNameConfig {
     method public com.mapbox.navigation.tripdata.shield.api.MapboxRouteShieldApi? getRouteShieldApi();
+    method public com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig? getShieldFontConfig();
     method public void setRouteShieldApi(com.mapbox.navigation.tripdata.shield.api.MapboxRouteShieldApi?);
+    method public void setShieldFontConfig(com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig?);
     property public final com.mapbox.navigation.tripdata.shield.api.MapboxRouteShieldApi? routeShieldApi;
+    property public final com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig? shieldFontConfig;
   }
 
 }
