@@ -75,6 +75,12 @@ class NavigationLocationProvider : LocationProvider {
         private set
 
     /**
+     * Configures the puck animation duration in milliseconds.
+     * Defaults to 1000ms.
+     */
+    var puckAnimationDuration: Long = LocationComponentConstants.DEFAULT_INTERVAL_MILLIS
+
+    /**
      * Register the location consumer to the Location Provider.
      *
      * The Location Consumer will get location and bearing updates from the Location Provider.
@@ -162,7 +168,7 @@ class NavigationLocationProvider : LocationProvider {
         this.onLocationUpdated(
             location = latLngUpdates,
             options = {
-                this.duration = LocationComponentConstants.DEFAULT_INTERVAL_MILLIS
+                this.duration = puckAnimationDuration
                 this.interpolator = puckAnimationEvaluatorInterpolator
                 this.setEvaluator(puckAnimationEvaluatorInterpolator)
                 latLngTransitionOptions?.also { this.apply(it) }
@@ -174,7 +180,7 @@ class NavigationLocationProvider : LocationProvider {
                 options = {
                     // keeping animation frames in sync between bearing and position animation
                     this.interpolator = puckAnimationEvaluatorInterpolator
-                    this.duration = LocationComponentConstants.DEFAULT_INTERVAL_MILLIS
+                    this.duration = puckAnimationDuration
                     bearingTransitionOptions?.also { this.apply(it) }
                 },
             )
