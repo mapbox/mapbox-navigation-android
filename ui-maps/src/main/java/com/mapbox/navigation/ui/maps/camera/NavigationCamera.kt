@@ -4,8 +4,11 @@ import android.os.SystemClock
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import com.mapbox.geojson.Point
+import com.mapbox.maps.CameraAnimationHint
+import com.mapbox.maps.CameraAnimationHintStage
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapView
+import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.plugin.animation.CameraAnimationsLifecycleListener
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
@@ -193,6 +196,7 @@ internal constructor(
 
         private const val LOG_CATEGORY = "NavigationCamera"
         private const val LOG_CAMERA_STATE_SAMPLING_PERIOD_MILLIS = 1000L
+        private const val APPLY_MAP_HINT_WHILE_IN_OVERVIEW_SAMPLING_PERIOD_MILLIS = 1000L
 
         /**
          * Constant used to recognize the owner of transitions initiated by the [NavigationCamera].
@@ -233,6 +237,9 @@ internal constructor(
     private var runningAnimation: MapboxAnimatorSet? = null
     private val transitionEndListeners = CopyOnWriteArraySet<TransitionEndListener>()
     private var frameTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT
+
+    private var lastCameraHintTime = 0L
+    private var prevFollowingCameraForOverviewAnimationHint: CameraOptions? = null
 
     private val navigationCameraStateChangedObservers =
         CopyOnWriteArraySet<NavigationCameraStateChangedObserver>()
@@ -466,7 +473,9 @@ internal constructor(
                     instant,
                 )
             }
+
             OVERVIEW -> {
+                setCameraAnimationHintWhileInOverview(viewportData.cameraForFollowing)
                 startAnimation(
                     animatorsCreator.updateFrameForOverview(
                         viewportData.cameraForOverview,
@@ -477,9 +486,40 @@ internal constructor(
                     instant,
                 )
             }
+
             IDLE, TRANSITION_TO_FOLLOWING, TRANSITION_TO_OVERVIEW -> {
                 // no impl
             }
+        }
+    }
+
+    /**
+     * Pre-loading map tiles around the puck while in the overview to unload CPU when
+     * animation to following mode starts
+     */
+    @OptIn(MapboxExperimental::class)
+    private fun setCameraAnimationHintWhileInOverview(cameraForFollowing: CameraOptions) {
+        val currentTime = SystemClock.elapsedRealtime()
+        if (currentTime - lastCameraHintTime >=
+            APPLY_MAP_HINT_WHILE_IN_OVERVIEW_SAMPLING_PERIOD_MILLIS &&
+            prevFollowingCameraForOverviewAnimationHint != cameraForFollowing
+        ) {
+            lastCameraHintTime = currentTime
+            prevFollowingCameraForOverviewAnimationHint = cameraForFollowing
+            logI(
+                "Applying camera hint for the target camera state = $cameraForFollowing",
+                LOG_CATEGORY,
+            )
+            mapboxMap.setCameraAnimationHint(
+                CameraAnimationHint.Builder().stages(
+                    listOf(
+                        CameraAnimationHintStage.Builder()
+                            .camera(cameraForFollowing)
+                            .progress(1)
+                            .build(),
+                    ),
+                ).build(),
+            )
         }
     }
 
