@@ -25,6 +25,7 @@ import com.mapbox.navigation.copilot.internal.PushStatus
 import com.mapbox.navigation.copilot.internal.PushStatusObserver
 import com.mapbox.navigation.copilot.work.HistoryUploadWorker
 import com.mapbox.navigation.copilot.work.HistoryUploadWorker.Companion.putCopilotSession
+import com.mapbox.navigation.core.internal.telemetry.standalone.StandaloneNavigationTelemetry
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import io.mockk.CapturingSlot
 import io.mockk.coEvery
@@ -94,6 +95,9 @@ class HistoryUploadWorkerTest {
         mockedUploadServiceInterface = mockHttpService()
 
         MapboxCopilot.pushStatusObservers.add(mockedPushStatusObserver)
+
+        mockkObject(StandaloneNavigationTelemetry.Companion)
+        every { StandaloneNavigationTelemetry.getOrCreate() } returns mockk(relaxed = true)
     }
 
     @After

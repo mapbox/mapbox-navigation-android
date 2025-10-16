@@ -35,6 +35,8 @@ import com.mapbox.navigation.core.internal.lifecycle.CarAppLifecycleOwner
 import com.mapbox.navigation.core.internal.telemetry.ExtendedUserFeedback
 import com.mapbox.navigation.core.internal.telemetry.UserFeedbackObserver
 import com.mapbox.navigation.core.internal.telemetry.registerUserFeedbackObserver
+import com.mapbox.navigation.core.internal.telemetry.standalone.StandaloneCustomEvent
+import com.mapbox.navigation.core.internal.telemetry.standalone.StandaloneNavigationTelemetry
 import com.mapbox.navigation.core.internal.telemetry.unregisterUserFeedbackObserver
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
@@ -242,6 +244,10 @@ internal class MapboxCopilotImpl(
         }
 
         val recording = copilotHistoryRecorder.startRecording().firstOrNull() ?: ""
+        if (recording.isEmpty()) {
+            reportCopilotError("History recording files are empty")
+        }
+
         currentHistoryRecordingSessionState = historyRecordingSessionState
         startSessionTime = SystemClock.elapsedRealtime()
         activeSession = CopilotSession.create(
@@ -284,6 +290,10 @@ internal class MapboxCopilotImpl(
             limitTotalHistoryFilesSize(finishedSessions)
         }
         val recording = copilotHistoryRecorder.startRecording().firstOrNull() ?: ""
+        if (recording.isEmpty()) {
+            reportCopilotError("History recording files are empty")
+        }
+
         // when restarting recording we inherit previous session info and just update start time
         activeSession = activeSession.copy(
             recording = recording,
@@ -436,5 +446,12 @@ internal class MapboxCopilotImpl(
         internal const val PROD_BASE_URL = "https://events.mapbox.com"
 
         internal fun logD(msg: String) = logD(msg, LOG_CATEGORY)
+
+        internal fun reportCopilotError(description: String) {
+            logD("reportCopilotError($description)", LOG_CATEGORY)
+            StandaloneNavigationTelemetry.getOrCreate().sendEvent(
+                StandaloneCustomEvent(type = "copilot-error", payload = description),
+            )
+        }
     }
 }
