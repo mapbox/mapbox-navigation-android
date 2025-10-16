@@ -30,6 +30,7 @@ import com.mapbox.navigation.copilot.MapboxCopilotImpl.Companion.MEDIA_TYPE_ZIP
 import com.mapbox.navigation.copilot.MapboxCopilotImpl.Companion.PROD_BASE_URL
 import com.mapbox.navigation.copilot.MapboxCopilotImpl.Companion.ZIP
 import com.mapbox.navigation.copilot.MapboxCopilotImpl.Companion.gson
+import com.mapbox.navigation.copilot.MapboxCopilotImpl.Companion.reportCopilotError
 import com.mapbox.navigation.copilot.internal.CopilotSession
 import com.mapbox.navigation.copilot.internal.PushStatus
 import com.mapbox.navigation.copilot.internal.saveFilename
@@ -65,6 +66,23 @@ internal class HistoryUploadWorker(
         val recordingFile =
             rename(File(copilotSession.recording), attachmentFilename(copilotSession))
         val sessionFile = File(recordingFile.parent, copilotSession.saveFilename())
+
+        if (!recordingFile.exists()) {
+            reportCopilotError(
+                "History file does not exist: ${recordingFile.name}. " +
+                    "Copilot session: $copilotSession. " +
+                    "Copilot dir files: ${recordingFile.parentFile?.listFiles()?.map { it.name }}",
+            )
+        }
+
+        if (!sessionFile.exists()) {
+            reportCopilotError(
+                "Session file does not exist: ${sessionFile.name}. " +
+                    "Copilot session: $copilotSession. " +
+                    "Copilot dir files: ${recordingFile.parentFile?.listFiles()?.map { it.name }}",
+            )
+        }
+
         val uploadSessionId = workerParams.inputData.getString(UPLOAD_SESSION_ID)!!
 
         val metadataList = arrayListOf(
@@ -138,6 +156,21 @@ internal class HistoryUploadWorker(
                 TransferState.FINISHED -> {
                     val httpResultCode = uploadStatus.httpResult?.value?.code
                     logD("uploadStatus state = FINISHED httpResultCode = $httpResultCode")
+
+                    uploadStatus.httpResult?.onError { error ->
+                        reportCopilotError(
+                            "History upload failed for ${uploadOptions.filePath}. " +
+                                "Response error = $error",
+                        )
+                    }?.onValue { value ->
+                        if (!value.code.isSuccessful()) {
+                            reportCopilotError(
+                                "History upload failed for ${uploadOptions.filePath}. " +
+                                    "Response data = $value",
+                            )
+                        }
+                    }
+
                     cont.resume(httpResultCode.isSuccessful())
                 }
 
@@ -146,6 +179,13 @@ internal class HistoryUploadWorker(
                         "uploadStatus state = FAILED error = ${uploadStatus.error}; " +
                             "HttpResponseData = ${uploadStatus.httpResult?.value}",
                     )
+
+                    reportCopilotError(
+                        "History upload failed for ${uploadOptions.filePath}. " +
+                            "Error = ${uploadStatus.error}, " +
+                            "HttpResponseData = ${uploadStatus.httpResult?.value}",
+                    )
+
                     cont.resume(false)
                 }
             }
