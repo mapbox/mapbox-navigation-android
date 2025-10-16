@@ -21,6 +21,15 @@ internal class TraceSectionsPerformanceObserver : PerformanceObserver {
         Trace.endSection()
     }
 
+    @SuppressLint("UnclosedTrace")
+    override fun asyncSectionStarted(name: String, id: Int) {
+        Trace.beginAsyncSection(wrapSectionName(name), id)
+    }
+
+    override fun asyncSectionFinished(name: String, id: Int, duration: Duration?) {
+        Trace.endAsyncSection(wrapSectionName(name), id)
+    }
+
     private fun wrapSectionName(name: String) = "$MAPBOX_TRACE_ID: $NAV_SDK_PREFIX: $name"
 }
 

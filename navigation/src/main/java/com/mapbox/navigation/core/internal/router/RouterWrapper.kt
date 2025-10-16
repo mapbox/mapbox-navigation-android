@@ -47,7 +47,6 @@ import kotlinx.coroutines.withContext
 import java.net.URL
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.time.ExperimentalTime
-import kotlin.time.TimeSource.Monotonic.markNow
 
 private class OngoingRequest(
     var parsingJob: Job?,
@@ -94,8 +93,7 @@ internal class RouterWrapper(
         var callbackInvoked = false
         var id: Long? = null
 
-        PerformanceTracker.syncSectionStarted("RouterWrapper#getRoute()")
-        val routeRequestStartMark = markNow()
+        val getRouteSection = PerformanceTracker.asyncSectionStarted("RouterWrapper#getRoute()")
 
         id = originRouter.getRoute(
             routeUrl,
@@ -108,10 +106,7 @@ internal class RouterWrapper(
             }
 
             mainJobControl.scope.launch {
-                PerformanceTracker.syncSectionCompleted(
-                    "RouterWrapper#getRoute()",
-                    routeRequestStartMark.elapsedNow(),
-                )
+                PerformanceTracker.asyncSectionCompleted(getRouteSection)
 
                 endRouteRequest(
                     id,
@@ -129,10 +124,7 @@ internal class RouterWrapper(
             activeRouteRequests[id] = OngoingRequest(
                 null,
                 {
-                    PerformanceTracker.syncSectionCompleted(
-                        "RouterWrapper#getRoute()",
-                        routeRequestStartMark.elapsedNow(),
-                    )
+                    PerformanceTracker.asyncSectionCompleted(getRouteSection)
 
                     callback.onCanceled(
                         routeOptions,
@@ -185,8 +177,9 @@ internal class RouterWrapper(
         var id: Long? = null
         var callbackInvoked = false
 
-        PerformanceTracker.syncSectionStarted("RouterWrapper#getRouteRefresh()")
-        val routeRequestStartMark = markNow()
+        val routeRefreshSection = PerformanceTracker.asyncSectionStarted(
+            "RouterWrapper#getRouteRefresh()",
+        )
 
         id = originRouter.getRouteRefresh(
             refreshOptions,
@@ -195,10 +188,7 @@ internal class RouterWrapper(
             logI("Received result from router.getRouteRefresh for ${route.id}", LOG_CATEGORY)
 
             mainJobControl.scope.launch {
-                PerformanceTracker.syncSectionCompleted(
-                    "RouterWrapper#getRouteRefresh()",
-                    routeRequestStartMark.elapsedNow(),
-                )
+                PerformanceTracker.asyncSectionCompleted(routeRefreshSection)
 
                 endRouteRefreshRequest(
                     id,
@@ -216,10 +206,7 @@ internal class RouterWrapper(
             activeRouteRefreshRequests[id] = OngoingRequest(
                 null,
                 {
-                    PerformanceTracker.syncSectionCompleted(
-                        "RouterWrapper#getRouteRefresh()",
-                        routeRequestStartMark.elapsedNow(),
-                    )
+                    PerformanceTracker.asyncSectionCompleted(routeRefreshSection)
 
                     callback.onFailure(NavigationRouterRefreshError("Request cancelled"))
                 },

@@ -15,4 +15,12 @@ internal class LogcatPerformanceLogging : PerformanceObserver {
     override fun syncSectionCompleted(name: String, duration: Duration?) {
         logI(TAG) { "$name section completed in $duration" }
     }
+
+    override fun asyncSectionStarted(name: String, id: Int) {
+        logI(TAG) { "$name async section started (id: $id)" }
+    }
+
+    override fun asyncSectionFinished(name: String, id: Int, duration: Duration?) {
+        logI(TAG) { "$name async section finished (id: $id) in $duration" }
+    }
 }

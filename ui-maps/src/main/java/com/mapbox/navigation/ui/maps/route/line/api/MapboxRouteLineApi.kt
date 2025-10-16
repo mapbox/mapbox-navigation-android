@@ -81,7 +81,6 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.time.ExperimentalTime
-import kotlin.time.TimeSource.Monotonic.markNow
 
 /**
  * Responsible for generating route line related data which can be rendered on the map to
@@ -517,8 +516,9 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         alternativeRoutesMetadata: List<AlternativeRouteMetadata>,
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>,
     ) {
-        PerformanceTracker.syncSectionStarted("MapboxRouteLineApi#setNavigationRouteLines")
-        val setNavigationRouteLinesStartMark = markNow()
+        val setNavigationRouteLinesSection = PerformanceTracker.asyncSectionStarted(
+            "MapboxRouteLineApi#setNavigationRouteLines",
+        )
 
         calculationsScope.coroutineContext.cancelChildren()
         if (newRoutes.isEmpty()) {
@@ -537,10 +537,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                         waypointsSource = clearValue.waypointsSource,
                     )
                 }
-                PerformanceTracker.syncSectionCompleted(
-                    "MapboxRouteLineApi#setNavigationRouteLines",
-                    setNavigationRouteLinesStartMark.elapsedNow(),
-                )
+                PerformanceTracker.asyncSectionCompleted(setNavigationRouteLinesSection)
                 consumer.accept(result)
             }
         } else {
@@ -560,10 +557,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                         alternativeRoutesMetadata,
                         activeLegIndex,
                     )
-                    PerformanceTracker.syncSectionCompleted(
-                        "MapboxRouteLineApi#setNavigationRouteLines",
-                        setNavigationRouteLinesStartMark.elapsedNow(),
-                    )
+                    PerformanceTracker.asyncSectionCompleted(setNavigationRouteLinesSection)
                     consumer.accept(routeData)
                 }
             }
@@ -657,8 +651,9 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
     fun clearRouteLine(
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteLineClearValue>>,
     ) {
-        PerformanceTracker.syncSectionStarted("MapboxRouteLineApi#clearRouteLine")
-        val clearRouteLineStartMark = markNow()
+        val clearRouteLineSection = PerformanceTracker.asyncSectionStarted(
+            "MapboxRouteLineApi#clearRouteLine",
+        )
 
         stopMemoryMonitoring()
 
@@ -678,10 +673,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                     it.onSet(routes, alternativeRoutesMetadata)
                 }
 
-                PerformanceTracker.syncSectionCompleted(
-                    "MapboxRouteLineApi#clearRouteLine",
-                    clearRouteLineStartMark.elapsedNow(),
-                )
+                PerformanceTracker.asyncSectionCompleted(clearRouteLineSection)
 
                 consumer.accept(
                     ExpectedFactory.createValue(
@@ -747,14 +739,12 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         routeProgress: RouteProgress,
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteLineUpdateValue>>,
     ) {
-        PerformanceTracker.syncSectionStarted("MapboxRouteLineApi#updateWithRouteProgress")
-        val updateWithRouteProgressStartMark = markNow()
+        val updateWithRouteProgressSection = PerformanceTracker.asyncSectionStarted(
+            "MapboxRouteLineApi#updateWithRouteProgress",
+        )
 
         fun perfCompletion() {
-            PerformanceTracker.syncSectionCompleted(
-                "MapboxRouteLineApi#updateWithRouteProgress",
-                updateWithRouteProgressStartMark.elapsedNow(),
-            )
+            PerformanceTracker.asyncSectionCompleted(updateWithRouteProgressSection)
         }
 
         routeProgressUpdatesQueue.addJob(
