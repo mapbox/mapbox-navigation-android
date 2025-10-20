@@ -12,9 +12,9 @@ import kotlin.time.Duration
  *
  * @param legIndex the index of the route leg where slow traffic is detected
  * @param slowTrafficGeometryRange the range of geometry indices affected by slow traffic
- * @param freeFlowRangeDuration the duration it would take to traverse the affected range under free-flow conditions
- * @param slowTrafficRangeDuration the duration it takes to traverse the affected range under current slow traffic conditions
- * @param slowTrafficRangeDistance the distance of the affected range in meters
+ * @param freeFlowRangeDuration the duration it would take to traverse the affected geometry range under free-flow conditions
+ * @param slowTrafficRangeDuration the duration it takes to traverse the affected geometry range under current slow traffic conditions
+ * @param slowTrafficRangeDistance the distance of the affected geometry range in meters
  *
  * @see [DriverNotification] for the base class of all driver notifications
  */

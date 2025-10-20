@@ -26,14 +26,11 @@ class SlowTrafficSegmentsFinder {
      * segment's congestion level.
      *
      * A "slow traffic segment" is considered a continuous sequence of geometry points where the
-     * congestion value is within any of the provided [targetCongestionsRanges]. When a point
+     * congestion value is within one of the provided [targetCongestionsRanges]. When a point
      * with a congestion level outside these ranges is encountered, the segment is considered
      * complete and is added to the results.
-     *
-     * A single returned [SlowTrafficSegment] can contain multiple
-     * levels of congestion (e.g., both "moderate" and "heavy"). The `traits` property of the
-     * segment provides a breakdown of the distance and duration for each specific congestion
-     * range found within that segment.
+     * The segment is also considered complete if the next point belongs to another range within
+     * [targetCongestionsRanges].
      *
      * @param routeProgress The current progress along the route. The search for traffic
      * will begin from this point forward.
@@ -64,76 +61,55 @@ class SlowTrafficSegmentsFinder {
         var accumulatedDistance = 0.0
         legs.forEachIndexed { legListIndex, leg ->
             val currentLegIndex = firstLegIndex + legListIndex
-            var firstGeometryIndex = if (currentLegIndex == firstLegIndex) {
+            val firstGeometryIndex = if (currentLegIndex == firstLegIndex) {
                 currentLegProgress?.geometryIndex ?: 0
             } else {
                 0
             }
 
             val geometry = Geometry.Companion.of(leg) ?: Geometry.Companion.EMPTY
-            var traitsMap: MutableMap<IntRange, SlowTrafficSegmentTraits>? = null
-            var trafficStartIndex: Int? = null
-            var trafficStartMeters: Double? = null
+            var currentSegment: SlowTrafficSegment? = null
 
             for (geometryIndex in firstGeometryIndex until geometry.size) {
-                var congestion = geometry.congestion(geometryIndex)
-                if (congestion.isIn(targetCongestionsRanges)) {
-                    traitsMap = traitsMap ?: mutableMapOf()
-                    trafficStartIndex = trafficStartIndex ?: geometryIndex
-                    trafficStartMeters = trafficStartMeters ?: accumulatedDistance
+                if (segmentsLimit <= result.size) {
+                    return@withContext result
+                }
+                val congestion = geometry.congestion(geometryIndex)
+                val congestionRange = targetCongestionsRanges.rangeOf(congestion)
 
-                    val congestionRange = targetCongestionsRanges.rangeOf(congestion) ?: continue
-                    val traits = traitsMap.getOrPut(congestionRange) {
-                        SlowTrafficSegmentTraits(congestionRange)
-                    }
-                    // Let's update the existing traits with new data
-                    traitsMap[congestionRange] = traits.updateBy(
-                        geometry,
-                        geometryIndex,
-                    )
-                } else {
-                    if (traitsMap != null &&
-                        trafficStartIndex != null &&
-                        trafficStartMeters != null
-                    ) {
-                        // Slow traffic section has just ended
-                        result.add(
-                            SlowTrafficSegment(
-                                legIndex = currentLegIndex,
-                                geometryRange = trafficStartIndex until geometryIndex,
-                                distanceToSegmentMeters = trafficStartMeters,
-                                traits = traitsMap.values.toSet(),
-                            ),
+                // If congestion range of [currentSegment] is not same as the one of the current
+                // geometry, then [currentSegment] has just ended.
+                if (currentSegment != null && currentSegment.congestionRange != congestionRange) {
+                    result.add(currentSegment)
+                    currentSegment = null
+                }
+
+                if (congestionRange != null) {
+                    if (currentSegment == null) {
+                        currentSegment = SlowTrafficSegment(
+                            congestionRange = congestionRange,
+                            legIndex = currentLegIndex,
+                            geometryRange = geometryIndex..geometryIndex,
+                            distanceToSegmentMeters = accumulatedDistance,
+                            distanceMeters = 0.0,
+                            freeFlowDuration = Duration.ZERO,
+                            duration = Duration.ZERO,
                         )
                     }
-                    traitsMap = null
-                    trafficStartIndex = null
-                    trafficStartMeters = null
-                    if (segmentsLimit <= result.size) {
-                        return@withContext result
-                    }
+                    currentSegment = currentSegment.updateBy(geometry, geometryIndex)
                 }
                 accumulatedDistance += geometry.distance(geometryIndex)
             }
-            // Last congestion, if any
-            if (traitsMap != null && trafficStartIndex != null && trafficStartMeters != null) {
-                result.add(
-                    SlowTrafficSegment(
-                        currentLegIndex,
-                        trafficStartIndex until geometry.size,
-                        trafficStartMeters,
-                        traitsMap.values.toSet(),
-                    ),
-                )
-            }
+            // Last congestion, if any, at the end of the leg
+            currentSegment?.let { result.add(it) }
         }
         result
     }
 
-    private fun SlowTrafficSegmentTraits.updateBy(
+    private fun SlowTrafficSegment.updateBy(
         geometry: Geometry,
         geometryIndex: Int,
-    ): SlowTrafficSegmentTraits {
+    ): SlowTrafficSegment {
         val legFreeFlowSpeed = geometry.freeFlowSpeed(geometryIndex)
         val freeFlowDurationSec = when {
             legFreeFlowSpeed != null -> {
@@ -153,11 +129,11 @@ class SlowTrafficSegmentsFinder {
             freeFlowDuration = this.freeFlowDuration + freeFlowDurationSec.seconds,
             duration = this.duration + geometry.duration(geometryIndex),
             distanceMeters = this.distanceMeters + geometry.distance(geometryIndex),
+            geometryRange = geometryRange.first..geometryIndex,
         )
     }
 
     private fun List<IntRange>.rangeOf(congestion: Int?) = firstOrNull { it.contains(congestion) }
-    private fun Int?.isIn(ranges: List<IntRange>) = ranges.rangeOf(this) != null
 
     private companion object {
         // Calc time with seconds:

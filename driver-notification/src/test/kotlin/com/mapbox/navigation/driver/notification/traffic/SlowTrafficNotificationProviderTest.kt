@@ -6,7 +6,6 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.flowRouteProgress
 import com.mapbox.navigation.driver.notification.internal.SlowTrafficSegment
-import com.mapbox.navigation.driver.notification.internal.SlowTrafficSegmentTraits
 import com.mapbox.navigation.driver.notification.internal.SlowTrafficSegmentsFinder
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import io.mockk.coEvery
@@ -91,14 +90,10 @@ class SlowTrafficNotificationProviderTest {
             legIndex = 0,
             geometryRange = 2..5,
             distanceToSegmentMeters = 21.0,
-            traits = setOf(
-                SlowTrafficSegmentTraits(
-                    congestionRange = slowTrafficCongestion,
-                    freeFlowDuration = 100.seconds,
-                    duration = 400.seconds,
-                    distanceMeters = 100.0,
-                ),
-            ),
+            congestionRange = slowTrafficCongestion,
+            freeFlowDuration = 100.seconds,
+            duration = 400.seconds,
+            distanceMeters = 100.0,
         )
         coEvery {
             val result = segmentsFinder.findSlowTrafficSegments(any(), any(), any(), any())
@@ -125,15 +120,15 @@ class SlowTrafficNotificationProviderTest {
         assertEquals(segment.geometryRange, slowTrafficNotification?.slowTrafficGeometryRange)
         assertEquals(segment.legIndex, slowTrafficNotification?.legIndex)
         assertEquals(
-            segment.traits.first().duration,
+            segment.duration,
             slowTrafficNotification?.slowTrafficRangeDuration,
         )
         assertEquals(
-            segment.traits.first().distanceMeters,
+            segment.distanceMeters,
             slowTrafficNotification?.slowTrafficRangeDistance,
         )
         assertEquals(
-            segment.traits.first().freeFlowDuration,
+            segment.freeFlowDuration,
             slowTrafficNotification?.freeFlowRangeDuration,
         )
     }

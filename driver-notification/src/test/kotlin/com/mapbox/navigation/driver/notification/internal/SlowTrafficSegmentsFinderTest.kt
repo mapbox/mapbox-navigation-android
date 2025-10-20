@@ -52,18 +52,16 @@ class SlowTrafficSegmentsFinderTest {
         // The distance before the segment starts is 50.0 + 60.0
         Assert.assertEquals(110.0, segment.distanceToSegmentMeters, 0.01)
 
-        Assert.assertEquals(1, segment.traits.size)
-        val traits = segment.traits.first()
         Assert.assertEquals(
             SEVERE_CONGESTION_RANGE,
-            traits.congestionRange,
+            segment.congestionRange,
         )
         // Total distance of the slow part: 70.0 + 80.0 + 90.0
-        Assert.assertEquals(240.0, traits.distanceMeters, 0.01)
+        Assert.assertEquals(240.0, segment.distanceMeters, 0.01)
         // Total duration of the slow part: 15.0 + 18.0 + 20.0
-        Assert.assertEquals(53.seconds, traits.duration)
+        Assert.assertEquals(53.seconds, segment.duration)
 
-        Assert.assertEquals(54, traits.freeFlowDuration.inWholeSeconds)
+        Assert.assertEquals(54, segment.freeFlowDuration.inWholeSeconds)
     }
 
     @Test
@@ -95,25 +93,25 @@ class SlowTrafficSegmentsFinderTest {
         Assert.assertEquals(0, firstSegment.legIndex)
         Assert.assertEquals(1..2, firstSegment.geometryRange)
         Assert.assertEquals(10.0, firstSegment.distanceToSegmentMeters, 0.01)
-        Assert.assertEquals(50.0, firstSegment.traits.first().distanceMeters, 0.01)
-        Assert.assertEquals(25.seconds, firstSegment.traits.first().duration)
+        Assert.assertEquals(50.0, firstSegment.distanceMeters, 0.01)
+        Assert.assertEquals(25.seconds, firstSegment.duration)
 
         val secondSegment = segments[1]
         Assert.assertEquals(0, secondSegment.legIndex)
         Assert.assertEquals(5..5, secondSegment.geometryRange)
         Assert.assertEquals(150.0, secondSegment.distanceToSegmentMeters, 0.01)
-        Assert.assertEquals(60.0, secondSegment.traits.first().distanceMeters, 0.01)
-        Assert.assertEquals(16.seconds, secondSegment.traits.first().duration)
+        Assert.assertEquals(60.0, secondSegment.distanceMeters, 0.01)
+        Assert.assertEquals(16.seconds, secondSegment.duration)
     }
 
     @Test
-    fun `finds single segment spanning multiple congestion traits`() = runBlocking {
+    fun `finds many segment spanning for multiple congestion traits`() = runBlocking {
         val annotation = mockk<LegAnnotation> {
             every { congestionNumeric() } returns listOf(
                 lowCongestion,
                 heavyCongestion, // start of segment
-                heavyCongestion,
-                severeCongestion,
+                heavyCongestion, // end of segment
+                severeCongestion, // start of segment
                 severeCongestion, // end of segment
                 lowCongestion,
             )
@@ -131,19 +129,61 @@ class SlowTrafficSegmentsFinderTest {
             ),
         )
 
-        Assert.assertEquals(1, segments.size)
-        val segment = segments.first()
-        Assert.assertEquals(1..4, segment.geometryRange)
-        Assert.assertEquals(10.0, segment.distanceToSegmentMeters, 0.01)
-        Assert.assertEquals(2, segment.traits.size)
+        Assert.assertEquals(2, segments.size)
+
+        Assert.assertEquals(HEAVY_CONGESTION_RANGE, segments.first().congestionRange)
+        Assert.assertEquals(0, segments.first().legIndex)
+        Assert.assertEquals(1..2, segments.first().geometryRange)
+        Assert.assertEquals(10.0, segments.first().distanceToSegmentMeters, 0.01)
+        Assert.assertEquals(50.0, segments.first().distanceMeters, 0.01)
+        Assert.assertEquals(17.seconds, segments.first().duration)
+
+        Assert.assertEquals(SEVERE_CONGESTION_RANGE, segments.last().congestionRange)
+        Assert.assertEquals(0, segments.last().legIndex)
+        Assert.assertEquals(3..4, segments.last().geometryRange)
+        Assert.assertEquals(60.0, segments.last().distanceToSegmentMeters, 0.01)
+        Assert.assertEquals(90.0, segments.last().distanceMeters, 0.01)
+        Assert.assertEquals(33.seconds, segments.last().duration)
+    }
+
+    @Test
+    fun `gives single summary for continuous segments spanning multiple congestion traits`() = runBlocking {
+        val annotation = mockk<LegAnnotation> {
+            every { congestionNumeric() } returns listOf(
+                lowCongestion,
+                heavyCongestion, // start of segment
+                heavyCongestion,
+                severeCongestion,
+                severeCongestion, // end of segment
+                lowCongestion,
+            )
+            every { distance() } returns listOf(10.0, 20.0, 30.0, 40.0, 50.0, 60.0)
+            every { duration() } returns listOf(1.0, 8.0, 9.0, 15.0, 18.0, 6.0)
+            every { freeflowSpeed() } returns listOf(36, 25, 25, 15, 15, 36)
+        }
+        val routeProgress = prepareRouteProgressFrom(annotation)
+
+        val summaries = finder.findAndSummarizeSlowTrafficSegments(
+            routeProgress = routeProgress,
+            targetCongestionsRanges = listOf(
+                HEAVY_CONGESTION_RANGE,
+                SEVERE_CONGESTION_RANGE,
+            ),
+        )
+
+        Assert.assertEquals(1, summaries.size)
+        val summary = summaries.first()
+        Assert.assertEquals(1..4, summary.geometryRange)
+        Assert.assertEquals(10.0, summary.distanceToSegmentMeters, 0.01)
+        Assert.assertEquals(2, summary.traits.size)
 
         val moderateTraits =
-            segment.traits.first { it.congestionRange == HEAVY_CONGESTION_RANGE }
+            summary.traits.first { it.congestionRange == HEAVY_CONGESTION_RANGE }
         Assert.assertEquals(50.0, moderateTraits.distanceMeters, 0.01)
         Assert.assertEquals(17.seconds, moderateTraits.duration)
 
         val severeTraits =
-            segment.traits.first { it.congestionRange == SEVERE_CONGESTION_RANGE }
+            summary.traits.first { it.congestionRange == SEVERE_CONGESTION_RANGE }
         Assert.assertEquals(90.0, severeTraits.distanceMeters, 0.01)
         Assert.assertEquals(33.seconds, severeTraits.duration)
     }
@@ -173,10 +213,8 @@ class SlowTrafficSegmentsFinderTest {
         Assert.assertEquals(0, segment.legIndex)
         Assert.assertEquals(2..3, segment.geometryRange)
         Assert.assertEquals(110.0, segment.distanceToSegmentMeters, 0.01)
-
-        val traits = segment.traits.first()
-        Assert.assertEquals(150.0, traits.distanceMeters, 0.01)
-        Assert.assertEquals(33.seconds, traits.duration)
+        Assert.assertEquals(150.0, segment.distanceMeters, 0.01)
+        Assert.assertEquals(33.seconds, segment.duration)
     }
 
     @Test
@@ -214,7 +252,7 @@ class SlowTrafficSegmentsFinderTest {
         Assert.assertEquals(0, firstSegment.legIndex)
         Assert.assertEquals(1..1, firstSegment.geometryRange)
         Assert.assertEquals(100.0, firstSegment.distanceToSegmentMeters, 0.01)
-        Assert.assertEquals(200.0, firstSegment.traits.first().distanceMeters, 0.01)
+        Assert.assertEquals(200.0, firstSegment.distanceMeters, 0.01)
 
         val secondSegment = segments[1]
         Assert.assertEquals(1, secondSegment.legIndex)
@@ -226,7 +264,7 @@ class SlowTrafficSegmentsFinderTest {
             secondSegment.distanceToSegmentMeters,
             0.01,
         )
-        Assert.assertEquals(70.0, secondSegment.traits.first().distanceMeters, 0.01)
+        Assert.assertEquals(70.0, secondSegment.distanceMeters, 0.01)
     }
 
     @Test

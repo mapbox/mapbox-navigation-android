@@ -93,22 +93,18 @@ class SlowTrafficNotificationProvider(
                 legsLimit = 1,
                 segmentsLimit = 1,
             ).firstOrNull()
-            // NOTE: because we've requested only 1 target congestion range, there
-            // can be only 1 item in `traits`.
-            val slowTrafficTraits = segment?.traits?.firstOrNull()
 
             if (segment == null ||
-                slowTrafficTraits == null ||
-                slowTrafficTraits.duration - slowTrafficTraits.freeFlowDuration < minTrafficDelay
+                segment.duration - segment.freeFlowDuration < minTrafficDelay
             ) {
                 return null
             }
             return SlowTrafficNotification(
                 segment.legIndex,
                 segment.geometryRange,
-                slowTrafficTraits.freeFlowDuration,
-                slowTrafficTraits.duration,
-                slowTrafficTraits.distanceMeters,
+                segment.freeFlowDuration,
+                segment.duration,
+                segment.distanceMeters,
             )
         }
         return null
