@@ -365,6 +365,7 @@ class NavigationScaleGestureHandler internal constructor(
         )
         gesturesPlugin.removeOnMoveListener(onMoveListener)
         gesturesPlugin.removeProtectedAnimationOwner(NAVIGATION_CAMERA_OWNER)
+        gesturesPlugin.updateSettings { focalPoint = null }
 
         userLocationIndicatorPositionProvider.removeObserver(onIndicatorPositionChangedListener)
 
