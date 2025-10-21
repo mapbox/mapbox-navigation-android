@@ -4,27 +4,42 @@ package com.mapbox.navigation.instrumentation_tests.core
 
 import android.location.Location
 import com.adevinta.android.barista.rule.cleardata.ClearFilesRule
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.common.TileStore
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
+import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.NavigationVersionSwitchObserver
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.instrumentation_tests.utils.tiles.OfflineRegion
 import com.mapbox.navigation.instrumentation_tests.utils.tiles.unpackOfflineTiles
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
+import com.mapbox.navigation.testing.ui.http.MockRequestHandler
+import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
+import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
+import com.mapbox.navigation.testing.utils.location.stayOnPosition
+import com.mapbox.navigation.testing.utils.setTestRouteRefreshInterval
 import com.mapbox.navigation.testing.utils.withMapboxNavigation
 import com.mapbox.navigation.testing.utils.withoutInternet
+import com.mapbox.navigation.utils.internal.toPoint
+import com.mapbox.turf.TurfMeasurement
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.withTimeoutOrNull
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.RecordedRequest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.fail
 import org.junit.Rule
 import org.junit.Test
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.time.Duration.Companion.seconds
 
 class OfflineTest : BaseCoreNoCleanUpTest() {
@@ -106,6 +121,7 @@ class OfflineTest : BaseCoreNoCleanUpTest() {
                             navigatorFellBackToTilesVersion = tilesVersion
                             versionSwitchCount++
                         }
+
                         override fun onSwitchToTargetVersion(tilesVersion: String?) {
                             navigatorFellBackToTilesVersion = tilesVersion
                             versionSwitchCount++
@@ -128,6 +144,63 @@ class OfflineTest : BaseCoreNoCleanUpTest() {
                     navigatorFellBackToTilesVersion,
                 )
                 assertEquals(1, versionSwitchCount)
+            }
+        }
+    }
+
+    @Test
+    fun offline_route_refresh() = sdkTest {
+        val refreshesAttempts = AtomicInteger(0)
+        val testRefreshIntervalMilliseconds = 100L
+        mockWebServerRule.requestHandlers.add(
+            object : MockRequestHandler {
+                override fun handle(request: RecordedRequest): MockResponse? {
+                    if (request.path?.contains("directions-refresh") == true) {
+                        refreshesAttempts.incrementAndGet()
+                    }
+                    return null
+                }
+            },
+        )
+        val version = context.unpackOfflineTiles(OfflineRegion.Berlin)
+        withMapboxNavigation(
+            historyRecorderRule = mapboxHistoryTestRule,
+            tileStore = TileStore.create(),
+            tilesVersion = version,
+            routeRefreshOptions = RouteRefreshOptions
+                .Builder()
+                .build().apply {
+                    setTestRouteRefreshInterval(testRefreshIntervalMilliseconds)
+                },
+        ) { navigation ->
+            val testOrigin = Point.fromLngLat(13.389456, 52.518050)
+            stayOnPosition(
+                point = testOrigin,
+                bearing = 270.0f,
+                frequencyHz = 1,
+            ) {
+                navigation.startTripSession()
+                val currentPosition = navigation.flowLocationMatcherResult().first {
+                    TurfMeasurement.distance(it.enhancedLocation.toPoint(), testOrigin) < 0.1
+                }
+                withoutInternet {
+                    val response = navigation.requestRoutes(
+                        RouteOptions
+                            .builder()
+                            .applyDefaultNavigationOptions()
+                            .baseUrl(mockWebServerRule.baseUrl)
+                            .coordinatesList(
+                                listOf(
+                                    currentPosition.enhancedLocation.toPoint(),
+                                    Point.fromLngLat(13.389507, 52.518734),
+                                ),
+                            )
+                            .build(),
+                    ).getSuccessfulResultOrThrowException()
+                    navigation.setNavigationRoutes(response.routes)
+                }
+                delay(testRefreshIntervalMilliseconds * 3)
+                assertEquals(0, refreshesAttempts.get())
             }
         }
     }

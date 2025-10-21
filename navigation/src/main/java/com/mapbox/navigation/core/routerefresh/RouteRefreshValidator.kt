@@ -25,6 +25,10 @@ internal object RouteRefreshValidator {
             RouteValidationResult.Invalid(
                 "Custom routes can't be refreshed",
             )
+        route.origin == RouterOrigin.OFFLINE ->
+            RouteValidationResult.Invalid(
+                "Offline routes can't be refreshed",
+            )
         route.routeOptions.enableRefresh() != true ->
             RouteValidationResult.Invalid("RouteOptions#enableRefresh is false")
         route.directionsRoute.requestUuid()?.isNotBlank() != true ->

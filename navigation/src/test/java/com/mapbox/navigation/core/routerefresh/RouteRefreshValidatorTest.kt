@@ -1,6 +1,8 @@
 package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.testing.assertIs
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createNavigationRoute
 import com.mapbox.navigation.testing.factories.createRouteOptions
@@ -54,6 +56,21 @@ class RouteRefreshValidatorTest {
                 .Invalid("RouteOptions#enableRefresh is false"),
             RouteRefreshValidator.validateRoute(route),
         )
+    }
+
+    @Test
+    fun `validate offline route`() {
+        val route = createNavigationRoute(
+            directionsRoute = createDirectionsRoute(
+                requestUuid = "uuid",
+                routeOptions = createRouteOptions(enableRefresh = true),
+            ),
+            routerOrigin = RouterOrigin.OFFLINE,
+        )
+
+        val result = RouteRefreshValidator.validateRoute(route)
+
+        assertIs<RouteRefreshValidator.RouteValidationResult.Invalid>(result)
     }
 
     @Test
