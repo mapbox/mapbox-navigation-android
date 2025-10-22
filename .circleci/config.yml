@@ -94,6 +94,8 @@ workflows:
       - assemble-instrumentation-test-internal
       - assemble-androidauto-test
       - assemble-app-mincompile
+      - assemble-qa-test-app
+      - assemble-android-auto-app
       - changelog-verification:
           filters:
             branches:
@@ -408,6 +410,18 @@ commands:
       - run:
           name: Assemble Navigation UI SDK (release)
           command: make assemble-ui-release
+
+  assemble-qa-test-app:
+    steps:
+      - run:
+          name: Assemble qa-test-app (both NDK 23 and NDK 27 variants)
+          command: make assemble-qa-test-app
+
+  assemble-android-auto-app:
+    steps:
+      - run:
+          name: Assemble assemble-android-auto-app (both NDK 23 and NDK 27 variants)
+          command: make assemble-android-auto-app
 
   assemble-old-deps-compat-release:
     parameters:
@@ -798,6 +812,22 @@ jobs:
       - assemble-app-mincompile:
           inject_token: true
       - write-workspace
+
+  assemble-qa-test-app:
+    executor: ndk-r22-latest-executor
+    resource_class: medium+
+    steps:
+      - checkout
+      - restore-gradle-cache
+      - assemble-qa-test-app
+
+  assemble-android-auto-app:
+    executor: ndk-r22-latest-executor
+    resource_class: medium+
+    steps:
+      - checkout
+      - restore-gradle-cache
+      - assemble-android-auto-app
 
   assemble-instrumentation-test-internal:
     executor: ndk-r22-latest-executor
