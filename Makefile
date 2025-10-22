@@ -258,3 +258,13 @@ update-metalava:
 car:
 	adb forward tcp:5277 tcp:5277
 	cd $(ANDROID_HOME)/extras/google/auto/ && ./desktop-head-unit
+
+.PHONY: assemble-qa-test-app
+assemble-qa-test-app:
+	./gradlew :qa-test-app:assembleDebug
+	./gradlew :qa-test-app:assembleDebug -PndkMajor=27
+
+.PHONY: assemble-android-auto-app
+assemble-android-auto-app:
+	./gradlew :android-auto-app:assembleDebug
+	./gradlew :android-auto-app:assembleDebug -PndkMajor=27
