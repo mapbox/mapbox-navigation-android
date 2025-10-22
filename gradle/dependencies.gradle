@@ -35,8 +35,7 @@ ext {
       mapboxCrashMonitor        : '2.0.0',
       mapboxAnnotationPlugin    : '0.8.0',
       mapboxBaseAndroid         : '0.8.0',
-      mapboxMapsAndroidAuto     : '0.5.0',
-      mapboxSearchAndroidAuto   : '1.0.0-rc.1',
+      mapboxMapsAndroidAuto     : '0.6.1',
       androidXLifecycle         : "${androidXLifecycleVersion}",
       androidXCoreVersion       : '1.6.0',
       androidXArchCoreVersion   : '2.1.0',
@@ -88,8 +87,7 @@ ext {
       mapboxSdkRefreshModels    : "com.mapbox.mapboxsdk:mapbox-sdk-directions-refresh-models:${version.mapboxSdkServices}",
       mapboxNavigator           : "com.mapbox.navigator:mapbox-navigation-native$ndkVersionSuffix:${version.mapboxNavigator}",
       mapboxCommonNative        : "com.mapbox.common:common$ndkVersionSuffix:${version.mapboxCommonNative}",
-      mapboxMapsAndroidAuto     : "com.mapbox.extension:maps-androidauto:${version.mapboxMapsAndroidAuto}",
-      mapboxSearchAndroidAuto   : "com.mapbox.search:mapbox-search-android:${version.mapboxSearchAndroidAuto}",
+      mapboxMapsAndroidAuto     : "com.mapbox.extension:maps-androidauto$ndkVersionSuffix:${version.mapboxMapsAndroidAuto}",
 
       /**
        * explicitly define Mapbox OkHttp dependency so that we are sure it's in sync with the Common SDK version we define
@@ -226,5 +224,15 @@ ext {
       mapboxAccessToken    : "com.mapbox.gradle.plugins:access-token:${pluginVersion.mapboxAccessToken}",
       mapboxNativeDownload : "com.mapbox.gradle.plugins:native-download:${pluginVersion.mapboxNativeDownload}",
       firebaseCrashlytics  : "com.google.firebase:firebase-crashlytics-gradle:${pluginVersion.firebaseCrashlytics}"
+  ]
+
+  androidAutoVersions = [
+      mapboxSearch    : '1.5.0',
+      mapboxNavigation: '2.21.0'
+  ]
+
+  androidAutoDependencies = [
+      mapboxSearch    : "com.mapbox.search:mapbox-search-android$ndkVersionSuffix:${androidAutoVersions.mapboxSearch}",
+      mapboxNavigation: "com.mapbox.navigation:android$ndkVersionSuffix:${androidAutoVersions.mapboxNavigation}"
   ]
 }

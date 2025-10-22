@@ -58,7 +58,6 @@ class PlacesListOnMapLayerUtilTest : MapboxRobolectricTestRunner() {
     fun initializeFavoritesLayer() {
         mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
         mockkObject(GeoJsonSource)
-        every { GeoJsonSource.directSetterEnabled() } returns true
         val style = mockk<Style>(relaxed = true) {
             every { getStyleImage("MapboxGenericLocationIcon") } returns null
             every { styleSourceExists("MapboxCarPlacesListLayerIdSource") } returns false
