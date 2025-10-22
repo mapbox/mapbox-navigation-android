@@ -68,12 +68,7 @@ android {
 dependencies {
     // Mapbox Navigation Android Auto SDK
     implementation project(':libnavui-androidauto')
-
-    // This example is used for development so it may depend on unstable versions.
-    // Examples based on final versions can be found in the examples repository.
-    //   https://github.com/mapbox/mapbox-navigation-android-examples
-    implementation("com.mapbox.navigation:ui-dropin:2.10.3")
-    implementation("com.mapbox.search:mapbox-search-android:1.0.0-rc.1")
+    implementation project(':libnavui-dropin')
 
     // Dependencies needed for this example.
     implementation dependenciesList.androidXCore

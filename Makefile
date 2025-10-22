@@ -176,12 +176,12 @@ ui-unit-tests-release-jacoco:
 .PHONY: publish-local
 publish-local:
 	./gradlew publishToMavenLocal
-	./gradlew publishToMavenLocal -x libnavui-androidauto:mapboxSDKRegistryUpload -PndkMajor=27
+	./gradlew publishToMavenLocal -PndkMajor=27
 
 .PHONY: upload-to-sdk-registry-snapshot
 upload-to-sdk-registry-snapshot:
 	./gradlew mapboxSDKRegistryUpload -Psnapshot=true
-	./gradlew mapboxSDKRegistryUpload -x libnavui-androidauto:mapboxSDKRegistryUpload -Psnapshot=true -PndkMajor=27
+	./gradlew mapboxSDKRegistryUpload -Psnapshot=true -PndkMajor=27
 
 .PHONY: upload-to-sdk-registry
 upload-to-sdk-registry:
@@ -199,7 +199,8 @@ publish-to-sdk-registry:
 
 .PHONY: upload-to-sdk-registry-androidauto
 upload-to-sdk-registry-androidauto:
-	./gradlew libnavui-androidauto:mapboxSDKRegistryUpload;
+	./gradlew libnavui-androidauto:mapboxSDKRegistryUpload
+	./gradlew libnavui-androidauto:mapboxSDKRegistryUpload -PndkMajor=27
 
 .PHONY: publish-to-sdk-registry-androidauto
 publish-to-sdk-registry-androidauto:

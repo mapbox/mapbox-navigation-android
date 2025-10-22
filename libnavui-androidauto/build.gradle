@@ -38,13 +38,10 @@ dependencies {
     // Jetpack car library.
     api(dependenciesList.mapboxMapsAndroidAuto)
 
-    // This defines the minimum version of Navigation which is included in this SDK. To upgrade the
-    // Navigation versions, you can specify a newer version in your downstream build.gradle.
-    api("com.mapbox.navigation:android:2.10.3")
-
-    // Search is currently in beta so it is not included in this SDK. The functionality of search
-    // is included behind this library's api.
-    implementation(dependenciesList.mapboxSearchAndroidAuto)
+    // This defines the minimum version of Navigation and Search that are included in this SDK.
+    // To upgrade the versions, you can specify a newer versions in your downstream build.gradle.
+    api(androidAutoDependencies.mapboxNavigation)
+    implementation(androidAutoDependencies.mapboxSearch)
 
     implementation(dependenciesList.androidXAppCompat)
     implementation(dependenciesList.coroutinesCore)
