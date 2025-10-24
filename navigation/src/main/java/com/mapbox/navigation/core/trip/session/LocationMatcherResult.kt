@@ -22,6 +22,7 @@ import com.mapbox.navigation.core.trip.session.location.CorrectedLocationData
  * In order to receive the speed limit make sure you add annotationsList with
  * DirectionsCriteria.ANNOTATION_MAXSPEED annotation to the route request.
  * @param roadEdgeMatchProbability when map matcher snaps to a road, this is the confidence in the chosen edge from all nearest edges.
+ * @param roadEdgeId the graph edge ID that the location is matched to, or null if no edge match is available.
  * @param zLevel [Int] current Z-level. Can be used to build a route from a proper level of a road.
  * @param road Road can be used to get information about the [Road] including name, shield name and shield url.
  * @param isDegradedMapMatching whether map matching was running in "degraded" mode, i.e. can have worse quality(usually happens due to the lack of map data).
@@ -43,6 +44,8 @@ class LocationMatcherResult internal constructor(
     val isTeleport: Boolean,
     val speedLimitInfo: SpeedLimitInfo,
     val roadEdgeMatchProbability: Float,
+    @ExperimentalMapboxNavigationAPI
+    val roadEdgeId: Long?,
     val zLevel: Int?,
     val road: Road,
     val isDegradedMapMatching: Boolean,
@@ -69,6 +72,7 @@ class LocationMatcherResult internal constructor(
         if (isTeleport != other.isTeleport) return false
         if (speedLimitInfo != other.speedLimitInfo) return false
         if (roadEdgeMatchProbability != other.roadEdgeMatchProbability) return false
+        if (roadEdgeId != other.roadEdgeId) return false
         if (road != other.road) return false
         if (isDegradedMapMatching != other.isDegradedMapMatching) return false
         if (inTunnel != other.inTunnel) return false
@@ -88,6 +92,7 @@ class LocationMatcherResult internal constructor(
         result = 31 * result + isTeleport.hashCode()
         result = 31 * result + speedLimitInfo.hashCode()
         result = 31 * result + roadEdgeMatchProbability.hashCode()
+        result = 31 * result + roadEdgeId.hashCode()
         result = 31 * result + road.hashCode()
         result = 31 * result + isDegradedMapMatching.hashCode()
         result = 31 * result + inTunnel.hashCode()
@@ -103,7 +108,8 @@ class LocationMatcherResult internal constructor(
         return "LocationMatcherResult(enhancedLocation=$enhancedLocation, " +
             "keyPoints=$keyPoints, isOffRoad=$isOffRoad, offRoadProbability=$offRoadProbability, " +
             "isTeleport=$isTeleport, speedLimitInfo=$speedLimitInfo, " +
-            "roadEdgeMatchProbability=$roadEdgeMatchProbability, road=$road, " +
+            "roadEdgeMatchProbability=$roadEdgeMatchProbability, " +
+            "roadEdgeId=$roadEdgeId, road=$road, " +
             "isDegradedMapMatching=$isDegradedMapMatching, " +
             "inTunnel=$inTunnel, " +
             "correctedLocationData=$correctedLocationData, " +
