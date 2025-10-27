@@ -6,6 +6,21 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## androidauto-v0.23.0 - 27 October, 2025
+### Changelog
+[Changes between 0.22.0 and 0.23.0](https://github.com/mapbox/mapbox-navigation-android/compare/androidauto-v0.22.0...androidauto-v0.23.0)
+
+#### Features
+- Added support for Android Auto module that supports Android 16 KB page-size devices. To consume SDK compatible with NDK 27 you need to add `-ndk27` suffix to the artifact name, for example, `com.mapbox.navigation:ui-androidauto` -> `com.mapbox.navigation:ui-androidauto-ndk27`
+
+#### Bug fixes and improvements
+
+
+### Mapbox dependencies
+This release defines minimum versions for the Mapbox dependencies.
+- Mapbox Maps Android Auto Extension `v0.6.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/extension-androidauto-v0.6.1))
+
+
 ## androidauto-v0.22.0 - 16 March, 2023
 ### Changelog
 [Changes between 0.21.0 and 0.22.0](https://github.com/mapbox/mapbox-navigation-android/compare/androidauto-v0.21.0...androidauto-v0.22.0)
