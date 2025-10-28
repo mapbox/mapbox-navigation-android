@@ -8,6 +8,7 @@ import android.os.Looper
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.UiThread
+import androidx.core.graphics.createBitmap
 import com.mapbox.maps.MapView
 
 /**
@@ -32,7 +33,9 @@ object ViewUtils {
                 map.foreground = BitmapDrawable(map.resources, snapshot)
             }
             root.isDrawingCacheEnabled = true
-            val bitmap = Bitmap.createBitmap(root.drawingCache)
+            val bitmap = root.drawingCache
+                ?.let { Bitmap.createBitmap(it) }
+                ?: createBitmap(1, 1)
             root.isDrawingCacheEnabled = false
             snapshots.forEachIndexed { index, (map, _) ->
                 map.foreground = foregrounds[index]
