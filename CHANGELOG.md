@@ -1,5 +1,20 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.16.1 - 28 October, 2025
+#### Features
+- Expose roadEdgeId to LocationMatcherResult 
+
+#### Bug fixes and improvements
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.16.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.16.1))
+- Mapbox Navigation Native `v324.16.1`
+- Mapbox Core Common `v24.16.1`
+- Mapbox Java `v7.8.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.8.0))
+
+
 ## Navigation SDK Core Framework 3.16.0 - 23 October, 2025
 #### Features
 
