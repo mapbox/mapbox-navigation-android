@@ -105,6 +105,10 @@ internal class MapboxNavigationViewApi(
         }
     }
 
+    override fun setVoiceInstructionsPlayer(player: MapboxVoiceInstructionsPlayer) {
+        MapboxAudioGuidance.getRegisteredInstance().setVoiceInstructionsPlayer(player)
+    }
+
     override fun getCurrentVoiceInstructionsPlayer(): MapboxVoiceInstructionsPlayer? {
         return MapboxAudioGuidance.getRegisteredInstance().getCurrentVoiceInstructionsPlayer()
     }
