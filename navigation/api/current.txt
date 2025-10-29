@@ -732,6 +732,9 @@ package com.mapbox.navigation.core.mapmatching {
     field public static final String OPENLR_FORMAT_TOMTOM = "tomtom";
     field public static final String OPENLR_SPEC_HERE = "here";
     field public static final String OPENLR_SPEC_TOMTOM = "tomtom";
+    field public static final String VOICE_UNITS_BRITISH_IMPERIAL = "british_imperial";
+    field public static final String VOICE_UNITS_IMPERIAL = "imperial";
+    field public static final String VOICE_UNITS_METRIC = "metric";
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapMatchingFailure {
@@ -759,6 +762,7 @@ package com.mapbox.navigation.core.mapmatching {
     method public java.util.List<java.lang.Integer>? getTimestamps();
     method public String getUser();
     method public Boolean? getVoiceInstructions();
+    method public String? getVoiceUnits();
     method public java.util.List<java.lang.String>? getWaypointNames();
     method public java.util.List<java.lang.Integer>? getWaypoints();
     property public final java.util.List<java.lang.String>? annotations;
@@ -776,6 +780,7 @@ package com.mapbox.navigation.core.mapmatching {
     property public final java.util.List<java.lang.Integer>? timestamps;
     property public final String user;
     property public final Boolean? voiceInstructions;
+    property public final String? voiceUnits;
     property public final java.util.List<java.lang.String>? waypointNames;
     property public final java.util.List<java.lang.Integer>? waypoints;
   }
@@ -799,6 +804,7 @@ package com.mapbox.navigation.core.mapmatching {
     method public com.mapbox.navigation.core.mapmatching.MapMatchingOptions.Builder timestamps(java.util.List<java.lang.Integer>? timestamps);
     method public com.mapbox.navigation.core.mapmatching.MapMatchingOptions.Builder user(String user);
     method public com.mapbox.navigation.core.mapmatching.MapMatchingOptions.Builder voiceInstructions(Boolean? voiceInstructions);
+    method public com.mapbox.navigation.core.mapmatching.MapMatchingOptions.Builder voiceUnits(@com.mapbox.navigation.core.mapmatching.MapMatchingVoiceUnits String? voiceUnits);
     method public com.mapbox.navigation.core.mapmatching.MapMatchingOptions.Builder waypointNames(java.util.List<java.lang.String>? waypointNames);
     method public com.mapbox.navigation.core.mapmatching.MapMatchingOptions.Builder waypoints(java.util.List<java.lang.Integer>? waypoints);
   }
@@ -815,6 +821,9 @@ package com.mapbox.navigation.core.mapmatching {
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class MapMatchingSuccessfulResult {
     method public java.util.List<com.mapbox.navigation.base.route.MapMatchingMatch> getMatches();
     property public final java.util.List<com.mapbox.navigation.base.route.MapMatchingMatch> matches;
+  }
+
+  @StringDef({com.mapbox.navigation.core.mapmatching.MapMatchingExtras.VOICE_UNITS_IMPERIAL, com.mapbox.navigation.core.mapmatching.MapMatchingExtras.VOICE_UNITS_BRITISH_IMPERIAL, com.mapbox.navigation.core.mapmatching.MapMatchingExtras.VOICE_UNITS_METRIC}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public @interface MapMatchingVoiceUnits {
   }
 
 }
