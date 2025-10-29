@@ -101,7 +101,12 @@ internal class VoiceInstructionsTextPlayer(
      * Clears any announcements queued.
      */
     override fun clear() {
-        getTextToSpeechOrNull()?.stop()
+        jobControl.scope.launch {
+            val tts = getTextToSpeechOrNull() ?: return@launch
+            if (tts.isSpeaking) {
+                tts.stop()
+            }
+        }
         currentPlay = null
     }
 
