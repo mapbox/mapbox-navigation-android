@@ -12,6 +12,7 @@ import com.mapbox.navigation.ui.utils.internal.datastore.booleanDataStoreKey
 import com.mapbox.navigation.ui.voice.internal.MapboxAudioGuidanceVoice
 import com.mapbox.navigation.ui.voice.internal.impl.MapboxAudioGuidanceServices
 import com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions
+import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -54,6 +55,10 @@ internal constructor(
     private val optionsFlow = MutableStateFlow(options)
 
     private var job: Job? = null
+
+    fun setVoiceInstructionsPlayer(player: MapboxVoiceInstructionsPlayer) {
+        audioGuidanceServices.setVoiceInstructionsPlayer(player)
+    }
 
     /**
      * Current instance of a [VoiceInstructionsPlayer].
