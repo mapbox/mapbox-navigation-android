@@ -114,7 +114,13 @@ abstract class NavigationViewApi {
     abstract fun routeReplayEnabled(enabled: Boolean)
 
     /**
-     * Access the current instance of [MapboxVoiceInstructionsPlayer] created by [NavigationView].
+     * Set the instance of [MapboxVoiceInstructionsPlayer].
+     */
+    abstract fun setVoiceInstructionsPlayer(player: MapboxVoiceInstructionsPlayer)
+
+    /**
+     * Access the current instance of [MapboxVoiceInstructionsPlayer] created by [NavigationView]
+     * or set in [setVoiceInstructionsPlayer].
      */
     abstract fun getCurrentVoiceInstructionsPlayer(): MapboxVoiceInstructionsPlayer?
 

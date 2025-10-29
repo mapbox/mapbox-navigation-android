@@ -15,6 +15,10 @@ class MapboxAudioGuidanceServices {
     var voiceInstructionsPlayer: MapboxVoiceInstructionsPlayer? = null
         private set
 
+    internal fun setVoiceInstructionsPlayer(player: MapboxVoiceInstructionsPlayer) {
+        voiceInstructionsPlayer = player
+    }
+
     fun mapboxAudioGuidanceVoice(
         mapboxNavigation: MapboxNavigation,
         language: String,
