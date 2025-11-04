@@ -2431,6 +2431,32 @@ class MapboxNavigationViewportDataSourceTest {
         assertEquals(expectedOptions.center, newData.cameraForFollowing.center)
     }
 
+    @Test
+    fun `defaultPitch update is applied in Free Drive`() {
+        val location = createLocation()
+
+        val firstPitch = 30.0
+        val secondPitch = 60.0
+        viewportDataSource.options.followingFrameOptions.defaultPitch = firstPitch
+
+        viewportDataSource.onLocationChanged(location)
+        viewportDataSource.evaluate()
+
+        assertEquals(
+            firstPitch,
+            viewportDataSource.getViewportData().cameraForFollowing.pitch,
+        )
+
+        viewportDataSource.options.followingFrameOptions.defaultPitch = secondPitch
+        viewportDataSource.onLocationChanged(location)
+        viewportDataSource.evaluate()
+
+        assertEquals(
+            secondPitch,
+            viewportDataSource.getViewportData().cameraForFollowing.pitch,
+        )
+    }
+
     @After
     fun tearDown() {
         unmockkObject(ViewportDataSourceProcessor)

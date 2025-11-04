@@ -555,11 +555,6 @@ class MapboxNavigationViewportDataSource private constructor(
                 routeProgress,
                 options.followingFrameOptions,
             )
-            followingPitchProperty.fallback = if (isFramingManeuverProperty.get()) {
-                ZERO_PITCH
-            } else {
-                options.followingFrameOptions.defaultPitch
-            }
 
             pointsToFrameOnCurrentStep = options.followingFrameOptions.framingStrategy
                 .getPointsToFrameOnCurrentStep(
@@ -587,6 +582,7 @@ class MapboxNavigationViewportDataSource private constructor(
 
     private fun clearProgressData() {
         followingPitchProperty.fallback = options.followingFrameOptions.defaultPitch
+        isFramingManeuverProperty.fallback = false
         pointsToFrameOnCurrentStep = emptyList()
         pointsToFrameAfterCurrentStep = emptyList()
         this.routeProgress = null
@@ -754,6 +750,12 @@ class MapboxNavigationViewportDataSource private constructor(
 
         // needs to be added here to be taken into account for bearing smoothing
         pointsForFollowing.addAll(additionalPointsToFrameForFollowing)
+
+        followingPitchProperty.fallback = if (isFramingManeuverProperty.get()) {
+            ZERO_PITCH
+        } else {
+            options.followingFrameOptions.defaultPitch
+        }
 
         if (pointsForFollowing.isEmpty()) {
             options.followingFrameOptions.run {
