@@ -1,5 +1,21 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.16.2 - 04 November, 2025
+#### Features
+- Reworked tile-loading delay in the predictive cache: both tile loading and tile calculation are now deferred for improved performance. 
+
+#### Bug fixes and improvements
+- Add the `RoadCamerasConfig::belowLayerId` option to set the `belowLayerId` of the road camera icons layer. By default, the road camera icons are below the 2D CPP icon. 
+- ⚠️ Breaking changes in Experimental API: `RoadCamerasConfig` constructor is now private. Use the `RoadCamerasConfig.Builder` to create an instance of `RoadCamerasConfig`. 
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.16.2` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.16.2))
+- Mapbox Navigation Native `v324.16.2`
+- Mapbox Core Common `v24.16.2`
+- Mapbox Java `v7.8.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.8.0))
+
+
 ## Navigation SDK Core Framework 3.16.1 - 28 October, 2025
 #### Features
 - Expose roadEdgeId to LocationMatcherResult 
