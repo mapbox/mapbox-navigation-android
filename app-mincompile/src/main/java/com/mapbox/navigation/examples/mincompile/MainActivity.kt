@@ -13,8 +13,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.common.LogConfiguration
 import com.mapbox.common.LoggingLevel
-import com.mapbox.navigation.examples.mincompile.databinding.LayoutActivityMainBinding
 import com.mapbox.navigation.examples.mincompile.LocationPermissionsHelper.Companion.areLocationPermissionsGranted
+import com.mapbox.navigation.examples.mincompile.databinding.LayoutActivityMainBinding
 
 class MainActivity : AppCompatActivity(), PermissionsListener {
 

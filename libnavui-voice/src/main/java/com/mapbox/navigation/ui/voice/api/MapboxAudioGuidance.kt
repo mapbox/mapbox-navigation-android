@@ -12,7 +12,6 @@ import com.mapbox.navigation.ui.utils.internal.datastore.booleanDataStoreKey
 import com.mapbox.navigation.ui.voice.internal.MapboxAudioGuidanceVoice
 import com.mapbox.navigation.ui.voice.internal.impl.MapboxAudioGuidanceServices
 import com.mapbox.navigation.ui.voice.options.MapboxSpeechApiOptions
-import com.mapbox.navigation.ui.voice.options.VoiceInstructionsPlayerOptions
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

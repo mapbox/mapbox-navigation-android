@@ -30,6 +30,7 @@ package com.mapbox.navigation.dropin {
     method public abstract boolean isReplayEnabled();
     method public abstract void recenterCamera();
     method public abstract void routeReplayEnabled(boolean enabled);
+    method public abstract void setVoiceInstructionsPlayer(com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer player);
     method public abstract com.mapbox.bindgen.Expected<com.mapbox.navigation.dropin.NavigationViewApiError,kotlin.Unit> startActiveGuidance();
     method public abstract com.mapbox.bindgen.Expected<com.mapbox.navigation.dropin.NavigationViewApiError,kotlin.Unit> startActiveGuidance(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
     method public abstract com.mapbox.bindgen.Expected<com.mapbox.navigation.dropin.NavigationViewApiError,kotlin.Unit> startArrival();
