@@ -55,6 +55,9 @@ internal constructor(
 
     private var job: Job? = null
 
+    /**
+     * Set the instance of [MapboxVoiceInstructionsPlayer].
+     */
     fun setVoiceInstructionsPlayer(player: MapboxVoiceInstructionsPlayer) {
         audioGuidanceServices.setVoiceInstructionsPlayer(player)
     }
