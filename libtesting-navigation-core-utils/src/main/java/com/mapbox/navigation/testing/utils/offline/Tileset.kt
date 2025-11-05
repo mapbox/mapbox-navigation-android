@@ -22,7 +22,7 @@ enum class Tileset(
     Berlin("tileset_berlin", listOf(TileDataDomain.NAVIGATION), null),
     NearMunich("tileset_near_munich", listOf(TileDataDomain.NAVIGATION), null),
     HelsinkiHdSd(
-        "tileset_helsinki",
+        "tileset_helsinki_2025-11-05",
         listOf(TileDataDomain.NAVIGATION, TileDataDomain.NAVIGATION_HD),
         "persistent_config_helsinki"
     ),
