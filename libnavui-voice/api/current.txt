@@ -37,6 +37,7 @@ package com.mapbox.navigation.ui.voice.api {
     method public void mute();
     method public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
     method public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public void setVoiceInstructionsPlayer(com.mapbox.navigation.ui.voice.api.MapboxVoiceInstructionsPlayer player);
     method public kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.voice.api.MapboxAudioGuidanceState> stateFlow();
     method public void toggle();
     method public void unmute();

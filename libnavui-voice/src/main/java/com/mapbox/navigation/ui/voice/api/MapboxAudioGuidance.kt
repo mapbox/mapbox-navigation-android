@@ -55,6 +55,10 @@ internal constructor(
 
     private var job: Job? = null
 
+    fun setVoiceInstructionsPlayer(player: MapboxVoiceInstructionsPlayer) {
+        audioGuidanceServices.setVoiceInstructionsPlayer(player)
+    }
+
     /**
      * Current instance of a [VoiceInstructionsPlayer].
      */
