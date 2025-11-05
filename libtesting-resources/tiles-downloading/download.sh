@@ -10,7 +10,7 @@ for file in configs/*; do
 
     archive="tileset_${filename%.*}.zip"
     zip "$archive" tile_store -r
-    mv "$archive" "../src/main/res/raw/$archive"
+    mv "$archive" "../src/main/assets/$archive"
     rm -rf tile_store
   fi
 done

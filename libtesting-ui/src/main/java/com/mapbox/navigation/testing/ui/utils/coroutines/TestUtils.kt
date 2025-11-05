@@ -24,7 +24,7 @@ import kotlinx.coroutines.withTimeout
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-private const val MAX_TIME_TO_UPDATE_ROUTE = 5_000L
+const val DEFAULT_MAX_TIME_TO_UPDATE_ROUTE = 5_000L
 const val DEFAULT_TIMEOUT_FOR_SDK_TEST = 30_000L
 
 fun sdkTest(
@@ -92,7 +92,7 @@ suspend fun MapboxNavigation.stopTripSessionAndWaitForIdleState() {
 
 @OptIn(ExperimentalCoroutinesApi::class)
 suspend fun MapboxNavigation.clearNavigationRoutesAndWaitForUpdate() =
-    withTimeout(MAX_TIME_TO_UPDATE_ROUTE) {
+    withTimeout(DEFAULT_MAX_TIME_TO_UPDATE_ROUTE) {
         suspendCancellableCoroutine<Unit?> {
             val observer = object : RoutesObserver {
                 override fun onRoutesChanged(result: RoutesUpdatedResult) {
@@ -113,13 +113,13 @@ suspend fun MapboxNavigation.clearNavigationRoutesAndWaitForUpdate() =
         }
     }
 
-suspend fun MapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes: List<NavigationRoute>) {
+suspend fun MapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes: List<NavigationRoute>, timeout: Long = DEFAULT_MAX_TIME_TO_UPDATE_ROUTE) {
     if (routes.isEmpty()) {
         throw IllegalArgumentException(
             "For empty routes use `clearNavigationRoutesAndWaitForUpdate` instead"
         )
     }
-    withTimeout(MAX_TIME_TO_UPDATE_ROUTE) {
+    withTimeout(30000) {
         coroutineScope {
             launch {
                 waitForNewRoute()
@@ -132,7 +132,7 @@ suspend fun MapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes: List<Na
 suspend fun MapboxNavigation.setNavigationRoutesAndAwaitError(
     routes: List<NavigationRoute>,
     legIndex: Int
-) = withTimeout(MAX_TIME_TO_UPDATE_ROUTE) {
+) = withTimeout(DEFAULT_MAX_TIME_TO_UPDATE_ROUTE) {
     suspendCancellableCoroutine<Unit?> { continuation ->
         val callback = RoutesSetCallback {
             if (it.isError) {
@@ -151,7 +151,7 @@ suspend fun MapboxNavigation.setNavigationRoutesAndWaitForAlternativesUpdate(
     routes: List<NavigationRoute>,
     initialLegIndex: Int = 0,
 ) =
-    withTimeout(MAX_TIME_TO_UPDATE_ROUTE) {
+    withTimeout(DEFAULT_MAX_TIME_TO_UPDATE_ROUTE) {
         setNavigationRoutes(routes, initialLegIndex)
         waitForAlternativeRoute()
     }

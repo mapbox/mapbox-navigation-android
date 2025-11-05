@@ -6,6 +6,7 @@ import androidx.test.espresso.Espresso
 import com.adevinta.android.barista.rule.cleardata.ClearFilesRule
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.common.TileDataDomain
 import com.mapbox.common.TileStore
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
@@ -28,8 +29,6 @@ import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.core.reroute.RerouteOptionsAdapter
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.instrumentation_tests.R
-import com.mapbox.navigation.instrumentation_tests.utils.tiles.OfflineRegion
-import com.mapbox.navigation.instrumentation_tests.utils.tiles.unpackOfflineTiles
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
@@ -57,6 +56,8 @@ import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracking
 import com.mapbox.navigation.testing.utils.location.stayOnPosition
+import com.mapbox.navigation.testing.utils.offline.Tileset
+import com.mapbox.navigation.testing.utils.offline.unpackTiles
 import com.mapbox.navigation.testing.utils.readRawFileText
 import com.mapbox.navigation.testing.utils.routes.MockRoute
 import com.mapbox.navigation.testing.utils.routes.RoutesProvider
@@ -214,7 +215,7 @@ class CoreRerouteTest(
         val mockRoute = RoutesProvider.near_munich_with_waypoints(context)
         val originLocation = mockRoute.routeWaypoints.first()
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
-        val tilesVersion = context.unpackOfflineTiles(OfflineRegion.NearMunich)
+        val tilesVersion = context.unpackTiles(Tileset.NearMunich)[TileDataDomain.NAVIGATION]!!
         withMapboxNavigation(
             useRealTiles = true,
             historyRecorderRule = mapboxHistoryTestRule,

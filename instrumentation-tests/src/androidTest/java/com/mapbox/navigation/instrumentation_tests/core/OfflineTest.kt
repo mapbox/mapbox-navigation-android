@@ -5,6 +5,7 @@ package com.mapbox.navigation.instrumentation_tests.core
 import android.location.Location
 import com.adevinta.android.barista.rule.cleardata.ClearFilesRule
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.common.TileDataDomain
 import com.mapbox.common.TileStore
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
@@ -13,8 +14,6 @@ import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.NavigationVersionSwitchObserver
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
-import com.mapbox.navigation.instrumentation_tests.utils.tiles.OfflineRegion
-import com.mapbox.navigation.instrumentation_tests.utils.tiles.unpackOfflineTiles
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.http.MockRequestHandler
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
@@ -23,6 +22,8 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.testing.utils.location.stayOnPosition
+import com.mapbox.navigation.testing.utils.offline.Tileset
+import com.mapbox.navigation.testing.utils.offline.unpackTiles
 import com.mapbox.navigation.testing.utils.setTestRouteRefreshInterval
 import com.mapbox.navigation.testing.utils.withMapboxNavigation
 import com.mapbox.navigation.testing.utils.withoutInternet
@@ -66,7 +67,7 @@ class OfflineTest : BaseCoreNoCleanUpTest() {
     @Test
     fun startNavigatorOfflineWithTilesAvailableAndVersionSpecified() = sdkTest {
         withoutInternet {
-            val version = context.unpackOfflineTiles(OfflineRegion.Berlin)
+            val version = context.unpackTiles(Tileset.Berlin)[TileDataDomain.NAVIGATION]!!
             locationReplayRule.playGeometry(TEST_BERLIN_ROUTE_GEOMETRY)
             withMapboxNavigation(
                 historyRecorderRule = mapboxHistoryTestRule,
@@ -106,7 +107,7 @@ class OfflineTest : BaseCoreNoCleanUpTest() {
     @Test
     fun startNavigatorOfflineWithTilesAvailableVersionNotSpecified() = sdkTest(timeout = 60_000) {
         withoutInternet {
-            val version = context.unpackOfflineTiles(OfflineRegion.Berlin)
+            val version = context.unpackTiles(Tileset.Berlin)[TileDataDomain.NAVIGATION]
             locationReplayRule.playGeometry(TEST_BERLIN_ROUTE_GEOMETRY)
             withMapboxNavigation(
                 historyRecorderRule = mapboxHistoryTestRule,
@@ -162,7 +163,7 @@ class OfflineTest : BaseCoreNoCleanUpTest() {
                 }
             },
         )
-        val version = context.unpackOfflineTiles(OfflineRegion.Berlin)
+        val version = context.unpackTiles(Tileset.Berlin)[TileDataDomain.NAVIGATION]!!
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
             tileStore = TileStore.create(),

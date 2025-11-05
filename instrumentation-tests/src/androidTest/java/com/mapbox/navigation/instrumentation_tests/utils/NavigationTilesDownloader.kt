@@ -14,6 +14,7 @@ import com.mapbox.navigation.base.options.RerouteOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
+import com.mapbox.navigation.testing.utils.ZipUtils
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.junit.Test

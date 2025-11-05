@@ -5,6 +5,7 @@ package com.mapbox.navigation.instrumentation_tests.core
 import android.location.Location
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsResponse
+import com.mapbox.common.TileDataDomain
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.route.routeOptions
@@ -16,8 +17,6 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.core.routerefresh.RouteRefreshExtra
-import com.mapbox.navigation.instrumentation_tests.utils.tiles.OfflineRegion
-import com.mapbox.navigation.instrumentation_tests.utils.tiles.unpackOfflineTiles
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.RouteRequestResult
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
@@ -32,6 +31,8 @@ import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracking
 import com.mapbox.navigation.testing.utils.location.stayOnPosition
+import com.mapbox.navigation.testing.utils.offline.Tileset
+import com.mapbox.navigation.testing.utils.offline.unpackTiles
 import com.mapbox.navigation.testing.utils.routes.EvRoutesProvider
 import com.mapbox.navigation.testing.utils.routes.MockedEvRouteWithSingleUserProvidedChargingStation
 import com.mapbox.navigation.testing.utils.routes.MockedEvRoutes
@@ -77,7 +78,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         val originalTestRoute = setupBerlinEvRoute()
 
         withMapboxNavigation(
-            offlineRegion = OfflineRegion.Berlin,
+            tileset = Tileset.Berlin,
         ) { navigation ->
             navigation.startTripSession()
             stayOnPosition(
@@ -121,7 +122,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
             mockWebServerRule.baseUrl,
         )
         withMapboxNavigation(
-            offlineRegion = OfflineRegion.Berlin,
+            tileset = Tileset.Berlin,
         ) { navigation ->
             navigation.startTripSession()
             stayOnPosition(
@@ -159,7 +160,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
             val testRoute = setupBerlinEvRouteWithCustomProvidedChargingStation()
 
             withMapboxNavigation(
-                offlineRegion = OfflineRegion.Berlin,
+                tileset = Tileset.Berlin,
             ) { navigation ->
                 navigation.startTripSession()
                 stayOnPosition(
@@ -195,7 +196,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         val testRouteAfterReroute = setupBerlinEvRouteAfterReroute()
 
         withMapboxNavigation(
-            offlineRegion = OfflineRegion.Berlin,
+            tileset = Tileset.Berlin,
         ) { navigation ->
             navigation.startTripSession()
             val requestResult = navigation.requestRoutes(originalTestRoute.routeOptions)
@@ -242,7 +243,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         routeRefreshOptions.setTestRouteRefreshInterval(1_500L)
 
         withMapboxNavigation(
-            offlineRegion = OfflineRegion.Berlin,
+            tileset = Tileset.Berlin,
             routeRefreshOptions = routeRefreshOptions,
         ) { navigation ->
             stayOnPosition(
@@ -345,11 +346,11 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
     }
 
     private suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigation(
-        offlineRegion: OfflineRegion? = null,
+        tileset: Tileset? = null,
         routeRefreshOptions: RouteRefreshOptions? = null,
         block: (MapboxNavigation) -> Unit,
     ) {
-        val tilesVersion = offlineRegion?.let { context.unpackOfflineTiles(it) }
+        val tilesVersion = tileset?.let { context.unpackTiles(it)[TileDataDomain.NAVIGATION]!! }
         withMapboxNavigation(
             tileStore = createTileStore(),
             tilesVersion = tilesVersion,

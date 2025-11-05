@@ -1,4 +1,4 @@
-package com.mapbox.navigation.instrumentation_tests.utils
+package com.mapbox.navigation.testing.utils
 
 import java.io.File
 import java.io.FileInputStream
@@ -8,9 +8,10 @@ import java.io.InputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
+import kotlin.collections.forEach
+import kotlin.collections.orEmpty
 
 object ZipUtils {
-
     @Throws(IOException::class)
     fun zipDirectory(folderToZip: File, outputFile: File) {
         FileOutputStream(outputFile).use { fos ->
@@ -61,4 +62,5 @@ object ZipUtils {
             }
         }
     }
+
 }
