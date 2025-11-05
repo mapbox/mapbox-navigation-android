@@ -6,6 +6,30 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.22.0 - 05 November, 2025
+### Changelog
+[Changes between v2.21.0 and v2.22.0](https://github.com/mapbox/mapbox-navigation-android/compare/v2.21.0...v2.22.0)
+
+#### Features
+- The `PredictiveCacheController(PredictiveCacheOptions)` constructor is now deprecated. Use `PredictiveCacheController(MapboxNavigation, PredictiveCacheOptions)` instead. [#7856](https://github.com/mapbox/navigation/pull/7856)
+- Exposed setting `MapboxVoiceInstructionsPlayer` to drop-in UI. Use `NavigationView#api#setVoiceInstructionsPlayer(MapboxVoiceInstructionsPlayer)` to set your own instance of `MapboxVoiceInstructionsPlayer`. [#7931](https://github.com/mapbox/navigation/pull/7931)
+- Added support for Android 16 KB page-size devices. To consume SDK compatible with NDK 27 you need to add `-ndk27` suffix to the artifact name, for example, `com.mapbox.navigation:android` -> `com.mapbox.navigation:android-ndk27` [#7917](https://github.com/mapbox/navigation/pull/7917)
+- Added support for Android Auto module that supports Android 16 KB page-size devices. To consume SDK compatible with NDK 27 you need to add `-ndk27` suffix to the artifact name, for example, `com.mapbox.navigation:ui-androidauto` -> `com.mapbox.navigation:ui-androidauto-ndk27`  [#7922](https://github.com/mapbox/navigation/pull/7922)
+- Optimized memory usage in Directions API model classes by interning frequently occurring strings in JSON. [#7840](https://github.com/mapbox/navigation/pull/7840)
+
+#### Bug fixes and improvements
+- Fixed an issue where native memory was not being properly released after the `MapboxNavigation` object was destroyed. [#7856](https://github.com/mapbox/navigation/pull/7856)
+- Fixed UI jank caused by on-device TextToSpeech player. [#7833](https://github.com/mapbox/navigation/pull/7833)
+- Fixed crash on `ManeuverViewBinder` with TransitionManager#go(Scene). [#7908](https://github.com/mapbox/navigation/pull/7908)
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.19.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.19.0))
+- Mapbox Navigation Native `v207.0.0`
+- Mapbox Core Common `v23.11.4`
+- Mapbox Java `v7.1.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.1.0))
+
+
 ## Mapbox Navigation SDK 2.20.4 - 18 July, 2025
 ### Changelog
 [Changes between v2.20.3 and v2.20.4](https://github.com/mapbox/mapbox-navigation-android/compare/v2.20.3...v2.20.4)
