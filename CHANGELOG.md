@@ -6,6 +6,8 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+
+
 ## Mapbox Navigation SDK 2.22.0 - 05 November, 2025
 ### Changelog
 [Changes between v2.21.0 and v2.22.0](https://github.com/mapbox/mapbox-navigation-android/compare/v2.21.0...v2.22.0)
