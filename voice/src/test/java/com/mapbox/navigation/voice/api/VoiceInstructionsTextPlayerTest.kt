@@ -249,6 +249,7 @@ class VoiceInstructionsTextPlayerTest {
     @Test
     fun `text to speech stop is called is called when clear`() = runTest {
         val textPlayer = initTextPlayer()
+        every { mockedTextToSpeech.isSpeaking } returns true
 
         textPlayer.clear()
 
