@@ -3,7 +3,6 @@ package com.mapbox.navigation.driver.notification.internal
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.RouteLeg
-import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.utils.Constants
 import com.mapbox.navigation.base.internal.utils.Constants.CongestionRange.HEAVY_CONGESTION_RANGE
 import com.mapbox.navigation.base.internal.utils.Constants.CongestionRange.SEVERE_CONGESTION_RANGE
@@ -20,15 +19,7 @@ class SlowTrafficSegmentsFinderTest {
     private val lowCongestion = Constants.CongestionRange.LOW_CONGESTION_RANGE.middle
     private val heavyCongestion = HEAVY_CONGESTION_RANGE.middle
     private val severeCongestion = SEVERE_CONGESTION_RANGE.middle
-    private val finder = SlowTrafficSegmentsFinder(
-        extractPoints = {
-                // We don't really care about the specific points
-                leg ->
-            List(leg.annotation()!!.distance()!!.size + 1) {
-                Point.fromLngLat(10.0, 20.0)
-            }
-        },
-    )
+    private val finder = SlowTrafficSegmentsFinder()
 
     @Test
     fun `finds single slow segment in middle of leg`() = runBlocking {

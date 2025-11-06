@@ -1379,7 +1379,6 @@ package com.mapbox.navigation.base.route {
     field public static final String INPUT_ERROR = "INPUT_ERROR";
     field public static final String NETWORK_ERROR = "NETWORK_ERROR";
     field public static final String RESPONSE_PARSING_ERROR = "RESPONSE_PARSING_ERROR";
-    field public static final String ROUTER_RECREATION_ERROR = "ROUTER_RECREATION_ERROR";
     field public static final String ROUTE_CREATION_ERROR = "ROUTE_CREATION_ERROR";
     field public static final String THROTTLING_ERROR = "THROTTLING_ERROR";
     field public static final String UNKNOWN_ERROR = "UNKNOWN_ERROR";
@@ -1390,7 +1389,6 @@ package com.mapbox.navigation.base.route {
     field public static final String INPUT_ERROR = "INPUT_ERROR";
     field public static final String NETWORK_ERROR = "NETWORK_ERROR";
     field public static final String RESPONSE_PARSING_ERROR = "RESPONSE_PARSING_ERROR";
-    field public static final String ROUTER_RECREATION_ERROR = "ROUTER_RECREATION_ERROR";
     field public static final String ROUTE_CREATION_ERROR = "ROUTE_CREATION_ERROR";
     field public static final String THROTTLING_ERROR = "THROTTLING_ERROR";
     field public static final String UNKNOWN_ERROR = "UNKNOWN_ERROR";

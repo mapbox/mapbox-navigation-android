@@ -22,6 +22,7 @@ ext {
     }
     if (ndkMajorVersion != null) {
         ndkVersionSuffix = "-ndk$ndkMajorVersion"
+        println("Building with NDK version suffix: " + ndkVersionSuffix)
     }
     
     /**
@@ -71,7 +72,6 @@ ext {
         'driver-notification' : new Tuple2("driver-notification$ndkVersionSuffix", 'navigation-core-driver-notification'),
         'ev-driver-notification' : new Tuple2("ev-driver-notification$ndkVersionSuffix", 'navigation-core-ev-driver-notification'),
         'audio' : new Tuple2("audio$ndkVersionSuffix", 'navigation-core-audio'),
-        'noa' : new Tuple2("noa$ndkVersionSuffix", 'navigation-core-noa'),
     ]
 }
 

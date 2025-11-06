@@ -41,7 +41,6 @@ android {
 
 dependencies {
 
-    implementation dependenciesList.mapboxSdkTurf
     implementation project(':navigation')
     testImplementation dependenciesList.androidxTestJunit
     testImplementation dependenciesList.coroutinesTestAndroid

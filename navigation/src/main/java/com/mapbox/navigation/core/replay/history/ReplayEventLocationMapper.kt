@@ -2,9 +2,7 @@ package com.mapbox.navigation.core.replay.history
 
 import android.os.SystemClock
 import androidx.annotation.VisibleForTesting
-import com.mapbox.bindgen.Value
 import com.mapbox.common.location.Location
-import com.mapbox.common.location.LocationExtraKeys
 import java.util.Date
 
 private const val MILLIS_PER_SECOND = 1000.0
@@ -18,13 +16,6 @@ internal fun ReplayEventLocation.mapToLocation(
     @VisibleForTesting elapsedTimeNano: Long = SystemClock.elapsedRealtimeNanos(),
 ): Location {
     return Location.Builder()
-        .extra(
-            Value.valueOf(
-                HashMap<String, Value>().apply {
-                    this[LocationExtraKeys.IS_MOCK] = Value(true)
-                },
-            ),
-        )
         .source(provider)
         .longitude(lon)
         .latitude(lat)

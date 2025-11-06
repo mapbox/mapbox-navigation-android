@@ -71,7 +71,7 @@ internal class MapboxNavigationProviderTest : MapboxNavigationBaseTest() {
         val navigation = MapboxNavigationProvider.create(navigationOptions)
         MapboxNavigationProvider.unregisterObserver(observer)
 
-        verify(exactly = 0) {
+        verify(exactly = 1) {
             observer.onDetached(navigation)
         }
         verify(exactly = 0) {

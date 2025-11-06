@@ -549,26 +549,6 @@ object RoutesProvider {
             coordinates,
         )
     }
-
-    fun helsinki_hd_sd_reroute(context: Context): MockRoute {
-        val jsonResponse = readRawFileText(context, R.raw.helsinki_hd_sd_reroute_route_response)
-        val coordinates = listOf(
-            Point.fromLngLat(24.815981, 60.213612),
-            Point.fromLngLat(24.8801009,60.2033859),
-        )
-        return MockRoute(
-            jsonResponse,
-            DirectionsResponse.fromJson(jsonResponse),
-            listOf(
-                MockDirectionsRequestHandler(
-                    profile = PROFILE_DRIVING_TRAFFIC,
-                    jsonResponse = jsonResponse,
-                    expectedCoordinates = coordinates,
-                ),
-            ),
-            coordinates,
-        )
-    }
 }
 
 suspend fun MapboxNavigation.requestMockRoutes(

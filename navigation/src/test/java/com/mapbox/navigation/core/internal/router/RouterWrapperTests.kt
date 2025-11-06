@@ -1365,8 +1365,7 @@ class RouterWrapperTests {
             url = routeUrl.toHttpUrlOrNull()!!.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM).toUrl(),
             routerOrigin = ONLINE,
             message = "Failed to get a route",
-            type = RouterFailureType.ROUTER_RECREATION_ERROR,
-            isRetryable = true,
+            type = RouterFailureType.UNKNOWN_ERROR,
         )
 
         val failures = slot<List<RouterFailure>>()
@@ -1378,7 +1377,7 @@ class RouterWrapperTests {
         assertEquals(expected.type, failure.type)
         assertEquals(expected.routerOrigin, failure.routerOrigin)
         assertEquals(expected.url, failure.url)
-        assertTrue(failure.isRetryable)
+        assertFalse(failure.isRetryable)
     }
 
     @Test
