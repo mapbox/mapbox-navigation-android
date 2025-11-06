@@ -10,6 +10,7 @@ import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.voice.model.SpeechVolume
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -29,19 +30,10 @@ internal class VoiceInstructionsTextPlayer(
     @VisibleForTesting
     internal var isLanguageSupported: Boolean = false
 
-    private var textToSpeechInitStatus: Int? = null
     private val jobControl = createDefaultScopeJobControl()
 
-    @VisibleForTesting
-    internal val textToSpeech = trace(TRACE_GET_TTS) {
-        TextToSpeechProvider.getTextToSpeech(context.applicationContext) { status ->
-            textToSpeechInitStatus = status
-            if (status == TextToSpeech.SUCCESS) {
-                initializeWithLanguage(Locale(language))
-                setUpUtteranceProgressListener()
-            }
-        }
-    }
+    private val textToSpeech = CompletableDeferred<TextToSpeech>()
+    private val textToSpeechStatus = CompletableDeferred<Int>()
 
     @VisibleForTesting
     internal var volumeLevel: Float = DEFAULT_VOLUME_LEVEL
@@ -50,10 +42,16 @@ internal class VoiceInstructionsTextPlayer(
     @VisibleForTesting
     internal var currentPlay: SpeechAnnouncement? = null
 
+    init {
+        initTextToSpeech()
+        initListenersOnceReady()
+    }
+
     fun updateLanguage(language: String) {
         this.language = language
-        if (textToSpeechInitStatus == TextToSpeech.SUCCESS) {
-            initializeWithLanguage(Locale(language))
+        jobControl.scope.launch {
+            val tts = awaitTextToSpeech() ?: return@launch
+            initializeWithLanguage(Locale(language), tts)
         }
     }
 
@@ -91,8 +89,11 @@ internal class VoiceInstructionsTextPlayer(
      */
     override fun volume(state: SpeechVolume) {
         volumeLevel = state.level
-        if (textToSpeech.isSpeaking && state.level == MUTE_VOLUME_LEVEL) {
-            textToSpeech.stop()
+        jobControl.scope.launch {
+            val tts = awaitTextToSpeech() ?: return@launch
+            if (tts.isSpeaking && state.level == MUTE_VOLUME_LEVEL) {
+                tts.stop()
+            }
         }
     }
 
@@ -100,7 +101,7 @@ internal class VoiceInstructionsTextPlayer(
      * Clears any announcements queued.
      */
     override fun clear() {
-        textToSpeech.stop()
+        getTextToSpeechOrNull()?.stop()
         currentPlay = null
     }
 
@@ -111,32 +112,57 @@ internal class VoiceInstructionsTextPlayer(
      */
     override fun shutdown() {
         jobControl.job.cancelChildren()
-        textToSpeech.setOnUtteranceProgressListener(null)
-        textToSpeech.shutdown()
+        getTextToSpeechOrNull()?.let {
+            it.setOnUtteranceProgressListener(null)
+            it.shutdown()
+        }
+        textToSpeech.cancel()
+        textToSpeechStatus.cancel()
         currentPlay = null
         volumeLevel = DEFAULT_VOLUME_LEVEL
     }
 
     @VisibleForTesting
-    internal fun initializeWithLanguage(language: Locale) {
-        jobControl.scope.launch {
-            trace(TRACE_INIT_LANG) {
-                isLanguageSupported = if (playerAttributes.options.checkIsLanguageAvailable) {
-                    textToSpeech.isLanguageAvailable(language) == TextToSpeech.LANG_AVAILABLE
-                } else {
-                    true
-                }
-                if (!isLanguageSupported) {
-                    logE { LANGUAGE_NOT_SUPPORTED }
-                    return@trace
-                }
-                textToSpeech.language = language
-            }
+    internal suspend fun awaitTextToSpeech(): TextToSpeech? {
+        return try {
+            val tts = textToSpeech.await()
+            val status = textToSpeechStatus.await()
+            tts.takeIf { status == TextToSpeech.SUCCESS }
+        } catch (e: Exception) {
+            null
         }
     }
 
-    private fun setUpUtteranceProgressListener() {
-        textToSpeech.setOnUtteranceProgressListener(
+    private fun getTextToSpeechOrNull(): TextToSpeech? {
+        return if (textToSpeech.isCompleted) {
+            textToSpeech.getCompleted()
+        } else {
+            null
+        }
+    }
+
+    private fun initializeWithLanguage(
+        language: Locale,
+        tts: TextToSpeech,
+    ) {
+        trace(TRACE_INIT_LANG) {
+            isLanguageSupported = if (playerAttributes.options.checkIsLanguageAvailable) {
+                tts.isLanguageAvailable(language) == TextToSpeech.LANG_AVAILABLE
+            } else {
+                true
+            }
+            if (!isLanguageSupported) {
+                logE { LANGUAGE_NOT_SUPPORTED }
+                return@trace
+            }
+            tts.language = language
+        }
+    }
+
+    private fun setUpUtteranceProgressListener(
+        tts: TextToSpeech,
+    ) {
+        tts.setOnUtteranceProgressListener(
             object : UtteranceProgressListener() {
                 override fun onDone(utteranceId: String?) {
                     donePlaying()
@@ -179,15 +205,36 @@ internal class VoiceInstructionsTextPlayer(
                 val bundle = currentBundle.apply {
                     putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, volumeLevel)
                 }
-                playerAttributes.applyOn(textToSpeech, bundle)
+                val tts = awaitTextToSpeech() ?: return@launch
+                playerAttributes.applyOn(tts, bundle)
 
-                textToSpeech.speak(
+                tts.speak(
                     announcement,
                     TextToSpeech.QUEUE_FLUSH,
                     bundle,
                     DEFAULT_UTTERANCE_ID,
                 )
             }
+        }
+    }
+
+    private fun initTextToSpeech() {
+        trace(TRACE_GET_TTS) {
+            textToSpeech.complete(
+                TextToSpeechProvider.getTextToSpeech(
+                    context.applicationContext,
+                ) { status ->
+                    textToSpeechStatus.complete(status)
+                },
+            )
+        }
+    }
+
+    private fun initListenersOnceReady() {
+        jobControl.scope.launch {
+            val tts = awaitTextToSpeech() ?: return@launch
+            initializeWithLanguage(Locale(language), tts)
+            setUpUtteranceProgressListener(tts)
         }
     }
 
