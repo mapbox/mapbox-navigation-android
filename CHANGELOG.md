@@ -1,5 +1,49 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.17.0-beta.1 - 07 November, 2025
+#### Features
+- Reworked tile-loading delay in the predictive cache: both tile loading and tile calculation are now deferred for improved performance. 
+- Improved routing logic to prevent fallback to the onboard router when the online router encounters a `RouteCreationError`. 
+- Added `MapMatchingOptions.voiceUnits` which allows applications to specify the unit system used for voice instructions in Map Matching. 
+- Improved performance of `MapboxEvViewClient`, its API was slightly changed for this purpose. 
+- Renamed `EvStationMarker.maxOutputPower` to `EvStationMarker.maxOutputPowerkW` for clarity. 
+- Added new field `EvStationMarker.capabilities` to describe supported charging capabilities. 
+- Expose roadEdgeId to LocationMatcherResult 
+- Added `styleSlot` parameter to `MapboxEvViewOptions` to give more control over EV layer placement. 
+
+#### Bug fixes and improvements
+- Fix ANR when calling `MapboxVoiceInstructionsPlayer::stop` 
+- Fixed waypoint handling when multiple matches are returned in `MapMatchingSuccessfulResult.matches`; waypoints are now assigned to the correct match. 
+
+- ⚠️ Breaking change (preview API): removed `MapMatchingSuccessfulResult#navigationRoutes`.
+
+Why: the `navigationRoutes` property encouraged incorrect usage — calling
+  `mapboxNavigation.setNavigationRoutes(result.navigationRoutes)` treats each
+  match as an alternative route. Matches are results of map-matching and are
+  not true route alternatives; passing them together will make the
+  navigator accept only first route rejecting the others.
+  Migration guide: select navigation route from a single match `mapboxNavigation.setNavigationRoutes(listOf(result.matches.first().navigationRoute))`. 
+- Fixed an issue where `FollowingFrameOptions#defaultPitch` updates were not applied in Free Drive.  
+- Fix NullPointerException when using `MapboxVoiceInstructionsPlayer`. 
+- Fix the bug that causes road cameras on alternative routes to not be removed from the road when its road is not active or passed during active guidance. 
+- Optimize the performance of road cameras in Free Drive mode.  
+- Add the `RoadCamerasConfig::belowLayerId` option to set the `belowLayerId` of the road camera icons layer. By default, the road camera icons are below the 2D CPP icon. 
+- ⚠️ Breaking changes in Experimental API: `RoadCamerasConfig` constructor is now private. Use the `RoadCamerasConfig.Builder` to create an instance of `RoadCamerasConfig`. 
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.17.0-beta.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.17.0-beta.1))
+- Mapbox Navigation Native `v324.17.0-beta.1`
+- Mapbox Core Common `v24.17.0-beta.1`
+- Mapbox Java `v7.8.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.8.0))
+
+
 ## Navigation SDK Core Framework 3.16.0-beta.1 - 26 September, 2025
 #### Notes
 3.16.x is the next version after 3.12.x. For technical reasons, versions 3.13.x, 3.14.x and 3.15.x are skipped. Starting from 3.16.x, the Nav SDK minor version will be aligned with other Mapbox dependencies.
