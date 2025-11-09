@@ -300,6 +300,7 @@ class OverviewViewportDataSource @VisibleForTesting internal constructor(
                     zoomProperty.fallback = min(cameraState.zoom, maxZoom)
                 }
             } else {
+                pitchProperty.fallback = ZERO_PITCH
                 bearingProperty.fallback = normalizeBearing(
                     cameraState.bearing,
                     BEARING_NORTH,
