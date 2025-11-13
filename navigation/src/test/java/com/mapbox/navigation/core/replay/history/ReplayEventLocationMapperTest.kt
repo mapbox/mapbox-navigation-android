@@ -1,6 +1,8 @@
 package com.mapbox.navigation.core.replay.history
 
+import com.mapbox.navigation.core.navigator.toFixLocation
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -48,6 +50,17 @@ class ReplayEventLocationMapperTest {
 
         assertEquals(3000, androidLocation.timestamp)
         assertEquals(3000000000, androidLocation.monotonicTimestamp)
+    }
+
+    @Test
+    fun `replay location is always mocked`() {
+        val eventsLocation = createTestEventLocation()
+
+        val fixLocation = eventsLocation
+            .mapToLocation(eventsLocation.time!!)
+            .toFixLocation()
+
+        assertTrue(fixLocation.isMock)
     }
 }
 
