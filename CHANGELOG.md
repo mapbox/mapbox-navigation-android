@@ -1,5 +1,22 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.16.3 - 14 November, 2025
+#### Features
+
+
+#### Bug fixes and improvements
+- Fix ANR when calling `MapboxVoiceInstructionsPlayer::stop` 
+- Fix NullPointerException when using `MapboxVoiceInstructionsPlayer`. 
+- Optimize the performance of road cameras in Free Drive mode.  
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.16.3` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.16.3))
+- Mapbox Navigation Native `v324.16.3`
+- Mapbox Core Common `v24.16.3`
+- Mapbox Java `v7.8.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.8.0))
+
+
 ## Navigation SDK Core Framework 3.16.2 - 04 November, 2025
 #### Features
 - Reworked tile-loading delay in the predictive cache: both tile loading and tile calculation are now deferred for improved performance. 
