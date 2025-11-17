@@ -27,7 +27,6 @@ import com.mapbox.navigation.core.navigator.toFixLocation
 import com.mapbox.navigation.core.navigator.toLocation
 import com.mapbox.navigation.core.navigator.toLocations
 import com.mapbox.navigation.core.reroute.RerouteController
-import com.mapbox.navigation.core.reroute.RerouteController.RerouteStateObserver
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
@@ -331,16 +330,8 @@ internal class MapboxTripSession(
             private const val LOG_CATEGORY = "RerouteInvocationHandler"
         }
 
-        private var rerouteInvoked = false
-
         @OptIn(ExperimentalTime::class)
         private var startTimeMark = TimeSource.Monotonic.markNow()
-
-        private val rerouteStateObserver = RerouteStateObserver {
-            if (it == RerouteState.FetchingRoute) {
-                rerouteInvoked = true
-            }
-        }
 
         fun triggerRerouteIfRequired(tripStatus: TripStatus) {
             if (repeatRerouteAfterOffRouteDelaySeconds == -1) {
@@ -355,25 +346,23 @@ internal class MapboxTripSession(
                     !tripSession.isOffRoute && tripStatus.isOffRoute -> {
                         logI("Trigger off-route observer for re-route", LOG_CATEGORY)
                         resetState()
-                        rerouteController.registerRerouteStateObserver(rerouteStateObserver)
                         tripSession.offRouteObserverForReroute?.onOffRouteStateChanged(true)
                     }
 
                     // Checks if the reroute was invoked the last time the user was off route
                     tripSession.isOffRoute && tripStatus.isOffRoute -> {
-                        if (rerouteInvoked) {
+                        val rerouteState = rerouteController.state
+                        if (rerouteState.isInProgress()) {
                             logI(
-                                "Re-route was invoked (catch RerouteState.FetchingRoute)",
+                                "Re-route is in progress [$rerouteState]",
                                 LOG_CATEGORY,
                             )
-                            rerouteController.unregisterRerouteStateObserver(rerouteStateObserver)
                             resetState()
                         } else {
                             if (exceedDelay()) {
                                 logI(
-                                    "Re-route wasn't invoked " +
-                                        "(missing RerouteState.FetchingRoute), " +
-                                        "repeating off-route observer call for re-route",
+                                    "Re-route not invoked [$rerouteState]. " +
+                                        "Repeating off-route observer call for re-route",
                                     LOG_CATEGORY,
                                 )
                                 resetState()
@@ -385,7 +374,6 @@ internal class MapboxTripSession(
                     // Resets the state
                     !tripSession.isOffRoute -> {
                         resetState()
-                        rerouteController.unregisterRerouteStateObserver(rerouteStateObserver)
                     }
                 }
             }
@@ -397,12 +385,7 @@ internal class MapboxTripSession(
 
         @OptIn(ExperimentalTime::class)
         private fun resetState() {
-            rerouteInvoked = false
             startTimeMark = TimeSource.Monotonic.markNow()
-        }
-
-        fun finish() {
-            rerouteController.unregisterRerouteStateObserver(rerouteStateObserver)
         }
     }
 
@@ -751,7 +734,6 @@ internal class MapboxTripSession(
 
     override fun resetOffRouteObserverForReroute() {
         offRouteObserverForReroute = null
-        rerouteInvocationHandler?.finish()
         rerouteInvocationHandler = null
     }
 
@@ -947,3 +929,5 @@ private val TripStatus.isOffRoute: Boolean
 
 private class NativeStatusProcessingError(cause: Throwable) :
     Throwable("Error processing native status update", cause)
+
+private fun RerouteState.isInProgress(): Boolean = this is RerouteState.FetchingRoute
