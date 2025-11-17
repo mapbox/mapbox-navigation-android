@@ -87,7 +87,6 @@ object MapboxNavigationProvider {
 
     internal fun unregisterObserver(observer: MapboxNavigationObserver) {
         observers.remove(observer)
-        mapboxNavigation?.let { observer.onDetached(it) }
     }
 
     private fun logD(msg: String) = com.mapbox.navigation.utils.internal.logD(msg, LOG_CATEGORY)
