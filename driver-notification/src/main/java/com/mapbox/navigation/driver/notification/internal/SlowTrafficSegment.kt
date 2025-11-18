@@ -1,6 +1,7 @@
 package com.mapbox.navigation.driver.notification.internal
 
 import androidx.annotation.RestrictTo
+import com.mapbox.geojson.Point
 import kotlin.time.Duration
 
 /**
@@ -27,4 +28,10 @@ data class SlowTrafficSegment(
     val distanceMeters: Double,
     val freeFlowDuration: Duration,
     val duration: Duration,
-)
+    // Note: it is mutable only as an optimization, in order not to create too many Lists
+    // during object's construction.
+    internal val _points: MutableList<Point> = mutableListOf(),
+) {
+
+    val points: List<Point> get() = _points
+}

@@ -2,7 +2,10 @@ package com.mapbox.navigation.driver.notification.internal
 
 import androidx.annotation.RestrictTo
 import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.core.constants.Constants
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.utils.internal.geometryPoints
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.time.Duration
@@ -13,9 +16,15 @@ import kotlin.time.Duration.Companion.seconds
  *
  * Note: The core logic is computationally intensive as it iterates through potentially thousands
  * of geometry points
+ *
+ * @param extractPoints for testing purposes only ([geometryPoints] is a static function)
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-class SlowTrafficSegmentsFinder {
+class SlowTrafficSegmentsFinder(
+    private val extractPoints: (RouteLeg) -> List<Point> = {
+        it.geometryPoints(Constants.PRECISION_6)
+    },
+) {
 
     /**
      * Scans the route, starting from the user's current progress, to find continuous
@@ -67,7 +76,7 @@ class SlowTrafficSegmentsFinder {
                 0
             }
 
-            val geometry = Geometry.Companion.of(leg) ?: Geometry.Companion.EMPTY
+            val geometry = Geometry.of(leg, extractPoints(leg)) ?: Geometry.Companion.EMPTY
             var currentSegment: SlowTrafficSegment? = null
 
             for (geometryIndex in firstGeometryIndex until geometry.size) {
@@ -117,25 +126,35 @@ class SlowTrafficSegmentsFinder {
                 // Applying conversion of the speed from km/h -> m/s
                 geometry.distance(geometryIndex) * KM_PER_H_TO_M_PER_SEC_RATE / legFreeFlowSpeed
             }
+
             0.0 < this.distanceMeters -> {
                 // Adding average duration based on the previous geometry
                 val avgTimePerMeter =
                     this.freeFlowDuration.inWholeSeconds.toDouble() / this.distanceMeters
                 geometry.distance(geometryIndex) * avgTimePerMeter
             }
+
             else -> 0.0
         }
+
         return this.copy(
             freeFlowDuration = this.freeFlowDuration + freeFlowDurationSec.seconds,
             duration = this.duration + geometry.duration(geometryIndex),
             distanceMeters = this.distanceMeters + geometry.distance(geometryIndex),
             geometryRange = geometryRange.first..geometryIndex,
-        )
+        ).apply {
+            // Each geometry consists of 2 points
+            if (_points.isEmpty()) {
+                _points.add(geometry.point(geometryIndex))
+            }
+            _points.add(geometry.point(geometryIndex + 1))
+        }
     }
 
     private fun List<IntRange>.rangeOf(congestion: Int?) = firstOrNull { it.contains(congestion) }
 
     private companion object {
+
         // Calc time with seconds:
         // dist_m / speed_km_h = dist_m / (speed_km_h * 1000 / 3600) = dist_m * 3.6 / speed_km_h = duration_sec
         private const val KM_PER_H_TO_M_PER_SEC_RATE = 3.6
@@ -150,20 +169,29 @@ private class Geometry(
     private val durations: List<Double>,
     private val freeFlowSpeeds: List<Int?>,
     private val congestions: List<Int?>,
+    private val points: List<Point>,
 ) {
+
     val size: Int = listOf(
         distances.size,
         durations.size,
         freeFlowSpeeds.size,
         congestions.size,
     ).min()
+
     fun distance(index: Int): Double = distances[index]
     fun duration(index: Int): Duration = durations[index].seconds
     fun freeFlowSpeed(index: Int): Int? = freeFlowSpeeds[index]
     fun congestion(index: Int): Int? = congestions[index]
 
+    /**
+     * Note: there will be `size + 1` number of points, because each geometry consists of 2 points.
+     */
+    fun point(index: Int): Point = points[index]
+
     companion object {
-        fun of(leg: RouteLeg): Geometry? {
+
+        fun of(leg: RouteLeg, points: List<Point>): Geometry? {
             val legDistances = leg.annotation()?.distance() ?: return null
             val legDurations = leg.annotation()?.duration() ?: return null
             val legFreeFlowSpeeds = leg.annotation()?.freeflowSpeed() ?: return null
@@ -174,9 +202,10 @@ private class Geometry(
                 legDurations,
                 legFreeFlowSpeeds,
                 legCongestions,
+                points,
             )
         }
 
-        val EMPTY = Geometry(emptyList(), emptyList(), emptyList(), emptyList())
+        val EMPTY = Geometry(emptyList(), emptyList(), emptyList(), emptyList(), emptyList())
     }
 }
