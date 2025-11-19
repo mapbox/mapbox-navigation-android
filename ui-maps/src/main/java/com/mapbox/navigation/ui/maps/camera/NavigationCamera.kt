@@ -607,8 +607,13 @@ internal constructor(
             }
 
             finishAnimation(animation)
-            transitionEndListeners.forEach { it.onTransitionEnd(isCanceled) }
+            // Custom transitionEndListener might synchronously start another transition.
+            // In this case we risk running into a race condition where the new transitionEndListeners
+            // will be cleared at the next line before its animation is ended.
+            // To avoid this, we first clear the existing listeners and only then notify them.
+            val listeners = transitionEndListeners.toSet()
             transitionEndListeners.clear()
+            listeners.forEach { it.onTransitionEnd(isCanceled) }
             updateFrame(viewportDataSource.getViewportData(), instant = false)
         }
 
