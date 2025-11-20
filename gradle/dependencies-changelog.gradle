@@ -1,0 +1,15 @@
+apply from: "${rootDir}/gradle/dependencies.gradle"
+
+task createDependenciesMd {
+    inputs.properties(this.ext.version)
+    outputs.file("$buildDir/dependencies.md")
+    doLast {
+        def versions = "- Mapbox Maps SDK v${this.ext.version.mapboxMapSdk} ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/android-v${this.ext.version.mapboxMapSdk}))  \n" +
+                "- Mapbox Navigation Native v${this.ext.version.mapboxNavigator}  \n" +
+                "- Mapbox Core Common v${this.ext.version.mapboxCommonNative}  \n" +
+                "- Mapbox Java v${this.ext.version.mapboxSdkServices} ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v${this.ext.version.mapboxSdkServices}))  \n" +
+                "- Mapbox Android Core v${this.ext.version.mapboxCore}  \n" +
+                "- Mapbox Android Telemetry v${this.ext.version.mapboxEvents}  "
+        new File(buildDir, "dependencies.md").text = versions
+    }
+}
