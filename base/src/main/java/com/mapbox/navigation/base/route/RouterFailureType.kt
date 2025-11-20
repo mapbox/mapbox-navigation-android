@@ -55,6 +55,11 @@ annotation class RouterFailureType {
         const val RESPONSE_PARSING_ERROR = "RESPONSE_PARSING_ERROR"
 
         /**
+         * Indicates that router was recreated for some internal reason.
+         */
+        const val ROUTER_RECREATION_ERROR = "ROUTER_RECREATION_ERROR"
+
+        /**
          * Error has an unknown type
          */
         const val UNKNOWN_ERROR = "UNKNOWN_ERROR"
