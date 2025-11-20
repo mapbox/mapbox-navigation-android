@@ -22,7 +22,6 @@ ext {
     }
     if (ndkMajorVersion != null) {
         ndkVersionSuffix = "-ndk$ndkMajorVersion"
-        println("Building with NDK version suffix: " + ndkVersionSuffix)
     }
     
     /**
