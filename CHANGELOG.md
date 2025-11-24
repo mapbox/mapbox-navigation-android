@@ -1,5 +1,26 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.17.0-rc.2 - 24 November, 2025
+#### Features
+
+
+#### Bug fixes and improvements
+
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.17.0-rc.2` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.17.0-rc.2))
+- Mapbox Navigation Native `v324.17.0-rc.2`
+- Mapbox Core Common `v24.17.0-rc.2`
+- Mapbox Java `v7.9.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.9.0))
+
+
 ## Navigation SDK Core Framework 3.17.0-rc.1 - 20 November, 2025
 #### Features
 - Reduce map-matcher latency in urban areas with lots of small tunnels 
