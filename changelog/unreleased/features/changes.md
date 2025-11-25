@@ -1,0 +1,1 @@
+- Added an `isOffline` flag to `EvStationMarker` to identify when charging station data is from an offline source.
