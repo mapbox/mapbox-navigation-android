@@ -18,6 +18,8 @@ import com.mapbox.navigation.base.road.model.RoadComponent
  * @param functionRoadClass the edge's [RoadClass]
  * @param speedLimit max speed of the edge (speed limit) in m/s
  * @param speed average speed along the edge in m/s
+ * @param freeFlowSpeed Optional edge's free flow speed (m/s) when there is no traffic
+ * @param constrainedFlowSpeed Optional edge's constrained flow speed (m/s) when there is traffic
  * @param ramp is the edge a ramp?
  * @param motorway is the edge a motorway?
  * @param bridge is the edge a bridge?
@@ -42,6 +44,8 @@ class EHorizonEdgeMetadata internal constructor(
     val functionRoadClass: String,
     val speedLimit: Double?,
     val speed: Double,
+    val freeFlowSpeed: Double?,
+    val constrainedFlowSpeed: Double?,
     val ramp: Boolean,
     val motorway: Boolean,
     val bridge: Boolean,
@@ -74,6 +78,8 @@ class EHorizonEdgeMetadata internal constructor(
         if (functionRoadClass != other.functionRoadClass) return false
         if (speedLimit != other.speedLimit) return false
         if (speed != other.speed) return false
+        if (freeFlowSpeed != other.freeFlowSpeed) return false
+        if (constrainedFlowSpeed != other.constrainedFlowSpeed) return false
         if (ramp != other.ramp) return false
         if (motorway != other.motorway) return false
         if (bridge != other.bridge) return false
@@ -103,6 +109,8 @@ class EHorizonEdgeMetadata internal constructor(
         result = 31 * result + functionRoadClass.hashCode()
         result = 31 * result + speedLimit.hashCode()
         result = 31 * result + speed.hashCode()
+        result = 31 * result + freeFlowSpeed.hashCode()
+        result = 31 * result + constrainedFlowSpeed.hashCode()
         result = 31 * result + ramp.hashCode()
         result = 31 * result + motorway.hashCode()
         result = 31 * result + bridge.hashCode()
@@ -132,6 +140,8 @@ class EHorizonEdgeMetadata internal constructor(
             "functionRoadClass='$functionRoadClass', " +
             "speedLimit=$speedLimit, " +
             "speed=$speed, " +
+            "freeFlowSpeed=$freeFlowSpeed, " +
+            "constrainedFlowSpeed=$constrainedFlowSpeed, " +
             "ramp=$ramp, " +
             "motorway=$motorway, " +
             "bridge=$bridge, " +

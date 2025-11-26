@@ -1580,9 +1580,11 @@ package com.mapbox.navigation.base.trip.model.eh {
 
   public final class EHorizonEdgeMetadata {
     method public boolean getBridge();
+    method public Double? getConstrainedFlowSpeed();
     method public String? getCountryCodeIso2();
     method public String? getCountryCodeIso3();
     method public byte getCurvature();
+    method public Double? getFreeFlowSpeed();
     method public String getFunctionRoadClass();
     method public double getHeading();
     method public Byte? getLaneCount();
@@ -1601,9 +1603,11 @@ package com.mapbox.navigation.base.trip.model.eh {
     method public boolean isRightHandTraffic();
     method public boolean isUrban();
     property public final boolean bridge;
+    property public final Double? constrainedFlowSpeed;
     property public final String? countryCodeIso2;
     property public final String? countryCodeIso3;
     property public final byte curvature;
+    property public final Double? freeFlowSpeed;
     property public final String functionRoadClass;
     property public final double heading;
     property public final boolean isOneWay;
