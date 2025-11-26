@@ -13,5 +13,5 @@ interface CameraStateManager {
 
     fun getCurrentState(): NavigationCameraState
 
-    fun deactivate()
+    fun disable()
 }

@@ -21,7 +21,7 @@ internal class NavigationCameraStateManager(
         return navigationCamera.state
     }
 
-    override fun deactivate() {
+    override fun disable() {
         navigationCamera.requestNavigationCameraToIdle()
     }
 }

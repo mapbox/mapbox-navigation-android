@@ -166,7 +166,7 @@ class NavigationScaleGestureHandler internal constructor(
         }
         when {
             owner != NAVIGATION_CAMERA_OWNER && owner != MapAnimationOwnerRegistry.GESTURES -> {
-                cameraStateManager.deactivate()
+                cameraStateManager.disable()
             }
 
             owner == MapAnimationOwnerRegistry.GESTURES -> {
@@ -178,7 +178,7 @@ class NavigationScaleGestureHandler internal constructor(
                         // do nothing
                     } // todo why is anchor called?
                     else -> {
-                        cameraStateManager.deactivate()
+                        cameraStateManager.disable()
                     }
                 }
             }
@@ -222,7 +222,7 @@ class NavigationScaleGestureHandler internal constructor(
                     applySingleFingerMoveThreshold(detector)
                 }
             } else {
-                cameraStateManager.deactivate()
+                cameraStateManager.disable()
             }
         }
 
@@ -263,7 +263,7 @@ class NavigationScaleGestureHandler internal constructor(
                 return true
             }
             if (cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING) {
-                cameraStateManager.deactivate()
+                cameraStateManager.disable()
                 detector.interrupt() // todo is this needed?
             }
             return false
