@@ -263,7 +263,8 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
             Int, List<RouteLineExpressionData>, InactiveRouteColors,
             List<RouteLineExpressionData>,
             >,
-        List<RouteLineExpressionData>,> by lazy { LruCache(4) }
+        List<RouteLineExpressionData>,
+        > by lazy { LruCache(4) }
 
     private var lastLocationPoint: Point? = null
 
@@ -354,7 +355,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
      * in the [MapboxRouteLineApiOptions]. If not 0.0 is returned.
      */
     fun getVanishPointOffset(): Double {
-        return vanishingRouteLine?.vanishPointOffset ?: 0.0
+        return getSafeVanishPointOffset()
     }
 
     /**
@@ -791,7 +792,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
                         activeLegIndex = currentLegIndex
 
                         val (maskingLayerData, routeLineData) = if (legChange) {
-                            val vanishingOffset = vanishingRouteLine?.vanishPointOffset ?: 0.0
+                            val vanishingOffset = getSafeVanishPointOffset()
                             val maskingLayerData = getRouteLineDynamicDataForMaskingLayers(
                                 currentPrimaryRoute,
                                 vanishingOffset,
@@ -1230,7 +1231,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         val alternativeRoute1 = partitionedRoutes.second.firstOrNull()
         val alternativeRoute2 = partitionedRoutes.second.getOrNull(1)
 
-        val vanishingPointOffset = vanishingRouteLine?.vanishPointOffset ?: 0.0
+        val vanishingPointOffset = getSafeVanishPointOffset()
 
         val routeLineExpressionDataDef = calculationsScope.async {
             primaryRoute.route.run {
@@ -1513,7 +1514,8 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
     ) -> List<RouteLineExpressionData> = {
             activeLegIndex: Int,
             segments: List<RouteLineExpressionData>,
-            colors: InactiveRouteColors, ->
+            colors: InactiveRouteColors,
+        ->
         segments.parallelMap(
             {
                 if (it.legIndex != activeLegIndex) {
@@ -1603,5 +1605,23 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
 
     private fun NavigationRoute?.isMultiLeg(): Boolean {
         return (this?.directionsRoute?.legs()?.size ?: 0) >= 2
+    }
+
+    /**
+     * Helper method to get vanishing point offset that respects the vanishing point state.
+     * Returns 0.0 if vanishing is disabled (e.g., during INITIALIZED state) to prevent rendering
+     * stale offset values.
+     *
+     * @return the vanishing point offset if enabled, otherwise 0.0
+     */
+    private fun getSafeVanishPointOffset(): Double {
+        val vanishing = vanishingRouteLine
+        return if (vanishing == null ||
+            vanishing.vanishingPointState == VanishingPointState.DISABLED
+        ) {
+            0.0
+        } else {
+            vanishing.vanishPointOffset
+        }
     }
 }

@@ -51,6 +51,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteNotFound
+import com.mapbox.navigation.ui.maps.route.line.model.VanishingPointState
 import com.mapbox.navigation.ui.maps.testing.TestRoute
 import com.mapbox.navigation.ui.maps.testing.TestingUtil.loadNavigationRoute
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
@@ -193,6 +194,58 @@ class MapboxRouteLineApiTest {
 
         assertEquals(
             99.9,
+            result,
+            0.0,
+        )
+    }
+
+    @Test
+    fun `getVanishPointOffset returns 0 when vanishing point state is DISABLED`() {
+        val options = MapboxRouteLineApiOptions.Builder()
+            .vanishingRouteLineEnabled(true)
+            .build()
+        every { vanishingRouteLine.vanishPointOffset } returns 0.456
+        every { vanishingRouteLine.vanishingPointState } returns VanishingPointState.DISABLED
+
+        val result = createRouteLineApi(options).getVanishPointOffset()
+
+        assertEquals(
+            0.0,
+            result,
+            0.0,
+        )
+    }
+
+    @Test
+    fun `getVanishPointOffset returns actual offset when vanishing point state is ENABLED`() {
+        val options = MapboxRouteLineApiOptions.Builder()
+            .vanishingRouteLineEnabled(true)
+            .build()
+        every { vanishingRouteLine.vanishPointOffset } returns 0.456
+        every { vanishingRouteLine.vanishingPointState } returns VanishingPointState.ENABLED
+
+        val result = createRouteLineApi(options).getVanishPointOffset()
+
+        assertEquals(
+            0.456,
+            result,
+            0.0,
+        )
+    }
+
+    @Test
+    fun `getVanishPointOffset returns actual offset when vanishing point state is ONLY_INCREASE_PROGRESS`() {
+        val options = MapboxRouteLineApiOptions.Builder()
+            .vanishingRouteLineEnabled(true)
+            .build()
+        every { vanishingRouteLine.vanishPointOffset } returns 0.789
+        every { vanishingRouteLine.vanishingPointState } returns
+            VanishingPointState.ONLY_INCREASE_PROGRESS
+
+        val result = createRouteLineApi(options).getVanishPointOffset()
+
+        assertEquals(
+            0.789,
             result,
             0.0,
         )
