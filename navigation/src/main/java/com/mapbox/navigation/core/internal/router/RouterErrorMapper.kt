@@ -17,5 +17,6 @@ internal fun RouterErrorType.mapToSdkRouterFailureType(): String {
         RouterErrorType.REQUEST_CANCELLED -> error("Should have been processed separately")
         RouterErrorType.MAP_MATCHING_CREATION_ERROR ->
             RouterFailureType.ROUTE_CREATION_ERROR
+        RouterErrorType.MISSING_TILES_ERROR -> RouterFailureType.ROUTER_RECREATION_ERROR
     }
 }
