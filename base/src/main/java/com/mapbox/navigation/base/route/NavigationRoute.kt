@@ -606,26 +606,30 @@ class NavigationRoute private constructor(
      * without comparing all other routes found in the [DirectionsResponse.routes].
      */
     override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+        PerformanceTracker.trackPerformanceSync("NavRoute#equals") {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
 
-        other as NavigationRoute
+            other as NavigationRoute
 
-        if (id != other.id) return false
-        if (directionsRoute != other.directionsRoute) return false
-        if (waypoints != other.waypoints) return false
+            if (id != other.id) return false
+            if (directionsRoute != other.directionsRoute) return false
+            if (waypoints != other.waypoints) return false
 
-        return true
+            return true
+        }
     }
 
     /**
      * Returns a hash code value for the object.
      */
     override fun hashCode(): Int {
-        var result = id.hashCode()
-        result = 31 * result + directionsRoute.hashCode()
-        result = 31 * result + waypoints.hashCode()
-        return result
+        PerformanceTracker.trackPerformanceSync("NavRoute#hashCode") {
+            var result = id.hashCode()
+            result = 31 * result + directionsRoute.hashCode()
+            result = 31 * result + waypoints.hashCode()
+            return result
+        }
     }
 
     /**
