@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.replay.route
 import androidx.annotation.UiThread
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.replay.MapboxReplayer
@@ -45,12 +46,14 @@ class ReplayProgressObserver @JvmOverloads constructor(
      * @param routeProgress from the navigation session
      */
     override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-        val currentLegProgress = routeProgress.currentLegProgress
-        val routeProgressRouteLeg = currentLegProgress?.routeLeg
-        val legIdentifier = routeProgress.getCurrentRouteLegIdentifier()
-        if (currentLegIdentifier != legIdentifier && currentLegProgress != null) {
-            currentLegIdentifier = legIdentifier
-            onRouteLegChanged(routeProgressRouteLeg, currentLegProgress.distanceTraveled)
+        PerformanceTracker.trackPerformanceSync("ReplayProgressObserver") {
+            val currentLegProgress = routeProgress.currentLegProgress
+            val routeProgressRouteLeg = currentLegProgress?.routeLeg
+            val legIdentifier = routeProgress.getCurrentRouteLegIdentifier()
+            if (currentLegIdentifier != legIdentifier && currentLegProgress != null) {
+                currentLegIdentifier = legIdentifier
+                onRouteLegChanged(routeProgressRouteLeg, currentLegProgress.distanceTraveled)
+            }
         }
     }
 
