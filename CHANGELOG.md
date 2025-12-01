@@ -1,5 +1,72 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.17.0-rc.3 - 01 December, 2025
+#### Features
+- Added ZStd support. 
+
+#### Bug fixes and improvements
+- Fixed an issue when adding a stop point on top of an already traversed route, which could show a carried-over vanishing portion from the previous route. That is accomplished by ensuring that `MapboxRouteLineApi.getVanishPointOffset()` returns `0.0` in case the point was in the `VanishingPointState.DISABLED` state. 
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.17.0-rc.3` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.17.0-rc.3))
+- Mapbox Navigation Native `v324.17.0-rc.3`
+- Mapbox Core Common `v24.17.0-rc.3`
+- Mapbox Java `v7.9.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.9.0))
+
+
+## Navigation SDK Core Framework 3.17.0-rc.2 - 24 November, 2025
+#### Features
+
+
+#### Bug fixes and improvements
+
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.17.0-rc.2` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.17.0-rc.2))
+- Mapbox Navigation Native `v324.17.0-rc.2`
+- Mapbox Core Common `v24.17.0-rc.2`
+- Mapbox Java `v7.9.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.9.0))
+
+
+## Navigation SDK Core Framework 3.17.0-rc.1 - 20 November, 2025
+#### Features
+- Reduce map-matcher latency in urban areas with lots of small tunnels 
+- Add a feature to override location bearing with yaw from orientation data (inactive by default) 
+- Improve behavior on elevated highways (new ramp detection algorithm) 
+- Improve tunnel mode behavior after tunnel exists 
+- Added `freeFlowSpeed` and `constrainedFlowSpeed` properties to `EHorizonEdgeMetadata` to provide free flow and constrained flow speed information for edges 
+
+#### Bug fixes and improvements
+- Fix an issue where transitionEndListener passed to `NavigationCamera#requestNavigationCameraTo...` might not have been invoked. 
+- Added RouterFailureType.ROUTER_RECREATION_ERROR when route request failed due to related reason and made this error retriable 
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.17.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.17.0-rc.1))
+- Mapbox Navigation Native `v324.17.0-rc.1`
+- Mapbox Core Common `v24.17.0-rc.1`
+- Mapbox Java `v7.9.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.9.0))
+
 ## Navigation SDK Core Framework 3.17.0-beta.1 - 07 November, 2025
 #### Features
 - Reworked tile-loading delay in the predictive cache: both tile loading and tile calculation are now deferred for improved performance. 
