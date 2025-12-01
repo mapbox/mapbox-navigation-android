@@ -1,5 +1,26 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.17.0-rc.3 - 01 December, 2025
+#### Features
+- Added ZStd support. 
+
+#### Bug fixes and improvements
+- Fixed an issue when adding a stop point on top of an already traversed route, which could show a carried-over vanishing portion from the previous route. That is accomplished by ensuring that `MapboxRouteLineApi.getVanishPointOffset()` returns `0.0` in case the point was in the `VanishingPointState.DISABLED` state. 
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.17.0-rc.3` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.17.0-rc.3))
+- Mapbox Navigation Native `v324.17.0-rc.3`
+- Mapbox Core Common `v24.17.0-rc.3`
+- Mapbox Java `v7.9.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.9.0))
+
+
 ## Navigation SDK Core Framework 3.17.0-rc.2 - 24 November, 2025
 #### Features
 
