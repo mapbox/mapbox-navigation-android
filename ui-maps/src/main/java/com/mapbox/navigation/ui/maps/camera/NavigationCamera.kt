@@ -244,6 +244,8 @@ internal constructor(
     private val navigationCameraStateChangedObservers =
         CopyOnWriteArraySet<NavigationCameraStateChangedObserver>()
 
+    private var currentStateTransitionListener: NavigationCameraTransitionListener? = null
+
     /**
      * Returns current [NavigationCameraState].
      * @see registerNavigationCameraStateChangeObserver
@@ -354,7 +356,9 @@ internal constructor(
                                 TRANSITION_TO_FOLLOWING,
                                 FOLLOWING,
                                 frameTransitionOptions,
-                            ),
+                            ).also {
+                                this@NavigationCamera.currentStateTransitionListener = it
+                            },
                         )
                     },
                     instant = false,
@@ -430,7 +434,9 @@ internal constructor(
                                 TRANSITION_TO_OVERVIEW,
                                 OVERVIEW,
                                 frameTransitionOptions,
-                            ),
+                            ).also {
+                                this@NavigationCamera.currentStateTransitionListener = it
+                            },
                         )
                     },
                     instant = false,
@@ -591,36 +597,11 @@ internal constructor(
         progressState: NavigationCameraState,
         finalState: NavigationCameraState,
         frameTransitionOptions: NavigationCameraTransitionOptions,
-    ) = object : MapboxAnimatorSetListener {
-
-        private var isCanceled = false
-
-        override fun onAnimationStart(animation: MapboxAnimatorSet) {
-            this@NavigationCamera.frameTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT
-            state = progressState
-        }
-
-        override fun onAnimationEnd(animation: MapboxAnimatorSet) {
-            if (!isCanceled) {
-                this@NavigationCamera.frameTransitionOptions = frameTransitionOptions
-                state = finalState
-            }
-
-            finishAnimation(animation)
-            // Custom transitionEndListener might synchronously start another transition.
-            // In this case we risk running into a race condition where the new transitionEndListeners
-            // will be cleared at the next line before its animation is ended.
-            // To avoid this, we first clear the existing listeners and only then notify them.
-            val listeners = transitionEndListeners.toSet()
-            transitionEndListeners.clear()
-            listeners.forEach { it.onTransitionEnd(isCanceled) }
-            updateFrame(viewportDataSource.getViewportData(), instant = false)
-        }
-
-        override fun onAnimationCancel(animation: MapboxAnimatorSet) {
-            isCanceled = true
-        }
-    }
+    ) = NavigationCameraTransitionListener(
+        progressState,
+        finalState,
+        frameTransitionOptions,
+    )
 
     private fun createFrameListener() = object : MapboxAnimatorSetListener {
 
@@ -640,5 +621,81 @@ internal constructor(
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private fun updateDebugger() {
         debugger?.cameraState = state
+    }
+
+    /**
+     * Updates following frame transition options on the fly.
+     * Note that these options will be reset on the next requestToFollowing invocation.
+     */
+    internal fun updateFollowingFrameTransitionOptions(
+        frameTransitionOptions: NavigationCameraTransitionOptions,
+    ) {
+        when (state) {
+            FOLLOWING -> {
+                this.frameTransitionOptions = frameTransitionOptions
+            }
+            TRANSITION_TO_FOLLOWING -> {
+                currentStateTransitionListener?.frameTransitionOptions = frameTransitionOptions
+            }
+            else -> {
+                // no-op
+            }
+        }
+    }
+
+    /**
+     * Updates overview frame transition options on the fly.
+     * Note that these options will be reset on the next requestToOverview invocation.
+     */
+    internal fun updateOverviewFrameTransitionOptions(
+        frameTransitionOptions: NavigationCameraTransitionOptions,
+    ) {
+        when (state) {
+            OVERVIEW -> {
+                this.frameTransitionOptions = frameTransitionOptions
+            }
+            TRANSITION_TO_OVERVIEW -> {
+                currentStateTransitionListener?.frameTransitionOptions = frameTransitionOptions
+            }
+            else -> {
+                // no-op
+            }
+        }
+    }
+
+    private inner class NavigationCameraTransitionListener(
+        private val progressState: NavigationCameraState,
+        private val finalState: NavigationCameraState,
+        var frameTransitionOptions: NavigationCameraTransitionOptions,
+    ) : MapboxAnimatorSetListener {
+        private var isCanceled = false
+
+        override fun onAnimationStart(animation: MapboxAnimatorSet) {
+            this@NavigationCamera.frameTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT
+            state = progressState
+        }
+
+        override fun onAnimationEnd(animation: MapboxAnimatorSet) {
+            if (!isCanceled) {
+                this@NavigationCamera.frameTransitionOptions = frameTransitionOptions
+                state = finalState
+            }
+
+            this@NavigationCamera.currentStateTransitionListener = null
+
+            finishAnimation(animation)
+            // Custom transitionEndListener might synchronously start another transition.
+            // In this case we risk running into a race condition where the new transitionEndListeners
+            // will be cleared at the next line before its animation is ended.
+            // To avoid this, we first clear the existing listeners and only then notify them.
+            val listeners = transitionEndListeners.toSet()
+            transitionEndListeners.clear()
+            listeners.forEach { it.onTransitionEnd(isCanceled) }
+            updateFrame(viewportDataSource.getViewportData(), instant = false)
+        }
+
+        override fun onAnimationCancel(animation: MapboxAnimatorSet) {
+            isCanceled = true
+        }
     }
 }

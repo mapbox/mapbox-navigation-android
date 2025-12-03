@@ -876,4 +876,188 @@ class NavigationCameraTest {
         val frameCamera: CameraOptions,
         val frameAnimatorSet: MapboxAnimatorSet,
     )
+
+    @Test
+    fun `updateFollowingFrameTransitionOptions when FOLLOWING updates frame options`() {
+        val initialFrameOpt = NavigationCameraTransitionOptions.Builder()
+            .maxDuration(250L)
+            .build()
+        val updatedFrameOpt = NavigationCameraTransitionOptions.Builder()
+            .maxDuration(100L)
+            .build()
+
+        navigationCamera.requestNavigationCameraToFollowing(
+            frameTransitionOptions = initialFrameOpt,
+        )
+        internalTransitionListenerSlot.captured.onAnimationStart(followingAnimatorSet)
+        internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
+
+        navigationCamera.updateFollowingFrameTransitionOptions(updatedFrameOpt)
+
+        val frameTransition = mockFrameTransitionForFollowing(updatedFrameOpt)
+        internalDataSourceObserverSlot.captured.viewportDataSourceUpdated(viewportData)
+
+        verifyTransitionExecuted(
+            AnimatorsCreator::updateFrameForFollowing,
+            frameTransition.frameCamera,
+            updatedFrameOpt,
+            frameTransition.frameAnimatorSet,
+        )
+    }
+
+    @Test
+    fun `updateFollowingFrameTransitionOptions when TRANSITION_TO_FOLLOWING updates transition listener options`() {
+        val initialFrameOpt = NavigationCameraTransitionOptions.Builder()
+            .maxDuration(250L)
+            .build()
+        val updatedFrameOpt = NavigationCameraTransitionOptions.Builder()
+            .maxDuration(100L)
+            .build()
+
+        navigationCamera.requestNavigationCameraToFollowing(
+            frameTransitionOptions = initialFrameOpt,
+        )
+        internalTransitionListenerSlot.captured.onAnimationStart(followingAnimatorSet)
+
+        navigationCamera.updateFollowingFrameTransitionOptions(updatedFrameOpt)
+        internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
+
+        val frameTransition = mockFrameTransitionForFollowing(updatedFrameOpt)
+        internalDataSourceObserverSlot.captured.viewportDataSourceUpdated(viewportData)
+
+        verifyTransitionExecuted(
+            AnimatorsCreator::updateFrameForFollowing,
+            frameTransition.frameCamera,
+            updatedFrameOpt,
+            frameTransition.frameAnimatorSet,
+        )
+    }
+
+    @Test
+    fun `updateFollowingFrameTransitionOptions when IDLE does nothing`() {
+        val updatedFrameOpt = NavigationCameraTransitionOptions.Builder()
+            .maxDuration(100L)
+            .build()
+
+        navigationCamera.updateFollowingFrameTransitionOptions(updatedFrameOpt)
+
+        // Verify no side effects - state remains IDLE
+        assertEquals(NavigationCameraState.IDLE, navigationCamera.state)
+    }
+
+    @Test
+    fun `updateFollowingFrameTransitionOptions when OVERVIEW does nothing`() {
+        val updatedFrameOpt = NavigationCameraTransitionOptions.Builder()
+            .maxDuration(100L)
+            .build()
+
+        navigationCamera.requestNavigationCameraToOverview()
+        internalTransitionListenerSlot.captured.onAnimationStart(overviewAnimatorSet)
+        internalTransitionListenerSlot.captured.onAnimationEnd(overviewAnimatorSet)
+
+        navigationCamera.updateFollowingFrameTransitionOptions(updatedFrameOpt)
+
+        val frameTransition = mockFrameTransitionForOverview(DEFAULT_FRAME_TRANSITION_OPT)
+        internalDataSourceObserverSlot.captured.viewportDataSourceUpdated(viewportData)
+
+        // Verify it still uses default options, not the updated ones
+        verifyTransitionExecuted(
+            AnimatorsCreator::updateFrameForOverview,
+            frameTransition.frameCamera,
+            DEFAULT_FRAME_TRANSITION_OPT,
+            frameTransition.frameAnimatorSet,
+        )
+    }
+
+    @Test
+    fun `updateOverviewFrameTransitionOptions when OVERVIEW updates frame options`() {
+        val initialFrameOpt = NavigationCameraTransitionOptions.Builder()
+            .maxDuration(250L)
+            .build()
+        val updatedFrameOpt = NavigationCameraTransitionOptions.Builder()
+            .maxDuration(100L)
+            .build()
+
+        navigationCamera.requestNavigationCameraToOverview(
+            frameTransitionOptions = initialFrameOpt,
+        )
+        internalTransitionListenerSlot.captured.onAnimationStart(overviewAnimatorSet)
+        internalTransitionListenerSlot.captured.onAnimationEnd(overviewAnimatorSet)
+
+        navigationCamera.updateOverviewFrameTransitionOptions(updatedFrameOpt)
+
+        val frameTransition = mockFrameTransitionForOverview(updatedFrameOpt)
+        internalDataSourceObserverSlot.captured.viewportDataSourceUpdated(viewportData)
+
+        verifyTransitionExecuted(
+            AnimatorsCreator::updateFrameForOverview,
+            frameTransition.frameCamera,
+            updatedFrameOpt,
+            frameTransition.frameAnimatorSet,
+        )
+    }
+
+    @Test
+    fun `updateOverviewFrameTransitionOptions when TRANSITION_TO_OVERVIEW updates transition listener options`() {
+        val initialFrameOpt = NavigationCameraTransitionOptions.Builder()
+            .maxDuration(250L)
+            .build()
+        val updatedFrameOpt = NavigationCameraTransitionOptions.Builder()
+            .maxDuration(100L)
+            .build()
+
+        navigationCamera.requestNavigationCameraToOverview(
+            frameTransitionOptions = initialFrameOpt,
+        )
+        internalTransitionListenerSlot.captured.onAnimationStart(overviewAnimatorSet)
+
+        navigationCamera.updateOverviewFrameTransitionOptions(updatedFrameOpt)
+        internalTransitionListenerSlot.captured.onAnimationEnd(overviewAnimatorSet)
+
+        val frameTransition = mockFrameTransitionForOverview(updatedFrameOpt)
+        internalDataSourceObserverSlot.captured.viewportDataSourceUpdated(viewportData)
+
+        verifyTransitionExecuted(
+            AnimatorsCreator::updateFrameForOverview,
+            frameTransition.frameCamera,
+            updatedFrameOpt,
+            frameTransition.frameAnimatorSet,
+        )
+    }
+
+    @Test
+    fun `updateOverviewFrameTransitionOptions when IDLE does nothing`() {
+        val updatedFrameOpt = NavigationCameraTransitionOptions.Builder()
+            .maxDuration(100L)
+            .build()
+
+        navigationCamera.updateOverviewFrameTransitionOptions(updatedFrameOpt)
+
+        // Verify no side effects - state remains IDLE
+        assertEquals(NavigationCameraState.IDLE, navigationCamera.state)
+    }
+
+    @Test
+    fun `updateOverviewFrameTransitionOptions when FOLLOWING does nothing`() {
+        val updatedFrameOpt = NavigationCameraTransitionOptions.Builder()
+            .maxDuration(100L)
+            .build()
+
+        navigationCamera.requestNavigationCameraToFollowing()
+        internalTransitionListenerSlot.captured.onAnimationStart(followingAnimatorSet)
+        internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
+
+        navigationCamera.updateOverviewFrameTransitionOptions(updatedFrameOpt)
+
+        val frameTransition = mockFrameTransitionForFollowing(DEFAULT_FRAME_TRANSITION_OPT)
+        internalDataSourceObserverSlot.captured.viewportDataSourceUpdated(viewportData)
+
+        // Verify it still uses default options, not the updated ones
+        verifyTransitionExecuted(
+            AnimatorsCreator::updateFrameForFollowing,
+            frameTransition.frameCamera,
+            DEFAULT_FRAME_TRANSITION_OPT,
+            frameTransition.frameAnimatorSet,
+        )
+    }
 }
