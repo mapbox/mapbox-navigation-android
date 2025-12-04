@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.route.arrow
 
 import androidx.core.graphics.drawable.DrawableCompat
+import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.maps.LayerPosition
@@ -31,6 +32,13 @@ internal object RouteArrowUtils {
     private const val TAG = "RouteArrowUtils"
 
     fun obtainArrowPointsFrom(routeProgress: RouteProgress): List<Point> {
+        if (isArrivalStep(routeProgress)) {
+            // The last step has an artificial maneuver with type = "arrive".
+            // Creating an arrow for it is:
+            // A) pointless, because there's no actual maneuver;
+            // B) incorrect, because it has duplicated points which result in deducted bearing = 0 (NAVAND-4899).
+            return listOf()
+        }
         val reversedCurrent = routeProgress.currentLegProgress
             ?.currentStepProgress?.stepPoints?.asReversed()
             .orEmpty()
@@ -61,10 +69,20 @@ internal object RouteArrowUtils {
         return arrowCurrentSliced.coordinates().asReversed() + arrowUpcomingSliced.coordinates()
     }
 
+    fun isArrivalStep(routeProgress: RouteProgress): Boolean {
+        val nextStep = routeProgress.currentLegProgress?.currentStepProgress?.stepIndex
+            ?.let { stepIndex ->
+                routeProgress.currentLegProgress?.routeLeg?.steps()?.getOrNull(stepIndex + 1)
+            }
+        return nextStep?.maneuver()?.type() == StepManeuver.ARRIVE
+    }
+
     @OptIn(MapboxExperimental::class, ExperimentalPreviewMapboxNavigationAPI::class)
     fun initializeLayers(style: Style, options: RouteArrowOptions) {
         val styleContainsSlotName = style.styleSlots.contains(options.slotName).also {
-            if (!it) { logW(TAG) { "The ${options.slotName} slot is not present in the style." } }
+            if (!it) {
+                logW(TAG) { "The ${options.slotName} slot is not present in the style." }
+            }
         }
         if (layersAreInitialized(style)) {
             return

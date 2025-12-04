@@ -139,19 +139,31 @@ class MapboxRouteArrowApi {
         removeArrow(maneuverPoints)
         maneuverPoints = getManeuverArrow(routeProgress)
 
-        return addArrow(maneuverPoints).mapValue { value ->
-            UpdateManeuverArrowValue(
-                visibilityChanges,
-                value
-                    .arrowShaftFeatureCollection
-                    .features()
-                    ?.firstOrNull(),
-                value
-                    .arrowHeadFeatureCollection
-                    .features()
-                    ?.firstOrNull(),
-            )
-        }
+        return addArrow(maneuverPoints)
+            .fold(
+                {
+                    UpdateManeuverArrowValue(
+                        visibilityChanges,
+                        null,
+                        null,
+                    )
+                },
+                { value ->
+                    UpdateManeuverArrowValue(
+                        visibilityChanges,
+                        value
+                            .arrowShaftFeatureCollection
+                            .features()
+                            ?.firstOrNull(),
+                        value
+                            .arrowHeadFeatureCollection
+                            .features()
+                            ?.firstOrNull(),
+                    )
+                },
+            ).let {
+                ExpectedFactory.createValue(it)
+            }
     }
 
     private fun getManeuverArrow(routeProgress: RouteProgress): ManeuverArrow {
@@ -171,7 +183,10 @@ class MapboxRouteArrowApi {
             routeProgress.currentLegProgress!!.currentStepProgress!!.stepPoints!!.size <
             RouteLayerConstants.TWO_POINTS
 
-        return if (invalidUpcomingStepPoints || invalidCurrentStepPoints) {
+        return if (invalidUpcomingStepPoints ||
+            invalidCurrentStepPoints ||
+            RouteArrowUtils.isArrivalStep(routeProgress)
+        ) {
             getHideArrowModifications()
         } else {
             getShowArrowModifications()
