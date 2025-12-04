@@ -24,7 +24,7 @@ suspend fun parseDirectionsResponse(
 ): Expected<Throwable, RoutesResponse> =
     withContext(dispatcher) {
         return@withContext try {
-            val response = PerformanceTracker.trackPerformanceSync("NavigationRoute#createAsync") {
+            val response = PerformanceTracker.trackPerformanceAsync("NavigationRoute#createAsync") {
                 NavigationRoute.createAsync(
                     directionsResponseJson = responseJson,
                     routeRequestUrl = requestUrl,
