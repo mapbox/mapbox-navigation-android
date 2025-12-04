@@ -774,10 +774,13 @@ package com.mapbox.navigation.ui.maps.location {
     method public void changePosition(com.mapbox.common.location.Location location, java.util.List<? extends com.mapbox.common.location.Location> keyPoints = emptyList(), kotlin.jvm.functions.Function1<? super android.animation.ValueAnimator,kotlin.Unit>? latLngTransitionOptions = null, kotlin.jvm.functions.Function1<? super android.animation.ValueAnimator,kotlin.Unit>? bearingTransitionOptions = null);
     method public java.util.List<com.mapbox.common.location.Location> getLastKeyPoints();
     method public com.mapbox.common.location.Location? getLastLocation();
+    method public long getPuckAnimationDuration();
     method public void registerLocationConsumer(com.mapbox.maps.plugin.locationcomponent.LocationConsumer locationConsumer);
+    method public void setPuckAnimationDuration(long);
     method public void unRegisterLocationConsumer(com.mapbox.maps.plugin.locationcomponent.LocationConsumer locationConsumer);
     property public final java.util.List<com.mapbox.common.location.Location> lastKeyPoints;
     property public final com.mapbox.common.location.Location? lastLocation;
+    property public final long puckAnimationDuration;
   }
 
 }
