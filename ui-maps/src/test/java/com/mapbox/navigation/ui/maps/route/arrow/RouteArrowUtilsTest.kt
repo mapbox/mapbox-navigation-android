@@ -4,6 +4,9 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import androidx.appcompat.content.res.AppCompatResources
+import com.mapbox.api.directions.v5.models.LegStep
+import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
 import com.mapbox.maps.Image
@@ -31,6 +34,7 @@ import io.mockk.verify
 import io.mockk.verifySequence
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -68,9 +72,11 @@ class RouteArrowUtilsTest {
         val routeStepPoints = listOf(Point.fromLngLat(-122.477395, 37.859513))
         val stepProgress = mockk<RouteStepProgress> {
             every { stepPoints } returns routeStepPoints
+            every { stepIndex } returns 0
         }
         val routeLegProgress = mockk<RouteLegProgress> {
             every { currentStepProgress } returns stepProgress
+            every { routeLeg } returns mockk(relaxed = true)
         }
         val routeProgress = mockk<RouteProgress> {
             every { currentLegProgress } returns routeLegProgress
@@ -91,9 +97,11 @@ class RouteArrowUtilsTest {
         )
         val stepProgress = mockk<RouteStepProgress> {
             every { stepPoints } returns routeStepPoints
+            every { stepIndex } returns 0
         }
         val routeLegProgress = mockk<RouteLegProgress> {
             every { currentStepProgress } returns stepProgress
+            every { routeLeg } returns mockk(relaxed = true)
         }
         val routeProgress = mockk<RouteProgress> {
             every { currentLegProgress } returns routeLegProgress
@@ -114,9 +122,11 @@ class RouteArrowUtilsTest {
         )
         val stepProgress = mockk<RouteStepProgress> {
             every { stepPoints } returns routeStepPoints
+            every { stepIndex } returns 0
         }
         val routeLegProgress = mockk<RouteLegProgress> {
             every { currentStepProgress } returns stepProgress
+            every { routeLeg } returns mockk(relaxed = true)
         }
         val routeProgress = mockk<RouteProgress> {
             every { currentLegProgress } returns routeLegProgress
@@ -140,9 +150,11 @@ class RouteArrowUtilsTest {
         )
         val stepProgress = mockk<RouteStepProgress> {
             every { stepPoints } returns routeStepPoints
+            every { stepIndex } returns 0
         }
         val routeLegProgress = mockk<RouteLegProgress> {
             every { currentStepProgress } returns stepProgress
+            every { routeLeg } returns mockk(relaxed = true)
         }
         val routeProgress = mockk<RouteProgress> {
             every { currentLegProgress } returns routeLegProgress
@@ -429,5 +441,207 @@ class RouteArrowUtilsTest {
             style.removeStyleSource(ARROW_SHAFT_SOURCE_ID)
             style.removeStyleSource(ARROW_HEAD_SOURCE_ID)
         }
+    }
+
+    @Test
+    fun `isArrivalStep returns true when next step is arrival`() {
+        val arriveManeuver = mockk<StepManeuver>(relaxed = true)
+        every { arriveManeuver.type() } returns StepManeuver.ARRIVE
+
+        val nextStep = mockk<LegStep>(relaxed = true)
+        every { nextStep.maneuver() } returns arriveManeuver
+
+        val routeLeg = mockk<RouteLeg>(relaxed = true)
+        every { routeLeg.steps() } returns listOf(mockk(relaxed = true), nextStep)
+
+        val stepProgress = mockk<RouteStepProgress>(relaxed = true)
+        every { stepProgress.stepIndex } returns 0
+
+        val routeLegProgress = mockk<RouteLegProgress>(relaxed = true)
+        every { routeLegProgress.currentStepProgress } returns stepProgress
+        every { routeLegProgress.routeLeg } returns routeLeg
+
+        val routeProgress = mockk<RouteProgress>(relaxed = true)
+        every { routeProgress.currentLegProgress } returns routeLegProgress
+
+        val result = RouteArrowUtils.isArrivalStep(routeProgress)
+
+        assertTrue(result)
+    }
+
+    @Test
+    fun `isArrivalStep returns false when next step is not arrival`() {
+        val turnManeuver = mockk<StepManeuver>(relaxed = true) {
+            every { type() } returns StepManeuver.TURN
+        }
+        val nextStep = mockk<LegStep>(relaxed = true) {
+            every { maneuver() } returns turnManeuver
+        }
+        val mockRouteLeg = mockk<RouteLeg>(relaxed = true) {
+            every { steps() } returns listOf(mockk(relaxed = true), nextStep)
+        }
+        val stepProgress = mockk<RouteStepProgress>(relaxed = true) {
+            every { stepIndex } returns 0
+        }
+        val routeLegProgress = mockk<RouteLegProgress>(relaxed = true) {
+            every { currentStepProgress } returns stepProgress
+            every { routeLeg } returns mockRouteLeg
+        }
+        val routeProgress = mockk<RouteProgress>(relaxed = true) {
+            every { currentLegProgress } returns routeLegProgress
+        }
+
+        val result = RouteArrowUtils.isArrivalStep(routeProgress)
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun `isArrivalStep returns false when there is no next step`() {
+        val mockRouteLeg = mockk<RouteLeg>(relaxed = true) {
+            every { steps() } returns listOf(mockk(relaxed = true))
+        }
+        val stepProgress = mockk<RouteStepProgress>(relaxed = true) {
+            every { stepIndex } returns 0
+        }
+        val routeLegProgress = mockk<RouteLegProgress>(relaxed = true) {
+            every { currentStepProgress } returns stepProgress
+            every { routeLeg } returns mockRouteLeg
+        }
+        val routeProgress = mockk<RouteProgress>(relaxed = true) {
+            every { currentLegProgress } returns routeLegProgress
+        }
+
+        val result = RouteArrowUtils.isArrivalStep(routeProgress)
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun `isArrivalStep returns false when current leg progress is null`() {
+        val routeProgress = mockk<RouteProgress>(relaxed = true) {
+            every { currentLegProgress } returns null
+        }
+
+        val result = RouteArrowUtils.isArrivalStep(routeProgress)
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun `isArrivalStep returns false when current step progress is null`() {
+        val routeLegProgress = mockk<RouteLegProgress>(relaxed = true) {
+            every { currentStepProgress } returns null
+            every { routeLeg } returns mockk(relaxed = true)
+        }
+        val routeProgress = mockk<RouteProgress>(relaxed = true) {
+            every { currentLegProgress } returns routeLegProgress
+        }
+
+        val result = RouteArrowUtils.isArrivalStep(routeProgress)
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun `isArrivalStep returns false when next step maneuver type is null`() {
+        val maneuver = mockk<StepManeuver>(relaxed = true) {
+            every { type() } returns null
+        }
+        val nextStep = mockk<LegStep>(relaxed = true) {
+            every { maneuver() } returns maneuver
+        }
+        val mockRouteLeg = mockk<RouteLeg>(relaxed = true) {
+            every { steps() } returns listOf(mockk(relaxed = true), nextStep)
+        }
+        val stepProgress = mockk<RouteStepProgress>(relaxed = true) {
+            every { stepIndex } returns 0
+        }
+        val routeLegProgress = mockk<RouteLegProgress>(relaxed = true) {
+            every { currentStepProgress } returns stepProgress
+            every { routeLeg } returns mockRouteLeg
+        }
+        val routeProgress = mockk<RouteProgress>(relaxed = true) {
+            every { currentLegProgress } returns routeLegProgress
+        }
+
+        val result = RouteArrowUtils.isArrivalStep(routeProgress)
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun `obtainArrowPointsFrom returns empty list when on arrival step`() {
+        val arriveManeuver = mockk<StepManeuver>(relaxed = true) {
+            every { type() } returns StepManeuver.ARRIVE
+        }
+        val nextStep = mockk<LegStep>(relaxed = true) {
+            every { maneuver() } returns arriveManeuver
+        }
+        val mockRouteLeg = mockk<RouteLeg>(relaxed = true) {
+            every { steps() } returns listOf(mockk(relaxed = true), nextStep)
+        }
+        val routeStepPoints = listOf(
+            Point.fromLngLat(-122.477395, 37.859513),
+            Point.fromLngLat(-122.4784726, 37.8587617),
+        )
+        val upcomingPoints = listOf(
+            Point.fromLngLat(-122.477395, 37.859513),
+            Point.fromLngLat(-122.4784726, 37.8587617),
+        )
+        val stepProgress = mockk<RouteStepProgress>(relaxed = true) {
+            every { stepPoints } returns routeStepPoints
+            every { stepIndex } returns 0
+        }
+        val routeLegProgress = mockk<RouteLegProgress>(relaxed = true) {
+            every { currentStepProgress } returns stepProgress
+            every { routeLeg } returns mockRouteLeg
+        }
+        val routeProgress = mockk<RouteProgress>(relaxed = true) {
+            every { currentLegProgress } returns routeLegProgress
+            every { upcomingStepPoints } returns upcomingPoints
+        }
+
+        val result = RouteArrowUtils.obtainArrowPointsFrom(routeProgress)
+
+        assertTrue(result.isEmpty())
+    }
+
+    @Test
+    fun `obtainArrowPointsFrom processes arrow when not on arrival step`() {
+        val turnManeuver = mockk<StepManeuver>(relaxed = true) {
+            every { type() } returns StepManeuver.TURN
+        }
+        val nextStep = mockk<LegStep>(relaxed = true) {
+            every { maneuver() } returns turnManeuver
+        }
+        val mockRouteLeg = mockk<RouteLeg>(relaxed = true) {
+            every { steps() } returns listOf(mockk(relaxed = true), nextStep)
+        }
+        val routeStepPoints = listOf(
+            Point.fromLngLat(-122.477395, 37.859513),
+            Point.fromLngLat(-122.4784726, 37.8587617),
+        )
+        val upcomingPoints = listOf(
+            Point.fromLngLat(-122.477395, 37.859513),
+            Point.fromLngLat(-122.4784726, 37.8587617),
+        )
+        val stepProgress = mockk<RouteStepProgress>(relaxed = true) {
+            every { stepPoints } returns routeStepPoints
+            every { stepIndex } returns 0
+        }
+        val routeLegProgress = mockk<RouteLegProgress>(relaxed = true) {
+            every { currentStepProgress } returns stepProgress
+            every { routeLeg } returns mockRouteLeg
+        }
+        val routeProgress = mockk<RouteProgress>(relaxed = true) {
+            every { currentLegProgress } returns routeLegProgress
+            every { upcomingStepPoints } returns upcomingPoints
+        }
+
+        val result = RouteArrowUtils.obtainArrowPointsFrom(routeProgress)
+
+        // Should process arrow points normally
+        assertEquals(4, result.size)
     }
 }

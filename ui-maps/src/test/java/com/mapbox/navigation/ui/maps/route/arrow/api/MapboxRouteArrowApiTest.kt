@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.route.arrow.api
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
@@ -10,11 +11,11 @@ import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
-import com.mapbox.navigation.ui.maps.route.arrow.model.InvalidPointError
 import com.mapbox.navigation.ui.maps.route.arrow.model.ManeuverArrow
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -33,18 +34,26 @@ class MapboxRouteArrowApiTest {
             Point.fromLngLat(-122.4784726, 37.8587617),
         )
         val route = getRoute()
+        val mockStep = mockk<LegStep> {
+            every { distance() } returns route.legs()!![0].steps()!![2].distance()
+        }
         val routeProgress = mockk<RouteProgress> {
             every { currentLegProgress } returns mockk {
                 every { legIndex } returns 0
+                every { routeLeg } returns mockk {
+                    every { steps() } returns listOf(
+                        mockk(),
+                        mockk(),
+                        mockStep,
+                    )
+                }
                 every { currentStepProgress } returns mockk {
                     every { stepPoints } returns PolylineUtils.decode(
                         route.legs()!![0].steps()!![2].geometry()!!,
                         6,
                     )
                     every { distanceTraveled } returns 0f
-                    every { step } returns mockk {
-                        every { distance() } returns route.legs()!![0].steps()!![2].distance()
-                    }
+                    every { step } returns mockStep
                     every { stepIndex } returns 2
                 }
             }
@@ -69,9 +78,11 @@ class MapboxRouteArrowApiTest {
         )
         val stepProgress = mockk<RouteStepProgress> {
             every { stepPoints } returns routeStepPoints
+            every { stepIndex } returns 0
         }
         val routeLegProgress = mockk<RouteLegProgress> {
             every { currentStepProgress } returns stepProgress
+            every { routeLeg } returns mockk(relaxed = true)
         }
         val routeProgress = mockk<RouteProgress> {
             every { currentLegProgress } returns routeLegProgress
@@ -81,7 +92,30 @@ class MapboxRouteArrowApiTest {
         val result =
             MapboxRouteArrowApi().addUpcomingManeuverArrow(routeProgress)
 
-        assertTrue(result.error is InvalidPointError)
+        assertTrue(result.isValue)
+        assertEquals(4, result.value!!.layerVisibilityModifications.size)
+        assertEquals(
+            RouteLayerConstants.ARROW_SHAFT_LINE_LAYER_ID,
+            result.value!!.layerVisibilityModifications[0].first,
+        )
+        assertEquals(Visibility.NONE, result.value!!.layerVisibilityModifications[0].second)
+        assertEquals(
+            RouteLayerConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID,
+            result.value!!.layerVisibilityModifications[1].first,
+        )
+        assertEquals(Visibility.NONE, result.value!!.layerVisibilityModifications[1].second)
+        assertEquals(
+            RouteLayerConstants.ARROW_HEAD_CASING_LAYER_ID,
+            result.value!!.layerVisibilityModifications[2].first,
+        )
+        assertEquals(Visibility.NONE, result.value!!.layerVisibilityModifications[2].second)
+        assertEquals(
+            RouteLayerConstants.ARROW_HEAD_LAYER_ID,
+            result.value!!.layerVisibilityModifications[3].first,
+        )
+        assertEquals(Visibility.NONE, result.value!!.layerVisibilityModifications[3].second)
+        assertNull(result.value!!.arrowShaftFeature)
+        assertNull(result.value!!.arrowHeadFeature)
     }
 
     @Test
@@ -259,18 +293,26 @@ class MapboxRouteArrowApiTest {
         )
         val firstManeuverArrow = ManeuverArrow(points)
         val route = getDirectionsRoute()
+        val mockStep = mockk<LegStep> {
+            every { distance() } returns route.legs()!![0].steps()!![2].distance()
+        }
         val routeProgress = mockk<RouteProgress> {
             every { currentLegProgress } returns mockk {
                 every { legIndex } returns 0
+                every { routeLeg } returns mockk {
+                    every { steps() } returns listOf(
+                        mockk(),
+                        mockk(),
+                        mockStep,
+                    )
+                }
                 every { currentStepProgress } returns mockk {
                     every { stepPoints } returns PolylineUtils.decode(
                         route.legs()!![0].steps()!![2].geometry()!!,
                         6,
                     )
                     every { distanceTraveled } returns 0f
-                    every { step } returns mockk {
-                        every { distance() } returns route.legs()!![0].steps()!![2].distance()
-                    }
+                    every { step } returns mockStep
                     every { stepIndex } returns 2
                 }
             }
@@ -343,18 +385,26 @@ class MapboxRouteArrowApiTest {
             Point.fromLngLat(-122.4784726, 37.8587617),
         )
         val route = getRoute()
+        val mockStep = mockk<LegStep> {
+            every { distance() } returns route.legs()!![0].steps()!![2].distance()
+        }
         val routeProgress = mockk<RouteProgress> {
             every { currentLegProgress } returns mockk {
                 every { legIndex } returns 0
+                every { routeLeg } returns mockk {
+                    every { steps() } returns listOf(
+                        mockk(),
+                        mockk(),
+                        mockStep,
+                    )
+                }
                 every { currentStepProgress } returns mockk {
                     every { stepPoints } returns PolylineUtils.decode(
                         route.legs()!![0].steps()!![2].geometry()!!,
                         6,
                     )
                     every { distanceTraveled } returns 0f
-                    every { step } returns mockk {
-                        every { distance() } returns route.legs()!![0].steps()!![2].distance()
-                    }
+                    every { step } returns mockStep
                     every { stepIndex } returns 2
                 }
             }
