@@ -1421,6 +1421,30 @@ class RouterWrapperTests {
             }.build()
     }
 
+    @Test
+    fun `route request missing tiles error`() =
+        coroutineRule.runBlockingTest {
+            routerWrapper.getRoute(routerOptions, signature, navigationRouterCallback)
+            getRouteSlot.captured.run(
+                ExpectedFactory.createError(
+                    listOf(
+                        createRouterError(
+                            type = RouterErrorType.MISSING_TILES_ERROR,
+                        ),
+                    ),
+                ),
+                nativeOriginOnboard,
+            )
+
+            val failures = slot<List<RouterFailure>>()
+            verify(exactly = 1) {
+                navigationRouterCallback.onFailure(capture(failures), routerOptions)
+            }
+            val failure: RouterFailure = failures.captured[0]
+            assertFalse(failure.isRetryable)
+            assertEquals(RouterFailureType.MISSING_TILES_ERROR, failure.type)
+        }
+
     private companion object {
 
         private const val CANCELLED_MESSAGE = "Cancelled"

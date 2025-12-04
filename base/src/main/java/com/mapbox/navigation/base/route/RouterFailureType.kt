@@ -13,6 +13,8 @@ import androidx.annotation.StringDef
     RouterFailureType.AUTHENTICATION_ERROR,
     RouterFailureType.ROUTE_CREATION_ERROR,
     RouterFailureType.RESPONSE_PARSING_ERROR,
+    RouterFailureType.ROUTER_RECREATION_ERROR,
+    RouterFailureType.MISSING_TILES_ERROR,
     RouterFailureType.UNKNOWN_ERROR,
 )
 annotation class RouterFailureType {
@@ -58,6 +60,11 @@ annotation class RouterFailureType {
          * Indicates that router was recreated for some internal reason.
          */
         const val ROUTER_RECREATION_ERROR = "ROUTER_RECREATION_ERROR"
+
+        /**
+         * Error caused by missing tiles required for route calculation
+         */
+        const val MISSING_TILES_ERROR = "MISSING_TILES_ERROR"
 
         /**
          * Error has an unknown type
