@@ -1333,4 +1333,4 @@ class RouteAlternativesControllerTest {
     }
 }
 
-private fun createParsingManagerForTest() = createRouteParsingManager()
+private fun createParsingManagerForTest() = createRouteParsingManager(false)

@@ -4,6 +4,8 @@ import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.DataRef
 import com.mapbox.navigation.base.internal.RouterFailureFactory
+import com.mapbox.navigation.base.internal.utils.RouteParsingManager
+import com.mapbox.navigation.base.internal.utils.RouteResponseInfo
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.internal.utils.parseDirectionsResponse
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -42,6 +44,7 @@ internal class NativeMapboxRerouteController(
     private val scope: CoroutineScope,
     private val parsingDispatcher: CoroutineDispatcher,
     private val routeParsingTracking: RouteParsingTracking,
+    private val routeParsingManager: RouteParsingManager,
 ) : InternalRerouteController() {
 
     private val observers = CopyOnWriteArraySet<RerouteStateObserver>()
@@ -206,13 +209,16 @@ internal class NativeMapboxRerouteController(
         routeResponse: DataRef,
         routeRequest: String,
         origin: RouterOrigin,
-    ): RerouteResponseParsingResult {
-        return parseDirectionsResponse(
+    ): RerouteResponseParsingResult = routeParsingManager.parseRouteResponse(
+        RouteResponseInfo.fromResponse(routeResponse.buffer),
+    ) { parsingOptions ->
+        parseDirectionsResponse(
             parsingDispatcher,
             routeResponse,
             routeRequest,
             origin.mapToSdkRouteOrigin(),
             Time.SystemClockImpl.millis(),
+            parsingOptions.useNativeRoute,
         ).fold(
             {
                 logE(TAG) { "error parsing route ${it.message}" }

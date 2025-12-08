@@ -14,6 +14,7 @@ import com.mapbox.navigation.base.internal.factory.RouteLegProgressFactory.build
 import com.mapbox.navigation.base.internal.factory.RouteProgressFactory.buildRouteProgressObject
 import com.mapbox.navigation.base.internal.factory.RouteStepProgressFactory.buildRouteStepProgressObject
 import com.mapbox.navigation.base.internal.factory.SpeedLimitInfoFactory
+import com.mapbox.navigation.base.internal.isNative
 import com.mapbox.navigation.base.road.model.Road
 import com.mapbox.navigation.base.route.LegWaypoint
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -27,6 +28,7 @@ import com.mapbox.navigation.core.trip.session.location.CorrectedLocationData
 import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logW
+import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.RouteIdentifier
@@ -236,12 +238,7 @@ internal fun NavigationStatus.getCurrentBannerInstructions(
                     if (steps.size > 0) {
                         val currentStep = steps[primaryRouteIndices.stepIndex]
                         currentStep.bannerInstructions()?.let { banners ->
-                            banners[nativeBanner.index]
-                                .toBuilder()
-                                .distanceAlongGeometry(
-                                    nativeBanner.remainingStepDistance.toDouble(),
-                                )
-                                .build()
+                            nativeBanner.mapToDirectionsApi(banners[nativeBanner.index])
                         }
                     } else {
                         logW("Steps cannot be null or empty", LOG_CATEGORY)
@@ -253,6 +250,26 @@ internal fun NavigationStatus.getCurrentBannerInstructions(
                 null
             }
         }
+    }
+}
+
+private fun BannerInstruction.mapToDirectionsApi(
+    currentBannerInstruction: BannerInstructions,
+): BannerInstructions? {
+    return if (currentBannerInstruction.isNative()) {
+        BannerInstructions.builder()
+            .distanceAlongGeometry(this.remainingStepDistance.toDouble())
+            .sub(currentBannerInstruction.sub())
+            .primary(currentBannerInstruction.primary())
+            .secondary(currentBannerInstruction.secondary())
+            .view(currentBannerInstruction.view())
+            .build()
+    } else {
+        currentBannerInstruction.toBuilder()
+            .distanceAlongGeometry(
+                this.remainingStepDistance.toDouble(),
+            )
+            .build()
     }
 }
 

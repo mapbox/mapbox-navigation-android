@@ -9,8 +9,10 @@ import com.google.gson.GsonBuilder
 import com.mapbox.api.directions.v5.DirectionsAdapterFactory
 import com.mapbox.api.directions.v5.models.Closure
 import com.mapbox.api.directions.v5.models.DirectionsResponse
+import com.mapbox.api.directions.v5.models.DirectionsResponseFBWrapper
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
+import com.mapbox.api.directions.v5.models.FBDirectionsResponse
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -20,6 +22,7 @@ import com.mapbox.api.matching.v5.models.MapMatchingResponse
 import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.directions.route.DirectionsRouteResponse
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.PointAsCoordinatesTypeAdapter
@@ -28,13 +31,16 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.CongestionNumericOverride
 import com.mapbox.navigation.base.internal.SDKRouteParser
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.toUpcomingRoadObjects
+import com.mapbox.navigation.base.internal.isNativeRoute
 import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.route.RoutesResponse
 import com.mapbox.navigation.base.internal.route.Waypoint
 import com.mapbox.navigation.base.internal.route.routerOrigin
 import com.mapbox.navigation.base.internal.utils.mapToSdk
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
+import com.mapbox.navigation.base.internal.utils.parseDirectionsResponse
 import com.mapbox.navigation.base.internal.utils.refreshTtl
+import com.mapbox.navigation.base.route.NavigationRoute.Companion.LOG_CATEGORY
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.Time
@@ -348,6 +354,7 @@ class NavigationRoute private constructor(
             routeRequestUrl: String,
             @RouterOrigin routerOrigin: String,
             responseTimeElapsedMillis: Long,
+            nativeRoute: Boolean,
             routeParser: SDKRouteParser = SDKRouteParser.default,
         ): RoutesResponse {
             logI("NavigationRoute.createAsync is called", LOG_CATEGORY)
@@ -369,11 +376,12 @@ class NavigationRoute private constructor(
                     PerformanceTracker.trackPerformanceSync(
                         "directionsJson#toDirectionsResponse()",
                     ) {
-                        directionsResponseJson.toDirectionsResponse().let {
+                        directionsResponseJson.toDirectionsResponse(nativeRoute).let {
                             val parseMillis = currentElapsedMillis() - startElapsedMillis
                             val parseThread = Thread.currentThread().name
                             logD(
-                                "parsed directions response to java model for ${it.uuid()}, " +
+                                "parsed directions response to public API models " +
+                                    "for ${it.uuid()}, " +
                                     "parse time ${parseMillis}ms",
                                 LOG_CATEGORY,
                             )
@@ -731,9 +739,24 @@ private val fakeDirectionsRoute: DirectionsRoute by lazy {
         .build()
 }
 
-internal fun DataRef.toDirectionsResponse(): DirectionsResponse {
-    return this.toReader().use { reader ->
-        DirectionsResponse.fromJson(reader)
+internal fun DataRef.toDirectionsResponse(nativeRoute: Boolean): DirectionsResponse {
+    return if (nativeRoute) {
+        val parsingResult = DirectionsRouteResponse.parseDirectionsResponseJson(this)
+        if (parsingResult.isError) {
+            throw DirectionsResponseParsingException(
+                Throwable(parsingResult.error ?: "unknown error"),
+            )
+        }
+        val flatBuffer = parsingResult.value!!.getData().buffer
+        return DirectionsResponseFBWrapper(
+            FBDirectionsResponse.getRootAsDirectionsResponse(
+                flatBuffer,
+            ),
+        )
+    } else {
+        this.toReader().use { reader ->
+            DirectionsResponse.fromJson(reader)
+        }
     }
 }
 
@@ -741,12 +764,18 @@ private fun getDirectionsRoute(
     response: DirectionsResponse,
     routeIndex: Int,
     routeOptions: RouteOptions,
-): DirectionsRoute =
-    response.routes()[routeIndex].toBuilder()
-        .requestUuid(response.uuid())
-        .routeIndex(routeIndex.toString())
-        .routeOptions(routeOptions)
-        .build()
+): DirectionsRoute {
+    return if (response.isNativeRoute()) {
+        // https://mapbox.atlassian.net/browse/NAVAND-6590
+        response.routes()[routeIndex]
+    } else {
+        response.routes()[routeIndex].toBuilder()
+            .requestUuid(response.uuid())
+            .routeIndex(routeIndex.toString())
+            .routeOptions(routeOptions)
+            .build()
+    }
+}
 
 private fun getDirectionsWaypoint(
     directionsResponse: DirectionsResponse,

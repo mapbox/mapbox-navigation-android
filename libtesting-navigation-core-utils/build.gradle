@@ -29,4 +29,6 @@ dependencies {
 
     // test
     api project(':libtesting-ui')
+
+    testImplementation project(":libtesting-navigation-base")
 }

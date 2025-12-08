@@ -330,7 +330,7 @@ internal class RouterWrapper(
 
                         val responseInfo =
                             RouteResponseInfo.fromResponse(responseBody.buffer)
-                        routeParsingManager.parseRouteResponse(responseInfo) {
+                        routeParsingManager.parseRouteResponse(responseInfo) { parsingOptions ->
                             val responseTimeElapsedMillis =
                                 Time.SystemClockImpl.millis()
                             val parsingResult = parseDirectionsResponse(
@@ -339,6 +339,7 @@ internal class RouterWrapper(
                                 routeUrl,
                                 origin.mapToSdkRouteOrigin(),
                                 responseTimeElapsedMillis,
+                                parsingOptions.useNativeRoute,
                             )
                             parsingResult.fold(
                                 { throwable ->

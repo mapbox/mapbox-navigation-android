@@ -430,12 +430,16 @@ class MapboxNavigationViewportDataSource private constructor(
     }
 
     internal fun onRoutesChanged(routes: List<NavigationRoute>) {
-        if (routes.isEmpty()) {
-            clearRouteData()
-        } else if (!areSameRoutes(routes, navigationRoutes)) {
-            clearRouteData()
-            this.navigationRoutes = routes
-            calculateRouteData(routes)
+        PerformanceTracker.trackPerformanceSync(
+            "MapboxNavigationViewportDataSource#onRoutesChanged",
+        ) {
+            if (routes.isEmpty()) {
+                clearRouteData()
+            } else if (!areSameRoutes(routes, navigationRoutes)) {
+                clearRouteData()
+                this.navigationRoutes = routes
+                calculateRouteData(routes)
+            }
         }
     }
 

@@ -7,6 +7,7 @@ import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.Size
+import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.utils.DecodeUtils.stepsGeometryToPoints
 import com.mapbox.navigation.ui.maps.internal.camera.OverviewMode
@@ -90,7 +91,9 @@ internal object ViewportDataSourceProcessor {
         minimumMetersForIntersectionDensity: Double,
         route: DirectionsRoute,
         completeRoutePoints: List<List<List<Point>>>,
-    ): List<List<Double>> {
+    ): List<List<Double>> = PerformanceTracker.trackPerformanceSync(
+        "ViewportDataSourceProcessor#processRouteIntersections",
+    ) {
         if (!enabled) {
             return emptyList()
         }

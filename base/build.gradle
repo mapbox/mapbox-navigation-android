@@ -42,6 +42,7 @@ dependencies {
     api dependenciesList.mapboxSdkDirectionsModels
     api dependenciesList.mapboxSdkServicesCore
     implementation dependenciesList.mapboxSdkServices
+    implementation dependenciesList.mapboxSdkGson
     // Navigator
     implementation dependenciesList.mapboxNavigator
 

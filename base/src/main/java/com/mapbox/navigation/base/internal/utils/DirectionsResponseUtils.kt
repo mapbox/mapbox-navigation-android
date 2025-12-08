@@ -21,6 +21,7 @@ suspend fun parseDirectionsResponse(
     requestUrl: String,
     @RouterOrigin routerOrigin: String,
     responseTimeElapsedMillis: Long,
+    nativeRoute: Boolean,
 ): Expected<Throwable, RoutesResponse> =
     withContext(dispatcher) {
         return@withContext try {
@@ -30,6 +31,7 @@ suspend fun parseDirectionsResponse(
                     routeRequestUrl = requestUrl,
                     routerOrigin,
                     responseTimeElapsedMillis,
+                    nativeRoute,
                 )
             }
 

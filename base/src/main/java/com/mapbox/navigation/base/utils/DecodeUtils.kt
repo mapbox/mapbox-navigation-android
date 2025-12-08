@@ -3,11 +3,13 @@ package com.mapbox.navigation.base.utils
 import android.util.LruCache
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.DirectionsRouteFBWrapper
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
+import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.utils.isSameRoute
 import com.mapbox.navigation.utils.internal.logD
 
@@ -43,7 +45,9 @@ object DecodeUtils {
      */
     @JvmStatic
     fun DirectionsRoute.completeGeometryToPoints(): List<Point> {
-        return completeGeometryDecodeCache.getOrDecode(geometry(), precision())
+        PerformanceTracker.trackPerformanceSync("DirectionsRoute.completeGeometryToPoints") {
+            return completeGeometryDecodeCache.getOrDecode(geometry(), precision())
+        }
     }
 
     /**
@@ -88,13 +92,15 @@ object DecodeUtils {
      */
     @JvmStatic
     fun DirectionsRoute.stepsGeometryToPoints(): List<List<List<Point>>> {
-        val precision = precision()
-        cacheRoute(route = this, precision)
-        return legs()?.map { leg ->
-            leg.steps()?.map { step ->
-                stepsGeometryDecodeCache.getOrDecode(step.geometry(), precision)
+        PerformanceTracker.trackPerformanceSync("DirectionsRoute.stepsGeometryToPoints") {
+            val precision = precision()
+            cacheRoute(route = this, precision)
+            return legs()?.map { leg ->
+                leg.steps()?.map { step ->
+                    stepsGeometryDecodeCache.getOrDecode(step.geometry(), precision)
+                }.orEmpty()
             }.orEmpty()
-        }.orEmpty()
+        }
     }
 
     /**
@@ -120,9 +126,11 @@ object DecodeUtils {
      */
     @JvmStatic
     fun DirectionsRoute.stepGeometryToPoints(legStep: LegStep): List<Point> {
-        val precision = precision()
-        cacheRoute(route = this, precision)
-        return stepsGeometryDecodeCache.getOrDecode(legStep.geometry(), precision)
+        PerformanceTracker.trackPerformanceSync("DirectionsRoute.stepGeometryToPoints") {
+            val precision = precision()
+            cacheRoute(route = this, precision)
+            return stepsGeometryDecodeCache.getOrDecode(legStep.geometry(), precision)
+        }
     }
 
     /**
@@ -162,62 +170,74 @@ object DecodeUtils {
         if (geometry == null) return emptyList()
         return synchronized(lock = this) {
             val key = geometry to precision
-            get(key) ?: PolylineUtils.decode(geometry, precision).also { put(key, it) }
+            get(key) ?: PerformanceTracker.trackPerformanceSync("DecodeUtils.decode-cache-miss") {
+                PolylineUtils.decode(geometry, precision).also { put(key, it) }
+            }
         }
     }
 
     private fun cacheRoute(route: DirectionsRoute, precision: Int) {
-        val stepCount = route.countSteps()
-        synchronized(stepsGeometryDecodeCache) {
-            cachedRoutes.removeAll { it.route.isSameRoute(route) && it.precision == precision }
-            if (cachedRoutes.size > 2) {
-                cachedRoutes.removeAt(0)
+        PerformanceTracker.trackPerformanceSync("DecodeUtils.cacheRoute") {
+            val stepCount = route.countSteps()
+            synchronized(stepsGeometryDecodeCache) {
+                cachedRoutes.removeAll {
+                    it.route.isSameRoute(route) && it.precision == precision
+                }
+                if (cachedRoutes.size > 2) {
+                    cachedRoutes.removeAt(0)
+                }
+                cachedRoutes.add(CachedRouteInfo(route, precision, stepCount))
+                stepsGeometryDecodeCache.resize(
+                    cachedRoutes.sumOf { it.stepCount }.coerceAtLeast(1),
+                )
             }
-            cachedRoutes.add(CachedRouteInfo(route, precision, stepCount))
-            stepsGeometryDecodeCache.resize(cachedRoutes.sumOf { it.stepCount }.coerceAtLeast(1))
         }
     }
 
     private fun DirectionsRoute.routeIdForLogs() = "${requestUuid()}#${routeIndex()}"
 
-    private fun removeAllRoutesExcept(routesToKeep: List<DirectionsRoute>) {
-        synchronized(stepsGeometryDecodeCache) {
-            logD(LOG_TAG) {
-                "Looking for routes to remove among cached:" +
-                    " ${cachedRoutes.joinToString(",") { it.route.routeIdForLogs() }}, " +
-                    "while ${routesToKeep.joinToString(",") { it.routeIdForLogs() }} " +
-                    "should be kept"
-            }
-            val cachedRoutesToRemove = cachedRoutes.filter { cached ->
-                routesToKeep.none {
-                    cached.route.isSameRoute(it)
-                }
-            }
-            cachedRoutesToRemove.forEach { cachedRouteToRemove ->
+    private fun removeAllRoutesExcept(routesToKeep: List<DirectionsRoute>) =
+        PerformanceTracker.trackPerformanceSync("DecodeUtils.removeAllRoutesExcept") {
+            synchronized(stepsGeometryDecodeCache) {
                 logD(LOG_TAG) {
-                    "Cleaning steps geometry caches for route:" +
-                        " ${cachedRouteToRemove.route.routeIdForLogs()}"
+                    "Looking for routes to remove among cached:" +
+                        " ${cachedRoutes.joinToString(",") { it.route.routeIdForLogs() }}, " +
+                        "while ${routesToKeep.joinToString(",") { it.routeIdForLogs() }} " +
+                        "should be kept"
                 }
-                val routeToRemove = cachedRouteToRemove.route
-                cachedRouteToRemove.route.legs()?.forEach {
-                    it.steps()?.forEach { step ->
-                        val stepGeometry = step.geometry()
-                        if (stepGeometry != null) {
-                            stepsGeometryDecodeCache.remove(
-                                stepGeometry to routeToRemove.precision(),
-                            )
-                        }
+                val cachedRoutesToRemove = cachedRoutes.filter { cached ->
+                    routesToKeep.none {
+                        cached.route.isSameRoute(it)
                     }
                 }
-                cachedRoutes.remove(cachedRouteToRemove)
+                cachedRoutesToRemove.forEach { cachedRouteToRemove ->
+                    logD(LOG_TAG) {
+                        "Cleaning steps geometry caches for route:" +
+                            " ${cachedRouteToRemove.route.routeIdForLogs()}"
+                    }
+                    val routeToRemove = cachedRouteToRemove.route
+                    cachedRouteToRemove.route.legs()?.forEach {
+                        it.steps()?.forEach { step ->
+                            val stepGeometry = step.geometry()
+                            if (stepGeometry != null) {
+                                stepsGeometryDecodeCache.remove(
+                                    stepGeometry to routeToRemove.precision(),
+                                )
+                            }
+                        }
+                    }
+                    cachedRoutes.remove(cachedRouteToRemove)
+                }
+                stepsGeometryDecodeCache.resize(
+                    cachedRoutes.sumOf { it.stepCount }.coerceAtLeast(1),
+                )
             }
-            stepsGeometryDecodeCache.resize(
-                cachedRoutes.sumOf { it.stepCount }.coerceAtLeast(1),
-            )
         }
-    }
 
     private fun DirectionsRoute.countSteps(): Int {
+        if (this is DirectionsRouteFBWrapper) {
+            return this.stepsCountWithGeometry
+        }
         return legs()?.sumOf { leg ->
             leg.steps()?.count { it.geometry() != null } ?: 0
         } ?: 0

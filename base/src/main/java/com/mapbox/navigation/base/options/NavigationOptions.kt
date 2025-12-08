@@ -39,6 +39,7 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1000L
  * @param enableSensors enables sensors for current position calculation (optional)
  * @param copilotOptions defines options for Copilot
  * @param trafficOverrideOptions defines options for traffic override
+ * @param nativeRouteObject defines whether to use native route object
  */
 class NavigationOptions
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -65,6 +66,8 @@ private constructor(
     val trafficOverrideOptions: TrafficOverrideOptions,
     @ExperimentalPreviewMapboxNavigationAPI
     val roadObjectMatcherOptions: RoadObjectMatcherOptions,
+    @ExperimentalPreviewMapboxNavigationAPI
+    val nativeRouteObject: Boolean,
 ) {
 
     /**
@@ -90,6 +93,7 @@ private constructor(
         copilotOptions(copilotOptions)
         trafficOverrideOptions(trafficOverrideOptions)
         roadObjectMatcherOptions(roadObjectMatcherOptions)
+        nativeRouteObject(nativeRouteObject)
     }
 
     /**
@@ -121,6 +125,7 @@ private constructor(
         if (copilotOptions != other.copilotOptions) return false
         if (trafficOverrideOptions != other.trafficOverrideOptions) return false
         if (roadObjectMatcherOptions != other.roadObjectMatcherOptions) return false
+        if (nativeRouteObject != other.nativeRouteObject) return false
 
         return true
     }
@@ -149,6 +154,7 @@ private constructor(
         result = 31 * result + copilotOptions.hashCode()
         result = 31 * result + trafficOverrideOptions.hashCode()
         result = 31 * result + roadObjectMatcherOptions.hashCode()
+        result = 31 * result + nativeRouteObject.hashCode()
         return result
     }
 
@@ -176,7 +182,8 @@ private constructor(
             "enableSensors=$enableSensors, " +
             "copilotOptions=$copilotOptions, " +
             "trafficOverrideOptions=$trafficOverrideOptions, " +
-            "roadObjectMatcherOptions=$roadObjectMatcherOptions" +
+            "roadObjectMatcherOptions=$roadObjectMatcherOptions, " +
+            "nativeRouteObject=$nativeRouteObject" +
             ")"
     }
 
@@ -216,6 +223,9 @@ private constructor(
         @ExperimentalPreviewMapboxNavigationAPI
         private var roadObjectMatcherOptions: RoadObjectMatcherOptions =
             RoadObjectMatcherOptions.Builder().build()
+
+        @ExperimentalPreviewMapboxNavigationAPI
+        private var nativeRouteObject: Boolean = false
 
         /**
          * Sets location options. See [LocationOptions] for details.
@@ -334,6 +344,15 @@ private constructor(
         fun roadObjectMatcherOptions(roadObjectMatcherOptions: RoadObjectMatcherOptions): Builder =
             apply { this.roadObjectMatcherOptions = roadObjectMatcherOptions }
 
+        // TODO: provide better documentation
+        // https://mapbox.atlassian.net/browse/NAVAND-6546
+        /**
+         * Defines whether to use native route object
+         */
+        @ExperimentalPreviewMapboxNavigationAPI
+        fun nativeRouteObject(value: Boolean): Builder =
+            apply { this.nativeRouteObject = value }
+
         /**
          * Build a new instance of [NavigationOptions]
          * @return NavigationOptions
@@ -360,6 +379,7 @@ private constructor(
                 locationOptions = locationOptions,
                 trafficOverrideOptions = trafficOverrideOptions,
                 roadObjectMatcherOptions = roadObjectMatcherOptions,
+                nativeRouteObject = nativeRouteObject,
             )
         }
     }

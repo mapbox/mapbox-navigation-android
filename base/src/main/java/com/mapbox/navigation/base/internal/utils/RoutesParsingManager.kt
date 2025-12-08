@@ -21,30 +21,63 @@ sealed class AlternativesParsingResult<out T> {
 
 typealias PrepareForParsingAction = suspend () -> Unit
 
+data class ParsingOptions(
+    val useNativeRoute: Boolean,
+)
+
 interface RouteParsingManager {
     fun setPrepareForParsingAction(action: PrepareForParsingAction)
 
     suspend fun <T> parseRouteResponse(
         routeResponseInfo: RouteResponseInfo,
-        parsing: suspend () -> T,
+        parsing: suspend (ParsingOptions) -> T,
     ): T
 
     suspend fun <T> parseAlternatives(
         arguments: AlternativesInfo,
-        parsing: suspend () -> T,
+        parsing: suspend (ParsingOptions) -> T,
     ): AlternativesParsingResult<T>
 
-    fun parseRouteToDirections(route: RouteInterface): DirectionsResponse {
-        logD(LOG_TAG) { "Parsing directions response for routeId = ${route.routeId}" }
-        return route.responseJsonRef.toDirectionsResponse()
+    fun parseRouteToDirections(route: RouteInterface): DirectionsResponse
+}
+
+fun createRouteParsingManager(useNativeRoute: Boolean): RouteParsingManager {
+    return if (useNativeRoute) {
+        NativeRouteParsingManager()
+    } else {
+        OptimisedForJavaMemoryRoutesParsingManager()
     }
 }
 
-fun createRouteParsingManager(): RouteParsingManager {
-    return OptimisedRoutesParsingManager()
+private class NativeRouteParsingManager : RouteParsingManager {
+
+    private val parsingOptions = ParsingOptions(useNativeRoute = true)
+
+    override fun setPrepareForParsingAction(action: PrepareForParsingAction) {
+        // No-op
+    }
+
+    override suspend fun <T> parseRouteResponse(
+        routeResponseInfo: RouteResponseInfo,
+        parsing: suspend (ParsingOptions) -> T,
+    ): T = parsing(parsingOptions)
+
+    override suspend fun <T> parseAlternatives(
+        arguments: AlternativesInfo,
+        parsing: suspend (ParsingOptions) -> T,
+    ): AlternativesParsingResult<T> = AlternativesParsingResult.Parsed(
+        parsing(parsingOptions),
+    )
+
+    override fun parseRouteToDirections(route: RouteInterface): DirectionsResponse {
+        logD(LOG_TAG) { "Parsing directions response for routeId = ${route.routeId}" }
+        return route.responseJsonRef.toDirectionsResponse(parsingOptions.useNativeRoute)
+    }
 }
 
-private class OptimisedRoutesParsingManager() : RouteParsingManager {
+private class OptimisedForJavaMemoryRoutesParsingManager() : RouteParsingManager {
+
+    private val parsingOptions = ParsingOptions(useNativeRoute = false)
 
     private val mutex = Mutex()
 
@@ -56,22 +89,22 @@ private class OptimisedRoutesParsingManager() : RouteParsingManager {
 
     override suspend fun <T> parseRouteResponse(
         routeResponseInfo: RouteResponseInfo,
-        parsing: suspend () -> T,
+        parsing: suspend (ParsingOptions) -> T,
     ): T {
         return if (routeResponseInfo.sizeBytes < RESPONSE_SIZE_TO_OPTIMIZE_BYTES) {
-            parsing()
+            parsing(parsingOptions)
         } else {
             logD(LOG_TAG) { "Enqueuing routes parsing" }
             mutex.withLock {
                 prepareForParsing()
-                parsing()
+                parsing(parsingOptions)
             }
         }
     }
 
     override suspend fun <T> parseAlternatives(
         arguments: AlternativesInfo,
-        parsing: suspend () -> T,
+        parsing: suspend (ParsingOptions) -> T,
     ): AlternativesParsingResult<T> {
         return if (mutex.isLocked) {
             logD(LOG_TAG) {
@@ -87,6 +120,11 @@ private class OptimisedRoutesParsingManager() : RouteParsingManager {
                 ),
             )
         }
+    }
+
+    override fun parseRouteToDirections(route: RouteInterface): DirectionsResponse {
+        logD(LOG_TAG) { "Parsing directions response for routeId = ${route.routeId}" }
+        return route.responseJsonRef.toDirectionsResponse(parsingOptions.useNativeRoute)
     }
 
     private suspend fun prepareForParsing() {

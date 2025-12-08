@@ -63,6 +63,7 @@ class NavigationRouteIsExpiredTest {
                 .build().toUrl("").toString(),
             RouterOrigin.ONLINE,
             clock.elapsedMillis,
+            false,
             TestSDKRouteParser(),
         ).routes
 

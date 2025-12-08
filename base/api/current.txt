@@ -1,4 +1,31 @@
 // Signature format: 3.0
+package com.google.flatbuffers {
+
+  public final class AccessUtilsKt {
+  }
+
+}
+
+package com.mapbox.api.directions.v5.models {
+
+  public final class FlatBuffersTypealiasesKt {
+  }
+
+}
+
+package com.mapbox.api.directions.v5.models.utils {
+
+  public final class ConstantsKt {
+  }
+
+  public final class UnhandedEnumMappingKt {
+  }
+
+  public final class UtilsKt {
+  }
+
+}
+
 package com.mapbox.navigation.base {
 
   @kotlin.RequiresOptIn(level=kotlin.RequiresOptIn.Level.ERROR) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) @kotlin.annotation.Target(allowedTargets={kotlin.annotation.AnnotationTarget.CLASS, kotlin.annotation.AnnotationTarget.FUNCTION, kotlin.annotation.AnnotationTarget.PROPERTY}) public @interface ExperimentalMapboxNavigationAPI {
@@ -695,6 +722,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.HistoryRecorderOptions getHistoryRecorderOptions();
     method public com.mapbox.navigation.base.options.IncidentsOptions getIncidentsOptions();
     method public com.mapbox.navigation.base.options.LocationOptions getLocationOptions();
+    method public boolean getNativeRouteObject();
     method public long getNavigatorPredictionMillis();
     method public com.mapbox.navigation.base.options.RerouteOptions getRerouteOptions();
     method public com.mapbox.navigation.base.options.RoadObjectMatcherOptions getRoadObjectMatcherOptions();
@@ -716,6 +744,7 @@ package com.mapbox.navigation.base.options {
     property public final com.mapbox.navigation.base.options.IncidentsOptions incidentsOptions;
     property public final boolean isDebugLoggingEnabled;
     property public final com.mapbox.navigation.base.options.LocationOptions locationOptions;
+    property public final boolean nativeRouteObject;
     property public final long navigatorPredictionMillis;
     property public final com.mapbox.navigation.base.options.RerouteOptions rerouteOptions;
     property public final com.mapbox.navigation.base.options.RoadObjectMatcherOptions roadObjectMatcherOptions;
@@ -739,6 +768,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder incidentsOptions(com.mapbox.navigation.base.options.IncidentsOptions incidentsOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder isDebugLoggingEnabled(boolean flag);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder locationOptions(com.mapbox.navigation.base.options.LocationOptions locationOptions);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.base.options.NavigationOptions.Builder nativeRouteObject(boolean value);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder navigatorPredictionMillis(long predictionMillis);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder rerouteOptions(com.mapbox.navigation.base.options.RerouteOptions rerouteOptions);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.base.options.NavigationOptions.Builder roadObjectMatcherOptions(com.mapbox.navigation.base.options.RoadObjectMatcherOptions roadObjectMatcherOptions);
@@ -1373,10 +1403,11 @@ package com.mapbox.navigation.base.route {
     property public final java.net.URL url;
   }
 
-  @StringDef({com.mapbox.navigation.base.route.RouterFailureType.Companion.THROTTLING_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.INPUT_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.NETWORK_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.AUTHENTICATION_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.ROUTE_CREATION_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.RESPONSE_PARSING_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.UNKNOWN_ERROR}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public @interface RouterFailureType {
+  @StringDef({com.mapbox.navigation.base.route.RouterFailureType.Companion.THROTTLING_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.INPUT_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.NETWORK_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.AUTHENTICATION_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.ROUTE_CREATION_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.RESPONSE_PARSING_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.ROUTER_RECREATION_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.MISSING_TILES_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.UNKNOWN_ERROR}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public @interface RouterFailureType {
     field public static final String AUTHENTICATION_ERROR = "AUTHENTICATION_ERROR";
     field public static final com.mapbox.navigation.base.route.RouterFailureType.Companion Companion;
     field public static final String INPUT_ERROR = "INPUT_ERROR";
+    field public static final String MISSING_TILES_ERROR = "MISSING_TILES_ERROR";
     field public static final String NETWORK_ERROR = "NETWORK_ERROR";
     field public static final String RESPONSE_PARSING_ERROR = "RESPONSE_PARSING_ERROR";
     field public static final String ROUTER_RECREATION_ERROR = "ROUTER_RECREATION_ERROR";
@@ -1388,6 +1419,7 @@ package com.mapbox.navigation.base.route {
   public static final class RouterFailureType.Companion {
     field public static final String AUTHENTICATION_ERROR = "AUTHENTICATION_ERROR";
     field public static final String INPUT_ERROR = "INPUT_ERROR";
+    field public static final String MISSING_TILES_ERROR = "MISSING_TILES_ERROR";
     field public static final String NETWORK_ERROR = "NETWORK_ERROR";
     field public static final String RESPONSE_PARSING_ERROR = "RESPONSE_PARSING_ERROR";
     field public static final String ROUTER_RECREATION_ERROR = "ROUTER_RECREATION_ERROR";

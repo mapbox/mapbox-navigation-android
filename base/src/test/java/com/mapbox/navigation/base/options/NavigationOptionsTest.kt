@@ -60,6 +60,7 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
             .trafficOverrideOptions(
                 TrafficOverrideOptions.Builder().isEnabled(true).build(),
             )
+            .nativeRouteObject(true)
             .roadObjectMatcherOptions(
                 RoadObjectMatcherOptions.Builder()
                     .openLRMaxDistanceToNode(newMaxDistance = 10.0)

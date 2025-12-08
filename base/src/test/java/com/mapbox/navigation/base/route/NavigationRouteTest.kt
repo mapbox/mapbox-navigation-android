@@ -95,6 +95,7 @@ class NavigationRouteTest {
                 requestUrl,
                 RouterOrigin.ONLINE,
                 0L,
+                false,
             )
 
             assertEquals(serialisedFromModel, serialisedFromString)

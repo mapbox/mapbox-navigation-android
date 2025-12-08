@@ -11,7 +11,7 @@ ext {
   // mapboxSdkHdFullSparseCheckout in generate_api_docs_android.sh depends on mapboxSdkVersionSuffix
   // Release Train depends on these two lines below
   // https://github.com/mapbox/release-train/blob/bd530da200d62fb45166ef91d7d892d90a453fa6/backend/model/step/navcoreandroid/PrepareChangelogNavCore.py#L122-L124
-  def mapboxSdkVersionSuffix = '18.0-SNAPSHOT-12-04--04-31.git-af74ceb'
+  def mapboxSdkVersionSuffix = '18.0-SNAPSHOT-12-08--04-31.git-3ead0d2'
   def mapboxNavigatorVersion = "324.${mapboxSdkVersionSuffix}"
 
   def ndkVersionSuffix = ""
@@ -28,6 +28,7 @@ ext {
   version = [
       mapboxMapSdk              : "11.${mapboxSdkVersionSuffix}",
       mapboxSdkServices         : "7.8.0",
+      mapboxSdkGson             : "0.0.3",
       mapboxNavigator           : mapboxNavigatorVersion,
       mapboxCommonNative        : "24.${mapboxSdkVersionSuffix}",
       mapboxNavSdkCpp           : "0.${mapboxSdkVersionSuffix}",
@@ -99,6 +100,7 @@ ext {
       mapboxSdkTurf             : "com.mapbox.mapboxsdk:mapbox-sdk-turf:${version.mapboxSdkServices}",
       mapboxSdkDirectionsModels : "com.mapbox.mapboxsdk:mapbox-sdk-directions-models:${version.mapboxSdkServices}",
       mapboxSdkRefreshModels    : "com.mapbox.mapboxsdk:mapbox-sdk-directions-refresh-models:${version.mapboxSdkServices}",
+      mapboxSdkGson             : "com.mapbox.mapboxsdk:auto-value-gson-runtime:${version.mapboxSdkGson}",
       mapboxNavigator           : "com.mapbox.navigator:dash-native$ndkVersionSuffix:${version.mapboxNavigator}",
       mapboxCommonNative        : "com.mapbox.common:common$ndkVersionSuffix:${version.mapboxCommonNative}",
       mapboxSearch              : "com.mapbox.search:mapbox-search-android$ndkVersionSuffix:${version.mapboxSearch}",

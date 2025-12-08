@@ -22,6 +22,7 @@ import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
+import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import com.mapbox.navigation.base.internal.accounts.SkuIdProvider
 import com.mapbox.navigation.base.internal.accounts.SkuIdProviderImpl
 import com.mapbox.navigation.base.internal.clearCache
@@ -486,6 +487,17 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     internal val skuIdProvider: SkuIdProvider
 
     init {
+        if (
+            navigationOptions.nativeRouteObject &&
+            navigationOptions.trafficOverrideOptions.isEnabled
+        ) {
+            // TODO: remove validation once native route object supports traffic override
+            // https://mapbox.atlassian.net/browse/NAVAND-6480
+            NotSupportedForNativeRouteObject(
+                "trafficOverrideOptions.isEnabled = true",
+            )
+        }
+
         val initSectionName = "MapboxNavigation#init-"
         PerformanceTracker.trackPerformanceSync(
             "${initSectionName}MapboxNavigationSDKInitializerImpl",
@@ -536,7 +548,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             ),
         )
 
-        val routeParsingManager = createRouteParsingManager()
+        val routeParsingManager = createRouteParsingManager(navigationOptions.nativeRouteObject)
         routeParsingManager.setPrepareForParsingAction(this::prepareNavigationForRoutesParsing)
         routerWrapper = PerformanceTracker.trackPerformanceSync(
             "${initSectionName}RouterWrapper",
@@ -663,6 +675,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             evDynamicDataHolder,
             Time.SystemClockImpl,
         )
+        // TODO: enable when NRO supports route refresh
+        // https://mapbox.atlassian.net/browse/NAVAND-6544
+        if (navigationOptions.nativeRouteObject) {
+            routeRefreshController.pauseRouteRefreshes()
+        }
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         routeRefreshController.registerRouteRefreshObserver {
             internalSetNavigationRoutes(
@@ -692,6 +709,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 scope = mainJobController.scope,
                 parsingDispatcher = Dispatchers.Default,
                 RouteParsingHistoryTracker(compositeRecorder),
+                routeParsingManager,
             )
         } else {
             NavigationComponentProvider.createRerouteController(
@@ -713,7 +731,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             tripSession.setOffRouteObserverForReroute(internalOffRouteObserver, it)
         }
         registerRoutesObserver(internalRoutesObserver)
-        registerRoutesObserver(routeRefreshController::onRoutesChanged)
+        // TODO: enable when refreshes via NRO are supported
+        // https://mapbox.atlassian.net/browse/NAVAND-6544
+        if (!navigationOptions.nativeRouteObject) {
+            registerRoutesObserver(routeRefreshController::onRoutesChanged)
+        }
         setUpRouteCacheClearer()
 
         roadObjectsStore = RoadObjectsStore(navigator)

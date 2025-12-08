@@ -7,6 +7,7 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonParser
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
+import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.route.TimeZone
 import com.mapbox.navigation.base.internal.route.Waypoint
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -19,23 +20,25 @@ import com.mapbox.navigation.utils.internal.logE
  * **This check does not compare route annotations!**
  */
 fun DirectionsRoute.isSameRoute(compare: DirectionsRoute?): Boolean {
-    if (this === compare) {
-        return true
-    }
+    PerformanceTracker.trackPerformanceSync("DirectionsRoute.isSameRoute") {
+        if (this === compare) {
+            return true
+        }
 
-    if (compare == null) {
+        if (compare == null) {
+            return false
+        }
+
+        ifNonNull(this.geometry(), compare.geometry()) { g1, g2 ->
+            return g1 == g2
+        }
+
+        ifNonNull(this.stepsNamesAsString(), compare.stepsNamesAsString()) { s1, s2 ->
+            return s1 == s2
+        }
+
         return false
     }
-
-    ifNonNull(this.geometry(), compare.geometry()) { g1, g2 ->
-        return g1 == g2
-    }
-
-    ifNonNull(this.stepsNamesAsString(), compare.stepsNamesAsString()) { s1, s2 ->
-        return s1 == s2
-    }
-
-    return false
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)

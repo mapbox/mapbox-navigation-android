@@ -186,7 +186,7 @@ class RouterWrapperTests {
         routerWrapper = RouterWrapper(
             router,
             ThreadController(),
-            createRouteParsingManager(),
+            createRouteParsingManager(false),
             mockk<RouteParsingTracking>(relaxed = true),
         )
     }

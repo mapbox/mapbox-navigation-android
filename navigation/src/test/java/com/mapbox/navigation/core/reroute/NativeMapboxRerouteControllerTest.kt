@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.reroute
 
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.internal.route.nativeRoute
+import com.mapbox.navigation.base.internal.utils.createRouteParsingManager
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.internal.performance.RouteParsingTracking
 import com.mapbox.navigation.core.internal.router.util.TestRouteFixtures
@@ -483,6 +484,7 @@ private fun createNativeMapboxRerouteController(
     scope,
     parsingDispatcher,
     routeParsingTracking,
+    createRouteParsingManager(false),
 )
 
 private class RerouteEventsRegistration : RerouteEventsProvider {
