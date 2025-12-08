@@ -18,12 +18,14 @@ import com.mapbox.common.UploadOptions
 import com.mapbox.common.UploadStatus
 import com.mapbox.common.UploadStatusCallback
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.create
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.delete
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.rename
 import com.mapbox.navigation.copilot.internal.CopilotSession
 import com.mapbox.navigation.copilot.internal.PushStatus
 import com.mapbox.navigation.copilot.internal.PushStatusObserver
 import com.mapbox.navigation.copilot.work.HistoryUploadWorker
+import com.mapbox.navigation.copilot.work.HistoryUploadWorker.Companion.cancelScheduledUploading
 import com.mapbox.navigation.copilot.work.HistoryUploadWorker.Companion.putCopilotSession
 import com.mapbox.navigation.core.internal.telemetry.standalone.StandaloneNavigationTelemetry
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
@@ -87,6 +89,17 @@ class HistoryUploadWorkerTest {
                 every { parent } returns originalFile.parent
                 every { absolutePath } returns originalFile.parent.orEmpty() + "/" + newFilename
                 every { name } returns newFilename
+                every { exists() } returns true
+            }
+        }
+        every { create(any(), any()) } answers {
+            val parent = firstArg<String?>()
+            val child = secondArg<String>()
+            mockk<File>(relaxed = true) {
+                every { this@mockk.parent } returns parent
+                every { absolutePath } returns parent.orEmpty() + "/" + child
+                every { name } returns child
+                every { exists() } returns true
             }
         }
         every { delete(any()) } returns false
@@ -98,6 +111,9 @@ class HistoryUploadWorkerTest {
 
         mockkObject(StandaloneNavigationTelemetry.Companion)
         every { StandaloneNavigationTelemetry.getOrCreate() } returns mockk(relaxed = true)
+
+        mockkObject(HistoryUploadWorker.Companion)
+        every { cancelScheduledUploading(any(), any()) } returns Unit
     }
 
     @After
@@ -227,6 +243,9 @@ class HistoryUploadWorkerTest {
         assertEquals(2, deletedFiles.size)
         assertNotNull(deletedFiles.firstOrNull { it.name.endsWith("pbf.gz") })
         assertNotNull(deletedFiles.firstOrNull { it.name.endsWith("metadata.json") })
+        verify(exactly = 1) {
+            cancelScheduledUploading(any(), any())
+        }
     }
 
     @Test
@@ -278,6 +297,10 @@ class HistoryUploadWorkerTest {
         verify(exactly = 0) {
             delete(any())
         }
+
+        verify(exactly = 0) {
+            cancelScheduledUploading(any(), any())
+        }
     }
 
     @Test
@@ -305,8 +328,11 @@ class HistoryUploadWorkerTest {
                 delete(capture(deletedFiles))
             }
             assertEquals(2, deletedFiles.size)
-            assertNotNull(deletedFiles.first { it.name.endsWith("pbf.gz") })
-            assertNotNull(deletedFiles.first { it.name.endsWith("metadata.json") })
+            assertNotNull(deletedFiles.firstOrNull { it.name.endsWith("pbf.gz") })
+            assertNotNull(deletedFiles.firstOrNull { it.name.endsWith("metadata.json") })
+            verify(exactly = 1) {
+                cancelScheduledUploading(any(), any())
+            }
         }
 
     @Test
@@ -328,8 +354,11 @@ class HistoryUploadWorkerTest {
                 delete(capture(deletedFiles))
             }
             assertEquals(2, deletedFiles.size)
-            assertNotNull(deletedFiles.first { it.name.endsWith("pbf.gz") })
-            assertNotNull(deletedFiles.first { it.name.endsWith("metadata.json") })
+            assertNotNull(deletedFiles.firstOrNull { it.name.endsWith("pbf.gz") })
+            assertNotNull(deletedFiles.firstOrNull { it.name.endsWith("metadata.json") })
+            verify(exactly = 1) {
+                cancelScheduledUploading(any(), any())
+            }
         }
 
     @Test

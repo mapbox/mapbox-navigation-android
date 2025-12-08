@@ -13,7 +13,9 @@ import com.mapbox.navigation.metrics.internal.TelemetryUtilsDelegate
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 
-internal object EventsServiceProvider {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+@VisibleForTesting
+object EventsServiceProvider {
     fun provideEventsService(eventsServerOptions: EventsServerOptions): EventsServiceInterface =
         EventsService.getOrCreate(eventsServerOptions)
 }

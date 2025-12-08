@@ -19,6 +19,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.copilot.AttachmentMetadata
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.attachmentFilename
+import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.create
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.generateSessionId
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.rename
 import com.mapbox.navigation.copilot.HttpServiceProvider
@@ -35,6 +36,7 @@ import com.mapbox.navigation.copilot.internal.CopilotSession
 import com.mapbox.navigation.copilot.internal.PushStatus
 import com.mapbox.navigation.copilot.internal.saveFilename
 import com.mapbox.navigation.utils.internal.logD
+import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -48,7 +50,7 @@ import kotlin.coroutines.resume
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class HistoryUploadWorker(
-    context: Context,
+    private val context: Context,
     private val workerParams: WorkerParameters,
 ) : CoroutineWorker(context, workerParams) {
 
@@ -65,7 +67,20 @@ internal class HistoryUploadWorker(
         val copilotSession = copilotSessionFrom(workerParams.inputData)
         val recordingFile =
             rename(File(copilotSession.recording), attachmentFilename(copilotSession))
-        val sessionFile = File(recordingFile.parent, copilotSession.saveFilename())
+        val sessionFile = create(recordingFile.parent, copilotSession.saveFilename())
+
+        logD(
+            "HistoryUploadWorker.doWork(). " +
+                "Session: $copilotSession, " +
+                "runAttemptCount: $runAttemptCount",
+        )
+
+        if (copilotSession.endedAt.isEmpty()) {
+            reportCopilotError(
+                "Passed copilot session has empty endedAt date: $copilotSession, " +
+                    "Copilot dir files: ${recordingFile.parentFile?.listFiles()?.map { it.name }}",
+            )
+        }
 
         if (!recordingFile.exists()) {
             reportCopilotError(
@@ -73,6 +88,8 @@ internal class HistoryUploadWorker(
                     "Copilot session: $copilotSession. " +
                     "Copilot dir files: ${recordingFile.parentFile?.listFiles()?.map { it.name }}",
             )
+            cleanup(copilotSession, recordingFile, sessionFile)
+            return@withContext Result.failure()
         }
 
         if (!sessionFile.exists()) {
@@ -107,15 +124,13 @@ internal class HistoryUploadWorker(
         if (uploadHistoryFile(uploadOptions)) {
             success(copilotSession)
             logD("Result.success(${recordingFile.name}|${sessionFile.name})")
-            delete(recordingFile)
-            delete(sessionFile)
+            cleanup(copilotSession, recordingFile, sessionFile)
             Result.success()
         } else {
             failure(copilotSession)
             if (runAttemptCount >= MAX_RUN_ATTEMPT_COUNT) {
                 logW("Result.failure(${recordingFile.name}|${sessionFile.name})")
-                delete(recordingFile)
-                delete(sessionFile)
+                cleanup(copilotSession, recordingFile, sessionFile)
                 Result.failure()
             } else {
                 logD(
@@ -129,9 +144,37 @@ internal class HistoryUploadWorker(
         }
     }
 
-    private fun delete(file: File) {
+    private fun cleanup(
+        copilotSession: CopilotSession,
+        recordingFile: File,
+        sessionFile: File,
+    ) {
+        if (!delete(sessionFile)) {
+            reportCopilotError("Can't delete session file")
+        }
+
+        if (!delete(recordingFile)) {
+            reportCopilotError("Can't delete recording file")
+        }
+
+        /**
+         * Cancels any pending upload jobs that may have been scheduled by
+         * [PeriodicHistoryCleanupWorker].
+         *
+         * NOTE: TODO This does not fully guarantee that a new job won’t be scheduled if
+         * [PeriodicHistoryCleanupWorker] is currently running.
+         */
+        cancelScheduledUploading(context, copilotSession)
+    }
+
+    private fun delete(file: File): Boolean {
         logD("Deleting ${file.name}")
-        HistoryAttachmentsUtils.delete(file)
+        return try {
+            HistoryAttachmentsUtils.delete(file)
+        } catch (e: SecurityException) {
+            logE("Deleting ${file.name} error: $e")
+            false
+        }
     }
 
     private suspend fun uploadHistoryFile(
@@ -215,6 +258,7 @@ internal class HistoryUploadWorker(
 
     private fun logD(msg: String) = logD("[upload] [$id] $msg", LOG_CATEGORY)
     private fun logW(msg: String) = logW("[upload] [$id] $msg", LOG_CATEGORY)
+    private fun logE(msg: String) = logE("[upload] [$id] $msg", LOG_CATEGORY)
 
     internal companion object {
 
@@ -235,23 +279,30 @@ internal class HistoryUploadWorker(
 
         /**
          * Max backoff delay is limited by [WorkRequest.MAX_BACKOFF_MILLIS] (5 hours = 18 000 seconds).
+         * With [MAX_RUN_ATTEMPT_COUNT] = 15, there are 15 total attempts (1 initial + 14 retries).
          * The total cumulative retry time could be approximately 20 hours
          * (it can be more depending on system delays):
          *
-         * 300 * 2⁰	= 300
-         * 300 * 2¹	= 600
-         * 300 * 2²	= 1200
-         * 300 * 2³	= 2400
-         * 300 * 2⁴	= 4800
-         * 300 * 2⁵	= 9600
-         * 300 * 2⁶	= 19200 -> capped to 18000
-         * 300 * 2⁷	= 38400 -> capped to 18000
-         * 300 × 2⁸	= 76800 -> caped to 18000
+         * Attempt 1: runs immediately (no delay)
+         * Delay before attempt 2: 10 * 2⁰	= 10
+         * Delay before attempt 3: 10 * 2¹	= 20
+         * Delay before attempt 4: 10 * 2²	= 40
+         * Delay before attempt 5: 10 * 2³	= 80
+         * Delay before attempt 6: 10 * 2⁴	= 160
+         * Delay before attempt 7: 10 * 2⁵	= 320
+         * Delay before attempt 8: 10 * 2⁶	= 640
+         * Delay before attempt 9: 10 * 2⁷	= 1280
+         * Delay before attempt 10: 10 * 2⁸	= 2560
+         * Delay before attempt 11: 10 * 2⁹	= 5120
+         * Delay before attempt 12: 10 * 2¹⁰ = 10240
+         * Delay before attempt 13: 10 * 2¹¹ = 20480 -> capped to 18000
+         * Delay before attempt 14: 10 * 2¹² = 40960 -> capped to 18000
+         * Delay before attempt 15: 10 * 2¹³ = 81920 -> capped to 18000
          *
-         * Total delay is 72900 seconds ≈ 20 hours
+         * Total cumulative delay is 74470 seconds ≈ 20 hours
          */
-        const val MAX_RUN_ATTEMPT_COUNT = 9
-        private const val DELAY_IN_SECONDS = 300L // 5 minutes
+        const val MAX_RUN_ATTEMPT_COUNT = 15
+        private const val DELAY_IN_SECONDS = 10L
 
         /**
          * uploadHistory
@@ -260,7 +311,6 @@ internal class HistoryUploadWorker(
             context: Context,
             copilotSession: CopilotSession,
         ) {
-            val workName = "copilot-upload.${copilotSession.recording}"
             val workRequest = OneTimeWorkRequestBuilder<HistoryUploadWorker>()
                 .setConstraints(requireInternet())
                 .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, DELAY_IN_SECONDS, TimeUnit.SECONDS)
@@ -269,8 +319,19 @@ internal class HistoryUploadWorker(
                 .build()
 
             WorkManager.getInstance(context)
-                .enqueueUniqueWork(workName, ExistingWorkPolicy.KEEP, workRequest)
+                .enqueueUniqueWork(
+                    copilotSession.workName(),
+                    ExistingWorkPolicy.KEEP,
+                    workRequest,
+                )
         }
+
+        fun cancelScheduledUploading(context: Context, copilotSession: CopilotSession) {
+            WorkManager.getInstance(context)
+                .cancelUniqueWork(copilotSession.workName())
+        }
+
+        private fun CopilotSession.workName() = "copilot-upload.$recording"
 
         private fun requireInternet() =
             Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()

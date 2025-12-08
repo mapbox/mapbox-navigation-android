@@ -9,7 +9,10 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.delete
 import com.mapbox.navigation.copilot.MapboxCopilotImpl.Companion.LOG_CATEGORY
+import com.mapbox.navigation.copilot.MapboxCopilotImpl.Companion.reportCopilotError
 import com.mapbox.navigation.copilot.internal.CopilotSession
+import com.mapbox.navigation.copilot.internal.CopilotSession.Companion.attachmentFile
+import com.mapbox.navigation.copilot.internal.CopilotSession.Companion.recordingFile
 import com.mapbox.navigation.copilot.internal.listCopilotRecordingFiles
 import com.mapbox.navigation.copilot.internal.listCopilotSessionFiles
 import com.mapbox.navigation.utils.internal.logD
@@ -22,7 +25,7 @@ import java.util.concurrent.TimeUnit
 /**
  * Periodic task worker that scans HISTORY_FILES_DIR and:
  * - schedules [HistoryUploadWorker] task for each .pbf.gz recording file that has
- *   matching .metadata.json session file, expect the latest one (active copilot session)
+ *   matching .metadata.json session file, except the latest one (active copilot session)
  * - deletes all residual .pbf.gz recording files that's missing .metadata.json session file
  *
  * IMPORTANT: This worker expects all files to be chronologically named.
@@ -34,72 +37,67 @@ internal class PeriodicHistoryCleanupWorker(
 ) : CoroutineWorker(context, workerParams) {
 
     private val historyFilesDir by lazy { workerParams.inputData.getString(HISTORY_FILES_DIR)!! }
-    private val stats = object {
-        var recUploadCount = 0
-        var recDeleteCount = 0
-    }
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-        val sessions = loadCopilotSessions()
-        val processedRecordings = scheduleRecordingsUpload(sessions)
-        deleteResidualRecordings(sessions, processedRecordings)
-
-        logD(
-            "Finished processing history files: " +
-                "uploading=${stats.recUploadCount}; deleted=${stats.recDeleteCount}",
-        )
+        val sessions = loadAllCopilotSessions()
+        scheduleRecordingsUpload(nonActiveSessions = sessions.dropLast(1))
+        deleteResidualRecordings(sessions)
         Result.success()
     }
 
-    private fun loadCopilotSessions(): List<CopilotSession> {
-        // get all .metadata.json files except the latest one
+    private fun loadAllCopilotSessions(): List<CopilotSession> {
         return File(historyFilesDir)
             .listCopilotSessionFiles()
             .sortedBy { it.absolutePath }
-            .dropLast(1)
             .mapNotNull { file ->
                 logD("Processing ${file.name}")
                 CopilotSession.fromJson(file.readText()).getOrNull()
             }
     }
 
-    /**
-     * @return List of recordings scheduled for upload
-     */
-    private fun scheduleRecordingsUpload(sessions: List<CopilotSession>): List<File> {
-        return sessions.fold(mutableListOf<File>()) { acc, session ->
-            val recordingFile = File(session.recording)
-            if (recordingFile.exists()) {
-                logD("Uploading recording ${session.recording}")
-                HistoryUploadWorker.uploadHistory(applicationContext, session)
-                acc.add(recordingFile)
-                stats.recUploadCount++
+    private fun scheduleRecordingsUpload(nonActiveSessions: List<CopilotSession>) {
+        return nonActiveSessions.forEach { session ->
+            val recordingFile = session.recordingFile
+            val file = if (recordingFile.exists()) {
+                recordingFile
+            } else {
+                val attachmentFile = session.attachmentFile
+                if (attachmentFile.exists()) {
+                    attachmentFile
+                } else {
+                    null
+                }
             }
-            acc
+
+            if (file != null) {
+                logD("Uploading recording ${file.absolutePath}")
+                HistoryUploadWorker.uploadHistory(applicationContext, session)
+            }
         }
     }
 
-    private fun deleteResidualRecordings(
-        sessions: List<CopilotSession>,
-        processedRecordings: List<File>,
-    ) {
-        val excludedRecordings = sessions.map { it.recording }.toMutableSet()
-        processedRecordings.forEach {
-            excludedRecordings.add(it.absolutePath)
+    private fun deleteResidualRecordings(sessions: List<CopilotSession>) {
+        val excludedRecordings: MutableSet<String> = mutableSetOf()
+
+        sessions.forEach {
+            excludedRecordings.add(it.recording)
+            excludedRecordings.add(it.attachmentFile.absolutePath)
         }
 
-        // we exclude latest (active) recording file,
-        // all recordings referenced by the .metadata.json files
-        // and all recordings already scheduled for upload
         File(historyFilesDir)
             .listCopilotRecordingFiles()
             .sortedBy { it.absolutePath }
-            .dropLast(1)
             .filter { it.absolutePath !in excludedRecordings }
-            .forEach {
-                logD("Deleting recording ${it.name}")
-                delete(it)
-                stats.recDeleteCount++
+            .forEach { fileToDelete ->
+                logD("Deleting recording ${fileToDelete.name}")
+                delete(fileToDelete)
+
+                reportCopilotError(
+                    "Deleting residual recording: $fileToDelete," +
+                        "Copilot dir files: ${
+                        fileToDelete.parentFile?.listFiles()?.map { it.name }
+                        }",
+                )
             }
     }
 

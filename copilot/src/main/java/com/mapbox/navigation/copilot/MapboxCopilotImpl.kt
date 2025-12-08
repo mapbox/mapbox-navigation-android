@@ -1,5 +1,6 @@
 package com.mapbox.navigation.copilot
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.os.SystemClock
@@ -51,6 +52,10 @@ import java.io.File
  * MapboxCopilot.
  *
  * @property mapboxNavigation
+ *
+ * TODO there may remain synchronisation issues:
+ * - make sure activeSession is accessed from only one thread
+ * - writing current session file should also be synchronised
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class MapboxCopilotImpl(
@@ -77,6 +82,7 @@ internal class MapboxCopilotImpl(
             }
         }
     private var startSessionTime: Long = 0
+
     private var activeSession: CopilotSession = CopilotSession()
     private val finishedSessions = mutableListOf<CopilotSession>()
     private val filepaths = HistoryFiles(applicationContext)
@@ -257,14 +263,13 @@ internal class MapboxCopilotImpl(
             recording = recording,
         )
         logD("startRecording $activeSession")
-        saveCopilotSession()
+        activeSession.saveCopilotSession()
 
         mapboxNavigation.registerArrivalObserver(arrivalObserver)
         restartRecordingHistoryJob = mainJobController.scope.launch {
             while (true) {
                 delay(maxHistoryFileLengthMilliseconds)
                 restartRecordingHistory()
-                saveCopilotSession()
             }
         }
     }
@@ -277,8 +282,10 @@ internal class MapboxCopilotImpl(
         return eventJson
     }
 
+    @SuppressLint("ImplicitSamInstance")
     private fun restartRecordingHistory() {
-        val session = activeSession.copy(endedAt = currentUtcTime())
+        val session = copyAndSaveActiveSession { copy(endedAt = currentUtcTime()) }
+
         logD("stopRecording $session")
         copilotHistoryRecorder.stopRecording { historyFilePath ->
             historyFilePath ?: return@stopRecording
@@ -295,10 +302,13 @@ internal class MapboxCopilotImpl(
         }
 
         // when restarting recording we inherit previous session info and just update start time
-        activeSession = activeSession.copy(
-            recording = recording,
-            startedAt = currentUtcTime(),
-        )
+        activeSession = copyAndSaveActiveSession {
+            copy(
+                recording = recording,
+                startedAt = currentUtcTime(),
+                endedAt = "",
+            )
+        }
         logD("startRecording $activeSession")
     }
 
@@ -307,7 +317,7 @@ internal class MapboxCopilotImpl(
             return
         }
         if (hasFeedback || !shouldSendHistoryOnlyWithFeedback) {
-            val session = activeSession.copy(endedAt = currentUtcTime())
+            val session = copyAndSaveActiveSession { copy(endedAt = currentUtcTime()) }
 
             pushOnActiveGuidance()
             pushDriveEndsEvent()
@@ -330,7 +340,7 @@ internal class MapboxCopilotImpl(
         }
         stopRecording { historyFilePath ->
             delete(File(historyFilePath))
-            deleteCopilotSession()
+            activeSession.deleteCopilotSession()
             activeSession = CopilotSession()
         }
     }
@@ -354,14 +364,24 @@ internal class MapboxCopilotImpl(
         }
     }
 
-    private fun saveCopilotSession() = mainJobController.scope.launch(Dispatchers.IO) {
-        val file = File(filepaths.copilotAbsolutePath(), activeSession.saveFilename())
-        file.writeText(activeSession.toJson())
+    private fun copyAndSaveActiveSession(
+        update: CopilotSession.() -> CopilotSession,
+    ): CopilotSession {
+        val session = activeSession.update()
+        session.saveCopilotSession()
+        return session
     }
 
-    private fun deleteCopilotSession() = mainJobController.scope.launch(Dispatchers.IO) {
-        delete(File(filepaths.copilotAbsolutePath(), activeSession.saveFilename()))
-    }
+    private fun CopilotSession.saveCopilotSession() =
+        mainJobController.scope.launch(Dispatchers.IO) {
+            val file = File(filepaths.copilotAbsolutePath(), saveFilename())
+            file.writeText(toJson())
+        }
+
+    private fun CopilotSession.deleteCopilotSession() =
+        mainJobController.scope.launch(Dispatchers.IO) {
+            delete(File(filepaths.copilotAbsolutePath(), saveFilename()))
+        }
 
     private fun stopRecording(callback: (String) -> Unit) {
         restartRecordingHistoryJob?.cancel()
@@ -450,7 +470,11 @@ internal class MapboxCopilotImpl(
         internal fun reportCopilotError(description: String) {
             logD("reportCopilotError($description)", LOG_CATEGORY)
             StandaloneNavigationTelemetry.getOrCreate().sendEvent(
-                StandaloneCustomEvent(type = "copilot-error", payload = description),
+                StandaloneCustomEvent(
+                    type = "copilot-error",
+                    payload = description,
+                    customEventVersion = "2.0",
+                ),
             )
         }
     }
