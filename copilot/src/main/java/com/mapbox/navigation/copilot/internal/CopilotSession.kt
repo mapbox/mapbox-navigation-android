@@ -9,6 +9,7 @@ import com.mapbox.navigation.base.internal.options.getOwner
 import com.mapbox.navigation.base.internal.utils.MapboxOptionsUtil.getTokenForService
 import com.mapbox.navigation.base.options.EventsAppMetadata
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.attachmentFilename
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.retrieveNavNativeSdkVersion
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.retrieveNavSdkVersion
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.retrieveOwnerFrom
@@ -48,6 +49,12 @@ data class CopilotSession(
     fun toJson(): String = Gson().toJson(this)
 
     companion object {
+
+        val CopilotSession.attachmentFile: File
+            get() = File(File(recording).parent, attachmentFilename(this))
+
+        val CopilotSession.recordingFile: File
+            get() = File(recording)
 
         fun fromJson(json: String): Result<CopilotSession> = runCatching {
             Gson().fromJson(json, CopilotSession::class.java)

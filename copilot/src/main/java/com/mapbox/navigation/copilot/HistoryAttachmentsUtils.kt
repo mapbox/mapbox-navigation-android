@@ -65,6 +65,8 @@ internal object HistoryAttachmentsUtils {
             File(from.parent, filename).also { from.renameTo(it) }
         }
 
+    fun create(parent: String?, child: String): File = File(parent, child)
+
     private fun decode(str: String): JSONObject {
         val requiredLength = (str.length - 1) / 4 * 4 + 4
         return JSONObject(
