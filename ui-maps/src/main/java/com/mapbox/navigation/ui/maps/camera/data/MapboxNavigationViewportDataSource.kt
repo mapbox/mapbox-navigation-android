@@ -823,7 +823,7 @@ class MapboxNavigationViewportDataSource private constructor(
                     .padding(padding)
                     .bearing(followingBearingProperty.get())
                     .pitch(followingPitchProperty.get())
-                    .zoom(cameraState.zoom)
+                    .zoom(options.followingFrameOptions.maxZoom)
                     .build()
                 if (pointsForFollowing.size > 1) {
                     mapboxMap.safeCameraForCoordinates(
@@ -837,7 +837,7 @@ class MapboxNavigationViewportDataSource private constructor(
             }
 
         if (cameraFrame.isEmpty) {
-            logW { "CameraOptions is empty" }
+            logW(LOG_CATEGORY) { "CameraOptions is empty" }
             return
         }
 
@@ -872,6 +872,9 @@ class MapboxNavigationViewportDataSource private constructor(
         return try {
             cameraForCoordinates(coordinates, camera, box)
         } catch (ex: MapboxMapException) {
+            logE {
+                "safeCameraForCoordinates exception: ${ex.cause}\n${ex.message}\n${ex.stackTrace}"
+            }
             cameraState.toCameraOptions()
         }
     }

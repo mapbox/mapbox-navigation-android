@@ -761,7 +761,7 @@ class MapboxNavigationViewportDataSourceTest {
             center(location.toPoint())
             bearing(smoothedBearing)
             pitch(viewportDataSource.options.followingFrameOptions.defaultPitch)
-            zoom(viewportDataSource.options.followingFrameOptions.minZoom)
+            zoom(viewportDataSource.options.followingFrameOptions.maxZoom)
             padding(singlePixelEdgeInsets)
         }
 
@@ -792,6 +792,19 @@ class MapboxNavigationViewportDataSourceTest {
         val data = viewportDataSource.getViewportData()
 
         // verify
+        verify(exactly = 1) {
+            mapboxMap.cameraForCoordinates(
+                expectedPoints,
+                match<CameraOptions> {
+                    it.pitch == ZERO_PITCH &&
+                        it.bearing == BEARING_NORTH &&
+                        it.padding == EMPTY_EDGE_INSETS
+                },
+                null,
+                null,
+                null,
+            )
+        }
         assertEquals(
             followingCameraOptions,
             data.cameraForFollowing,
@@ -812,7 +825,7 @@ class MapboxNavigationViewportDataSourceTest {
             center(additionalPoint)
             bearing(smoothedBearing)
             pitch(viewportDataSource.options.followingFrameOptions.defaultPitch)
-            zoom(viewportDataSource.options.followingFrameOptions.minZoom)
+            zoom(viewportDataSource.options.followingFrameOptions.maxZoom)
             padding(singlePixelEdgeInsets)
         }
 
@@ -944,7 +957,7 @@ class MapboxNavigationViewportDataSourceTest {
             center(location.toPoint())
             bearing(smoothedBearing)
             pitch(viewportDataSource.options.followingFrameOptions.defaultPitch)
-            zoom(mapboxMap.cameraState.zoom)
+            zoom(viewportDataSource.options.followingFrameOptions.maxZoom)
             padding(singlePixelEdgeInsets)
         }
         val followingZoom = 16.0
@@ -1021,7 +1034,7 @@ class MapboxNavigationViewportDataSourceTest {
             center(location.toPoint())
             bearing(smoothedBearing)
             pitch(viewportDataSource.options.followingFrameOptions.defaultPitch)
-            zoom(mapboxMap.cameraState.zoom)
+            zoom(viewportDataSource.options.followingFrameOptions.maxZoom)
             padding(singlePixelEdgeInsets)
         }
         val followingZoom = 16.0
@@ -1230,7 +1243,7 @@ class MapboxNavigationViewportDataSourceTest {
             center(location.toPoint())
             bearing(smoothedBearing)
             pitch(viewportDataSource.options.followingFrameOptions.defaultPitch)
-            zoom(mapboxMap.cameraState.zoom)
+            zoom(viewportDataSource.options.followingFrameOptions.maxZoom)
             padding(singlePixelEdgeInsets)
         }
         val followingZoom = 16.0
@@ -1405,7 +1418,7 @@ class MapboxNavigationViewportDataSourceTest {
             center(location.toPoint())
             bearing(smoothedBearing)
             pitch(viewportDataSource.options.followingFrameOptions.defaultPitch)
-            zoom(mapboxMap.cameraState.zoom)
+            zoom(viewportDataSource.options.followingFrameOptions.maxZoom)
             padding(singlePixelEdgeInsets)
         }
         val followingZoom = 16.0
@@ -1429,6 +1442,13 @@ class MapboxNavigationViewportDataSourceTest {
         val data = viewportDataSource.getViewportData()
 
         // verify
+        verify(exactly = 1) {
+            mapboxMap.cameraForCoordinates(
+                expectedFollowingPoints,
+                fallbackOptions,
+                followingScreenBox,
+            )
+        }
         assertEquals(
             followingCameraOptions,
             data.cameraForFollowing,
@@ -1461,7 +1481,7 @@ class MapboxNavigationViewportDataSourceTest {
             center(location.toPoint())
             bearing(smoothedBearing)
             pitch(ZERO_PITCH)
-            zoom(mapboxMap.cameraState.zoom)
+            zoom(viewportDataSource.options.followingFrameOptions.maxZoom)
             padding(singlePixelEdgeInsets)
         }
         val followingZoom = 16.0
@@ -1547,7 +1567,7 @@ class MapboxNavigationViewportDataSourceTest {
             center(location.toPoint())
             bearing(smoothedBearing)
             pitch(ZERO_PITCH)
-            zoom(mapboxMap.cameraState.zoom)
+            zoom(viewportDataSource.options.followingFrameOptions.maxZoom)
             padding(singlePixelEdgeInsets)
         }
         val followingZoom = 5.0 // less than min zoom - should use min zoom
@@ -1599,6 +1619,13 @@ class MapboxNavigationViewportDataSourceTest {
         val data = viewportDataSource.getViewportData()
 
         // verify
+        verify(exactly = 1) {
+            mapboxMap.cameraForCoordinates(
+                expectedFollowingPoints,
+                fallbackOptions,
+                followingScreenBox,
+            )
+        }
         assertEquals(
             followingCameraOptions.toBuilder()
                 .zoom(10.5)
@@ -1629,7 +1656,7 @@ class MapboxNavigationViewportDataSourceTest {
             center(location.toPoint())
             bearing(smoothedBearing)
             pitch(viewportDataSource.options.followingFrameOptions.defaultPitch)
-            zoom(viewportDataSource.options.followingFrameOptions.minZoom)
+            zoom(viewportDataSource.options.followingFrameOptions.maxZoom)
             padding(singlePixelEdgeInsets)
         }
         val pointsForInitialFollowingFrame = mutableListOf<Point>().apply {
@@ -1731,7 +1758,7 @@ class MapboxNavigationViewportDataSourceTest {
             center(location.toPoint())
             bearing(smoothedBearing)
             pitch(ZERO_PITCH)
-            zoom(viewportDataSource.options.followingFrameOptions.minZoom)
+            zoom(viewportDataSource.options.followingFrameOptions.maxZoom)
             padding(singlePixelEdgeInsets)
         }
 
@@ -1814,7 +1841,7 @@ class MapboxNavigationViewportDataSourceTest {
             center(location.toPoint())
             bearing(smoothedBearing)
             pitch(viewportDataSource.options.followingFrameOptions.defaultPitch)
-            zoom(mapboxMap.cameraState.zoom)
+            zoom(viewportDataSource.options.followingFrameOptions.maxZoom)
             padding(singlePixelEdgeInsets)
         }
         val followingZoom = 16.0
@@ -1899,7 +1926,7 @@ class MapboxNavigationViewportDataSourceTest {
             center(location.toPoint())
             bearing(smoothedBearing)
             pitch(viewportDataSource.options.followingFrameOptions.defaultPitch)
-            zoom(viewportDataSource.options.followingFrameOptions.minZoom)
+            zoom(viewportDataSource.options.followingFrameOptions.maxZoom)
             padding(singlePixelEdgeInsets)
         }
 
@@ -1973,7 +2000,7 @@ class MapboxNavigationViewportDataSourceTest {
             center(location.toPoint())
             bearing(smoothedBearing)
             pitch(viewportDataSource.options.followingFrameOptions.defaultPitch)
-            zoom(viewportDataSource.options.followingFrameOptions.minZoom)
+            zoom(viewportDataSource.options.followingFrameOptions.maxZoom)
             padding(singlePixelEdgeInsets)
         }
 

@@ -41,6 +41,9 @@ class FollowingFrameOptions {
     /**
      * The max zoom that will be generated for camera following frames.
      *
+     * The maxZoom value is applied directly when the zoom level cannot be calculated precisely,
+     * e.g., when there is only one point to frame.
+     *
      * Defaults to `16.35`.
      */
     var maxZoom = 16.35

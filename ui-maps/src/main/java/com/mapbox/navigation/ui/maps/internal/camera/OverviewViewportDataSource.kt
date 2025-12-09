@@ -55,6 +55,10 @@ class OverviewViewportDataSource @VisibleForTesting internal constructor(
         internalOptions: InternalViewportDataSourceOptions,
     ) : this(mapboxMap, internalOptions, RoutesIndicesConverter())
 
+    private companion object {
+        private const val LOG_CATEGORY = "OverviewViewportDataSource"
+    }
+
     internal var internalOptions = internalOptions
         set(value) {
             if (field != value) {
@@ -323,7 +327,7 @@ class OverviewViewportDataSource @VisibleForTesting internal constructor(
                 }
 
                 if (cameraFrame.isEmpty) {
-                    logW { "CameraOptions is empty" }
+                    logW(LOG_CATEGORY) { "CameraOptions is empty" }
                 } else {
                     // TODO should be non-null (reproducible with Camera test)
                     centerProperty.fallback = cameraFrame.center!!
