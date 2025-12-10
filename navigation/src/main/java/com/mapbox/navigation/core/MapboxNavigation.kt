@@ -730,7 +730,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             ?: return null
         return NavigatorLoader.createCacheHandle(
             config,
-            createTilesConfig(true, version),
+            createTilesConfig(false, version),
             historyRecorderHandles.composite,
         )
     }
