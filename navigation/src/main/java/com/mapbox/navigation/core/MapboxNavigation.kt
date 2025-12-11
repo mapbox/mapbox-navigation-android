@@ -99,6 +99,7 @@ import com.mapbox.navigation.core.reroute.RerouteState.Failed
 import com.mapbox.navigation.core.reroute.RerouteState.FetchingRoute
 import com.mapbox.navigation.core.reroute.RerouteState.Interrupted
 import com.mapbox.navigation.core.reroute.RerouteState.RouteFetched
+import com.mapbox.navigation.core.reroute.RerouteStateV2
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesControllerProvider
@@ -148,6 +149,7 @@ import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
+import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
 import com.mapbox.navigator.AlertsServiceOptions
 import com.mapbox.navigator.CacheHandle
@@ -705,6 +707,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 directionsSession::routesPlusIgnored,
                 { routes, legIndex ->
                     internalSetNavigationRoutes(routes, SetRoutes.Reroute(legIndex))
+                    true
                 },
                 scope = mainJobController.scope,
                 parsingDispatcher = Dispatchers.Default,
@@ -1756,6 +1759,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      *
      * @param resultCallback optional [ReplanRoutesCallback] to receive the result of the rerouting.
      */
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
     @ExperimentalPreviewMapboxNavigationAPI
     @JvmOverloads
     fun replanRoute(resultCallback: ReplanRoutesCallback? = null) {
@@ -1765,13 +1769,13 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
             val rerouteStateObserver = createSingleUseRerouteObserver(resultCallback)
             rerouteStateObserver?.let {
-                rerouteController?.registerRerouteStateObserver(rerouteStateObserver)
+                rerouteController?.registerRerouteStateV2Observer(rerouteStateObserver)
             }
 
             controller.rerouteOnParametersChange { result ->
                 // Unregister the temporary observer if it's available.
                 rerouteStateObserver?.let { observer ->
-                    rerouteController?.unregisterRerouteStateObserver(observer)
+                    rerouteController?.unregisterRerouteStateV2Observer(observer)
                 }
 
                 // When the controller gets a new route, handle the result.
@@ -2337,6 +2341,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                     result.routes,
                     SetRoutes.Reroute(result.initialLegIndex),
                 )
+                true
+            } else {
+                false
             }
         }
     }
@@ -2473,17 +2480,18 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         }
     }
 
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
     private fun createSingleUseRerouteObserver(
         callback: ReplanRoutesCallback?,
-    ): RerouteStateObserver? {
+    ): RerouteController.RerouteStateV2Observer? {
         if (isRerouteEnabled().not() || callback == null) return null
 
-        return object : RerouteStateObserver {
-            override fun onRerouteStateChanged(rerouteState: RerouteState) {
+        return object : RerouteController.RerouteStateV2Observer {
+            override fun onRerouteStateChanged(rerouteState: RerouteStateV2) {
                 when (rerouteState) {
-                    Interrupted -> {
+                    is RerouteStateV2.Interrupted -> {
                         // If the reroute is interrupted, notify the callback and unregister.
-                        rerouteController?.unregisterRerouteStateObserver(this)
+                        rerouteController?.unregisterRerouteStateV2Observer(this)
                         logI(LOG_CATEGORY) {
                             "Updating the caller of the interruption using the passed callback" +
                                 " instance."
@@ -2496,9 +2504,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                         )
                     }
 
-                    is Failed -> {
+                    is RerouteStateV2.Failed -> {
                         // If the reroute fails, notify the callback and unregister.
-                        rerouteController?.unregisterRerouteStateObserver(this)
+                        rerouteController?.unregisterRerouteStateV2Observer(this)
                         logE(LOG_CATEGORY) {
                             "Updating the caller of the error using the passed callback instance."
                         }
@@ -2510,8 +2518,16 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                         )
                     }
 
-                    FetchingRoute, RerouteState.Idle, is RouteFetched -> {
+                    is RerouteStateV2.FetchingRoute,
+                    is RerouteStateV2.Idle,
+                    is RerouteStateV2.RouteFetched,
+                    is RerouteStateV2.Deviation.RouteIgnored,
+                    is RerouteStateV2.Deviation.ApplyingRoute,
+                    -> {
                         // No-op as these states are handled elsewhere.
+                    }
+                    else -> {
+                        logW(LOG_CATEGORY) { "Unexpected state: $rerouteState" }
                     }
                 }
             }

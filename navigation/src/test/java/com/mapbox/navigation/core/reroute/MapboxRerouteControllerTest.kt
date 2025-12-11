@@ -34,10 +34,8 @@ import io.mockk.clearMocks
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
-import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
-import io.mockk.runs
 import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
@@ -88,13 +86,21 @@ class MapboxRerouteControllerTest {
     private lateinit var errorFromResult: RouteOptionsUpdater.RouteOptionsResult.Error
 
     @MockK
-    private lateinit var internalRouteCallback: InternalRerouteController.RoutesCallback
+    private lateinit var internalDeviationRouteCallback:
+        InternalRerouteController.DeviationRoutesCallback
+
+    @MockK
+    private lateinit var internalRouteReplanRouteCallback:
+        InternalRerouteController.RouteReplanRoutesCallback
 
     @MockK
     private lateinit var routeCallback: RerouteController.RoutesCallback
 
     @MockK
     lateinit var primaryRerouteObserver: RerouteController.RerouteStateObserver
+
+    @MockK
+    lateinit var primaryRerouteV2Observer: RerouteController.RerouteStateV2Observer
 
     @MockK
     private lateinit var compositeRerouteOptionsAdapter: MapboxRerouteOptionsAdapter
@@ -145,7 +151,9 @@ class MapboxRerouteControllerTest {
     fun initial_state() {
         assertEquals(RerouteState.Idle, rerouteController.state)
         verify(exactly = 0) {
-            rerouteController.rerouteOnDeviation(any<InternalRerouteController.RoutesCallback>())
+            rerouteController.rerouteOnDeviation(
+                any<InternalRerouteController.DeviationRoutesCallback>(),
+            )
         }
         verify(exactly = 0) { rerouteController.interrupt() }
     }
@@ -156,6 +164,16 @@ class MapboxRerouteControllerTest {
 
         assertTrue("RerouteStateObserver is not added", added)
         verify(exactly = 1) { primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle) }
+    }
+
+    @Test
+    fun initial_state_with_added_state_v2_observer() {
+        val added = addRerouteStateV2Observer()
+
+        assertTrue("RerouteStateV2Observer is not added", added)
+        verify(exactly = 1) {
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+        }
     }
 
     @Test
@@ -170,7 +188,7 @@ class MapboxRerouteControllerTest {
             )
         } returns 1L
 
-        rerouteController.rerouteOnDeviation(internalRouteCallback)
+        rerouteController.rerouteOnDeviation(internalDeviationRouteCallback)
         routeRequestCallback.captured.onRoutesReady(
             listOf(mockk(relaxed = true)),
             RouterOrigin.ONLINE,
@@ -191,6 +209,7 @@ class MapboxRerouteControllerTest {
     fun reroute_on_deviation_success() = coroutineRule.runBlockingTest {
         mockRouteOptionsResult(successFromResult)
         addRerouteStateObserver()
+        addRerouteStateV2Observer()
         val routes = listOf(
             mockk<NavigationRoute> {
                 every {
@@ -209,10 +228,14 @@ class MapboxRerouteControllerTest {
             )
         } returns 1L
 
-        rerouteController.rerouteOnDeviation(internalRouteCallback)
+        rerouteController.rerouteOnDeviation(internalDeviationRouteCallback)
         routeRequestCallback.captured.onRoutesReady(routes, origin)
 
-        verify(exactly = 1) { internalRouteCallback.onNewRoutes(RerouteResult(routes, 0, origin)) }
+        verify(exactly = 1) {
+            internalDeviationRouteCallback.onNewRoutes(
+                RerouteResult(routes, 0, origin),
+            )
+        }
         verify(exactly = 1) {
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
         }
@@ -231,9 +254,88 @@ class MapboxRerouteControllerTest {
     }
 
     @Test
+    fun reroute_on_deviation_success_route_accepted() = coroutineRule.runBlockingTest {
+        mockRouteOptionsResult(successFromResult)
+        addRerouteStateObserver()
+        addRerouteStateV2Observer()
+        val routes = listOf(
+            mockk<NavigationRoute> {
+                every {
+                    directionsRoute
+                } returns MapboxJavaObjectsFactory.directionsRoute(routeOptions = null)
+                every { origin } returns RouterOrigin.ONLINE
+            },
+        )
+        val origin = RouterOrigin.ONLINE
+        val routeRequestCallback = slot<NavigationRouterCallback>()
+        every {
+            directionsSession.requestRoutes(
+                routeOptionsFromSuccessResult,
+                deviationSignature,
+                capture(routeRequestCallback),
+            )
+        } returns 1L
+        every { internalDeviationRouteCallback.onNewRoutes(any()) } returns true
+
+        rerouteController.rerouteOnDeviation(internalDeviationRouteCallback)
+        routeRequestCallback.captured.onRoutesReady(routes, origin)
+
+        verify(exactly = 1) {
+            internalDeviationRouteCallback.onNewRoutes(RerouteResult(routes, 0, origin))
+        }
+        verifyOrder {
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.FetchingRoute())
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.RouteFetched(origin))
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Deviation.ApplyingRoute())
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+        }
+    }
+
+    @Test
+    fun reroute_on_deviation_success_route_ignored() = coroutineRule.runBlockingTest {
+        mockRouteOptionsResult(successFromResult)
+        addRerouteStateObserver()
+        addRerouteStateV2Observer()
+        val routes = listOf(
+            mockk<NavigationRoute> {
+                every {
+                    directionsRoute
+                } returns MapboxJavaObjectsFactory.directionsRoute(routeOptions = null)
+                every { origin } returns RouterOrigin.ONLINE
+            },
+        )
+        val origin = RouterOrigin.ONLINE
+        val routeRequestCallback = slot<NavigationRouterCallback>()
+        every {
+            directionsSession.requestRoutes(
+                routeOptionsFromSuccessResult,
+                deviationSignature,
+                capture(routeRequestCallback),
+            )
+        } returns 1L
+        every { internalDeviationRouteCallback.onNewRoutes(any()) } returns false
+
+        rerouteController.rerouteOnDeviation(internalDeviationRouteCallback)
+        routeRequestCallback.captured.onRoutesReady(routes, origin)
+
+        verify(exactly = 1) {
+            internalDeviationRouteCallback.onNewRoutes(RerouteResult(routes, 0, origin))
+        }
+        verifyOrder {
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.FetchingRoute())
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.RouteFetched(origin))
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Deviation.RouteIgnored())
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+        }
+    }
+
+    @Test
     fun app_triggered_reroute_success() = coroutineRule.runBlockingTest {
         mockRouteOptionsResult(successFromResult)
         addRerouteStateObserver()
+        addRerouteStateV2Observer()
         val routes = listOf(
             mockk<NavigationRoute> {
                 every {
@@ -270,10 +372,16 @@ class MapboxRerouteControllerTest {
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.RouteFetched(origin))
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
         }
+        verifyOrder {
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.FetchingRoute())
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.RouteFetched(origin))
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+        }
     }
 
     @Test
-    fun reroute_success_from_alternative_directions_api_routes() {
+    fun reroute_success_from_alternative_directions_api_routes_route_accepted() {
         mockkStatic(
             NavigationRoute::routerOrigin,
         ) {
@@ -313,14 +421,15 @@ class MapboxRerouteControllerTest {
 
             val slotRerouteResult = slot<RerouteResult>()
             every {
-                internalRouteCallback.onNewRoutes(capture(slotRerouteResult))
-            } just runs
+                internalDeviationRouteCallback.onNewRoutes(capture(slotRerouteResult))
+            } returns true
             addRerouteStateObserver()
+            addRerouteStateV2Observer()
 
-            rerouteController.rerouteOnDeviation(internalRouteCallback)
+            rerouteController.rerouteOnDeviation(internalDeviationRouteCallback)
 
             verify(exactly = 1) {
-                internalRouteCallback.onNewRoutes(any())
+                internalDeviationRouteCallback.onNewRoutes(any())
             }
             assertEquals(expectedRoutes, slotRerouteResult.captured.routes)
             assertEquals(initialLegIndex, slotRerouteResult.captured.initialLegIndex)
@@ -332,10 +441,107 @@ class MapboxRerouteControllerTest {
                 primaryRerouteObserver.onRerouteStateChanged(
                     RerouteState.RouteFetched(RouterOrigin.ONLINE),
                 )
-                internalRouteCallback.onNewRoutes(
+                internalDeviationRouteCallback.onNewRoutes(
                     RerouteResult(expectedRoutes, initialLegIndex, RouterOrigin.ONLINE),
                 )
                 primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
+            }
+            verifyOrder {
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.FetchingRoute())
+                primaryRerouteV2Observer.onRerouteStateChanged(
+                    RerouteStateV2.RouteFetched(RouterOrigin.ONLINE),
+                )
+                internalDeviationRouteCallback.onNewRoutes(
+                    RerouteResult(expectedRoutes, initialLegIndex, RouterOrigin.ONLINE),
+                )
+                primaryRerouteV2Observer.onRerouteStateChanged(
+                    RerouteStateV2.Deviation.ApplyingRoute(),
+                )
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+            }
+        }
+    }
+
+    @Test
+    fun reroute_success_from_alternative_directions_api_routes_route_ignored() {
+        mockkStatic(
+            NavigationRoute::routerOrigin,
+        ) {
+            val initialLegIndex = 1
+            val routeId1 = "id_1"
+            val routeId2 = "id_2"
+            val mockRoutes = listOf<NavigationRoute>(
+                mockk {
+                    every { id } returns routeId1
+                    every {
+                        routerOrigin
+                    } throws IllegalStateException(
+                        "route 1 origin mustn't be invoked: " +
+                            "it removes from list and is not mapped",
+                    )
+                    every { responseOriginAPI } returns ResponseOriginAPI.DIRECTIONS_API
+                },
+                mockk {
+                    every { id } returns routeId2
+                    every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
+                    every { responseOriginAPI } returns ResponseOriginAPI.DIRECTIONS_API
+                },
+            )
+            val expectedRoutes = listOf(mockRoutes[1], mockRoutes[0])
+            every { directionsSession.routes } returns mockRoutes
+            every { tripSession.getRouteProgress() } returns mockk(relaxed = true) {
+                every { routeAlternativeId } returns routeId2
+                every { currentRouteGeometryIndex } returns 40
+                every { currentLegProgress } returns mockk(relaxed = true) {
+                    every { legIndex } returns 2
+                    every { geometryIndex } returns 10
+                }
+                every {
+                    internalAlternativeRouteIndices()
+                } returns mapOf(routeId2 to mockk { every { legIndex } returns initialLegIndex })
+            }
+
+            val slotRerouteResult = slot<RerouteResult>()
+            every {
+                internalDeviationRouteCallback.onNewRoutes(capture(slotRerouteResult))
+            } returns false
+            addRerouteStateObserver()
+            addRerouteStateV2Observer()
+
+            rerouteController.rerouteOnDeviation(internalDeviationRouteCallback)
+
+            verify(exactly = 1) {
+                internalDeviationRouteCallback.onNewRoutes(any())
+            }
+            assertEquals(expectedRoutes, slotRerouteResult.captured.routes)
+            assertEquals(initialLegIndex, slotRerouteResult.captured.initialLegIndex)
+            assertEquals(RouterOrigin.ONLINE, slotRerouteResult.captured.origin)
+
+            verifyOrder {
+                primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
+                primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
+                primaryRerouteObserver.onRerouteStateChanged(
+                    RerouteState.RouteFetched(RouterOrigin.ONLINE),
+                )
+                internalDeviationRouteCallback.onNewRoutes(
+                    RerouteResult(expectedRoutes, initialLegIndex, RouterOrigin.ONLINE),
+                )
+                primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
+            }
+            verifyOrder {
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.FetchingRoute())
+                primaryRerouteV2Observer.onRerouteStateChanged(
+                    RerouteStateV2.RouteFetched(RouterOrigin.ONLINE),
+                )
+                internalDeviationRouteCallback.onNewRoutes(
+                    RerouteResult(expectedRoutes, initialLegIndex, RouterOrigin.ONLINE),
+                )
+                primaryRerouteV2Observer.onRerouteStateChanged(
+                    RerouteStateV2.Deviation.RouteIgnored(),
+                )
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
             }
         }
     }
@@ -440,6 +646,7 @@ class MapboxRerouteControllerTest {
             suspendCoroutine { continuation ->
                 rerouteController.rerouteOnDeviation {
                     continuation.resume(it)
+                    true
                 }
             }
         }
@@ -456,6 +663,7 @@ class MapboxRerouteControllerTest {
             suspendCoroutine { continuation ->
                 rerouteController.rerouteOnDeviation {
                     continuation.resume(it)
+                    true
                 }
             }
         }
@@ -466,7 +674,7 @@ class MapboxRerouteControllerTest {
     }
 
     @Test
-    fun reroute_success_from_alternative_mixed_routes() {
+    fun reroute_success_from_alternative_mixed_routes_route_accepted() {
         mockkStatic(
             NavigationRoute::routerOrigin,
         ) {
@@ -506,14 +714,15 @@ class MapboxRerouteControllerTest {
 
             val slotRerouteResult = slot<RerouteResult>()
             every {
-                internalRouteCallback.onNewRoutes(capture(slotRerouteResult))
-            } just runs
+                internalDeviationRouteCallback.onNewRoutes(capture(slotRerouteResult))
+            } returns true
             addRerouteStateObserver()
+            addRerouteStateV2Observer()
 
-            rerouteController.rerouteOnDeviation(internalRouteCallback)
+            rerouteController.rerouteOnDeviation(internalDeviationRouteCallback)
 
             verify(exactly = 1) {
-                internalRouteCallback.onNewRoutes(any())
+                internalDeviationRouteCallback.onNewRoutes(any())
             }
             assertEquals(expectedRoutes, slotRerouteResult.captured.routes)
             assertEquals(initialLegIndex, slotRerouteResult.captured.initialLegIndex)
@@ -525,16 +734,115 @@ class MapboxRerouteControllerTest {
                 primaryRerouteObserver.onRerouteStateChanged(
                     RerouteState.RouteFetched(RouterOrigin.ONLINE),
                 )
-                internalRouteCallback.onNewRoutes(
+                internalDeviationRouteCallback.onNewRoutes(
                     RerouteResult(expectedRoutes, initialLegIndex, RouterOrigin.ONLINE),
                 )
                 primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
+            }
+
+            verifyOrder {
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.FetchingRoute())
+                primaryRerouteV2Observer.onRerouteStateChanged(
+                    RerouteStateV2.RouteFetched(RouterOrigin.ONLINE),
+                )
+                internalDeviationRouteCallback.onNewRoutes(
+                    RerouteResult(expectedRoutes, initialLegIndex, RouterOrigin.ONLINE),
+                )
+                primaryRerouteV2Observer.onRerouteStateChanged(
+                    RerouteStateV2.Deviation.ApplyingRoute(),
+                )
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
             }
         }
     }
 
     @Test
-    fun reroute_success_from_alternative_no_leg_progress() {
+    fun reroute_success_from_alternative_mixed_routes_route_ignored() {
+        mockkStatic(
+            NavigationRoute::routerOrigin,
+        ) {
+            val initialLegIndex = 1
+            val routeId1 = "id_1"
+            val routeId2 = "id_2"
+            val mockRoutes = listOf<NavigationRoute>(
+                mockk {
+                    every { id } returns routeId1
+                    every {
+                        routerOrigin
+                    } throws IllegalStateException(
+                        "route 1 origin mustn't be invoked: " +
+                            "it removes from list and is not mapped",
+                    )
+                    every { responseOriginAPI } returns ResponseOriginAPI.MAP_MATCHING_API
+                },
+                mockk {
+                    every { id } returns routeId2
+                    every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
+                    every { responseOriginAPI } returns ResponseOriginAPI.DIRECTIONS_API
+                },
+            )
+            val expectedRoutes = listOf(mockRoutes[1], mockRoutes[0])
+            every { directionsSession.routes } returns mockRoutes
+            every { tripSession.getRouteProgress() } returns mockk(relaxed = true) {
+                every { routeAlternativeId } returns routeId2
+                every { currentRouteGeometryIndex } returns 40
+                every { currentLegProgress } returns mockk(relaxed = true) {
+                    every { legIndex } returns 2
+                    every { geometryIndex } returns 10
+                }
+                every {
+                    internalAlternativeRouteIndices()
+                } returns mapOf(routeId2 to mockk { every { legIndex } returns initialLegIndex })
+            }
+
+            val slotRerouteResult = slot<RerouteResult>()
+            every {
+                internalDeviationRouteCallback.onNewRoutes(capture(slotRerouteResult))
+            } returns false
+            addRerouteStateObserver()
+            addRerouteStateV2Observer()
+
+            rerouteController.rerouteOnDeviation(internalDeviationRouteCallback)
+
+            verify(exactly = 1) {
+                internalDeviationRouteCallback.onNewRoutes(any())
+            }
+            assertEquals(expectedRoutes, slotRerouteResult.captured.routes)
+            assertEquals(initialLegIndex, slotRerouteResult.captured.initialLegIndex)
+            assertEquals(RouterOrigin.ONLINE, slotRerouteResult.captured.origin)
+
+            verifyOrder {
+                primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
+                primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
+                primaryRerouteObserver.onRerouteStateChanged(
+                    RerouteState.RouteFetched(RouterOrigin.ONLINE),
+                )
+                internalDeviationRouteCallback.onNewRoutes(
+                    RerouteResult(expectedRoutes, initialLegIndex, RouterOrigin.ONLINE),
+                )
+                primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
+            }
+
+            verifyOrder {
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.FetchingRoute())
+                primaryRerouteV2Observer.onRerouteStateChanged(
+                    RerouteStateV2.RouteFetched(RouterOrigin.ONLINE),
+                )
+                internalDeviationRouteCallback.onNewRoutes(
+                    RerouteResult(expectedRoutes, initialLegIndex, RouterOrigin.ONLINE),
+                )
+                primaryRerouteV2Observer.onRerouteStateChanged(
+                    RerouteStateV2.Deviation.RouteIgnored(),
+                )
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+            }
+        }
+    }
+
+    @Test
+    fun reroute_success_from_alternative_no_leg_progress_route_accepted() {
         mockkStatic(
             NavigationRoute::routerOrigin,
         ) {
@@ -569,14 +877,15 @@ class MapboxRerouteControllerTest {
             }
             val slotRerouteResult = slot<RerouteResult>()
             every {
-                internalRouteCallback.onNewRoutes(capture(slotRerouteResult))
-            } just runs
+                internalDeviationRouteCallback.onNewRoutes(capture(slotRerouteResult))
+            } returns true
             addRerouteStateObserver()
+            addRerouteStateV2Observer()
 
-            rerouteController.rerouteOnDeviation(internalRouteCallback)
+            rerouteController.rerouteOnDeviation(internalDeviationRouteCallback)
 
             verify(exactly = 1) {
-                internalRouteCallback.onNewRoutes(any())
+                internalDeviationRouteCallback.onNewRoutes(any())
             }
             assertEquals(expectedRoutes, slotRerouteResult.captured.routes)
             assertEquals(1, slotRerouteResult.captured.initialLegIndex)
@@ -588,16 +897,108 @@ class MapboxRerouteControllerTest {
                 primaryRerouteObserver.onRerouteStateChanged(
                     RerouteState.RouteFetched(RouterOrigin.ONLINE),
                 )
-                internalRouteCallback.onNewRoutes(
+                internalDeviationRouteCallback.onNewRoutes(
                     RerouteResult(expectedRoutes, 1, RouterOrigin.ONLINE),
                 )
                 primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
+            }
+            verifyOrder {
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.FetchingRoute())
+                primaryRerouteV2Observer.onRerouteStateChanged(
+                    RerouteStateV2.RouteFetched(RouterOrigin.ONLINE),
+                )
+                internalDeviationRouteCallback.onNewRoutes(
+                    RerouteResult(expectedRoutes, 1, RouterOrigin.ONLINE),
+                )
+                primaryRerouteV2Observer.onRerouteStateChanged(
+                    RerouteStateV2.Deviation.ApplyingRoute(),
+                )
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
             }
         }
     }
 
     @Test
-    fun reroute_success_from_alternative_no_alternative_index() {
+    fun reroute_success_from_alternative_no_leg_progress_route_ignored() {
+        mockkStatic(
+            NavigationRoute::routerOrigin,
+        ) {
+            val routeId1 = "id_1"
+            val routeId2 = "id_2"
+            val mockRoutes = listOf<NavigationRoute>(
+                mockk {
+                    every { id } returns routeId1
+                    every {
+                        routerOrigin
+                    } throws IllegalStateException(
+                        "route 1 origin mustn't be invoked: " +
+                            "it removes from list and is not mapped",
+                    )
+                    every { responseOriginAPI } returns ResponseOriginAPI.DIRECTIONS_API
+                },
+                mockk {
+                    every { id } returns routeId2
+                    every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
+                    every { responseOriginAPI } returns ResponseOriginAPI.DIRECTIONS_API
+                },
+            )
+            val expectedRoutes = listOf(mockRoutes[1], mockRoutes[0])
+            every { directionsSession.routes } returns mockRoutes
+            every { tripSession.getRouteProgress() } returns mockk(relaxed = true) {
+                every { routeAlternativeId } returns routeId2
+                every { currentRouteGeometryIndex } returns 40
+                every { currentLegProgress } returns null
+                every {
+                    internalAlternativeRouteIndices()
+                } returns mapOf(routeId2 to mockk { every { legIndex } returns 1 })
+            }
+            val slotRerouteResult = slot<RerouteResult>()
+            every {
+                internalDeviationRouteCallback.onNewRoutes(capture(slotRerouteResult))
+            } returns false
+            addRerouteStateObserver()
+            addRerouteStateV2Observer()
+
+            rerouteController.rerouteOnDeviation(internalDeviationRouteCallback)
+
+            verify(exactly = 1) {
+                internalDeviationRouteCallback.onNewRoutes(any())
+            }
+            assertEquals(expectedRoutes, slotRerouteResult.captured.routes)
+            assertEquals(1, slotRerouteResult.captured.initialLegIndex)
+            assertEquals(RouterOrigin.ONLINE, slotRerouteResult.captured.origin)
+
+            verifyOrder {
+                primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
+                primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
+                primaryRerouteObserver.onRerouteStateChanged(
+                    RerouteState.RouteFetched(RouterOrigin.ONLINE),
+                )
+                internalDeviationRouteCallback.onNewRoutes(
+                    RerouteResult(expectedRoutes, 1, RouterOrigin.ONLINE),
+                )
+                primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
+            }
+            verifyOrder {
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.FetchingRoute())
+                primaryRerouteV2Observer.onRerouteStateChanged(
+                    RerouteStateV2.RouteFetched(RouterOrigin.ONLINE),
+                )
+                internalDeviationRouteCallback.onNewRoutes(
+                    RerouteResult(expectedRoutes, 1, RouterOrigin.ONLINE),
+                )
+                primaryRerouteV2Observer.onRerouteStateChanged(
+                    RerouteStateV2.Deviation.RouteIgnored(),
+                )
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+            }
+        }
+    }
+
+    @Test
+    fun reroute_success_from_alternative_no_alternative_index_route_accepted() {
         mockkStatic(
             NavigationRoute::routerOrigin,
         ) {
@@ -641,14 +1042,15 @@ class MapboxRerouteControllerTest {
             }
             val slotRerouteResult = slot<RerouteResult>()
             every {
-                internalRouteCallback.onNewRoutes(capture(slotRerouteResult))
-            } just runs
+                internalDeviationRouteCallback.onNewRoutes(capture(slotRerouteResult))
+            } returns true
             addRerouteStateObserver()
+            addRerouteStateV2Observer()
 
-            rerouteController.rerouteOnDeviation(internalRouteCallback)
+            rerouteController.rerouteOnDeviation(internalDeviationRouteCallback)
 
             verify(exactly = 1) {
-                internalRouteCallback.onNewRoutes(any())
+                internalDeviationRouteCallback.onNewRoutes(any())
             }
             assertEquals(expectedRoutes, slotRerouteResult.captured.routes)
             assertEquals(0, slotRerouteResult.captured.initialLegIndex)
@@ -660,10 +1062,111 @@ class MapboxRerouteControllerTest {
                 primaryRerouteObserver.onRerouteStateChanged(
                     RerouteState.RouteFetched(RouterOrigin.ONLINE),
                 )
-                internalRouteCallback.onNewRoutes(
+                internalDeviationRouteCallback.onNewRoutes(
                     RerouteResult(expectedRoutes, 0, RouterOrigin.ONLINE),
                 )
                 primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
+            }
+            verifyOrder {
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.FetchingRoute())
+                primaryRerouteV2Observer.onRerouteStateChanged(
+                    RerouteStateV2.RouteFetched(RouterOrigin.ONLINE),
+                )
+                internalDeviationRouteCallback.onNewRoutes(
+                    RerouteResult(expectedRoutes, 0, RouterOrigin.ONLINE),
+                )
+                primaryRerouteV2Observer.onRerouteStateChanged(
+                    RerouteStateV2.Deviation.ApplyingRoute(),
+                )
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+            }
+        }
+    }
+
+    @Test
+    fun reroute_success_from_alternative_no_alternative_index_route_ignored() {
+        mockkStatic(
+            NavigationRoute::routerOrigin,
+        ) {
+            val routeId1 = "id_1"
+            val routeId2 = "id_2"
+            val routeId3 = "id_3"
+            val mockRoutes = listOf<NavigationRoute>(
+                mockk {
+                    every { id } returns routeId1
+                    every {
+                        routerOrigin
+                    } throws IllegalStateException(
+                        "route 1 origin mustn't be invoked: " +
+                            "it removes from list and is not mapped",
+                    )
+                    every { responseOriginAPI } returns ResponseOriginAPI.DIRECTIONS_API
+                },
+                mockk {
+                    every { id } returns routeId2
+                    every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
+                    every { responseOriginAPI } returns ResponseOriginAPI.DIRECTIONS_API
+                },
+                mockk {
+                    every { id } returns routeId3
+                    every { routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
+                    every { responseOriginAPI } returns ResponseOriginAPI.DIRECTIONS_API
+                },
+            )
+            val expectedRoutes = listOf(mockRoutes[2], mockRoutes[0], mockRoutes[1])
+            every { directionsSession.routes } returns mockRoutes
+            every { tripSession.getRouteProgress() } returns mockk(relaxed = true) {
+                every { routeAlternativeId } returns routeId3
+                every { currentRouteGeometryIndex } returns 40
+                every { currentLegProgress } returns mockk(relaxed = true) {
+                    every { legIndex } returns 2
+                    every { geometryIndex } returns 10
+                }
+                every {
+                    internalAlternativeRouteIndices()
+                } returns mapOf("bad_id" to mockk { every { legIndex } returns 1 })
+            }
+            val slotRerouteResult = slot<RerouteResult>()
+            every {
+                internalDeviationRouteCallback.onNewRoutes(capture(slotRerouteResult))
+            } returns false
+            addRerouteStateObserver()
+            addRerouteStateV2Observer()
+
+            rerouteController.rerouteOnDeviation(internalDeviationRouteCallback)
+
+            verify(exactly = 1) {
+                internalDeviationRouteCallback.onNewRoutes(any())
+            }
+            assertEquals(expectedRoutes, slotRerouteResult.captured.routes)
+            assertEquals(0, slotRerouteResult.captured.initialLegIndex)
+            assertEquals(RouterOrigin.ONLINE, slotRerouteResult.captured.origin)
+
+            verifyOrder {
+                primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
+                primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
+                primaryRerouteObserver.onRerouteStateChanged(
+                    RerouteState.RouteFetched(RouterOrigin.ONLINE),
+                )
+                internalDeviationRouteCallback.onNewRoutes(
+                    RerouteResult(expectedRoutes, 0, RouterOrigin.ONLINE),
+                )
+                primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
+            }
+            verifyOrder {
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.FetchingRoute())
+                primaryRerouteV2Observer.onRerouteStateChanged(
+                    RerouteStateV2.RouteFetched(RouterOrigin.ONLINE),
+                )
+                internalDeviationRouteCallback.onNewRoutes(
+                    RerouteResult(expectedRoutes, 0, RouterOrigin.ONLINE),
+                )
+                primaryRerouteV2Observer.onRerouteStateChanged(
+                    RerouteStateV2.Deviation.RouteIgnored(),
+                )
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
             }
         }
     }
@@ -671,6 +1174,7 @@ class MapboxRerouteControllerTest {
     @Test
     fun reroute_unsuccess() {
         addRerouteStateObserver()
+        addRerouteStateV2Observer()
         mockRouteOptionsResult(successFromResult)
         val routeRequestCallback = slot<NavigationRouterCallback>()
         every {
@@ -681,7 +1185,7 @@ class MapboxRerouteControllerTest {
             )
         } returns 1L
 
-        rerouteController.rerouteOnDeviation(internalRouteCallback)
+        rerouteController.rerouteOnDeviation(internalDeviationRouteCallback)
         routeRequestCallback.captured.onFailure(mockk(), MapboxJavaObjectsFactory.routeOptions())
 
         verify(exactly = 1) {
@@ -698,6 +1202,12 @@ class MapboxRerouteControllerTest {
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
             primaryRerouteObserver.onRerouteStateChanged(ofType<RerouteState.Failed>())
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
+        }
+        verifyOrder {
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.FetchingRoute())
+            primaryRerouteV2Observer.onRerouteStateChanged(ofType<RerouteStateV2.Failed>())
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
         }
     }
 
@@ -720,11 +1230,12 @@ class MapboxRerouteControllerTest {
         }
 
         addRerouteStateObserver()
+        addRerouteStateV2Observer()
 
-        rerouteController.rerouteOnDeviation(internalRouteCallback)
+        rerouteController.rerouteOnDeviation(internalDeviationRouteCallback)
 
         verify(exactly = 0) {
-            internalRouteCallback.onNewRoutes(any())
+            internalDeviationRouteCallback.onNewRoutes(any())
         }
 
         verifyOrder {
@@ -735,6 +1246,14 @@ class MapboxRerouteControllerTest {
             )
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
         }
+        verifyOrder {
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.FetchingRoute())
+            primaryRerouteV2Observer.onRerouteStateChanged(
+                match { it is RerouteStateV2.Failed },
+            )
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+        }
     }
 
     @Test
@@ -742,6 +1261,7 @@ class MapboxRerouteControllerTest {
         coroutineRule.runBlockingTest {
             mockRouteOptionsResult(successFromResult)
             addRerouteStateObserver()
+            addRerouteStateV2Observer()
             val routes = listOf(
                 mockk<NavigationRoute> {
                     every { id } returns "id_1"
@@ -764,11 +1284,11 @@ class MapboxRerouteControllerTest {
                 rerouteOptions.rerouteStrategyForMapMatchedRoutes
             } returns NavigateToFinalDestination
 
-            rerouteController.rerouteOnDeviation(internalRouteCallback)
+            rerouteController.rerouteOnDeviation(internalDeviationRouteCallback)
             routeRequestCallback.captured.onRoutesReady(routes, origin)
 
             verify(exactly = 1) {
-                internalRouteCallback.onNewRoutes(RerouteResult(routes, 0, origin))
+                internalDeviationRouteCallback.onNewRoutes(RerouteResult(routes, 0, origin))
             }
             verify(exactly = 1) {
                 primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
@@ -785,12 +1305,19 @@ class MapboxRerouteControllerTest {
                 primaryRerouteObserver.onRerouteStateChanged(RerouteState.RouteFetched(origin))
                 primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
             }
+            verifyOrder {
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.FetchingRoute())
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.RouteFetched(origin))
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+            }
         }
 
     @Test
     fun reroute_request_canceled_external() {
         mockRouteOptionsResult(successFromResult)
         addRerouteStateObserver()
+        addRerouteStateV2Observer()
         val routeRequestCallback = slot<NavigationRouterCallback>()
         every {
             directionsSession.requestRoutes(
@@ -800,7 +1327,7 @@ class MapboxRerouteControllerTest {
             )
         } returns 1L
 
-        rerouteController.rerouteOnDeviation(internalRouteCallback)
+        rerouteController.rerouteOnDeviation(internalDeviationRouteCallback)
         routeRequestCallback.captured.onCanceled(
             MapboxJavaObjectsFactory.routeOptions(),
             RouterOrigin.ONLINE,
@@ -821,11 +1348,18 @@ class MapboxRerouteControllerTest {
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.Interrupted)
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
         }
+        verifyOrder {
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.FetchingRoute())
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Interrupted())
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+        }
     }
 
     @Test
     fun reroute_calls_interrupt_if_currently_fetching() = coroutineRule.runBlockingTest {
         addRerouteStateObserver()
+        addRerouteStateV2Observer()
         val routeOptions1 = MapboxJavaObjectsFactory.routeOptions(
             coordinates = listOf(Point.fromLngLat(1.0, 2.0), Point.fromLngLat(3.0, 4.0)),
         )
@@ -852,13 +1386,13 @@ class MapboxRerouteControllerTest {
         } returns 2L
 
         mockRouteOptionsResult(updaterSuccess1)
-        rerouteController.rerouteOnDeviation(internalRouteCallback)
+        rerouteController.rerouteOnDeviation(internalDeviationRouteCallback)
         pauseDispatcher {
             // this ensure that we don't run coroutines synchronously that could
             // make the test pass even if state changes were scheduled back to the message queue
             // in an incorrect order
             mockRouteOptionsResult(updaterSuccess2)
-            rerouteController.rerouteOnDeviation(internalRouteCallback)
+            rerouteController.rerouteOnDeviation(internalDeviationRouteCallback)
             routeRequestCallback1.captured.onCanceled(routeOptions1, RouterOrigin.ONLINE)
         }
         verify(exactly = 0) { directionsSession.cancelRouteRequest(1L) }
@@ -869,12 +1403,19 @@ class MapboxRerouteControllerTest {
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.Interrupted)
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
         }
+        verifyOrder {
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.FetchingRoute())
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Interrupted())
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+        }
     }
 
     @Test
     fun reroute_only_calls_interrupt_if_currently_fetching() {
         mockRouteOptionsResult(successFromResult)
         addRerouteStateObserver()
+        addRerouteStateV2Observer()
         val routeRequestCallback = slot<NavigationRouterCallback>()
         every {
             directionsSession.requestRoutes(
@@ -884,7 +1425,7 @@ class MapboxRerouteControllerTest {
             )
         } returns 1L
 
-        rerouteController.rerouteOnDeviation(internalRouteCallback)
+        rerouteController.rerouteOnDeviation(internalDeviationRouteCallback)
         routeRequestCallback.captured.onRoutesReady(
             listOf(mockk(relaxed = true)),
             RouterOrigin.ONLINE,
@@ -895,12 +1436,16 @@ class MapboxRerouteControllerTest {
         verify(exactly = 0) {
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.Interrupted)
         }
+        verify(exactly = 0) {
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Interrupted())
+        }
     }
 
     @Test
     fun interrupt_route_request() {
         mockRouteOptionsResult(successFromResult)
         addRerouteStateObserver()
+        addRerouteStateV2Observer()
         val routeRequestCallback = slot<NavigationRouterCallback>()
         every {
             directionsSession.requestRoutes(
@@ -918,7 +1463,7 @@ class MapboxRerouteControllerTest {
             )
         }
 
-        rerouteController.rerouteOnDeviation(internalRouteCallback)
+        rerouteController.rerouteOnDeviation(internalDeviationRouteCallback)
         rerouteController.interrupt()
 
         verify(exactly = 1) {
@@ -936,12 +1481,19 @@ class MapboxRerouteControllerTest {
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.Interrupted)
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
         }
+        verifyOrder {
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.FetchingRoute())
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Interrupted())
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+        }
     }
 
     @Test
     fun interrupt_route_request_with_pending_callback() = coroutineRule.runBlockingTest {
         mockRouteOptionsResult(successFromResult)
         addRerouteStateObserver()
+        addRerouteStateV2Observer()
         val routeRequestCallback = slot<NavigationRouterCallback>()
         every {
             directionsSession.requestRoutes(
@@ -951,7 +1503,7 @@ class MapboxRerouteControllerTest {
             )
         } returns 1L
 
-        rerouteController.rerouteOnDeviation(internalRouteCallback)
+        rerouteController.rerouteOnDeviation(internalDeviationRouteCallback)
         rerouteController.interrupt()
 
         routeRequestCallback.captured.onRoutesReady(
@@ -959,13 +1511,14 @@ class MapboxRerouteControllerTest {
             RouterOrigin.ONLINE,
         )
 
-        coVerify(exactly = 0) { internalRouteCallback.onNewRoutes(any()) }
+        coVerify(exactly = 0) { internalDeviationRouteCallback.onNewRoutes(any()) }
     }
 
     @Test
     fun cancelling_scope_changes_state_to_interrupted() = coroutineRule.runBlockingTest {
         mockRouteOptionsResult(successFromResult)
         addRerouteStateObserver()
+        addRerouteStateV2Observer()
         val routeRequestCallback = slot<NavigationRouterCallback>()
         every {
             directionsSession.requestRoutes(
@@ -975,7 +1528,7 @@ class MapboxRerouteControllerTest {
             )
         } returns 1L
 
-        rerouteController.rerouteOnDeviation(internalRouteCallback)
+        rerouteController.rerouteOnDeviation(internalDeviationRouteCallback)
         // we don't invoke onCancel callback here
         rerouteController.interrupt()
 
@@ -984,6 +1537,11 @@ class MapboxRerouteControllerTest {
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.Interrupted)
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
         }
+        verifyOrder {
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.FetchingRoute())
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Interrupted())
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+        }
     }
 
     @Test
@@ -991,6 +1549,7 @@ class MapboxRerouteControllerTest {
         coroutineRule.runBlockingTest {
             mockRouteOptionsResult(successFromResult)
             addRerouteStateObserver()
+            addRerouteStateV2Observer()
             val routeRequestCallback = slot<NavigationRouterCallback>()
             every {
                 directionsSession.requestRoutes(
@@ -1008,7 +1567,7 @@ class MapboxRerouteControllerTest {
                 )
             }
 
-            rerouteController.rerouteOnDeviation(internalRouteCallback)
+            rerouteController.rerouteOnDeviation(internalDeviationRouteCallback)
             rerouteController.interrupt()
 
             verifyOrder {
@@ -1019,6 +1578,14 @@ class MapboxRerouteControllerTest {
             verify(exactly = 1) {
                 primaryRerouteObserver.onRerouteStateChanged(RerouteState.Interrupted)
             }
+            verifyOrder {
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.FetchingRoute())
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Interrupted())
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+            }
+            verify(exactly = 1) {
+                primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Interrupted())
+            }
         }
 
     @Test
@@ -1026,15 +1593,22 @@ class MapboxRerouteControllerTest {
         coroutineRule.runBlockingTest {
             mockRouteOptionsResult(errorFromResult)
             addRerouteStateObserver()
+            addRerouteStateV2Observer()
 
             pauseDispatcher {
-                rerouteController.rerouteOnDeviation(internalRouteCallback)
+                rerouteController.rerouteOnDeviation(internalDeviationRouteCallback)
 
                 verifySequence {
                     primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
                     primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
                     primaryRerouteObserver.onRerouteStateChanged(ofType<RerouteState.Failed>())
                     primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
+                }
+                verifySequence {
+                    primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+                    primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.FetchingRoute())
+                    primaryRerouteV2Observer.onRerouteStateChanged(ofType<RerouteStateV2.Failed>())
+                    primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
                 }
             }
         }
@@ -1047,15 +1621,23 @@ class MapboxRerouteControllerTest {
                 RouteOptionsUpdater.RouteOptionsResult.Error(mockk(), preRouterFailure),
             )
             addRerouteStateObserver()
+            addRerouteStateV2Observer()
 
             pauseDispatcher {
                 rerouteController.reroute(routeCallback)
 
                 val states = mutableListOf<RerouteState>()
+                val statesV2 = mutableListOf<RerouteStateV2>()
                 verify { primaryRerouteObserver.onRerouteStateChanged(capture(states)) }
+                verify { primaryRerouteV2Observer.onRerouteStateChanged(capture(statesV2)) }
                 assertTrue(
                     states.any {
                         it is RerouteState.Failed && preRouterFailure in it.preRouterReasons
+                    },
+                )
+                assertTrue(
+                    statesV2.any {
+                        it is RerouteStateV2.Failed && preRouterFailure in it.preRouterReasons
                     },
                 )
             }
@@ -1068,14 +1650,20 @@ class MapboxRerouteControllerTest {
                 RouteOptionsUpdater.RouteOptionsResult.Error(mockk()),
             )
             addRerouteStateObserver()
+            addRerouteStateV2Observer()
 
             pauseDispatcher {
                 rerouteController.reroute(routeCallback)
 
                 val states = mutableListOf<RerouteState>()
+                val statesV2 = mutableListOf<RerouteStateV2>()
                 verify { primaryRerouteObserver.onRerouteStateChanged(capture(states)) }
+                verify { primaryRerouteV2Observer.onRerouteStateChanged(capture(statesV2)) }
                 assertTrue(
                     states.any { it is RerouteState.Failed && it.preRouterReasons.isEmpty() },
+                )
+                assertTrue(
+                    statesV2.any { it is RerouteStateV2.Failed && it.preRouterReasons.isEmpty() },
                 )
             }
         }
@@ -1089,8 +1677,9 @@ class MapboxRerouteControllerTest {
     fun invalid_route_option() {
         mockRouteOptionsResult(errorFromResult)
         addRerouteStateObserver()
+        addRerouteStateV2Observer()
 
-        rerouteController.rerouteOnDeviation(internalRouteCallback)
+        rerouteController.rerouteOnDeviation(internalDeviationRouteCallback)
 
         verify(exactly = 1) {
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
@@ -1106,6 +1695,12 @@ class MapboxRerouteControllerTest {
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.FetchingRoute)
             primaryRerouteObserver.onRerouteStateChanged(ofType<RerouteState.Failed>())
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
+        }
+        verifyOrder {
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.FetchingRoute())
+            primaryRerouteV2Observer.onRerouteStateChanged(ofType<RerouteStateV2.Failed>())
+            primaryRerouteV2Observer.onRerouteStateChanged(RerouteStateV2.Idle())
         }
         verify(exactly = 0) { directionsSession.requestRoutes(any(), any(), any()) }
     }
@@ -1134,6 +1729,7 @@ class MapboxRerouteControllerTest {
             every { directionsSession.getPrimaryRouteOptions() } returns mockRoute
             mockRouteOptionsResult(successFromResult)
             addRerouteStateObserver()
+            addRerouteStateV2Observer()
             every { rerouteOptions.avoidManeuverSeconds } returns secondsRadius
             every {
                 tripSession.locationMatcherResult
@@ -1146,7 +1742,7 @@ class MapboxRerouteControllerTest {
             }
 
             clearMocks(routeOptionsUpdater, answers = false)
-            rerouteController.rerouteOnDeviation(internalRouteCallback)
+            rerouteController.rerouteOnDeviation(internalDeviationRouteCallback)
 
             routeRequestCallback.captured.onRoutesReady(
                 listOf(mockk(relaxed = true)),
@@ -1184,6 +1780,7 @@ class MapboxRerouteControllerTest {
             every { directionsSession.getPrimaryRouteOptions() } returns mockRo
             mockRouteOptionsResult(successFromResult)
             addRerouteStateObserver()
+            addRerouteStateV2Observer()
             every { rerouteOptions.avoidManeuverSeconds } returns 1
             every {
                 tripSession.locationMatcherResult
@@ -1196,7 +1793,7 @@ class MapboxRerouteControllerTest {
             }
 
             clearMocks(routeOptionsUpdater, answers = false)
-            rerouteController.rerouteOnDeviation(internalRouteCallback)
+            rerouteController.rerouteOnDeviation(internalDeviationRouteCallback)
 
             routeRequestCallback.captured.onRoutesReady(
                 listOf(mockk(relaxed = true)),
@@ -1222,10 +1819,25 @@ class MapboxRerouteControllerTest {
         assertFalse(rerouteController.unregisterRerouteStateObserver(primaryRerouteObserver))
     }
 
+    @Test
+    fun add_the_same_observer_v2_twice_and_remove_twice() {
+        assertTrue(addRerouteStateV2Observer())
+        assertFalse(addRerouteStateV2Observer())
+
+        assertTrue(rerouteController.unregisterRerouteStateV2Observer(primaryRerouteV2Observer))
+        assertFalse(rerouteController.unregisterRerouteStateV2Observer(primaryRerouteV2Observer))
+    }
+
     private fun addRerouteStateObserver(
         rerouteStateObserver: RerouteController.RerouteStateObserver = primaryRerouteObserver,
     ): Boolean {
         return rerouteController.registerRerouteStateObserver(rerouteStateObserver)
+    }
+
+    private fun addRerouteStateV2Observer(
+        rerouteStateObserver: RerouteController.RerouteStateV2Observer = primaryRerouteV2Observer,
+    ): Boolean {
+        return rerouteController.registerRerouteStateV2Observer(rerouteStateObserver)
     }
 
     @Test
@@ -1245,7 +1857,7 @@ class MapboxRerouteControllerTest {
             )
         } returns 1L
 
-        rerouteController.rerouteOnDeviation(internalRouteCallback)
+        rerouteController.rerouteOnDeviation(internalDeviationRouteCallback)
         routeRequestCallback.captured.onRoutesReady(
             listOf(mockk(relaxed = true)),
             RouterOrigin.ONLINE,

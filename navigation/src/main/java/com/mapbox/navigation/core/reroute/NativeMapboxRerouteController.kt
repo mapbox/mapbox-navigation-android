@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.reroute
 import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.DataRef
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.RouterFailureFactory
 import com.mapbox.navigation.base.internal.utils.RouteParsingManager
 import com.mapbox.navigation.base.internal.utils.RouteResponseInfo
@@ -33,8 +34,9 @@ import java.net.MalformedURLException
 import java.net.URL
 import java.util.concurrent.CopyOnWriteArraySet
 
-internal typealias UpdateRoutes = (List<NavigationRoute>, legIndex: Int) -> Unit
+internal typealias UpdateRoutes = (List<NavigationRoute>, legIndex: Int) -> Boolean
 
+@OptIn(ExperimentalMapboxNavigationAPI::class)
 internal class NativeMapboxRerouteController(
     rerouteEventsProvider: RerouteEventsProvider,
     private val rerouteController: RerouteControllerInterface,
@@ -48,8 +50,14 @@ internal class NativeMapboxRerouteController(
 ) : InternalRerouteController() {
 
     private val observers = CopyOnWriteArraySet<RerouteStateObserver>()
-    override var state: RerouteState = RerouteState.Idle
-        private set(value) {
+    private val observersV2 = CopyOnWriteArraySet<RerouteStateV2Observer>()
+
+    /**
+     * There's a private backing field for [state] so that it can become val
+     * so that we don't accidentally update it instead of stateV2.
+     */
+    private var deprecatedState: RerouteState = RerouteState.Idle
+        set(value) {
             if (field == value) {
                 return
             }
@@ -58,10 +66,29 @@ internal class NativeMapboxRerouteController(
             observers.forEach { it.onRerouteStateChanged(value) }
         }
 
+    /*
+     Backed by `deprecatedState`. Should not be updated directly - all the internal logic should switch to `stateV2`.
+    */
+    override val state: RerouteState
+        get() = deprecatedState
+
+    override var stateV2: RerouteStateV2 = RerouteStateV2.Idle()
+        private set(value) {
+            if (field == value) {
+                return
+            }
+            logD(TAG) { "RerouteState: $value" }
+            field = value
+            value.toRerouteState()?.let {
+                deprecatedState = it
+            }
+            observersV2.forEach { it.onRerouteStateChanged(value) }
+        }
+
     private val nativeRerouteObserver = object : RerouteObserver {
         override fun onRerouteDetected(routeRequest: String): Boolean {
             logD(TAG) { "onRerouteDetected: $routeRequest" }
-            state = RerouteState.FetchingRoute
+            stateV2 = RerouteStateV2.FetchingRoute()
             return true
         }
 
@@ -74,22 +101,41 @@ internal class NativeMapboxRerouteController(
             scope.launch {
                 logD(TAG) { "Parsing reroute response $routeRequest" }
                 when (val result = handleRerouteResponse(routeResponse, routeRequest, origin)) {
-                    RerouteResponseParsingResult.Error -> {}
-                    is RerouteResponseParsingResult.RoutesAvailable ->
-                        updateRoutes(result.newRoutes, result.primaryRouteLegIndex)
+                    is RerouteResponseParsingResult.Error -> {
+                        stateV2 = RerouteStateV2.Failed(
+                            "Error parsing route",
+                            result.throwable,
+                        )
+                        stateV2 = RerouteStateV2.Idle()
+                    }
+                    is RerouteResponseParsingResult.RoutesAvailable -> {
+                        stateV2 = RerouteStateV2.RouteFetched(
+                            result.newRoutes.firstOrNull()?.origin.orEmpty(),
+                        )
+                        val routeAccepted = updateRoutes(
+                            result.newRoutes,
+                            result.primaryRouteLegIndex,
+                        )
+                        stateV2 = if (routeAccepted) {
+                            RerouteStateV2.Deviation.ApplyingRoute()
+                        } else {
+                            RerouteStateV2.Deviation.RouteIgnored()
+                        }
+                        stateV2 = RerouteStateV2.Idle()
+                    }
                 }
             }
         }
 
         override fun onRerouteCancelled() {
             logD(TAG) { "onRerouteCancelled" }
-            state = RerouteState.Interrupted
-            state = RerouteState.Idle
+            stateV2 = RerouteStateV2.Interrupted()
+            stateV2 = RerouteStateV2.Idle()
         }
 
         override fun onRerouteFailed(error: RerouteError) {
             setRerouteFailureState("onRerouteFailed", error)
-            state = RerouteState.Idle
+            stateV2 = RerouteStateV2.Idle()
         }
 
         override fun onSwitchToAlternative(route: RouteInterface, legIndex: Int) {
@@ -97,12 +143,17 @@ internal class NativeMapboxRerouteController(
             val origin = route.routerOrigin.mapToSdkRouteOrigin()
             val routes = getCurrentRoutes().toMutableList()
             val routeToSwitchTo = routes.firstOrNull { it.id == route.routeId } ?: return
-            state = RerouteState.FetchingRoute
+            stateV2 = RerouteStateV2.FetchingRoute()
             routes.remove(routeToSwitchTo)
             routes.add(0, routeToSwitchTo)
-            state = RerouteState.RouteFetched(origin)
-            updateRoutes(routes, legIndex)
-            state = RerouteState.Idle
+            stateV2 = RerouteStateV2.RouteFetched(origin)
+            val routeAccepted = updateRoutes(routes, legIndex)
+            stateV2 = if (routeAccepted) {
+                RerouteStateV2.Deviation.ApplyingRoute()
+            } else {
+                RerouteStateV2.Deviation.RouteIgnored()
+            }
+            stateV2 = RerouteStateV2.Idle()
         }
     }
 
@@ -116,14 +167,53 @@ internal class NativeMapboxRerouteController(
     }
 
     @Deprecated("native reroute controller identify reroute without external help")
-    override fun rerouteOnDeviation(callback: RoutesCallback) {
+    override fun rerouteOnDeviation(callback: DeviationRoutesCallback) {
     }
 
     // TODO: https://mapbox.atlassian.net/browse/NAVAND-4496
     // test how route replan stops ongoing request
-    override fun rerouteOnParametersChange(callback: RoutesCallback) {
+    override fun rerouteOnParametersChange(callback: RouteReplanRoutesCallback) {
         logI(TAG) { "Forcing reroute because of parameters change" }
-        rerouteDetector.forceReroute(ForceRerouteReason.PARAMETERS_CHANGE)
+        stateV2 = RerouteStateV2.FetchingRoute()
+        rerouteDetector.forceReroute(ForceRerouteReason.PARAMETERS_CHANGE) {
+            logD(TAG) {
+                "Received force reroute on parameters change callback with ${it.value}, ${it.error}"
+            }
+            it.onValue { value ->
+                scope.launch {
+                    val parsingResult = handleRerouteResponse(
+                        value.routeResponse,
+                        value.routeRequest,
+                        value.origin,
+                    )
+                    when (parsingResult) {
+                        is RerouteResponseParsingResult.Error -> {
+                            stateV2 = RerouteStateV2.Failed(
+                                "Error parsing route",
+                                parsingResult.throwable,
+                            )
+                            stateV2 = RerouteStateV2.Idle()
+                        }
+                        is RerouteResponseParsingResult.RoutesAvailable -> {
+                            stateV2 = RerouteStateV2.RouteFetched(
+                                parsingResult.newRoutes.firstOrNull()?.origin.orEmpty(),
+                            )
+                            stateV2 = RerouteStateV2.Idle()
+                            callback.onNewRoutes(
+                                RerouteResult(
+                                    parsingResult.newRoutes,
+                                    parsingResult.primaryRouteLegIndex,
+                                    value.origin.mapToSdkRouteOrigin(),
+                                ),
+                            )
+                        }
+                    }
+                }
+            }.onError { rerouteError ->
+                setRerouteFailureState("User triggered force reroute", rerouteError)
+                stateV2 = RerouteStateV2.Idle()
+            }
+        }
     }
 
     override fun setRerouteOptionsAdapter(rerouteOptionsAdapter: RerouteOptionsAdapter?) {
@@ -138,7 +228,7 @@ internal class NativeMapboxRerouteController(
 
     override fun reroute(callback: RerouteController.RoutesCallback) {
         logI(TAG) { "Forcing reroute because of user request" }
-        state = RerouteState.FetchingRoute
+        stateV2 = RerouteStateV2.FetchingRoute()
         rerouteDetector.forceReroute(ForceRerouteReason.USER_TRIGGERED) {
             logD(TAG) { "Received force reroute callback with ${it.value}, ${it.error}" }
             it.onValue { value ->
@@ -149,17 +239,28 @@ internal class NativeMapboxRerouteController(
                         value.origin,
                     )
                     when (parsingResult) {
-                        RerouteResponseParsingResult.Error -> {}
-                        is RerouteResponseParsingResult.RoutesAvailable ->
+                        is RerouteResponseParsingResult.Error -> {
+                            stateV2 = RerouteStateV2.Failed(
+                                "Error parsing route",
+                                parsingResult.throwable,
+                            )
+                            stateV2 = RerouteStateV2.Idle()
+                        }
+                        is RerouteResponseParsingResult.RoutesAvailable -> {
+                            stateV2 = RerouteStateV2.RouteFetched(
+                                parsingResult.newRoutes.firstOrNull()?.origin.orEmpty(),
+                            )
+                            stateV2 = RerouteStateV2.Idle()
                             callback.onNewRoutes(
                                 parsingResult.newRoutes,
                                 parsingResult.newRoutes.first().origin,
                             )
+                        }
                     }
                 }
             }.onError { rerouteError ->
                 setRerouteFailureState("User triggered force reroute", rerouteError)
-                state = RerouteState.Idle
+                stateV2 = RerouteStateV2.Idle()
             }
         }
     }
@@ -171,10 +272,10 @@ internal class NativeMapboxRerouteController(
                 "message: ${rerouteError.message}; " +
                 "router errors: ${rerouteError.routerErrors}"
         }
-        state = if (rerouteError.type == RerouteErrorType.CANCELLED) {
-            RerouteState.Interrupted
+        stateV2 = if (rerouteError.type == RerouteErrorType.CANCELLED) {
+            RerouteStateV2.Interrupted()
         } else {
-            RerouteState.Failed(
+            RerouteStateV2.Failed(
                 message = rerouteError.message,
                 throwable = null,
                 reasons = rerouteError.routerErrors
@@ -201,6 +302,18 @@ internal class NativeMapboxRerouteController(
         return result
     }
 
+    override fun unregisterRerouteStateV2Observer(
+        rerouteStateObserver: RerouteStateV2Observer,
+    ): Boolean = observersV2.remove(rerouteStateObserver)
+
+    override fun registerRerouteStateV2Observer(
+        rerouteStateObserver: RerouteStateV2Observer,
+    ): Boolean {
+        val result = observersV2.add(rerouteStateObserver)
+        rerouteStateObserver.onRerouteStateChanged(stateV2)
+        return result
+    }
+
     override fun unregisterRerouteStateObserver(
         rerouteStateObserver: RerouteStateObserver,
     ): Boolean = observers.remove(rerouteStateObserver)
@@ -222,16 +335,9 @@ internal class NativeMapboxRerouteController(
         ).fold(
             {
                 logE(TAG) { "error parsing route ${it.message}" }
-                state = RerouteState.Failed(
-                    "Error parsing route",
-                    it,
-                )
-                state = RerouteState.Idle
-                RerouteResponseParsingResult.Error
+                RerouteResponseParsingResult.Error(it)
             },
             {
-                state = RerouteState.RouteFetched(it.routes.firstOrNull()?.origin.orEmpty())
-                state = RerouteState.Idle
                 routeParsingTracking.routeResponseIsParsed(it.meta)
                 RerouteResponseParsingResult.RoutesAvailable(it.routes, 0)
             },
@@ -275,7 +381,7 @@ internal class NativeMapboxRerouteController(
             val primaryRouteLegIndex: Int,
         ) : RerouteResponseParsingResult()
 
-        object Error : RerouteResponseParsingResult()
+        data class Error(val throwable: Throwable) : RerouteResponseParsingResult()
     }
 
     companion object {

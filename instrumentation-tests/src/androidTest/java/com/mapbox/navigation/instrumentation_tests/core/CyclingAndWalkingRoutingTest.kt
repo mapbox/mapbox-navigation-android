@@ -24,7 +24,9 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
 import com.mapbox.navigation.testing.utils.assertions.assertSuccessfulRerouteStateTransition
+import com.mapbox.navigation.testing.utils.assertions.assertSuccessfulRouteAppliedRerouteStateTransition
 import com.mapbox.navigation.testing.utils.assertions.recordRerouteStates
+import com.mapbox.navigation.testing.utils.assertions.recordRerouteStatesV2
 import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
@@ -132,6 +134,7 @@ class CyclingAndWalkingRoutingTest(private val directionsProfile: String) :
             historyRecorderRule = mapboxHistoryTestRule,
         ) { navigation ->
             val rerouteStates = navigation.recordRerouteStates()
+            val rerouteStatesV2 = navigation.recordRerouteStatesV2()
             val routes = stayOnPosition(originLocation, bearing = 0.0f) {
                 navigation.startTripSession()
                 navigation.requestRoutes(
@@ -154,6 +157,7 @@ class CyclingAndWalkingRoutingTest(private val directionsProfile: String) :
                     it.reason == ROUTES_UPDATE_REASON_REROUTE
                 }
                 assertSuccessfulRerouteStateTransition(rerouteStates)
+                assertSuccessfulRouteAppliedRerouteStateTransition(rerouteStatesV2)
                 val newWaypoints = routesUpdate.navigationRoutes.first()
                     .directionsRoute.routeOptions()!!.coordinatesList()
                 assertEquals(2, newWaypoints.size)
@@ -208,6 +212,7 @@ class CyclingAndWalkingRoutingTest(private val directionsProfile: String) :
                 ),
             )
             val rerouteStates = mapboxNavigation.recordRerouteStates()
+            val rerouteStatesV2 = mapboxNavigation.recordRerouteStatesV2()
 
             mapboxNavigation.startTripSession()
             val routes = mapboxNavigation.requestRoutes(
@@ -247,6 +252,7 @@ class CyclingAndWalkingRoutingTest(private val directionsProfile: String) :
                 }
             }.first()
             assertSuccessfulRerouteStateTransition(rerouteStates)
+            assertSuccessfulRouteAppliedRerouteStateTransition(rerouteStatesV2)
         }
     }
 
@@ -257,6 +263,7 @@ class CyclingAndWalkingRoutingTest(private val directionsProfile: String) :
             assumeTrue(directionsProfile != PROFILE_WALKING)
 
             val rerouteStates = mapboxNavigation.recordRerouteStates()
+            val rerouteStatesV2 = mapboxNavigation.recordRerouteStatesV2()
             val mockRoute = RoutesProvider.cycling_dc_short_two_legs_with_alternative(context)
             mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
             val routes = mapboxNavigation.requestRoutes(
@@ -287,6 +294,7 @@ class CyclingAndWalkingRoutingTest(private val directionsProfile: String) :
             }.first()
             assertEquals(routes[1], rerouteResult.navigationRoutes.first())
             assertSuccessfulRerouteStateTransition(rerouteStates)
+            assertSuccessfulRouteAppliedRerouteStateTransition(rerouteStatesV2)
         }
     }
 

@@ -1222,14 +1222,22 @@ package com.mapbox.navigation.core.reroute {
 
   @UiThread public abstract class RerouteController {
     method public abstract com.mapbox.navigation.core.reroute.RerouteState getState();
+    method public abstract com.mapbox.navigation.core.reroute.RerouteStateV2 getStateV2();
     method public abstract boolean registerRerouteStateObserver(com.mapbox.navigation.core.reroute.RerouteController.RerouteStateObserver rerouteStateObserver);
+    method @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public abstract boolean registerRerouteStateV2Observer(com.mapbox.navigation.core.reroute.RerouteController.RerouteStateV2Observer rerouteStateObserver);
     method public abstract void reroute(com.mapbox.navigation.core.reroute.RerouteController.RoutesCallback callback);
     method public abstract boolean unregisterRerouteStateObserver(com.mapbox.navigation.core.reroute.RerouteController.RerouteStateObserver rerouteStateObserver);
+    method @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public abstract boolean unregisterRerouteStateV2Observer(com.mapbox.navigation.core.reroute.RerouteController.RerouteStateV2Observer rerouteStateObserver);
     property public abstract com.mapbox.navigation.core.reroute.RerouteState state;
+    property public abstract com.mapbox.navigation.core.reroute.RerouteStateV2 stateV2;
   }
 
   public static fun interface RerouteController.RerouteStateObserver {
     method public void onRerouteStateChanged(com.mapbox.navigation.core.reroute.RerouteState rerouteState);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public static fun interface RerouteController.RerouteStateV2Observer {
+    method public void onRerouteStateChanged(com.mapbox.navigation.core.reroute.RerouteStateV2 rerouteState);
   }
 
   @UiThread public static fun interface RerouteController.RoutesCallback {
@@ -1275,8 +1283,48 @@ package com.mapbox.navigation.core.reroute {
     property public final String routerOrigin;
   }
 
+  public final class RerouteStateExKt {
+  }
+
   public fun interface RerouteStateObserver {
     method public void onRerouteStateChanged(com.mapbox.navigation.core.reroute.RerouteState rerouteState);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public abstract class RerouteStateV2 {
+  }
+
+  public abstract static class RerouteStateV2.Deviation extends com.mapbox.navigation.core.reroute.RerouteStateV2 {
+  }
+
+  public static final class RerouteStateV2.Deviation.ApplyingRoute extends com.mapbox.navigation.core.reroute.RerouteStateV2.Deviation {
+  }
+
+  public static final class RerouteStateV2.Deviation.RouteIgnored extends com.mapbox.navigation.core.reroute.RerouteStateV2.Deviation {
+  }
+
+  public static final class RerouteStateV2.Failed extends com.mapbox.navigation.core.reroute.RerouteStateV2 {
+    method public String getMessage();
+    method public java.util.List<com.mapbox.navigation.base.route.RouterFailure>? getReasons();
+    method public Throwable? getThrowable();
+    method public boolean isRetryable();
+    property public final boolean isRetryable;
+    property public final String message;
+    property public final java.util.List<com.mapbox.navigation.base.route.RouterFailure>? reasons;
+    property public final Throwable? throwable;
+  }
+
+  public static final class RerouteStateV2.FetchingRoute extends com.mapbox.navigation.core.reroute.RerouteStateV2 {
+  }
+
+  public static final class RerouteStateV2.Idle extends com.mapbox.navigation.core.reroute.RerouteStateV2 {
+  }
+
+  public static final class RerouteStateV2.Interrupted extends com.mapbox.navigation.core.reroute.RerouteStateV2 {
+  }
+
+  public static final class RerouteStateV2.RouteFetched extends com.mapbox.navigation.core.reroute.RerouteStateV2 {
+    method public String getRouterOrigin();
+    property public final String routerOrigin;
   }
 
   public final class RouteHistoryOptionsAdapterKt {
