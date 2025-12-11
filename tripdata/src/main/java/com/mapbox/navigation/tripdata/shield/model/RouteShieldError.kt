@@ -1,5 +1,7 @@
 package com.mapbox.navigation.tripdata.shield.model
 
+import com.mapbox.navigation.utils.internal.obfuscateAccessToken
+
 /**
  * Data structure that holds information about errors in downloading route shields.
  * @property url that was downloaded and resulted in an error
@@ -35,6 +37,9 @@ class RouteShieldError internal constructor(
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "RouteShieldError(url='$url', errorMessage='$errorMessage')"
+        return "RouteShieldError(" +
+            "url='${url?.obfuscateAccessToken()}', " +
+            "errorMessage='$errorMessage'" +
+            ")"
     }
 }
