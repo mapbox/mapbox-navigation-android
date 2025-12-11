@@ -24,6 +24,7 @@ import com.mapbox.navigation.core.mapmatching.MapMatchingFailure
 import com.mapbox.navigation.core.mapmatching.MapMatchingOptions
 import com.mapbox.navigation.core.mapmatching.MapMatchingSuccessfulResult
 import com.mapbox.navigation.core.reroute.RerouteState
+import com.mapbox.navigation.core.reroute.RerouteStateV2
 import com.mapbox.navigation.core.routerefresh.RouteRefreshExtra
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
@@ -33,11 +34,14 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrTh
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestMapMatching
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
 import com.mapbox.navigation.testing.ui.utils.coroutines.rerouteStates
+import com.mapbox.navigation.testing.ui.utils.coroutines.rerouteStatesV2
 import com.mapbox.navigation.testing.ui.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
 import com.mapbox.navigation.testing.utils.assertions.assertRerouteFailedTransition
+import com.mapbox.navigation.testing.utils.assertions.assertRerouteFailedTransitionV2
+import com.mapbox.navigation.testing.utils.assertions.assertSuccessfulRouteAppliedRerouteStateTransition
 import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRefreshHandler
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
@@ -58,6 +62,7 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
 import okhttp3.mockwebserver.MockResponse
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -190,8 +195,12 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
             historyRecorderRule = mapboxHistoryTestRule,
         ) { navigation ->
             val rerouteStates = mutableListOf<RerouteState>()
+            val rerouteStatesV2 = mutableListOf<RerouteStateV2>()
             navigation.getRerouteController()!!.registerRerouteStateObserver {
                 rerouteStates.add(it)
+            }
+            navigation.getRerouteController()!!.registerRerouteStateV2Observer {
+                rerouteStatesV2.add(it)
             }
 
             val (options, directionOptions) =
@@ -222,6 +231,7 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
                 regularOnlineRerouteFlow,
                 rerouteStates,
             )
+            assertSuccessfulRouteAppliedRerouteStateTransition(rerouteStatesV2)
         }
     }
 
@@ -231,8 +241,12 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
             historyRecorderRule = mapboxHistoryTestRule,
         ) { navigation ->
             val rerouteStates = mutableListOf<RerouteState>()
+            val rerouteStatesV2 = mutableListOf<RerouteStateV2>()
             navigation.getRerouteController()!!.registerRerouteStateObserver {
                 rerouteStates.add(it)
+            }
+            navigation.getRerouteController()!!.registerRerouteStateV2Observer {
+                rerouteStatesV2.add(it)
             }
 
             val (primaryMapMatched, _, mapMatchedAlternativeOptions) =
@@ -263,6 +277,7 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
                 regularOnlineRerouteFlow,
                 rerouteStates,
             )
+            assertSuccessfulRouteAppliedRerouteStateTransition(rerouteStatesV2)
         }
     }
 
@@ -315,8 +330,12 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
             historyRecorderRule = mapboxHistoryTestRule,
         ) { navigation ->
             val rerouteStates = mutableListOf<RerouteState>()
+            val rerouteStatesV2 = mutableListOf<RerouteStateV2>()
             navigation.getRerouteController()!!.registerRerouteStateObserver {
                 rerouteStates.add(it)
+            }
+            navigation.getRerouteController()!!.registerRerouteStateV2Observer {
+                rerouteStatesV2.add(it)
             }
             val options = setupTestMapMatchingRoute()
             val result = navigation.requestMapMatching(options).getSuccessfulOrThrowException()
@@ -336,10 +355,21 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
                 navigation.getRerouteController()?.rerouteStates()?.first {
                     it !is RerouteState.Idle
                 }
+                navigation.getRerouteController()?.rerouteStatesV2()?.first {
+                    it !is RerouteStateV2.Idle
+                }
                 navigation.getRerouteController()?.rerouteStates()?.first {
                     it is RerouteState.Idle
                 }
+                navigation.getRerouteController()?.rerouteStatesV2()?.first {
+                    it is RerouteStateV2.Idle
+                }
+
+                // let the rerouteStatesV2Observer be notified
+                yield()
+
                 assertRerouteFailedTransition(rerouteStates)
+                assertRerouteFailedTransitionV2(rerouteStatesV2)
             }
         }
     }
@@ -350,8 +380,12 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
             historyRecorderRule = mapboxHistoryTestRule,
         ) { navigation ->
             val rerouteStates = mutableListOf<RerouteState>()
+            val rerouteStatesV2 = mutableListOf<RerouteStateV2>()
             navigation.getRerouteController()!!.registerRerouteStateObserver {
                 rerouteStates.add(it)
+            }
+            navigation.getRerouteController()!!.registerRerouteStateV2Observer {
+                rerouteStatesV2.add(it)
             }
             val options = setupTestMapMatchingRoute()
             val result = navigation.requestMapMatching(options).getSuccessfulOrThrowException()
@@ -385,6 +419,7 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
                     .drop(3)
                     .first()
                 assertRerouteFailedTransition(rerouteStates)
+                assertRerouteFailedTransitionV2(rerouteStatesV2)
             }
         }
     }
@@ -398,8 +433,12 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
             val geometryToDeviate = setupMockRouteAfterDeviation()
 
             val rerouteStates = mutableListOf<RerouteState>()
+            val rerouteStatesV2 = mutableListOf<RerouteStateV2>()
             navigation.getRerouteController()!!.registerRerouteStateObserver {
                 rerouteStates.add(it)
+            }
+            navigation.getRerouteController()!!.registerRerouteStateV2Observer {
+                rerouteStatesV2.add(it)
             }
 
             val options = setupAlternativeRoutesFromMapMatchingAndDirectionsAPI()
@@ -442,6 +481,7 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
             )
 
             assertEquals(regularOnlineRerouteFlow, rerouteStates)
+            assertSuccessfulRouteAppliedRerouteStateTransition(rerouteStatesV2)
         }
     }
 
@@ -454,8 +494,12 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
             val geometryToDeviate = setupMockRouteAfterDeviation()
 
             val rerouteStates = mutableListOf<RerouteState>()
+            val rerouteStatesV2 = mutableListOf<RerouteStateV2>()
             navigation.getRerouteController()!!.registerRerouteStateObserver {
                 rerouteStates.add(it)
+            }
+            navigation.getRerouteController()!!.registerRerouteStateV2Observer {
+                rerouteStatesV2.add(it)
             }
 
             val options = setupTwoLegsMapMatchingRoute()
@@ -509,6 +553,7 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
             )
 
             assertEquals(regularOnlineRerouteFlow, rerouteStates)
+            assertSuccessfulRouteAppliedRerouteStateTransition(rerouteStatesV2)
         }
     }
 
@@ -519,8 +564,12 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
             rerouteStrategyForMapMatchedRoutes = RerouteDisabled,
         ) { navigation ->
             val rerouteStates = mutableListOf<RerouteState>()
+            val rerouteStatesV2 = mutableListOf<RerouteStateV2>()
             navigation.getRerouteController()!!.registerRerouteStateObserver {
                 rerouteStates.add(it)
+            }
+            navigation.getRerouteController()!!.registerRerouteStateV2Observer {
+                rerouteStatesV2.add(it)
             }
 
             val waitForReroute = CompletableDeferred<Unit>()
@@ -555,6 +604,8 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
             )
 
             assertEquals(expectedStates, rerouteStates)
+            assertRerouteFailedTransitionV2(rerouteStatesV2)
+            assertEquals(message, (rerouteStatesV2[2] as RerouteStateV2.Failed).message)
         }
     }
 

@@ -28,6 +28,7 @@ import com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_R
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.core.reroute.RerouteOptionsAdapter
 import com.mapbox.navigation.core.reroute.RerouteState
+import com.mapbox.navigation.core.reroute.RerouteStateV2
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
@@ -36,6 +37,7 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.navigateNextRouteLeg
 import com.mapbox.navigation.testing.ui.utils.coroutines.offRouteUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
 import com.mapbox.navigation.testing.ui.utils.coroutines.rerouteStates
+import com.mapbox.navigation.testing.ui.utils.coroutines.rerouteStatesV2
 import com.mapbox.navigation.testing.ui.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
@@ -48,8 +50,13 @@ import com.mapbox.navigation.testing.utils.DelayedResponseModifier
 import com.mapbox.navigation.testing.utils.assertions.RerouteStateTransitionAssertion
 import com.mapbox.navigation.testing.utils.assertions.assertIs
 import com.mapbox.navigation.testing.utils.assertions.assertRerouteFailedTransition
+import com.mapbox.navigation.testing.utils.assertions.assertRerouteFailedTransitionV2
 import com.mapbox.navigation.testing.utils.assertions.assertSuccessfulRerouteStateTransition
+import com.mapbox.navigation.testing.utils.assertions.assertSuccessfulRouteAppliedRerouteStateTransition
+import com.mapbox.navigation.testing.utils.assertions.assertSuccessfulRouteIgnoredRerouteStateTransition
+import com.mapbox.navigation.testing.utils.assertions.assertSuccessfulRouteReplanRerouteStateTransition
 import com.mapbox.navigation.testing.utils.assertions.recordRerouteStates
+import com.mapbox.navigation.testing.utils.assertions.recordRerouteStatesV2
 import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRefreshHandler
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
@@ -70,6 +77,7 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.yield
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
@@ -177,6 +185,7 @@ class CoreRerouteTest(
             customConfig = getTestCustomConfig(),
         ) { navigation ->
             val rerouteStates = navigation.recordRerouteStates()
+            val rerouteStatesV2 = navigation.recordRerouteStatesV2()
             val routes = stayOnPosition(originLocation, bearing = 0.0f) {
                 navigation.startTripSession()
                 navigation.requestRoutes(
@@ -195,6 +204,7 @@ class CoreRerouteTest(
                     it.reason == ROUTES_UPDATE_REASON_REROUTE
                 }
                 assertSuccessfulRerouteStateTransition(rerouteStates)
+                assertSuccessfulRouteAppliedRerouteStateTransition(rerouteStatesV2)
                 val newWaypoints = routesUpdate.navigationRoutes.first()
                     .directionsRoute.routeOptions()!!.coordinatesList()
                 assertEquals(2, newWaypoints.size)
@@ -250,7 +260,8 @@ class CoreRerouteTest(
                     navigation.offRouteUpdates().first { it }
                     navigation
                         .getRerouteController()?.let { ctrl ->
-                            ctrl.rerouteStates().first { it == RerouteState.FetchingRoute }
+                            ctrl.rerouteStates().first { it is RerouteState.FetchingRoute }
+                            ctrl.rerouteStatesV2().first { it is RerouteStateV2.FetchingRoute }
                         }
                 }
             }
@@ -328,6 +339,88 @@ class CoreRerouteTest(
         rerouteStateTransitionAssertion.assert()
     }
 
+    @Test
+    fun reroute_states_when_the_user_returns_to_route() = sdkTest {
+        assumeFalse(
+            "Native controller interrupts reroute instead of just ignoring the response",
+            runOptions.nativeReroute,
+        )
+        val mapboxNavigation = createMapboxNavigation()
+        val mockRoute = RoutesProvider.dc_very_short(context)
+        val originLocation = mockRoute.routeWaypoints.first()
+        val initialLocation = mockLocationUpdatesRule.generateLocationUpdate {
+            latitude = originLocation.latitude()
+            longitude = originLocation.longitude()
+        }
+        val offRouteLocationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+            latitude = originLocation.latitude() + 0.002
+            longitude = originLocation.longitude()
+        }
+
+        mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
+        val requestHandler = MockDirectionsRequestHandler(
+            profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+            jsonResponse = mockRoute.routeResponseJson,
+            expectedCoordinates = mockRoute.routeWaypoints,
+            relaxedExpectedCoordinates = false,
+        )
+        val rerouteRequestHandler = MockDirectionsRequestHandler(
+            profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+            jsonResponse = readRawFileText(context, R.raw.reroute_response_dc_very_short),
+            expectedCoordinates = listOf(
+                Point.fromLngLat(
+                    offRouteLocationUpdate.longitude,
+                    offRouteLocationUpdate.latitude,
+                ),
+                mockRoute.routeWaypoints.last(),
+            ),
+            relaxedExpectedCoordinates = true,
+        )
+        val responseModifier = DelayedResponseModifier(10000)
+        rerouteRequestHandler.jsonResponseModifier = responseModifier
+        mockWebServerRule.requestHandlers.add(requestHandler)
+        mockWebServerRule.requestHandlers.add(rerouteRequestHandler)
+
+        val rerouteStateTransitionAssertion = RerouteStateTransitionAssertion(
+            mapboxNavigation.getRerouteController()!!,
+        ) {
+            requiredState(RerouteState.Idle)
+            requiredState(RerouteState.FetchingRoute)
+            requiredState(RerouteState.RouteFetched(RouterOrigin.ONLINE))
+            requiredState(RerouteState.Idle)
+        }
+        val rerouteStatesV2 = mapboxNavigation.recordRerouteStatesV2()
+
+        val originalRoutes = mapboxNavigation.requestRoutes(
+            RouteOptions.builder()
+                .applyDefaultNavigationOptions()
+                .applyLanguageAndVoiceUnitOptions(context)
+                .baseUrl(mockWebServerRule.baseUrl)
+                .coordinatesList(mockRoute.routeWaypoints)
+                .build(),
+        ).getSuccessfulResultOrThrowException().routes
+        mapboxNavigation.startTripSession()
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(originalRoutes)
+        mapboxNavigation.moveAlongTheRouteUntilTracking(
+            originalRoutes.first(),
+            mockLocationReplayerRule,
+        )
+        mockLocationReplayerRule.loopUpdate(offRouteLocationUpdate, times = 5)
+        // wait for OFF_ROUTE
+        mapboxNavigation.offRouteUpdates().filter { it }.first()
+        mockLocationReplayerRule.loopUpdate(initialLocation, times = 120)
+        // wait until the puck returns to the route
+        mapboxNavigation.offRouteUpdates().filterNot { it }.first()
+
+        mapboxNavigation.getRerouteController()!!.rerouteStates().first { it !is RerouteState.Idle }
+        responseModifier.interruptDelay()
+        mapboxNavigation.getRerouteController()!!.rerouteStates().first { it is RerouteState.Idle }
+        yield()
+
+        rerouteStateTransitionAssertion.assert()
+        assertSuccessfulRouteIgnoredRerouteStateTransition(rerouteStatesV2)
+    }
+
     @Test(timeout = 10_000)
     fun reroute_is_not_cancelled_when_alternatives_change() = sdkTest {
         // setting to 2s as NN router's default timeout at the time of creating the test is 5s
@@ -356,6 +449,7 @@ class CoreRerouteTest(
             requiredState(RerouteState.RouteFetched(RouterOrigin.ONLINE))
             requiredState(RerouteState.Idle)
         }
+        val rerouteStatesV2 = mapboxNavigation.recordRerouteStatesV2()
 
         val originalRoutes = mapboxNavigation.requestRoutes(
             testData.originRouteOptions,
@@ -396,6 +490,7 @@ class CoreRerouteTest(
             rerouteUpdate.navigationRoutes.first().waypoints!!.map { it.location() },
         )
         rerouteStateTransitionAssertion.assert()
+        assertSuccessfulRouteAppliedRerouteStateTransition(rerouteStatesV2)
     }
 
     @Test(timeout = 10_000)
@@ -437,6 +532,7 @@ class CoreRerouteTest(
             requiredState(RerouteState.RouteFetched(RouterOrigin.ONLINE))
             requiredState(RerouteState.Idle)
         }
+        val rerouteStatesV2 = mapboxNavigation.recordRerouteStatesV2()
 
         val originalRoutes = mapboxNavigation.requestRoutes(
             testData.originRouteOptions,
@@ -472,6 +568,7 @@ class CoreRerouteTest(
             routesUpdate.navigationRoutes.first().waypoints!!.map { it.location() },
         )
         rerouteStateTransitionAssertion.assert()
+        assertSuccessfulRouteAppliedRerouteStateTransition(rerouteStatesV2)
     }
 
     @Test
@@ -500,6 +597,7 @@ class CoreRerouteTest(
                 routes.first().routeOptions.exclude(),
             )
             val rerouteStates = navigation.recordRerouteStates()
+            val rerouteStatesV2 = navigation.recordRerouteStatesV2()
             navigation.setRerouteOptionsAdapter(
                 object : RerouteOptionsAdapter {
                     override fun onRouteOptions(routeOptions: RouteOptions): RouteOptions {
@@ -531,6 +629,7 @@ class CoreRerouteTest(
                 route.routeOptions.exclude(),
             )
             assertSuccessfulRerouteStateTransition(rerouteStates)
+            assertSuccessfulRouteReplanRerouteStateTransition(rerouteStatesV2)
         }
     }
 
@@ -570,6 +669,7 @@ class CoreRerouteTest(
                 },
             )
             val rerouteStates = navigation.recordRerouteStates()
+            val rerouteStatesV2 = navigation.recordRerouteStatesV2()
             stayOnPosition(
                 mockRoute.routeWaypoints.first(),
                 0.0f,
@@ -587,6 +687,7 @@ class CoreRerouteTest(
                 route.routeOptions.exclude(),
             )
             assertSuccessfulRerouteStateTransition(rerouteStates)
+            assertSuccessfulRouteReplanRerouteStateTransition(rerouteStatesV2)
         }
     }
 
@@ -600,6 +701,7 @@ class CoreRerouteTest(
             longitude = originLocation.longitude()
         }
         val rerouteStates = mapboxNavigation.recordRerouteStates()
+        val rerouteStatesV2 = mapboxNavigation.recordRerouteStatesV2()
 
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
         mockWebServerRule.requestHandlers.add(
@@ -642,6 +744,7 @@ class CoreRerouteTest(
             }
         }.first()
         assertSuccessfulRerouteStateTransition(rerouteStates)
+        assertSuccessfulRouteAppliedRerouteStateTransition(rerouteStatesV2)
     }
 
     @Test
@@ -683,6 +786,7 @@ class CoreRerouteTest(
                 ),
             )
             val rerouteStates = mapboxNavigation.recordRerouteStates()
+            val rerouteStatesV2 = mapboxNavigation.recordRerouteStatesV2()
 
             mapboxNavigation.startTripSession()
             val routes = mapboxNavigation.requestRoutes(
@@ -719,6 +823,7 @@ class CoreRerouteTest(
                 }
             }.first()
             assertSuccessfulRerouteStateTransition(rerouteStates)
+            assertSuccessfulRouteAppliedRerouteStateTransition(rerouteStatesV2)
         }
     }
 
@@ -726,6 +831,7 @@ class CoreRerouteTest(
     fun reroute_on_multileg_route_with_waypoint_names_and_targets_without_indices() = sdkTest {
         val mapboxNavigation = createMapboxNavigation()
         val rerouteStates = mapboxNavigation.recordRerouteStates()
+        val rerouteStatesV2 = mapboxNavigation.recordRerouteStatesV2()
         val mockRoute = RoutesProvider.dc_very_short_two_legs(context)
         val originalLocation = mockLocationUpdatesRule.generateLocationUpdate {
             latitude = mockRoute.routeWaypoints.first().latitude()
@@ -804,6 +910,7 @@ class CoreRerouteTest(
             }
         }.first()
         assertSuccessfulRerouteStateTransition(rerouteStates)
+        assertSuccessfulRouteAppliedRerouteStateTransition(rerouteStatesV2)
     }
 
     @Test
@@ -813,6 +920,7 @@ class CoreRerouteTest(
             customConfig = getTestCustomConfig(),
         ) { mapboxNavigation ->
             val rerouteState = mapboxNavigation.recordRerouteStates()
+            val rerouteStateV2 = mapboxNavigation.recordRerouteStatesV2()
 
             val mockRoute = RoutesProvider.dc_short_with_alternative_same_beginning(context)
             mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
@@ -843,6 +951,7 @@ class CoreRerouteTest(
                     !it.navigationRoutes.contains(routes[0])
             }
             assertSuccessfulRerouteStateTransition(rerouteState)
+            assertSuccessfulRouteAppliedRerouteStateTransition(rerouteStateV2)
         }
     }
 
@@ -853,6 +962,7 @@ class CoreRerouteTest(
             customConfig = getTestCustomConfig(),
         ) { mapboxNavigation ->
             val rerouteStates = mapboxNavigation.recordRerouteStates()
+            val rerouteStatesV2 = mapboxNavigation.recordRerouteStatesV2()
             val mockRoute = RoutesProvider.dc_short_two_legs_with_alternative(context)
             mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
             val routes = mapboxNavigation.requestRoutes(
@@ -880,6 +990,7 @@ class CoreRerouteTest(
             }.first()
             assertEquals(routes[1], rerouteResult.navigationRoutes.first())
             assertSuccessfulRerouteStateTransition(rerouteStates)
+            assertSuccessfulRouteAppliedRerouteStateTransition(rerouteStatesV2)
         }
     }
 
@@ -961,6 +1072,7 @@ class CoreRerouteTest(
             )
 
             val rerouteStates = mapboxNavigation.recordRerouteStates()
+            val rerouteStatesV2 = mapboxNavigation.recordRerouteStatesV2()
             val originalRoutes = mapboxNavigation.requestRoutes(
                 RouteOptions.builder()
                     .applyDefaultNavigationOptions()
@@ -987,10 +1099,19 @@ class CoreRerouteTest(
                         .first()
                     val failedState = assertIs<RerouteState.Failed>(rerouteState)
                     assertTrue(failedState.isRetryable)
+
+                    val rerouteStateV2 = mapboxNavigation.getRerouteController()!!
+                        .rerouteStatesV2()
+                        .filter { it is RerouteStateV2.Failed || it is RerouteStateV2.RouteFetched }
+                        .first()
+                    val failedStateV2 = assertIs<RerouteStateV2.Failed>(rerouteStateV2)
+                    assertTrue(failedStateV2.isRetryable)
                 }
             }
             assertRerouteFailedTransition(rerouteStates)
+            assertRerouteFailedTransitionV2(rerouteStatesV2)
             val rerouteStatesAfterFailure = mapboxNavigation.recordRerouteStates()
+            val rerouteStatesV2AfterFailure = mapboxNavigation.recordRerouteStatesV2()
             stayOnPosition(offRouteLocationUpdate) {
                 mapboxNavigation.getRerouteController()!!
                     .reroute { routes, _ ->
@@ -1002,6 +1123,7 @@ class CoreRerouteTest(
                     .first { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_NEW }
             }
             assertSuccessfulRerouteStateTransition(rerouteStatesAfterFailure)
+            assertSuccessfulRouteReplanRerouteStateTransition(rerouteStatesV2AfterFailure)
         }
     }
 

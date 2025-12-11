@@ -38,6 +38,7 @@ import com.mapbox.navigation.core.internal.telemetry.unregisterUserFeedbackObser
 import com.mapbox.navigation.core.navigator.CacheHandleWrapper
 import com.mapbox.navigation.core.preview.RoutesPreview
 import com.mapbox.navigation.core.reroute.InternalRerouteController
+import com.mapbox.navigation.core.reroute.InternalRerouteController.RouteReplanRoutesCallback
 import com.mapbox.navigation.core.reroute.InternalRerouteController.RoutesCallback
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteResult
@@ -499,14 +500,14 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
         verify(exactly = 1) {
             defaultRerouteController.rerouteOnDeviation(
-                any<InternalRerouteController.RoutesCallback>(),
+                any<InternalRerouteController.DeviationRoutesCallback>(),
             )
         }
 
         verify(ordering = Ordering.ORDERED) {
             tripSession.setOffRouteObserverForReroute(any(), any())
             defaultRerouteController.rerouteOnDeviation(
-                any<InternalRerouteController.RoutesCallback>(),
+                any<InternalRerouteController.DeviationRoutesCallback>(),
             )
         }
     }
@@ -541,15 +542,17 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         val newAcceptedRoutes = listOf(newInputRoutes[0], newInputRoutes[2])
         val newIgnoredRoutes = listOf(IgnoredRoute(newInputRoutes[1], invalidRouteReason))
         val initialLegIndex = 2
+        var actualRouteAccepted: Boolean? = null
 
         every {
             defaultRerouteController.rerouteOnDeviation(
-                any<InternalRerouteController.RoutesCallback>(),
+                any<InternalRerouteController.DeviationRoutesCallback>(),
             )
         } answers {
-            (firstArg() as InternalRerouteController.RoutesCallback).onNewRoutes(
-                RerouteResult(newInputRoutes, initialLegIndex, RouterOrigin.ONLINE),
-            )
+            actualRouteAccepted = (firstArg() as InternalRerouteController.DeviationRoutesCallback)
+                .onNewRoutes(
+                    RerouteResult(newInputRoutes, initialLegIndex, RouterOrigin.ONLINE),
+                )
         }
 
         coEvery {
@@ -575,18 +578,21 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                 ),
             )
         }
+        assertEquals(true, actualRouteAccepted)
     }
 
     @Test
     fun `new routes are not set after reroute if they are invalid`() {
         val newRoutes = listOf(mockk<NavigationRoute>(relaxed = true), mockk(relaxed = true))
 
+        var actualRouteAccepted: Boolean? = null
+
         every {
             defaultRerouteController.rerouteOnDeviation(
-                any<InternalRerouteController.RoutesCallback>(),
+                any<InternalRerouteController.DeviationRoutesCallback>(),
             )
         } answers {
-            (firstArg() as InternalRerouteController.RoutesCallback)
+            actualRouteAccepted = (firstArg() as InternalRerouteController.DeviationRoutesCallback)
                 .onNewRoutes(RerouteResult(newRoutes, 1, RouterOrigin.ONLINE))
         }
 
@@ -604,6 +610,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         coVerify(exactly = 0) {
             directionsSession.setNavigationRoutesFinished(any())
         }
+        assertEquals(false, actualRouteAccepted)
     }
 
     @Test
@@ -616,7 +623,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
         verify(exactly = 0) {
             defaultRerouteController.rerouteOnDeviation(
-                any<InternalRerouteController.RoutesCallback>(),
+                any<InternalRerouteController.DeviationRoutesCallback>(),
             )
         }
     }
@@ -1470,7 +1477,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     @Test
     fun `set route - reroute immediately interrupts reroute`() =
         coroutineRule.runBlockingTest {
-            val rerouteCallbackSlot = slot<InternalRerouteController.RoutesCallback>()
+            val rerouteCallbackSlot = slot<InternalRerouteController.DeviationRoutesCallback>()
             every {
                 defaultRerouteController.rerouteOnDeviation(capture(rerouteCallbackSlot))
             } just Runs
@@ -2101,7 +2108,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         val rerouteResult =
             RerouteResult(routes = emptyList(), initialLegIndex = 0, origin = "Online")
         every { defaultRerouteController.rerouteOnParametersChange(any()) } answers {
-            (firstArg() as RoutesCallback).onNewRoutes(rerouteResult)
+            (firstArg() as RouteReplanRoutesCallback).onNewRoutes(rerouteResult)
         }
         mapboxNavigation.setRerouteEnabled(true)
 
@@ -2140,7 +2147,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             RerouteResult(routes = emptyList(), initialLegIndex = 0, origin = "Online")
 
         every { defaultRerouteController.rerouteOnParametersChange(any()) } answers {
-            (firstArg() as RoutesCallback).onNewRoutes(rerouteResult)
+            (firstArg() as RouteReplanRoutesCallback).onNewRoutes(rerouteResult)
         }
         coEvery { tripSession.setRoutes(any(), any()) } returns
             NativeSetRouteError(error = newRouteErrorMessage)
@@ -2209,7 +2216,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         val rerouteResult =
             RerouteResult(routes = emptyList(), initialLegIndex = 0, origin = "Online")
         every { defaultRerouteController.rerouteOnParametersChange(any()) } answers {
-            (firstArg() as RoutesCallback).onNewRoutes(rerouteResult)
+            (firstArg() as RouteReplanRoutesCallback).onNewRoutes(rerouteResult)
         }
         coEvery { tripSession.setRoutes(any(), any()) } returns
             NativeSetRouteError(error = newRouteErrorMessage)
@@ -2808,7 +2815,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         // Additional verification that reroute was triggered on off-route
         verify(exactly = 1) {
             defaultRerouteController.rerouteOnDeviation(
-                any<InternalRerouteController.RoutesCallback>(),
+                any<InternalRerouteController.DeviationRoutesCallback>(),
             )
         }
     }

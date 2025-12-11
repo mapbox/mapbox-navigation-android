@@ -54,15 +54,17 @@ class MapboxHistoryTestRule : TestWatcher() {
     }
 
     override fun finished(description: Description) {
-        val filePath = historyRecorder.fileDirectory()!!
-        val file = File(filePath)
-        file.walk().filterNot { it.isDirectory }.forEach {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                saveFileUsingMediaStore(it, context, description.methodName, it.name)
-            } else {
-                val path = description.methodName + File.separator + it.name
-                val target = File(directory, path)
-                it.copyTo(target)
+        if (::historyRecorder.isInitialized) {
+            val filePath = historyRecorder.fileDirectory()!!
+            val file = File(filePath)
+            file.walk().filterNot { it.isDirectory }.forEach {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    saveFileUsingMediaStore(it, context, description.methodName, it.name)
+                } else {
+                    val path = description.methodName + File.separator + it.name
+                    val target = File(directory, path)
+                    it.copyTo(target)
+                }
             }
         }
     }

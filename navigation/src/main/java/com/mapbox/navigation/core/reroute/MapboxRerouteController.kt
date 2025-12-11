@@ -49,6 +49,8 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
 
     private val observers = CopyOnWriteArraySet<RerouteStateObserver>()
 
+    private val observersV2 = CopyOnWriteArraySet<RerouteStateV2Observer>()
+
     private val mainJobController: JobControl = threadController.getMainScopeAndRootJob()
 
     private var rerouteJob: Job? = null
@@ -78,19 +80,40 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
         ),
     )
 
-    override var state: RerouteState = RerouteState.Idle
+    /**
+     * There's a private backing field for [state] so that it can become val
+     * so that we don't accidentally update it instead of stateV2.
+     */
+    private var deprecatedState: RerouteState = RerouteState.Idle
+        set(value) {
+            if (field != value) {
+                field = value
+                observers.forEach { it.onRerouteStateChanged(value) }
+            }
+        }
+
+    /*
+    Backed by `deprecatedState`. Should not be updated directly - all the internal logic should switch to `stateV2`.
+     */
+    override val state: RerouteState
+        get() = deprecatedState
+
+    override var stateV2: RerouteStateV2 = RerouteStateV2.Idle()
         private set(value) {
             if (field == value) {
                 return
             }
             field = value
-            if (value is RerouteState.Idle) {
+            if (value is RerouteStateV2.Idle) {
                 runningRerouteCausedByRouteReplan = false
             }
-            if (value !is RerouteState.FetchingRoute) {
+            if (value !is RerouteStateV2.FetchingRoute) {
                 lastSignature = null
             }
-            observers.forEach { it.onRerouteStateChanged(field) }
+            value.toRerouteState()?.let {
+                deprecatedState = it
+            }
+            observersV2.forEach { it.onRerouteStateChanged(field) }
         }
 
     private companion object {
@@ -120,19 +143,20 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
     override fun reroute(callback: RerouteController.RoutesCallback) {
         rerouteInternal(
             appTriggeredRerouteSignature,
-        ) { result: RerouteResult ->
-            callback.onNewRoutes(result.routes, result.origin)
-        }
+            RouteReplanRoutesCallback { result: RerouteResult ->
+                callback.onNewRoutes(result.routes, result.origin)
+            },
+        )
     }
 
-    override fun rerouteOnDeviation(callback: RoutesCallback) {
+    override fun rerouteOnDeviation(callback: DeviationRoutesCallback) {
         // Do not reroute if we are already fetching a route for deviation
         if (state != RerouteState.FetchingRoute || lastSignature != deviationSignature) {
             rerouteInternal(deviationSignature, callback)
         }
     }
 
-    override fun rerouteOnParametersChange(callback: RoutesCallback) {
+    override fun rerouteOnParametersChange(callback: RouteReplanRoutesCallback) {
         runningRerouteCausedByRouteReplan = true
         rerouteInternal(parametersChangeSignature, callback)
     }
@@ -145,7 +169,7 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
         val ignoreDeviationToAlternatives = runningRerouteCausedByRouteReplan
         logI(LOG_CATEGORY) { "Starting reroute, signature = $signature" }
         interrupt()
-        state = RerouteState.FetchingRoute
+        stateV2 = RerouteStateV2.FetchingRoute()
         logI("Fetching route", LOG_CATEGORY)
 
         val routeProgress = tripSession.getRouteProgress()
@@ -166,9 +190,27 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
 
                     val origin = relevantAlternative.routerOrigin.mapToSdkRouteOrigin()
 
-                    state = RerouteState.RouteFetched(origin)
-                    callback.onNewRoutes(RerouteResult(newList, alternativeLegIndex, origin))
-                    state = RerouteState.Idle
+                    stateV2 = RerouteStateV2.RouteFetched(origin)
+                    when (callback) {
+                        is DeviationRoutesCallback -> {
+                            val routeAccepted = callback.onNewRoutes(
+                                RerouteResult(newList, alternativeLegIndex, origin),
+                            )
+                            stateV2 = if (routeAccepted) {
+                                RerouteStateV2.Deviation.ApplyingRoute()
+                            } else {
+                                RerouteStateV2.Deviation.RouteIgnored()
+                            }
+                        }
+                        is RouteReplanRoutesCallback -> {
+                            // Should never happen
+                            logW(LOG_CATEGORY) { "Switched to an alternative on route replan" }
+                            callback.onNewRoutes(
+                                RerouteResult(newList, alternativeLegIndex, origin),
+                            )
+                        }
+                    }
+                    stateV2 = RerouteStateV2.Idle()
                 }
                 return
             }
@@ -178,8 +220,8 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
         if (primaryRoute == null) {
             val message = "Primary route is null while rerouting"
             logW(LOG_CATEGORY) { "$message, failing reroute." }
-            state = RerouteState.Failed(message)
-            state = RerouteState.Idle
+            stateV2 = RerouteStateV2.Failed(message)
+            stateV2 = RerouteStateV2.Idle()
             return
         }
 
@@ -188,8 +230,8 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
             logW(LOG_CATEGORY) {
                 "$message, failing reroute."
             }
-            state = RerouteState.Failed(message)
-            state = RerouteState.Idle
+            stateV2 = RerouteStateV2.Failed(message)
+            stateV2 = RerouteStateV2.Idle()
             return
         }
 
@@ -203,8 +245,8 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
             logW(LOG_CATEGORY) {
                 "$message, failing reroute."
             }
-            state = RerouteState.Failed(message)
-            state = RerouteState.Idle
+            stateV2 = RerouteStateV2.Failed(message)
+            stateV2 = RerouteStateV2.Idle()
             return
         }
 
@@ -234,13 +276,13 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
                     }
 
                     is RouteOptionsUpdater.RouteOptionsResult.Error -> {
-                        state = RerouteState.Failed(
+                        stateV2 = RerouteStateV2.Failed(
                             message = "Cannot combine route options",
                             throwable = routeOptionsResult.error,
                             reasons = null,
                             preRouterReasons = listOfNotNull(routeOptionsResult.reason),
                         )
-                        state = RerouteState.Idle
+                        stateV2 = RerouteStateV2.Idle()
                     }
                 }
             }
@@ -272,6 +314,20 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
         return observers.remove(rerouteStateObserver)
     }
 
+    override fun registerRerouteStateV2Observer(
+        rerouteStateObserver: RerouteStateV2Observer,
+    ): Boolean {
+        val result = observersV2.add(rerouteStateObserver)
+        rerouteStateObserver.onRerouteStateChanged(stateV2)
+        return result
+    }
+
+    override fun unregisterRerouteStateV2Observer(
+        rerouteStateObserver: RerouteStateV2Observer,
+    ): Boolean {
+        return observersV2.remove(rerouteStateObserver)
+    }
+
     private fun request(
         callback: RoutesCallback,
         routeOptions: RouteOptions,
@@ -280,21 +336,38 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
         rerouteJob = mainJobController.scope.launch {
             when (val result = requestAsync(routeOptions, signature)) {
                 is RouteRequestResult.Success -> {
-                    state = RerouteState.RouteFetched(result.routerOrigin)
-                    state = RerouteState.Idle
-                    callback.onNewRoutes(RerouteResult(result.routes, 0, result.routerOrigin))
+                    stateV2 = RerouteStateV2.RouteFetched(result.routerOrigin)
+                    when (callback) {
+                        is DeviationRoutesCallback -> {
+                            val routeAccepted = callback.onNewRoutes(
+                                RerouteResult(result.routes, 0, result.routerOrigin),
+                            )
+                            stateV2 = if (routeAccepted) {
+                                RerouteStateV2.Deviation.ApplyingRoute()
+                            } else {
+                                RerouteStateV2.Deviation.RouteIgnored()
+                            }
+                            stateV2 = RerouteStateV2.Idle()
+                        }
+                        is RouteReplanRoutesCallback -> {
+                            stateV2 = RerouteStateV2.Idle()
+                            callback.onNewRoutes(
+                                RerouteResult(result.routes, 0, result.routerOrigin),
+                            )
+                        }
+                    }
                 }
 
                 is RouteRequestResult.Failure -> {
-                    state = RerouteState.Failed(
+                    stateV2 = RerouteStateV2.Failed(
                         "Route request failed",
                         reasons = result.reasons,
                     )
-                    state = RerouteState.Idle
+                    stateV2 = RerouteStateV2.Idle()
                 }
 
                 is RouteRequestResult.Cancellation -> {
-                    if (state == RerouteState.FetchingRoute) {
+                    if (stateV2 is RerouteStateV2.FetchingRoute) {
                         logI("Request canceled via router")
                     }
                     onRequestInterrupted()
@@ -308,9 +381,9 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
     }
 
     private fun onRequestInterrupted() {
-        if (state == RerouteState.FetchingRoute) {
-            state = RerouteState.Interrupted
-            state = RerouteState.Idle
+        if (stateV2 is RerouteStateV2.FetchingRoute) {
+            stateV2 = RerouteStateV2.Interrupted()
+            stateV2 = RerouteStateV2.Idle()
         }
     }
 

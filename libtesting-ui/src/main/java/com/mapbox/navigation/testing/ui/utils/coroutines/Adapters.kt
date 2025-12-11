@@ -8,6 +8,7 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.common.location.Location
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
@@ -32,6 +33,7 @@ import com.mapbox.navigation.core.preview.RoutesPreviewObserver
 import com.mapbox.navigation.core.preview.RoutesPreviewUpdate
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
+import com.mapbox.navigation.core.reroute.RerouteStateV2
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesError
 import com.mapbox.navigation.core.routerefresh.RouteRefreshStateResult
 import com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver
@@ -117,6 +119,16 @@ fun RerouteController.rerouteStates(): Flow<RerouteState> {
         { registerRerouteStateObserver(it) },
         { unregisterRerouteStateObserver(it) },
         "RerouteState"
+    )
+}
+
+@OptIn(ExperimentalMapboxNavigationAPI::class)
+fun RerouteController.rerouteStatesV2(): Flow<RerouteStateV2> {
+    return loggedCallbackFlow(
+        { RerouteController.RerouteStateV2Observer(it) },
+        { registerRerouteStateV2Observer(it) },
+        { unregisterRerouteStateV2Observer(it) },
+        "RerouteStateV2"
     )
 }
 

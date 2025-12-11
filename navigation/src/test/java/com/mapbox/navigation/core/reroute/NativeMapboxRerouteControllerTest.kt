@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.reroute
 
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.route.nativeRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.internal.performance.RouteParsingTracking
@@ -45,6 +46,7 @@ import org.junit.Test
 
 private val TEST_REROUTE_URL = createRouteOptions().toUrl("***").toString()
 
+@OptIn(ExperimentalMapboxNavigationAPI::class)
 class NativeMapboxRerouteControllerTest {
 
     private val testRouteFixtures = TestRouteFixtures()
@@ -69,12 +71,15 @@ class NativeMapboxRerouteControllerTest {
     @Test
     fun `reroute is cancelled`() {
         val observerRegistration = RerouteEventsRegistration()
-        val updateRoutes = mockk<UpdateRoutes>()
+        val updateRoutes = mockk<UpdateRoutes>() {
+            every { this@mockk.invoke(any(), any()) } returns true
+        }
         val controller = createNativeMapboxRerouteController(
             rerouteEventsRegistration = observerRegistration,
             updateRoutes = updateRoutes,
         )
         val states = controller.recordRerouteState()
+        val statesV2 = controller.recordRerouteStateV2()
         val statesFromSecondSubscriber = controller.recordRerouteState()
 
         observerRegistration.observer.apply {
@@ -91,6 +96,15 @@ class NativeMapboxRerouteControllerTest {
             states,
         )
         assertEquals(
+            listOf(
+                RerouteStateV2.Idle(),
+                RerouteStateV2.FetchingRoute(),
+                RerouteStateV2.Interrupted(),
+                RerouteStateV2.Idle(),
+            ),
+            statesV2,
+        )
+        assertEquals(
             states,
             statesFromSecondSubscriber,
         )
@@ -99,7 +113,9 @@ class NativeMapboxRerouteControllerTest {
 
     @Test
     fun `reroute is successful`() {
-        val updateRoutes = mockk<UpdateRoutes>()
+        val updateRoutes = mockk<UpdateRoutes>() {
+            every { this@mockk.invoke(any(), any()) } returns true
+        }
         val observerRegistration = RerouteEventsRegistration()
         val parsingTracking = mockk<RouteParsingTracking>(relaxed = true)
         val controller = createNativeMapboxRerouteController(
@@ -108,6 +124,7 @@ class NativeMapboxRerouteControllerTest {
             routeParsingTracking = parsingTracking,
         )
         val states = controller.recordRerouteState()
+        val statesV2 = controller.recordRerouteStateV2()
 
         observerRegistration.observer.apply {
             onRerouteDetected(TEST_REROUTE_URL)
@@ -126,6 +143,66 @@ class NativeMapboxRerouteControllerTest {
             ),
             states,
         )
+        assertEquals(
+            listOf(
+                RerouteStateV2.Idle(),
+                RerouteStateV2.FetchingRoute(),
+                RerouteStateV2.RouteFetched(com.mapbox.navigation.base.route.RouterOrigin.OFFLINE),
+                RerouteStateV2.Deviation.ApplyingRoute(),
+                RerouteStateV2.Idle(),
+            ),
+            statesV2,
+        )
+        verify(exactly = 1) {
+            updateRoutes(match { it.map { it.id } == listOf("cjeacbr8s21bk47lggcvce7lv#0") }, eq(0))
+        }
+        verify {
+            parsingTracking.routeResponseIsParsed(any())
+        }
+    }
+
+    @Test
+    fun `reroute is successful but got back on route`() {
+        val updateRoutes = mockk<UpdateRoutes>() {
+            every { this@mockk.invoke(any(), any()) } returns false
+        }
+        val observerRegistration = RerouteEventsRegistration()
+        val parsingTracking = mockk<RouteParsingTracking>(relaxed = true)
+        val controller = createNativeMapboxRerouteController(
+            rerouteEventsRegistration = observerRegistration,
+            updateRoutes = updateRoutes,
+            routeParsingTracking = parsingTracking,
+        )
+        val states = controller.recordRerouteState()
+        val statesV2 = controller.recordRerouteStateV2()
+
+        observerRegistration.observer.apply {
+            onRerouteDetected(TEST_REROUTE_URL)
+            onRerouteReceived(
+                testRouteFixtures.loadTwoLegRoute().toDataRef(),
+                TEST_REROUTE_URL,
+                RouterOrigin.ONBOARD,
+            )
+        }
+        assertEquals(
+            listOf(
+                RerouteState.Idle,
+                RerouteState.FetchingRoute,
+                RerouteState.RouteFetched(com.mapbox.navigation.base.route.RouterOrigin.OFFLINE),
+                RerouteState.Idle,
+            ),
+            states,
+        )
+        assertEquals(
+            listOf(
+                RerouteStateV2.Idle(),
+                RerouteStateV2.FetchingRoute(),
+                RerouteStateV2.RouteFetched(com.mapbox.navigation.base.route.RouterOrigin.OFFLINE),
+                RerouteStateV2.Deviation.RouteIgnored(),
+                RerouteStateV2.Idle(),
+            ),
+            statesV2,
+        )
         verify(exactly = 1) {
             updateRoutes(match { it.map { it.id } == listOf("cjeacbr8s21bk47lggcvce7lv#0") }, eq(0))
         }
@@ -136,7 +213,9 @@ class NativeMapboxRerouteControllerTest {
 
     @Test
     fun `reroute is successful after parent is destroyed`() {
-        val updateRoutes = mockk<UpdateRoutes>()
+        val updateRoutes = mockk<UpdateRoutes>() {
+            every { this@mockk.invoke(any(), any()) } returns true
+        }
         val observerRegistration = RerouteEventsRegistration()
         val parentScope = TestScope(UnconfinedTestDispatcher())
         val controller = createNativeMapboxRerouteController(
@@ -145,6 +224,7 @@ class NativeMapboxRerouteControllerTest {
             updateRoutes = updateRoutes,
         )
         val states = controller.recordRerouteState()
+        val statesV2 = controller.recordRerouteStateV2()
 
         observerRegistration.observer.apply {
             onRerouteDetected(TEST_REROUTE_URL)
@@ -163,6 +243,13 @@ class NativeMapboxRerouteControllerTest {
             ),
             states,
         )
+        assertEquals(
+            listOf(
+                RerouteStateV2.Idle(),
+                RerouteStateV2.FetchingRoute(),
+            ),
+            statesV2,
+        )
         verify(exactly = 0) { updateRoutes.invoke(any(), any()) }
     }
 
@@ -173,6 +260,7 @@ class NativeMapboxRerouteControllerTest {
             rerouteEventsRegistration = observerRegistration,
         )
         val states = controller.recordRerouteState()
+        val statesV2 = controller.recordRerouteStateV2()
 
         observerRegistration.observer.apply {
             onRerouteDetected(TEST_REROUTE_URL)
@@ -195,6 +283,19 @@ class NativeMapboxRerouteControllerTest {
         assertFalse(
             (states[2] as RerouteState.Failed).isRetryable,
         )
+
+        assertEquals(
+            listOf(
+                RerouteStateV2.Idle::class.java,
+                RerouteStateV2.FetchingRoute::class.java,
+                RerouteStateV2.Failed::class.java,
+                RerouteStateV2.Idle::class.java,
+            ),
+            statesV2.map { it.javaClass },
+        )
+        assertFalse(
+            (statesV2[2] as RerouteStateV2.Failed).isRetryable,
+        )
     }
 
     @Test
@@ -204,6 +305,7 @@ class NativeMapboxRerouteControllerTest {
             rerouteEventsRegistration = observerRegistration,
         )
         val states = controller.recordRerouteState()
+        val statesV2 = controller.recordRerouteStateV2()
 
         observerRegistration.observer.apply {
             onRerouteDetected(TEST_REROUTE_URL)
@@ -245,6 +347,31 @@ class NativeMapboxRerouteControllerTest {
             TEST_REROUTE_URL,
             failureReason.url.toString(),
         )
+
+        assertEquals(
+            listOf(
+                RerouteStateV2.Idle::class.java,
+                RerouteStateV2.FetchingRoute::class.java,
+                RerouteStateV2.Failed::class.java,
+                RerouteStateV2.Idle::class.java,
+            ),
+            statesV2.map { it.javaClass },
+        )
+        val failureV2 = statesV2[2] as RerouteStateV2.Failed
+        assertTrue(failureV2.isRetryable)
+        assertEquals(
+            1,
+            failureV2.reasons?.size,
+        )
+        val failureReasonV2 = failureV2.reasons!![0]
+        assertEquals(
+            com.mapbox.navigation.base.route.RouterOrigin.OFFLINE,
+            failureReasonV2.routerOrigin,
+        )
+        assertEquals(
+            TEST_REROUTE_URL,
+            failureReasonV2.url.toString(),
+        )
     }
 
     @Test
@@ -266,9 +393,11 @@ class NativeMapboxRerouteControllerTest {
             updateRoutes = { routes, legIndex ->
                 currentRoutes = routes
                 currentLegIndex = legIndex
+                true
             },
         )
         val states = controller.recordRerouteState()
+        val statesV2 = controller.recordRerouteStateV2()
 
         observerRegistration.observer.apply {
             onSwitchToAlternative(
@@ -284,6 +413,73 @@ class NativeMapboxRerouteControllerTest {
                 RerouteState.Idle,
             ),
             states,
+        )
+        assertEquals(
+            listOf(
+                RerouteStateV2.Idle(),
+                RerouteStateV2.FetchingRoute(),
+                RerouteStateV2.RouteFetched(com.mapbox.navigation.base.route.RouterOrigin.ONLINE),
+                RerouteStateV2.Deviation.ApplyingRoute(),
+                RerouteStateV2.Idle(),
+            ),
+            statesV2,
+        )
+        assertEquals(
+            listOf("test#1", "test#0"),
+            currentRoutes.map { it.id },
+        )
+        assertEquals(1, currentLegIndex)
+    }
+
+    @Test
+    fun `switch to alternative route is successful but route is ignored`() {
+        var currentLegIndex = 0
+        var currentRoutes = createNavigationRoutes(
+            response = createDirectionsResponse(
+                uuid = "test",
+                routes = listOf(
+                    createDirectionsRoute(),
+                    createDirectionsRoute(),
+                ),
+            ),
+        )
+        val observerRegistration = RerouteEventsRegistration()
+        val controller = createNativeMapboxRerouteController(
+            rerouteEventsRegistration = observerRegistration,
+            getCurrentRoutes = { currentRoutes },
+            updateRoutes = { routes, legIndex ->
+                currentRoutes = routes
+                currentLegIndex = legIndex
+                false
+            },
+        )
+        val states = controller.recordRerouteState()
+        val statesV2 = controller.recordRerouteStateV2()
+
+        observerRegistration.observer.apply {
+            onSwitchToAlternative(
+                currentRoutes[1].nativeRoute(),
+                1,
+            )
+        }
+        assertEquals(
+            listOf(
+                RerouteState.Idle,
+                RerouteState.FetchingRoute,
+                RerouteState.RouteFetched(com.mapbox.navigation.base.route.RouterOrigin.ONLINE),
+                RerouteState.Idle,
+            ),
+            states,
+        )
+        assertEquals(
+            listOf(
+                RerouteStateV2.Idle(),
+                RerouteStateV2.FetchingRoute(),
+                RerouteStateV2.RouteFetched(com.mapbox.navigation.base.route.RouterOrigin.ONLINE),
+                RerouteStateV2.Deviation.RouteIgnored(),
+                RerouteStateV2.Idle(),
+            ),
+            statesV2,
         )
         assertEquals(
             listOf("test#1", "test#0"),
@@ -311,6 +507,7 @@ class NativeMapboxRerouteControllerTest {
             updateRoutes = updateRoutes,
         )
         val states = controller.recordRerouteState()
+        val statesV2 = controller.recordRerouteStateV2()
 
         observerRegistration.observer.apply {
             onSwitchToAlternative(
@@ -323,6 +520,12 @@ class NativeMapboxRerouteControllerTest {
                 RerouteState.Idle,
             ),
             states,
+        )
+        assertEquals(
+            listOf(
+                RerouteStateV2.Idle(),
+            ),
+            statesV2,
         )
         verify(exactly = 0) { updateRoutes(any(), any()) }
     }
@@ -338,6 +541,7 @@ class NativeMapboxRerouteControllerTest {
             rerouteDetector = rerouteDetector,
         )
         val states = controller.recordRerouteState()
+        val statesV2 = controller.recordRerouteStateV2()
 
         var newRoutes: List<NavigationRoute>? = null
         var newRoutesOrigin: String? = null
@@ -369,6 +573,15 @@ class NativeMapboxRerouteControllerTest {
             ),
             states,
         )
+        assertEquals(
+            listOf(
+                RerouteStateV2.Idle(),
+                RerouteStateV2.FetchingRoute(),
+                RerouteStateV2.RouteFetched(com.mapbox.navigation.base.route.RouterOrigin.ONLINE),
+                RerouteStateV2.Idle(),
+            ),
+            statesV2,
+        )
         verify(exactly = 0) { updateRoutes(any(), any()) }
     }
 
@@ -383,6 +596,7 @@ class NativeMapboxRerouteControllerTest {
             rerouteDetector = rerouteDetector,
         )
         val states = controller.recordRerouteState()
+        val statesV2 = controller.recordRerouteStateV2()
 
         val rerouteCallback = mockk<RerouteController.RoutesCallback>()
         controller.reroute(rerouteCallback)
@@ -416,6 +630,15 @@ class NativeMapboxRerouteControllerTest {
             ),
             states.map { it.javaClass },
         )
+        assertEquals(
+            listOf(
+                RerouteStateV2.Idle::class.java,
+                RerouteStateV2.FetchingRoute::class.java,
+                RerouteStateV2.Failed::class.java,
+                RerouteStateV2.Idle::class.java,
+            ),
+            statesV2.map { it.javaClass },
+        )
         verify(exactly = 0) { updateRoutes(any(), any()) }
     }
 
@@ -430,6 +653,7 @@ class NativeMapboxRerouteControllerTest {
             rerouteDetector = rerouteDetector,
         )
         val states = controller.recordRerouteState()
+        val statesV2 = controller.recordRerouteStateV2()
 
         val rerouteCallback = mockk<RerouteController.RoutesCallback>()
         controller.reroute(rerouteCallback)
@@ -461,6 +685,15 @@ class NativeMapboxRerouteControllerTest {
             ),
             states.map { it.javaClass },
         )
+        assertEquals(
+            listOf(
+                RerouteStateV2.Idle::class.java,
+                RerouteStateV2.FetchingRoute::class.java,
+                RerouteStateV2.Interrupted::class.java,
+                RerouteStateV2.Idle::class.java,
+            ),
+            statesV2.map { it.javaClass },
+        )
         verify(exactly = 0) { updateRoutes(any(), any()) }
     }
 }
@@ -472,7 +705,7 @@ private fun createNativeMapboxRerouteController(
     scope: CoroutineScope = TestScope(UnconfinedTestDispatcher()),
     parsingDispatcher: CoroutineDispatcher = UnconfinedTestDispatcher(),
     getCurrentRoutes: () -> List<NavigationRoute> = { emptyList() },
-    updateRoutes: UpdateRoutes = { _, _ -> },
+    updateRoutes: UpdateRoutes = { _, _ -> true },
     routeParsingTracking: RouteParsingTracking = mockk(relaxed = true),
 ) = NativeMapboxRerouteController(
     rerouteEventsRegistration,
@@ -500,6 +733,15 @@ private class RerouteEventsRegistration : RerouteEventsProvider {
 private fun RerouteController.recordRerouteState(): List<RerouteState> {
     val states = mutableListOf<RerouteState>()
     this.registerRerouteStateObserver {
+        states.add(it)
+    }
+    return states
+}
+
+@OptIn(ExperimentalMapboxNavigationAPI::class)
+private fun RerouteController.recordRerouteStateV2(): List<RerouteStateV2> {
+    val states = mutableListOf<RerouteStateV2>()
+    this.registerRerouteStateV2Observer {
         states.add(it)
     }
     return states
