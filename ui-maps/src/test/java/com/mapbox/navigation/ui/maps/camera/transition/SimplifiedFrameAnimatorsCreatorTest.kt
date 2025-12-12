@@ -54,7 +54,7 @@ internal class SimplifiedFrameAnimatorsCreatorTest {
             stateTransitionProvider.transitionToOverview(cameraOptions, transitionOptions)
         } returns animatorSet
 
-        val actual = animatorsCreator.transitionToOverview(cameraOptions, transitionOptions)
+        val actual = animatorsCreator.transitionToRouteOverview(cameraOptions, transitionOptions)
 
         actual.start()
         verify { animatorSet.start() }

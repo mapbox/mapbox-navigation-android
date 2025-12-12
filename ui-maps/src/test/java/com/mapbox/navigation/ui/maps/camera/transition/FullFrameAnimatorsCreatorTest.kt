@@ -45,7 +45,7 @@ internal class FullFrameAnimatorsCreatorTest {
             stateTransition.transitionToOverview(cameraOptions, transitionOptions)
         } returns animatorSet
 
-        val actual = animatorsCreator.transitionToOverview(cameraOptions, transitionOptions)
+        val actual = animatorsCreator.transitionToRouteOverview(cameraOptions, transitionOptions)
 
         checkChildAnimators(animatorSet, actual)
     }

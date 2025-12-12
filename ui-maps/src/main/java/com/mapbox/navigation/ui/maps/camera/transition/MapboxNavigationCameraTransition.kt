@@ -54,8 +54,6 @@ class MapboxNavigationCameraTransition @VisibleForTesting internal constructor(
         transitionOptions: NavigationCameraTransitionOptions,
     ): AnimatorSet {
         val animators = mutableListOf<ValueAnimator>()
-        val currentMapCameraState = mapboxMap.cameraState
-
         cameraOptions.center?.let { center ->
             val centerAnimator = cameraPlugin.createCenterAnimator(
                 CameraAnimatorOptions.cameraAnimatorOptions(center) {

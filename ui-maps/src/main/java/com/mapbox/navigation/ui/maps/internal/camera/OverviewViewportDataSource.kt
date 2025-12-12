@@ -120,6 +120,10 @@ class OverviewViewportDataSource @VisibleForTesting internal constructor(
     }
 
     private fun calculateRouteData(routes: List<NavigationRoute>) {
+        if (internalOptions.overviewMode == OverviewMode.POINTS) {
+            clearRoutePointsData()
+            return
+        }
         runIfActive {
             if (routes.isEmpty()) {
                 clearRouteData()
@@ -152,13 +156,17 @@ class OverviewViewportDataSource @VisibleForTesting internal constructor(
         }
     }
 
-    fun clearRouteData() {
-        this.navigationRoutes = emptyList()
+    private fun clearRoutePointsData() {
         indicesConverter.onRoutesChanged(emptyList())
         runIfActive {
             simplifiedCompleteRoutesPoints = emptyList()
             simplifiedRemainingPointsOnRoutes = emptyList()
         }
+    }
+
+    fun clearRouteData() {
+        this.navigationRoutes = emptyList()
+        clearRoutePointsData()
     }
 
     fun clearProgressData() {
@@ -173,6 +181,9 @@ class OverviewViewportDataSource @VisibleForTesting internal constructor(
     fun onRouteProgressChanged(
         routeProgress: RouteProgress,
     ) {
+        if (internalOptions.overviewMode == OverviewMode.POINTS) {
+            return
+        }
         this.routeProgress = routeProgress
         val currentRoute = this.navigationRoutes.firstOrNull()
         if (currentRoute == null) {
@@ -214,11 +225,12 @@ class OverviewViewportDataSource @VisibleForTesting internal constructor(
                                         indices.legGeometryIndex,
                                     )
                                     if (stepGeometryIndex != null) {
-                                        cachedRemainingPoints[route.id] = getCachedRemainingPoints(
-                                            route,
-                                            indices,
-                                            stepGeometryIndex,
-                                        )
+                                        cachedRemainingPoints[route.id] =
+                                            getCachedRemainingPoints(
+                                                route,
+                                                indices,
+                                                stepGeometryIndex,
+                                            )
                                     }
                                 }
                                 getRemainingPointsOnRoute(
@@ -289,7 +301,11 @@ class OverviewViewportDataSource @VisibleForTesting internal constructor(
             val pointsForOverview = simplifiedRemainingPointsOnRoutes.toMutableList()
 
             val localTargetLocation = targetLocation
-            if (localTargetLocation != null) {
+
+            // Don't track the puck during the points overview
+            if (localTargetLocation != null &&
+                internalOptions.overviewMode != OverviewMode.POINTS
+            ) {
                 pointsForOverview.add(0, localTargetLocation.toPoint())
             }
 

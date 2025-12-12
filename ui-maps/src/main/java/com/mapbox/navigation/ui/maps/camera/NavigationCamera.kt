@@ -30,6 +30,7 @@ import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState.TRANSITI
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraStateChangedObserver
 import com.mapbox.navigation.ui.maps.camera.transition.AnimatorsCreator
 import com.mapbox.navigation.ui.maps.camera.transition.DefaultSimplifiedUpdateFrameTransitionProvider
+import com.mapbox.navigation.ui.maps.camera.transition.FullAnimatorSet
 import com.mapbox.navigation.ui.maps.camera.transition.FullFrameAnimatorsCreator
 import com.mapbox.navigation.ui.maps.camera.transition.MapboxAnimatorSet
 import com.mapbox.navigation.ui.maps.camera.transition.MapboxAnimatorSetListener
@@ -41,6 +42,8 @@ import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitio
 import com.mapbox.navigation.ui.maps.camera.transition.SimplifiedFrameAnimatorsCreator
 import com.mapbox.navigation.ui.maps.camera.transition.TransitionEndListener
 import com.mapbox.navigation.ui.maps.camera.transition.UpdateFrameAnimatorsOptions
+import com.mapbox.navigation.ui.maps.internal.camera.OverviewMode
+import com.mapbox.navigation.ui.maps.internal.camera.OverviewViewportDataSource
 import com.mapbox.navigation.ui.maps.internal.camera.SimplifiedUpdateFrameTransitionProvider
 import com.mapbox.navigation.utils.internal.logI
 import java.util.concurrent.CopyOnWriteArraySet
@@ -227,6 +230,7 @@ internal constructor(
                         DefaultSimplifiedUpdateFrameTransitionProvider(cameraPlugin),
                     )
                 }
+
                 false -> {
                     FullFrameAnimatorsCreator(stateTransition, cameraPlugin, mapboxMap)
                 }
@@ -245,6 +249,8 @@ internal constructor(
         CopyOnWriteArraySet<NavigationCameraStateChangedObserver>()
 
     private var currentStateTransitionListener: NavigationCameraTransitionListener? = null
+    private var overviewViewportDataSource: OverviewViewportDataSource? =
+        (viewportDataSource as? MapboxNavigationViewportDataSource)?.overviewViewportDataSource
 
     /**
      * Returns current [NavigationCameraState].
@@ -341,9 +347,11 @@ internal constructor(
                     transitionEndListeners.add(transitionEndListener)
                 }
             }
+
             FOLLOWING -> {
                 transitionEndListener?.onTransitionEnd(isCanceled = false)
             }
+
             IDLE, TRANSITION_TO_OVERVIEW, OVERVIEW -> {
                 val data = viewportDataSource.getViewportData()
                 startAnimation(
@@ -419,32 +427,54 @@ internal constructor(
                     transitionEndListeners.add(transitionEndListener)
                 }
             }
+
             OVERVIEW -> {
                 transitionEndListener?.onTransitionEnd(isCanceled = false)
             }
+
             IDLE, TRANSITION_TO_FOLLOWING, FOLLOWING -> {
-                val data = viewportDataSource.getViewportData()
                 startAnimation(
-                    animatorsCreator.transitionToOverview(
-                        data.cameraForOverview,
+                    getOverviewTransition(
                         stateTransitionOptions,
-                    ).apply {
-                        addListener(
-                            createTransitionListener(
-                                TRANSITION_TO_OVERVIEW,
-                                OVERVIEW,
-                                frameTransitionOptions,
-                            ).also {
-                                this@NavigationCamera.currentStateTransitionListener = it
-                            },
-                        )
-                    },
+                        frameTransitionOptions,
+                    ),
                     instant = false,
                     transitionEndListener,
                 )
             }
         }
     }
+
+    private fun getOverviewTransition(
+        stateTransitionOptions: NavigationCameraTransitionOptions,
+        frameTransitionOptions: NavigationCameraTransitionOptions,
+    ): FullAnimatorSet {
+        val cameraForOverview = viewportDataSource.getViewportData().cameraForOverview
+        return if (overviewViewportDataSource?.isPointsOverview() == true) {
+            animatorsCreator.transitionToPointsOverview(
+                cameraForOverview,
+                stateTransitionOptions,
+            )
+        } else {
+            animatorsCreator.transitionToRouteOverview(
+                cameraForOverview,
+                stateTransitionOptions,
+            )
+        }.apply {
+            addListener(
+                createTransitionListener(
+                    TRANSITION_TO_OVERVIEW,
+                    OVERVIEW,
+                    frameTransitionOptions,
+                ).also {
+                    this@NavigationCamera.currentStateTransitionListener = it
+                },
+            )
+        }
+    }
+
+    private fun OverviewViewportDataSource.isPointsOverview() =
+        this.internalOptions.overviewMode == OverviewMode.POINTS
 
     /**
      * Immediately goes to [IDLE] state canceling all ongoing transitions.
@@ -634,9 +664,11 @@ internal constructor(
             FOLLOWING -> {
                 this.frameTransitionOptions = frameTransitionOptions
             }
+
             TRANSITION_TO_FOLLOWING -> {
                 currentStateTransitionListener?.frameTransitionOptions = frameTransitionOptions
             }
+
             else -> {
                 // no-op
             }
@@ -654,9 +686,11 @@ internal constructor(
             OVERVIEW -> {
                 this.frameTransitionOptions = frameTransitionOptions
             }
+
             TRANSITION_TO_OVERVIEW -> {
                 currentStateTransitionListener?.frameTransitionOptions = frameTransitionOptions
             }
+
             else -> {
                 // no-op
             }

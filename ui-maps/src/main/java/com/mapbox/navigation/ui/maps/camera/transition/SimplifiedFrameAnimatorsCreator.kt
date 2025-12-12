@@ -4,6 +4,7 @@ import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.navigation.ui.maps.internal.camera.SimplifiedUpdateFrameTransitionProvider
+import com.mapbox.navigation.ui.maps.internal.camera.transitionToPointsOverviewInternal
 
 internal class SimplifiedFrameAnimatorsCreator(
     private val cameraAnimationsPlugin: CameraAnimationsPlugin,
@@ -23,7 +24,7 @@ internal class SimplifiedFrameAnimatorsCreator(
         )
     }
 
-    override fun transitionToOverview(
+    override fun transitionToRouteOverview(
         cameraOptions: CameraOptions,
         transitionOptions: NavigationCameraTransitionOptions,
     ): FullAnimatorSet {
@@ -31,6 +32,22 @@ internal class SimplifiedFrameAnimatorsCreator(
             cameraAnimationsPlugin,
             mapboxMap,
             stateTransitionProvider.transitionToOverview(cameraOptions, transitionOptions),
+        )
+    }
+
+    override fun transitionToPointsOverview(
+        cameraOptions: CameraOptions,
+        transitionOptions: NavigationCameraTransitionOptions,
+    ): FullAnimatorSet {
+        return FullAnimatorSet(
+            cameraAnimationsPlugin,
+            mapboxMap,
+            transitionToPointsOverviewInternal(
+                cameraAnimationsPlugin,
+                mapboxMap,
+                cameraOptions,
+                transitionOptions,
+            ),
         )
     }
 

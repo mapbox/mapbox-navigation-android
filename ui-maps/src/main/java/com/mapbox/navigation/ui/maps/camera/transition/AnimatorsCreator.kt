@@ -9,7 +9,12 @@ internal sealed interface AnimatorsCreator {
         transitionOptions: NavigationCameraTransitionOptions,
     ): FullAnimatorSet
 
-    fun transitionToOverview(
+    fun transitionToRouteOverview(
+        cameraOptions: CameraOptions,
+        transitionOptions: NavigationCameraTransitionOptions,
+    ): FullAnimatorSet
+
+    fun transitionToPointsOverview(
         cameraOptions: CameraOptions,
         transitionOptions: NavigationCameraTransitionOptions,
     ): FullAnimatorSet

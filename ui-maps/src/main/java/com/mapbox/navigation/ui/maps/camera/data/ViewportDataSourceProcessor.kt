@@ -231,7 +231,7 @@ internal object ViewportDataSourceProcessor {
             }
         val remainingPointsAfterCurrentStep = remainingStepsAfterCurrentStep.flatten()
         val remainingPointsAfterCurrentLeg = when (overviewMode) {
-            OverviewMode.ACTIVE_LEG -> emptyList()
+            OverviewMode.ACTIVE_LEG, OverviewMode.POINTS -> emptyList()
             OverviewMode.ENTIRE_ROUTE -> simplifiedCompleteRoutePoints.subList(
                 legIndex + 1,
                 simplifiedCompleteRoutePoints.size,

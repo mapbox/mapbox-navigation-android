@@ -67,7 +67,7 @@ class NavigationCameraTest {
     )
     private val animatorsCreator: AnimatorsCreator = mockk(relaxUnitFun = true) {
         every { transitionToFollowing(any(), any()) } returns followingAnimatorSet
-        every { transitionToOverview(any(), any()) } returns overviewAnimatorSet
+        every { transitionToRouteOverview(any(), any()) } returns overviewAnimatorSet
         every { updateFrameForFollowing(any(), any()) } returns followingFrameAnimatorSet
         every { updateFrameForOverview(any(), any()) } returns overviewFrameAnimatorSet
     }
@@ -157,7 +157,7 @@ class NavigationCameraTest {
         navigationCamera.requestNavigationCameraToOverview()
 
         verifyTransitionExecuted(
-            AnimatorsCreator::transitionToOverview,
+            AnimatorsCreator::transitionToRouteOverview,
             overviewCameraOptions,
             DEFAULT_STATE_TRANSITION_OPT,
             overviewAnimatorSet,
@@ -206,7 +206,7 @@ class NavigationCameraTest {
         navigationCamera.requestNavigationCameraToOverview()
 
         verifyTransitionExecuted(
-            AnimatorsCreator::transitionToOverview,
+            AnimatorsCreator::transitionToRouteOverview,
             overviewCameraOptions,
             DEFAULT_STATE_TRANSITION_OPT,
             overviewAnimatorSet,
@@ -416,7 +416,7 @@ class NavigationCameraTest {
             times = 0,
         )
         verifyTransitionExecuted(
-            AnimatorsCreator::transitionToOverview,
+            AnimatorsCreator::transitionToRouteOverview,
             overviewCameraOptions,
             DEFAULT_STATE_TRANSITION_OPT,
             overviewAnimatorSet,
@@ -530,7 +530,7 @@ class NavigationCameraTest {
         )
 
         verifyTransitionExecuted(
-            AnimatorsCreator::transitionToOverview,
+            AnimatorsCreator::transitionToRouteOverview,
             overviewCameraOptions,
             stateOpt,
             overviewAnimatorSet,
