@@ -1,5 +1,26 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.17.1 - 12 December, 2025
+#### Features
+- Added new class `RerouteStateV2`: it allows you to observe RerouteStates with additional substates which are not present in the original `RerouteState`.  
+Current additional states are: `RerouteStateV2.Deviation.ApplyingRoute` and `RerouteStateV2.Deviation.RouteIgnored`. See the corresponding API reference for details.
+To observe `RerouteStateV2`, register a new type of observer: `RerouteController#registerRerouteStateV2Observer`.
+
+#### Bug fixes and improvements
+- Improved EV SAR call to return requested number of charging stations. 
+- ⚠️ Breaking change (preview API): removed `MapboxRoadCamerasDisplayConfig::showOnlyOnRoute`. Safe to remove. It's now a default behavior to show road cameras only on the route. 
+- Fixed a bug that prevented road cameras from being removed from the map after passing them. 
+- Fixed Copilot issues that caused recordings to be lost. 
+- Obfuscated access token in `RouteShieldError#url#toString`. 
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.17.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.17.1))
+- Mapbox Navigation Native `v324.17.1`
+- Mapbox Core Common `v24.17.1`
+- Mapbox Java `v7.9.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.9.0))
+
+
 ## Navigation SDK Core Framework 3.17.0 - 04 December, 2025
 #### Features
 - Added support of connctor types in `MapboxEvViewOptions` to be able to customize the connector types in the EV view. 
