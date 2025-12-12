@@ -1,5 +1,7 @@
 package com.mapbox.navigation.core.routerefresh
 
+import com.mapbox.api.directionsrefresh.v1.models.DirectionsRefreshResponse
+import com.mapbox.bindgen.DataRef
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.directions.session.RouteRefresh
@@ -7,6 +9,7 @@ import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshCallbac
 import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshError
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createNavigationRoute
+import com.mapbox.navigation.testing.factories.toDataRef
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Test
@@ -41,13 +44,14 @@ internal class RouteRefreshStub : RouteRefresh {
     fun setRefreshedRoute(
         refreshedRoute: NavigationRoute,
         expectedRefreshRequestData: RouteRefreshRequestData? = null,
+        refreshResponse: DataRef = "{}".toDataRef(),
     ) {
         handlers[refreshedRoute.id] = { _, refreshRequestData, callback ->
             if (expectedRefreshRequestData == null ||
                 refreshRequestData == expectedRefreshRequestData
             ) {
                 // TODO: refresh legs only from the passed index
-                callback.onRefreshReady(refreshedRoute)
+                callback.onRefreshReady(refreshedRoute, refreshResponse)
             } else {
                 throw IllegalArgumentException(
                     "Expected refresh data to be $expectedRefreshRequestData " +
@@ -95,7 +99,7 @@ class RouteRefreshStubTest {
         )
 
         verify(exactly = 1) { callback.onFailure(any()) }
-        verify(exactly = 0) { callback.onRefreshReady(any()) }
+        verify(exactly = 0) { callback.onRefreshReady(any(), any()) }
     }
 
     @Test
@@ -113,7 +117,11 @@ class RouteRefreshStubTest {
                 requestUuid = "test",
             ),
         )
-        stub.setRefreshedRoute(refreshed)
+        val refreshResponse = DirectionsRefreshResponse.builder()
+            .code("200")
+            .build()
+            .toJson().toDataRef()
+        stub.setRefreshedRoute(refreshed, refreshResponse = refreshResponse)
 
         val callback = mockk<NavigationRouterRefreshCallback>(relaxed = true)
         stub.requestRouteRefresh(
@@ -122,7 +130,7 @@ class RouteRefreshStubTest {
             callback,
         )
 
-        verify(exactly = 1) { callback.onRefreshReady(refreshed) }
+        verify(exactly = 1) { callback.onRefreshReady(refreshed, refreshResponse) }
         verify(exactly = 0) { callback.onFailure(any()) }
     }
 
@@ -151,7 +159,7 @@ class RouteRefreshStubTest {
             callback,
         )
 
-        verify(exactly = 1) { callback.onRefreshReady(refreshed) }
+        verify(exactly = 1) { callback.onRefreshReady(refreshed, any()) }
         verify(exactly = 0) { callback.onFailure(any()) }
     }
 
@@ -180,7 +188,7 @@ class RouteRefreshStubTest {
             callback,
         )
 
-        verify(exactly = 0) { callback.onRefreshReady(refreshed) }
+        verify(exactly = 0) { callback.onRefreshReady(refreshed, any()) }
         verify(exactly = 0) { callback.onFailure(any()) }
     }
 
@@ -202,7 +210,7 @@ class RouteRefreshStubTest {
         )
 
         verify(exactly = 1) { callback.onFailure(any()) }
-        verify(exactly = 0) { callback.onRefreshReady(any()) }
+        verify(exactly = 0) { callback.onRefreshReady(any(), any()) }
     }
 
     @Test
@@ -223,6 +231,6 @@ class RouteRefreshStubTest {
         )
 
         verify(exactly = 0) { callback.onFailure(any()) }
-        verify(exactly = 0) { callback.onRefreshReady(any()) }
+        verify(exactly = 0) { callback.onRefreshReady(any(), any()) }
     }
 }

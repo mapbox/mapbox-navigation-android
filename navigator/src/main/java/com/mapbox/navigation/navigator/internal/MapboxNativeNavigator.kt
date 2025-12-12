@@ -1,7 +1,7 @@
 package com.mapbox.navigation.navigator.internal
 
 import androidx.annotation.RestrictTo
-import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.common.TileStore
 import com.mapbox.common.TilesetDescriptor
@@ -100,9 +100,15 @@ interface MapboxNativeNavigator : RerouteEventsProvider {
      * Updates annotations so that subsequent calls to getStatus will
      * reflect the most current annotations for the route.
      *
-     * @param route [DirectionsRoute]
+     * @param route [NavigationRoute]
+     * @param refreshResponse Optional DataRef from refresh response to avoid JSON reconstruction
+     * @param geometryIndex Optional geometry index from which the route refresh was requested
      */
-    suspend fun refreshRoute(route: NavigationRoute): Expected<String, List<RouteAlternative>>
+    suspend fun refreshRoute(
+        route: NavigationRoute,
+        refreshResponse: DataRef?,
+        geometryIndex: Int?,
+    ): Expected<String, List<RouteAlternative>>
 
     /**
      * Follows a new leg of the already loaded directions.

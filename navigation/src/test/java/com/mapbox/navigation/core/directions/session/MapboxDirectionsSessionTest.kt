@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.directions.session
 
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.bindgen.DataRef
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.internal.route.routeOptions
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -46,6 +47,7 @@ class MapboxDirectionsSessionTest {
     private val routes: List<NavigationRoute> = listOf(route)
     private val ignoredRoutes: List<IgnoredRoute> = listOf(ignoredRoute)
     private val routeRefreshRequestData = RouteRefreshRequestData(1, 2, 3, emptyMap())
+    private val refreshResponse: DataRef = mockk(relaxUnitFun = true)
     private lateinit var routeCallback: NavigationRouterCallback
     private lateinit var refreshCallback: NavigationRouterRefreshCallback
 
@@ -124,9 +126,9 @@ class MapboxDirectionsSessionTest {
     @Test
     fun `route refresh response - success`() {
         session.requestRouteRefresh(route, routeRefreshRequestData, routesRefreshRequestCallback)
-        refreshCallback.onRefreshReady(route)
+        refreshCallback.onRefreshReady(route, refreshResponse)
 
-        verify(exactly = 1) { routesRefreshRequestCallback.onRefreshReady(route) }
+        verify(exactly = 1) { routesRefreshRequestCallback.onRefreshReady(route, refreshResponse) }
     }
 
     @Test
@@ -172,11 +174,19 @@ class MapboxDirectionsSessionTest {
             SetRoutes.CleanUp to 0,
             SetRoutes.Reroute(5) to 5,
             SetRoutes.Alternatives(3) to 3,
-            SetRoutes.RefreshRoutes(
+            SetRoutes.RefreshRoutes.RefreshControllerRefresh(
                 mockk {
-                    every { legIndex } returns 4
+                    every { primaryRouteRefresherResult } returns mockk {
+                        every { routeProgressData } returns mockk {
+                            every { legIndex } returns 4
+                        }
+                    }
                 },
             ) to 4,
+            SetRoutes.RefreshRoutes.ExternalRefresh(
+                legIndex = 5,
+                isManual = true,
+            ) to 5,
         )
 
         cases.forEach { (setRoutes, expectedInitialLegIndex) ->
@@ -186,7 +196,7 @@ class MapboxDirectionsSessionTest {
 
             assertEquals(expectedInitialLegIndex, session.initialLegIndex)
         }
-        assertEquals("5 (one per each sealed class) cases must be covered", 5, cases.size)
+        assertEquals("6 (one per each sealed class) cases must be covered", 6, cases.size)
     }
 
     @Test

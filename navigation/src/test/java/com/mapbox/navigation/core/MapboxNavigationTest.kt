@@ -1546,13 +1546,13 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                 RouteRefresherResult(
                     primaryRoute,
                     primaryRouteProgressData,
-                    RouteRefresherStatus.SUCCESS,
+                    RouteRefresherStatus.Success(mockk()),
                 ),
                 listOf(
                     RouteRefresherResult(
                         alternativeRoute,
                         alternativeRouteProgressData,
-                        RouteRefresherStatus.SUCCESS,
+                        RouteRefresherStatus.Success(mockk()),
                     ),
                 ),
             )
@@ -1570,7 +1570,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             coVerify(exactly = 1) {
                 tripSession.setRoutes(
                     listOf(primaryRoute, alternativeRoute),
-                    SetRoutes.RefreshRoutes(primaryRouteProgressData),
+                    SetRoutes.RefreshRoutes.RefreshControllerRefresh(routesRefreshData),
                 )
             }
             verify(exactly = 0) { defaultRerouteController.interrupt() }
@@ -1631,7 +1631,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             coEvery {
                 tripSession.setRoutes(
                     refreshedRoutes,
-                    SetRoutes.RefreshRoutes(routeProgressData),
+                    SetRoutes.RefreshRoutes.RefreshControllerRefresh(mockk()),
                 )
             } returns NativeSetRouteError("some error")
 
@@ -1895,18 +1895,18 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                 RouteRefresherResult(
                     primaryRoute,
                     primaryRouteProgressData,
-                    RouteRefresherStatus.SUCCESS,
+                    RouteRefresherStatus.Success(mockk()),
                 ),
                 listOf(
                     RouteRefresherResult(
                         alternativeRoute1,
                         alternativeRoute1ProgressData,
-                        RouteRefresherStatus.SUCCESS,
+                        RouteRefresherStatus.Success(mockk()),
                     ),
                     RouteRefresherResult(
                         alternativeRoute2,
                         alternativeRoute2ProgressData,
-                        RouteRefresherStatus.SUCCESS,
+                        RouteRefresherStatus.Success(mockk()),
                     ),
                 ),
             )
@@ -1915,7 +1915,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             coVerify(exactly = 1) {
                 tripSession.setRoutes(
                     listOf(primaryRoute, alternativeRoute1, alternativeRoute2),
-                    SetRoutes.RefreshRoutes(primaryRouteProgressData),
+                    SetRoutes.RefreshRoutes.RefreshControllerRefresh(routesRefreshData),
                 )
             }
             verify(exactly = 1) {
@@ -1923,7 +1923,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                     DirectionsSessionRoutes(
                         acceptedRefreshRoutes,
                         ignoredRefreshRoutes,
-                        SetRoutes.RefreshRoutes(primaryRouteProgressData),
+                        SetRoutes.RefreshRoutes.RefreshControllerRefresh(routesRefreshData),
                     ),
                 )
             }
@@ -1986,13 +1986,13 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                 RouteRefresherResult(
                     primaryRoute,
                     primaryRouteProgressData,
-                    RouteRefresherStatus.SUCCESS,
+                    RouteRefresherStatus.Success(mockk()),
                 ),
                 listOf(
                     RouteRefresherResult(
                         alternativeRoute,
                         alternativeRouteProgressData,
-                        RouteRefresherStatus.SUCCESS,
+                        RouteRefresherStatus.Success(mockk()),
                     ),
                 ),
             )
@@ -2008,7 +2008,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             coVerify(exactly = 1) {
                 tripSession.setRoutes(
                     listOf(primaryRoute, alternativeRoute),
-                    SetRoutes.RefreshRoutes(primaryRouteProgressData),
+                    SetRoutes.RefreshRoutes.RefreshControllerRefresh(routesRefreshData),
                 )
             }
             verify(exactly = 0) {

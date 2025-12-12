@@ -21,17 +21,15 @@ internal class ExpiringDataRemover(
             routesRefresherResult.primaryRouteRefresherResult.routeProgressData.legIndex,
         )
         val alternativeRoutesData = routesRefresherResult.alternativesRouteRefresherResults.map {
-            RouteRefresherResult(
-                removeExpiringDataFromRoute(it.route, it.routeProgressData?.legIndex ?: 0),
-                it.routeProgressData,
-                it.status,
+            it.copy(
+                route = removeExpiringDataFromRoute(it.route, it.routeProgressData?.legIndex ?: 0),
+                wasRouteUpdated = true,
             )
         }
         return RoutesRefresherResult(
-            RouteRefresherResult(
-                primaryRoute,
-                routesRefresherResult.primaryRouteRefresherResult.routeProgressData,
-                routesRefresherResult.primaryRouteRefresherResult.status,
+            routesRefresherResult.primaryRouteRefresherResult.copy(
+                route = primaryRoute,
+                wasRouteUpdated = true,
             ),
             alternativeRoutesData,
         )

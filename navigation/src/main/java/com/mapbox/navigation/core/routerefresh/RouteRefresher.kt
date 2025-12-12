@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.routerefresh
 
 import android.util.Log
+import com.mapbox.bindgen.DataRef
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.internal.route.isExpired
 import com.mapbox.navigation.base.internal.route.routeOptions
@@ -25,17 +26,20 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
-internal enum class RouteRefresherStatus {
-    SUCCESS, FAILURE, INVALID, INVALIDATED
+internal sealed class RouteRefresherStatus {
+    data class Success(val refreshResponse: DataRef) : RouteRefresherStatus()
+    object Failure : RouteRefresherStatus()
+    object Invalid : RouteRefresherStatus()
+    object Invalidated : RouteRefresherStatus()
 }
 
-internal data class RouteRefresherResult<T>(
+internal data class RouteRefresherResult<out T>(
     val route: NavigationRoute,
     val routeProgressData: T,
     val status: RouteRefresherStatus,
+    val wasRouteUpdated: Boolean = status is RouteRefresherStatus.Success,
 ) {
-
-    fun isSuccess(): Boolean = status == RouteRefresherStatus.SUCCESS
+    fun isSuccess(): Boolean = status is RouteRefresherStatus.Success
 }
 
 internal data class RoutesRefresherResult(
@@ -48,8 +52,17 @@ internal data class RoutesRefresherResult(
     }
 
     fun anyRequestFailed(): Boolean {
-        return primaryRouteRefresherResult.status == RouteRefresherStatus.FAILURE ||
-            alternativesRouteRefresherResults.any { it.status == RouteRefresherStatus.FAILURE }
+        return primaryRouteRefresherResult.status == RouteRefresherStatus.Failure ||
+            alternativesRouteRefresherResults.any { it.status == RouteRefresherStatus.Failure }
+    }
+
+    fun find(routeId: String?): RouteRefresherResult<RouteProgressData?>? {
+        if (primaryRouteRefresherResult.route.id == routeId) {
+            return primaryRouteRefresherResult
+        }
+        return alternativesRouteRefresherResults.firstOrNull {
+            it.route.id == routeId
+        }
     }
 }
 
@@ -111,7 +124,7 @@ internal class RouteRefresher(
                     val timeoutDefault = RouteRefresherResult(
                         routeData.first,
                         routeProgressData,
-                        RouteRefresherStatus.FAILURE,
+                        RouteRefresherStatus.Failure,
                     )
                     withTimeoutOrDefault(timeout, timeoutDefault) {
                         if (routeProgressData != null) {
@@ -126,7 +139,7 @@ internal class RouteRefresher(
                             RouteRefresherResult<RouteProgressData?>(
                                 routeData.first,
                                 routeProgressData,
-                                RouteRefresherStatus.FAILURE,
+                                RouteRefresherStatus.Failure,
                             )
                         }
                     }
@@ -145,14 +158,22 @@ internal class RouteRefresher(
                 "route ${route.id} can't be refreshed because ${validationResult.reason}",
                 RouteRefreshLog.LOG_CATEGORY,
             )
-            return RouteRefresherResult(route, routeProgressData, RouteRefresherStatus.INVALID)
+            return RouteRefresherResult(
+                route,
+                routeProgressData,
+                RouteRefresherStatus.Invalid,
+            )
         }
         if (route.isExpired()) {
             logI(
                 "route ${route.id} will not be refreshed because it is invalidated",
                 RouteRefreshLog.LOG_CATEGORY,
             )
-            return RouteRefresherResult(route, routeProgressData, RouteRefresherStatus.INVALIDATED)
+            return RouteRefresherResult(
+                route,
+                routeProgressData,
+                RouteRefresherStatus.Invalidated,
+            )
         }
         val routeRefreshRequestData = RouteRefreshRequestData(
             routeProgressData.legIndex,
@@ -168,9 +189,9 @@ internal class RouteRefresher(
                     RouteRefreshLog.LOG_CATEGORY,
                 )
                 val status = if (result.error.refreshTtl == 0) {
-                    RouteRefresherStatus.INVALIDATED
+                    RouteRefresherStatus.Invalidated
                 } else {
-                    RouteRefresherStatus.FAILURE
+                    RouteRefresherStatus.Failure
                 }
                 RouteRefresherResult(route, routeProgressData, status)
             }
@@ -184,7 +205,11 @@ internal class RouteRefresher(
                     oldRoute = route,
                     currentLegIndex = routeRefreshRequestData.legIndex,
                 )
-                RouteRefresherResult(result.route, routeProgressData, RouteRefresherStatus.SUCCESS)
+                RouteRefresherResult(
+                    result.route,
+                    routeProgressData,
+                    RouteRefresherStatus.Success(result.refreshResponse),
+                )
             }
         }
     }
@@ -198,8 +223,8 @@ internal class RouteRefresher(
                 route,
                 routeRefreshRequestData,
                 object : NavigationRouterRefreshCallback {
-                    override fun onRefreshReady(route: NavigationRoute) {
-                        continuation.resume(RouteRefreshResult.Success(route))
+                    override fun onRefreshReady(route: NavigationRoute, refreshResponse: DataRef) {
+                        continuation.resume(RouteRefreshResult.Success(route, refreshResponse))
                     }
 
                     override fun onFailure(error: NavigationRouterRefreshError) {
@@ -245,7 +270,10 @@ internal class RouteRefresher(
     }
 
     private sealed class RouteRefreshResult {
-        data class Success(val route: NavigationRoute) : RouteRefreshResult()
+        data class Success(
+            val route: NavigationRoute,
+            val refreshResponse: DataRef,
+        ) : RouteRefreshResult()
         data class Fail(val error: NavigationRouterRefreshError) : RouteRefreshResult()
     }
 }

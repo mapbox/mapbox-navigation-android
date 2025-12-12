@@ -164,6 +164,7 @@ class RouterWrapperTests {
     private val getRouteSlot = slot<com.mapbox.navigator.RouterDataRefCallback>()
     private val refreshRouteSlot = slot<RouterRefreshCallback>()
     private val routeSlot = slot<NavigationRoute>()
+    private val refreshResponseSlot = slot<DataRef>()
 
     @Before
     fun setUp() {
@@ -707,7 +708,7 @@ class RouterWrapperTests {
         refreshRouteSlot.captured.run(routerRefreshSuccess, nativeOriginOnline, hashMapOf())
 
         verify(exactly = 0) { routerRefreshCallback.onFailure(any()) }
-        verify(exactly = 0) { routerRefreshCallback.onRefreshReady(any()) }
+        verify(exactly = 0) { routerRefreshCallback.onRefreshReady(any(), any()) }
     }
 
     @Test
@@ -745,7 +746,7 @@ class RouterWrapperTests {
         refreshRouteSlot.captured.run(routerRefreshSuccess, nativeOriginOnline, hashMapOf())
 
         verify(exactly = 0) { routerRefreshCallback.onFailure(any()) }
-        verify(exactly = 0) { routerRefreshCallback.onRefreshReady(any()) }
+        verify(exactly = 0) { routerRefreshCallback.onRefreshReady(any(), any()) }
     }
 
     @Test
@@ -786,7 +787,7 @@ class RouterWrapperTests {
 
         getRouteSlot.captured.run(routerResultSuccess, nativeOriginOnline)
 
-        verify(exactly = 0) { routerRefreshCallback.onRefreshReady(any()) }
+        verify(exactly = 0) { routerRefreshCallback.onRefreshReady(any(), any()) }
         verify(exactly = 0) { routerRefreshCallback.onFailure(any()) }
         verify(exactly = 0) { navigationRouterCallback.onCanceled(any(), any()) }
         verify(exactly = 0) { navigationRouterCallback.onFailure(any(), any()) }
@@ -796,7 +797,7 @@ class RouterWrapperTests {
 
         refreshRouteSlot.captured.run(routerRefreshSuccess, nativeOriginOnline, hashMapOf())
 
-        verify(exactly = 1) { routerRefreshCallback.onRefreshReady(any()) }
+        verify(exactly = 1) { routerRefreshCallback.onRefreshReady(any(), any()) }
         verify(exactly = 0) { routerRefreshCallback.onFailure(any()) }
         verify(exactly = 0) { navigationRouterCallback.onCanceled(any(), any()) }
         verify(exactly = 0) { navigationRouterCallback.onFailure(any(), any()) }
@@ -840,7 +841,7 @@ class RouterWrapperTests {
         clearMocks(routerRefreshCallback, navigationRouterCallback, answers = false)
         refreshRouteSlot.captured.run(routerRefreshSuccess, nativeOriginOnline, hashMapOf())
 
-        verify(exactly = 0) { routerRefreshCallback.onRefreshReady(any()) }
+        verify(exactly = 0) { routerRefreshCallback.onRefreshReady(any(), any()) }
         verify(exactly = 0) { routerRefreshCallback.onFailure(any()) }
         verify(exactly = 0) { navigationRouterCallback.onCanceled(any(), any()) }
         verify(exactly = 0) { navigationRouterCallback.onFailure(any(), any()) }
@@ -850,7 +851,7 @@ class RouterWrapperTests {
 
         getRouteSlot.captured.run(routerResultSuccess, nativeOriginOnline)
 
-        verify(exactly = 0) { routerRefreshCallback.onRefreshReady(any()) }
+        verify(exactly = 0) { routerRefreshCallback.onRefreshReady(any(), any()) }
         verify(exactly = 0) { routerRefreshCallback.onFailure(any()) }
         verify(exactly = 0) { navigationRouterCallback.onCanceled(any(), any()) }
         verify(exactly = 0) { navigationRouterCallback.onFailure(any(), any()) }
@@ -920,9 +921,9 @@ class RouterWrapperTests {
 
         refreshRouteSlots[0].run(routerRefreshSuccess, nativeOriginOnline, hashMapOf())
 
-        verify(exactly = 0) { routerRefreshCallback.onRefreshReady(any()) }
+        verify(exactly = 0) { routerRefreshCallback.onRefreshReady(any(), any()) }
         verify(exactly = 0) { routerRefreshCallback.onFailure(any()) }
-        verify(exactly = 0) { routerRefreshCallback2.onRefreshReady(any()) }
+        verify(exactly = 0) { routerRefreshCallback2.onRefreshReady(any(), any()) }
         verify(exactly = 0) { routerRefreshCallback2.onFailure(any()) }
         verify(exactly = 0) { navigationRouterCallback.onCanceled(any(), any()) }
         verify(exactly = 0) { navigationRouterCallback.onFailure(any(), any()) }
@@ -941,9 +942,9 @@ class RouterWrapperTests {
 
         getRouteSlots[0].run(routerResultSuccess, nativeOriginOnline)
 
-        verify(exactly = 0) { routerRefreshCallback.onRefreshReady(any()) }
+        verify(exactly = 0) { routerRefreshCallback.onRefreshReady(any(), any()) }
         verify(exactly = 0) { routerRefreshCallback.onFailure(any()) }
-        verify(exactly = 0) { routerRefreshCallback2.onRefreshReady(any()) }
+        verify(exactly = 0) { routerRefreshCallback2.onRefreshReady(any(), any()) }
         verify(exactly = 0) { routerRefreshCallback2.onFailure(any()) }
         verify(exactly = 0) { navigationRouterCallback.onCanceled(any(), any()) }
         verify(exactly = 0) { navigationRouterCallback.onFailure(any(), any()) }
@@ -962,9 +963,9 @@ class RouterWrapperTests {
 
         getRouteSlots[1].run(routerResultSuccess, nativeOriginOnline)
 
-        verify(exactly = 0) { routerRefreshCallback.onRefreshReady(any()) }
+        verify(exactly = 0) { routerRefreshCallback.onRefreshReady(any(), any()) }
         verify(exactly = 0) { routerRefreshCallback.onFailure(any()) }
-        verify(exactly = 0) { routerRefreshCallback2.onRefreshReady(any()) }
+        verify(exactly = 0) { routerRefreshCallback2.onRefreshReady(any(), any()) }
         verify(exactly = 0) { routerRefreshCallback2.onFailure(any()) }
         verify(exactly = 0) { navigationRouterCallback.onCanceled(any(), any()) }
         verify(exactly = 0) { navigationRouterCallback.onFailure(any(), any()) }
@@ -983,9 +984,9 @@ class RouterWrapperTests {
 
         refreshRouteSlots[1].run(routerRefreshSuccess, nativeOriginOnline, hashMapOf())
 
-        verify(exactly = 0) { routerRefreshCallback.onRefreshReady(any()) }
+        verify(exactly = 0) { routerRefreshCallback.onRefreshReady(any(), any()) }
         verify(exactly = 0) { routerRefreshCallback.onFailure(any()) }
-        verify(exactly = 0) { routerRefreshCallback2.onRefreshReady(any()) }
+        verify(exactly = 0) { routerRefreshCallback2.onRefreshReady(any(), any()) }
         verify(exactly = 0) { routerRefreshCallback2.onFailure(any()) }
         verify(exactly = 0) { navigationRouterCallback.onCanceled(any(), any()) }
         verify(exactly = 0) { navigationRouterCallback.onFailure(any(), any()) }
@@ -1107,10 +1108,16 @@ class RouterWrapperTests {
             ONLINE,
         ).first()
 
-        verify(exactly = 1) { routerRefreshCallback.onRefreshReady(capture(routeSlot)) }
+        verify(exactly = 1) {
+            routerRefreshCallback.onRefreshReady(
+                capture(routeSlot),
+                capture(refreshResponseSlot),
+            )
+        }
         checkRefreshedNavigationRouteWithWithWaypoints(expected, routeSlot.captured)
         assertNotNull(routeSlot.captured.routeRefreshMetadata)
         assertTrue(routeSlot.captured.routeRefreshMetadata!!.isUpToDate)
+        assertEquals(routerRefreshSuccess.value, refreshResponseSlot.captured)
     }
 
     @Test
@@ -1160,7 +1167,7 @@ class RouterWrapperTests {
             ONLINE,
         ).first()
 
-        verify(exactly = 1) { routerRefreshCallback.onRefreshReady(capture(routeSlot)) }
+        verify(exactly = 1) { routerRefreshCallback.onRefreshReady(capture(routeSlot), any()) }
         checkRefreshedNavigationRouteWithWithWaypoints(expected, routeSlot.captured)
     }
 
@@ -1304,7 +1311,7 @@ class RouterWrapperTests {
             )
 
             val routeCaptor = slot<NavigationRoute>()
-            verify { routerRefreshCallback.onRefreshReady(capture(routeCaptor)) }
+            verify { routerRefreshCallback.onRefreshReady(capture(routeCaptor), any()) }
 
             clock.advanceTimeBy(49.seconds)
             assertFalse(routeCaptor.captured.isExpired())
@@ -1340,7 +1347,7 @@ class RouterWrapperTests {
             refreshRouteSlot.captured.run(routerRefreshSuccess, nativeOriginOnboard, hashMapOf())
 
             val routeCaptor = slot<NavigationRoute>()
-            verify { routerRefreshCallback.onRefreshReady(capture(routeCaptor)) }
+            verify { routerRefreshCallback.onRefreshReady(capture(routeCaptor), any()) }
 
             clock.advanceTimeBy(10_000.seconds)
             assertFalse(routeCaptor.captured.isExpired())

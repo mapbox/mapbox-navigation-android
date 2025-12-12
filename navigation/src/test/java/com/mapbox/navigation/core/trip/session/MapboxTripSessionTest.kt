@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
+import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.location.Location
 import com.mapbox.common.location.LocationServiceFactory
@@ -16,6 +17,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.core.SetRoutes
+import com.mapbox.navigation.core.SetRoutes.RefreshRoutes.RefreshControllerRefresh
 import com.mapbox.navigation.core.internal.RouteProgressData
 import com.mapbox.navigation.core.navigator.getCurrentBannerInstructions
 import com.mapbox.navigation.core.navigator.getLocationMatcherResult
@@ -25,6 +27,10 @@ import com.mapbox.navigation.core.navigator.toFixLocation
 import com.mapbox.navigation.core.navigator.toLocation
 import com.mapbox.navigation.core.navigator.toLocations
 import com.mapbox.navigation.core.reroute.RerouteController
+import com.mapbox.navigation.core.routerefresh.RouteRefresherResult
+import com.mapbox.navigation.core.routerefresh.RouteRefresherStatus
+import com.mapbox.navigation.core.routerefresh.RouteRefresherStatus.Success
+import com.mapbox.navigation.core.routerefresh.RoutesRefresherResult
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
 import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManager
@@ -35,6 +41,7 @@ import com.mapbox.navigation.navigator.internal.utils.calculateRemainingWaypoint
 import com.mapbox.navigation.navigator.internal.utils.getCurrentLegDestination
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.testing.assertIs
 import com.mapbox.navigation.testing.factories.createNavigationStatus
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
@@ -173,7 +180,7 @@ class MapboxTripSessionTest {
         coEvery { navigator.setRoutes(any(), any(), any(), any()) } returns createSetRouteResult()
         coEvery { navigator.setAlternativeRoutes(any()) } returns listOf()
         coEvery {
-            navigator.refreshRoute(any())
+            navigator.refreshRoute(any(), any(), any())
         } returns ExpectedFactory.createValue(listOf())
         every { navigationStatus.getTripStatusFrom(any()) } returns tripStatus
 
@@ -725,15 +732,15 @@ class MapboxTripSessionTest {
 
             tripSession.setRoutes(
                 refreshedRoutes,
-                SetRoutes.RefreshRoutes(RouteProgressData(0, 0, null)),
+                mockSuccessfulSetRouteRefresh(refreshedRoutes),
             )
 
             coVerifyOrder {
-                navigator.refreshRoute(refreshedRoutes[1])
-                navigator.refreshRoute(refreshedRoutes[0])
+                navigator.refreshRoute(refreshedRoutes[1], any(), any())
+                navigator.refreshRoute(refreshedRoutes[0], any(), any())
             }
             refreshedRoutes.forEach {
-                coVerify(exactly = 1) { navigator.refreshRoute(it) }
+                coVerify(exactly = 1) { navigator.refreshRoute(it, any(), any()) }
             }
             coVerify(exactly = 0) {
                 navigator.setRoutes(
@@ -742,6 +749,90 @@ class MapboxTripSessionTest {
                 )
             }
             coVerify(exactly = 0) { navigator.setAlternativeRoutes(any()) }
+        }
+
+    @Test
+    fun `only primary route was updated during refresh`() =
+        coroutineRule.runBlockingTest {
+            val refreshedRoutes = listOf(
+                mockk<NavigationRoute>(relaxed = true) {
+                    every { id } returns "id0"
+                },
+                mockk<NavigationRoute>(relaxed = true) {
+                    every { id } returns "id1"
+                },
+            )
+            tripSession.start(true)
+            val primaryRouteRefreshResponse = mockk<DataRef>()
+            val primaryRouteRefreshGeometryIndex = 2223
+
+            tripSession.setRoutes(
+                refreshedRoutes,
+                RefreshControllerRefresh(
+                    RoutesRefresherResult(
+                        RouteRefresherResult(
+                            refreshedRoutes.first(),
+                            RouteProgressData(3, primaryRouteRefreshGeometryIndex, 444),
+                            Success(primaryRouteRefreshResponse),
+                        ),
+                        refreshedRoutes.drop(1).map {
+                            RouteRefresherResult(
+                                it,
+                                RouteProgressData(2, 2, 3),
+                                RouteRefresherStatus.Failure,
+                            )
+                        },
+                    ),
+                ),
+            )
+
+            coVerify(exactly = 1) {
+                navigator.refreshRoute(
+                    refreshedRoutes.first(),
+                    primaryRouteRefreshResponse,
+                    primaryRouteRefreshGeometryIndex,
+                )
+            }
+            coVerify(exactly = 1) {
+                navigator.refreshRoute(any(), any(), any())
+            }
+        }
+
+    @Test
+    fun `none routes were updated during refresh`() =
+        coroutineRule.runBlockingTest {
+            val refreshedRoutes = listOf(
+                mockk<NavigationRoute>(relaxed = true) {
+                    every { id } returns "id0"
+                },
+                mockk<NavigationRoute>(relaxed = true) {
+                    every { id } returns "id1"
+                },
+            )
+            tripSession.start(true)
+
+            val result = tripSession.setRoutes(
+                refreshedRoutes,
+                RefreshControllerRefresh(
+                    RoutesRefresherResult(
+                        RouteRefresherResult(
+                            refreshedRoutes.first(),
+                            RouteProgressData(3, 8, 1),
+                            RouteRefresherStatus.Failure,
+                        ),
+                        refreshedRoutes.drop(1).map {
+                            RouteRefresherResult(
+                                it,
+                                RouteProgressData(2, 2, 3),
+                                RouteRefresherStatus.Failure,
+                            )
+                        },
+                    ),
+                ),
+            )
+
+            assertIs<NativeSetRouteError>(result)
+            coVerify(exactly = 0) { navigator.refreshRoute(any(), any(), any()) }
         }
 
     @Test
@@ -760,7 +851,7 @@ class MapboxTripSessionTest {
             coVerify(exactly = 0) {
                 navigator.setRoutes(routes.first(), 2, any(), any())
             }
-            coVerify(exactly = 0) { navigator.refreshRoute(any()) }
+            coVerify(exactly = 0) { navigator.refreshRoute(any(), any(), any()) }
         }
 
     @Test
@@ -857,10 +948,10 @@ class MapboxTripSessionTest {
                 },
             )
             coEvery {
-                navigator.refreshRoute(refreshedRoutes[0])
+                navigator.refreshRoute(refreshedRoutes[0], any(), any())
             } returns ExpectedFactory.createValue(mockAlternativesMetadata2)
             coEvery {
-                navigator.refreshRoute(refreshedRoutes[1])
+                navigator.refreshRoute(refreshedRoutes[1], any(), any())
             } returns ExpectedFactory.createValue(mockAlternativesMetadata1)
 
             refreshedRoutes.forEachIndexed { i, route ->
@@ -870,7 +961,7 @@ class MapboxTripSessionTest {
             tripSession.start(true)
             val result = tripSession.setRoutes(
                 refreshedRoutes,
-                SetRoutes.RefreshRoutes(routeProgressData),
+                mockSuccessfulSetRouteRefresh(refreshedRoutes),
             )
 
             assertEquals(
@@ -923,13 +1014,13 @@ class MapboxTripSessionTest {
                 },
             )
             coEvery {
-                navigator.refreshRoute(refreshedRoutes[0])
+                navigator.refreshRoute(refreshedRoutes[0], any(), any())
             } coAnswers {
                 delay(300)
                 ExpectedFactory.createValue(mockAlternativesMetadata2)
             }
             coEvery {
-                navigator.refreshRoute(refreshedRoutes[1])
+                navigator.refreshRoute(refreshedRoutes[1], any(), any())
             } coAnswers {
                 delay(500)
                 ExpectedFactory.createValue(mockAlternativesMetadata1)
@@ -944,7 +1035,7 @@ class MapboxTripSessionTest {
             val job = coroutineRule.coroutineScope.launch {
                 tripSession.setRoutes(
                     refreshedRoutes,
-                    SetRoutes.RefreshRoutes(routeProgressData),
+                    mockSuccessfulSetRouteRefresh(refreshedRoutes),
                 )
             }
 
@@ -994,10 +1085,10 @@ class MapboxTripSessionTest {
                 },
             )
             coEvery {
-                navigator.refreshRoute(refreshedRoutes[0])
+                navigator.refreshRoute(refreshedRoutes[0], any(), any())
             } returns ExpectedFactory.createValue(mockAlternativesMetadata1)
             coEvery {
-                navigator.refreshRoute(refreshedRoutes[1])
+                navigator.refreshRoute(refreshedRoutes[1], any(), any())
             } returns ExpectedFactory.createError(error)
 
             refreshedRoutes.forEachIndexed { i, route ->
@@ -1007,7 +1098,7 @@ class MapboxTripSessionTest {
             tripSession.start(true)
             val result = tripSession.setRoutes(
                 refreshedRoutes,
-                SetRoutes.RefreshRoutes(routeProgressData),
+                mockSuccessfulSetRouteRefresh(refreshedRoutes),
             )
 
             assertEquals(
@@ -1026,13 +1117,13 @@ class MapboxTripSessionTest {
         coroutineRule.runBlockingTest {
             val error = "some error"
             coEvery {
-                navigator.refreshRoute(any())
+                navigator.refreshRoute(any(), any(), any())
             } returns ExpectedFactory.createError(error)
 
             tripSession.start(true)
             val result = tripSession.setRoutes(
                 routes,
-                SetRoutes.RefreshRoutes(routeProgressData),
+                mockSuccessfulSetRouteRefresh(routes),
             )
 
             assertEquals(error, (result as NativeSetRouteError).error)
@@ -1478,7 +1569,7 @@ class MapboxTripSessionTest {
         coroutineRule.runBlockingTest {
             val primary = mockNavigationRoute()
             val alternative = mockNavigationRoute()
-            coEvery { navigator.refreshRoute(primary) } coAnswers {
+            coEvery { navigator.refreshRoute(primary, any(), any()) } coAnswers {
                 delay(100)
                 ExpectedFactory.createValue(emptyList())
             }
@@ -1490,7 +1581,7 @@ class MapboxTripSessionTest {
             tripSession.start(withTripService = true)
 
             pauseDispatcher {
-                val setRoutesInfo = SetRoutes.RefreshRoutes(routeProgressData)
+                val setRoutesInfo = mockSuccessfulSetRouteRefresh(listOf(primary, alternative))
                 launch { tripSession.setRoutes(listOf(primary, alternative), setRoutesInfo) }
                 runCurrent()
                 advanceTimeBy(delayTimeMillis = 50)
@@ -1722,36 +1813,38 @@ class MapboxTripSessionTest {
             assertNull(tripSession.lastVoiceInstruction)
         }
 
-    @Test fun `reroute invocation handler handles reroute completion when user is still off-route`() = coroutineRule.runBlockingTest {
-        // Arrange
-        val mockRerouteController = mockk<RerouteController>(relaxed = true)
-        val mockOffRouteObserver = mockk<OffRouteObserver>(relaxed = true)
+    @Test
+    fun `reroute invocation handler handles reroute completion when user is still off-route`() =
+        coroutineRule.runBlockingTest {
+            // Arrange
+            val mockRerouteController = mockk<RerouteController>(relaxed = true)
+            val mockOffRouteObserver = mockk<OffRouteObserver>(relaxed = true)
 
-        val offRouteNavigationStatus = mockk<NavigationStatus>(relaxed = true) {
-            every { routeState } returns RouteState.OFF_ROUTE
+            val offRouteNavigationStatus = mockk<NavigationStatus>(relaxed = true) {
+                every { routeState } returns RouteState.OFF_ROUTE
+            }
+            val offRouteTripStatus = mockk<TripStatus>(relaxed = true) {
+                every { navigationStatus } returns offRouteNavigationStatus
+            }
+
+            tripSession.setOffRouteObserverForReroute(mockOffRouteObserver, mockRerouteController)
+            tripSession.start(true)
+
+            // Act - trigger off-route state multiple times to simulate reroute logic
+            every { offRouteNavigationStatus.getTripStatusFrom(any()) } returns offRouteTripStatus
+            navigatorObserverImplSlot.captured.onStatus(
+                navigationStatusOrigin,
+                offRouteNavigationStatus,
+            )
+            navigatorObserverImplSlot.captured.onStatus(
+                navigationStatusOrigin,
+                offRouteNavigationStatus,
+            )
+
+            verify { mockOffRouteObserver.onOffRouteStateChanged(true) }
+
+            tripSession.stop()
         }
-        val offRouteTripStatus = mockk<TripStatus>(relaxed = true) {
-            every { navigationStatus } returns offRouteNavigationStatus
-        }
-
-        tripSession.setOffRouteObserverForReroute(mockOffRouteObserver, mockRerouteController)
-        tripSession.start(true)
-
-        // Act - trigger off-route state multiple times to simulate reroute logic
-        every { offRouteNavigationStatus.getTripStatusFrom(any()) } returns offRouteTripStatus
-        navigatorObserverImplSlot.captured.onStatus(
-            navigationStatusOrigin,
-            offRouteNavigationStatus,
-        )
-        navigatorObserverImplSlot.captured.onStatus(
-            navigationStatusOrigin,
-            offRouteNavigationStatus,
-        )
-
-        verify { mockOffRouteObserver.onOffRouteStateChanged(true) }
-
-        tripSession.stop()
-    }
 
     @After
     fun cleanUp() {
@@ -1777,6 +1870,24 @@ private fun mockNavigationRoute(
 ): NavigationRoute = mockk(relaxed = true) {
     every { upcomingRoadObjects } returns roadObjects
 }
+
+private fun mockSuccessfulSetRouteRefresh(routes: List<NavigationRoute>) =
+    SetRoutes.RefreshRoutes.RefreshControllerRefresh(
+        RoutesRefresherResult(
+            RouteRefresherResult(
+                routes.first(),
+                RouteProgressData(1, 2, 3),
+                RouteRefresherStatus.Success(mockk()),
+            ),
+            routes.drop(1).map {
+                RouteRefresherResult(
+                    it,
+                    RouteProgressData(2, 2, 3),
+                    RouteRefresherStatus.Success(mockk()),
+                )
+            },
+        ),
+    )
 
 fun createSetRouteError(
     error: String = "test error",

@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.internal.router
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.bindgen.DataRef
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterFailure
 
@@ -10,8 +11,10 @@ import com.mapbox.navigation.base.route.RouterFailure
 internal interface NavigationRouterRefreshCallback {
     /**
      * Called with a new instance of [NavigationRoute] with the underlying [DirectionsRoute] refreshed.
+     * @param route The refreshed route
+     * @param refreshResponse The original refresh response
      */
-    fun onRefreshReady(route: NavigationRoute)
+    fun onRefreshReady(route: NavigationRoute, refreshResponse: DataRef)
 
     /**
      * Called when an error has occurred while refreshing the route.

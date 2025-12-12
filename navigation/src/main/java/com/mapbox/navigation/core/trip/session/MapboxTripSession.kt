@@ -5,6 +5,7 @@ import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.Expected
+import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.location.Location
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.factory.RoadFactory
@@ -28,6 +29,7 @@ import com.mapbox.navigation.core.navigator.toLocation
 import com.mapbox.navigation.core.navigator.toLocations
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
+import com.mapbox.navigation.core.routerefresh.RouteRefresherStatus
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
 import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManager
@@ -59,7 +61,6 @@ import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 import kotlin.time.TimeSource
-import kotlin.time.minus
 
 /**
  * Default implementation of [TripSession]
@@ -138,14 +139,29 @@ internal class MapboxTripSession(
             }
             is SetRoutes.RefreshRoutes -> {
                 if (routes.isNotEmpty()) {
+                    val refreshControllerRefresh = setRoutes
+                        as? SetRoutes.RefreshRoutes.RefreshControllerRefresh
                     val primaryRoute = routes.first()
-                    lateinit var refreshRouteResult: Expected<String, List<RouteAlternative>>
+                    var refreshRouteResult: Expected<String, List<RouteAlternative>> =
+                        ExpectedFactory.createError("None of the routes were refreshed")
                     var lastSavedResultValue: Expected<String, List<RouteAlternative>>? = null
                     // primary route must be refreshed at the very end,
                     // because after it is refreshed,
                     // statuses that correspond to the refreshed route will start coming
                     for (route in routes.drop(1) + primaryRoute) {
-                        refreshRouteResult = navigator.refreshRoute(route)
+                        val refreshMetadata = refreshControllerRefresh?.routeRefreshResult
+                            ?.find(route.id)
+                        if (refreshMetadata?.wasRouteUpdated == false) {
+                            // skip refresh in NN if route was not updated
+                            continue
+                        }
+                        refreshRouteResult = navigator.refreshRoute(
+                            route,
+                            (refreshMetadata?.status as? RouteRefresherStatus.Success)
+                                ?.refreshResponse,
+                            refreshMetadata?.routeProgressData?.routeGeometryIndex,
+                        )
+
                         if (refreshRouteResult.isValue) {
                             lastSavedResultValue = refreshRouteResult
                         }

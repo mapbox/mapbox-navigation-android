@@ -22,6 +22,8 @@ internal fun SetRoutes.initialLegIndex(): Int =
         is SetRoutes.Reorder -> legIndex
         SetRoutes.CleanUp -> MapboxDirectionsSession.DEFAULT_INITIAL_LEG_INDEX
         is SetRoutes.NewRoutes -> legIndex
-        is SetRoutes.RefreshRoutes -> routeProgressData.legIndex
+        is SetRoutes.RefreshRoutes.ExternalRefresh -> legIndex
+        is SetRoutes.RefreshRoutes.RefreshControllerRefresh ->
+            routeRefreshResult.primaryRouteRefresherResult.routeProgressData.legIndex
         is SetRoutes.Reroute -> legIndex
     }

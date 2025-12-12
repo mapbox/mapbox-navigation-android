@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit
  *
  * This includes traffic congestion and estimated travel time. Make sure that [RouteOptions.enableRefresh] is true to take advantage of this feature.
  *
- * In case of a route refresh failing for `3 * `[intervalMillis] (default is 15 min), expired incidents and congestion annotations
+ * In case of a route refresh failing for `3 * `[intervalMillis] (default is 5 min), expired incidents and congestion annotations
  * will be removed from the route in order to avoid presenting non-critical, outdated information. Closures are not cleared automatically, only upon information from a successful refresh.
  *
  * @param intervalMillis The refresh interval in milliseconds, default is 5 min.

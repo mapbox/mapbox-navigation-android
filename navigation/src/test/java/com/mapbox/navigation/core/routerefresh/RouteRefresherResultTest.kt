@@ -19,12 +19,12 @@ internal class RouteRefresherResultTest(
         @Parameterized.Parameters(name = "{0} to {1}")
         fun data(): Collection<Array<Any>> {
             val result: Collection<Array<Any>> = listOf(
-                arrayOf(RouteRefresherStatus.FAILURE, false),
-                arrayOf(RouteRefresherStatus.INVALIDATED, false),
-                arrayOf(RouteRefresherStatus.INVALID, false),
-                arrayOf(RouteRefresherStatus.SUCCESS, true),
+                arrayOf(RouteRefresherStatus.Failure, false),
+                arrayOf(RouteRefresherStatus.Invalidated, false),
+                arrayOf(RouteRefresherStatus.Invalid, false),
+                arrayOf(RouteRefresherStatus.Success(mockk()), true),
             )
-            assertEquals(RouteRefresherStatus.values().size, result.size)
+            assertEquals(RouteRefresherStatus::class.sealedSubclasses.size, result.size)
             return result
         }
     }
@@ -34,5 +34,6 @@ internal class RouteRefresherResultTest(
         val input = RouteRefresherResult(mockk(), mockk<RouteProgressData>(), status)
 
         assertEquals(expected, input.isSuccess())
+        assertEquals(expected, input.wasRouteUpdated)
     }
 }

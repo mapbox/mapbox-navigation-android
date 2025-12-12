@@ -1,9 +1,9 @@
 package com.mapbox.navigation.core
 
-import com.mapbox.navigation.core.internal.RouteProgressData
 import com.mapbox.navigation.core.internal.congestions.TrafficOverrideHandler
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
+import com.mapbox.navigation.core.routerefresh.RoutesRefresherResult
 
 internal sealed class SetRoutes {
 
@@ -49,8 +49,13 @@ internal sealed class SetRoutes {
      * Currently this can only be trigger internally by a response to [RouteRefreshController.refresh]
      * or applying traffic filtration in [TrafficOverrideHandler]
      */
-    internal data class RefreshRoutes(
-        val routeProgressData: RouteProgressData,
-        val isManualRefresh: Boolean = false,
-    ) : SetRoutes()
+    internal sealed class RefreshRoutes : SetRoutes() {
+        internal data class ExternalRefresh(
+            val legIndex: Int,
+            val isManual: Boolean,
+        ) : RefreshRoutes()
+        internal data class RefreshControllerRefresh(
+            val routeRefreshResult: RoutesRefresherResult,
+        ) : RefreshRoutes()
+    }
 }

@@ -15,13 +15,13 @@ internal class RoutesRefreshAttemptProcessor(
 
     private fun processInvalidatedRoutes(result: RoutesRefresherResult) {
         val invalidatedRoutes = mutableListOf<NavigationRoute>()
-        if (result.primaryRouteRefresherResult.status == RouteRefresherStatus.INVALIDATED) {
+        if (result.primaryRouteRefresherResult.status == RouteRefresherStatus.Invalidated) {
             if (invalidatedRouteIds.add(result.primaryRouteRefresherResult.route.id)) {
                 invalidatedRoutes.add(result.primaryRouteRefresherResult.route)
             }
         }
         result.alternativesRouteRefresherResults.forEach {
-            if (it.status == RouteRefresherStatus.INVALIDATED) {
+            if (it.status == RouteRefresherStatus.Invalidated) {
                 if (invalidatedRouteIds.add(it.route.id)) {
                     invalidatedRoutes.add(it.route)
                 }

@@ -65,7 +65,6 @@ import com.mapbox.navigation.core.history.TestingContext.Companion.toNativeObjec
 import com.mapbox.navigation.core.internal.LowMemoryManager
 import com.mapbox.navigation.core.internal.MapboxNavigationSDKInitializerImpl
 import com.mapbox.navigation.core.internal.ReachabilityService
-import com.mapbox.navigation.core.internal.RouteProgressData
 import com.mapbox.navigation.core.internal.SdkInfoProvider
 import com.mapbox.navigation.core.internal.congestions.TrafficOverrideHandler
 import com.mapbox.navigation.core.internal.nativeNavigator
@@ -687,7 +686,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             internalSetNavigationRoutes(
                 listOf(it.primaryRouteRefresherResult.route) +
                     it.alternativesRouteRefresherResults.map { it.route },
-                SetRoutes.RefreshRoutes(it.primaryRouteRefresherResult.routeProgressData),
+                SetRoutes.RefreshRoutes.RefreshControllerRefresh(it),
             )
         }
 
@@ -1312,13 +1311,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     ) {
         internalSetNavigationRoutes(
             routes,
-            SetRoutes.RefreshRoutes(
-                RouteProgressData(
-                    legIndex = currentLegIndex(),
-                    0, // isn't used
-                    0, // isn't used
-                ),
-                isManualRefresh = isManualRefresh,
+            SetRoutes.RefreshRoutes.ExternalRefresh(
+                legIndex = currentLegIndex(),
+                isManual = isManualRefresh,
             ),
         )
     }
@@ -1372,8 +1367,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                                 setRoutesInfo,
                             )
                             directionsSession.setNavigationRoutesFinished(directionsSessionRoutes)
-                            if (setRoutesInfo is SetRoutes.RefreshRoutes &&
-                                setRoutesInfo.isManualRefresh
+                            if (
+                                setRoutesInfo is SetRoutes.RefreshRoutes.ExternalRefresh &&
+                                setRoutesInfo.isManual
                             ) {
                                 routeRefreshController.onRoutesRefreshedManually(
                                     routes,

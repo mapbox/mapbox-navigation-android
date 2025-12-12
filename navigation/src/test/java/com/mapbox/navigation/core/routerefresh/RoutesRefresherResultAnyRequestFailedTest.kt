@@ -21,55 +21,63 @@ internal class RoutesRefresherResultAnyRequestFailedTest(
         fun data(): Collection<Array<Any>> {
             return listOf(
                 // #0
-                arrayOf(RouteRefresherStatus.SUCCESS, emptyList<Boolean>(), false),
-                arrayOf(RouteRefresherStatus.INVALID, emptyList<Boolean>(), false),
-                arrayOf(RouteRefresherStatus.INVALIDATED, emptyList<Boolean>(), false),
-                arrayOf(RouteRefresherStatus.FAILURE, emptyList<Boolean>(), true),
-                arrayOf(RouteRefresherStatus.INVALID, listOf(RouteRefresherStatus.SUCCESS), false),
+                arrayOf(RouteRefresherStatus.Success(mockk()), emptyList<Boolean>(), false),
+                arrayOf(RouteRefresherStatus.Invalid, emptyList<Boolean>(), false),
+                arrayOf(RouteRefresherStatus.Invalidated, emptyList<Boolean>(), false),
+                arrayOf(RouteRefresherStatus.Failure, emptyList<Boolean>(), true),
+                arrayOf(
+                    RouteRefresherStatus.Invalid,
+                    listOf(RouteRefresherStatus.Success(mockk())),
+                    false,
+                ),
 
                 // #5
                 arrayOf(
-                    RouteRefresherStatus.FAILURE,
-                    listOf(RouteRefresherStatus.INVALIDATED),
+                    RouteRefresherStatus.Failure,
+                    listOf(RouteRefresherStatus.Invalidated),
                     true,
                 ),
-                arrayOf(RouteRefresherStatus.SUCCESS, listOf(RouteRefresherStatus.FAILURE), true),
-                arrayOf(RouteRefresherStatus.FAILURE, listOf(RouteRefresherStatus.FAILURE), true),
                 arrayOf(
-                    RouteRefresherStatus.SUCCESS,
-                    listOf(RouteRefresherStatus.INVALIDATED, RouteRefresherStatus.INVALID),
+                    RouteRefresherStatus.Success(mockk()),
+                    listOf(RouteRefresherStatus.Failure),
+                    true,
+                ),
+                arrayOf(RouteRefresherStatus.Failure, listOf(RouteRefresherStatus.Failure), true),
+                arrayOf(
+                    RouteRefresherStatus.Success(mockk()),
+                    listOf(RouteRefresherStatus.Invalidated, RouteRefresherStatus.Invalid),
                     false,
                 ),
                 arrayOf(
-                    RouteRefresherStatus.FAILURE,
-                    listOf(RouteRefresherStatus.SUCCESS, RouteRefresherStatus.INVALIDATED),
+                    RouteRefresherStatus.Failure,
+                    listOf(RouteRefresherStatus.Success(mockk()), RouteRefresherStatus.Invalidated),
                     true,
                 ),
 
                 // #10
                 arrayOf(
-                    RouteRefresherStatus.INVALIDATED,
-                    listOf(RouteRefresherStatus.FAILURE, RouteRefresherStatus.SUCCESS),
+                    RouteRefresherStatus.Invalidated,
+                    listOf(RouteRefresherStatus.Failure, RouteRefresherStatus.Success(mockk())),
                     true,
                 ),
                 arrayOf(
-                    RouteRefresherStatus.SUCCESS,
-                    listOf(RouteRefresherStatus.INVALID, RouteRefresherStatus.FAILURE),
+                    RouteRefresherStatus.Success(mockk()),
+                    listOf(RouteRefresherStatus.Invalid, RouteRefresherStatus.Failure),
                     true,
                 ),
                 arrayOf(
-                    RouteRefresherStatus.FAILURE,
-                    listOf(RouteRefresherStatus.FAILURE, RouteRefresherStatus.INVALIDATED),
+                    RouteRefresherStatus.Failure,
+                    listOf(RouteRefresherStatus.Failure, RouteRefresherStatus.Invalidated),
                     true,
                 ),
                 arrayOf(
-                    RouteRefresherStatus.FAILURE,
-                    listOf(RouteRefresherStatus.SUCCESS, RouteRefresherStatus.FAILURE),
+                    RouteRefresherStatus.Failure,
+                    listOf(RouteRefresherStatus.Success(mockk()), RouteRefresherStatus.Failure),
                     true,
                 ),
                 arrayOf(
-                    RouteRefresherStatus.FAILURE,
-                    listOf(RouteRefresherStatus.FAILURE, RouteRefresherStatus.FAILURE),
+                    RouteRefresherStatus.Failure,
+                    listOf(RouteRefresherStatus.Failure, RouteRefresherStatus.Failure),
                     true,
                 ),
             )

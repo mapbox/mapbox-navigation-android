@@ -29,7 +29,7 @@ class RoutesRefreshAttemptProcessorTest {
     fun onRoutesInvalidated_nonInvalidatedRoutes() {
         processor.onRoutesRefreshAttemptFinished(
             RoutesRefresherResult(
-                mockk { every { status } returns RouteRefresherStatus.SUCCESS },
+                mockk { every { status } returns RouteRefresherStatus.Success(mockk()) },
                 emptyList(),
             ),
         )
@@ -41,11 +41,23 @@ class RoutesRefreshAttemptProcessorTest {
     fun onRoutesInvalidated_singlePrimaryInvalidatedRoute() {
         processor.onRoutesRefreshAttemptFinished(
             RoutesRefresherResult(
-                RouteRefresherResult(primaryRoute, mockk(), RouteRefresherStatus.INVALIDATED),
+                RouteRefresherResult(primaryRoute, mockk(), RouteRefresherStatus.Invalidated),
                 listOf(
-                    RouteRefresherResult(alternativeRoute1, mockk(), RouteRefresherStatus.FAILURE),
-                    RouteRefresherResult(alternativeRoute2, mockk(), RouteRefresherStatus.SUCCESS),
-                    RouteRefresherResult(alternativeRoute3, mockk(), RouteRefresherStatus.INVALID),
+                    RouteRefresherResult(
+                        alternativeRoute1,
+                        mockk(),
+                        RouteRefresherStatus.Failure,
+                    ),
+                    RouteRefresherResult(
+                        alternativeRoute2,
+                        mockk(),
+                        RouteRefresherStatus.Success(mockk()),
+                    ),
+                    RouteRefresherResult(
+                        alternativeRoute3,
+                        mockk(),
+                        RouteRefresherStatus.Invalid,
+                    ),
                 ),
             ),
         )
@@ -59,15 +71,23 @@ class RoutesRefreshAttemptProcessorTest {
     fun onRoutesInvalidated_singleAlternativeInvalidatedRoute() {
         processor.onRoutesRefreshAttemptFinished(
             RoutesRefresherResult(
-                RouteRefresherResult(primaryRoute, mockk(), RouteRefresherStatus.SUCCESS),
+                RouteRefresherResult(primaryRoute, mockk(), RouteRefresherStatus.Success(mockk())),
                 listOf(
-                    RouteRefresherResult(alternativeRoute1, mockk(), RouteRefresherStatus.FAILURE),
+                    RouteRefresherResult(
+                        alternativeRoute1,
+                        mockk(),
+                        RouteRefresherStatus.Failure,
+                    ),
                     RouteRefresherResult(
                         alternativeRoute2,
                         mockk(),
-                        RouteRefresherStatus.INVALIDATED,
+                        RouteRefresherStatus.Invalidated,
                     ),
-                    RouteRefresherResult(alternativeRoute3, mockk(), RouteRefresherStatus.INVALID),
+                    RouteRefresherResult(
+                        alternativeRoute3,
+                        mockk(),
+                        RouteRefresherStatus.Invalid,
+                    ),
                 ),
             ),
         )
@@ -81,22 +101,22 @@ class RoutesRefreshAttemptProcessorTest {
     fun onRoutesInvalidated_multipleInvalidatedRoutes() {
         processor.onRoutesRefreshAttemptFinished(
             RoutesRefresherResult(
-                RouteRefresherResult(primaryRoute, mockk(), RouteRefresherStatus.INVALIDATED),
+                RouteRefresherResult(primaryRoute, mockk(), RouteRefresherStatus.Invalidated),
                 listOf(
                     RouteRefresherResult(
                         alternativeRoute1,
                         mockk(),
-                        RouteRefresherStatus.INVALIDATED,
+                        RouteRefresherStatus.Invalidated,
                     ),
                     RouteRefresherResult(
                         alternativeRoute2,
                         mockk(),
-                        RouteRefresherStatus.INVALIDATED,
+                        RouteRefresherStatus.Invalidated,
                     ),
                     RouteRefresherResult(
                         alternativeRoute3,
                         mockk(),
-                        RouteRefresherStatus.INVALIDATED,
+                        RouteRefresherStatus.Invalidated,
                     ),
                 ),
             ),
@@ -115,17 +135,17 @@ class RoutesRefreshAttemptProcessorTest {
     fun onRoutesInvalidated_allInvalidatedRoutesAlreadyProcessed() {
         processor.onRoutesRefreshAttemptFinished(
             RoutesRefresherResult(
-                RouteRefresherResult(primaryRoute, mockk(), RouteRefresherStatus.INVALIDATED),
+                RouteRefresherResult(primaryRoute, mockk(), RouteRefresherStatus.Invalidated),
                 listOf(
                     RouteRefresherResult(
                         alternativeRoute1,
                         mockk(),
-                        RouteRefresherStatus.INVALIDATED,
+                        RouteRefresherStatus.Invalidated,
                     ),
                     RouteRefresherResult(
                         alternativeRoute2,
                         mockk(),
-                        RouteRefresherStatus.INVALIDATED,
+                        RouteRefresherStatus.Invalidated,
                     ),
                 ),
             ),
@@ -134,19 +154,23 @@ class RoutesRefreshAttemptProcessorTest {
 
         processor.onRoutesRefreshAttemptFinished(
             RoutesRefresherResult(
-                RouteRefresherResult(primaryRoute, mockk(), RouteRefresherStatus.INVALIDATED),
+                RouteRefresherResult(primaryRoute, mockk(), RouteRefresherStatus.Invalidated),
                 listOf(
                     RouteRefresherResult(
                         alternativeRoute1,
                         mockk(),
-                        RouteRefresherStatus.INVALIDATED,
+                        RouteRefresherStatus.Invalidated,
                     ),
                     RouteRefresherResult(
                         mockk { every { id } returns "id#2" },
                         mockk(),
-                        RouteRefresherStatus.INVALIDATED,
+                        RouteRefresherStatus.Invalidated,
                     ),
-                    RouteRefresherResult(alternativeRoute3, mockk(), RouteRefresherStatus.SUCCESS),
+                    RouteRefresherResult(
+                        alternativeRoute3,
+                        mockk(),
+                        RouteRefresherStatus.Success(mockk()),
+                    ),
                 ),
             ),
         )
@@ -158,17 +182,17 @@ class RoutesRefreshAttemptProcessorTest {
     fun onRoutesInvalidated_someInvalidatedRoutesAlreadyProcessed() {
         processor.onRoutesRefreshAttemptFinished(
             RoutesRefresherResult(
-                RouteRefresherResult(primaryRoute, mockk(), RouteRefresherStatus.INVALIDATED),
+                RouteRefresherResult(primaryRoute, mockk(), RouteRefresherStatus.Invalidated),
                 listOf(
                     RouteRefresherResult(
                         alternativeRoute1,
                         mockk(),
-                        RouteRefresherStatus.INVALIDATED,
+                        RouteRefresherStatus.Invalidated,
                     ),
                     RouteRefresherResult(
                         alternativeRoute2,
                         mockk(),
-                        RouteRefresherStatus.SUCCESS,
+                        RouteRefresherStatus.Success(mockk()),
                     ),
                 ),
             ),
@@ -177,22 +201,22 @@ class RoutesRefreshAttemptProcessorTest {
 
         processor.onRoutesRefreshAttemptFinished(
             RoutesRefresherResult(
-                RouteRefresherResult(primaryRoute, mockk(), RouteRefresherStatus.INVALIDATED),
+                RouteRefresherResult(primaryRoute, mockk(), RouteRefresherStatus.Invalidated),
                 listOf(
                     RouteRefresherResult(
                         alternativeRoute1,
                         mockk(),
-                        RouteRefresherStatus.INVALIDATED,
+                        RouteRefresherStatus.Invalidated,
                     ),
                     RouteRefresherResult(
                         alternativeRoute2,
                         mockk(),
-                        RouteRefresherStatus.INVALIDATED,
+                        RouteRefresherStatus.Invalidated,
                     ),
                     RouteRefresherResult(
                         alternativeRoute3,
                         mockk(),
-                        RouteRefresherStatus.INVALIDATED,
+                        RouteRefresherStatus.Invalidated,
                     ),
                 ),
             ),

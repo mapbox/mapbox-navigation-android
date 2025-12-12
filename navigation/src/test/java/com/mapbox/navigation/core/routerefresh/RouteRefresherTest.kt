@@ -1,6 +1,8 @@
 package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.api.directions.v5.models.LegAnnotation
+import com.mapbox.api.directionsrefresh.v1.models.DirectionsRefreshResponse
+import com.mapbox.bindgen.DataRef
 import com.mapbox.navigation.base.internal.route.isExpired
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.RoutesRefreshData
@@ -15,6 +17,7 @@ import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createIncident
 import com.mapbox.navigation.testing.factories.createNavigationRoute
 import com.mapbox.navigation.testing.factories.createRouteLeg
+import com.mapbox.navigation.testing.factories.toDataRef
 import com.mapbox.navigation.utils.internal.LoggerFrontend
 import io.mockk.coEvery
 import io.mockk.every
@@ -57,6 +60,14 @@ class RouteRefresherTest {
     private val newRoute2 = mockk<NavigationRoute>(relaxed = true) {
         every { id } returns route2Id
     }
+    private val refreshResponse1: DataRef = DirectionsRefreshResponse.builder()
+        .code("201")
+        .build()
+        .toJson().toDataRef()
+    private val refreshResponse2: DataRef = DirectionsRefreshResponse.builder()
+        .code("202")
+        .build()
+        .toJson().toDataRef()
     private val legIndex1 = 1
     private val legIndex2 = 4
     private val legIndex3 = 7
@@ -113,11 +124,11 @@ class RouteRefresherTest {
             RouteRefreshValidator.validateRoute(any())
         } returns RouteRefreshValidator.RouteValidationResult.Valid
         every { routeRefresh.requestRouteRefresh(route1, any(), any()) } answers {
-            (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute1)
+            (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute1, refreshResponse1)
             0
         }
         every { routeRefresh.requestRouteRefresh(route2, any(), any()) } answers {
-            (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute2)
+            (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute2, refreshResponse2)
             0
         }
         every { routeDiffProvider.buildRouteDiffs(route1, newRoute1, legIndex1) } returns listOf(
@@ -129,9 +140,17 @@ class RouteRefresherTest {
             "diff#4",
         )
         val expected = RoutesRefresherResult(
-            RouteRefresherResult(newRoute1, routesProgressData1, RouteRefresherStatus.SUCCESS),
+            RouteRefresherResult(
+                newRoute1,
+                routesProgressData1,
+                RouteRefresherStatus.Success(refreshResponse1),
+            ),
             listOf(
-                RouteRefresherResult(newRoute2, routesProgressData2, RouteRefresherStatus.SUCCESS),
+                RouteRefresherResult(
+                    newRoute2,
+                    routesProgressData2,
+                    RouteRefresherStatus.Success(refreshResponse2),
+                ),
             ),
         )
 
@@ -153,11 +172,11 @@ class RouteRefresherTest {
             RouteRefreshValidator.validateRoute(any())
         } returns RouteRefreshValidator.RouteValidationResult.Valid
         every { routeRefresh.requestRouteRefresh(route1, any(), any()) } answers {
-            (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute1)
+            (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute1, refreshResponse1)
             0
         }
         every { routeRefresh.requestRouteRefresh(route2, any(), any()) } answers {
-            (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute2)
+            (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute2, refreshResponse2)
             0
         }
         every {
@@ -193,7 +212,7 @@ class RouteRefresherTest {
             0
         }
         every { routeRefresh.requestRouteRefresh(route2, any(), any()) } answers {
-            (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute2)
+            (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute2, refreshResponse2)
             0
         }
         every { routeDiffProvider.buildRouteDiffs(any(), any(), any()) } returns listOf(
@@ -201,9 +220,13 @@ class RouteRefresherTest {
             "diff#2",
         )
         val expected = RoutesRefresherResult(
-            RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.FAILURE),
+            RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.Failure),
             listOf(
-                RouteRefresherResult(newRoute2, routesProgressData2, RouteRefresherStatus.SUCCESS),
+                RouteRefresherResult(
+                    newRoute2,
+                    routesProgressData2,
+                    RouteRefresherStatus.Success(refreshResponse2),
+                ),
             ),
         )
 
@@ -329,10 +352,18 @@ class RouteRefresherTest {
             0
         }
         val expected = RoutesRefresherResult(
-            RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.FAILURE),
+            RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.Failure),
             listOf(
-                RouteRefresherResult(route2, routesProgressData2, RouteRefresherStatus.FAILURE),
-                RouteRefresherResult(route3, routesProgressData3, RouteRefresherStatus.FAILURE),
+                RouteRefresherResult(
+                    route2,
+                    routesProgressData2,
+                    RouteRefresherStatus.Failure,
+                ),
+                RouteRefresherResult(
+                    route3,
+                    routesProgressData3,
+                    RouteRefresherStatus.Failure,
+                ),
             ),
         )
 
@@ -465,10 +496,18 @@ class RouteRefresherTest {
             0
         }
         val expected = RoutesRefresherResult(
-            RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.FAILURE),
+            RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.Failure),
             listOf(
-                RouteRefresherResult(route2, routesProgressData2, RouteRefresherStatus.INVALIDATED),
-                RouteRefresherResult(route3, routesProgressData3, RouteRefresherStatus.FAILURE),
+                RouteRefresherResult(
+                    route2,
+                    routesProgressData2,
+                    RouteRefresherStatus.Invalidated,
+                ),
+                RouteRefresherResult(
+                    route3,
+                    routesProgressData3,
+                    RouteRefresherStatus.Failure,
+                ),
             ),
         )
 
@@ -501,13 +540,17 @@ class RouteRefresherTest {
         } returns RouteRefreshValidator.RouteValidationResult.Valid
         every { routeRefresh.requestRouteRefresh(route1, any(), any()) } returns 0
         every { routeRefresh.requestRouteRefresh(route2, any(), any()) } answers {
-            (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute2)
+            (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute2, refreshResponse2)
             0
         }
         val expected = RoutesRefresherResult(
-            RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.FAILURE),
+            RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.Failure),
             listOf(
-                RouteRefresherResult(newRoute2, routesProgressData2, RouteRefresherStatus.SUCCESS),
+                RouteRefresherResult(
+                    newRoute2,
+                    routesProgressData2,
+                    RouteRefresherStatus.Success(refreshResponse2),
+                ),
             ),
         )
 
@@ -533,13 +576,17 @@ class RouteRefresherTest {
             RouteRefreshValidator.validateRoute(route2)
         } returns RouteRefreshValidator.RouteValidationResult.Valid
         every { routeRefresh.requestRouteRefresh(route2, any(), any()) } answers {
-            (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute2)
+            (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute2, refreshResponse2)
             0
         }
         val expected = RoutesRefresherResult(
-            RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.INVALID),
+            RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.Invalid),
             listOf(
-                RouteRefresherResult(newRoute2, routesProgressData2, RouteRefresherStatus.SUCCESS),
+                RouteRefresherResult(
+                    newRoute2,
+                    routesProgressData2,
+                    RouteRefresherStatus.Success(refreshResponse2),
+                ),
             ),
         )
 
@@ -632,8 +679,14 @@ class RouteRefresherTest {
             routesRefreshDataProvider.getRoutesRefreshData(listOf(route1, route2))
         } returns routesRefreshData
         val expected = RoutesRefresherResult(
-            RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.INVALID),
-            listOf(RouteRefresherResult(route2, routesProgressData2, RouteRefresherStatus.INVALID)),
+            RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.Invalid),
+            listOf(
+                RouteRefresherResult(
+                    route2,
+                    routesProgressData2,
+                    RouteRefresherStatus.Invalid,
+                ),
+            ),
         )
 
         val actual = sut.refresh(listOf(route1, route2), 10)
@@ -662,17 +715,25 @@ class RouteRefresherTest {
         every { route1.isExpired() } returns true
         every { route2.isExpired() } returns false
         every { routeRefresh.requestRouteRefresh(route1, any(), any()) } answers {
-            (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute1)
+            (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute1, refreshResponse1)
             0
         }
         every { routeRefresh.requestRouteRefresh(route2, any(), any()) } answers {
-            (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute2)
+            (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute2, refreshResponse2)
             0
         }
         val expected = RoutesRefresherResult(
-            RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.INVALIDATED),
+            RouteRefresherResult(
+                route1,
+                routesProgressData1,
+                RouteRefresherStatus.Invalidated,
+            ),
             listOf(
-                RouteRefresherResult(newRoute2, routesProgressData2, RouteRefresherStatus.SUCCESS),
+                RouteRefresherResult(
+                    newRoute2,
+                    routesProgressData2,
+                    RouteRefresherStatus.Success(refreshResponse2),
+                ),
             ),
         )
 
@@ -765,9 +826,17 @@ class RouteRefresherTest {
             routesRefreshDataProvider.getRoutesRefreshData(listOf(route1, route2))
         } returns routesRefreshData
         val expected = RoutesRefresherResult(
-            RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.INVALIDATED),
+            RouteRefresherResult(
+                route1,
+                routesProgressData1,
+                RouteRefresherStatus.Invalidated,
+            ),
             listOf(
-                RouteRefresherResult(route2, routesProgressData2, RouteRefresherStatus.INVALIDATED),
+                RouteRefresherResult(
+                    route2,
+                    routesProgressData2,
+                    RouteRefresherStatus.Invalidated,
+                ),
             ),
         )
 

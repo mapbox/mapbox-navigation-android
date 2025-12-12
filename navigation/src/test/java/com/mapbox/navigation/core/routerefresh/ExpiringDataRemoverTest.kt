@@ -171,17 +171,21 @@ class ExpiringDataRemoverTest {
         val route2RouteProgressData = RouteProgressData(2, 5, 6)
         val route3RouteProgressData = RouteProgressData(0, 5, 7)
         val input = RoutesRefresherResult(
-            RouteRefresherResult(route1, route1RouteProgressData, RouteRefresherStatus.SUCCESS),
+            RouteRefresherResult(
+                route1,
+                route1RouteProgressData,
+                RouteRefresherStatus.Failure,
+            ),
             listOf(
                 RouteRefresherResult(
                     route2,
                     route2RouteProgressData,
-                    RouteRefresherStatus.FAILURE,
+                    RouteRefresherStatus.Failure,
                 ),
                 RouteRefresherResult(
                     route3,
                     route3RouteProgressData,
-                    RouteRefresherStatus.INVALIDATED,
+                    RouteRefresherStatus.Invalidated,
                 ),
             ),
         )
@@ -189,18 +193,21 @@ class ExpiringDataRemoverTest {
             RouteRefresherResult(
                 expectedNewRoute1,
                 route1RouteProgressData,
-                RouteRefresherStatus.SUCCESS,
+                RouteRefresherStatus.Failure,
+                wasRouteUpdated = true,
             ),
             listOf(
                 RouteRefresherResult(
                     expectedNewRoute2,
                     route2RouteProgressData,
-                    RouteRefresherStatus.FAILURE,
+                    RouteRefresherStatus.Failure,
+                    wasRouteUpdated = true,
                 ),
                 RouteRefresherResult(
                     expectedNewRoute3,
                     route3RouteProgressData,
-                    RouteRefresherStatus.INVALIDATED,
+                    RouteRefresherStatus.Invalidated,
+                    wasRouteUpdated = true,
                 ),
             ),
         )

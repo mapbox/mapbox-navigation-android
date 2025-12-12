@@ -1,11 +1,8 @@
 package com.mapbox.navigation.navigator.internal
 
 import androidx.annotation.RestrictTo
-import com.google.gson.JsonArray
-import com.google.gson.JsonParser
 import com.mapbox.api.directionsrefresh.v1.models.DirectionsRefreshResponse
-import com.mapbox.api.directionsrefresh.v1.models.DirectionsRouteRefresh
-import com.mapbox.api.directionsrefresh.v1.models.RouteLegRefresh
+import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.TileStore
@@ -13,11 +10,11 @@ import com.mapbox.common.TilesetDescriptor
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.route.nativeRoute
-import com.mapbox.navigation.base.internal.utils.Constants
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions
 import com.mapbox.navigation.base.options.toPredictiveLocationTrackerOptions
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.navigator.internal.utils.toDirectionsRefreshResponse
 import com.mapbox.navigation.navigator.internal.utils.toEvStateData
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.logD
@@ -283,38 +280,9 @@ class MapboxNativeNavigatorImpl(
      */
     override suspend fun refreshRoute(
         route: NavigationRoute,
+        refreshResponse: DataRef?,
+        geometryIndex: Int?,
     ): Expected<String, List<RouteAlternative>> {
-        val refreshedLegs = route.directionsRoute.legs()?.map { routeLeg ->
-            RouteLegRefresh.builder()
-                .annotation(routeLeg.annotation())
-                .incidents(routeLeg.incidents())
-                .notifications(routeLeg.notifications())
-                .build()
-        }
-        val refreshedWaypoints = route.waypoints
-        val refreshRoute = DirectionsRouteRefresh.builder()
-            .legs(refreshedLegs)
-            .unrecognizedJsonProperties(
-                refreshedWaypoints?.let { waypoints ->
-                    mapOf(
-                        Constants.RouteResponse.KEY_WAYPOINTS to JsonArray().apply {
-                            waypoints.forEach { waypoint ->
-                                add(JsonParser.parseString(waypoint.toJson()))
-                            }
-                        },
-                    )
-                },
-            )
-            .build()
-        val refreshResponse = DirectionsRefreshResponse.builder()
-            .code("200")
-            .route(refreshRoute)
-            .build()
-
-        val refreshResponseJson = withContext(ThreadController.DefaultDispatcher) {
-            refreshResponse.toJson()
-        }
-
         val callback = {
                 continuation: Continuation<Expected<String, List<RouteAlternative>>>,
                 expected: Expected<String, RefreshRouteResult>, ->
@@ -343,17 +311,39 @@ class MapboxNativeNavigatorImpl(
                 },
             )
         }
-        return suspendCancellableCoroutine { continuation ->
+
+        return if (refreshResponse != null && geometryIndex != null) {
             logD(
                 "Refreshing native route ${route.nativeRoute().routeId} " +
-                    "with generated refresh response: $refreshResponseJson",
+                    "with response from Directions API at geometry index $geometryIndex",
                 LOG_CATEGORY,
             )
-            navigator.refreshRoute(
-                refreshResponseJson,
-                route.nativeRoute().routeId,
-                0,
-            ) { callback(continuation, it) }
+            suspendCancellableCoroutine { continuation ->
+                navigator.refreshRoute(
+                    refreshResponse,
+                    route.nativeRoute().routeId,
+                    geometryIndex,
+                ) { callback(continuation, it) }
+            }
+        } else {
+            val generatedRefreshResponse = route.toDirectionsRefreshResponse()
+            val refreshResponseJson = withContext(ThreadController.DefaultDispatcher) {
+                generatedRefreshResponse.toJson()
+            }
+
+            suspendCancellableCoroutine { continuation ->
+                logD(
+                    "Refreshing native route ${route.nativeRoute().routeId} " +
+                        "with generated refresh response: $refreshResponseJson",
+                    LOG_CATEGORY,
+                )
+
+                navigator.refreshRoute(
+                    refreshResponseJson,
+                    route.nativeRoute().routeId,
+                    0,
+                ) { callback(continuation, it) }
+            }
         }
     }
 

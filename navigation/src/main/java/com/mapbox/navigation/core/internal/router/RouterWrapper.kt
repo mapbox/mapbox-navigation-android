@@ -428,7 +428,7 @@ internal class RouterWrapper(
                         ),
                     )
                 },
-                {
+                { dataRef ->
                     mainJobControl.scope.launch {
                         if (id != null) {
                             if (activeRouteRefreshRequests[id] == null) {
@@ -440,7 +440,7 @@ internal class RouterWrapper(
                             }
                         }
                         withContext(ThreadController.DefaultDispatcher) {
-                            parseDirectionsRouteRefresh(it)
+                            parseDirectionsRouteRefresh(dataRef)
                                 .onValue {
                                     logD(
                                         "Parsed route refresh response for " +
@@ -467,13 +467,13 @@ internal class RouterWrapper(
                             { throwable ->
                                 callback.onFailure(
                                     NavigationRouterRefreshError(
-                                        "failed for response: $it",
+                                        "failed for response: $dataRef",
                                         throwable,
                                     ),
                                 )
                             },
-                            {
-                                callback.onRefreshReady(it)
+                            { refreshedRoute ->
+                                callback.onRefreshReady(refreshedRoute, dataRef)
                             },
                         )
                     }
@@ -519,9 +519,9 @@ internal class RouterWrapper(
         private val callback: NavigationRouterRefreshCallback,
     ) : NavigationRouterRefreshCallback {
 
-        override fun onRefreshReady(route: NavigationRoute) {
+        override fun onRefreshReady(route: NavigationRoute, refreshResponse: DataRef) {
             if (removeRequest()) {
-                callback.onRefreshReady(route)
+                callback.onRefreshReady(route, refreshResponse)
             }
         }
 

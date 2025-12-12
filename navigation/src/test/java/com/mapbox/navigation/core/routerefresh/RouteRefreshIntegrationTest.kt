@@ -19,11 +19,13 @@ import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshCallbac
 import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshError
 import com.mapbox.navigation.core.internal.router.Router
 import com.mapbox.navigation.core.internal.utils.CoroutineUtils
+import com.mapbox.navigation.navigator.internal.utils.toDirectionsRefreshResponse
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.NativeRouteParserRule
 import com.mapbox.navigation.testing.factories.createNavigationRoutes
+import com.mapbox.navigation.testing.factories.toDataRef
 import com.mapbox.navigation.utils.internal.Time
 import io.mockk.every
 import io.mockk.mockk
@@ -205,7 +207,10 @@ internal open class RouteRefreshIntegrationTest {
             routeRefreshAnswerScope.launch {
                 delay(responseDelay)
                 if (invocationNumber >= successfulAttemptNumber) {
-                    callback.onRefreshReady(refreshedRoute)
+                    callback.onRefreshReady(
+                        refreshedRoute,
+                        refreshedRoute.toDirectionsRefreshResponse().toJson().toDataRef(),
+                    )
                 } else {
                     callback.onFailure(NavigationRouterRefreshError())
                 }
