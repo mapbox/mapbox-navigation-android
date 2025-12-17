@@ -1,6 +1,7 @@
 package com.mapbox.navigation.base.options
 
 import android.content.Context
+import com.mapbox.api.directions.v5.models.DirectionsJsonObject
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
@@ -39,7 +40,19 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1000L
  * @param enableSensors enables sensors for current position calculation (optional)
  * @param copilotOptions defines options for Copilot
  * @param trafficOverrideOptions defines options for traffic override
- * @param nativeRouteObject defines whether to use native route object
+ * @param nativeRouteObject defines whether to use native route object.
+ * This is an early preview feature. When this option is enabled, some functionality
+ * is disabled or not fully supported:
+ * - Traffic override is not supported. Navigator instantiation throws an exception
+ *   when both [nativeRouteObject] and [TrafficOverrideOptions.isEnabled] are set to `true`.
+ * - Subtypes of [DirectionsJsonObject] (for example,
+ *   [com.mapbox.api.directions.v5.models.DirectionsResponse]) do not support the
+ *   `toBuilder()` function.
+ * - The contract of `equals()` / `hashCode()` is not met for subtypes of
+ *   [DirectionsJsonObject].
+ * - Route refresh is not supported.
+ * - A route parsed using the native route object may not fully match the same route
+ *   parsed with [nativeRouteObject] set to `false`.
  */
 class NavigationOptions
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -344,10 +357,21 @@ private constructor(
         fun roadObjectMatcherOptions(roadObjectMatcherOptions: RoadObjectMatcherOptions): Builder =
             apply { this.roadObjectMatcherOptions = roadObjectMatcherOptions }
 
-        // TODO: provide better documentation
-        // https://mapbox.atlassian.net/browse/NAVAND-6546
         /**
-         * Defines whether to use native route object
+         * Defines whether to use native route object.
+         *
+         * This is an early preview feature. When this option is enabled, some functionality
+         * is disabled or not fully supported:
+         * - Traffic override is not supported. Navigator instantiation throws an exception
+         *   when both [nativeRouteObject] and [TrafficOverrideOptions.isEnabled] are set to `true`.
+         * - Subtypes of [DirectionsJsonObject] (for example,
+         *   [com.mapbox.api.directions.v5.models.DirectionsResponse]) do not support the
+         *   `toBuilder()` function.
+         * - The contract of `equals()` / `hashCode()` is not met for subtypes of
+         *   [DirectionsJsonObject].
+         * - Route refresh is not supported.
+         * - A route parsed using the native route object may not fully match the same route
+         *   parsed with [nativeRouteObject] set to `false`.
          */
         @ExperimentalPreviewMapboxNavigationAPI
         fun nativeRouteObject(value: Boolean): Builder =
