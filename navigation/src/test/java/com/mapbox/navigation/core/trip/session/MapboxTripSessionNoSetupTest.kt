@@ -15,6 +15,7 @@ import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.toUpcomingR
 import com.mapbox.navigation.base.options.LocationOptions
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.core.SetRoutes
+import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.infra.TestLocationProvider
 import com.mapbox.navigation.core.infra.recorders.BannerInstructionsObserverRecorder
 import com.mapbox.navigation.core.infra.recorders.OffRouteObserverRecorder
@@ -577,6 +578,8 @@ private fun buildTripSession(
         every { hasServiceStarted() } returns false
     }
 
+    val directionsSession: DirectionsSession = mockk(relaxUnitFun = true)
+
     val parentJob = SupervisorJob()
     val testScope = CoroutineScope(parentJob + TestCoroutineDispatcher())
     val threadController = spyk<ThreadController>()
@@ -592,6 +595,7 @@ private fun buildTripSession(
     }
     return MapboxTripSession(
         tripService,
+        directionsSession,
         TripSessionLocationEngine(LocationOptions.Builder().build()),
         nativeNavigator,
         threadController,

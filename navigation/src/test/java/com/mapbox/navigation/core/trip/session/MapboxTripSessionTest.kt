@@ -18,6 +18,10 @@ import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.core.SetRoutes
 import com.mapbox.navigation.core.SetRoutes.RefreshRoutes.RefreshControllerRefresh
+import com.mapbox.navigation.core.directions.session.DirectionsSession
+import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.directions.session.SetNavigationRoutesStartedObserver
 import com.mapbox.navigation.core.internal.RouteProgressData
 import com.mapbox.navigation.core.navigator.getCurrentBannerInstructions
 import com.mapbox.navigation.core.navigator.getLocationMatcherResult
@@ -110,6 +114,9 @@ class MapboxTripSessionTest {
     private val tripService: TripService = mockk(relaxUnitFun = true) {
         every { hasServiceStarted() } returns false
     }
+
+    private val directionsSession: DirectionsSession = mockk(relaxed = true)
+
     private lateinit var locationUpdateAnswers: (Location) -> Unit
     private val tripSessionLocationEngine: TripSessionLocationEngine = mockk(relaxUnitFun = true) {
         every { startLocationUpdates(any(), captureLambda()) } answers {
@@ -217,6 +224,7 @@ class MapboxTripSessionTest {
     private fun buildTripSession(): MapboxTripSession {
         return MapboxTripSession(
             tripService,
+            directionsSession,
             tripSessionLocationEngine,
             navigator,
             threadController,
@@ -1844,6 +1852,37 @@ class MapboxTripSessionTest {
             verify { mockOffRouteObserver.onOffRouteStateChanged(true) }
 
             tripSession.stop()
+        }
+
+    @Test
+    fun `start of routes update should toggle isUpdatingRoutes flag`() =
+        coroutineRule.runBlockingTest {
+            val startObserver = slot<SetNavigationRoutesStartedObserver>()
+            val finishObserver = slot<RoutesObserver>()
+
+            every {
+                directionsSession.registerSetNavigationRoutesStartedObserver(capture(startObserver))
+            } just Runs
+
+            every {
+                directionsSession.registerSetNavigationRoutesFinishedObserver(
+                    capture(finishObserver),
+                )
+            } just Runs
+
+            tripSession = buildTripSession()
+
+            assertFalse(tripSession.isUpdatingRoute.get())
+
+            startObserver.captured.onRoutesSetStarted(mockk())
+
+            assertTrue(tripSession.isUpdatingRoute.get())
+
+            finishObserver.captured.onRoutesChanged(
+                RoutesUpdatedResult(emptyList(), emptyList(), ""),
+            )
+
+            assertFalse(tripSession.isUpdatingRoute.get())
         }
 
     @After

@@ -107,6 +107,7 @@ internal object NavigationComponentProvider {
 
     fun createTripSession(
         tripService: TripService,
+        directionsSession: DirectionsSession,
         tripSessionLocationEngine: TripSessionLocationEngine,
         navigator: MapboxNativeNavigator,
         threadController: ThreadController,
@@ -114,6 +115,7 @@ internal object NavigationComponentProvider {
     ): TripSession = PerformanceTracker.trackPerformanceSync("createTripSession") {
         MapboxTripSession(
             tripService,
+            directionsSession,
             tripSessionLocationEngine,
             navigator = navigator,
             threadController,

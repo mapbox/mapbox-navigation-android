@@ -25,7 +25,19 @@ internal interface DirectionsSession : RouteRefresh {
 
     val initialLegIndex: Int
 
+    /**
+     * Notify that route setting process has started.
+     * During the process of routes update, NavSDK skips all the [NavigationStatus] updates.
+     *
+     * Make sure to call [setNavigationRoutesFinished] when done to release the updates.
+     * */
     fun setNavigationRoutesStarted(params: RoutesSetStartedParams)
+
+    /**
+     * Notify that route setting process has finished.
+     *
+     * @param routes DirectionsSessionRoutes
+     */
     fun setNavigationRoutesFinished(routes: DirectionsSessionRoutes)
 
     /**
