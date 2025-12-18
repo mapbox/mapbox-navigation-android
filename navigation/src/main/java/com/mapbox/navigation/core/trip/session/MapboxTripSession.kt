@@ -17,6 +17,7 @@ import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.core.SetRoutes
+import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.internal.utils.initialLegIndex
 import com.mapbox.navigation.core.internal.utils.mapToReason
 import com.mapbox.navigation.core.navigator.getCurrentBannerInstructions
@@ -57,6 +58,7 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 import kotlin.time.TimeSource
@@ -66,6 +68,7 @@ import kotlin.time.minus
  * Default implementation of [TripSession]
  *
  * @param tripService TripService
+ * @param directionsSession Directions session
  * @param tripSessionLocationEngine the location engine
  * @param navigator Native navigator
  * @param threadController controller for main/io jobs
@@ -75,6 +78,7 @@ import kotlin.time.minus
 @MainThread
 internal class MapboxTripSession(
     override val tripService: TripService,
+    private val directionsSession: DirectionsSession,
     private val tripSessionLocationEngine: TripSessionLocationEngine,
     private val navigator: MapboxNativeNavigator,
     private val threadController: ThreadController,
@@ -86,11 +90,17 @@ internal class MapboxTripSession(
         private const val LOG_CATEGORY = "MapboxTripSession"
     }
 
-    private var isUpdatingRoute = false
     private var updateLegIndexJob: Job? = null
 
     @VisibleForTesting
+    internal val isUpdatingRoute = AtomicBoolean(false)
+
+    @VisibleForTesting
     internal var primaryRoute: NavigationRoute? = null
+
+    init {
+        registerSetRoutesObservers()
+    }
 
     override suspend fun setRoutes(
         routes: List<NavigationRoute>,
@@ -466,7 +476,7 @@ internal class MapboxTripSession(
                     "Error processing native status update: origin=$origin, status=$status.\n" +
                         "Error: $error\n" +
                         "MapboxTripSession state: " +
-                        "isUpdatingRoute=$isUpdatingRoute, primaryRoute=${primaryRoute?.id}"
+                        "isUpdatingRoute=${isUpdatingRoute.get()}, primaryRoute=${primaryRoute?.id}"
                 }
                 throw NativeStatusProcessingError(error)
             }
@@ -791,7 +801,7 @@ internal class MapboxTripSession(
 
         // we should skip RouteProgress, BannerInstructions, isOffRoute state updates while
         // setting a new route
-        if (isUpdatingRoute) {
+        if (isUpdatingRoute.get()) {
             logD("route progress update dropped - updating routes", LOG_CATEGORY)
             return
         }
@@ -934,10 +944,33 @@ internal class MapboxTripSession(
         }
     }
 
+    /**
+     * Executes a route update transaction, setting the `isUpdatingRoute` flag to true
+     * Works alongside with the observers registered in [registerSetRoutesObservers].
+     * This ensures that during the execution of the provided function, any incoming
+     * route progress updates are ignored, preventing potential race conditions
+     */
     private inline fun <T> updateRouteTransaction(func: () -> T): T {
-        isUpdatingRoute = true
-        return func().also {
-            isUpdatingRoute = false
+        isUpdatingRoute.set(true)
+        return try {
+            func()
+        } finally {
+            isUpdatingRoute.set(false)
+        }
+    }
+
+    /**
+     * Registers an observer to detect an upcoming routes change even before `setRoutes` is called.
+     * This helps handle race conditions by setting `isUpdatingRoute` early, allowing the session to
+     * ignore route progress updates that may arrive from the navigator during the route update process.
+     */
+    private fun registerSetRoutesObservers() {
+        directionsSession.registerSetNavigationRoutesStartedObserver {
+            isUpdatingRoute.set(true)
+        }
+
+        directionsSession.registerSetNavigationRoutesFinishedObserver {
+            isUpdatingRoute.set(false)
         }
     }
 }

@@ -1851,13 +1851,15 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                 every { id } returns "id3"
             }
             every { directionsSession.routes } returnsMany listOf(listOf(route1), listOf(route2))
+            every { directionsSession.ignoredRoutes } returns emptyList()
 
             mapboxNavigation.setNavigationRoutes(listOf(route1, route3))
 
             coVerify(exactly = 0) {
                 tripSession.setRoutes(any(), any())
             }
-            verify(exactly = 0) {
+
+            verify(exactly = 1) {
                 directionsSession.setNavigationRoutesFinished(any())
             }
         }
@@ -2742,6 +2744,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         every {
             NavigationComponentProvider.createTripSession(
                 tripService = any(),
+                directionsSession = any(),
                 tripSessionLocationEngine = any(),
                 navigator = any(),
                 any(),
@@ -2749,6 +2752,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             )
         } returns MapboxTripSession(
             tripService,
+            directionsSession,
             tripSessionLocationEngine,
             navigator,
             threadController,

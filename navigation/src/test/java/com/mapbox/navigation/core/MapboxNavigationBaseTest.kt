@@ -384,6 +384,7 @@ internal open class MapboxNavigationBaseTest {
         every {
             NavigationComponentProvider.createTripSession(
                 tripService = tripService,
+                directionsSession = directionsSession,
                 tripSessionLocationEngine = tripSessionLocationEngine,
                 navigator = navigator,
                 threadController,

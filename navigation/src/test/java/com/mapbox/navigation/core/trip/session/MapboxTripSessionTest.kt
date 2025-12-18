@@ -16,6 +16,10 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.core.SetRoutes
+import com.mapbox.navigation.core.directions.session.DirectionsSession
+import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.directions.session.SetNavigationRoutesStartedObserver
 import com.mapbox.navigation.core.internal.RouteProgressData
 import com.mapbox.navigation.core.navigator.getCurrentBannerInstructions
 import com.mapbox.navigation.core.navigator.getLocationMatcherResult
@@ -103,6 +107,9 @@ class MapboxTripSessionTest {
     private val tripService: TripService = mockk(relaxUnitFun = true) {
         every { hasServiceStarted() } returns false
     }
+
+    private val directionsSession: DirectionsSession = mockk(relaxed = true)
+
     private lateinit var locationUpdateAnswers: (Location) -> Unit
     private val tripSessionLocationEngine: TripSessionLocationEngine = mockk(relaxUnitFun = true) {
         every { startLocationUpdates(any(), captureLambda()) } answers {
@@ -210,6 +217,7 @@ class MapboxTripSessionTest {
     private fun buildTripSession(): MapboxTripSession {
         return MapboxTripSession(
             tripService,
+            directionsSession,
             tripSessionLocationEngine,
             navigator,
             threadController,
@@ -1723,139 +1731,179 @@ class MapboxTripSessionTest {
         }
 
     @Test
-    fun `reroute invocation handler triggers reroute when going off-route for the first time`() = coroutineRule.runBlockingTest {
-        // Arrange
-        val mockRerouteController = mockk<RerouteController>(relaxed = true)
-        val mockOffRouteObserver = mockk<OffRouteObserver>(relaxed = true)
-        val offRouteNavigationStatus = mockk<NavigationStatus>(relaxed = true) {
-            every { routeState } returns RouteState.OFF_ROUTE
+    fun `reroute invocation handler triggers reroute when going off-route for the first time`() =
+        coroutineRule.runBlockingTest {
+            // Arrange
+            val mockRerouteController = mockk<RerouteController>(relaxed = true)
+            val mockOffRouteObserver = mockk<OffRouteObserver>(relaxed = true)
+            val offRouteNavigationStatus = mockk<NavigationStatus>(relaxed = true) {
+                every { routeState } returns RouteState.OFF_ROUTE
+            }
+            val offRouteTripStatus = mockk<TripStatus>(relaxed = true) {
+                every { navigationStatus } returns offRouteNavigationStatus
+            }
+
+            tripSession.setOffRouteObserverForReroute(mockOffRouteObserver, mockRerouteController)
+            tripSession.start(true)
+
+            // Simulate going off-route: tripSession.isOffRoute is false initially, tripStatus.isOffRoute is true
+            every { navigationStatus.routeState } returns RouteState.TRACKING
+            every { tripStatus.navigationStatus } returns navigationStatus
+
+            // Act - simulate the navigator observer receiving an off-route status
+            every { offRouteNavigationStatus.getTripStatusFrom(any()) } returns offRouteTripStatus
+            navigatorObserverImplSlot.captured.onStatus(
+                navigationStatusOrigin,
+                offRouteNavigationStatus,
+            )
+
+            // Assert - verify reroute controller interaction
+            verify { mockRerouteController.registerRerouteStateObserver(any()) }
+            verify { mockOffRouteObserver.onOffRouteStateChanged(true) }
+
+            tripSession.stop()
         }
-        val offRouteTripStatus = mockk<TripStatus>(relaxed = true) {
-            every { navigationStatus } returns offRouteNavigationStatus
-        }
-
-        tripSession.setOffRouteObserverForReroute(mockOffRouteObserver, mockRerouteController)
-        tripSession.start(true)
-
-        // Simulate going off-route: tripSession.isOffRoute is false initially, tripStatus.isOffRoute is true
-        every { navigationStatus.routeState } returns RouteState.TRACKING
-        every { tripStatus.navigationStatus } returns navigationStatus
-
-        // Act - simulate the navigator observer receiving an off-route status
-        every { offRouteNavigationStatus.getTripStatusFrom(any()) } returns offRouteTripStatus
-        navigatorObserverImplSlot.captured.onStatus(
-            navigationStatusOrigin,
-            offRouteNavigationStatus,
-        )
-
-        // Assert - verify reroute controller interaction
-        verify { mockRerouteController.registerRerouteStateObserver(any()) }
-        verify { mockOffRouteObserver.onOffRouteStateChanged(true) }
-
-        tripSession.stop()
-    }
-
-    @Test fun `reroute invocation handler handles reroute completion when user is still off-route`() = coroutineRule.runBlockingTest {
-        // Arrange
-        val mockRerouteController = mockk<RerouteController>(relaxed = true)
-        val mockOffRouteObserver = mockk<OffRouteObserver>(relaxed = true)
-
-        val offRouteNavigationStatus = mockk<NavigationStatus>(relaxed = true) {
-            every { routeState } returns RouteState.OFF_ROUTE
-        }
-        val offRouteTripStatus = mockk<TripStatus>(relaxed = true) {
-            every { navigationStatus } returns offRouteNavigationStatus
-        }
-
-        tripSession.setOffRouteObserverForReroute(mockOffRouteObserver, mockRerouteController)
-        tripSession.start(true)
-
-        // Act - trigger off-route state multiple times to simulate reroute logic
-        every { offRouteNavigationStatus.getTripStatusFrom(any()) } returns offRouteTripStatus
-        navigatorObserverImplSlot.captured.onStatus(
-            navigationStatusOrigin,
-            offRouteNavigationStatus,
-        )
-        navigatorObserverImplSlot.captured.onStatus(
-            navigationStatusOrigin,
-            offRouteNavigationStatus,
-        )
-
-        // Assert - verify reroute controller interaction
-        verify(atLeast = 1) { mockRerouteController.registerRerouteStateObserver(any()) }
-        verify { mockOffRouteObserver.onOffRouteStateChanged(true) }
-
-        tripSession.stop()
-    }
 
     @Test
-    fun `reroute invocation handler integrates properly with TripSession reroute logic`() = coroutineRule.runBlockingTest {
-        // Arrange
-        val mockRerouteController = mockk<RerouteController>(relaxed = true)
-        val mockOffRouteObserver = mockk<OffRouteObserver>(relaxed = true)
-        val offRouteNavigationStatus = mockk<NavigationStatus>(relaxed = true) {
-            every { routeState } returns RouteState.OFF_ROUTE
+    fun `reroute invocation handler handles reroute completion when user is still off-route`() =
+        coroutineRule.runBlockingTest {
+            // Arrange
+            val mockRerouteController = mockk<RerouteController>(relaxed = true)
+            val mockOffRouteObserver = mockk<OffRouteObserver>(relaxed = true)
+
+            val offRouteNavigationStatus = mockk<NavigationStatus>(relaxed = true) {
+                every { routeState } returns RouteState.OFF_ROUTE
+            }
+            val offRouteTripStatus = mockk<TripStatus>(relaxed = true) {
+                every { navigationStatus } returns offRouteNavigationStatus
+            }
+
+            tripSession.setOffRouteObserverForReroute(mockOffRouteObserver, mockRerouteController)
+            tripSession.start(true)
+
+            // Act - trigger off-route state multiple times to simulate reroute logic
+            every { offRouteNavigationStatus.getTripStatusFrom(any()) } returns offRouteTripStatus
+            navigatorObserverImplSlot.captured.onStatus(
+                navigationStatusOrigin,
+                offRouteNavigationStatus,
+            )
+            navigatorObserverImplSlot.captured.onStatus(
+                navigationStatusOrigin,
+                offRouteNavigationStatus,
+            )
+
+            // Assert - verify reroute controller interaction
+            verify(atLeast = 1) { mockRerouteController.registerRerouteStateObserver(any()) }
+            verify { mockOffRouteObserver.onOffRouteStateChanged(true) }
+
+            tripSession.stop()
         }
-        val offRouteTripStatus = mockk<TripStatus>(relaxed = true) {
-            every { navigationStatus } returns offRouteNavigationStatus
-        }
-
-        tripSession.setOffRouteObserverForReroute(mockOffRouteObserver, mockRerouteController)
-        tripSession.start(true)
-
-        // Act - trigger multiple off-route states to test the integration
-        every { offRouteNavigationStatus.getTripStatusFrom(any()) } returns offRouteTripStatus
-        navigatorObserverImplSlot.captured.onStatus(
-            navigationStatusOrigin,
-            offRouteNavigationStatus,
-        )
-
-        // Assert - verify basic reroute controller integration
-        verify(atLeast = 1) { mockRerouteController.registerRerouteStateObserver(any()) }
-        verify { mockOffRouteObserver.onOffRouteStateChanged(true) }
-
-        tripSession.stop()
-    }
 
     @Test
-    fun `reroute invocation handler resets state when back on route`() = coroutineRule.runBlockingTest {
-        // Arrange
-        val mockRerouteController = mockk<RerouteController>(relaxed = true)
-        val mockOffRouteObserver = mockk<OffRouteObserver>(relaxed = true)
-        val onRouteNavigationStatus = mockk<NavigationStatus>(relaxed = true) {
-            every { routeState } returns RouteState.TRACKING
+    fun `reroute invocation handler integrates properly with TripSession reroute logic`() =
+        coroutineRule.runBlockingTest {
+            // Arrange
+            val mockRerouteController = mockk<RerouteController>(relaxed = true)
+            val mockOffRouteObserver = mockk<OffRouteObserver>(relaxed = true)
+            val offRouteNavigationStatus = mockk<NavigationStatus>(relaxed = true) {
+                every { routeState } returns RouteState.OFF_ROUTE
+            }
+            val offRouteTripStatus = mockk<TripStatus>(relaxed = true) {
+                every { navigationStatus } returns offRouteNavigationStatus
+            }
+
+            tripSession.setOffRouteObserverForReroute(mockOffRouteObserver, mockRerouteController)
+            tripSession.start(true)
+
+            // Act - trigger multiple off-route states to test the integration
+            every { offRouteNavigationStatus.getTripStatusFrom(any()) } returns offRouteTripStatus
+            navigatorObserverImplSlot.captured.onStatus(
+                navigationStatusOrigin,
+                offRouteNavigationStatus,
+            )
+
+            // Assert - verify basic reroute controller integration
+            verify(atLeast = 1) { mockRerouteController.registerRerouteStateObserver(any()) }
+            verify { mockOffRouteObserver.onOffRouteStateChanged(true) }
+
+            tripSession.stop()
         }
-        val onRouteTripStatus = mockk<TripStatus>(relaxed = true) {
-            every { navigationStatus } returns onRouteNavigationStatus
-        }
-
-        tripSession.setOffRouteObserverForReroute(mockOffRouteObserver, mockRerouteController)
-        tripSession.start(true)
-
-        // Act - simulate being back on route
-        every { onRouteNavigationStatus.getTripStatusFrom(any()) } returns onRouteTripStatus
-        navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, onRouteNavigationStatus)
-
-        // Assert - verify observer cleanup when back on route
-        verify(atLeast = 1) { mockRerouteController.unregisterRerouteStateObserver(any()) }
-
-        tripSession.stop()
-    }
 
     @Test
-    fun `resetOffRouteObserverForReroute cleans up resources properly`() = coroutineRule.runBlockingTest {
-        // Arrange
-        val mockRerouteController = mockk<RerouteController>(relaxed = true)
-        val mockOffRouteObserver = mockk<OffRouteObserver>(relaxed = true)
+    fun `start of routes update should toggle isUpdatingRoutes flag`() =
+        coroutineRule.runBlockingTest {
+            val startObserver = slot<SetNavigationRoutesStartedObserver>()
+            val finishObserver = slot<RoutesObserver>()
 
-        tripSession.setOffRouteObserverForReroute(mockOffRouteObserver, mockRerouteController)
+            every {
+                directionsSession.registerSetNavigationRoutesStartedObserver(capture(startObserver))
+            } just Runs
 
-        // Act
-        tripSession.resetOffRouteObserverForReroute()
+            every {
+                directionsSession.registerSetNavigationRoutesFinishedObserver(
+                    capture(finishObserver),
+                )
+            } just Runs
 
-        // Assert - verify cleanup method was called on controller
-        verify { mockRerouteController.unregisterRerouteStateObserver(any()) }
-    }
+            tripSession = buildTripSession()
+
+            assertFalse(tripSession.isUpdatingRoute.get())
+
+            startObserver.captured.onRoutesSetStarted(mockk())
+
+            assertTrue(tripSession.isUpdatingRoute.get())
+
+            finishObserver.captured.onRoutesChanged(
+                RoutesUpdatedResult(emptyList(), emptyList(), ""),
+            )
+
+            assertFalse(tripSession.isUpdatingRoute.get())
+        }
+
+    @Test
+    fun `reroute invocation handler resets state when back on route`() =
+        coroutineRule.runBlockingTest {
+            // Arrange
+            val mockRerouteController = mockk<RerouteController>(relaxed = true)
+            val mockOffRouteObserver = mockk<OffRouteObserver>(relaxed = true)
+            val onRouteNavigationStatus = mockk<NavigationStatus>(relaxed = true) {
+                every { routeState } returns RouteState.TRACKING
+            }
+            val onRouteTripStatus = mockk<TripStatus>(relaxed = true) {
+                every { navigationStatus } returns onRouteNavigationStatus
+            }
+
+            tripSession.setOffRouteObserverForReroute(mockOffRouteObserver, mockRerouteController)
+            tripSession.start(true)
+
+            // Act - simulate being back on route
+            every { onRouteNavigationStatus.getTripStatusFrom(any()) } returns onRouteTripStatus
+            navigatorObserverImplSlot.captured.onStatus(
+                navigationStatusOrigin,
+                onRouteNavigationStatus,
+            )
+
+            // Assert - verify observer cleanup when back on route
+            verify(atLeast = 1) { mockRerouteController.unregisterRerouteStateObserver(any()) }
+
+            tripSession.stop()
+        }
+
+    @Test
+    fun `resetOffRouteObserverForReroute cleans up resources properly`() =
+        coroutineRule.runBlockingTest {
+            // Arrange
+            val mockRerouteController = mockk<RerouteController>(relaxed = true)
+            val mockOffRouteObserver = mockk<OffRouteObserver>(relaxed = true)
+
+            tripSession.setOffRouteObserverForReroute(mockOffRouteObserver, mockRerouteController)
+
+            // Act
+            tripSession.resetOffRouteObserverForReroute()
+
+            // Assert - verify cleanup method was called on controller
+            verify { mockRerouteController.unregisterRerouteStateObserver(any()) }
+        }
 
     @After
     fun cleanUp() {

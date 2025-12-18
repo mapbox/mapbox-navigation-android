@@ -50,6 +50,7 @@ import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
 import com.mapbox.navigation.core.arrival.AutoArrivalController
 import com.mapbox.navigation.core.directions.session.DirectionsSession
+import com.mapbox.navigation.core.directions.session.DirectionsSessionRoutes
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesSetStartedParams
@@ -596,8 +597,13 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         tripSessionLocationEngine = NavigationComponentProvider.createTripSessionLocationEngine(
             locationOptions = navigationOptions.locationOptions,
         )
+
+        directionsSession = NavigationComponentProvider.createDirectionsSession(routerWrapper)
+        directionsSession.registerSetNavigationRoutesFinishedObserver(navigationSession)
+
         tripSession = NavigationComponentProvider.createTripSession(
             tripService = tripService,
+            directionsSession = directionsSession,
             tripSessionLocationEngine = tripSessionLocationEngine,
             navigator = navigator,
             threadController,
@@ -608,8 +614,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         tripSession.registerStateObserver(navigationSession)
         tripSession.registerStateObserver(historyRecordingStateHandler)
 
-        directionsSession = NavigationComponentProvider.createDirectionsSession(routerWrapper)
-        directionsSession.registerSetNavigationRoutesFinishedObserver(navigationSession)
         if (reachabilityObserverId == null) {
             reachabilityObserverId = ReachabilityService.addReachabilityObserver(
                 connectivityHandler,
@@ -1338,6 +1342,16 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                                 "are outdated. Primary route has changed " +
                                 "from ${routes.first().id} " +
                                 "to ${directionsSession.routes.firstOrNull()?.id}",
+                        ),
+                    )
+
+                    // Even though we are not setting new routes here,
+                    // we need to inform that the operation (setNavigationRoutesStarted) is finished
+                    directionsSession.setNavigationRoutesFinished(
+                        DirectionsSessionRoutes(
+                            acceptedRoutes = directionsSession.routes,
+                            ignoredRoutes = directionsSession.ignoredRoutes,
+                            setRoutesInfo = setRoutesInfo,
                         ),
                     )
                 } else {
