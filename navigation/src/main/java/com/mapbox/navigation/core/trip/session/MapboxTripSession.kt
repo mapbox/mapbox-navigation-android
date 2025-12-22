@@ -2,7 +2,6 @@ package com.mapbox.navigation.core.trip.session
 
 import androidx.annotation.MainThread
 import androidx.annotation.VisibleForTesting
-import com.mapbox.annotation.MapboxExperimental
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.Expected
@@ -26,15 +25,12 @@ import com.mapbox.navigation.core.navigator.getCurrentBannerInstructions
 import com.mapbox.navigation.core.navigator.getLocationMatcherResult
 import com.mapbox.navigation.core.navigator.getRouteProgressFrom
 import com.mapbox.navigation.core.navigator.getTripStatusFrom
-import com.mapbox.navigation.core.navigator.mapToDirectionsApi
 import com.mapbox.navigation.core.navigator.toFixLocation
 import com.mapbox.navigation.core.navigator.toLocation
 import com.mapbox.navigation.core.navigator.toLocations
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.routerefresh.RouteRefresherStatus
-import com.mapbox.navigation.core.trip.RelevantVoiceInstructionsCallback
-import com.mapbox.navigation.core.trip.VoiceInstructionsAvailableObserver
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
 import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManager
@@ -57,8 +53,6 @@ import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteState
 import com.mapbox.navigator.RoutesChangeInfo
 import com.mapbox.navigator.SetRoutesReason
-import com.mapbox.navigator.VoiceInstructionsAvailabilityObserver
-import com.mapbox.navigator.VoiceInstructionsCallback
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
@@ -126,7 +120,6 @@ internal class MapboxTripSession(
                     SetRoutesReason.CLEAN_UP,
                 )
             }
-
             is SetRoutes.NewRoutes -> {
                 setRouteToNativeNavigator(
                     routes,
@@ -134,7 +127,6 @@ internal class MapboxTripSession(
                     SetRoutesReason.NEW_ROUTE,
                 )
             }
-
             is SetRoutes.Reroute -> {
                 setRouteToNativeNavigator(
                     routes,
@@ -142,14 +134,12 @@ internal class MapboxTripSession(
                     SetRoutesReason.REROUTE,
                 )
             }
-
             is SetRoutes.Alternatives -> {
                 NativeSetRouteValue(
                     routes = routes,
                     nativeAlternatives = navigator.setAlternativeRoutes(routes.drop(1)),
                 )
             }
-
             is SetRoutes.Reorder -> {
                 setRouteToNativeNavigator(
                     routes,
@@ -157,7 +147,6 @@ internal class MapboxTripSession(
                     SetRoutesReason.ALTERNATIVE,
                 )
             }
-
             is SetRoutes.RefreshRoutes -> {
                 if (routes.isNotEmpty()) {
                     val refreshControllerRefresh = setRoutes
@@ -266,14 +255,6 @@ internal class MapboxTripSession(
     private val stateObservers = CopyOnWriteArraySet<TripSessionStateObserver>()
     private val bannerInstructionsObservers = CopyOnWriteArraySet<BannerInstructionsObserver>()
     private val voiceInstructionsObservers = CopyOnWriteArraySet<VoiceInstructionsObserver>()
-
-    @OptIn(MapboxExperimental::class)
-    private val voiceInstructionsAvailableObserver =
-        CopyOnWriteArraySet<VoiceInstructionsAvailableObserver>()
-
-    @OptIn(MapboxExperimental::class)
-    private val relevantVoiceInstructionsCallbacks =
-        CopyOnWriteArraySet<RelevantVoiceInstructionsCallback>()
     private val fallbackVersionsObservers = CopyOnWriteArraySet<FallbackVersionsObserver>()
 
     private val bannerInstructionEvent = BannerInstructionEvent()
@@ -356,17 +337,6 @@ internal class MapboxTripSession(
             )
         }
     }
-
-    @OptIn(MapboxExperimental::class)
-    private val voiceInstructionsAvailabilityObserver =
-        VoiceInstructionsAvailabilityObserver { available ->
-            voiceInstructionsAvailableObserver.forEach { observer ->
-                observer.onChanged(available)
-            }
-        }
-
-    @OptIn(MapboxExperimental::class)
-    private var voiceInstructionsObserver: VoiceInstructionsCallback? = null
 
     /**
      * Helper class that handles the reroute invocation logic based on the off-route state changes.
@@ -703,73 +673,6 @@ internal class MapboxTripSession(
     }
 
     /**
-     * Register [VoiceInstructionsAvailabilityObserver]
-     *
-     * @see [unregisterVoiceInstructionsAvailabilityObserver]
-     */
-    @OptIn(MapboxExperimental::class)
-    override fun registerVoiceInstructionsAvailabilityObserver(
-        observer: VoiceInstructionsAvailableObserver,
-    ) {
-        if (voiceInstructionsAvailableObserver.isEmpty()) {
-            navigator.addVoiceInstructionsAvailabilityObserver(
-                voiceInstructionsAvailabilityObserver,
-            )
-        }
-        voiceInstructionsAvailableObserver.add(observer)
-    }
-
-    /**
-     * Unregister [VoiceInstructionsAvailabilityObserver]
-     *
-     * @see [registerVoiceInstructionsAvailabilityObserver]
-     */
-    @OptIn(MapboxExperimental::class)
-    override fun unregisterVoiceInstructionsAvailabilityObserver(
-        observer: VoiceInstructionsAvailableObserver,
-    ) {
-        voiceInstructionsAvailableObserver.remove(observer)
-        if (voiceInstructionsAvailableObserver.isEmpty()) {
-            navigator.removeVoiceInstructionsAvailabilityObserver(
-                voiceInstructionsAvailabilityObserver,
-            )
-        }
-    }
-
-    /**
-     * Unregister all [VoiceInstructionsAvailabilityObserver]
-     *
-     * @see [registerVoiceInstructionsAvailabilityObserver]
-     */
-    @OptIn(MapboxExperimental::class)
-    override fun unregisterAllVoiceInstructionsAvailabilityObserver() {
-        voiceInstructionsAvailableObserver.clear()
-        navigator.removeVoiceInstructionsAvailabilityObserver(
-            voiceInstructionsAvailabilityObserver,
-        )
-    }
-
-    /**
-     * Register [RelevantVoiceInstructionsCallback]
-     *
-     * This will immediately fetch the relevant voice instructions asynchronously and invoke
-     * the observer callback. The observer will be automatically unregistered after receiving
-     * the callback since this is a one-time fetch operation.
-     */
-    @OptIn(MapboxExperimental::class)
-    override fun registerRelevantVoiceInstructionsCallback(
-        callback: RelevantVoiceInstructionsCallback,
-    ) {
-        relevantVoiceInstructionsCallbacks.add(callback)
-
-        // Each registration triggers a new fetch since this is a one-time callback
-        voiceInstructionsObserver = createVoiceInstructionsObserverCallback()
-        voiceInstructionsObserver?.let { callback ->
-            navigator.getRelevantVoiceInstructions(callback)
-        }
-    }
-
-    /**
      * Follows a new leg of the already loaded directions.
      * Returns an initialized navigation status if no errors occurred
      * otherwise, it returns an invalid navigation status state.
@@ -1030,19 +933,14 @@ internal class MapboxTripSession(
         }
     }
 
-    @OptIn(MapboxExperimental::class)
-    private fun createVoiceInstructionsObserverCallback(): VoiceInstructionsCallback =
-        VoiceInstructionsCallback { voiceInstructions ->
-            val apiVoiceInstructions = voiceInstructions.mapNotNull { it.mapToDirectionsApi() }
-
-            relevantVoiceInstructionsCallbacks.forEach { observer ->
-                observer.onRelevantVoiceInstructionsReceived(apiVoiceInstructions)
-            }
-
-            // Automatically clear all observers after callback since this is a one-time operation
-            relevantVoiceInstructionsCallbacks.clear()
-            voiceInstructionsObserver = null
+    private fun checkVoiceInstructionEvent(
+        currentVoiceInstructions: VoiceInstructions?,
+        action: (VoiceInstructions) -> Unit,
+    ) {
+        ifNonNull(currentVoiceInstructions) { voiceInstructions ->
+            action(voiceInstructions)
         }
+    }
 
     /**
      * Executes a route update transaction, setting the `isUpdatingRoute` flag to true

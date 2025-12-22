@@ -11,7 +11,6 @@ import androidx.annotation.RequiresPermission
 import androidx.annotation.RestrictTo
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
-import com.mapbox.annotation.MapboxExperimental
 import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
@@ -96,7 +95,10 @@ import com.mapbox.navigation.core.reroute.RerouteController.RerouteStateObserver
 import com.mapbox.navigation.core.reroute.RerouteOptionsAdapter
 import com.mapbox.navigation.core.reroute.RerouteResult
 import com.mapbox.navigation.core.reroute.RerouteState
+import com.mapbox.navigation.core.reroute.RerouteState.Failed
 import com.mapbox.navigation.core.reroute.RerouteState.FetchingRoute
+import com.mapbox.navigation.core.reroute.RerouteState.Interrupted
+import com.mapbox.navigation.core.reroute.RerouteState.RouteFetched
 import com.mapbox.navigation.core.reroute.RerouteStateV2
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
@@ -112,8 +114,6 @@ import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FeedbackHelper
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadataWrapper
-import com.mapbox.navigation.core.trip.RelevantVoiceInstructionsCallback
-import com.mapbox.navigation.core.trip.VoiceInstructionsAvailableObserver
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LegIndexUpdatedCallback
@@ -1627,48 +1627,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      */
     fun unregisterVoiceInstructionsObserver(voiceInstructionsObserver: VoiceInstructionsObserver) {
         tripSession.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
-    }
-
-    /**
-     * Register [VoiceInstructionsAvailableObserver] which informs you when there are an available
-     * voice instructions.
-     *
-     * Note: to retrieve the actual voice instructions when they are available, use
-     * [registerRelevantVoiceInstructionsCallback].
-     *
-     * @param observer the observer to register
-     *
-     * @see [unregisterVoiceInstructionsAvailableObserver]
-     */
-    @MapboxExperimental
-    fun registerVoiceInstructionsAvailableObserver(observer: VoiceInstructionsAvailableObserver) {
-        tripSession.registerVoiceInstructionsAvailabilityObserver(observer)
-    }
-
-    /**
-     * Unregisters [VoiceInstructionsAvailableObserver].
-     *
-     * @param observer the observer to unregister
-     *
-     * @see [registerVoiceInstructionsAvailableObserver]
-     */
-    @MapboxExperimental
-    fun unregisterVoiceInstructionsAvailableObserver(observer: VoiceInstructionsAvailableObserver) {
-        tripSession.unregisterVoiceInstructionsAvailabilityObserver(observer)
-    }
-
-    /**
-     * Registers a [RelevantVoiceInstructionsCallback] to receive the relevant voice instructions.
-     *
-     * Note: the observer will be **automatically unregistered** after receiving the callback, as
-     * this is a one-time fetch operation. And if you need to get the relevant voice instructions
-     * again, simply call this method again.
-     *
-     * @param callback the observer to register (will be auto-unregistered after callback)
-     */
-    @MapboxExperimental
-    fun registerRelevantVoiceInstructionsCallback(callback: RelevantVoiceInstructionsCallback) {
-        tripSession.registerRelevantVoiceInstructionsCallback(callback)
     }
 
     /**

@@ -17,7 +17,6 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrTh
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.testing.utils.readRawFileText
-import retrofit2.http.Url
 import java.net.URL
 
 object RoutesProvider {
@@ -26,7 +25,7 @@ object RoutesProvider {
         val jsonResponse = readRawFileText(context, R.raw.route_response_dc_very_short)
         val coordinates = listOf(
             Point.fromLngLat(-77.031991, 38.894721),
-            Point.fromLngLat(-77.030923, 38.895433),
+            Point.fromLngLat(-77.030923, 38.895433)
         )
         return MockRoute(
             jsonResponse,
@@ -52,7 +51,7 @@ object RoutesProvider {
             readRawFileText(context, R.raw.route_response_dc_short_with_invalid_alternatives)
         val coordinates = listOf(
             Point.fromLngLat(-77.03195769941682, 38.894396260868234),
-            Point.fromLngLat(-77.02899192253159, 38.89624973628139),
+            Point.fromLngLat(-77.02899192253159, 38.89624973628139)
         )
         return MockRoute(
             jsonResponse,
@@ -72,7 +71,7 @@ object RoutesProvider {
         val jsonResponse = readRawFileText(context, R.raw.route_response_dc_short_with_alternative)
         val coordinates = listOf(
             Point.fromLngLat(-77.033625, 38.891164),
-            Point.fromLngLat(-77.03002, 38.895453),
+            Point.fromLngLat(-77.03002, 38.895453)
         )
         return MockRoute(
             jsonResponse,
@@ -91,11 +90,11 @@ object RoutesProvider {
     fun dc_short_with_alternative_no_uuid(context: Context): MockRoute {
         val jsonResponse = readRawFileText(
             context,
-            R.raw.route_response_dc_short_with_alternative_no_uuid,
+            R.raw.route_response_dc_short_with_alternative_no_uuid
         )
         val coordinates = listOf(
             Point.fromLngLat(-77.033625, 38.891164),
-            Point.fromLngLat(-77.03002, 38.895453),
+            Point.fromLngLat(-77.03002, 38.895453)
         )
         return MockRoute(
             jsonResponse,
@@ -114,11 +113,11 @@ object RoutesProvider {
     fun dc_short_with_alternative_same_beginning(context: Context): MockRoute {
         val jsonResponse = readRawFileText(
             context,
-            R.raw.route_response_dc_short_with_alternative_same_begining,
+            R.raw.route_response_dc_short_with_alternative_same_begining
         )
         val coordinates = listOf(
             Point.fromLngLat(-77.02821219854371, 38.887758247504166),
-            Point.fromLngLat(-77.03002, 38.895453),
+            Point.fromLngLat(-77.03002, 38.895453)
         )
         return MockRoute(
             jsonResponse,
@@ -140,7 +139,7 @@ object RoutesProvider {
         val coordinates = listOf(
             Point.fromLngLat(-77.036082, 38.887578),
             Point.fromLngLat(-77.033625, 38.891164),
-            Point.fromLngLat(-77.03002, 38.895453),
+            Point.fromLngLat(-77.03002, 38.895453)
         )
         return MockRoute(
             jsonResponse,
@@ -162,7 +161,7 @@ object RoutesProvider {
         val coordinates = listOf(
             Point.fromLngLat(-77.031957, 38.894721),
             Point.fromLngLat(-77.029671, 38.895531),
-            Point.fromLngLat(-77.021913, 38.899821),
+            Point.fromLngLat(-77.021913, 38.899821)
         )
         return MockRoute(
             jsonResponse,
@@ -184,7 +183,7 @@ object RoutesProvider {
         val coordinates = listOf(
             Point.fromLngLat(-77.031957, 38.894721),
             Point.fromLngLat(-77.029671, 38.895531),
-            Point.fromLngLat(-77.021913, 38.899821),
+            Point.fromLngLat(-77.021913, 38.899821)
         )
         return MockRoute(
             jsonResponse,
@@ -228,7 +227,7 @@ object RoutesProvider {
             readRawFileText(context, R.raw.route_response_dc_short_with_alternative_reroute)
         val coordinates = listOf(
             Point.fromLngLat(-77.036178, 38.892106),
-            Point.fromLngLat(-77.03002, 38.895453),
+            Point.fromLngLat(-77.03002, 38.895453)
         )
         return MockRoute(
             jsonResponse,
@@ -249,7 +248,7 @@ object RoutesProvider {
         val coordinates = listOf(
             Point.fromLngLat(-77.031991, 38.894721),
             Point.fromLngLat(-77.031991, 38.895433),
-            Point.fromLngLat(-77.030923, 38.895433),
+            Point.fromLngLat(-77.030923, 38.895433)
         )
         // TODO: add more data if you need it for your scenarios
         return MockRoute(
@@ -272,7 +271,7 @@ object RoutesProvider {
         val coordinates = listOf(
             Point.fromLngLat(-77.031991, 38.894721),
             Point.fromLngLat(-77.031991, 38.895433),
-            Point.fromLngLat(-77.030923, 38.895433),
+            Point.fromLngLat(-77.030923, 38.895433)
         )
         // TODO: add more data if you need it for your scenarios
         return MockRoute(
@@ -292,12 +291,12 @@ object RoutesProvider {
     fun near_munich_with_waypoints(context: Context): MockRoute {
         val jsonResponse = readRawFileText(
             context,
-            R.raw.route_response_near_munich_with_waypoints,
+            R.raw.route_response_near_munich_with_waypoints
         )
         val coordinates = listOf(
             Point.fromLngLat(12.733982017085935, 48.30224175840664),
             Point.fromLngLat(12.690353, 48.254544),
-            Point.fromLngLat(12.686236328301874, 48.251801613727025),
+            Point.fromLngLat(12.686236328301874, 48.251801613727025)
         )
         return MockRoute(
             jsonResponse,
@@ -316,13 +315,13 @@ object RoutesProvider {
     fun near_munich_with_waypoints_for_reroute(context: Context): DirectionsRoute {
         val jsonResponse = readRawFileText(
             context,
-            R.raw.route_response_near_munich_with_waypoints_for_reroute,
+            R.raw.route_response_near_munich_with_waypoints_for_reroute
         )
         return DirectionsResponse.fromJson(jsonResponse).routes()[0]
     }
 
     fun two_routes_different_legs_count_the_same_incident(
-        context: Context,
+        context: Context
     ): Triple<MockRoute, MockRoute, String> {
         val origin = "11.428011943347627,48.143406486859135"
         val destination = "11.443258702449555,48.14554279886465"
@@ -332,12 +331,12 @@ object RoutesProvider {
                     "$origin;$destination" +
                     "?access_token=**&alternatives=true" +
                     "&annotations=closure,congestion_numeric,congestion,speed,duration,distance" +
-                    "&geometries=polyline6&language=en&overview=full&steps=true",
-            ),
+                    "&geometries=polyline6&language=en&overview=full&steps=true"
+            )
         )
         val oneLegRoute = readRawFileText(
             context,
-            R.raw.route_through_incident_6058002857835914_one_leg,
+            R.raw.route_through_incident_6058002857835914_one_leg
         )
         val oneLegMockRoute = MockRoute(
             oneLegRoute,
@@ -359,12 +358,12 @@ object RoutesProvider {
                     ";$destination" +
                     "?access_token=**&alternatives=true" +
                     "&annotations=closure,congestion_numeric,congestion,speed,duration,distance" +
-                    "&geometries=polyline6&language=en&overview=full&steps=true",
-            ),
+                    "&geometries=polyline6&language=en&overview=full&steps=true"
+            )
         )
         val twoLegsRouteJson = readRawFileText(
             context,
-            R.raw.route_through_incident_6058002857835914_two_legs,
+            R.raw.route_through_incident_6058002857835914_two_legs
         )
         val twoLegsMockRoute = MockRoute(
             twoLegsRouteJson,
@@ -407,16 +406,16 @@ object RoutesProvider {
         val model = DirectionsResponse.fromJson(responseJson)
         val waypoints = model.waypoints()!!.map { it.location() }
         val handler = MockDirectionsRequestHandler(
-            profile = "driving-traffic",
-            jsonResponse = responseJson,
-            expectedCoordinates = waypoints,
-            relaxedExpectedCoordinates = true,
-        )
+                profile = "driving-traffic",
+                jsonResponse = responseJson,
+                expectedCoordinates = waypoints,
+                relaxedExpectedCoordinates = true
+            )
         return MockRoute(
             responseJson,
             model,
             listOf(handler),
-            waypoints,
+            waypoints
         )
     }
 
@@ -531,34 +530,6 @@ object RoutesProvider {
         )
     }
 
-    fun berlin_short_1(context: Context): MockRoute {
-        val jsonResponse = readRawFileText(
-            context,
-            R.raw.berlin_short_1_response,
-        )
-        val routeOptions = RouteOptions.fromUrl(
-            URL(
-                readRawFileText(
-                    context,
-                    R.raw.berlin_short_1_request,
-                ),
-            ),
-        )
-
-        return MockRoute(
-            jsonResponse,
-            DirectionsResponse.fromJson(jsonResponse),
-            listOf(
-                MockDirectionsRequestHandler(
-                    profile = PROFILE_WALKING,
-                    jsonResponse = jsonResponse,
-                    expectedCoordinates = routeOptions.coordinatesList(),
-                ),
-            ),
-            routeOptions.coordinatesList(),
-        )
-    }
-
     fun helsinki_hd_sd(context: Context): MockRoute {
         val jsonResponse = readRawFileText(context, R.raw.helsinki_hd_sd_route_response)
         val coordinates = listOf(
@@ -602,7 +573,7 @@ object RoutesProvider {
 
 suspend fun MapboxNavigation.requestMockRoutes(
     mockWebServerRule: MockWebServerRule,
-    mockRoute: MockRoute,
+    mockRoute: MockRoute
 ): List<NavigationRoute> {
     mockRoute.mockRequestHandlers.forEach {
         if (!mockWebServerRule.requestHandlers.contains(it)) {
@@ -610,6 +581,6 @@ suspend fun MapboxNavigation.requestMockRoutes(
         }
     }
     return requestRoutes(
-        mockRoute.routeOptions(mockWebServerRule.baseUrl),
+        mockRoute.routeOptions(mockWebServerRule.baseUrl)
     ).getSuccessfulResultOrThrowException().routes
 }

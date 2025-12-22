@@ -70,13 +70,11 @@ package com.mapbox.navigation.core {
     method public void registerNavigationSessionStateObserver(com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver navigationSessionStateObserver);
     method public void registerNavigationVersionSwitchObserver(com.mapbox.navigation.core.NavigationVersionSwitchObserver observer);
     method public void registerOffRouteObserver(com.mapbox.navigation.core.trip.session.OffRouteObserver offRouteObserver);
-    method @com.mapbox.annotation.MapboxExperimental public void registerRelevantVoiceInstructionsCallback(com.mapbox.navigation.core.trip.RelevantVoiceInstructionsCallback callback);
     method public void registerRouteProgressObserver(com.mapbox.navigation.core.trip.session.RouteProgressObserver routeProgressObserver);
     method public void registerRoutesInvalidatedObserver(com.mapbox.navigation.core.RoutesInvalidatedObserver observer);
     method public void registerRoutesObserver(com.mapbox.navigation.core.directions.session.RoutesObserver routesObserver);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void registerRoutesPreviewObserver(com.mapbox.navigation.core.preview.RoutesPreviewObserver observer);
     method public void registerTripSessionStateObserver(com.mapbox.navigation.core.trip.session.TripSessionStateObserver tripSessionStateObserver);
-    method @com.mapbox.annotation.MapboxExperimental public void registerVoiceInstructionsAvailableObserver(com.mapbox.navigation.core.trip.VoiceInstructionsAvailableObserver observer);
     method public void registerVoiceInstructionsObserver(com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver voiceInstructionsObserver);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void replanRoute(com.mapbox.navigation.core.ReplanRoutesCallback? resultCallback = null);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void replanRoute();
@@ -117,7 +115,6 @@ package com.mapbox.navigation.core {
     method public void unregisterRoutesObserver(com.mapbox.navigation.core.directions.session.RoutesObserver routesObserver);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void unregisterRoutesPreviewObserver(com.mapbox.navigation.core.preview.RoutesPreviewObserver observer);
     method public void unregisterTripSessionStateObserver(com.mapbox.navigation.core.trip.session.TripSessionStateObserver tripSessionStateObserver);
-    method @com.mapbox.annotation.MapboxExperimental public void unregisterVoiceInstructionsAvailableObserver(com.mapbox.navigation.core.trip.VoiceInstructionsAvailableObserver observer);
     method public void unregisterVoiceInstructionsObserver(com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver voiceInstructionsObserver);
     property @Deprecated public final com.mapbox.navigation.core.EtcGateApi etcGateAPI;
     property public final com.mapbox.navigator.Experimental experimental;
@@ -1293,7 +1290,7 @@ package com.mapbox.navigation.core.reroute {
     method public void onRerouteStateChanged(com.mapbox.navigation.core.reroute.RerouteState rerouteState);
   }
 
-  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public abstract sealed class RerouteStateV2 {
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public abstract class RerouteStateV2 {
   }
 
   public abstract static class RerouteStateV2.Deviation extends com.mapbox.navigation.core.reroute.RerouteStateV2 {
@@ -1574,14 +1571,6 @@ package com.mapbox.navigation.core.trip {
   public static final class MapboxTripStarter.Companion {
     method public com.mapbox.navigation.core.trip.MapboxTripStarter create();
     method public com.mapbox.navigation.core.trip.MapboxTripStarter getRegisteredInstance();
-  }
-
-  @com.mapbox.annotation.MapboxExperimental public fun interface RelevantVoiceInstructionsCallback {
-    method @MainThread public void onRelevantVoiceInstructionsReceived(java.util.List<? extends com.mapbox.api.directions.v5.models.VoiceInstructions> voiceInstructions);
-  }
-
-  @com.mapbox.annotation.MapboxExperimental public fun interface VoiceInstructionsAvailableObserver {
-    method @MainThread public void onChanged(boolean available);
   }
 
 }

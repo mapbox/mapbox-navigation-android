@@ -15,7 +15,6 @@ class LaneIndicatorTest : BuilderTest<LaneIndicator, LaneIndicator.Builder>() {
             .activeDirection("straight")
             .directions(listOf("straight"))
             .isActive(true)
-            .accessDesignated(listOf("hov", "bus"))
     }
 
     @Test

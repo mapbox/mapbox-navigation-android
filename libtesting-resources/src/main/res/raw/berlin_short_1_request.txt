@@ -1,1 +1,0 @@
-https://api.mapbox.com/directions/v5/mapbox/driving-traffic/13.397167,52.509051;13.389507,52.518734?geometries=polyline6&overview=full&steps=true&continue_straight=true&annotations=congestion_numeric%2Cmaxspeed%2Cclosure%2Cspeed%2Cduration%2Cdistance&roundabout_exits=true&voice_instructions=true&banner_instructions=true&enable_refresh=true

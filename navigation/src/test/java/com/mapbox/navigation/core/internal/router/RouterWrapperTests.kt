@@ -428,7 +428,7 @@ class RouterWrapperTests {
                 message = "Failed to parse response",
                 type = RouterFailureType.RESPONSE_PARSING_ERROR,
                 throwable = IllegalStateException(
-                    "java.lang.IllegalStateException: Missing required properties:  routes",
+                    "java.lang.IllegalStateException: Property \"routes\" has not been set",
                 ),
             )
 

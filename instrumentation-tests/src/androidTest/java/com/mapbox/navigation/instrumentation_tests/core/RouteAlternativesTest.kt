@@ -5,8 +5,6 @@ import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directionsrefresh.v1.models.DirectionsRouteRefresh
 import com.mapbox.api.directionsrefresh.v1.models.RouteLegRefresh
-import com.mapbox.common.TileDataDomain
-import com.mapbox.common.TileStore
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -15,7 +13,6 @@ import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
 import com.mapbox.navigation.base.internal.extensions.internalAlternativeRouteIndices
 import com.mapbox.navigation.base.internal.route.routeOptions
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.RoutesSetSuccess
@@ -37,8 +34,6 @@ import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.testing.utils.http.MockDynamicDirectionsRefreshHandler
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.testing.utils.location.stayOnPosition
-import com.mapbox.navigation.testing.utils.offline.Tileset
-import com.mapbox.navigation.testing.utils.offline.unpackTiles
 import com.mapbox.navigation.testing.utils.openRawResource
 import com.mapbox.navigation.testing.utils.readRawFileText
 import com.mapbox.navigation.testing.utils.routes.RoutesProvider
@@ -49,9 +44,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.withTimeoutOrNull
 import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.RecordedRequest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -60,8 +53,6 @@ import org.junit.Rule
 import org.junit.Test
 import java.io.InputStreamReader
 import java.net.URL
-import java.util.concurrent.CountDownLatch
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * This test ensures that alternative route recommendations
@@ -600,64 +591,6 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
 
                 val result = mapboxNavigation.switchToAlternativeAsync(routes.first())
                 assertTrue(result.isError)
-            }
-        }
-    }
-
-    @Test
-    fun late_online_route() = sdkTest {
-        val navigationTilesVersion = context.unpackTiles(Tileset.Berlin)[TileDataDomain.NAVIGATION]
-        val mockRoute = RoutesProvider.berlin_short_1(context)
-        val onlineResponseLock = CountDownLatch(1)
-        val handlersWithDelay = mockRoute.mockRequestHandlers.map {
-            object : MockRequestHandler {
-                override fun handle(request: RecordedRequest): MockResponse? {
-                    val response = it.handle(request)
-                    if (response != null) {
-                        onlineResponseLock.await()
-                    }
-                    return response
-                }
-            }
-        }
-        mockWebServerRule.requestHandlers.addAll(handlersWithDelay)
-        withMapboxNavigation(
-            historyRecorderRule = mapboxHistoryTestRule,
-            tileStore = TileStore.create(),
-            tilesVersion = navigationTilesVersion,
-            customConfig = """
-                {
-                    "router": {
-                        "hybridRouterConfig": {
-                            "fallbackDelaySeconds": 0,
-                            "timeoutToFallbackSeconds": 1
-                        }
-                    }
-                }
-            """.trimIndent(),
-        ) { navigation ->
-            val response = navigation.requestRoutes(
-                RouteOptions
-                    .builder()
-                    .baseUrl(mockWebServerRule.baseUrl)
-                    .applyDefaultNavigationOptions()
-                    .coordinatesList(mockRoute.routeWaypoints)
-                    .build(),
-            ).getSuccessfulResultOrThrowException()
-            assertEquals(RouterOrigin.OFFLINE, response.routes.first().origin)
-            stayOnPosition(mockRoute.routeWaypoints.first(), 270.0f) {
-                navigation.startTripSession()
-                navigation.setNavigationRoutesAsync(response.routes)
-                navigation.routeProgressUpdates().first()
-
-                onlineResponseLock.countDown()
-                val updateTimeout = 5.seconds
-                val update = withTimeoutOrNull(updateTimeout) {
-                    navigation.routesUpdates().first {
-                        it.navigationRoutes.first().responseUUID == mockRoute.routeResponse.uuid()
-                    }
-                }
-                assertNotNull("No late online route update in $updateTimeout", update)
             }
         }
     }

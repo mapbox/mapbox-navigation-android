@@ -11,7 +11,7 @@ ext {
   // mapboxSdkHdFullSparseCheckout in generate_api_docs_android.sh depends on mapboxSdkVersionSuffix
   // Release Train depends on these two lines below
   // https://github.com/mapbox/release-train/blob/bd530da200d62fb45166ef91d7d892d90a453fa6/backend/model/step/navcoreandroid/PrepareChangelogNavCore.py#L122-L124
-  def mapboxSdkVersionSuffix = '19.0-SNAPSHOT-01-09--10-07.git-6957557'
+  def mapboxSdkVersionSuffix = '18.0-SNAPSHOT-12-19--04-31.git-d23d529'
   def mapboxNavigatorVersion = "324.${mapboxSdkVersionSuffix}"
 
   def ndkVersionSuffix = ""
@@ -27,8 +27,8 @@ ext {
 
   version = [
       mapboxMapSdk              : "11.${mapboxSdkVersionSuffix}",
-      mapboxSdkServices         : "7.9.0",
-      mapboxSdkGson             : "0.0.4",
+      mapboxSdkServices         : "7.8.0",
+      mapboxSdkGson             : "0.0.3",
       mapboxNavigator           : mapboxNavigatorVersion,
       mapboxCommonNative        : "24.${mapboxSdkVersionSuffix}",
       mapboxNavSdkCpp           : "0.${mapboxSdkVersionSuffix}",

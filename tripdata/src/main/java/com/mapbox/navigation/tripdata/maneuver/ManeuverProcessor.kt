@@ -4,7 +4,6 @@ import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerText
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.api.directions.v5.models.IntersectionLanes
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.internal.utils.isSameRoute
@@ -41,7 +40,6 @@ internal object ManeuverProcessor {
                     action.distanceFormatter,
                 )
             }
-
             is ManeuverAction.GetManeuverList -> {
                 processManeuverList(
                     action.routeProgress,
@@ -128,25 +126,21 @@ internal object ManeuverProcessor {
                         "currentLegProgress is null",
                     )
                 }
-
                 stepIndex == null -> {
                     return ManeuverResult.GetManeuverListWithProgress.Failure(
                         "stepIndex is null",
                     )
                 }
-
                 currentInstructionIndex == null -> {
                     return ManeuverResult.GetManeuverListWithProgress.Failure(
                         "instructionIndex is null",
                     )
                 }
-
                 stepDistanceRemaining == null -> {
                     return ManeuverResult.GetManeuverListWithProgress.Failure(
                         "distanceRemaining is null",
                     )
                 }
-
                 else -> {
                     if (!route.isSameRoute(maneuverState.route)) {
                         maneuverState.route = route
@@ -194,17 +188,16 @@ internal object ManeuverProcessor {
                 ifNonNull(routeLeg?.steps()) { steps ->
                     val stepList = mutableListOf<StepIndexToManeuvers>()
                     for (stepIndex in 0..steps.lastIndex) {
-                        val nextStepIntersections = if (stepIndex == steps.lastIndex) {
+                        val stepIntersections = if (stepIndex == steps.lastIndex) {
                             steps[stepIndex].intersections()
                         } else {
                             steps[stepIndex + 1].intersections()
                         }
                         ifNonNull(
                             steps[stepIndex].bannerInstructions(),
-                            nextStepIntersections,
-                        ) { bannerInstruction, nextStepIntersections ->
-                            val maneuverPoint = nextStepIntersections.first().location()
-                            val lanes = nextStepIntersections.first().lanes()
+                            stepIntersections,
+                        ) { bannerInstruction, intersections ->
+                            val maneuverPoint = intersections.first().location()
                             val maneuverList = mutableListOf<Maneuver>()
                             val drivingSide = steps[stepIndex].drivingSide()!!
                             bannerInstruction.forEach { banner ->
@@ -214,7 +207,6 @@ internal object ManeuverProcessor {
                                         bannerInstruction = banner,
                                         maneuverPoint = maneuverPoint,
                                         distanceFormatter = distanceFormatter,
-                                        intersectionLanes = lanes,
                                     ),
                                 )
                             }
@@ -315,12 +307,11 @@ internal object ManeuverProcessor {
         maneuverPoint: Point,
         bannerInstruction: BannerInstructions,
         distanceFormatter: DistanceFormatter,
-        intersectionLanes: List<IntersectionLanes>?,
     ): Maneuver {
         val primaryManeuver = getPrimaryManeuver(drivingSide, bannerInstruction.primary())
         val secondaryManeuver = getSecondaryManeuver(drivingSide, bannerInstruction.secondary())
         val subManeuver = getSubManeuverText(drivingSide, bannerInstruction.sub())
-        val laneGuidance = getLaneGuidance(drivingSide, bannerInstruction, intersectionLanes)
+        val laneGuidance = getLaneGuidance(drivingSide, bannerInstruction)
         val totalStepDistance = bannerInstruction.distanceAlongGeometry()
         val stepDistance = StepDistance(distanceFormatter, totalStepDistance, null)
         return Maneuver(
@@ -347,7 +338,6 @@ internal object ManeuverProcessor {
                     createComponents(bannerComponentList),
                 )
             }
-
             else -> {
                 PrimaryManeuver()
             }
@@ -371,7 +361,6 @@ internal object ManeuverProcessor {
                     createComponents(bannerComponentList),
                 )
             }
-
             else -> {
                 null
             }
@@ -397,7 +386,6 @@ internal object ManeuverProcessor {
                             createComponents(bannerComponentList),
                         )
                     }
-
                     else -> {
                         null
                     }
@@ -410,33 +398,40 @@ internal object ManeuverProcessor {
     private fun getLaneGuidance(
         drivingSide: String,
         bannerInstruction: BannerInstructions,
-        nextIntersectionLanes: List<IntersectionLanes>?,
     ): Lane? {
-        return ifNonNull(nextIntersectionLanes) { list ->
-            val laneIndicatorList = mutableListOf<LaneIndicator>()
-            list.forEach { lane ->
-                val directions = lane.indications()
-                val active = lane.active() == true
-                val activeDirection = if (active && lane.validIndication() == null) {
-                    bannerInstruction.primary().modifier()
-                } else {
-                    lane.validIndication()
-                }
-                val accessDesignatedPerLane = lane.access()?.designated().orEmpty()
-                if (!directions.isNullOrEmpty()) {
-                    laneIndicatorList.add(
-                        LaneIndicator
-                            .Builder()
-                            .isActive(active)
-                            .directions(directions)
-                            .drivingSide(drivingSide)
-                            .activeDirection(activeDirection)
-                            .accessDesignated(accessDesignatedPerLane)
-                            .build(),
-                    )
+        val subBannerText = bannerInstruction.sub()
+        return subBannerText?.let { subBanner ->
+            if (subBanner.type() == null && subBanner.text().isEmpty()) {
+                val bannerComponentList = subBanner.components()
+                return ifNonNull(bannerComponentList) { list ->
+                    val laneIndicatorList = mutableListOf<LaneIndicator>()
+                    list.forEach {
+                        if (it.type() == BannerComponents.LANE) {
+                            val directions = it.directions()
+                            val active = it.active()
+                            val activeDirection: String? =
+                                if (active!! && it.activeDirection() == null) {
+                                    bannerInstruction.primary().modifier()
+                                } else {
+                                    it.activeDirection()
+                                }
+                            if (!directions.isNullOrEmpty()) {
+                                laneIndicatorList.add(
+                                    LaneIndicator
+                                        .Builder()
+                                        .isActive(active)
+                                        .directions(directions)
+                                        .drivingSide(drivingSide)
+                                        .activeDirection(activeDirection)
+                                        .build(),
+                                )
+                            }
+                        }
+                    }
+                    Lane(laneIndicatorList)
                 }
             }
-            Lane(laneIndicatorList)
+            null
         }
     }
 
@@ -453,7 +448,6 @@ internal object ManeuverProcessor {
                         .build()
                     componentList.add(Component(BannerComponents.EXIT, exit))
                 }
-
                 component.type() == BannerComponents.EXIT_NUMBER -> {
                     val exitNumber = ExitNumberComponentNode
                         .Builder()
@@ -461,7 +455,6 @@ internal object ManeuverProcessor {
                         .build()
                     componentList.add(Component(BannerComponents.EXIT_NUMBER, exitNumber))
                 }
-
                 component.type() == BannerComponents.TEXT -> {
                     val text = TextComponentNode
                         .Builder()
@@ -471,7 +464,6 @@ internal object ManeuverProcessor {
                         .build()
                     componentList.add(Component(BannerComponents.TEXT, text))
                 }
-
                 component.type() == BannerComponents.DELIMITER -> {
                     val delimiter = DelimiterComponentNode
                         .Builder()
@@ -479,7 +471,6 @@ internal object ManeuverProcessor {
                         .build()
                     componentList.add(Component(BannerComponents.DELIMITER, delimiter))
                 }
-
                 component.type() == BannerComponents.ICON -> {
                     val roadShield = RoadShieldComponentNode
                         .Builder()

@@ -2,7 +2,6 @@ package com.mapbox.navigation.core.trip.session
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.annotation.MapboxExperimental
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.DataRef
@@ -36,7 +35,6 @@ import com.mapbox.navigation.core.routerefresh.RouteRefresherResult
 import com.mapbox.navigation.core.routerefresh.RouteRefresherStatus
 import com.mapbox.navigation.core.routerefresh.RouteRefresherStatus.Success
 import com.mapbox.navigation.core.routerefresh.RoutesRefresherResult
-import com.mapbox.navigation.core.trip.RelevantVoiceInstructionsCallback
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
 import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManager
@@ -59,8 +57,6 @@ import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteState
 import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.SetRoutesResult
-import com.mapbox.navigator.VoiceInstruction
-import com.mapbox.navigator.VoiceInstructionsCallback
 import io.mockk.Runs
 import io.mockk.clearMocks
 import io.mockk.coEvery
@@ -1887,110 +1883,6 @@ class MapboxTripSessionTest {
             )
 
             assertFalse(tripSession.isUpdatingRoute.get())
-        }
-
-    @OptIn(MapboxExperimental::class)
-    @Test
-    fun `registerRelevantVoiceInstructionsCallback triggers native fetch and invokes callback`() =
-        coroutineRule.runBlockingTest {
-            // Arrange
-            val nativeVoiceInstruction = VoiceInstruction(
-                "Test_SSML",
-                "Test_Announcement",
-                180.0f,
-                1,
-            )
-            val nativeVoiceInstructions = listOf(nativeVoiceInstruction)
-            val callbackSlot = slot<VoiceInstructionsCallback>()
-
-            every {
-                navigator.getRelevantVoiceInstructions(capture(callbackSlot))
-            } answers {
-                callbackSlot.captured.run(nativeVoiceInstructions)
-            }
-
-            val observer =
-                RelevantVoiceInstructionsCallback { voiceInstructions ->
-                    // Assert observer was called with mapped instructions
-                    assertEquals(
-                        nativeVoiceInstruction.ssmlAnnouncement,
-                        voiceInstructions.first().ssmlAnnouncement(),
-                    )
-                }
-
-            // Act
-            tripSession = buildTripSession()
-            tripSession.registerRelevantVoiceInstructionsCallback(observer)
-
-            // Verify native method was called
-            verify(exactly = 1) { navigator.getRelevantVoiceInstructions(any()) }
-        }
-
-    @OptIn(MapboxExperimental::class)
-    @Test
-    fun `registerRelevantVoiceInstructionsCallback automatically unregisters after callback`() =
-        coroutineRule.runBlockingTest {
-            // Arrange
-            val nativeVoiceInstruction1 = VoiceInstruction(
-                "Test_SSML",
-                "Test_Announcement",
-                180.0f,
-                1,
-            )
-            val nativeVoiceInstructions1 = listOf(nativeVoiceInstruction1)
-            val callbackSlot1 = slot<VoiceInstructionsCallback>()
-
-            every {
-                navigator.getRelevantVoiceInstructions(capture(callbackSlot1))
-            } answers {
-                callbackSlot1.captured.run(nativeVoiceInstructions1)
-            }
-
-            val observer1 =
-                RelevantVoiceInstructionsCallback { voiceInstructions ->
-                    // Assert observer was called with mapped instructions
-                    assertEquals(
-                        nativeVoiceInstruction1.ssmlAnnouncement,
-                        voiceInstructions.first().ssmlAnnouncement(),
-                    )
-                }
-
-            // Act
-            tripSession = buildTripSession()
-            tripSession.registerRelevantVoiceInstructionsCallback(observer1)
-
-            // Verify native method was called
-            verify(exactly = 1) { navigator.getRelevantVoiceInstructions(any()) }
-
-            // Arrange 2
-            val nativeVoiceInstruction2 = VoiceInstruction(
-                "Test_SSML_2",
-                "Test_Announcement_2",
-                181.0f,
-                2,
-            )
-            val nativeVoiceInstructions2 = listOf(nativeVoiceInstruction2)
-            val callbackSlot2 = slot<VoiceInstructionsCallback>()
-            val observer2 =
-                RelevantVoiceInstructionsCallback { voiceInstructions ->
-                    // Assert observer was called with mapped instructions
-                    assertEquals(
-                        nativeVoiceInstruction2.ssmlAnnouncement,
-                        voiceInstructions.first().ssmlAnnouncement(),
-                    )
-                }
-            clearMocks(navigator)
-            every {
-                navigator.getRelevantVoiceInstructions(capture(callbackSlot2))
-            } answers {
-                callbackSlot2.captured.run(nativeVoiceInstructions2)
-            }
-
-            // Act
-            tripSession.registerRelevantVoiceInstructionsCallback(observer2)
-
-            // Verify native method was called again (proving auto-unregister happened)
-            verify(exactly = 1) { navigator.getRelevantVoiceInstructions(any()) }
         }
 
     @After
