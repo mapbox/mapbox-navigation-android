@@ -1,5 +1,21 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.17.2 - 23 December, 2025
+#### Features
+
+
+#### Bug fixes and improvements
+- Fix the race condition when canceling Active Guidance from a background thread that does not immediately cancel Route Progress updates.  
+- Fix ConcurrentModificationException in RoadCamerasByTileProvider 
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.17.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.17.1))
+- Mapbox Navigation Native `v324.17.1`
+- Mapbox Core Common `v24.17.1`
+- Mapbox Java `v7.9.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.9.0))
+
+
 ## Navigation SDK Core Framework 3.17.1 - 12 December, 2025
 #### Features
 - Added new class `RerouteStateV2`: it allows you to observe RerouteStates with additional substates which are not present in the original `RerouteState`.  
