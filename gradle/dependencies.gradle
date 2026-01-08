@@ -27,8 +27,8 @@ ext {
 
   version = [
       mapboxMapSdk              : "11.${mapboxSdkVersionSuffix}",
-      mapboxSdkServices         : "7.8.0",
-      mapboxSdkGson             : "0.0.3",
+      mapboxSdkServices         : "7.9.0",
+      mapboxSdkGson             : "0.0.4",
       mapboxNavigator           : mapboxNavigatorVersion,
       mapboxCommonNative        : "24.${mapboxSdkVersionSuffix}",
       mapboxNavSdkCpp           : "0.${mapboxSdkVersionSuffix}",
