@@ -153,6 +153,12 @@ class PredictiveCacheController @VisibleForTesting internal constructor(
             createMapsController(styleURI, map, tileStore)
         }
 
+        if (cacheCurrentMapStyle) {
+            map.style?.styleURI?.let { styleURI ->
+                createMapsController(styleURI, map, tileStore, null)
+            }
+        }
+
         val styleLoadedCallback = StyleLoadedCallback {
             if (cacheCurrentMapStyle) {
                 map.style?.styleURI?.let { styleURI ->

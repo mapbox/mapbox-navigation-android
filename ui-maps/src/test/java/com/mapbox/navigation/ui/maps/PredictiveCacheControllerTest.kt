@@ -81,7 +81,7 @@ class PredictiveCacheControllerTest {
     }
 
     @Test
-    fun `check createMapsController`() {
+    fun `check createMapsController without current style`() {
         mockkObject(OfflineManagerProvider) {
             val locationOptions1 = mockk<PredictiveCacheLocationOptions>(relaxed = true)
             val locationOptions2 = mockk<PredictiveCacheLocationOptions>(relaxed = true)
@@ -112,7 +112,9 @@ class PredictiveCacheControllerTest {
             val mockedTileStore = mockk<TileStore>()
             every { TileStore.create(any()) } returns mockedTileStore
             every { MapboxMapsOptions.tileStore } returns mockedTileStore
-            val mockedMapboxMap = mockk<MapboxMap>(relaxed = true)
+            val mockedMapboxMap = mockk<MapboxMap>(relaxed = true) {
+                every { style } returns null
+            }
             val mockTilesetDescriptor1: TilesetDescriptor = mockk()
             val mockTilesetDescriptor2: TilesetDescriptor = mockk()
             val mockTilesetDescriptor3: TilesetDescriptor = mockk()
@@ -217,6 +219,106 @@ class PredictiveCacheControllerTest {
 
             // "non_valid://test_test
             verify(exactly = 1) { errorHandler.onError(any()) }
+        }
+    }
+
+    @Test
+    fun `check createMapsController with current style`() {
+        mockkObject(OfflineManagerProvider) {
+            val locationOptions1 = mockk<PredictiveCacheLocationOptions>(relaxed = true)
+            val locationOptions2 = mockk<PredictiveCacheLocationOptions>(relaxed = true)
+            val predictiveCacheOptions = PredictiveCacheOptions.Builder()
+                .predictiveCacheMapsOptionsList(
+                    listOf(
+                        PredictiveCacheMapsOptions.Builder()
+                            .minZoom(40.toByte())
+                            .maxZoom(50.toByte())
+                            .predictiveCacheLocationOptions(locationOptions1)
+                            .build(),
+                        PredictiveCacheMapsOptions.Builder()
+                            .minZoom(20.toByte())
+                            .maxZoom(30.toByte())
+                            .predictiveCacheLocationOptions(locationOptions2)
+                            .build(),
+                    ),
+                )
+                .build()
+
+            val mockedTileStore = mockk<TileStore>()
+            every { TileStore.create(any()) } returns mockedTileStore
+            every { MapboxMapsOptions.tileStore } returns mockedTileStore
+            val mockedMapboxMap = mockk<MapboxMap>(relaxed = true) {
+                every { style } returns mockk(relaxed = true) {
+                    every { styleURI } returns "mapbox://test_test"
+                }
+            }
+            val mockTilesetDescriptor1: TilesetDescriptor = mockk()
+            val mockTilesetDescriptor2: TilesetDescriptor = mockk()
+            val offlineManager = mockk<OfflineManagerProxy> {
+                every {
+                    createTilesetDescriptor(
+                        match { options: TilesetDescriptorOptions ->
+                            options.minZoom == 40.toByte()
+                        },
+                    )
+                } returns mockTilesetDescriptor1
+                every {
+                    createTilesetDescriptor(
+                        match { options: TilesetDescriptorOptions ->
+                            options.minZoom == 20.toByte()
+                        },
+                    )
+                } returns mockTilesetDescriptor2
+            }
+            every {
+                OfflineManagerProvider.provideOfflineManager()
+            } returns offlineManager
+            val slotPredictiveCacheControllerKeys1 =
+                slot<List<PredictiveCache.PredictiveCacheControllerKey>>()
+            every {
+                predictiveCache.createMapsControllers(
+                    mockedMapboxMap,
+                    capture(slotPredictiveCacheControllerKeys1),
+                )
+            } just Runs
+
+            val predictiveCacheController = PredictiveCacheController(
+                predictiveCacheOptions,
+                predictiveCache,
+            )
+
+            predictiveCacheController.predictiveCacheControllerErrorHandler = errorHandler
+            predictiveCacheController.createStyleMapControllers(
+                mockedMapboxMap,
+                styles = emptyList(),
+            )
+
+            val slotListTilesetDescriptorOptions = mutableListOf<TilesetDescriptorOptions>()
+            verify(exactly = 2) {
+                offlineManager.createTilesetDescriptor(
+                    capture(slotListTilesetDescriptorOptions),
+                )
+            }
+
+            assertEquals(40.toByte(), slotListTilesetDescriptorOptions[0].minZoom)
+            assertEquals(50.toByte(), slotListTilesetDescriptorOptions[0].maxZoom)
+            assertEquals("mapbox://test_test", slotListTilesetDescriptorOptions[0].styleURI)
+            assertEquals(20.toByte(), slotListTilesetDescriptorOptions[1].minZoom)
+            assertEquals(30.toByte(), slotListTilesetDescriptorOptions[1].maxZoom)
+            assertEquals("mapbox://test_test", slotListTilesetDescriptorOptions[1].styleURI)
+
+            val capturedKeys1 = slotPredictiveCacheControllerKeys1.captured
+            assertEquals(2, capturedKeys1.size)
+            assertEquals("mapbox://test_test", capturedKeys1[0].styleUri)
+            assertEquals(mockTilesetDescriptor1, capturedKeys1[0].tilesetDescriptor)
+            assertEquals(locationOptions1, capturedKeys1[0].locationOptions)
+            assertEquals(mockedTileStore, capturedKeys1[0].tileStore)
+            assertEquals("mapbox://test_test", capturedKeys1[1].styleUri)
+            assertEquals(mockTilesetDescriptor2, capturedKeys1[1].tilesetDescriptor)
+            assertEquals(locationOptions2, capturedKeys1[1].locationOptions)
+            assertEquals(mockedTileStore, capturedKeys1[1].tileStore)
+
+            verify(exactly = 0) { errorHandler.onError(any()) }
         }
     }
 
