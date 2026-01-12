@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core
 
+import com.mapbox.annotation.MapboxExperimental
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.MapboxOptions
@@ -39,7 +40,6 @@ import com.mapbox.navigation.core.navigator.CacheHandleWrapper
 import com.mapbox.navigation.core.preview.RoutesPreview
 import com.mapbox.navigation.core.reroute.InternalRerouteController
 import com.mapbox.navigation.core.reroute.InternalRerouteController.RouteReplanRoutesCallback
-import com.mapbox.navigation.core.reroute.InternalRerouteController.RoutesCallback
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteResult
 import com.mapbox.navigation.core.reroute.RerouteState
@@ -51,6 +51,7 @@ import com.mapbox.navigation.core.telemetry.NavigationTelemetry
 import com.mapbox.navigation.core.telemetry.UserFeedback
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
 import com.mapbox.navigation.core.testutil.createRoutesUpdatedResult
+import com.mapbox.navigation.core.trip.RelevantVoiceInstructionsCallback
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.MapboxTripSession
 import com.mapbox.navigation.core.trip.session.NativeSetRouteError
@@ -439,6 +440,37 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         mapboxNavigation.onDestroy()
 
         verify(exactly = 1) { tripSession.unregisterAllVoiceInstructionsObservers() }
+    }
+
+    @OptIn(MapboxExperimental::class)
+    @Test
+    fun registerRelevantVoiceInstructionsCallback() {
+        createMapboxNavigation()
+        val observer = mockk<RelevantVoiceInstructionsCallback>(
+            relaxUnitFun = true,
+        )
+
+        mapboxNavigation.registerRelevantVoiceInstructionsCallback(observer)
+
+        verify(exactly = 1) { tripSession.registerRelevantVoiceInstructionsCallback(observer) }
+    }
+
+    @OptIn(MapboxExperimental::class)
+    @Test
+    fun registerRelevantVoiceInstructionsCallbackWithMultipleObservers() {
+        createMapboxNavigation()
+        val observer1 = mockk<RelevantVoiceInstructionsCallback>(
+            relaxUnitFun = true,
+        )
+        val observer2 = mockk<RelevantVoiceInstructionsCallback>(
+            relaxUnitFun = true,
+        )
+
+        mapboxNavigation.registerRelevantVoiceInstructionsCallback(observer1)
+        mapboxNavigation.registerRelevantVoiceInstructionsCallback(observer2)
+
+        verify(exactly = 1) { tripSession.registerRelevantVoiceInstructionsCallback(observer1) }
+        verify(exactly = 1) { tripSession.registerRelevantVoiceInstructionsCallback(observer2) }
     }
 
     @Test

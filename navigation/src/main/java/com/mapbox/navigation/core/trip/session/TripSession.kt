@@ -1,10 +1,13 @@
 package com.mapbox.navigation.core.trip.session
 
+import com.mapbox.annotation.MapboxExperimental
 import com.mapbox.common.location.Location
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.SetRoutes
 import com.mapbox.navigation.core.reroute.RerouteController
+import com.mapbox.navigation.core.trip.RelevantVoiceInstructionsCallback
+import com.mapbox.navigation.core.trip.VoiceInstructionsAvailableObserver
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
 import com.mapbox.navigator.FallbackVersionsObserver
@@ -51,6 +54,18 @@ internal interface TripSession {
     fun registerVoiceInstructionsObserver(voiceInstructionsObserver: VoiceInstructionsObserver)
     fun unregisterVoiceInstructionsObserver(voiceInstructionsObserver: VoiceInstructionsObserver)
     fun unregisterAllVoiceInstructionsObservers()
+
+    @OptIn(MapboxExperimental::class)
+    fun registerVoiceInstructionsAvailabilityObserver(observer: VoiceInstructionsAvailableObserver)
+
+    @OptIn(MapboxExperimental::class)
+    fun unregisterVoiceInstructionsAvailabilityObserver(
+        observer: VoiceInstructionsAvailableObserver,
+    )
+    fun unregisterAllVoiceInstructionsAvailabilityObserver()
+
+    @OptIn(MapboxExperimental::class)
+    fun registerRelevantVoiceInstructionsCallback(callback: RelevantVoiceInstructionsCallback)
 
     fun updateLegIndex(legIndex: Int, callback: LegIndexUpdatedCallback)
 

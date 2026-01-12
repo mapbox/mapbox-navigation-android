@@ -1,6 +1,7 @@
 package com.mapbox.navigation.navigator.internal
 
 import androidx.annotation.RestrictTo
+import com.mapbox.annotation.MapboxExperimental
 import com.mapbox.api.directionsrefresh.v1.models.DirectionsRefreshResponse
 import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
@@ -59,6 +60,8 @@ import com.mapbox.navigator.Telemetry
 import com.mapbox.navigator.TestingContext
 import com.mapbox.navigator.TilesConfig
 import com.mapbox.navigator.VehicleType
+import com.mapbox.navigator.VoiceInstructionsAvailabilityObserver
+import com.mapbox.navigator.VoiceInstructionsCallback
 import com.mapbox.navigator.WeatherData
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -102,8 +105,8 @@ class MapboxNativeNavigatorImpl(
     }
 
     private fun init(tilesConfig: TilesConfig) {
-        val sectionName = "MapboxNativeNavigatorImpl#init-"
-        val cacheHandle = PerformanceTracker.trackPerformanceSync("${sectionName}cacheHandle") {
+        val sectionPrefix = "$PERF_TRACKER_SECTION_NAME#init-"
+        val cacheHandle = PerformanceTracker.trackPerformanceSync("${sectionPrefix}cacheHandle") {
             NavigatorLoader.createCacheHandle(
                 config,
                 tilesConfig,
@@ -111,11 +114,11 @@ class MapboxNativeNavigatorImpl(
             )
         }
 
-        adasisFacade = PerformanceTracker.trackPerformanceSync("${sectionName}adasisFacade") {
+        adasisFacade = PerformanceTracker.trackPerformanceSync("${sectionPrefix}adasisFacade") {
             AdasisFacadeBuilder.build(config, cacheHandle, historyRecorderComposite)
         }
 
-        navigator = PerformanceTracker.trackPerformanceSync("${sectionName}navigator") {
+        navigator = PerformanceTracker.trackPerformanceSync("${sectionPrefix}navigator") {
             NavigatorLoader.createNavigator(
                 cacheHandle,
                 config,
@@ -127,28 +130,28 @@ class MapboxNativeNavigatorImpl(
         }
 
         cache = cacheHandle
-        graphAccessor = PerformanceTracker.trackPerformanceSync("${sectionName}graphAccessor") {
+        graphAccessor = PerformanceTracker.trackPerformanceSync("${sectionPrefix}graphAccessor") {
             GraphAccessor(cacheHandle)
         }
         roadObjectMatcher = PerformanceTracker.trackPerformanceSync(
-            "${sectionName}roadObjectMatcher",
+            "${sectionPrefix}roadObjectMatcher",
         ) {
             RoadObjectMatcher(cacheHandle, roadObjectMatcherConfig)
         }
         roadObjectsStore = PerformanceTracker.trackPerformanceSync(
-            "${sectionName}roadObjectsStore",
+            "${sectionPrefix}roadObjectsStore",
         ) {
             navigator.roadObjectStore()
         }
-        experimental = PerformanceTracker.trackPerformanceSync("${sectionName}experimental") {
+        experimental = PerformanceTracker.trackPerformanceSync("${sectionPrefix}experimental") {
             navigator.experimental
         }
         routeAlternativesController = PerformanceTracker.trackPerformanceSync(
-            "${sectionName}routeAlternativesController",
+            "${sectionPrefix}routeAlternativesController",
         ) {
             navigator.routeAlternativesController
         }
-        telemetry = PerformanceTracker.trackPerformanceSync("${sectionName}telemetry") {
+        telemetry = PerformanceTracker.trackPerformanceSync("${sectionPrefix}telemetry") {
             navigator.getTelemetry(eventsMetadataProvider)
         }
     }
@@ -285,7 +288,8 @@ class MapboxNativeNavigatorImpl(
     ): Expected<String, List<RouteAlternative>> {
         val callback = {
                 continuation: Continuation<Expected<String, List<RouteAlternative>>>,
-                expected: Expected<String, RefreshRouteResult>, ->
+                expected: Expected<String, RefreshRouteResult>,
+            ->
             expected.fold(
                 { error ->
                     logE(
@@ -404,6 +408,25 @@ class MapboxNativeNavigatorImpl(
         nativeNavigatorRecreationObserver: NativeNavigatorRecreationObserver,
     ) {
         nativeNavigatorRecreationObservers.remove(nativeNavigatorRecreationObserver)
+    }
+
+    @OptIn(MapboxExperimental::class)
+    override fun addVoiceInstructionsAvailabilityObserver(
+        observer: VoiceInstructionsAvailabilityObserver,
+    ) {
+        navigator.voiceInstructionsRetriever.subscribe(observer)
+    }
+
+    @OptIn(MapboxExperimental::class)
+    override fun removeVoiceInstructionsAvailabilityObserver(
+        observer: VoiceInstructionsAvailabilityObserver,
+    ) {
+        navigator.voiceInstructionsRetriever.unsubscribe(observer)
+    }
+
+    @OptIn(MapboxExperimental::class)
+    override fun getRelevantVoiceInstructions(observer: VoiceInstructionsCallback) {
+        navigator.voiceInstructionsRetriever.getRelevantVoiceInstructions(observer)
     }
 
     private fun unregisterAllNativeNavigatorObservers() {
@@ -581,6 +604,7 @@ class MapboxNativeNavigatorImpl(
 
     private companion object {
 
+        private const val PERF_TRACKER_SECTION_NAME = "MapboxNativeNavigatorImpl"
         const val LOG_CATEGORY = "MapboxNativeNavigatorImpl"
     }
 }
