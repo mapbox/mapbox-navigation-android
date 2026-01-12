@@ -39,6 +39,8 @@ import com.mapbox.navigator.Telemetry
 import com.mapbox.navigator.TestingContext
 import com.mapbox.navigator.TilesConfig
 import com.mapbox.navigator.VehicleType
+import com.mapbox.navigator.VoiceInstructionsAvailabilityObserver
+import com.mapbox.navigator.VoiceInstructionsCallback
 import com.mapbox.navigator.WeatherData
 
 /**
@@ -147,6 +149,16 @@ interface MapboxNativeNavigator : RerouteEventsProvider {
     fun removeNativeNavigatorRecreationObserver(
         nativeNavigatorRecreationObserver: NativeNavigatorRecreationObserver,
     )
+
+    fun addVoiceInstructionsAvailabilityObserver(
+        observer: VoiceInstructionsAvailabilityObserver,
+    )
+
+    fun removeVoiceInstructionsAvailabilityObserver(
+        observer: VoiceInstructionsAvailabilityObserver,
+    )
+
+    fun getRelevantVoiceInstructions(observer: VoiceInstructionsCallback)
 
     /**
      * Unregister native observers
