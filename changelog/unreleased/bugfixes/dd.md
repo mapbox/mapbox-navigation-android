@@ -1,0 +1,1 @@
+- Made `RerouteStateV2` a sealed class.

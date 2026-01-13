@@ -1293,7 +1293,7 @@ package com.mapbox.navigation.core.reroute {
     method public void onRerouteStateChanged(com.mapbox.navigation.core.reroute.RerouteState rerouteState);
   }
 
-  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public abstract class RerouteStateV2 {
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public abstract sealed class RerouteStateV2 {
   }
 
   public abstract static class RerouteStateV2.Deviation extends com.mapbox.navigation.core.reroute.RerouteStateV2 {
