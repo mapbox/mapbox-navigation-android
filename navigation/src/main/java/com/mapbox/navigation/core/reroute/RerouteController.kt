@@ -251,7 +251,7 @@ sealed class RerouteState {
  * Reroute state V2. Compared to [RerouteState], it has additional states: [Deviation.ApplyingRoute] and [Deviation.RouteIgnored].
  */
 @ExperimentalMapboxNavigationAPI
-abstract class RerouteStateV2 internal constructor() {
+sealed class RerouteStateV2 protected constructor() {
 
     /**
      * [RerouteController] is idle.
