@@ -516,9 +516,41 @@ class ManeuverProcessorTest {
 
         val actual = ManeuverProcessor.process(maneuverAction) as
             ManeuverResult.GetManeuverListWithProgress.Success
-        val activeDirection = actual.maneuvers[1].laneGuidance!!.allLanes[0].activeDirection
+        val activeDirection = actual.maneuvers[1].primary.modifier
 
         assertEquals("left", activeDirection)
+    }
+
+    @Test
+    fun `when maneuver contains lane guidance information then expected lanes are added`() {
+        val expectedLaneGuidanceValues = listOf("left", "straight", "straight", "right")
+        val route = DirectionsRoute.fromJson(
+            FileUtils.loadJsonFixture("car_route_with_lane_guidance.json"),
+        )
+        val routeProgress = mockRouteProgress(
+            _route = route,
+            _distanceRemainingOnStep = 15f,
+            _routeLegIndex = 0,
+            _stepIndex = 0,
+            _instructionIndex = 0,
+        )
+        val maneuverState = ManeuverState()
+        val distanceFormatter = mockk<DistanceFormatter>()
+        val maneuverOptions = ManeuverOptions.Builder().filterDuplicateManeuvers(false).build()
+        val maneuverAction = ManeuverAction.GetManeuverList(
+            routeProgress,
+            maneuverState,
+            maneuverOptions,
+            distanceFormatter,
+        )
+
+        val actual = ManeuverProcessor.process(maneuverAction) as
+            ManeuverResult.GetManeuverListWithProgress.Success
+        val laneGuidanceValues = actual.maneuvers[2].laneGuidance!!.allLanes.flatMap {
+            it.directions
+        }
+
+        assertEquals(expectedLaneGuidanceValues, laneGuidanceValues)
     }
 
     @Test
@@ -806,6 +838,66 @@ class ManeuverProcessorTest {
 
         assertEquals(expected, actual.maneuvers.size)
         assertEquals(15.0, actual.maneuvers[0].stepDistance.distanceRemaining)
+    }
+
+    @Test
+    fun `when maneuver contains lane access information for bus then expected information is extracted`() {
+        val expectedAccessDesignated = listOf("bus")
+        val route = DirectionsRoute.fromJson(
+            FileUtils.loadJsonFixture("car_route_with_lane_guidance_and_access_bus.json"),
+        )
+        val routeProgress = mockRouteProgress(
+            _route = route,
+            _distanceRemainingOnStep = 15f,
+            _routeLegIndex = 0,
+            _stepIndex = 0,
+            _instructionIndex = 0,
+        )
+        val maneuverState = ManeuverState()
+        val distanceFormatter = mockk<DistanceFormatter>()
+        val maneuverOptions = ManeuverOptions.Builder().filterDuplicateManeuvers(false).build()
+        val maneuverAction = ManeuverAction.GetManeuverList(
+            routeProgress,
+            maneuverState,
+            maneuverOptions,
+            distanceFormatter,
+        )
+
+        val actual = ManeuverProcessor.process(maneuverAction) as
+            ManeuverResult.GetManeuverListWithProgress.Success
+        val actualAccessDesignated = actual.maneuvers[0].laneGuidance!!.allLanes[1].accessDesignated
+
+        assertEquals(expectedAccessDesignated, actualAccessDesignated)
+    }
+
+    @Test
+    fun `when maneuver contains lane access information for hov then expected information is extracted`() {
+        val expectedAccessDesignated = listOf("hov")
+        val route = DirectionsRoute.fromJson(
+            FileUtils.loadJsonFixture("car_route_with_lane_guidance_and_access_hov.json"),
+        )
+        val routeProgress = mockRouteProgress(
+            _route = route,
+            _distanceRemainingOnStep = 15f,
+            _routeLegIndex = 0,
+            _stepIndex = 0,
+            _instructionIndex = 0,
+        )
+        val maneuverState = ManeuverState()
+        val distanceFormatter = mockk<DistanceFormatter>()
+        val maneuverOptions = ManeuverOptions.Builder().filterDuplicateManeuvers(false).build()
+        val maneuverAction = ManeuverAction.GetManeuverList(
+            routeProgress,
+            maneuverState,
+            maneuverOptions,
+            distanceFormatter,
+        )
+
+        val actual = ManeuverProcessor.process(maneuverAction) as
+            ManeuverResult.GetManeuverListWithProgress.Success
+        val actualAccessDesignated = actual.maneuvers[1].laneGuidance!!.allLanes[5].accessDesignated
+
+        assertEquals(expectedAccessDesignated, actualAccessDesignated)
     }
 
     private fun mockRouteProgress(

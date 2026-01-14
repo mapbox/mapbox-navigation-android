@@ -302,11 +302,13 @@ package com.mapbox.navigation.tripdata.maneuver.model {
   }
 
   public final class LaneIndicator {
+    method public java.util.List<java.lang.String> getAccessDesignated();
     method public String? getActiveDirection();
     method public java.util.List<java.lang.String> getDirections();
     method public String getDrivingSide();
     method public boolean isActive();
     method public com.mapbox.navigation.tripdata.maneuver.model.LaneIndicator.Builder toBuilder();
+    property public final java.util.List<java.lang.String> accessDesignated;
     property public final String? activeDirection;
     property public final java.util.List<java.lang.String> directions;
     property public final String drivingSide;
@@ -315,6 +317,7 @@ package com.mapbox.navigation.tripdata.maneuver.model {
 
   public static final class LaneIndicator.Builder {
     ctor public LaneIndicator.Builder();
+    method public com.mapbox.navigation.tripdata.maneuver.model.LaneIndicator.Builder accessDesignated(@com.mapbox.api.directions.v5.models.IntersectionLaneAccess.LaneDesignatedVehicleType java.util.List<java.lang.String> accessDesignated);
     method public com.mapbox.navigation.tripdata.maneuver.model.LaneIndicator.Builder activeDirection(String? activeDirection);
     method public com.mapbox.navigation.tripdata.maneuver.model.LaneIndicator build();
     method public com.mapbox.navigation.tripdata.maneuver.model.LaneIndicator.Builder directions(java.util.List<java.lang.String> directions);

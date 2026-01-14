@@ -2,6 +2,7 @@ package com.mapbox.navigation.tripdata.maneuver.model
 
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerText
+import com.mapbox.api.directions.v5.models.IntersectionLaneAccess.LaneDesignatedVehicleType
 import com.mapbox.api.directions.v5.models.LegStep
 
 /**
@@ -37,12 +38,16 @@ import com.mapbox.api.directions.v5.models.LegStep
  * @property activeDirection String shows which of the lane's [directions] is applicable to the current
  * route, when there is more than one. Only available for `mapbox/driving` profile. For other profiles
  * the activeDirection falls back to [BannerText.modifier]
+ * @property accessDesignated List<String> indicates the vehicle types for which this lane is designated.
+ * Can include values such as "bicycle", "bus", "hov", "moped", "motorcycle" or "taxi"".
+ * Empty if no access restrictions apply or if the information is unavailable.
  */
 class LaneIndicator private constructor(
     val isActive: Boolean,
     val drivingSide: String,
     val directions: List<String>,
     val activeDirection: String? = null,
+    @param:LaneDesignatedVehicleType val accessDesignated: List<String> = emptyList(),
 ) {
 
     /**
@@ -58,6 +63,7 @@ class LaneIndicator private constructor(
         if (directions != other.directions) return false
         if (drivingSide != other.drivingSide) return false
         if (activeDirection != other.activeDirection) return false
+        if (accessDesignated != other.accessDesignated) return false
 
         return true
     }
@@ -70,6 +76,7 @@ class LaneIndicator private constructor(
         result = 31 * result + directions.hashCode()
         result = 31 * result + drivingSide.hashCode()
         result = 31 * result + activeDirection.hashCode()
+        result = 31 * result + accessDesignated.hashCode()
         return result
     }
 
@@ -81,7 +88,8 @@ class LaneIndicator private constructor(
             "isActive=$isActive, " +
             "directions=$directions, " +
             "drivingSide=$drivingSide, " +
-            "activeDirection=$activeDirection" +
+            "activeDirection=$activeDirection, " +
+            "accessDesignated=$accessDesignated" +
             ")"
     }
 
@@ -94,6 +102,7 @@ class LaneIndicator private constructor(
             .directions(directions)
             .drivingSide(drivingSide)
             .activeDirection(activeDirection)
+            .accessDesignated(accessDesignated)
     }
 
     /**
@@ -106,6 +115,7 @@ class LaneIndicator private constructor(
         private var directions: List<String> = listOf()
         private var drivingSide: String = ""
         private var activeDirection: String? = null
+        private var accessDesignated: List<String> = listOf()
 
         /**
          * apply isActive to the Builder.
@@ -140,6 +150,14 @@ class LaneIndicator private constructor(
             apply { this.activeDirection = activeDirection }
 
         /**
+         * apply accessDesignated to the Builder.
+         * @param accessDesignated List<String>?
+         * @return Builder
+         */
+        fun accessDesignated(@LaneDesignatedVehicleType accessDesignated: List<String>): Builder =
+            apply { this.accessDesignated = accessDesignated }
+
+        /**
          * Build the [LaneIndicator]
          * @return LaneIndicator
          */
@@ -149,6 +167,7 @@ class LaneIndicator private constructor(
                 drivingSide,
                 directions,
                 activeDirection,
+                accessDesignated,
             )
         }
     }
