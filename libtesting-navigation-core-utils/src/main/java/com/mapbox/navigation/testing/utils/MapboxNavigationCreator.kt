@@ -32,7 +32,6 @@ suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigation(
     historyRecorderRule: MapboxHistoryTestRule? = null, // TODO: copy features to new infra
     customConfig: String? = null,
     routeRefreshOptions: RouteRefreshOptions? = null,
-    nativeRouteObject: Boolean = false,
     rerouteStrategyForMapMatchedRoutes: RerouteStrategyForMapMatchedRoutes = RerouteDisabled,
     block: (navigation: MapboxNavigation) -> Unit
 ) {
@@ -60,7 +59,6 @@ suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigation(
                         .build()
                 )
             }
-            nativeRouteObject(nativeRouteObject)
             rerouteOptions(
                 RerouteOptions.Builder()
                     .rerouteStrategyForMapMatchedRoutes(rerouteStrategyForMapMatchedRoutes)
