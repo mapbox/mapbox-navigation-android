@@ -7,6 +7,7 @@ import com.mapbox.navigator.ActiveGuidanceInfo
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.BannerSection
 import com.mapbox.navigator.CorrectedLocationData
+import com.mapbox.navigator.FallbackReason
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.HdMatchingResult
 import com.mapbox.navigator.MapMatcherOutput
@@ -74,12 +75,14 @@ fun createNavigationStatus(
     hdMatchingResult: HdMatchingResult? = null,
     mapMatchedSystemTime: Date = Date(),
     isAdasDataAvailable: Boolean? = null,
+    fallbackReason: FallbackReason = FallbackReason.NONE,
 ): NavigationStatus {
     return NavigationStatus(
         routeState,
         stale,
         location,
         isFallback,
+        fallbackReason,
         isTunnel,
         isParkingAisle,
         isRoundabout,
@@ -220,6 +223,10 @@ fun createRouteInterface(
 
     override fun getResponseJsonRef(): DataRef {
         return responseJson.toDataRef()
+    }
+
+    override fun getDirectionsRouteContextRef(): DataRef {
+        TODO("Not yet implemented")
     }
 
     override fun getRequestUri() = requestURI
