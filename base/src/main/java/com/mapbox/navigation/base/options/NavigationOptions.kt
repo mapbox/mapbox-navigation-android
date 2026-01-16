@@ -2,6 +2,7 @@ package com.mapbox.navigation.base.options
 
 import android.content.Context
 import com.mapbox.api.directions.v5.models.DirectionsJsonObject
+import com.mapbox.navigation.base.BuildConfig
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
@@ -238,7 +239,7 @@ private constructor(
             RoadObjectMatcherOptions.Builder().build()
 
         @ExperimentalPreviewMapboxNavigationAPI
-        private var nativeRouteObject: Boolean = false
+        private var nativeRouteObject: Boolean = BuildConfig.NATIVE_ROUTE_OBJECT_DEFAULT
 
         /**
          * Sets location options. See [LocationOptions] for details.

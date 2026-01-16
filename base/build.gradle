@@ -29,6 +29,7 @@ android {
         consumerProguardFiles 'proguard-rules.pro', "../proguard/proguard-project.pro"
 
         buildConfigField 'String', "MAPBOX_NAVIGATION_VERSION_NAME", String.format("\"%s\"", project.ext.versionName)
+        buildConfigField 'boolean', "NATIVE_ROUTE_OBJECT_DEFAULT", project.findProperty("nroDefault")?.toString() ?: "false"
     }
 
     testOptions {
