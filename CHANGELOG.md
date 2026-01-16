@@ -1,5 +1,50 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.18.0 - 16 January, 2026
+#### Features
+- Added Experimental API: 
+  - `MapboxNavigation#registerVoiceInstructionsAvailableObserver` and `MapboxNavigation#unregisterVoiceInstructionsAvailableObserver` to be notified when voice instructions become available or unavailable;
+  - `MapboxNavigation#registerRelevantVoiceInstructionsCallback` to asynchronously fetch the relevant voice instructions. The callback is automatically unregistered after receiving the result, register again for subsequent voice instructions.
+- Adjust `FollowingFrameOptions#maxZoom`: The value is applied directly when the zoom level cannot be calculated precisely, e.g., when there is only one point to frame. 
+- Added experimental `NavigationOptions#nativeRouteObject` which replaces `NavigationRoute#directionsRoute` with a thin wrapper that accesses route data stored in native memory instead of the Java heap. This is an early preview feature. When this option is enabled, some functionality is disabled or not fully supported. See `NavigationOptions#nativeRouteObject` for details. 
+- Added new class `RerouteStateV2`: it allows you to observe RerouteStates with additional substates which are not present in the original `RerouteState`.  
+Current additional states are: `RerouteStateV2.Deviation.ApplyingRoute` and `RerouteStateV2.Deviation.RouteIgnored`. See the corresponding API reference for details.
+To observe `RerouteStateV2`, register a new type of observer: `RerouteController#registerRerouteStateV2Observer`. 
+- Capabilities list added to Connector object, so it is now compliant with OCPI v2.3.0 
+- Added an `isOffline` flag to `EvStationMarker` to identify when charging station data is from an offline source. 
+- Added support of connctor types in `MapboxEvViewOptions` to be able to customize the connector types in the EV view. 
+
+#### Bug fixes and improvements
+- Made `RerouteStateV2` a sealed class. 
+- Fixed an issue when adding a stop point on top of an already traversed route, which could show a carried-over vanishing portion from the previous route. That is accomplished by ensuring that `MapboxRouteLineApi.getVanishPointOffset()` returns `0.0` in case the point was in the `VanishingPointState.DISABLED` state. 
+- Obfuscated access token in `RouteShieldError#url#toString`. 
+- Improved EV SAR call to return requested number of charging stations. 
+- Fix an issue where transitionEndListener passed to `NavigationCamera#requestNavigationCameraTo...` might not have been invoked. 
+- Added RouterFailureType.ROUTER_RECREATION_ERROR when route request failed due to related reason and made this error retriable 
+- Improved EV SAR call to evenly distribute returned stations along the route. 
+- Fixed the routing tiles endpoint configuration to avoid redundant recreations of Navigator. 
+- ⚠️ Breaking change (preview API): removed `MapboxRoadCamerasDisplayConfig::showOnlyOnRoute`. Safe to remove. It's now a default behavior to show road cameras only on the route. 
+- Fixed a bug that prevented road cameras from being removed from the map after passing them. 
+- Fixed an issue when re-route might take a few minutes, because of missing internal reroute state. 
+- Fixed Copilot issues that caused recordings to be lost. 
+- Fix ConcurrentModificationException in RoadCamerasByTileProvider 
+- Fix the race condition when canceling Active Guidance from a background thread that does not immediately cancel Route Progress updates.  
+- Avoid high CPU usage when user location is stationary.
+- Improve DR accuracy after sharp turns.
+- Update interface for retrieving last voice instructions.
+- Incident positions after a mid-leg route refresh now use correct distance calculations.
+- Disallow route refreshes in other than Tracking state.
+- Native Route Object via Flatbuffers.
+- Implement reaction on notification that user-provided-charging-station is not needed.
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.18.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.18.0))
+- Mapbox Navigation Native `v324.18.0`
+- Mapbox Core Common `v24.18.0`
+- Mapbox Java `v7.9.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.9.0))
+
+
 ## Navigation SDK Core Framework 3.18.0-beta.1 - 18 December, 2025
 #### Features
 - Adjust `FollowingFrameOptions#maxZoom`: The value is applied directly when the zoom level cannot be calculated precisely, e.g., when there is only one point to frame. 
