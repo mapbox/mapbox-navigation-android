@@ -206,6 +206,9 @@ class NavigationScaleGestureHandler internal constructor(
     // reused when camera is not in following state
     private val notFollowingRotationAngleThreshold =
         initialGesturesManager.rotateGestureDetector.angleThreshold
+    private val notFollowingMoveThreshold = initialGesturesManager.moveGestureDetector.moveThreshold
+    private val notFollowingMoveThresholdRect =
+        initialGesturesManager.moveGestureDetector.moveThresholdRect
 
     private var puckScreenPosition: Point? = null
 
@@ -304,12 +307,12 @@ class NavigationScaleGestureHandler internal constructor(
     ) {
         if (cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING) {
             moveGestureDetector.moveThreshold = options.followingInitialMoveThreshold
+            moveGestureDetector.moveThresholdRect = null
             rotateGestureDetector.angleThreshold = options.followingRotationAngleThreshold
         } else {
-            moveGestureDetector.moveThreshold = 0f
-            moveGestureDetector.moveThresholdRect = null
-            rotateGestureDetector.angleThreshold =
-                notFollowingRotationAngleThreshold
+            moveGestureDetector.moveThreshold = notFollowingMoveThreshold
+            moveGestureDetector.moveThresholdRect = notFollowingMoveThresholdRect
+            rotateGestureDetector.angleThreshold = notFollowingRotationAngleThreshold
         }
     }
 
