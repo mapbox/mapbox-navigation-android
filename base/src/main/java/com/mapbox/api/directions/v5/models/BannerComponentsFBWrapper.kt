@@ -35,7 +35,8 @@ internal class BannerComponentsFBWrapper(
     }
 
     override fun subType(): String? {
-        return when (fb.subType) {
+        val subType = fb.subType ?: return null
+        return when (subType) {
             FBBannerComponentSubType.Aftertoll -> AFTERTOLL
             FBBannerComponentSubType.Cityreal -> CITYREAL
             FBBannerComponentSubType.ExpresswayEntrance -> EXPRESSWAY_ENTRANCE

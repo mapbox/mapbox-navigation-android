@@ -49,6 +49,7 @@ internal fun Byte?.fbToStepManeuverType(
         FBManeuverType.ExitRoundabout -> StepManeuver.EXIT_ROUNDABOUT
         FBManeuverType.ExitRotary -> StepManeuver.EXIT_ROTARY
         FBManeuverType.Unknown -> unrecognized?.get(propertyName)?.asString()
+        null -> null
         else -> unhandledEnumMapping(propertyName, this)
     }
 }

@@ -19,7 +19,8 @@ internal class MaxSpeedFBWrapper(
     override fun speed(): Int? = fb.speed
 
     override fun unit(): String? {
-        return when (fb.unit) {
+        val unit = fb.unit ?: return null
+        return when (unit) {
             FBSpeedLimitUnit.Kmph -> SpeedLimit.KMPH
             FBSpeedLimitUnit.Mph -> SpeedLimit.MPH
             FBSpeedLimitUnit.Unknown -> unrecognizeFlexBufferMap?.get("unit")?.asString()
