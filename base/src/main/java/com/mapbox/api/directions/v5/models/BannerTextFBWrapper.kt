@@ -37,7 +37,8 @@ internal class BannerTextFBWrapper(
     override fun degrees(): Double? = fb.degrees
 
     override fun drivingSide(): String? {
-        return when (fb.drivingSide) {
+        val drivingSide = fb.drivingSide ?: return null
+        return when (drivingSide) {
             FBDrivingSide.Left -> "left"
             FBDrivingSide.Right -> "right"
             FBDrivingSide.Unknown -> unrecognizeFlexBufferMap?.get("driving_side")?.asString()

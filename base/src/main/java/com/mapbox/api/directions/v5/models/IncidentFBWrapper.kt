@@ -49,7 +49,8 @@ internal class IncidentFBWrapper(
     override fun longDescription(): String? = fb.longDescription
 
     override fun impact(): String? {
-        return when (fb.impact) {
+        val impact = fb.impact ?: return null
+        return when (impact) {
             FBIncidentImpact.Critical -> Incident.IMPACT_CRITICAL
             FBIncidentImpact.Major -> Incident.IMPACT_MAJOR
             FBIncidentImpact.Minor -> Incident.IMPACT_MINOR
