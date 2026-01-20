@@ -727,6 +727,42 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
         }
     }
 
+    @Test
+    fun alternative_request_keeps_eta_model_parameter() = sdkTest {
+        setupMockRequestHandlers()
+        withMapboxNavigation(
+            historyRecorderRule = mapboxHistoryTestRule,
+        ) { mapboxNavigation ->
+            val routes = mapboxNavigation.requestNavigationRoutes(
+                startCoordinates,
+                unrecognized = mapOf("eta_model" to "enhanced"),
+            )
+            mockWebServerRule.requestHandlers.clear()
+            val alternativesHandler = MockDirectionsRequestHandler(
+                "driving-traffic",
+                readRawFileText(context, R.raw.route_response_alternative_during_navigation),
+                startCoordinates,
+                relaxedExpectedCoordinates = true,
+            )
+            mockWebServerRule.requestHandlers.add(alternativesHandler)
+            mapboxNavigation.startTripSession()
+            mapboxNavigation.flowLocationMatcherResult().first()
+            mapboxNavigation.setNavigationRoutesAsync(routes)
+            mockLocationReplayerRule.playRoute(routes.first().directionsRoute)
+
+            val newRoutesUuid = "DD8MJ37zcI2gU4XXhtt-Gz1vdFShCMtf7AOyEHVylhqcEyreYNiT6Q=="
+            mapboxNavigation.routesUpdates()
+                .filter {
+                    it.reason == RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE &&
+                        it.navigationRoutes.any { it.id.startsWith(newRoutesUuid) }
+                }
+                .first()
+
+            val alternativesRequest = alternativesHandler.handledRequests.last()
+            assertEquals("enhanced", alternativesRequest.requestUrl?.queryParameter("eta_model"))
+        }
+    }
+
     private fun setupMockRequestHandlers() {
         // Nav-native requests alternate routes, so we are only
         // ensuring the initial route has alternatives.
@@ -780,11 +816,13 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
 
     private suspend fun MapboxNavigation.requestNavigationRoutes(
         coordinates: List<Point>,
+        unrecognized: Map<String, String>? = null,
     ): List<NavigationRoute> {
         val routeOptions = RouteOptions.builder()
             .applyDefaultNavigationOptions()
             .alternatives(true)
             .coordinatesList(coordinates)
+            .unrecognizedProperties(unrecognized)
             .baseUrl(mockWebServerRule.baseUrl) // Comment out to test a real server
             .build()
         return requestRoutes(routeOptions)

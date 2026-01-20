@@ -91,6 +91,7 @@ import java.net.URI
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlin.math.abs
 
 @OptIn(ExperimentalMapboxNavigationAPI::class)
 @RunWith(Parameterized::class)
@@ -1176,6 +1177,53 @@ class CoreRerouteTest(
                 alternativeRoute,
                 rerouteToHiddenAlternativeUpdate.navigationRoutes[0],
             )
+        }
+    }
+
+    @Test
+    fun reroute_keeps_eta_model_parameter() = sdkTest {
+        val mapboxNavigation = createMapboxNavigation()
+        val coordinates = listOf(
+            Point.fromLngLat(139.828785, 36.503349),
+            Point.fromLngLat(139.051904, 35.982396),
+        )
+        val offRouteLocation = mockLocationUpdatesRule.generateLocationUpdate {
+            this.latitude = coordinates[0].latitude() + 0.002
+            this.longitude = coordinates[0].longitude()
+        }
+        val handler = MockDirectionsRequestHandler(
+            DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+            readRawFileText(context, R.raw.route_response_enhanced_model),
+            coordinates,
+            relaxedExpectedCoordinates = true,
+        )
+        mockWebServerRule.requestHandlers.add(handler)
+
+        mapboxNavigation.startTripSession()
+        stayOnPosition(coordinates[0].latitude(), coordinates[0].longitude(), 0f) {
+            mapboxNavigation.flowLocationMatcherResult().filter {
+                abs(it.enhancedLocation.latitude - coordinates[0].latitude()) < 0.001 &&
+                    abs(it.enhancedLocation.longitude - coordinates[0].longitude()) < 0.001
+            }.first()
+            val routes = mapboxNavigation.requestRoutes(
+                RouteOptions.builder()
+                    .applyDefaultNavigationOptions()
+                    .applyLanguageAndVoiceUnitOptions(context)
+                    .baseUrl(mockWebServerRule.baseUrl)
+                    .coordinatesList(coordinates)
+                    .unrecognizedProperties(mapOf("eta_model" to "enhanced"))
+                    .build(),
+            ).getSuccessfulResultOrThrowException().routes
+
+            mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
+        }
+        stayOnPosition(offRouteLocation.latitude, offRouteLocation.longitude, 0f) {
+            mapboxNavigation.routesUpdates()
+                .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE }
+                .first()
+
+            val rerouteRequest = handler.handledRequests.last()
+            assertEquals("enhanced", rerouteRequest.requestUrl?.queryParameter("eta_model"))
         }
     }
 
