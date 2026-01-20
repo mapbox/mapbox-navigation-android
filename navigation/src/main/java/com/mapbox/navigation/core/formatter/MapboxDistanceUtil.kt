@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.formatter
 import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
+import com.mapbox.navigation.base.formatter.Rounding
 import com.mapbox.navigation.base.formatter.UnitType
 import com.mapbox.navigation.core.R
 import com.mapbox.turf.TurfConstants
@@ -16,6 +17,7 @@ import kotlin.math.roundToInt
  */
 object MapboxDistanceUtil {
 
+    private const val INVALID_ROUNDING_INCREMENT = 50
     private val enLanguage = Locale("en").language
 
     /**
@@ -84,15 +86,35 @@ object MapboxDistanceUtil {
             distanceInMeters !in 0.0..Double.MAX_VALUE -> smallValue(
                 0.0,
                 roundingIncrement,
+                INVALID_ROUNDING_INCREMENT,
                 TurfConstants.UNIT_METERS,
                 UnitType.METRIC,
             )
+
+            distanceInMeters < 25.0 -> smallValue(
+                distanceInMeters,
+                roundingIncrement,
+                5,
+                TurfConstants.UNIT_METERS,
+                UnitType.METRIC,
+            )
+
+            distanceInMeters < 100 -> smallValue(
+                distanceInMeters,
+                roundingIncrement,
+                25,
+                TurfConstants.UNIT_METERS,
+                UnitType.METRIC,
+            )
+
             distanceInMeters < 1000.0 -> smallValue(
                 distanceInMeters,
                 roundingIncrement,
+                50,
                 TurfConstants.UNIT_METERS,
                 UnitType.METRIC,
             )
+
             else -> {
                 val distanceInKm = TurfConversion.convertLength(
                     distanceInMeters,
@@ -107,6 +129,7 @@ object MapboxDistanceUtil {
                         UnitType.METRIC,
                         locale,
                     )
+
                     else -> largeValue(
                         distanceInKm,
                         0,
@@ -128,22 +151,44 @@ object MapboxDistanceUtil {
             distanceInMiles !in 0.0..Double.MAX_VALUE -> smallValue(
                 0.0,
                 roundingIncrement,
+                INVALID_ROUNDING_INCREMENT,
                 TurfConstants.UNIT_YARDS,
                 UnitType.IMPERIAL,
             )
+
             distanceInMiles < 0.1 -> {
                 val distanceInYards = TurfConversion.convertLength(
                     distanceInMiles,
                     TurfConstants.UNIT_MILES,
                     TurfConstants.UNIT_YARDS,
                 )
-                smallValue(
-                    distanceInYards,
-                    roundingIncrement,
-                    TurfConstants.UNIT_YARDS,
-                    UnitType.IMPERIAL,
-                )
+                when {
+                    distanceInYards < 20 -> smallValue(
+                        distanceInYards,
+                        roundingIncrement,
+                        10,
+                        TurfConstants.UNIT_YARDS,
+                        UnitType.IMPERIAL,
+                    )
+
+                    distanceInYards < 100 -> smallValue(
+                        distanceInYards,
+                        roundingIncrement,
+                        25,
+                        TurfConstants.UNIT_YARDS,
+                        UnitType.IMPERIAL,
+                    )
+
+                    else -> smallValue(
+                        distanceInYards,
+                        roundingIncrement,
+                        50,
+                        TurfConstants.UNIT_YARDS,
+                        UnitType.IMPERIAL,
+                    )
+                }
             }
+
             distanceInMiles < 3.0 -> largeValue(
                 distanceInMiles,
                 1,
@@ -151,6 +196,7 @@ object MapboxDistanceUtil {
                 UnitType.IMPERIAL,
                 locale,
             )
+
             else -> largeValue(
                 distanceInMiles,
                 0,
@@ -170,9 +216,11 @@ object MapboxDistanceUtil {
             distanceInMiles !in 0.0..Double.MAX_VALUE -> smallValue(
                 0.0,
                 roundingIncrement,
+                INVALID_ROUNDING_INCREMENT,
                 TurfConstants.UNIT_FEET,
                 UnitType.IMPERIAL,
             )
+
             distanceInMiles < 0.1 -> {
                 val distanceInFeet = TurfConversion.convertLength(
                     distanceInMiles,
@@ -182,10 +230,12 @@ object MapboxDistanceUtil {
                 smallValue(
                     distanceInFeet,
                     roundingIncrement,
+                    50,
                     TurfConstants.UNIT_FEET,
                     UnitType.IMPERIAL,
                 )
             }
+
             distanceInMiles < 3.0 -> largeValue(
                 distanceInMiles,
                 1,
@@ -193,6 +243,7 @@ object MapboxDistanceUtil {
                 UnitType.IMPERIAL,
                 locale,
             )
+
             else -> largeValue(
                 distanceInMiles,
                 0,
@@ -206,12 +257,19 @@ object MapboxDistanceUtil {
     private fun smallValue(
         distance: Double,
         roundingIncrement: Int,
+        defaultRoundingIncrement: Int,
         unitTypeString: String,
         unitType: UnitType,
     ): FormattingData {
+        val inferredRoundingIncrement =
+            if (roundingIncrement == Rounding.INCREMENT_DISTANCE_DEPENDENT) {
+                defaultRoundingIncrement
+            } else {
+                roundingIncrement
+            }
         val roundedValue = roundSmallDistance(
             distance,
-            roundingIncrement,
+            inferredRoundingIncrement,
         )
         return FormattingData(
             roundedValue.toDouble(),
