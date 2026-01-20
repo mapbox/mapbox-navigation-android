@@ -2,6 +2,10 @@
 
 package com.mapbox.navigation.base.internal.route
 
+import com.google.gson.Gson
+import com.google.gson.JsonArray
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.Closure
@@ -14,9 +18,14 @@ import com.mapbox.api.directions.v5.models.Notification
 import com.mapbox.api.directions.v5.models.NotificationDetails
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.api.directionsrefresh.v1.models.DirectionsRefreshResponse
+import com.mapbox.api.directionsrefresh.v1.models.DirectionsRouteRefresh
+import com.mapbox.api.directionsrefresh.v1.models.RouteLegRefresh
+import com.mapbox.bindgen.DataRef
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.utils.Constants
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.testing.FileUtils
@@ -30,7 +39,6 @@ import com.mapbox.navigation.testing.factories.createRouteOptions
 import com.mapbox.navigation.testing.factories.createRouteStep
 import com.mapbox.navigation.testing.factories.createWaypoint
 import io.mockk.every
-import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.verify
 import junit.framework.Assert.assertEquals
@@ -39,6 +47,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import java.net.URL
+import java.nio.ByteBuffer
 
 class RouteProgressExTest {
 
@@ -68,7 +77,7 @@ class RouteProgressExTest {
             "3-steps-route-directions-request-url.txt",
         )
 
-        val refreshedRoute = sourceRoute.refreshRoute(
+        val refreshedRoute = sourceRoute.testRouteRefresh(
             initialLegIndex = 0,
             currentLegGeometryIndex = 0,
             legAnnotations = listOf(
@@ -127,30 +136,34 @@ class RouteProgressExTest {
             "3-steps-route-directions-response.json",
             "3-steps-route-directions-request-url.txt",
         )
-            .update({
-                toBuilder()
-                    .legs(
-                        legs()?.map {
-                            it.toBuilder()
-                                .annotation(
-                                    it.annotation()
-                                        ?.toBuilder()
-                                        ?.duration(null)
-                                        ?.congestionNumeric(MutableList(7) { 1 })
-                                        ?.build(),
-                                )
-                                .build()
-                        },
-                    )
-                    .routeOptions(
-                        routeOptions()?.toBuilder()
-                            ?.annotations(DirectionsCriteria.ANNOTATION_CONGESTION)
-                            ?.build(),
-                    )
-                    .build()
-            }, { this }, null,)
+            .update(
+                {
+                    toBuilder()
+                        .legs(
+                            legs()?.map {
+                                it.toBuilder()
+                                    .annotation(
+                                        it.annotation()
+                                            ?.toBuilder()
+                                            ?.duration(null)
+                                            ?.congestionNumeric(MutableList(7) { 1 })
+                                            ?.build(),
+                                    )
+                                    .build()
+                            },
+                        )
+                        .routeOptions(
+                            routeOptions()?.toBuilder()
+                                ?.annotations(DirectionsCriteria.ANNOTATION_CONGESTION)
+                                ?.build(),
+                        )
+                        .build()
+                },
+                { this },
+                null,
+            )
 
-        val refreshedRoute = sourceRoute.refreshRoute(
+        val refreshedRoute = sourceRoute.testRouteRefresh(
             initialLegIndex = 0,
             currentLegGeometryIndex = 0,
             legAnnotations = listOf(
@@ -204,7 +217,7 @@ class RouteProgressExTest {
             "6-steps-3-waypoints-directions-request-url.txt",
         )
 
-        val refreshedRoute = sourceRoute.refreshRoute(
+        val refreshedRoute = sourceRoute.testRouteRefresh(
             initialLegIndex = 1,
             currentLegGeometryIndex = 0,
             legAnnotations = listOf(
@@ -256,7 +269,7 @@ class RouteProgressExTest {
             "3-steps-route-directions-response-ev-without-notifications.json",
             "3-steps-route-directions-request-url-ev-without-notifications.txt",
         )
-        val refreshedRoute = sourceRoute.refreshRoute(
+        val refreshedRoute = sourceRoute.testRouteRefresh(
             initialLegIndex = 0,
             currentLegGeometryIndex = 0,
             legAnnotations = null,
@@ -279,7 +292,7 @@ class RouteProgressExTest {
             "3-steps-route-directions-response-ev-with-only-ev-notifications.json",
             "3-steps-route-directions-request-url-ev-with-only-ev-notifications.txt",
         )
-        val refreshedRoute = sourceRoute.refreshRoute(
+        val refreshedRoute = sourceRoute.testRouteRefresh(
             initialLegIndex = 0,
             currentLegGeometryIndex = 0,
             legAnnotations = null,
@@ -304,7 +317,7 @@ class RouteProgressExTest {
             "3-steps-route-directions-response-ev-with-notifications.json",
             "3-steps-route-directions-request-url-ev-with-notifications.txt",
         )
-        val refreshedRoute = sourceRoute.refreshRoute(
+        val refreshedRoute = sourceRoute.testRouteRefresh(
             initialLegIndex = 0,
             currentLegGeometryIndex = 0,
             legAnnotations = null,
@@ -347,7 +360,7 @@ class RouteProgressExTest {
             "3-steps-route-directions-request-url-ev-with-notifications.txt",
         )
         val sourceNotifications = listOf(provideEvNotifications()[0].drop(1))
-        val refreshedRoute = sourceRoute.refreshRoute(
+        val refreshedRoute = sourceRoute.testRouteRefresh(
             initialLegIndex = 0,
             currentLegGeometryIndex = 0,
             legAnnotations = null,
@@ -399,7 +412,7 @@ class RouteProgressExTest {
                 (provideEvNotifications()[0]).apply { removeAt(0) },
                 (provideEvNotifications()[1]),
             )
-        val refreshedRoute = sourceRoute.refreshRoute(
+        val refreshedRoute = sourceRoute.testRouteRefresh(
             initialLegIndex = 0,
             currentLegGeometryIndex = 0,
             legAnnotations = null,
@@ -812,16 +825,14 @@ class RouteProgressExTest {
                 )
             },
         ).forEach { (description, navRoute, refreshItems, result) ->
-            mockkObject(AnnotationsRefresher) {
-                val incidentsRefresher = mockk<IncidentsRefresher>(relaxed = true)
-                val closuresRefresher = mockk<ClosuresRefresher>(relaxed = true)
+            mockkObject(AnnotationsRefresher, IncidentsRefresher, ClosuresRefresher) {
                 every {
                     AnnotationsRefresher.getRefreshedAnnotations(any(), any(), any(), any(), any())
                 } returnsMany
                     (result.newLegAnnotation?.drop(refreshItems.startWithIndex) ?: emptyList())
                 navRoute.directionsRoute.legs()?.forEachIndexed { index, leg ->
                     every {
-                        incidentsRefresher.getRefreshedRoadObjects(
+                        IncidentsRefresher.getRefreshedRoadObjects(
                             leg.incidents(),
                             refreshItems.incidents?.get(index),
                             any(),
@@ -831,7 +842,7 @@ class RouteProgressExTest {
                         result.newIncidents!![index]!!
                     }
                     every {
-                        closuresRefresher.getRefreshedRoadObjects(
+                        ClosuresRefresher.getRefreshedRoadObjects(
                             leg.closures(),
                             refreshItems.closures?.get(index),
                             any(),
@@ -842,7 +853,7 @@ class RouteProgressExTest {
                     }
                 }
                 val updatedNavRoute = try {
-                    navRoute.refreshRoute(
+                    navRoute.testRouteRefresh(
                         refreshItems.startWithIndex,
                         refreshItems.legGeometryIndex,
                         refreshItems.legAnnotation,
@@ -852,9 +863,6 @@ class RouteProgressExTest {
                         refreshItems.waypoints,
                         refreshItems.responseTime,
                         refreshItems.refreshTtl,
-                        incidentsRefresher,
-                        closuresRefresher,
-                        NotificationsRefresher(),
                     )
                 } catch (t: Throwable) {
                     throw Throwable("unhandled exception in $description", t)
@@ -1236,7 +1244,7 @@ class RouteProgressExTest {
                 addLeg = true,
                 waypointsPerRoute = false,
             )
-            val updatedRoute = inputRoute.refreshRoute(
+            val updatedRoute = inputRoute.testRouteRefresh(
                 0,
                 0,
                 null,
@@ -1246,9 +1254,6 @@ class RouteProgressExTest {
                 refreshedWaypoints,
                 0,
                 null,
-                mockk(relaxed = true),
-                mockk(relaxed = true),
-                mockk(relaxed = true),
             )
             assertEquals(expectedWaypoints, updatedRoute.waypoints)
         }
@@ -1260,7 +1265,7 @@ class RouteProgressExTest {
                 addLeg = true,
                 waypointsPerRoute = true,
             )
-            val updatedRoute = inputRoute.refreshRoute(
+            val updatedRoute = inputRoute.testRouteRefresh(
                 0,
                 0,
                 null,
@@ -1487,7 +1492,7 @@ class RouteProgressExTest {
         val legAnnotation: List<LegAnnotation?>?,
         val incidents: List<List<Incident>?>?,
         val closures: List<List<Closure>?>?,
-        val waypoints: List<DirectionsWaypoint?>?,
+        val waypoints: List<DirectionsWaypoint>?,
         val responseTime: Long,
         val refreshTtl: Int?,
         val legGeometryIndex: Int?,
@@ -1521,3 +1526,71 @@ private fun createNavigationRouteFromResource(
     routerOrigin = RouterOrigin.ONLINE,
     responseTimeElapsedSeconds = null,
 ).first()
+
+internal fun NavigationRoute.testRouteRefresh(
+    initialLegIndex: Int,
+    currentLegGeometryIndex: Int?,
+    legAnnotations: List<LegAnnotation?>?,
+    incidents: List<List<Incident>?>?,
+    closures: List<List<Closure>?>?,
+    notifications: List<List<Notification>?>?,
+    waypoints: List<DirectionsWaypoint>?,
+    responseTimeElapsedSeconds: Long,
+    refreshTtl: Int?,
+): NavigationRoute {
+    val legsCount = listOf(
+        incidents?.size,
+        notifications?.size,
+        closures?.size,
+        legAnnotations?.size,
+    ).maxBy { it ?: 0 } ?: 0
+    val routeRefreshResponse = DirectionsRefreshResponse.builder()
+        .route(
+            DirectionsRouteRefresh.builder().legs(
+                (0 until legsCount).map { legIndex ->
+                    RouteLegRefresh.builder()
+                        .annotation(legAnnotations?.get(legIndex))
+                        .notifications(notifications?.get(legIndex))
+                        .closures(closures?.get(legIndex))
+                        .incidents(incidents?.get(legIndex))
+                        .build()
+                },
+            ).unrecognizedJsonProperties(
+                mutableMapOf<String, JsonElement>().apply {
+                    if (waypoints != null) {
+                        put(
+                            Constants.RouteResponse.KEY_WAYPOINTS,
+                            JsonArray().apply {
+                                waypoints.forEach { waypoint ->
+                                    add(
+                                        waypoint?.let {
+                                            Gson().fromJson(it.toJson(), JsonObject::class.java)
+                                        },
+                                    )
+                                }
+                            },
+                        )
+                    }
+                    if (refreshTtl != null) {
+                        put(Constants.RouteResponse.KEY_REFRESH_TTL, JsonPrimitive(refreshTtl))
+                    }
+                },
+            )
+                .build(),
+        )
+        .code("ok")
+        .build()
+    val dataRefResponse = routeRefreshResponse.toJson().toByteArray().let { response ->
+        ByteBuffer.allocateDirect(response.size).let {
+            it.put(response)
+            DataRef(it)
+        }
+    }
+
+    return this.internalRefreshRoute(
+        refreshResponse = dataRefResponse,
+        legIndex = initialLegIndex,
+        legGeometryIndex = currentLegGeometryIndex ?: 0,
+        responseTimeElapsedSeconds = responseTimeElapsedSeconds,
+    ).getOrThrow()
+}

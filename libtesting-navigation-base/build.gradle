@@ -23,9 +23,11 @@ android {
 
 dependencies {
     api project(':libtesting-thirdparty')
+    implementation project(':libtesting-navigation-util')
     // testing modules should not transitively bring in project dependencies
     compileOnly(project(':base'))
     compileOnly(project(':utils'))
+    implementation dependenciesList.coroutinesAndroid
     implementation dependenciesList.junit
     implementation dependenciesList.mockk
 }

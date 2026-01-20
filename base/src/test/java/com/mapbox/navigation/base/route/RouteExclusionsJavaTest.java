@@ -10,10 +10,11 @@ import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.navigation.base.extensions.RouteOptionsExtensions;
 import com.mapbox.navigation.testing.FileUtils;
-import com.mapbox.navigation.testing.NativeRouteParserRule;
+import com.mapbox.navigation.testing.LoggingFrontendTestRule;
 
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -23,6 +24,9 @@ import java.util.Map;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RouteExclusionsJavaTest {
+
+    @Rule
+    public TestRule loggerRule = new LoggingFrontendTestRule();
 
     @Test
     public void emptyExclusionViolationsIfNoExcludeRouteOptionsAdded() {

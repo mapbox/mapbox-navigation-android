@@ -1,8 +1,19 @@
 {
   "routes": [
     {
-      "country_crossed": false,
-      "weight_typical": 47.935,
+      "unrecognized_string": "unrecognized property string",
+      "unrecognized_boolean": true,
+      "unrecognized_int": 123,
+      "unrecognized_double": 123.456,
+      "unrecognized_null": null,
+      "unrecognized_object": {
+        "inner_key": "inner value",
+        "inner_object": {
+          "inner_inner_key": "inner inner value"
+        },
+        "inner_int_array": [1, 2, 3, null]
+      },
+      "unrecognized_string_array": ["a", "b", "c", null],
       "duration_typical": 36.137,
       "weight_name": "auto",
       "weight": 43.689,
@@ -421,18 +432,5 @@
     }
   ],
   "code": "Ok",
-  "unrecognized_string": "unrecognized property string",
-  "unrecognized_boolean": true,
-  "unrecognized_int": 123,
-  "unrecognized_double": 123.456,
-  "unrecognized_null": null,
-  "unrecognized_object": {
-    "inner_key": "inner value",
-    "inner_object": {
-      "inner_inner_key": "inner inner value"
-    },
-    "inner_int_array": [1, 2, 3, null]
-  },
-  "unrecognized_string_array": ["a", "b", "c", null],
   "uuid": "mLvI15Cn4ff9TaK-0KrK2rHMQseyqdHqIFBVQpeGYBhPTOyB4nhDVw=="
 }

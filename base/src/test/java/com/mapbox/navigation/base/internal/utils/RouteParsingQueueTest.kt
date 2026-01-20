@@ -14,17 +14,15 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
-class RouteParsingManagerTest {
+class RouteParsingQueueTest {
 
     @get:Rule
     val logRule = LoggingFrontendTestRule()
 
     @Test
     fun `parse long routes with optimisations`() = runBlocking {
-        val queue = createTestParsingManager()
         var preparedForParsing = false
-
-        queue.setPrepareForParsingAction {
+        val queue = createTestParsingQueue {
             preparedForParsing = true
         }
         val result = queue.parseRouteResponse(longRoutesResponseInfo()) {
@@ -37,10 +35,8 @@ class RouteParsingManagerTest {
 
     @Test
     fun `parse alternatives`() = runBlocking {
-        val queue = createTestParsingManager()
         var preparedForParsing = false
-
-        queue.setPrepareForParsingAction {
+        val queue = createTestParsingQueue {
             preparedForParsing = true
         }
         val result = queue.parseAlternatives(longRoutesAlternativesInfo()) {
@@ -53,13 +49,11 @@ class RouteParsingManagerTest {
 
     @Test
     fun `parse long routes in parallel`() = runBlockingTest {
-        val queue = createTestParsingManager()
         val rerouteResponseParsing = ParsingTask<String>()
         val newRoutesResponseParsing = ParsingTask<String>()
         val newRoutesResponseParsing2 = ParsingTask<String>()
         var preparedForParsingTimes = 0
-
-        queue.setPrepareForParsingAction {
+        val queue = createTestParsingQueue {
             preparedForParsingTimes++
         }
         val rerouteParsingResult = async {
@@ -101,14 +95,12 @@ class RouteParsingManagerTest {
 
     @Test
     fun `parse short routes in parallel with`() = runBlockingTest {
-        val queue = createTestParsingManager()
         val rerouteResponseParsing = ParsingTask<String>()
         val newRoutesResponseParsing = ParsingTask<String>()
         val newRoutesResponseParsing2 = ParsingTask<String>()
         var preparedForParsingTimes = 0
         val shortRoutesResponseInfo = createRoutesResponseInfo(100)
-
-        queue.setPrepareForParsingAction {
+        val queue = createTestParsingQueue {
             preparedForParsingTimes++
         }
         val rerouteParsingResult = async {
@@ -142,15 +134,13 @@ class RouteParsingManagerTest {
 
     @Test
     fun `parse mix of short and long routes in parallel`() = runBlockingTest {
-        val queue = createTestParsingManager()
         val rerouteResponseParsing = ParsingTask<String>()
         val newLongRoutesResponseParsingTask = ParsingTask<String>()
         val newRoutesResponseParsing2 = ParsingTask<String>()
         var preparedForParsingTimes = 0
         val shortRoutesResponseInfo = createRoutesResponseInfo(100)
         val longRoutesResponseInfo = longRoutesResponseInfo()
-
-        queue.setPrepareForParsingAction {
+        val queue = createTestParsingQueue {
             preparedForParsingTimes++
         }
         val rerouteParsingResult = async {
@@ -184,12 +174,10 @@ class RouteParsingManagerTest {
 
     @Test
     fun `parse alternatives in parallel to reroute with optimisations`() = runBlockingTest {
-        val queue = createTestParsingManager()
         val rerouteResponseParsing = ParsingTask<String>()
         val alternativesRouteParsing = ParsingTask<String>()
         var preparedForParsingTimes = 0
-
-        queue.setPrepareForParsingAction {
+        val queue = createTestParsingQueue {
             preparedForParsingTimes++
         }
         val rerouteParsingResult = async {
@@ -217,12 +205,10 @@ class RouteParsingManagerTest {
 
     @Test
     fun `parse routes in parallel to alternatives with optimisations`() = runBlockingTest {
-        val queue = createTestParsingManager()
         val rerouteResponseParsing = ParsingTask<String>()
         val alternativesRouteParsing = ParsingTask<String>()
         var preparedForParsingTimes = 0
-
-        queue.setPrepareForParsingAction {
+        val queue = createTestParsingQueue {
             preparedForParsingTimes++
         }
         val alternativesParsingResult = async {
@@ -254,10 +240,8 @@ class RouteParsingManagerTest {
 
     @Test
     fun `parse routes then alternatives`() = runBlocking {
-        val queue = createTestParsingManager()
         var preparedForParsingTimes = 0
-
-        queue.setPrepareForParsingAction {
+        val queue = createTestParsingQueue {
             preparedForParsingTimes++
         }
         val routesParstingResult = queue.parseRouteResponse(longRoutesResponseInfo()) {
@@ -273,9 +257,9 @@ class RouteParsingManagerTest {
     }
 }
 
-fun createTestParsingManager(
-    useNativeRoute: Boolean = false,
-) = createRouteParsingManager(useNativeRoute)
+fun createTestParsingQueue(
+    prepareAction: () -> Unit = { },
+) = createOptimizedRoutesParsingQueue(prepareAction)
 
 class ParsingTask<T>() {
     private val completableDeferred = CompletableDeferred<T>()

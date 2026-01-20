@@ -8,6 +8,7 @@ import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.internal.extensions.internalAlternativeRouteIndices
+import com.mapbox.navigation.base.internal.route.toDirectionsRefreshResponseInternal
 import com.mapbox.navigation.base.internal.route.update
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshOptions
@@ -19,7 +20,6 @@ import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshCallbac
 import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshError
 import com.mapbox.navigation.core.internal.router.Router
 import com.mapbox.navigation.core.internal.utils.CoroutineUtils
-import com.mapbox.navigation.navigator.internal.utils.toDirectionsRefreshResponse
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
@@ -209,7 +209,11 @@ internal open class RouteRefreshIntegrationTest {
                 if (invocationNumber >= successfulAttemptNumber) {
                     callback.onRefreshReady(
                         refreshedRoute,
-                        refreshedRoute.toDirectionsRefreshResponse().toJson().toDataRef(),
+                        refreshedRoute
+                            .toDirectionsRefreshResponseInternal()
+                            .getOrThrow()
+                            .toJson()
+                            .toDataRef(),
                     )
                 } else {
                     callback.onFailure(NavigationRouterRefreshError())

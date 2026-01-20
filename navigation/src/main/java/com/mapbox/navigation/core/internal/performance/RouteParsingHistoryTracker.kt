@@ -1,12 +1,9 @@
 package com.mapbox.navigation.core.internal.performance
 
 import com.mapbox.navigation.base.internal.route.RoutesResponse
+import com.mapbox.navigation.base.internal.route.parsing.RouteParsingTracking
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.utils.internal.Time
-
-internal interface RouteParsingTracking {
-    fun routeResponseIsParsed(metadata: RoutesResponse.Metadata)
-}
 
 internal class RouteParsingHistoryTracker(
     private val historyRecorder: MapboxHistoryRecorder,
@@ -21,8 +18,6 @@ internal class RouteParsingHistoryTracker(
                 "response_parse_thread": "$responseParseThread",
                 "native_wait_duration": $nativeWaitMillis,
                 "native_parse_duration": $nativeParseMillis,
-                "route_options_wait_duration": $routeOptionsWaitMillis,
-                "route_options_parse_duration": $routeOptionsParseMillis,
                 "main_thread_wait_duration": ${Time.SystemClockImpl.millis() - createdAtElapsedMillis}
                 }
                 """.trimIndent()

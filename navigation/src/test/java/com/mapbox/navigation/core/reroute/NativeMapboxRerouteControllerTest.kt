@@ -3,9 +3,7 @@ package com.mapbox.navigation.core.reroute
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.route.nativeRoute
-import com.mapbox.navigation.base.internal.utils.createRouteParsingManager
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.core.internal.performance.RouteParsingTracking
 import com.mapbox.navigation.core.internal.router.util.TestRouteFixtures
 import com.mapbox.navigation.navigator.internal.RerouteEventsProvider
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
@@ -16,6 +14,7 @@ import com.mapbox.navigation.testing.factories.createNavigationRoutes
 import com.mapbox.navigation.testing.factories.createRerouteError
 import com.mapbox.navigation.testing.factories.createRouteOptions
 import com.mapbox.navigation.testing.factories.createRouterError
+import com.mapbox.navigation.testing.factories.createTestNavigationRoutesParsing
 import com.mapbox.navigation.testing.factories.toDataRef
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.ForceRerouteCallback
@@ -118,11 +117,9 @@ class NativeMapboxRerouteControllerTest {
             every { this@mockk.invoke(any(), any()) } returns true
         }
         val observerRegistration = RerouteEventsRegistration()
-        val parsingTracking = mockk<RouteParsingTracking>(relaxed = true)
         val controller = createNativeMapboxRerouteController(
             rerouteEventsRegistration = observerRegistration,
             updateRoutes = updateRoutes,
-            routeParsingTracking = parsingTracking,
         )
         val states = controller.recordRerouteState()
         val statesV2 = controller.recordRerouteStateV2()
@@ -157,9 +154,6 @@ class NativeMapboxRerouteControllerTest {
         verify(exactly = 1) {
             updateRoutes(match { it.map { it.id } == listOf("cjeacbr8s21bk47lggcvce7lv#0") }, eq(0))
         }
-        verify {
-            parsingTracking.routeResponseIsParsed(any())
-        }
     }
 
     @Test
@@ -168,11 +162,9 @@ class NativeMapboxRerouteControllerTest {
             every { this@mockk.invoke(any(), any()) } returns false
         }
         val observerRegistration = RerouteEventsRegistration()
-        val parsingTracking = mockk<RouteParsingTracking>(relaxed = true)
         val controller = createNativeMapboxRerouteController(
             rerouteEventsRegistration = observerRegistration,
             updateRoutes = updateRoutes,
-            routeParsingTracking = parsingTracking,
         )
         val states = controller.recordRerouteState()
         val statesV2 = controller.recordRerouteStateV2()
@@ -206,9 +198,6 @@ class NativeMapboxRerouteControllerTest {
         )
         verify(exactly = 1) {
             updateRoutes(match { it.map { it.id } == listOf("cjeacbr8s21bk47lggcvce7lv#0") }, eq(0))
-        }
-        verify {
-            parsingTracking.routeResponseIsParsed(any())
         }
     }
 
@@ -707,7 +696,6 @@ private fun createNativeMapboxRerouteController(
     parsingDispatcher: CoroutineDispatcher = UnconfinedTestDispatcher(),
     getCurrentRoutes: () -> List<NavigationRoute> = { emptyList() },
     updateRoutes: UpdateRoutes = { _, _ -> true },
-    routeParsingTracking: RouteParsingTracking = mockk(relaxed = true),
 ) = NativeMapboxRerouteController(
     rerouteEventsRegistration,
     rerouteController,
@@ -715,9 +703,7 @@ private fun createNativeMapboxRerouteController(
     getCurrentRoutes,
     updateRoutes,
     scope,
-    parsingDispatcher,
-    routeParsingTracking,
-    createRouteParsingManager(false),
+    createTestNavigationRoutesParsing(parsingDispatcher),
 )
 
 private class RerouteEventsRegistration : RerouteEventsProvider {

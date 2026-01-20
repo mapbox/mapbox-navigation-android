@@ -6,7 +6,11 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.testing.NativeRouteParserRule
+import com.mapbox.navigation.base.internal.route.parsing.DirectionsResponseToParse
+import com.mapbox.navigation.base.internal.route.testing.toDataRefJava
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
+import com.mapbox.navigation.testing.factories.createTestNavigationRoutesParsing
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -21,7 +25,7 @@ class NavigationRouteWaypointsTest(
 ) {
 
     @get:Rule
-    val routeParserRule = NativeRouteParserRule()
+    val loggerFrontendTestRule = LoggingFrontendTestRule()
 
     companion object {
 
@@ -73,31 +77,42 @@ class NavigationRouteWaypointsTest(
 
     @Test
     fun waypoints() {
-        val route = NavigationRoute.create(
-            DirectionsResponse.builder()
-                .waypoints(responseWaypoints)
-                .routes(
-                    listOf(
-                        DirectionsRoute.builder()
-                            .distance(1.0)
-                            .duration(2.9)
-                            .waypoints(routeWaypoints)
-                            .build(),
-                    ),
-                )
-                .code("Ok")
-                .build(),
-            RouteOptions.builder()
-                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                .coordinatesList(
-                    listOf(
-                        Point.fromLngLat(1.1, 2.2),
-                        Point.fromLngLat(3.3, 4.4),
-                    ),
-                )
-                .build(),
-            RouterOrigin.OFFLINE,
-        ).first()
-        assertEquals(expectedWaypoints, route.waypoints)
+        val testRouteOptions = RouteOptions.builder()
+            .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+            .coordinatesList(
+                listOf(
+                    Point.fromLngLat(1.1, 2.2),
+                    Point.fromLngLat(3.3, 4.4),
+                ),
+            )
+            .build()
+        val testDirectionsResponse = DirectionsResponse.builder()
+            .waypoints(responseWaypoints)
+            .routes(
+                listOf(
+                    DirectionsRoute.builder()
+                        .distance(1.0)
+                        .duration(2.9)
+                        .waypoints(routeWaypoints)
+                        .build(),
+                ),
+            )
+            .code("Ok")
+            .build()
+
+        val parsedRoutes = runBlocking {
+            createTestNavigationRoutesParsing().parseDirectionsResponse(
+                DirectionsResponseToParse.from(
+                    responseBody = testDirectionsResponse.toJson().toDataRefJava(),
+                    routeRequest = testRouteOptions.toUrl("***").toString(),
+                    routerOrigin = RouterOrigin.OFFLINE,
+                ),
+            ).getOrThrow()
+        }
+
+        assertEquals(
+            expectedWaypoints,
+            parsedRoutes.routes.first().waypoints,
+        )
     }
 }

@@ -34,14 +34,5 @@ data class RoutesResponse(
          * Duration of native parsing.
          */
         val nativeParseMillis: Long,
-        /**
-         * The waiting time in the scheduler between receiving a response from the server and
-         * route options parsing start.
-         */
-        val routeOptionsWaitMillis: Long,
-        /**
-         * Duration of route options parsing.
-         */
-        val routeOptionsParseMillis: Long,
     )
 }

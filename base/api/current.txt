@@ -1328,9 +1328,6 @@ package com.mapbox.navigation.base.route {
   public static final class NavigationRoute.Companion {
   }
 
-  public final class NavigationRouteEx {
-  }
-
   public interface NavigationRouterCallback {
     method public void onCanceled(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, @com.mapbox.navigation.base.route.RouterOrigin String routerOrigin);
     method public void onFailure(java.util.List<com.mapbox.navigation.base.route.RouterFailure> reasons, com.mapbox.api.directions.v5.models.RouteOptions routeOptions);

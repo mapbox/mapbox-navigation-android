@@ -7,6 +7,8 @@ inline fun <reified T> assertNoDiffs(
     actual: T,
     ignoreGetters: List<String> = emptyList(),
     emptyAndNullArraysAreTheSame: Boolean = false,
+    doubleComparisonEpsilon: Double = 0.000001,
+    tag: String = "",
 ) {
     val result = findDiff(
         baseClass = T::class.java,
@@ -14,9 +16,11 @@ inline fun <reified T> assertNoDiffs(
         actual = actual,
         ignoreGetters = ignoreGetters,
         nullAndEmptyArraysAreTheSame = emptyAndNullArraysAreTheSame,
+        doubleComparisonEpsilon = doubleComparisonEpsilon,
     )
     if (result.differences.isNotEmpty()) {
-        val message = "Objects are different:\n" + result.differences.joinToString("\n") {
+        val tag = if (tag.isNotEmpty()) "$tag: " else ""
+        val message = "$tag objects are different:\n" + result.differences.joinToString("\n") {
             "path: ${it.path}, expected: ${it.expectedValueString}, actual: ${it.actualValueString}"
         }
         fail(message)
@@ -51,6 +55,7 @@ fun <T> findDiff(
     ignoreGetters: List<String> = emptyList(),
     nullAndEmptyArraysAreTheSame: Boolean = false,
     visitedPathCallback: (String) -> Unit = {},
+    doubleComparisonEpsilon: Double = 0.000001,
 ): FindDiffResult {
     // Use IdentityHashMap-based set to track visited objects by identity, not equals()
     val visited = mutableSetOf<IdentityWrapper>()
@@ -63,6 +68,7 @@ fun <T> findDiff(
         visited,
         nullAndEmptyArraysAreTheSame,
         visitedPathCallback,
+        doubleComparisonEpsilon,
     )
     return FindDiffResult(differences)
 }
@@ -77,6 +83,7 @@ private fun findDiffInternal(
     visited: MutableSet<IdentityWrapper>,
     nullAndEmptyArraysAreTheSame: Boolean,
     visitedPathCallback: (String) -> Unit,
+    doubleComparisonEpsilon: Double,
 ): List<Difference> {
     val differences = mutableListOf<Difference>()
     
@@ -198,6 +205,7 @@ private fun findDiffInternal(
                         mutableSetOf(),  // Fresh visited set for each element
                         nullAndEmptyArraysAreTheSame,
                         visitedPathCallback,
+                        doubleComparisonEpsilon,
                     )
                     differences.addAll(elementDifferences)
                     // Always add the element path since we visited it
@@ -205,7 +213,7 @@ private fun findDiffInternal(
                 } else {
                     // Compare simple elements directly
                     visitedPathCallback(elementPath)
-                    if (expectedElement != actualElement) {
+                    if (!areValuesEqual(expectedElement, actualElement, doubleComparisonEpsilon)) {
                         differences.add(
                             Difference(
                                 path = elementPath,
@@ -221,7 +229,7 @@ private fun findDiffInternal(
         
         // For other collections (Set, Map), compare directly using equals
         visitedPathCallback(fieldName)
-        val valuesDiffer = expected != actual
+        val valuesDiffer = !areValuesEqual(expected, actual, doubleComparisonEpsilon)
         if (valuesDiffer) {
             differences.add(
                 Difference(
@@ -374,16 +382,13 @@ private fun findDiffInternal(
                         visited,
                         nullAndEmptyArraysAreTheSame,
                         visitedPathCallback,
+                        doubleComparisonEpsilon,
                     )
                     differences.addAll(nestedDifferences)
                     // Always add the path since we visited it (already added above)
                 } else {
                     // Compare simple values
-                    val valuesDiffer = when {
-                        expectedValue == null && actualValue == null -> false
-                        expectedValue == null || actualValue == null -> true
-                        else -> expectedValue != actualValue
-                    }
+                    val valuesDiffer = !areValuesEqual(expectedValue, actualValue, doubleComparisonEpsilon)
                     
                     if (valuesDiffer) {
                         val expectedValueString = expectedValue?.toString() ?: "null"
@@ -404,6 +409,32 @@ private fun findDiffInternal(
     }
     
     return differences
+}
+
+private fun areValuesEqual(expected: Any?, actual: Any?, epsilon: Double): Boolean {
+    if (expected == null && actual == null) return true
+    if (expected == null || actual == null) return false
+    
+    // Handle Double comparison with epsilon
+    if (expected is Double && actual is Double) {
+        // Special handling for NaN - treat NaN as equal to NaN
+        if (expected.isNaN() && actual.isNaN()) return true
+        if (expected.isNaN() || actual.isNaN()) return false
+        // Compare with epsilon
+        return kotlin.math.abs(expected - actual) <= epsilon
+    }
+    
+    // Handle Float comparison with epsilon
+    if (expected is Float && actual is Float) {
+        // Special handling for NaN - treat NaN as equal to NaN
+        if (expected.isNaN() && actual.isNaN()) return true
+        if (expected.isNaN() || actual.isNaN()) return false
+        // Compare with epsilon
+        return kotlin.math.abs(expected - actual) <= epsilon
+    }
+    
+    // For all other types, use default equality
+    return expected == actual
 }
 
 private fun isPrimitiveOrSimpleType(type: Class<*>): Boolean {

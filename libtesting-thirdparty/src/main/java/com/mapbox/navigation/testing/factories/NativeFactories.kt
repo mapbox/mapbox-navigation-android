@@ -209,7 +209,7 @@ fun createRouteInterface(
     waypoints: List<Waypoint> = emptyList(),
     expirationTimeMs: Long? = null,
     lastRefreshTimestamp: Date? = null,
-    routeGeometry: List<Point>,
+    routeGeometry: List<Point> = emptyList(),
 ): RouteInterface = object : RouteInterface {
 
     override fun getRouteId() = "$responseUuid#$routeIndex"

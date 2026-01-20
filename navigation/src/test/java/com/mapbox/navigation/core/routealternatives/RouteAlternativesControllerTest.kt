@@ -3,8 +3,7 @@ package com.mapbox.navigation.core.routealternatives
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.route.isExpired
-import com.mapbox.navigation.base.internal.utils.RouteParsingManager
-import com.mapbox.navigation.base.internal.utils.createRouteParsingManager
+import com.mapbox.navigation.base.internal.route.parsing.RouteInterfacesParser
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -24,10 +23,10 @@ import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createNavigationRoute
 import com.mapbox.navigation.testing.factories.createRouteInterface
 import com.mapbox.navigation.testing.factories.createRouteOptions
+import com.mapbox.navigation.testing.factories.createTestRouteInterfaceParser
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteAlternativesControllerInterface
-import com.mapbox.navigator.RouteAlternativesObserver
 import com.mapbox.navigator.RouteIntersection
 import io.mockk.every
 import io.mockk.just
@@ -36,7 +35,6 @@ import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.runs
 import io.mockk.slot
-import io.mockk.spyk
 import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import io.mockk.verify
@@ -81,14 +79,15 @@ class RouteAlternativesControllerTest {
 
     private fun createRouteAlternativesController(
         options: RouteAlternativesOptions = RouteAlternativesOptions.Builder().build(),
-        routeParsingManager: RouteParsingManager = createParsingManagerForTest(),
+        navigationRoutesParser: RouteInterfacesParser = createTestRouteInterfaceParser(
+            coroutineRule.testDispatcher,
+        ),
     ) = RouteAlternativesController(
         options,
         navigator,
         tripSession,
         ThreadController(),
-        routeParsingManager,
-        directionSession,
+        navigationRoutesParser,
     )
 
     @Before
@@ -628,10 +627,7 @@ class RouteAlternativesControllerTest {
     @Test
     fun `alternative routes are updated`() =
         coroutineRule.runBlockingTest {
-            val parsingManager = createParsingManagerForTest()
-            val routeAlternativesController = createRouteAlternativesController(
-                routeParsingManager = parsingManager,
-            )
+            val routeAlternativesController = createRouteAlternativesController()
             val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
             every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
 
@@ -647,10 +643,7 @@ class RouteAlternativesControllerTest {
             routeAlternativesController.setRouteUpdateSuggestionListener {
                 routesUpdateSuggestion = it
             }
-            var parsingPreparation = 0
-            parsingManager.setPrepareForParsingAction {
-                parsingPreparation++
-            }
+
             nativeObserver.captured.onRouteAlternativesUpdated(
                 null,
                 listOf(
@@ -688,75 +681,6 @@ class RouteAlternativesControllerTest {
                     "route_response_new_for_refresh#0",
                     "FYenNs6nfVvkDQgvLWnYcZvn2nvekWStF7nM0JV0X_IBAlsXWvomuA==#0",
                     "route_response_new_for_refresh#1",
-                ),
-                newRoutes.map { it.id },
-            )
-            assertEquals(
-                "no parsing preparation expected for short routes",
-                0,
-                parsingPreparation,
-            )
-        }
-
-    @Test
-    fun `alternative long routes are updated`() =
-        coroutineRule.runBlockingTest {
-            val parsingManager = createParsingManagerForTest()
-            val routeAlternativesController = createRouteAlternativesController(
-                routeParsingManager = parsingManager,
-            )
-            val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
-            every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
-
-            val testPrimaryRoute = createNavigationRoute(
-                createDirectionsRoute(requestUuid = "testPrimaryRoute"),
-            )
-            val routeProgress = mockk<RouteProgress>(relaxed = true) {
-                every { navigationRoute } returns testPrimaryRoute
-            }
-            every { tripSession.getRouteProgress() } returns routeProgress
-
-            var routesUpdateSuggestion: UpdateRouteSuggestion? = null
-            routeAlternativesController.setRouteUpdateSuggestionListener {
-                routesUpdateSuggestion = it
-            }
-            var parsingPreparation = 0
-            parsingManager.setPrepareForParsingAction {
-                parsingPreparation++
-                assertNull(
-                    "parsing preparation happened after alternatives routes were suggested",
-                    routesUpdateSuggestion,
-                )
-            }
-            nativeObserver.captured.onRouteAlternativesUpdated(
-                null,
-                listOf(
-                    createNativeAlternativeMock(
-                        alternativeId = 1,
-                        fileName = "long_route_7k.json",
-                        routeIndex = 0,
-                    ),
-                ),
-                emptyList(),
-            )
-
-            assertEquals(
-                1,
-                parsingPreparation,
-            )
-            assertNotNull(
-                "no routes update suggestion",
-                routesUpdateSuggestion,
-            )
-            assertEquals(
-                SuggestionType.AlternativesUpdated,
-                routesUpdateSuggestion!!.type,
-            )
-            val newRoutes = routesUpdateSuggestion!!.newRoutes
-            assertEquals(
-                listOf(
-                    "testPrimaryRoute#0",
-                    "Hx9dSjQIDnHkThyjoziZBodVBvaSGynKcAZEd2Ha5O05s3pKsvYkAQ==#0",
                 ),
                 newRoutes.map { it.id },
             )
@@ -1140,126 +1064,6 @@ class RouteAlternativesControllerTest {
             verify(exactly = 0) { controllerInterface.removeObserver(any()) }
         }
 
-    @Test
-    fun `during alternatives parsing should look up for existing route`() = coroutineRule.runBlockingTest {
-        fun createRouteWithId(
-            newRouteId: String,
-        ) = createNativeAlternativeMock().apply {
-            val spyk = spyk(route) {
-                every { routeId } returns newRouteId
-            }
-            every { route } returns spyk
-        }
-
-        val nativeRoute = createRouteWithId("route")
-        val firstAlternative = createRouteWithId("alternative_route_1")
-        val secondAlternative = createRouteWithId("alternative_route_2")
-
-        every { directionSession.findRoute(any()) } returns null
-
-        val routeAlternativesController = createRouteAlternativesController()
-
-        val nativeObserver = slot<RouteAlternativesObserver>()
-        every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
-
-        var ignore: UpdateRouteSuggestion? = null
-        routeAlternativesController.setRouteUpdateSuggestionListener {
-            ignore = it
-        }
-
-        nativeObserver.captured.onRouteAlternativesUpdated(
-            nativeRoute.route,
-            listOf(firstAlternative, secondAlternative),
-            emptyList(),
-        )
-
-        listOf(
-            nativeRoute.route.routeId,
-            firstAlternative.route.routeId,
-            secondAlternative.route.routeId,
-        ).forEach { routeId ->
-            verify(exactly = 1) {
-                directionSession.findRoute(routeId)
-            }
-        }
-    }
-
-    @Test
-    fun `during alternatives parsing if route already exist should not parse again`() = coroutineRule.runBlockingTest {
-        fun createRouteWithId(
-            newRouteId: String,
-            newResponseUUID: String,
-        ) = createNativeAlternativeMock().apply {
-            val spyk = spyk(route) {
-                every { routeId } returns newRouteId
-                every { responseUuid } returns newResponseUUID
-            }
-            every { route } returns spyk
-        }
-
-        val nativeRoute = createRouteWithId("route", "uuid1").route
-        val firstAlternative = createRouteWithId("alternative_route_1", "uuid2")
-        val secondAlternative = createRouteWithId("alternative_route_2", "uuid2")
-
-        val firstAlternativeRoute = firstAlternative.route
-        val secondAlternativeRoute = secondAlternative.route
-
-        every { directionSession.findRoute(eq("route")) } returns null
-        every { directionSession.findRoute(eq("alternative_route_1")) } returns null
-        every {
-            directionSession.findRoute(eq("alternative_route_2"))
-        } returns mockk<NavigationRoute>(
-            relaxed = true,
-        )
-
-        val routeParsingMock = spyk(createParsingManagerForTest()) {
-            val fromJson = DirectionsResponse.fromJson(
-                FileUtils.loadJsonFixture("route_alternative_from_native.json"),
-            )
-            every { parseRouteToDirections(any()) } returns fromJson
-        }
-
-        val routeAlternativesController = createRouteAlternativesController(
-            routeParsingManager = routeParsingMock,
-        )
-
-        val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
-        every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
-
-        var ignore: UpdateRouteSuggestion? = null
-        routeAlternativesController.setRouteUpdateSuggestionListener {
-            ignore = it
-        }
-
-        nativeObserver.captured.onRouteAlternativesUpdated(
-            nativeRoute,
-            listOf(firstAlternative, secondAlternative),
-            emptyList(),
-        )
-
-        listOf(
-            nativeRoute.routeId,
-            firstAlternativeRoute.routeId,
-            secondAlternativeRoute.routeId,
-        ).forEach { routeId ->
-            verify(exactly = 1) {
-                directionSession.findRoute(routeId)
-            }
-        }
-
-        verify(exactly = 1) {
-            routeParsingMock.parseRouteToDirections(refEq(nativeRoute))
-        }
-
-        verify(exactly = 1) {
-            routeParsingMock.parseRouteToDirections(refEq(firstAlternativeRoute))
-        }
-
-        verify(exactly = 0) {
-            routeParsingMock.parseRouteToDirections(refEq(secondAlternativeRoute))
-        }
-    }
-
     private val nativeInfoFork = com.mapbox.navigator.AlternativeRouteInfo(
         100.0, // distance
         200.0, // duration
@@ -1332,5 +1136,3 @@ class RouteAlternativesControllerTest {
         }
     }
 }
-
-private fun createParsingManagerForTest() = createRouteParsingManager(false)

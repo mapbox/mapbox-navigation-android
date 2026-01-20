@@ -18,6 +18,7 @@ import com.mapbox.navigation.base.route.ResponseOriginAPI
 import com.mapbox.navigation.base.route.ResponseOriginAPI.Companion.DIRECTIONS_API
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
+import com.mapbox.navigation.testing.PrintLoggingFrontend
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.Waypoint
@@ -69,6 +70,7 @@ fun createNavigationRoutes(
         routerOrigin,
         responseTimeElapsedSeconds,
         responseOriginAPI,
+        logger = PrintLoggingFrontend,
     )
 }
 

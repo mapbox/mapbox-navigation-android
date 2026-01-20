@@ -20,6 +20,7 @@ import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.instrumentation_tests.R
+import com.mapbox.navigation.instrumentation_tests.utils.assumeNotNROBecauseOfSerialization
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
@@ -198,6 +199,7 @@ class ClosuresTest : BaseCoreNoCleanUpTest() {
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     @Test
     fun closures_detection_works_after_deserialization() = sdkTest {
+        assumeNotNROBecauseOfSerialization()
         withMapboxNavigation { navigation ->
             val mockRoute = RoutesProvider.route_alternative_with_closure(context)
             val routes = navigation.requestMockRoutes(

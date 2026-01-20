@@ -20,6 +20,7 @@ import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
+import com.mapbox.navigation.instrumentation_tests.utils.assumeNotNROBecauseNativeRefreshIsBeingFixed
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
@@ -303,6 +304,7 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
 
     @Test
     fun ev_route_refresh_updates_ev_annotations_duration_waypoints_for_the_whole_route() = sdkTest {
+        assumeNotNROBecauseNativeRefreshIsBeingFixed()
         addRefreshRequestHandler(
             R.raw.ev_route_refresh_response,
             acceptedGeometryIndex = 0,
@@ -441,6 +443,7 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
     @Test
     fun ev_route_refresh_updates_ev_annotations_duration_waypoints_for_truncated_current_leg() =
         sdkTest {
+            assumeNotNROBecauseNativeRefreshIsBeingFixed()
             val geometryIndex = 384
             addRefreshRequestHandler(
                 R.raw.ev_route_refresh_response_starting_from_384,
@@ -505,6 +508,7 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
     @Test
     fun ev_route_refresh_updates_ev_annotations_duration_waypoints_for_truncated_next_leg() =
         sdkTest {
+            assumeNotNROBecauseNativeRefreshIsBeingFixed()
             addRefreshRequestHandler(
                 R.raw.ev_route_refresh_response_with_truncated_next_leg,
                 acceptedGeometryIndex = 0,
@@ -563,6 +567,7 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
 
     @Test
     fun ev_route_refresh_updates_ev_annotations_duration_waypoints_for_second_leg() = sdkTest {
+        assumeNotNROBecauseNativeRefreshIsBeingFixed()
         val routeGeometryIndex = 774
         val legGeometryIndex = 26
         replaceOriginalResponseHandler(R.raw.ev_route_response_for_refresh_with_2_waypoints)

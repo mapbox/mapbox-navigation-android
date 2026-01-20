@@ -8,7 +8,7 @@ import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
 
-private object PrintLoggingFrontend : LoggerFrontend {
+object PrintLoggingFrontend : LoggerFrontend {
 
     override fun getLogLevel(): LoggingLevel = LoggingLevel.DEBUG
 

@@ -16,6 +16,7 @@ import com.mapbox.navigation.core.RoutesInvalidatedParams
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.routerefresh.RouteRefreshExtra
 import com.mapbox.navigation.instrumentation_tests.R
+import com.mapbox.navigation.instrumentation_tests.utils.assumeNotNROBecauseOfSerialization
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
@@ -114,6 +115,7 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
 
     @Test
     fun refreshTtlExpiresOnFirstRefreshForAllRoutesAfterDeserialization() = sdkTest {
+        assumeNotNROBecauseOfSerialization()
         createMapboxNavigation(frequentRefreshOptions)
         mockWebServerRule.requestHandlers.clear()
         mockWebServerRule.requestHandlers.add(

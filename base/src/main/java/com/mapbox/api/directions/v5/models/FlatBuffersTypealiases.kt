@@ -18,6 +18,7 @@ internal typealias FBCostPerVehicleSize = com.mapbox.directions.generated.CostPe
 internal typealias FBDirectionsResponse = com.mapbox.directions.generated.DirectionsResponse
 internal typealias FBResponseMetadata = com.mapbox.directions.generated.ResponseMetadata
 internal typealias FBDirectionsRoute = com.mapbox.directions.generated.DirectionsRoute
+internal typealias FBDirectionsRouteContext = com.mapbox.directions.generated.DirectionsRouteContext
 internal typealias FBDirectionsWaypoint = com.mapbox.directions.generated.DirectionsWaypoint
 internal typealias FBDrivingSide = com.mapbox.directions.generated.DrivingSide
 internal typealias FBIncident = com.mapbox.directions.generated.Incident

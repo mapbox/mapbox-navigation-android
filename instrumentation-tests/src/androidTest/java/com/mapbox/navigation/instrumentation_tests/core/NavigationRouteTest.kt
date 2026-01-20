@@ -5,6 +5,7 @@ import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.route.deserializeNavigationRouteFrom
 import com.mapbox.navigation.base.internal.route.serialize
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
+import com.mapbox.navigation.instrumentation_tests.utils.assumeNotNROBecauseOfSerialization
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.utils.routes.RoutesProvider
@@ -54,6 +55,7 @@ class NavigationRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
 
     @Test
     fun deserialize_serialize_routes() = sdkTest {
+        assumeNotNROBecauseOfSerialization()
         withMapboxNavigation { navigation ->
             val mockRoute = RoutesProvider.route_alternative_with_closure(context)
 

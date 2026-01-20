@@ -3,17 +3,22 @@ package com.mapbox.navigation.ui.maps.route.callout.api
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.factories.createDirectionsResponse
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createNavigationRoutes
 import com.mapbox.navigation.ui.maps.internal.route.callout.api.MapboxRouteCalloutsApi
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
+import org.junit.Rule
 import org.junit.Test
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class MapboxRouteCalloutApiTest {
+
+    @get:Rule
+    val loggingRule = LoggingFrontendTestRule()
 
     @Test
     fun `generate a single callout when there is only one route`() {

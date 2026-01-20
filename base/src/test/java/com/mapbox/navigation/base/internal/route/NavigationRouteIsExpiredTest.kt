@@ -3,13 +3,13 @@ package com.mapbox.navigation.base.internal.route
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.internal.route.parsing.DirectionsResponseToParse
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.TestSystemClock
-import com.mapbox.navigation.testing.factories.TestSDKRouteParser
+import com.mapbox.navigation.testing.factories.createTestNavigationRoutesParsing
 import com.mapbox.navigation.testing.factories.toDataRef
 import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.every
@@ -50,22 +50,25 @@ class NavigationRouteIsExpiredTest {
 
     @Test
     fun isRouteExpired() = coroutineRule.runBlockingTest {
-        val routes = NavigationRoute.createAsync(
-            FileUtils.loadJsonFixture("routes_with_refresh_ttl.json").toDataRef(),
-            RouteOptions.builder()
-                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                .coordinatesList(
-                    listOf(
-                        Point.fromLngLat(18.576644, 54.410361),
-                        Point.fromLngLat(18.576235, 54.412025),
-                    ),
-                )
-                .build().toUrl("").toString(),
-            RouterOrigin.ONLINE,
-            clock.elapsedMillis,
-            false,
-            TestSDKRouteParser(),
-        ).routes
+        val routes = createTestNavigationRoutesParsing(
+            coroutineRule.testDispatcher,
+        )
+            .parseDirectionsResponse(
+                DirectionsResponseToParse(
+                    routeRequest = RouteOptions.builder()
+                        .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                        .coordinatesList(
+                            listOf(
+                                Point.fromLngLat(18.576644, 54.410361),
+                                Point.fromLngLat(18.576235, 54.412025),
+                            ),
+                        )
+                        .build().toUrl("").toString(),
+                    responseBody = FileUtils.loadJsonFixture("routes_with_refresh_ttl.json")
+                        .toDataRef(),
+                    routerOrigin = RouterOrigin.ONLINE,
+                ),
+            ).getOrThrow().routes
 
         clock.advanceTimeBy(9.seconds)
 

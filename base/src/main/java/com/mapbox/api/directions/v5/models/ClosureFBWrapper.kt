@@ -32,11 +32,21 @@ internal class ClosureFBWrapper(
         if (other is ClosureFBWrapper && other.fb === fb) return true
         if (other is ClosureFBWrapper && efficientEquals(fb, other.fb)) return true
 
+        if (other is Closure) {
+            if (geometryIndexStart() != other.geometryIndexStart()) return false
+            if (geometryIndexEnd() != other.geometryIndexEnd()) return false
+            if (unrecognized() != other.unrecognized()) return false
+            return true
+        }
+
         return false
     }
 
     override fun hashCode(): Int {
-        return efficientHashCode(fb)
+        var result = geometryIndexStart()
+        result = 31 * result + geometryIndexEnd()
+        result = 31 * result + unrecognized().hashCode()
+        return result
     }
 
     override fun toString(): String {

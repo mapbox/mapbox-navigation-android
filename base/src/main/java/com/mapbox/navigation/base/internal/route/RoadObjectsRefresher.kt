@@ -3,7 +3,7 @@ package com.mapbox.navigation.base.internal.route
 import com.mapbox.api.directions.v5.models.Closure
 import com.mapbox.api.directions.v5.models.Incident
 
-internal class IncidentsRefresher : RoadObjectsRefresher<Incident, Incident.Builder>(
+internal object IncidentsRefresher : RoadObjectsRefresher<Incident, Incident.Builder>(
     { this.toBuilder() },
     { this.build() },
     { this.geometryIndexStart() },
@@ -12,7 +12,7 @@ internal class IncidentsRefresher : RoadObjectsRefresher<Incident, Incident.Buil
     { this.geometryIndexEnd(it) },
 )
 
-internal class ClosuresRefresher : RoadObjectsRefresher<Closure, Closure.Builder>(
+internal object ClosuresRefresher : RoadObjectsRefresher<Closure, Closure.Builder>(
     { this.toBuilder() },
     { this.build() },
     { this.geometryIndexStart() },
