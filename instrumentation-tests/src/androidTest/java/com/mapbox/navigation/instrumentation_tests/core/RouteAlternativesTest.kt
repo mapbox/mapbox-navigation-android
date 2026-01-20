@@ -683,6 +683,50 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
         }
     }
 
+    @Test
+    fun disableContinuousAlternatives() = sdkTest {
+        setupMockRequestHandlers()
+        withMapboxNavigation(
+            customConfig = """{"navigation":{"alternativeRoutes":{"maxAlternatives":0}}}""",
+            historyRecorderRule = mapboxHistoryTestRule,
+        ) { mapboxNavigation ->
+            val routes = mapboxNavigation.requestNavigationRoutes(startCoordinates)
+
+            mockWebServerRule.requestHandlers.clear()
+            mockWebServerRule.requestHandlers.add(
+                MockDirectionsRequestHandler(
+                    "driving-traffic",
+                    readRawFileText(context, R.raw.route_response_alternative_during_navigation),
+                    startCoordinates,
+                    relaxedExpectedCoordinates = true,
+                ),
+            )
+            stayOnPosition(
+                startCoordinates.first().latitude(),
+                startCoordinates.first().longitude(),
+                30f,
+            ) {
+                mapboxNavigation.startTripSession()
+                mapboxNavigation.flowLocationMatcherResult().first()
+            }
+            mapboxNavigation.setNavigationRoutesAsync(routes)
+            var alternativeUpdates = 0
+            val originalUuid = "1SSd29ZxmjD7ELLqDJHRPPDP5W4wdh633IbGo41pJrL6wpJRmzNaMA=="
+            mapboxNavigation.registerRoutesObserver {
+                if (it.reason == RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE &&
+                    it.navigationRoutes.any { !it.id.startsWith(originalUuid) }
+                ) {
+                    alternativeUpdates++
+                }
+            }
+            mockLocationReplayerRule.playRoute(routes.first().directionsRoute)
+
+            // this is where the alternative update happens if CAs are enabled
+            mapboxNavigation.routeProgressUpdates().first { it.fractionTraveled >= 0.1 }
+            assertEquals(0, alternativeUpdates)
+        }
+    }
+
     private fun setupMockRequestHandlers() {
         // Nav-native requests alternate routes, so we are only
         // ensuring the initial route has alternatives.
