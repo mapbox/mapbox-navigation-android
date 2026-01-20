@@ -3,13 +3,16 @@
 package com.mapbox.navigation.base.route
 
 import com.google.gson.JsonPrimitive
-import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
+import com.mapbox.navigation.base.internal.route.operations.RouteOperations
+import com.mapbox.navigation.base.internal.route.parsing.DirectionsResponseToParse
+import com.mapbox.navigation.base.internal.route.parsing.setupParsing
+import com.mapbox.navigation.base.internal.route.testing.toDataRefJava
 import com.mapbox.navigation.base.internal.route.updateExpirationTime
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
@@ -18,7 +21,6 @@ import com.mapbox.navigation.testing.factories.createClosure
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createNavigationRoute
 import com.mapbox.navigation.testing.factories.createRouteOptions
-import com.mapbox.navigation.testing.factories.toDataRef
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -26,7 +28,6 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
-import java.net.URL
 
 class NavigationRouteTest {
 
@@ -41,7 +42,7 @@ class NavigationRouteTest {
         val requestUrl = FileUtils.loadJsonFixture("test_directions_request_url.txt")
         val responseJson = FileUtils.loadJsonFixture("test_directions_response.json")
 
-        val navigationRoute = NavigationRoute.create(
+        val navigationRoute = createRoute(
             directionsResponseJson = responseJson,
             routeRequestUrl = requestUrl,
             routerOrigin = RouterOrigin.OFFLINE,
@@ -55,7 +56,7 @@ class NavigationRouteTest {
         val requestUrl = FileUtils.loadJsonFixture("test_directions_request_url.txt")
         val responseJson = FileUtils.loadJsonFixture("test_directions_response.json")
 
-        val navigationRoute = NavigationRoute.create(
+        val navigationRoute = createRoute(
             directionsResponseJson = responseJson,
             routeRequestUrl = requestUrl,
             routerOrigin = RouterOrigin.OFFLINE,
@@ -70,52 +71,20 @@ class NavigationRouteTest {
     }
 
     @Test
-    fun `navigation routes serialised from string, data_ref, and model are equals`() =
-        runBlocking<Unit> {
-            val responseString = FileUtils.loadJsonFixture("test_directions_response.json")
-            val responseModel = DirectionsResponse.fromJson(
-                FileUtils.loadJsonFixture("test_directions_response.json"),
-            )
-            val responseDataRef = responseString.toDataRef()
-            val requestUrl = FileUtils.loadJsonFixture("test_directions_request_url.txt")
-            val testRouteOptions = RouteOptions.fromUrl(URL(requestUrl))
-
-            val serialisedFromModel = NavigationRoute.create(
-                responseModel,
-                testRouteOptions,
-                RouterOrigin.ONLINE,
-            )
-            val serialisedFromString = NavigationRoute.create(
-                responseString,
-                requestUrl,
-                RouterOrigin.ONLINE,
-            )
-            val serialisedFromDataRef = NavigationRoute.createAsync(
-                responseDataRef,
-                requestUrl,
-                RouterOrigin.ONLINE,
-                0L,
-                false,
-            )
-
-            assertEquals(serialisedFromModel, serialisedFromString)
-            assertEquals(serialisedFromModel, serialisedFromDataRef.routes)
-        }
-
-    @Test
     fun `fill expected closures on original route creation`() {
         val routeJson = FileUtils.loadJsonFixture("route_closure_second_waypoint.json")
         val route = DirectionsRoute.fromJson(routeJson)
         val actual = NavigationRoute(
-            route,
-            route.waypoints(),
-            RouteOptions.builder()
+            directionsRoute = route,
+            waypoints = route.waypoints(),
+            routeOptions = RouteOptions.builder()
                 .applyDefaultNavigationOptions()
                 .coordinates("0.0,0.0;1.1,1.1")
                 .build(),
-            mockk(relaxed = true),
-            null,
-            ResponseOriginAPI.DIRECTIONS_API,
+            nativeRoute = mockk(relaxed = true),
+            expirationTimeElapsedSeconds = null,
+            responseOriginAPI = ResponseOriginAPI.DIRECTIONS_API,
+            operations = mockk<RouteOperations>(),
         )
 
         assertEquals(
@@ -129,15 +98,16 @@ class NavigationRouteTest {
         val routeJson = FileUtils.loadJsonFixture("route_closure_second_waypoint.json")
         val route = DirectionsRoute.fromJson(routeJson)
         val original = NavigationRoute(
-            route,
-            route.waypoints(),
-            RouteOptions.builder()
+            directionsRoute = route,
+            waypoints = route.waypoints(),
+            routeOptions = RouteOptions.builder()
                 .applyDefaultNavigationOptions()
                 .coordinates("0.0,0.0;1.1,1.1")
                 .build(),
-            mockk(relaxed = true),
-            null,
-            ResponseOriginAPI.DIRECTIONS_API,
+            nativeRoute = mockk(relaxed = true),
+            expirationTimeElapsedSeconds = null,
+            responseOriginAPI = ResponseOriginAPI.DIRECTIONS_API,
+            operations = mockk<RouteOperations>(),
         )
 
         val newRouteJson = FileUtils.loadJsonFixture("route_closure_second_silent_waypoint.json")
@@ -154,15 +124,16 @@ class NavigationRouteTest {
         val routeJson = FileUtils.loadJsonFixture("route_closure_second_waypoint.json")
         val route = DirectionsRoute.fromJson(routeJson)
         val navigationRoute = NavigationRoute(
-            route,
-            route.waypoints(),
-            RouteOptions.builder()
+            directionsRoute = route,
+            waypoints = route.waypoints(),
+            routeOptions = RouteOptions.builder()
                 .applyDefaultNavigationOptions()
                 .coordinates("0.0,0.0;1.1,1.1")
                 .build(),
-            mockk(relaxed = true),
-            null,
-            ResponseOriginAPI.DIRECTIONS_API,
+            nativeRoute = mockk(relaxed = true),
+            expirationTimeElapsedSeconds = null,
+            responseOriginAPI = ResponseOriginAPI.DIRECTIONS_API,
+            operations = mockk<RouteOperations>(),
         )
 
         navigationRoute.updateExpirationTime(45)
@@ -211,7 +182,7 @@ class NavigationRouteTest {
         val requestUrl = FileUtils.loadJsonFixture("test_directions_request_url.txt")
         val responseJson = FileUtils.loadJsonFixture("test_directions_response.json")
 
-        val navigationRoute = NavigationRoute.create(
+        val navigationRoute = createRoute(
             directionsResponseJson = responseJson,
             routeRequestUrl = requestUrl,
             routerOrigin = RouterOrigin.ONLINE,
@@ -296,4 +267,19 @@ class NavigationRouteTest {
             secondMatch.navigationRoute.waypoints?.map { it.location() },
         )
     }
+}
+
+internal fun createRoute(
+    directionsResponseJson: String,
+    routeRequestUrl: String,
+    @RouterOrigin
+    routerOrigin: String,
+): List<NavigationRoute> = runBlocking {
+    setupParsing(nativeRoute = false).parseDirectionsResponse(
+        DirectionsResponseToParse.from(
+            responseBody = directionsResponseJson.toDataRefJava(),
+            routeRequest = routeRequestUrl,
+            routerOrigin = routerOrigin,
+        ),
+    ).getOrThrow().routes
 }

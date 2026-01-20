@@ -6,6 +6,7 @@ import androidx.annotation.RestrictTo
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.DirectionsRouteFBWrapper
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.route.TimeZone
@@ -90,7 +91,11 @@ private fun String.parseMetadata(): Map<String, JsonElement>? {
 
 fun DirectionsRoute.refreshTtl(): Int? {
     return try {
-        unrecognizedJsonProperties?.get(Constants.RouteResponse.KEY_REFRESH_TTL)?.asInt
+        if (this is DirectionsRouteFBWrapper) {
+            this.refreshTtl
+        } else { // expecting mapbox java implementation
+            unrecognizedJsonProperties?.get(Constants.RouteResponse.KEY_REFRESH_TTL)?.asInt
+        }
     } catch (ex: Throwable) {
         null
     }

@@ -1,22 +1,15 @@
 package com.mapbox.navigation.core.routealternatives
 
-import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.navigation.base.internal.utils.AlternativesInfo
+import com.mapbox.navigation.base.internal.route.parsing.RouteInterfacesParser
 import com.mapbox.navigation.base.internal.utils.AlternativesParsingResult
-import com.mapbox.navigation.base.internal.utils.RouteParsingManager
-import com.mapbox.navigation.base.internal.utils.RouteResponseInfo
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
-import com.mapbox.navigation.base.internal.utils.parseRouteInterfaces
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.core.directions.session.DirectionsSession
-import com.mapbox.navigation.core.directions.session.findRoute
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.utils.internal.ThreadController
-import com.mapbox.navigation.utils.internal.Time
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
@@ -26,7 +19,6 @@ import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouteIntersection
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
 internal typealias UpdateRoutesSuggestionObserver = (UpdateRouteSuggestion) -> Unit
@@ -36,8 +28,7 @@ internal class RouteAlternativesController(
     navigator: MapboxNativeNavigator,
     private val tripSession: TripSession,
     private val threadController: ThreadController,
-    private val routeParsingManager: RouteParsingManager,
-    private val directionSession: DirectionsSession,
+    private val routeInterfacesParser: RouteInterfacesParser,
 ) : AlternativeMetadataProvider {
 
     @RouterOrigin
@@ -155,30 +146,17 @@ internal class RouteAlternativesController(
         nativeAlternatives: List<RouteAlternative>,
         block: suspend (List<NavigationRoute>, String) -> Unit,
     ) = mainJobControl.scope.launch {
-        val responseTimeElapsedSeconds = Time.SystemClockImpl.seconds()
-
         val primaryRoutes = onlinePrimaryRoute?.let { listOf(it) } ?: emptyList()
         val allAlternatives = primaryRoutes + nativeAlternatives.map { it.route }
 
         val alternatives = if (allAlternatives.isNotEmpty()) {
-            val args = AlternativesInfo(
-                RouteResponseInfo.fromResponses(allAlternatives.map { it.responseJsonRef.buffer }),
+            val alternativesParsingResult = routeInterfacesParser.parserContinuousAlternatives(
+                allAlternatives,
             )
-
-            val alternativesParsingResult = routeParsingManager.parseAlternatives(args) {
-                withContext(ThreadController.DefaultDispatcher) {
-                    parseRouteInterfaces(
-                        routes = allAlternatives,
-                        responseTimeElapsedSeconds = responseTimeElapsedSeconds,
-                        routeLookup = directionSession::findRoute,
-                        routeToDirections = routeParsingManager::parseRouteToDirections,
-                    )
-                }
-            }
 
             val expected = when (alternativesParsingResult) {
                 AlternativesParsingResult.NotActual -> {
-                    ExpectedFactory.createError(
+                    Result.failure(
                         Throwable("cancelled because another parsing is already in progress"),
                     )
                 }
@@ -186,9 +164,7 @@ internal class RouteAlternativesController(
                 is AlternativesParsingResult.Parsed -> alternativesParsingResult.value
             }
 
-            if (expected.isValue) {
-                expected.value
-            } else {
+            expected.map { it.routes }.getOrElse {
                 logE(
                     """
                         |unable to parse alternatives;
@@ -198,10 +174,10 @@ internal class RouteAlternativesController(
                     LOG_CATEGORY,
                 )
                 null
-            } ?: return@launch
+            }
         } else {
             emptyList()
-        }
+        } ?: return@launch
 
         processAlternativesMetadata(alternatives, nativeAlternatives)
         val origin = getOrigin(nativeAlternatives)

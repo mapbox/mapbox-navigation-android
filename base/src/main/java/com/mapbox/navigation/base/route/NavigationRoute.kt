@@ -3,57 +3,38 @@
 
 package com.mapbox.navigation.base.route
 
-import androidx.annotation.Keep
 import androidx.annotation.WorkerThread
-import com.google.gson.GsonBuilder
-import com.mapbox.api.directions.v5.DirectionsAdapterFactory
 import com.mapbox.api.directions.v5.models.Closure
 import com.mapbox.api.directions.v5.models.DirectionsResponse
-import com.mapbox.api.directions.v5.models.DirectionsResponseFBWrapper
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
-import com.mapbox.api.directions.v5.models.FBDirectionsResponse
-import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.api.directions.v5.models.StepIntersection
-import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.api.matching.v5.models.MapMatchingResponse
 import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.directions.route.DirectionsRouteResponse
-import com.mapbox.geojson.LineString
-import com.mapbox.geojson.Point
-import com.mapbox.geojson.PointAsCoordinatesTypeAdapter
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.CongestionNumericOverride
 import com.mapbox.navigation.base.internal.SDKRouteParser
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.toUpcomingRoadObjects
-import com.mapbox.navigation.base.internal.isNativeRoute
 import com.mapbox.navigation.base.internal.performance.PerformanceTracker
-import com.mapbox.navigation.base.internal.route.RoutesResponse
+import com.mapbox.navigation.base.internal.route.NavigationRouteData
 import com.mapbox.navigation.base.internal.route.Waypoint
-import com.mapbox.navigation.base.internal.route.routerOrigin
+import com.mapbox.navigation.base.internal.route.operations.JavaRouteOperations
+import com.mapbox.navigation.base.internal.route.operations.RouteOperations
+import com.mapbox.navigation.base.internal.route.operations.RouteUpdate
+import com.mapbox.navigation.base.internal.route.parsing.models.DirectionsResponseParsingResult
+import com.mapbox.navigation.base.internal.route.parsing.models.createResponseParsingResult
 import com.mapbox.navigation.base.internal.utils.mapToSdk
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
-import com.mapbox.navigation.base.internal.utils.parseDirectionsResponse
 import com.mapbox.navigation.base.internal.utils.refreshTtl
-import com.mapbox.navigation.base.route.NavigationRoute.Companion.LOG_CATEGORY
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
-import com.mapbox.navigation.utils.internal.ThreadController
-import com.mapbox.navigation.utils.internal.Time
 import com.mapbox.navigation.utils.internal.ifNonNull
-import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
-import com.mapbox.navigation.utils.internal.logI
-import com.mapbox.navigation.utils.internal.toReader
 import com.mapbox.navigator.RouteInterface
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import java.net.URL
-import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Wraps a route object used across the Navigation SDK features.
@@ -67,44 +48,26 @@ import kotlin.time.Duration.Companion.milliseconds
  * @param routeRefreshMetadata contains data that describes refreshing of this route object.
  * The field is null until the first refresh.
  */
-class NavigationRoute private constructor(
+class NavigationRoute internal constructor(
     val directionsRoute: DirectionsRoute,
     val waypoints: List<DirectionsWaypoint>?,
-    internal val routeOptions: RouteOptions,
-    internal val nativeRoute: RouteInterface,
-    internal val unavoidableClosures: List<List<Closure>>,
-    internal var expirationTimeElapsedSeconds: Long?,
-    internal val overriddenTraffic: CongestionNumericOverride? = null,
+    // TODO: NAVAND-1732, receive via nativeRoute.getMapboxAPI() instead of storing
     @ExperimentalMapboxNavigationAPI
     @ResponseOriginAPI
     val responseOriginAPI: String,
     @ExperimentalMapboxNavigationAPI
-    val routeRefreshMetadata: RouteRefreshMetadata?,
+    val routeRefreshMetadata: RouteRefreshMetadata? = null,
+    internal val routeOptions: RouteOptions,
+    internal val nativeRoute: RouteInterface,
+    // TODO: NAVAND-6774
+    internal var expirationTimeElapsedSeconds: Long?,
+    private val operations: RouteOperations,
+    // TODO: NAVAND-6774
+    internal val unavoidableClosures: List<List<Closure>> = directionsRoute.legs()
+        ?.map { leg -> leg.closures().orEmpty() }
+        .orEmpty(),
+    internal val overriddenTraffic: CongestionNumericOverride? = null,
 ) {
-
-    internal constructor(
-        directionsRoute: DirectionsRoute,
-        waypoints: List<DirectionsWaypoint>?,
-        routeOptions: RouteOptions,
-        nativeRoute: RouteInterface,
-        expirationTimeElapsedSeconds: Long?,
-        @ResponseOriginAPI
-        responseOriginAPI: String,
-        overriddenTraffic: CongestionNumericOverride? = null,
-    ) : this(
-        directionsRoute,
-        waypoints,
-        routeOptions,
-        nativeRoute,
-        directionsRoute.legs()
-            ?.map { leg -> leg.closures().orEmpty() }
-            .orEmpty(),
-        expirationTimeElapsedSeconds,
-        overriddenTraffic,
-        responseOriginAPI,
-        null,
-    )
-
     /**
      * The index of the route that this wrapper tracks from the collection of routes returned
      * in the original response.
@@ -148,30 +111,59 @@ class NavigationRoute private constructor(
      */
     @WorkerThread
     internal fun serialize(): String {
-        val gson = GsonBuilder()
-            .registerTypeAdapterFactory(DirectionsAdapterFactory.create())
-            .registerTypeAdapter(Point::class.java, PointAsCoordinatesTypeAdapter())
-            .create()
-
-        val state = SerialisationState(
-            directionsRoute,
-            routeOptions,
-            waypoints,
-            routeIndex,
-            routerOrigin,
-            unavoidableClosures,
-            responseOriginAPI,
-            responseUUID,
-            expirationTimeElapsedSeconds,
-            routeRefreshMetadata,
-        )
-        return gson.toJson(state)
+        return operations.serialize(
+            NavigationRouteData(
+                unavoidableClosures,
+                expirationTimeElapsedSeconds,
+            ),
+        ).getOrThrow()
     }
 
+    @WorkerThread
+    internal fun refresh(
+        refreshResponse: DataRef,
+        legIndex: Int,
+        legGeometryIndex: Int,
+        responseTimeElapsedSeconds: Long,
+    ): Result<NavigationRoute> {
+        return operations.refresh(
+            refreshResponse,
+            legIndex,
+            legGeometryIndex,
+            responseTimeElapsedSeconds,
+        ).map {
+            refresh(it)
+        }
+    }
+
+    internal fun clientSideUpdate(
+        directionsRouteBlock: DirectionsRoute.() -> DirectionsRoute,
+        waypointsBlock: List<DirectionsWaypoint>?.() -> List<DirectionsWaypoint>?,
+        overriddenTraffic: CongestionNumericOverride?,
+        routeRefreshMetadata: RouteRefreshMetadata?,
+    ): Result<NavigationRoute> {
+        return operations.clientSideRouteUpdate(
+            directionsRouteBlock,
+            waypointsBlock,
+            overriddenTraffic,
+            routeRefreshMetadata,
+        ).map { refresh(it) }
+    }
+
+    internal fun toDirectionsRefreshResponse() = operations.toDirectionsRefreshResponse()
+
+    private fun refresh(route: RouteUpdate): NavigationRoute = this.copy(
+        directionsRoute = route.routeModelsParsingResult.data.route,
+        waypoints = route.routeModelsParsingResult.data.routesWaypoint,
+        operations = route.routeModelsParsingResult.operations,
+        routeRefreshMetadata = route.routeRefreshMetadata,
+        expirationTimeElapsedSeconds = route.newExpirationTimeElapsedSeconds.update(
+            expirationTimeElapsedSeconds,
+        ),
+        overriddenTraffic = route.overriddenTraffic.update(overriddenTraffic),
+    )
+
     companion object {
-
-        private const val LOG_CATEGORY = "NavigationRoute"
-
         /**
          * Deserializes instance of [NavigationRoute] from string so that it could be passed to a
          * different application which uses the same version of Navigation Core Framework.
@@ -180,58 +172,12 @@ class NavigationRoute private constructor(
          */
         @WorkerThread
         internal fun deserializeFrom(value: String): Expected<Throwable, NavigationRoute> {
-            return try {
-                val gson = GsonBuilder()
-                    .registerTypeAdapterFactory(DirectionsAdapterFactory.create())
-                    .registerTypeAdapter(Point::class.java, PointAsCoordinatesTypeAdapter())
-                    .create()
-
-                val state = gson.fromJson(value, SerialisationState::class.java)
-
-                val nativeRoute = restoreNativeRoute(state)
-
-                val route = NavigationRoute(
-                    state.directionRoute,
-                    state.waypoints,
-                    state.routeOptions,
-                    nativeRoute,
-                    state.unavoidableClosures,
-                    state.expirationTimeElapsedSeconds,
-                    responseOriginAPI = state.responseOriginAPI,
-                    overriddenTraffic = null,
-                    routeRefreshMetadata = state.routeRefreshMetadata,
-                )
-                ExpectedFactory.createValue(route)
-            } catch (t: Throwable) {
-                ExpectedFactory.createError(t)
+            // TODO: https://mapbox.atlassian.net/browse/NAVAND-6775
+            return JavaRouteOperations.deserializeFrom(value).map {
+                ExpectedFactory.createValue<Throwable, NavigationRoute>(it)
+            }.getOrElse {
+                ExpectedFactory.createError(it)
             }
-        }
-
-        /**
-         * Creates new instances of [NavigationRoute] based on the routes found in the [directionsResponse].
-         *
-         * Should not be called from UI thread. Contains serialisation and deserialisation under the hood.
-         *
-         * @param directionsResponse response to be parsed into [NavigationRoute]s
-         * @param routeOptions options used to generate the [directionsResponse]
-         * @param routerOrigin origin where route was fetched from
-         */
-        @JvmStatic
-        internal fun create(
-            directionsResponse: DirectionsResponse,
-            routeOptions: RouteOptions,
-            @RouterOrigin
-            routerOrigin: String,
-        ): List<NavigationRoute> {
-            return create(
-                directionsResponse,
-                directionsResponseJson = directionsResponse.toJson(),
-                routeOptions,
-                routeOptionsUrlString = routeOptions.toUrl("").toString(),
-                routerOrigin,
-                null,
-                ResponseOriginAPI.DIRECTIONS_API,
-            )
         }
 
         /**
@@ -284,16 +230,24 @@ class NavigationRoute private constructor(
                     .build()
                 // TODO: NAVAND-1732 parse map matching response in NN without converting it
                 // to directions response
-                val routesResult = create(
-                    directionsResponse,
+                val routesResult = SDKRouteParser.default.parseDirectionsResponse(
                     directionsResponse.toJson(),
-                    routeOptions,
                     requestUrl,
                     RouterOrigin.ONLINE,
                     // map matched routes don't expire
-                    responseTimeElapsedSeconds = Long.MAX_VALUE,
-                    ResponseOriginAPI.MAP_MATCHING_API,
-                )
+                ).run {
+                    create(
+                        this,
+                        createResponseParsingResult(
+                            directionsResponse,
+                            routeOptions,
+                            RouterOrigin.ONLINE,
+                            ResponseOriginAPI.MAP_MATCHING_API,
+                        ),
+                        responseTimeElapsedSeconds = Long.MAX_VALUE,
+                        responseOriginAPI = ResponseOriginAPI.MAP_MATCHING_API,
+                    )
+                }
                 val matchesResult = routesResult.mapIndexed { index, navigationRoute ->
                     MapMatchingMatch(
                         navigationRoute,
@@ -306,271 +260,42 @@ class NavigationRoute private constructor(
             }
         }
 
-        /**
-         * Creates new instances of [NavigationRoute] based on the routes found in the [directionsResponseJson].
-         *
-         * Should not be called from UI thread. Contains serialisation and deserialisation under the hood.
-         *
-         * @param directionsResponseJson response to be parsed into [NavigationRoute]s
-         * @param routeRequestUrl URL used to generate the [directionsResponseJson]
-         * @param routerOrigin origin where route was fetched from
-         *
-         * @throws DirectionsResponseParsingException if `directionsResponseJson` is invalid
-         */
-        @JvmStatic
         internal fun create(
-            directionsResponseJson: String,
-            routeRequestUrl: String,
-            @RouterOrigin
-            routerOrigin: String,
-        ): List<NavigationRoute> {
-            val directionsResponse = try {
-                DirectionsResponse.fromJson(directionsResponseJson)
-            } catch (ex: Throwable) {
-                logE(LOG_CATEGORY) { "Error parsing directions response" }
-                throw DirectionsResponseParsingException(ex)
-            }
-            return create(
-                directionsResponse = directionsResponse,
-                directionsResponseJson = directionsResponseJson,
-                routeOptions = RouteOptions.fromUrl(URL(routeRequestUrl)),
-                routeOptionsUrlString = routeRequestUrl,
-                routerOrigin = routerOrigin,
-                responseTimeElapsedSeconds = null,
-                ResponseOriginAPI.DIRECTIONS_API,
-            )
-        }
-
-        /**
-         * Creates new instances of [NavigationRoute] based on the routes found in the [directionsResponseJson].
-         *
-         * This function parallelizes response parsing and native navigator parsing.
-         *
-         * @param directionsResponseJson response to be parsed into [NavigationRoute]s
-         * @param routeRequestUrl URL used to generate the [directionsResponseJson]
-         */
-        internal suspend fun createAsync(
-            directionsResponseJson: DataRef,
-            routeRequestUrl: String,
-            @RouterOrigin routerOrigin: String,
-            responseTimeElapsedMillis: Long,
-            nativeRoute: Boolean,
-            routeParser: SDKRouteParser = SDKRouteParser.default,
-        ): RoutesResponse {
-            logI("NavigationRoute.createAsync is called", LOG_CATEGORY)
-
-            return coroutineScope {
-                data class ParseResult<T>(
-                    val value: T,
-                    val waitMillis: Long,
-                    val parseMillis: Long,
-                    val threadName: String = "",
-                )
-
-                fun currentElapsedMillis() = Time.SystemClockImpl.millis()
-
-                val deferredResponseParsing = async(ThreadController.DefaultDispatcher) {
-                    val startElapsedMillis = currentElapsedMillis()
-                    val waitMillis = startElapsedMillis - responseTimeElapsedMillis
-
-                    PerformanceTracker.trackPerformanceSync(
-                        "directionsJson#toDirectionsResponse()",
-                    ) {
-                        directionsResponseJson.toDirectionsResponse(nativeRoute).let {
-                            val parseMillis = currentElapsedMillis() - startElapsedMillis
-                            val parseThread = Thread.currentThread().name
-                            logD(
-                                "parsed directions response to public API models " +
-                                    "for ${it.uuid()}, " +
-                                    "parse time ${parseMillis}ms",
-                                LOG_CATEGORY,
-                            )
-                            ParseResult(it, waitMillis, parseMillis, parseThread)
-                        }
-                    }
-                }
-                val deferredNativeParsing = async(ThreadController.DefaultDispatcher) {
-                    val startElapsedMillis = currentElapsedMillis()
-                    val waitMillis = startElapsedMillis - responseTimeElapsedMillis
-
-                    PerformanceTracker.trackPerformanceSync(
-                        "SDKRouteParser#parseDirectionsResponse()",
-                    ) {
-                        routeParser.parseDirectionsResponse(
-                            directionsResponseJson,
-                            routeRequestUrl,
-                            routerOrigin,
-                        ).let {
-                            val parseMillis = currentElapsedMillis() - startElapsedMillis
-                            logD(
-                                "parsed directions response to RouteInterface " +
-                                    "for ${it.value?.firstOrNull()?.responseUuid}, " +
-                                    "parse time ${parseMillis}ms",
-                                LOG_CATEGORY,
-                            )
-                            ParseResult(it, waitMillis, parseMillis)
-                        }
-                    }
-                }
-                val deferredRouteOptionsParsing = async(ThreadController.DefaultDispatcher) {
-                    val startElapsedMillis = currentElapsedMillis()
-                    val waitMillis = startElapsedMillis - responseTimeElapsedMillis
-
-                    RouteOptions.fromUrl(URL(routeRequestUrl)).let {
-                        val parseMillis = currentElapsedMillis() - startElapsedMillis
-                        logD(LOG_CATEGORY) {
-                            "parsed request url to RouteOptions: ${it.toUrl("***")}, " +
-                                "parse time ${parseMillis}ms"
-                        }
-                        ParseResult(it, waitMillis, parseMillis)
-                    }
-                }
-
-                val nativeParseResult = deferredNativeParsing.await()
-                val responseParseResult = deferredResponseParsing.await()
-                val routeOptionsResult = deferredRouteOptionsParsing.await()
-
-                create(
-                    nativeParseResult.value,
-                    responseParseResult.value,
-                    routeOptionsResult.value,
-                    responseTimeElapsedMillis.milliseconds.inWholeSeconds,
-                    ResponseOriginAPI.DIRECTIONS_API,
-                ).let { routes ->
-                    val totalParseMillis = responseParseResult.parseMillis +
-                        nativeParseResult.parseMillis + routeOptionsResult.parseMillis
-
-                    logD(
-                        "NavigationRoute.createAsync finished " +
-                            "for ${routes.firstOrNull()?.responseUUID}," +
-                            "total parse time ${totalParseMillis}ms",
-                        LOG_CATEGORY,
-                    )
-
-                    RoutesResponse(
-                        routes = routes,
-                        meta = RoutesResponse.Metadata(
-                            createdAtElapsedMillis = currentElapsedMillis(),
-                            responseWaitMillis = responseParseResult.waitMillis,
-                            responseParseMillis = responseParseResult.parseMillis,
-                            responseParseThread = responseParseResult.threadName,
-                            nativeWaitMillis = nativeParseResult.waitMillis,
-                            nativeParseMillis = nativeParseResult.parseMillis,
-                            routeOptionsWaitMillis = routeOptionsResult.waitMillis,
-                            routeOptionsParseMillis = routeOptionsResult.parseMillis,
-                        ),
-                    )
-                }
-            }
-        }
-
-        internal fun create(
-            directionsResponse: DirectionsResponse,
-            routeOptions: RouteOptions,
-            routeParser: SDKRouteParser,
-            @RouterOrigin routerOrigin: String,
-            responseTimeElapsedSeconds: Long?,
-            @ResponseOriginAPI responseOriginAPI: String = ResponseOriginAPI.DIRECTIONS_API,
-        ): List<NavigationRoute> {
-            return create(
-                directionsResponse,
-                directionsResponseJson = directionsResponse.toJson(),
-                routeOptions,
-                routeOptionsUrlString = routeOptions.toUrl("").toString(),
-                routerOrigin,
-                responseTimeElapsedSeconds,
-                responseOriginAPI,
-                routeParser,
-            )
-        }
-
-        private fun create(
-            directionsResponse: DirectionsResponse,
-            directionsResponseJson: String,
-            routeOptions: RouteOptions,
-            routeOptionsUrlString: String,
-            @RouterOrigin
-            routerOrigin: String,
-            responseTimeElapsedSeconds: Long?,
-            @ResponseOriginAPI
-            responseOriginAPI: String,
-            routeParser: SDKRouteParser = SDKRouteParser.default,
-        ): List<NavigationRoute> {
-            return routeParser.parseDirectionsResponse(
-                directionsResponseJson,
-                routeOptionsUrlString,
-                routerOrigin,
-            ).run {
-                create(
-                    this,
-                    directionsResponse,
-                    routeOptions,
-                    responseTimeElapsedSeconds,
-                    responseOriginAPI = responseOriginAPI,
-                )
-            }
-        }
-
-        private fun create(
             expected: Expected<String, List<RouteInterface>>,
-            directionsResponse: DirectionsResponse,
-            routeOptions: RouteOptions,
+            directionsResponseParsingResult: DirectionsResponseParsingResult,
             responseTimeElapsedSeconds: Long?,
             @ResponseOriginAPI
             responseOriginAPI: String,
         ): List<NavigationRoute> {
-            return expected.fold({ error ->
-                logE("NavigationRoute", "Failed to parse a route. Reason: $error")
-                listOf()
-            }, { value ->
-                value
-            },).mapIndexed { index, routeInterface ->
+            return expected.fold(
+                { error ->
+                    logE("NavigationRoute", "Failed to parse a route. Reason: $error")
+                    listOf()
+                },
+                { value ->
+                    value
+                },
+            ).mapIndexed { index, routeInterface ->
                 NavigationRoute(
-                    getDirectionsRoute(directionsResponse, index, routeOptions),
-                    getDirectionsWaypoint(directionsResponse, index),
-                    routeOptions,
-                    routeInterface,
-                    ifNonNull(
-                        directionsResponse.routes().getOrNull(index)?.refreshTtl(),
+                    directionsRoute = directionsResponseParsingResult
+                        .routesParsingResult[index].data.route,
+                    waypoints = directionsResponseParsingResult
+                        .routesParsingResult[index].data.routesWaypoint,
+                    routeOptions = directionsResponseParsingResult.routeOptions,
+                    nativeRoute = routeInterface,
+                    expirationTimeElapsedSeconds = ifNonNull(
+                        directionsResponseParsingResult
+                            .routesParsingResult[index].data.route.refreshTtl(),
                         responseTimeElapsedSeconds,
                     ) { refreshTtl, responseTimeElapsedSeconds ->
                         refreshTtl + responseTimeElapsedSeconds
                     },
                     responseOriginAPI = responseOriginAPI,
                     overriddenTraffic = null,
+                    operations = directionsResponseParsingResult
+                        .routesParsingResult[index].operations,
                 )
             }
-        }
-
-        // TODO: adopt native serialization/deserialization NAVAND-1764
-        private fun restoreNativeRoute(state: SerialisationState): RouteInterface {
-            val directionsResponse = DirectionsResponse.builder()
-                .routes(
-                    MutableList(state.routeIndex + 1) {
-                        if (it == state.routeIndex) {
-                            state.directionRoute
-                        } else {
-                            fakeDirectionsRoute
-                        }
-                    },
-                )
-                .waypoints(
-                    if (state.routeOptions.waypointsPerRoute() != true) {
-                        state.waypoints
-                    } else {
-                        null
-                    },
-                )
-                .code("Ok")
-                .uuid(state.responseUUID)
-                .build()
-
-            val nativeRoute = SDKRouteParser.default.parseDirectionsResponse(
-                directionsResponse.toJson(),
-                state.routeOptions.toUrl("***").toString(),
-                state.routerOrigin.mapToSdkRouteOrigin(),
-            ).value!![state.routeIndex]
-            return nativeRoute
         }
     }
 
@@ -655,131 +380,17 @@ class NavigationRoute private constructor(
         overriddenTraffic: CongestionNumericOverride? = this.overriddenTraffic,
         expirationTimeElapsedSeconds: Long? = this.expirationTimeElapsedSeconds,
         routeRefreshMetadata: RouteRefreshMetadata? = this.routeRefreshMetadata,
+        operations: RouteOperations = this.operations,
     ): NavigationRoute = NavigationRoute(
-        directionsRoute,
-        waypoints,
-        routeOptions,
-        nativeRoute,
-        this.unavoidableClosures,
-        expirationTimeElapsedSeconds,
-        overriddenTraffic,
-        this.responseOriginAPI,
-        routeRefreshMetadata,
-    )
-
-    @Keep
-    private data class SerialisationState(
-        val directionRoute: DirectionsRoute,
-        val routeOptions: RouteOptions,
-        val waypoints: List<DirectionsWaypoint>?,
-        val routeIndex: Int,
-        val routerOrigin: com.mapbox.navigator.RouterOrigin,
-        val unavoidableClosures: List<List<Closure>>,
-        @ResponseOriginAPI
-        val responseOriginAPI: String,
-        val responseUUID: String,
-        val expirationTimeElapsedSeconds: Long?,
-        val routeRefreshMetadata: RouteRefreshMetadata?,
-    )
-}
-
-internal fun RouteInterface.toNavigationRoute(
-    responseTimeElapsedSeconds: Long,
-    directionsResponse: DirectionsResponse,
-): NavigationRoute {
-    val refreshTtl = directionsResponse.routes().getOrNull(routeIndex)?.refreshTtl()
-    val routeOptions = RouteOptions.fromUrl(URL(requestUri))
-    return NavigationRoute(
+        directionsRoute = directionsRoute,
+        waypoints = waypoints,
         routeOptions = routeOptions,
-        directionsRoute = getDirectionsRoute(directionsResponse, routeIndex, routeOptions),
-        waypoints = getDirectionsWaypoint(directionsResponse, routeIndex),
-        nativeRoute = this,
-        expirationTimeElapsedSeconds = refreshTtl?.plus(responseTimeElapsedSeconds),
-        // Continuous alternatives are always from Directions API
-        responseOriginAPI = ResponseOriginAPI.DIRECTIONS_API,
-        overriddenTraffic = null,
+        nativeRoute = nativeRoute,
+        unavoidableClosures = this.unavoidableClosures,
+        expirationTimeElapsedSeconds = expirationTimeElapsedSeconds,
+        overriddenTraffic = overriddenTraffic,
+        responseOriginAPI = this.responseOriginAPI,
+        routeRefreshMetadata = routeRefreshMetadata,
+        operations = operations,
     )
-}
-
-private val fakeDirectionsRoute: DirectionsRoute by lazy {
-    val fakeIntersection = StepIntersection.builder()
-        .rawLocation(doubleArrayOf(0.0, 0.0))
-        .build()
-    val fakeManeuver = StepManeuver.builder()
-        .rawLocation(doubleArrayOf(0.0, 0.0))
-        .type(StepManeuver.ARRIVE)
-        .build()
-    val fakeSteps = listOf(
-        LegStep.builder()
-            .distance(0.0)
-            .duration(0.0)
-            .mode("driving")
-            .maneuver(fakeManeuver)
-            .weight(0.0)
-            .geometry(
-                LineString.fromLngLats(
-                    listOf(
-                        Point.fromLngLat(0.0, 0.0),
-                        Point.fromLngLat(0.0, 0.0),
-                    ),
-                ).toPolyline(6),
-            )
-            .intersections(listOf(fakeIntersection))
-            .build(),
-    )
-    val fakeLegs = listOf(
-        RouteLeg.builder()
-            .steps(fakeSteps)
-            .build(),
-    )
-    DirectionsRoute.builder()
-        .distance(0.0)
-        .duration(0.0)
-        .legs(fakeLegs)
-        .build()
-}
-
-internal fun DataRef.toDirectionsResponse(nativeRoute: Boolean): DirectionsResponse {
-    return if (nativeRoute) {
-        val parsingResult = DirectionsRouteResponse.parseDirectionsResponseJson(this)
-        if (parsingResult.isError) {
-            throw DirectionsResponseParsingException(
-                Throwable(parsingResult.error ?: "unknown error"),
-            )
-        }
-        val flatBuffer = parsingResult.value!!.getData().buffer
-        return DirectionsResponseFBWrapper(
-            FBDirectionsResponse.getRootAsDirectionsResponse(
-                flatBuffer,
-            ),
-        )
-    } else {
-        this.toReader().use { reader ->
-            DirectionsResponse.fromJson(reader)
-        }
-    }
-}
-
-private fun getDirectionsRoute(
-    response: DirectionsResponse,
-    routeIndex: Int,
-    routeOptions: RouteOptions,
-): DirectionsRoute {
-    return if (response.isNativeRoute()) {
-        // https://mapbox.atlassian.net/browse/NAVAND-6590
-        response.routes()[routeIndex]
-    } else {
-        response.routes()[routeIndex].toBuilder()
-            .requestUuid(response.uuid())
-            .routeIndex(routeIndex.toString())
-            .routeOptions(routeOptions)
-            .build()
-    }
-}
-
-private fun getDirectionsWaypoint(
-    directionsResponse: DirectionsResponse,
-    routeIndex: Int,
-): List<DirectionsWaypoint>? {
-    return directionsResponse.routes()[routeIndex].waypoints() ?: directionsResponse.waypoints()
 }

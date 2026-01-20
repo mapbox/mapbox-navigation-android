@@ -6,7 +6,7 @@ import org.junit.Test
 
 class RoadObjectsRefresherTest {
 
-    private val incidentsRefresher = IncidentsRefresher()
+    private val incidentsRefresher = IncidentsRefresher
 
     @Test
     fun nullOldObjectsNullNewObjects() {

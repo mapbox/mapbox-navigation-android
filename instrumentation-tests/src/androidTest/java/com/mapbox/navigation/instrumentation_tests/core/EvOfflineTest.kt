@@ -6,6 +6,7 @@ import android.location.Location
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.common.TileDataDomain
+import com.mapbox.navigation.base.BuildConfig.NATIVE_ROUTE_OBJECT_DEFAULT
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.route.routeOptions
@@ -17,6 +18,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.core.routerefresh.RouteRefreshExtra
+import com.mapbox.navigation.instrumentation_tests.utils.assumeNotNROBecauseToBuilderIsRequiredForTest
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.RouteRequestResult
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
@@ -42,6 +44,7 @@ import com.mapbox.navigation.testing.utils.withoutInternet
 import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Assume.assumeFalse
 import org.junit.Rule
 import org.junit.Test
 import java.util.concurrent.TimeUnit
@@ -117,6 +120,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
 
     @Test
     fun offlineOnlineSwitchWhenOnlineRouteIsTheSameAsCurrentOffline() = sdkTest {
+        assumeNotNROBecauseToBuilderIsRequiredForTest()
         val evBerlinTestRoute = EvRoutesProvider.getBerlinEvRoute(
             context,
             mockWebServerRule.baseUrl,
@@ -235,6 +239,12 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
 
     @Test
     fun refresh_online_ev_route_offline() = sdkTest {
+        // TODO: https://mapbox.atlassian.net/browse/NAVAND-6480
+        assumeFalse(
+            "NRO doesn't support client side update",
+            NATIVE_ROUTE_OBJECT_DEFAULT,
+        )
+
         val originalTestRoute = setupBerlinEvRoute()
 
         val routeRefreshOptions = RouteRefreshOptions.Builder()
@@ -363,13 +373,19 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
 }
 
 private fun NavigationRoute.getChargingStationsType() = getWaypointMetadata("type")
-private fun NavigationRoute.getChargingStationsPowerKw() = getWaypointMetadata("power_kw")
+private fun NavigationRoute.getChargingStationsPowerKw() = getWaypointMetadataInt("power_kw")
 private fun NavigationRoute.getChargingStationsCurrentType() = getWaypointMetadata("current_type")
 private fun NavigationRoute.getChargingStationsId() = getWaypointMetadata("station_id")
 
 private fun NavigationRoute.getWaypointMetadata(name: String): List<String?> {
     return waypoints?.map {
         it.unrecognizedJsonProperties?.get("metadata")?.asJsonObject?.get(name)?.asString
+    } ?: emptyList()
+}
+
+private fun NavigationRoute.getWaypointMetadataInt(name: String): List<Int?> {
+    return waypoints?.map {
+        it.unrecognizedJsonProperties?.get("metadata")?.asJsonObject?.get(name)?.asInt
     } ?: emptyList()
 }
 
@@ -382,7 +398,7 @@ private fun verifyUserProvidedChargingStationMetadata(
         route.getChargingStationsType(),
     )
     assertEquals(
-        listOf(null, "${testRoute.chargingStationPowerKw}", null),
+        listOf(null, testRoute.chargingStationPowerKw, null),
         route.getChargingStationsPowerKw(),
     )
     assertEquals(

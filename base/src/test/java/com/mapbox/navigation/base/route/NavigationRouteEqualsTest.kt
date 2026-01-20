@@ -6,12 +6,17 @@ import com.google.gson.JsonPrimitive
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.navigation.testing.factories.TestSDKRouteParser
+import com.mapbox.navigation.base.internal.route.parsing.DirectionsResponseToParse
+import com.mapbox.navigation.base.internal.route.testing.toDataRefJava
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.factories.createDirectionsResponse
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createRouteOptions
+import com.mapbox.navigation.testing.factories.createTestNavigationRoutesParsing
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -27,6 +32,9 @@ class NavigationRouteEqualsTest(
     private val expirationTime2: Long?,
     private val expected: Boolean,
 ) {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     companion object {
 
@@ -180,20 +188,25 @@ class NavigationRouteEqualsTest(
 
     @Before
     fun setUp() {
-        route1 = NavigationRoute.create(
-            directionsResponse1,
-            routeOptions1,
-            TestSDKRouteParser(),
-            routerOrigin = RouterOrigin.ONLINE,
-            expirationTime1,
-        ).first()
-        route2 = NavigationRoute.create(
-            directionsResponse2,
-            routeOptions2,
-            TestSDKRouteParser(),
-            RouterOrigin.ONLINE,
-            expirationTime2,
-        ).first()
+        val parser = createTestNavigationRoutesParsing()
+        route1 = runBlocking {
+            parser.parseDirectionsResponse(
+                DirectionsResponseToParse.from(
+                    responseBody = directionsResponse1.toJson().toDataRefJava(),
+                    routeRequest = routeOptions1.toUrl("***").toString(),
+                    routerOrigin = RouterOrigin.ONLINE,
+                ),
+            ).getOrThrow().routes.first()
+        }
+        route2 = runBlocking {
+            parser.parseDirectionsResponse(
+                DirectionsResponseToParse.from(
+                    responseBody = directionsResponse2.toJson().toDataRefJava(),
+                    routeRequest = routeOptions2.toUrl("***").toString(),
+                    routerOrigin = RouterOrigin.ONLINE,
+                ),
+            ).getOrThrow().routes.first()
+        }
     }
 
     @Test

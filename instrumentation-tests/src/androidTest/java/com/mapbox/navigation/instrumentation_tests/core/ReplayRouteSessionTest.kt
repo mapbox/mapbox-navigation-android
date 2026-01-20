@@ -9,6 +9,7 @@ import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.replay.route.ReplayRouteSession
 import com.mapbox.navigation.core.replay.route.ReplayRouteSessionOptions
+import com.mapbox.navigation.instrumentation_tests.utils.assumeNotNROBecauseOfClientSideUpdate
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.routeProgressUpdates
@@ -57,7 +58,9 @@ class ReplayRouteSessionTest : BaseCoreNoCleanUpTest() {
     @After
     fun tearDown() {
         runOnMainSync {
-            replayRouteSession.onDetached(mapboxNavigation)
+            if (::mapboxNavigation.isInitialized) {
+                replayRouteSession.onDetached(mapboxNavigation)
+            }
         }
     }
 
@@ -85,6 +88,10 @@ class ReplayRouteSessionTest : BaseCoreNoCleanUpTest() {
 
     @Test
     fun routeIsPlayedFromCurrentPositionAfterRefresh() = sdkTest {
+        // it's hard to emulate server side refresh,
+        // ignoring that test for NRO,
+        // while java relies on client side update
+        assumeNotNROBecauseOfClientSideUpdate()
         mapboxNavigation = MapboxNavigationProvider.create(
             NavigationOptions.Builder(context)
                 .routeRefreshOptions(routeRefreshOptions(3000))

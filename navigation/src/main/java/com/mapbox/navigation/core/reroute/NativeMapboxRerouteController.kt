@@ -5,15 +5,13 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.DataRef
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.RouterFailureFactory
-import com.mapbox.navigation.base.internal.utils.RouteParsingManager
-import com.mapbox.navigation.base.internal.utils.RouteResponseInfo
+import com.mapbox.navigation.base.internal.route.parsing.DirectionsResponseToParse
+import com.mapbox.navigation.base.internal.route.parsing.NavigationRoutesParser
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
-import com.mapbox.navigation.base.internal.utils.parseDirectionsResponse
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.core.internal.performance.RouteParsingTracking
+import com.mapbox.navigation.base.route.ResponseOriginAPI
 import com.mapbox.navigation.core.internal.router.mapToSdkRouterFailureType
 import com.mapbox.navigation.navigator.internal.RerouteEventsProvider
-import com.mapbox.navigation.utils.internal.Time
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
@@ -27,7 +25,6 @@ import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouteOptionsAdapter
 import com.mapbox.navigator.RouterErrorType
 import com.mapbox.navigator.RouterOrigin
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.net.MalformedURLException
@@ -44,9 +41,7 @@ internal class NativeMapboxRerouteController(
     private val getCurrentRoutes: () -> List<NavigationRoute>,
     private val updateRoutes: UpdateRoutes,
     private val scope: CoroutineScope,
-    private val parsingDispatcher: CoroutineDispatcher,
-    private val routeParsingTracking: RouteParsingTracking,
-    private val routeParsingManager: RouteParsingManager,
+    private val routeParser: NavigationRoutesParser,
 ) : InternalRerouteController() {
 
     private val observers = CopyOnWriteArraySet<RerouteStateObserver>()
@@ -322,26 +317,23 @@ internal class NativeMapboxRerouteController(
         routeResponse: DataRef,
         routeRequest: String,
         origin: RouterOrigin,
-    ): RerouteResponseParsingResult = routeParsingManager.parseRouteResponse(
-        RouteResponseInfo.fromResponse(routeResponse.buffer),
-    ) { parsingOptions ->
-        parseDirectionsResponse(
-            parsingDispatcher,
-            routeResponse,
-            routeRequest,
-            origin.mapToSdkRouteOrigin(),
-            Time.SystemClockImpl.millis(),
-            parsingOptions.useNativeRoute,
-        ).fold(
-            {
-                logE(TAG) { "error parsing route ${it.message}" }
-                RerouteResponseParsingResult.Error(it)
-            },
-            {
-                routeParsingTracking.routeResponseIsParsed(it.meta)
-                RerouteResponseParsingResult.RoutesAvailable(it.routes, 0)
-            },
-        )
+    ): RerouteResponseParsingResult {
+        return routeParser.parseDirectionsResponse(
+            DirectionsResponseToParse(
+                routeResponse,
+                routeRequest,
+                origin.mapToSdkRouteOrigin(),
+                responseOriginAPI = ResponseOriginAPI.DIRECTIONS_API,
+            ),
+        ).map {
+            RerouteResponseParsingResult.RoutesAvailable(
+                it.routes,
+                0,
+            )
+        }.getOrElse {
+            logE(TAG) { "error parsing route ${it.message}" }
+            RerouteResponseParsingResult.Error(it)
+        }
     }
 
     @VisibleForTesting

@@ -11,11 +11,11 @@ import com.mapbox.common.TilesetDescriptor
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.route.nativeRoute
+import com.mapbox.navigation.base.internal.route.toDirectionsRefreshResponseInternal
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions
 import com.mapbox.navigation.base.options.toPredictiveLocationTrackerOptions
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.navigator.internal.utils.toDirectionsRefreshResponse
 import com.mapbox.navigation.navigator.internal.utils.toEvStateData
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.logD
@@ -330,7 +330,11 @@ class MapboxNativeNavigatorImpl(
                 ) { callback(continuation, it) }
             }
         } else {
-            val generatedRefreshResponse = route.toDirectionsRefreshResponse()
+            val generatedRefreshResponse = route.toDirectionsRefreshResponseInternal().getOrElse {
+                return ExpectedFactory.createError(
+                    it.message ?: "unknown error during refresh response client side generation",
+                )
+            }
             val refreshResponseJson = withContext(ThreadController.DefaultDispatcher) {
                 generatedRefreshResponse.toJson()
             }

@@ -1,0 +1,23 @@
+{
+  "code": "Ok",
+  "routes": [ ],
+  "uuid": "FYenNs6nfVvkddevLWnYcZvn2nvekWStF7nM0JV0X_IBAlsXWvomuA==",
+  "waypoints": [
+    {
+      "distance": 0,
+      "location": [
+        -121.895755,
+        37.351202
+      ],
+      "name": "East Taylor Street"
+    },
+    {
+      "distance": 24.248,
+      "location": [
+        -121.876939,
+        37.338848
+      ],
+      "name": "South 12th Street"
+    }
+  ]
+}

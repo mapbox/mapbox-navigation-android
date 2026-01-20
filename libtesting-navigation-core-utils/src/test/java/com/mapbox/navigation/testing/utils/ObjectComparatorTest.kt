@@ -482,6 +482,36 @@ class ObjectComparatorTest {
         assertEquals(emptyList<Difference>(), result.differences)
     }
 
+    @Test
+    fun `doubles comparison`() {
+        class Test(
+            val double1: Double,
+            val double2: Double,
+            val double3: Double,
+        )
+
+        val result = findDiff(
+            Test::class.java,
+            Test(
+                double1 = 5.000001,
+                double2 = -1.999999,
+                double3 = Double.NaN,
+            ),
+            Test(
+                double1 = 5.000002,
+                double2 = -1.98,
+                double3 = Double.NaN,
+            ),
+            nullAndEmptyArraysAreTheSame = false,
+            doubleComparisonEpsilon = 0.01,
+        )
+
+        assertEquals(
+            listOf("double2"),
+            result.differences.map { it.path },
+        )
+    }
+
 
     private class TestData(
         val name: String = "test",

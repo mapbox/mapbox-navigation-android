@@ -17,14 +17,12 @@ import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.internal.RouterFailureFactory
 import com.mapbox.navigation.base.internal.route.isExpired
 import com.mapbox.navigation.base.internal.utils.MapboxOptionsUtil
-import com.mapbox.navigation.base.internal.utils.createRouteParsingManager
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterFailureType
 import com.mapbox.navigation.base.route.RouterOrigin.Companion.OFFLINE
 import com.mapbox.navigation.base.route.RouterOrigin.Companion.ONLINE
-import com.mapbox.navigation.core.internal.performance.RouteParsingTracking
 import com.mapbox.navigation.core.internal.router.util.TestRouteFixtures
 import com.mapbox.navigation.navigator.internal.mapToRoutingMode
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
@@ -35,6 +33,7 @@ import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createNavigationRoute
 import com.mapbox.navigation.testing.factories.createNavigationRoutes
 import com.mapbox.navigation.testing.factories.createRouterError
+import com.mapbox.navigation.testing.factories.createTestNavigationRoutesParsing
 import com.mapbox.navigation.testing.factories.toDataRef
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.GetRouteOptions
@@ -187,8 +186,9 @@ class RouterWrapperTests {
         routerWrapper = RouterWrapper(
             router,
             ThreadController(),
-            createRouteParsingManager(false),
-            mockk<RouteParsingTracking>(relaxed = true),
+            createTestNavigationRoutesParsing(
+                parsingDispatcher = coroutineRule.testDispatcher,
+            ),
         )
     }
 
@@ -1025,52 +1025,50 @@ class RouterWrapperTests {
 
     @Test
     fun `route refresh set right params`() {
-        mockkStatic("com.mapbox.navigation.base.route.NavigationRouteEx") {
-            val newToken = "new.token"
-            val routeOptions = provideDefaultRouteOptions()
-            val route = createNavigationRoutes(
-                response = DirectionsResponse.builder()
-                    .code("200")
-                    .uuid(UUID)
-                    .routes(listOf(createDirectionsRoute(routeIndex = "0")))
-                    .build(),
-                options = routeOptions,
-                routerOrigin = ONLINE,
-            ).first()
+        val newToken = "new.token"
+        val routeOptions = provideDefaultRouteOptions()
+        val route = createNavigationRoutes(
+            response = DirectionsResponse.builder()
+                .code("200")
+                .uuid(UUID)
+                .routes(listOf(createDirectionsRoute(routeIndex = "0")))
+                .build(),
+            options = routeOptions,
+            routerOrigin = ONLINE,
+        ).first()
 
-            val legIndex = 12
-            val routeGeometryIndex = 23
-            val legGeometryIndex = 19
-            val requestData = RouteRefreshRequestData(
-                legIndex,
-                routeGeometryIndex,
-                legGeometryIndex,
-                evData,
+        val legIndex = 12
+        val routeGeometryIndex = 23
+        val legGeometryIndex = 19
+        val requestData = RouteRefreshRequestData(
+            legIndex,
+            routeGeometryIndex,
+            legGeometryIndex,
+            evData,
+        )
+        every {
+            MapboxOptionsUtil.getTokenForService(MapboxServices.DIRECTIONS)
+        } returns newToken
+        routerWrapper.getRouteRefresh(route, requestData, routerRefreshCallback)
+
+        val expectedRefreshOptions = RouteRefreshOptions(
+            UUID,
+            0,
+            legIndex,
+            RoutingProfile(
+                routeOptions.profile().mapToRoutingMode(),
+                routeOptions.user(),
+            ),
+            routerOptions.baseUrl(),
+            routeGeometryIndex,
+            HashMap(evData),
+        )
+
+        verify(exactly = 1) {
+            router.getRouteRefresh(
+                expectedRefreshOptions,
+                any(),
             )
-            every {
-                MapboxOptionsUtil.getTokenForService(MapboxServices.DIRECTIONS)
-            } returns newToken
-            routerWrapper.getRouteRefresh(route, requestData, routerRefreshCallback)
-
-            val expectedRefreshOptions = RouteRefreshOptions(
-                UUID,
-                0,
-                legIndex,
-                RoutingProfile(
-                    routeOptions.profile().mapToRoutingMode(),
-                    routeOptions.user(),
-                ),
-                routerOptions.baseUrl(),
-                routeGeometryIndex,
-                HashMap(evData),
-            )
-
-            verify(exactly = 1) {
-                router.getRouteRefresh(
-                    expectedRefreshOptions,
-                    any(),
-                )
-            }
         }
     }
 
@@ -1175,6 +1173,7 @@ class RouterWrapperTests {
         expected: NavigationRoute,
         actual: NavigationRoute,
     ) {
+        assertEquals(expected.directionsRoute, actual.directionsRoute)
         assertEquals(expected, actual) // directions route equality
         assertEquals(expected.waypoints, actual.waypoints)
     }

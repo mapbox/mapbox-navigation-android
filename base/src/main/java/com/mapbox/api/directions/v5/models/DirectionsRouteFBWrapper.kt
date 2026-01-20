@@ -8,6 +8,7 @@ import java.nio.ByteBuffer
 
 internal class DirectionsRouteFBWrapper(
     private val fb: FBDirectionsRoute,
+    private val routeOptions: RouteOptions? = null,
 ) : DirectionsRoute(), BaseFBWrapper {
 
     internal val stepsCountWithGeometry: Int by lazy {
@@ -26,6 +27,8 @@ internal class DirectionsRouteFBWrapper(
         stepsCountWithGeometry
         _geometry
     }
+
+    internal val refreshTtl: Int? get() = fb.refreshTtl
 
     override val unrecognized: ByteBuffer?
         get() = fb.unrecognizedPropertiesAsByteBuffer
@@ -60,7 +63,7 @@ internal class DirectionsRouteFBWrapper(
     }
 
     // TODO: https://mapbox.atlassian.net/browse/NAVAND-6590
-    override fun routeOptions(): RouteOptions? = null
+    override fun routeOptions(): RouteOptions? = routeOptions
 
     override fun voiceLanguage(): String? = fb.voiceLocale
 

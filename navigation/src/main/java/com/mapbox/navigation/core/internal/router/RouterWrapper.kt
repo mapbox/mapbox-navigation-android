@@ -2,6 +2,8 @@
  * Tampering with any file that contains billing code is a violation of Mapbox Terms of Service and will result in enforcement of the penalties stipulated in the ToS.
  */
 
+@file:OptIn(ExperimentalMapboxNavigationAPI::class)
+
 package com.mapbox.navigation.core.internal.router
 
 import androidx.annotation.MainThread
@@ -10,24 +12,25 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.common.MapboxServices
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.internal.RouterFailureFactory
 import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.route.internalRefreshRoute
+import com.mapbox.navigation.base.internal.route.parsing.DirectionsResponseParsingSuccessfulResult
+import com.mapbox.navigation.base.internal.route.parsing.DirectionsResponseToParse
+import com.mapbox.navigation.base.internal.route.parsing.NavigationRoutesParser
 import com.mapbox.navigation.base.internal.route.routeOptions
 import com.mapbox.navigation.base.internal.route.updateExpirationTime
 import com.mapbox.navigation.base.internal.utils.MapboxOptionsUtil
-import com.mapbox.navigation.base.internal.utils.RouteParsingManager
-import com.mapbox.navigation.base.internal.utils.RouteResponseInfo
 import com.mapbox.navigation.base.internal.utils.isErrorRetryable
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
-import com.mapbox.navigation.base.internal.utils.parseDirectionsResponse
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
+import com.mapbox.navigation.base.route.ResponseOriginAPI
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterFailureType
 import com.mapbox.navigation.base.route.RouterFailureType.Companion.RESPONSE_PARSING_ERROR
-import com.mapbox.navigation.core.internal.performance.RouteParsingTracking
 import com.mapbox.navigation.navigator.internal.mapToRoutingMode
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.Time
@@ -58,8 +61,7 @@ private class OngoingRequest(
 internal class RouterWrapper(
     router: RouterInterface,
     private val threadController: ThreadController,
-    private val routeParsingManager: RouteParsingManager,
-    private val routeParsingTracking: RouteParsingTracking,
+    private val navigationRoutesParser: NavigationRoutesParser,
 ) : Router {
 
     private val activeRouteRequests = mutableMapOf<Long, OngoingRequest>()
@@ -327,50 +329,34 @@ internal class RouterWrapper(
                                     this@launch.coroutineContext[Job]
                             }
                         }
-
-                        val responseInfo =
-                            RouteResponseInfo.fromResponse(responseBody.buffer)
-                        routeParsingManager.parseRouteResponse(responseInfo) { parsingOptions ->
-                            val responseTimeElapsedMillis =
-                                Time.SystemClockImpl.millis()
-                            val parsingResult = parseDirectionsResponse(
-                                ThreadController.DefaultDispatcher,
+                        navigationRoutesParser.parseDirectionsResponse(
+                            DirectionsResponseToParse(
                                 responseBody,
                                 routeUrl,
                                 origin.mapToSdkRouteOrigin(),
-                                responseTimeElapsedMillis,
-                                parsingOptions.useNativeRoute,
+                                ResponseOriginAPI.DIRECTIONS_API,
+                            ),
+                        ).onSuccess { response: DirectionsResponseParsingSuccessfulResult ->
+                            val routes = response.routes
+                            val routeOrigin = origin.mapToSdkRouteOrigin()
+
+                            logI(
+                                "Routes parsing completed: ${routes.map { it.id }}",
+                                LOG_CATEGORY,
                             )
-                            parsingResult.fold(
-                                { throwable ->
-                                    requestEnder.onFailure(
-                                        listOf(
-                                            RouterFailureFactory.create(
-                                                url = urlWithoutToken,
-                                                routerOrigin = origin.mapToSdkRouteOrigin(),
-                                                message = "Failed to parse response",
-                                                type = RESPONSE_PARSING_ERROR,
-                                                throwable = throwable,
-                                            ),
-                                        ),
-                                        routeOptions,
-                                    )
-                                },
-                                { response ->
-                                    val routes = response.routes
-                                    val routeOrigin =
-                                        origin.mapToSdkRouteOrigin()
-
-                                    logI(
-                                        "Routes parsing completed: ${routes.map { it.id }}",
-                                        LOG_CATEGORY,
-                                    )
-
-                                    routeParsingTracking.routeResponseIsParsed(
-                                        response.meta,
-                                    )
-                                    requestEnder.onRoutesReady(routes, routeOrigin)
-                                },
+                            requestEnder.onRoutesReady(routes, routeOrigin)
+                        }.onFailure { throwable ->
+                            requestEnder.onFailure(
+                                listOf(
+                                    RouterFailureFactory.create(
+                                        url = urlWithoutToken,
+                                        routerOrigin = origin.mapToSdkRouteOrigin(),
+                                        message = "Failed to parse response",
+                                        type = RESPONSE_PARSING_ERROR,
+                                        throwable = throwable,
+                                    ),
+                                ),
+                                routeOptions,
                             )
                         }
                     }
@@ -440,30 +426,16 @@ internal class RouterWrapper(
                             }
                         }
                         withContext(ThreadController.DefaultDispatcher) {
-                            parseDirectionsRouteRefresh(dataRef)
-                                .onValue {
-                                    logD(
-                                        "Parsed route refresh response for " +
-                                            "route(${route.id})",
-                                        LOG_CATEGORY,
-                                    )
-                                }
-                                .onError {
-                                    logD(
-                                        "Failed to parse route refresh response for " +
-                                            "route(${route.id})",
-                                        LOG_CATEGORY,
-                                    )
-                                }
-                                .mapValue { routeRefresh ->
-                                    route.internalRefreshRoute(
-                                        routeRefresh,
-                                        refreshOptions.legIndex,
-                                        routeRefreshRequestData.legGeometryIndex,
-                                        responseTimeElapsedSeconds,
-                                    )
-                                }
+                            route.internalRefreshRoute(
+                                refreshResponse = dataRef,
+                                legIndex = refreshOptions.legIndex,
+                                legGeometryIndex = routeRefreshRequestData.legGeometryIndex ?: 0,
+                                responseTimeElapsedSeconds,
+                            )
                         }.fold(
+                            { refreshedRoute ->
+                                callback.onRefreshReady(refreshedRoute, dataRef)
+                            },
                             { throwable ->
                                 callback.onFailure(
                                     NavigationRouterRefreshError(
@@ -472,9 +444,7 @@ internal class RouterWrapper(
                                     ),
                                 )
                             },
-                            { refreshedRoute ->
-                                callback.onRefreshReady(refreshedRoute, dataRef)
-                            },
+
                         )
                     }
                 },

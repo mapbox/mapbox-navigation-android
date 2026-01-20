@@ -28,6 +28,7 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.routerefresh.RouteRefreshExtra
 import com.mapbox.navigation.instrumentation_tests.R
+import com.mapbox.navigation.instrumentation_tests.utils.assumeNotNROBecauseToBuilderIsRequiredForTest
 import com.mapbox.navigation.testing.router.MapboxNavigationTestRouteRefresher
 import com.mapbox.navigation.testing.router.MapboxNavigationTestRouter
 import com.mapbox.navigation.testing.router.RefreshOptions
@@ -46,6 +47,7 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
+import com.mapbox.navigation.testing.utils.assertNoDiffs
 import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracking
@@ -133,7 +135,7 @@ class CustomRouterTest : BaseCoreNoCleanUpTest() {
                 val update = navigation.routesUpdates().first {
                     it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH
                 }
-                assertEquals(
+                assertNoDiffs(
                     initialRoutesResponse.routes.first().directionsRoute.legs()?.first()
                         ?.annotation(),
                     update.navigationRoutes.first().directionsRoute.legs()?.first()
@@ -212,6 +214,7 @@ class CustomRouterTest : BaseCoreNoCleanUpTest() {
 
     @Test
     fun refresh_annotations_from_a_middle_of_the_route_first_leg() {
+        assumeNotNROBecauseToBuilderIsRequiredForTest()
         val testRouteOptions = RouteOptions.builder()
             .applyDefaultNavigationOptions()
             .coordinates("-73.9777,40.762861;-73.976687,40.76322;-73.974737,40.761998")
@@ -374,12 +377,12 @@ class CustomRouterTest : BaseCoreNoCleanUpTest() {
                         routeIndexAtRefresh,
                         testAnnotationsRefreshValues,
                     )
-                    assertEquals(
+                    assertNoDiffs(
                         // the first incident is before the point of refresh
                         listOf(firstLegNewIncidents[1]),
                         refreshedFirstLeg.incidents(),
                     )
-                    assertEquals(
+                    assertNoDiffs(
                         // the first closure is before the point of refresh
                         listOf(firstLegNewClosures[1]),
                         refreshedFirstLeg.closures(),
@@ -391,7 +394,7 @@ class CustomRouterTest : BaseCoreNoCleanUpTest() {
                         0,
                         testAnnotationsRefreshValues,
                     )
-                    assertEquals(
+                    assertNoDiffs(
                         secondLegNewIncidents,
                         refreshedSecondLeg.incidents(),
                     )

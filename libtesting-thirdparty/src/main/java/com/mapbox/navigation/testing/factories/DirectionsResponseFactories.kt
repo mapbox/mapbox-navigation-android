@@ -31,8 +31,12 @@ fun createDirectionsResponse(
     responseWaypoints: List<DirectionsWaypoint> = listOf(createWaypoint(), createWaypoint()),
     routeOptions: RouteOptions? = createRouteOptions()
 ): DirectionsResponse {
-    val processedRoutes = routes.map {
-        it.toBuilder().requestUuid(uuid).routeOptions(routeOptions).build()
+    val processedRoutes = routes.mapIndexed { index, route ->
+        route.toBuilder()
+            .requestUuid(uuid)
+            .routeOptions(routeOptions)
+            .routeIndex(index.toString())
+            .build()
     }
     return DirectionsResponse.builder()
         .uuid(uuid)

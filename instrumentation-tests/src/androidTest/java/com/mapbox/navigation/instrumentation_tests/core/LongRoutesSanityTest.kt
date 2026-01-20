@@ -11,6 +11,7 @@ import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.internal.extensions.flowRouteProgress
 import com.mapbox.navigation.instrumentation_tests.R
+import com.mapbox.navigation.instrumentation_tests.utils.assumeNotNROBecauseOfAlternativesDropDuringSerialization
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
@@ -72,6 +73,7 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
 
     @Test
     fun requestNewRoutesWhileLongRoutesAreSet() = sdkTest(EXTENDED_TIMEOUT_FOR_SLOW_PARSING) {
+        assumeNotNROBecauseOfAlternativesDropDuringSerialization()
         val longRoutesOptions = setupLongRoutes()
         val shortRoutesOptions = setupShortRoutes()
         withMapboxNavigation { navigation ->
@@ -105,6 +107,7 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
 
     @Test
     fun requestNewRoutesWhileLongRoutesArePreviewed() = sdkTest(EXTENDED_TIMEOUT_FOR_SLOW_PARSING) {
+        assumeNotNROBecauseOfAlternativesDropDuringSerialization()
         val longRoutesOptions = setupLongRoutes()
         val shortRoutesOptions = setupShortRoutes()
         withMapboxNavigation { navigation ->
@@ -134,6 +137,7 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
 
     @Test
     fun rerouteOnLongRoute() = sdkTest(EXTENDED_TIMEOUT_FOR_SLOW_PARSING) {
+        assumeNotNROBecauseOfAlternativesDropDuringSerialization()
         val longRoutesOptions = setupLongRoutes()
         val longRoutesRerouteOptions = setupLongRoutesReroute()
         withMapboxNavigation { navigation ->
@@ -234,5 +238,3 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
             .build()
     }
 }
-
-private fun Int.megabytesInBytes() = this * 1024 * 1024

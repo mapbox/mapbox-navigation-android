@@ -228,7 +228,7 @@ internal open class MapboxNavigationBaseTest {
         } returns evDynamicDataHolder
         mockkObject(RouteAlternativesControllerProvider)
         every {
-            RouteAlternativesControllerProvider.create(any(), any(), any(), any(), any(), any())
+            RouteAlternativesControllerProvider.create(any(), any(), any(), any(), any())
         } returns routeAlternativesController
         mockkObject(MapMatchingAPIProvider)
         every {

@@ -6,8 +6,8 @@ import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.bindgen.Value
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.testing.NativeRouteParserRule
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.internal.route.line.toData
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions
@@ -41,7 +41,7 @@ class VanishingRouteLineRoboTest {
     var coroutineRule = MainCoroutineRule()
 
     @get:Rule
-    val nativeRouteParserRule = NativeRouteParserRule()
+    val loggingRule = LoggingFrontendTestRule()
 
     private val ctx: Context = mockk()
 
