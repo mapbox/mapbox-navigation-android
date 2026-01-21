@@ -3,7 +3,6 @@ package com.mapbox.navigation.ui.maps.camera
 import android.os.SystemClock
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
-import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraAnimationHint
 import com.mapbox.maps.CameraAnimationHintStage
 import com.mapbox.maps.CameraOptions
@@ -576,15 +575,6 @@ internal constructor(
         navigationCameraStateChangedObserver: NavigationCameraStateChangedObserver,
     ) {
         navigationCameraStateChangedObservers.remove(navigationCameraStateChangedObserver)
-    }
-
-    // for coordination layer use only
-    internal fun jumpToCameraCenter(center: Point?) {
-        mapboxMap.setCamera(
-            CameraOptions.Builder()
-                .center(center)
-                .build(),
-        )
     }
 
     private fun setIdleProperties() {

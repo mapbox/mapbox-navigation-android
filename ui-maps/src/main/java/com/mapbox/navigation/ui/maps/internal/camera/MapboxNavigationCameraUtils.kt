@@ -2,8 +2,6 @@ package com.mapbox.navigation.ui.maps.internal.camera
 
 import android.animation.AnimatorSet
 import androidx.annotation.RestrictTo
-import com.mapbox.geojson.Point
-import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
@@ -24,11 +22,6 @@ fun AnimatorSet.constraintDurationTo(maxDuration: Long): AnimatorSet {
         }
     }
     return this
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-fun NavigationCamera.jumpToCameraCenterInternal(center: Point?) {
-    jumpToCameraCenter(center)
 }
 
 /**
