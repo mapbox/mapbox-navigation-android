@@ -54,20 +54,36 @@ class RouteRefreshController internal constructor(
      * [RoutesObserver.onRoutesChanged] callbacks for state management.
      * You can use [registerRouteRefreshStateObserver] to monitor refresh statuses independently.
      * NOTE: the invocation will have no effect if another route refresh request is in progress.
+     *
+     * @param callback invoked when the refresh request is finished.
      */
-    fun requestImmediateRouteRefresh() {
+    fun requestImmediateRouteRefresh(
+        callback: ImmediateRouteRefreshCallback = ImmediateRouteRefreshCallback {},
+    ) {
         val routes = plannedRouteRefreshController.routesToRefresh
         if (routes.isNullOrEmpty()) {
             logI("No routes to refresh", RouteRefreshLog.LOG_CATEGORY)
             stateHolder.onStarted()
             stateHolder.onFailure("No routes to refresh")
+            callback.onRefreshFinished(ImmediateRouteRefreshResult.NotStarted())
             return
         }
         plannedRouteRefreshController.pause()
-        immediateRouteRefreshController.requestRoutesRefresh(routes) {
-            if (it is RoutesRefresherExecutorResult.Finished) {
-                plannedRouteRefreshController.resume()
+        immediateRouteRefreshController.requestRoutesRefresh(routes) { result ->
+            val callbackResult = when (result) {
+                is RoutesRefresherExecutorResult.Finished -> {
+                    plannedRouteRefreshController.resume()
+                    if (result.value.anySuccess()) {
+                        ImmediateRouteRefreshResult.Success()
+                    } else {
+                        ImmediateRouteRefreshResult.Failure()
+                    }
+                }
+                is RoutesRefresherExecutorResult.ReplacedByNewer -> {
+                    ImmediateRouteRefreshResult.Cancelled()
+                }
             }
+            callback.onRefreshFinished(callbackResult)
         }
     }
 

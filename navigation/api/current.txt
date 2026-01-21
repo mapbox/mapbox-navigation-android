@@ -1391,10 +1391,32 @@ package com.mapbox.navigation.core.routeoptions {
 
 package com.mapbox.navigation.core.routerefresh {
 
+  public fun interface ImmediateRouteRefreshCallback {
+    method public void onRefreshFinished(com.mapbox.navigation.core.routerefresh.ImmediateRouteRefreshResult result);
+  }
+
+  public abstract sealed class ImmediateRouteRefreshResult {
+  }
+
+  public static final class ImmediateRouteRefreshResult.Cancelled extends com.mapbox.navigation.core.routerefresh.ImmediateRouteRefreshResult {
+  }
+
+  public static final class ImmediateRouteRefreshResult.Failure extends com.mapbox.navigation.core.routerefresh.ImmediateRouteRefreshResult {
+  }
+
+  public static final class ImmediateRouteRefreshResult.NotStarted extends com.mapbox.navigation.core.routerefresh.ImmediateRouteRefreshResult {
+  }
+
+  public static final class ImmediateRouteRefreshResult.Success extends com.mapbox.navigation.core.routerefresh.ImmediateRouteRefreshResult {
+  }
+
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RouteRefreshController {
     method public void pauseRouteRefreshes();
     method public void registerRouteRefreshStateObserver(com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver routeRefreshStatesObserver);
-    method public void requestImmediateRouteRefresh();
+    method public void requestImmediateRouteRefresh(com.mapbox.navigation.core.routerefresh.ImmediateRouteRefreshCallback callback = ImmediateRouteRefreshCallback({ var it: com.mapbox.navigation.core.routerefresh.ImmediateRouteRefreshResult ->
+
+
+}));
     method public void resumeRouteRefreshes();
     method public void unregisterRouteRefreshStateObserver(com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver routeRefreshStatesObserver);
   }
