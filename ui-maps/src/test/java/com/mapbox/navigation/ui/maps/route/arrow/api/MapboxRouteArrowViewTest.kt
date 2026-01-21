@@ -475,6 +475,143 @@ class MapboxRouteArrowViewTest {
     }
 
     @Test
+    fun render_ClearArrowsState_retriesWhenSourceNotFound() {
+        mockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
+        mockkObject(RouteArrowUtils)
+        val options = RouteArrowOptions.Builder(ctx).build()
+        val arrowShaftSource = mockk<GeoJsonSource>(relaxed = true)
+        val arrowHeadSource = mockk<GeoJsonSource>(relaxed = true)
+        val style = mockk<Style> {
+            // First call returns null (simulating invalid surface), second succeeds
+            every { getSource(ARROW_HEAD_SOURCE_ID) } returnsMany listOf(null, arrowHeadSource)
+            every { getSource(ARROW_SHAFT_SOURCE_ID) } returnsMany listOf(null, arrowShaftSource)
+            every { styleSlots } returns listOf()
+        }.also {
+            mockCheckForLayerInitialization(it)
+        }
+        val emptyShaftFC = FeatureCollection.fromFeatures(listOf())
+        val emptyHeadFC = FeatureCollection.fromFeatures(listOf())
+        val clearState = ClearArrowsValue(emptyShaftFC, emptyHeadFC)
+        val view = MapboxRouteArrowView(options)
+
+        // First render fails (sources not found)
+        view.render(style, clearState)
+        // Second render with same state should retry (not skip due to hash collision)
+        view.render(style, clearState)
+
+        // Verify
+        verify(exactly = 2) { style.getSource(ARROW_HEAD_SOURCE_ID) }
+        verify(exactly = 2) { style.getSource(ARROW_SHAFT_SOURCE_ID) }
+        verify { arrowShaftSource.featureCollection(emptyShaftFC) }
+        verify { arrowHeadSource.featureCollection(emptyHeadFC) }
+        unmockkObject(RouteArrowUtils)
+        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
+    }
+
+    @Test
+    fun render_ClearArrowsState_skipsRenderWhenSuccessfulAndHashMatches() {
+        mockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
+        mockkObject(RouteArrowUtils)
+        val options = RouteArrowOptions.Builder(ctx).build()
+        val arrowShaftSource = mockk<GeoJsonSource>(relaxed = true)
+        val arrowHeadSource = mockk<GeoJsonSource>(relaxed = true)
+        val style = mockk<Style> {
+            every { getSource(ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
+            every { getSource(ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
+            every { styleSlots } returns listOf()
+        }.also {
+            mockCheckForLayerInitialization(it)
+        }
+        val emptyShaftFC = FeatureCollection.fromFeatures(listOf())
+        val emptyHeadFC = FeatureCollection.fromFeatures(listOf())
+        val clearState = ClearArrowsValue(emptyShaftFC, emptyHeadFC)
+        val view = MapboxRouteArrowView(options)
+
+        // First render succeeds
+        view.render(style, clearState)
+        // Second render with same state should skip (hash matches and previous succeeded)
+        view.render(style, clearState)
+
+        // Verify
+        verify(exactly = 1) { arrowShaftSource.featureCollection(emptyShaftFC) }
+        verify(exactly = 1) { arrowHeadSource.featureCollection(emptyHeadFC) }
+        unmockkObject(RouteArrowUtils)
+        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
+    }
+
+    @Test
+    fun render_PartialFailure_tracksAsFailure() {
+        mockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
+        mockkObject(RouteArrowUtils)
+        val options = RouteArrowOptions.Builder(ctx).build()
+        val arrowShaftSource = mockk<GeoJsonSource>(relaxed = true)
+        val arrowHeadSource = mockk<GeoJsonSource>(relaxed = true)
+        val style = mockk<Style> {
+            // Shaft source exists, but head source doesn't on first call
+            every { getSource(ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
+            every { getSource(ARROW_HEAD_SOURCE_ID) } returnsMany listOf(null, arrowHeadSource)
+            every { styleSlots } returns listOf()
+        }.also {
+            mockCheckForLayerInitialization(it)
+        }
+        val emptyShaftFC = FeatureCollection.fromFeatures(listOf())
+        val emptyHeadFC = FeatureCollection.fromFeatures(listOf())
+        val clearState = ClearArrowsValue(emptyShaftFC, emptyHeadFC)
+        val view = MapboxRouteArrowView(options)
+
+        // First render partially fails (shaft succeeds, head fails)
+        view.render(style, clearState)
+        // Second render should retry (not skip due to partial failure)
+        view.render(style, clearState)
+
+        // Verify
+        verify(exactly = 2) { style.getSource(ARROW_HEAD_SOURCE_ID) }
+        verify { arrowHeadSource.featureCollection(emptyHeadFC) }
+        unmockkObject(RouteArrowUtils)
+        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
+    }
+
+    @Test
+    fun render_DifferentArrowData_alwaysRenders() {
+        mockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
+        mockkObject(RouteArrowUtils)
+        val options = RouteArrowOptions.Builder(ctx).build()
+        val arrowShaftSource = mockk<GeoJsonSource>(relaxed = true)
+        val arrowHeadSource = mockk<GeoJsonSource>(relaxed = true)
+        val style = mockk<Style> {
+            every { getSource(ARROW_HEAD_SOURCE_ID) } returns arrowHeadSource
+            every { getSource(ARROW_SHAFT_SOURCE_ID) } returns arrowShaftSource
+            every { styleSlots } returns listOf()
+        }.also {
+            mockCheckForLayerInitialization(it)
+        }
+        val featureJson1 = "{\"type\":\"Feature\",\"geometry\":{\"type\":\"LineString\"," +
+            "\"coordinates\":[[-122.5234885,37.9754331]]}}"
+        val featureJson2 = "{\"type\":\"Feature\",\"geometry\":{\"type\":\"LineString\"," +
+            "\"coordinates\":[[-122.5234885,37.9754332]]}}"
+        val arrowShaftFC1 = FeatureCollection.fromFeatures(listOf(Feature.fromJson(featureJson1)))
+        val arrowHeadFC1 = FeatureCollection.fromFeatures(listOf(Feature.fromJson(featureJson1)))
+        val arrowShaftFC2 = FeatureCollection.fromFeatures(listOf(Feature.fromJson(featureJson2)))
+        val arrowHeadFC2 = FeatureCollection.fromFeatures(listOf(Feature.fromJson(featureJson2)))
+        val state1 = ArrowAddedValue(arrowShaftFC1, arrowHeadFC1)
+        val state2 = ArrowAddedValue(arrowShaftFC2, arrowHeadFC2)
+        val view = MapboxRouteArrowView(options)
+
+        // First render
+        view.render(style, state1)
+        // Second render with different data
+        view.render(style, state2)
+
+        // Verify
+        verify { arrowShaftSource.featureCollection(arrowShaftFC1) }
+        verify { arrowShaftSource.featureCollection(arrowShaftFC2) }
+        verify { arrowHeadSource.featureCollection(arrowHeadFC1) }
+        verify { arrowHeadSource.featureCollection(arrowHeadFC2) }
+        unmockkObject(RouteArrowUtils)
+        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
+    }
+
+    @Test
     fun getVisibility() {
         mockkObject(MapboxRouteLineUtils)
         val options = RouteArrowOptions.Builder(ctx).build()

@@ -64,6 +64,12 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
     private var lastRenderHash: Int? = null
 
     /**
+     * Tracks if the last render attempt was successful or not. This information is helpful when
+     * deciding to skip clearing a previous render attempt if it failed.
+     */
+    private var lastRenderSucceeded: Boolean = false
+
+    /**
      * Renders an [ArrowVisibilityChangeValue] applying view side effects based on the data
      * it contains.
      *
@@ -187,11 +193,13 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
     ) {
         val hash = Objects.hash(arrowVisibiliyChange, shaftFeatureCollection, headFeatureCollection)
 
-        if (hash == lastRenderHash) {
+        // Only skip the render if we have same data and the previous render succeeded.
+        if (hash == lastRenderHash && lastRenderSucceeded) {
             return
         }
 
         lastRenderHash = hash
+        var renderSucceeded = true
 
         rebuildSourcesAndLayersIfNeeded(style)
 
@@ -202,20 +210,24 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
         }
 
         if (shaftFeatureCollection != null) {
-            updateSource(
+            val success = updateSource(
                 style,
                 RouteLayerConstants.ARROW_SHAFT_SOURCE_ID,
                 shaftFeatureCollection,
             )
+            renderSucceeded = success
         }
 
         if (headFeatureCollection != null) {
-            updateSource(
+            val success = updateSource(
                 style,
                 RouteLayerConstants.ARROW_HEAD_SOURCE_ID,
                 headFeatureCollection,
             )
+            renderSucceeded = renderSucceeded && success
         }
+
+        lastRenderSucceeded = renderSucceeded
     }
 
     private fun updateLayerVisibility(style: Style, layerId: String, visibility: Visibility) {
@@ -226,16 +238,36 @@ class MapboxRouteArrowView(private val options: RouteArrowOptions) {
         }
     }
 
-    private fun updateSource(style: Style, sourceId: String, featureCollection: FeatureCollection) {
+    /**
+     * Updates a GeoJSON source with new feature collection data.
+     *
+     * @return true if the source was successfully updated or no update was needed,
+     *         false if the source could not be found (e.g., due to invalid surface)
+     */
+    private fun updateSource(
+        style: Style,
+        sourceId: String,
+        featureCollection: FeatureCollection,
+    ): Boolean {
         val newFeatureCollectionHash = featureCollection.hashCode()
         // Only update the sources if it has changed
         if (currentSourceHashes[sourceId] != newFeatureCollectionHash) {
             val geoJsonSource = style.getSourceAs<GeoJsonSource>(sourceId)
-            if (geoJsonSource != null) {
+            return if (geoJsonSource != null) {
                 geoJsonSource.featureCollection(featureCollection)
                 currentSourceHashes[sourceId] = newFeatureCollectionHash
+                true
+            } else {
+                logE(LOG_CATEGORY) {
+                    "Failed to update arrow source $sourceId - source not found. " +
+                        "This may indicate an invalid rendering surface."
+                }
+                return false
             }
         }
+
+        // Data hasn't changed so no updates needed.
+        return true
     }
 
     private fun rebuildLayersAndSources(style: Style, options: RouteArrowOptions) {
