@@ -441,44 +441,63 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
         ) { mapboxNavigation ->
-            val mockRoute = RoutesProvider.dc_short_alternative_has_more_legs(context)
-            mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
+            val mockSingleLegPrimaryRoute = RoutesProvider
+                .dc_short_alternative_after_parssing_waypoint(context)
+            val mockMultiLegAlternative = RoutesProvider
+                .dc_short_two_legs_with_alternative(context)
+            mockWebServerRule.requestHandlers.addAll(
+                mockMultiLegAlternative.mockRequestHandlers +
+                    mockSingleLegPrimaryRoute.mockRequestHandlers,
+            )
 
-            val routes = mapboxNavigation.requestRoutes(
+            val multilegAlternative = mapboxNavigation.requestRoutes(
                 RouteOptions.builder()
                     .applyDefaultNavigationOptions()
                     .applyLanguageAndVoiceUnitOptions(context)
                     .baseUrl(mockWebServerRule.baseUrl)
                     .waypointsPerRoute(true)
-                    .coordinatesList(mockRoute.routeWaypoints).build(),
-            ).getSuccessfulResultOrThrowException().routes
+                    .coordinatesList(mockMultiLegAlternative.routeWaypoints).build(),
+            ).getSuccessfulResultOrThrowException().routes.first()
+            val singleLegPrimaryRoute = mapboxNavigation.requestRoutes(
+                RouteOptions.builder()
+                    .applyDefaultNavigationOptions()
+                    .applyLanguageAndVoiceUnitOptions(context)
+                    .baseUrl(mockWebServerRule.baseUrl)
+                    .waypointsPerRoute(true)
+                    .coordinatesList(mockSingleLegPrimaryRoute.routeWaypoints).build(),
+            ).getSuccessfulResultOrThrowException().routes.first()
 
-            mockLocationReplayerRule.playRoute(
-                routes[0].directionsRoute,
-                eventsToDrop = 15,
-            )
-            mapboxNavigation.startTripSession()
-            mapboxNavigation.setNavigationRoutes(routes)
+            stayOnPosition(
+                38.891661978977254,
+                -77.03364491065338,
+                0f,
+            ) {
+                mapboxNavigation.startTripSession()
+                mapboxNavigation.setNavigationRoutesAsync(
+                    listOf(
+                        singleLegPrimaryRoute,
+                        multilegAlternative,
+                    ),
+                )
 
-            mapboxNavigation.routeProgressUpdates()
-                .filter {
-                    it.currentLegProgress?.legIndex == 0 &&
-                        it.currentRouteGeometryIndex > 16
-                }
-                .first()
+                mapboxNavigation.routeProgressUpdates()
+                    .first {
+                        it.currentState == RouteProgressState.TRACKING
+                    }
 
-            val result = mapboxNavigation.switchToAlternativeAsync(routes[1])
-            assertIs<RoutesSetSuccess>(result.value)
+                val result = mapboxNavigation.switchToAlternativeAsync(multilegAlternative)
+                assertIs<RoutesSetSuccess>(result.value)
 
-            val routeProgress = mapboxNavigation.routeProgressUpdates()
-                .first {
-                    it.currentState == RouteProgressState.TRACKING &&
-                        it.navigationRoute.id == routes[1].id
-                }
-            assertEquals(
-                1,
-                routeProgress.remainingWaypoints,
-            )
+                val routeProgress = mapboxNavigation.routeProgressUpdates()
+                    .first {
+                        it.currentState == RouteProgressState.TRACKING &&
+                            it.navigationRoute.id == multilegAlternative.id
+                    }
+                assertEquals(
+                    1,
+                    routeProgress.remainingWaypoints,
+                )
+            }
         }
     }
 

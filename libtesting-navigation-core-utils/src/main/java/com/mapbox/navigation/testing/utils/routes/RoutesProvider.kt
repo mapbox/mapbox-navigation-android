@@ -156,6 +156,33 @@ object RoutesProvider {
         )
     }
 
+    /**
+     * supposed to be used to receive alternative route for location right after
+     * passing first waypoint of [dc_short_two_legs_with_alternative]
+     */
+    fun dc_short_alternative_after_parssing_waypoint(context: Context): MockRoute {
+        val jsonResponse = readRawFileText(
+                context,
+            R.raw.route_response_dc_short_alternative_after_parssing_waypoint,
+        )
+        val coordinates = listOf(
+            Point.fromLngLat(-77.0336373902816,38.891366337985374),
+            Point.fromLngLat(-77.03002,38.895453),
+        )
+        return MockRoute(
+            jsonResponse,
+            DirectionsResponse.fromJson(jsonResponse),
+            listOf(
+                MockDirectionsRequestHandler(
+                    profile = PROFILE_DRIVING_TRAFFIC,
+                    jsonResponse = jsonResponse,
+                    expectedCoordinates = coordinates,
+                ),
+            ),
+            coordinates,
+        )
+    }
+
     fun dc_short_two_legs_with_alternative_for_second_leg(context: Context): MockRoute {
         val jsonResponse =
             readRawFileText(context, R.raw.route_response_dc_short_with_alternative_for_second_leg)
