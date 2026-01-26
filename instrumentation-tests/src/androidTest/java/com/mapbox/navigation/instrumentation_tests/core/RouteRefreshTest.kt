@@ -28,7 +28,6 @@ import com.mapbox.navigation.core.routerefresh.RouteRefreshStateResult
 import com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
-import com.mapbox.navigation.instrumentation_tests.utils.assumeNotNROBecauseNativeRefreshIsBeingFixed
 import com.mapbox.navigation.instrumentation_tests.utils.assumeNotNROBecauseOfClientSideUpdate
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
@@ -144,7 +143,6 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
 
     @Test
     fun route_refresh_update_traffic_annotations_incidents_closures_notifications_all() = sdkTest {
-        assumeNotNROBecauseNativeRefreshIsBeingFixed()
         val routeOptions = generateRouteOptions(twoCoordinates, isEv = true)
         val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
             .getSuccessfulResultOrThrowException()
@@ -323,10 +321,9 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                         "Expected details but got null",
                         actual.details(),
                     )
-                    assertEquals(
-                        "Details mismatch",
-                        expected.details()?.toString(),
-                        actual.details()?.toString(),
+                    assertNoDiffs(
+                        expected.details(),
+                        actual.details(),
                     )
                 }
 
@@ -355,11 +352,11 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                     actual.chargingStationId(),
                 )
             }
-        assertEquals(
+        assertNoDiffs(
             requestedRoutes[0].waypoints,
             refreshedRoutes[0].waypoints,
         )
-        assertEquals(
+        assertNoDiffs(
             requestedRoutes[1].waypoints,
             refreshedRoutes[1].waypoints,
         )
@@ -535,7 +532,6 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
     @Test
     fun route_refresh_updates_annotations_incidents_and_closures_for_truncated_current_leg() =
         sdkTest {
-            assumeNotNROBecauseNativeRefreshIsBeingFixed()
             setupMockRequestHandlers(
                 twoCoordinates,
                 R.raw.route_response_route_refresh_with_objects_ahead,

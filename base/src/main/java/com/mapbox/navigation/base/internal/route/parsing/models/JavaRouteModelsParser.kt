@@ -8,6 +8,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.route.operations.JavaRouteOperations
 import com.mapbox.navigation.base.internal.route.parsing.DirectionsResponseToParse
 import com.mapbox.navigation.base.route.ResponseOriginAPI
@@ -30,13 +31,17 @@ internal class JavaRouteModelsParser(
             "parsing directions response"
         }
         return Result.runCatching {
-            parseDirectionsResponseJava(response)
+            PerformanceTracker.trackPerformanceSync(
+                "JavaRouteModelsParser#parseDirectionsResponseJava",
+            ) {
+                parseDirectionsResponseJava(response)
+            }
         }
     }
 }
 
 @WorkerThread
-internal fun parseDirectionsResponseJava(
+private fun parseDirectionsResponseJava(
     responseToParse: DirectionsResponseToParse,
 ): DirectionsResponseParsingResult {
     val routeOptions = RouteOptions.fromUrl(URL(responseToParse.routeRequest))

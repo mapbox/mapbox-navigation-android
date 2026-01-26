@@ -5,6 +5,7 @@ package com.mapbox.navigation.base.internal.route.testing
 import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.BuildConfig.NATIVE_ROUTE_OBJECT_DEFAULT
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.SDKRouteParser
 import com.mapbox.navigation.base.internal.route.parsing.DirectionsResponseToParse
@@ -54,7 +55,7 @@ fun createNavigationRouteForTest(
     routeOptions: RouteOptions,
     @com.mapbox.navigation.base.route.RouterOrigin
     routerOrigin: String,
-): List<NavigationRoute> = setupParsing(nativeRoute = false).let {
+): List<NavigationRoute> = setupParsing(nativeRoute = NATIVE_ROUTE_OBJECT_DEFAULT).let {
     runBlocking {
         it.parseDirectionsResponse(
             DirectionsResponseToParse.from(

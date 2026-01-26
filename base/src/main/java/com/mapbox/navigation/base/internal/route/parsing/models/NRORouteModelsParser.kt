@@ -12,6 +12,7 @@ import com.mapbox.api.directions.v5.models.utils.FlatbuffersListWrapper
 import com.mapbox.directions.route.DirectionsRouteContext
 import com.mapbox.directions.route.DirectionsRouteResponse
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.route.operations.NroRouteOperations
 import com.mapbox.navigation.base.internal.route.parsing.DirectionsResponseToParse
 import com.mapbox.navigation.base.route.DirectionsResponseParsingException
@@ -33,7 +34,11 @@ internal class NRORouteModelsParser(
             "parsing directions response"
         }
         return Result.runCatching {
-            parseDirectionsResponseNRO(response)
+            PerformanceTracker.trackPerformanceSync(
+                "NRORouteModelsParser#parseDirectionsResponseNRO",
+            ) {
+                parseDirectionsResponseNRO(response)
+            }
         }
     }
 }
