@@ -8,6 +8,7 @@ inline fun <reified T> assertNoDiffs(
     ignoreGetters: List<String> = emptyList(),
     emptyAndNullArraysAreTheSame: Boolean = false,
     doubleComparisonEpsilon: Double = 0.000001,
+    nullAndEmptyStringsAreTheSame: Boolean = false,
     tag: String = "",
 ) {
     val result = findDiff(
@@ -17,6 +18,7 @@ inline fun <reified T> assertNoDiffs(
         ignoreGetters = ignoreGetters,
         nullAndEmptyArraysAreTheSame = emptyAndNullArraysAreTheSame,
         doubleComparisonEpsilon = doubleComparisonEpsilon,
+        nullAndEmptyStringsAreTheSame = nullAndEmptyStringsAreTheSame,
     )
     if (result.differences.isNotEmpty()) {
         val tag = if (tag.isNotEmpty()) "$tag: " else ""
@@ -56,6 +58,7 @@ fun <T> findDiff(
     nullAndEmptyArraysAreTheSame: Boolean = false,
     visitedPathCallback: (String) -> Unit = {},
     doubleComparisonEpsilon: Double = 0.000001,
+    nullAndEmptyStringsAreTheSame: Boolean = false,
 ): FindDiffResult {
     // Use IdentityHashMap-based set to track visited objects by identity, not equals()
     val visited = mutableSetOf<IdentityWrapper>()
@@ -69,6 +72,7 @@ fun <T> findDiff(
         nullAndEmptyArraysAreTheSame,
         visitedPathCallback,
         doubleComparisonEpsilon,
+        nullAndEmptyStringsAreTheSame,
     )
     return FindDiffResult(differences)
 }
@@ -84,6 +88,7 @@ private fun findDiffInternal(
     nullAndEmptyArraysAreTheSame: Boolean,
     visitedPathCallback: (String) -> Unit,
     doubleComparisonEpsilon: Double,
+    nullAndEmptyStringsAreTheSame: Boolean,
 ): List<Difference> {
     val differences = mutableListOf<Difference>()
     
@@ -105,6 +110,14 @@ private fun findDiffInternal(
             }
             return differences
         }
+    }
+    if (nullAndEmptyStringsAreTheSame &&
+        areNullAndEmptyStringEquivalents(expected, actual)
+    ) {
+        if (pathPrefix.isNotEmpty()) {
+            visitedPathCallback(pathPrefix)
+        }
+        return differences
     }
     if (expected == null || actual == null) {
         val fieldName = if (pathPrefix.isEmpty()) "root" else pathPrefix
@@ -173,6 +186,12 @@ private fun findDiffInternal(
                     visitedPathCallback(elementPath)
                     continue
                 }
+                if (nullAndEmptyStringsAreTheSame &&
+                    areNullAndEmptyStringEquivalents(expectedElement, actualElement)
+                ) {
+                    visitedPathCallback(elementPath)
+                    continue
+                }
                 if (expectedElement == null || actualElement == null) {
                     visitedPathCallback(elementPath)
                     differences.add(
@@ -206,6 +225,7 @@ private fun findDiffInternal(
                         nullAndEmptyArraysAreTheSame,
                         visitedPathCallback,
                         doubleComparisonEpsilon,
+                        nullAndEmptyStringsAreTheSame,
                     )
                     differences.addAll(elementDifferences)
                     // Always add the element path since we visited it
@@ -213,7 +233,17 @@ private fun findDiffInternal(
                 } else {
                     // Compare simple elements directly
                     visitedPathCallback(elementPath)
-                    if (!areValuesEqual(expectedElement, actualElement, doubleComparisonEpsilon)) {
+                    if (nullAndEmptyStringsAreTheSame &&
+                        areNullAndEmptyStringEquivalents(expectedElement, actualElement)
+                    ) {
+                        continue
+                    }
+                    if (!areValuesEqual(
+                            expectedElement,
+                            actualElement,
+                            doubleComparisonEpsilon,
+                            nullAndEmptyStringsAreTheSame
+                        )) {
                         differences.add(
                             Difference(
                                 path = elementPath,
@@ -229,7 +259,12 @@ private fun findDiffInternal(
         
         // For other collections (Set, Map), compare directly using equals
         visitedPathCallback(fieldName)
-        val valuesDiffer = !areValuesEqual(expected, actual, doubleComparisonEpsilon)
+        val valuesDiffer = !areValuesEqual(
+            expected,
+            actual,
+            doubleComparisonEpsilon,
+            nullAndEmptyStringsAreTheSame,
+        )
         if (valuesDiffer) {
             differences.add(
                 Difference(
@@ -383,12 +418,18 @@ private fun findDiffInternal(
                         nullAndEmptyArraysAreTheSame,
                         visitedPathCallback,
                         doubleComparisonEpsilon,
+                    nullAndEmptyStringsAreTheSame,
                     )
                     differences.addAll(nestedDifferences)
                     // Always add the path since we visited it (already added above)
                 } else {
                     // Compare simple values
-                    val valuesDiffer = !areValuesEqual(expectedValue, actualValue, doubleComparisonEpsilon)
+                val valuesDiffer = !areValuesEqual(
+                    expectedValue,
+                    actualValue,
+                    doubleComparisonEpsilon,
+                    nullAndEmptyStringsAreTheSame,
+                )
                     
                     if (valuesDiffer) {
                         val expectedValueString = expectedValue?.toString() ?: "null"
@@ -411,8 +452,18 @@ private fun findDiffInternal(
     return differences
 }
 
-private fun areValuesEqual(expected: Any?, actual: Any?, epsilon: Double): Boolean {
+private fun areValuesEqual(
+    expected: Any?,
+    actual: Any?,
+    epsilon: Double,
+    nullAndEmptyStringsAreTheSame: Boolean,
+): Boolean {
     if (expected == null && actual == null) return true
+    if (nullAndEmptyStringsAreTheSame &&
+        areNullAndEmptyStringEquivalents(expected, actual)
+    ) {
+        return true
+    }
     if (expected == null || actual == null) return false
     
     // Handle Double comparison with epsilon
@@ -478,6 +529,15 @@ private fun areNullAndEmptyEquivalents(expected: Any?, actual: Any?): Boolean {
 
     return (expected == null && isEmptyCollectionOrArray(actual)) ||
             (actual == null && isEmptyCollectionOrArray(expected))
+}
+
+private fun areNullAndEmptyStringEquivalents(expected: Any?, actual: Any?): Boolean {
+    if (expected == null && actual == null) {
+        return false
+    }
+
+    return (expected == null && actual is String && actual.isEmpty()) ||
+        (actual == null && expected is String && expected.isEmpty())
 }
 
 private fun isStandardObjectMethod(method: java.lang.reflect.Method): Boolean {

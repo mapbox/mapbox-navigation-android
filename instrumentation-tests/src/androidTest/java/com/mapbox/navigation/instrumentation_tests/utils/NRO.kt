@@ -10,14 +10,6 @@ private fun assumeNotNRO(reason: String) {
     )
 }
 
-// TODO: https://mapbox.atlassian.net/browse/NAVSDKCPP-957
-fun assumeNotNROBecauseNativeRefreshIsBeingFixed() {
-    assumeNotNRO(
-        "we're fixing NRO refresh in the " +
-            "context of https://mapbox.atlassian.net/browse/NAVSDKCPP-957",
-    )
-}
-
 fun assumeNotNROBecauseOfAlternativesDropDuringSerialization() {
     assumeNotNRO("With NRO Nav SDK doesn't have to drop alternatives to parse routes")
 }

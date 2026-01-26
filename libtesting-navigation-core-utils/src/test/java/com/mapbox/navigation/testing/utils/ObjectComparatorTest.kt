@@ -483,6 +483,40 @@ class ObjectComparatorTest {
     }
 
     @Test
+    fun `option to ignore null and empty strings - enabled`() {
+        class Test(val items: List<String?>)
+
+        val result = findDiff(
+            Test::class.java,
+            Test(listOf("", null, "")),
+            Test(listOf(null, "", "")),
+            nullAndEmptyStringsAreTheSame = true,
+        )
+
+        assertEquals(
+            emptyList<String>(),
+            result.differences.map { it.path },
+        )
+    }
+
+    @Test
+    fun `option to ignore null and empty strings - disabled`() {
+        class Test(val items: List<String?>)
+
+        val result = findDiff(
+            Test::class.java,
+            Test(listOf("", null, "")),
+            Test(listOf(null, "", "")),
+            nullAndEmptyStringsAreTheSame = false,
+        )
+
+        assertEquals(
+            listOf("items[0]", "items[1]"),
+            result.differences.map { it.path },
+        )
+    }
+
+    @Test
     fun `doubles comparison`() {
         class Test(
             val double1: Double,

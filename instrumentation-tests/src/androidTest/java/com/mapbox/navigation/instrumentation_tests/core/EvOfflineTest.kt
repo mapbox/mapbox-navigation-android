@@ -6,7 +6,6 @@ import android.location.Location
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.common.TileDataDomain
-import com.mapbox.navigation.base.BuildConfig.NATIVE_ROUTE_OBJECT_DEFAULT
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.route.routeOptions
@@ -18,6 +17,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.core.routerefresh.RouteRefreshExtra
+import com.mapbox.navigation.instrumentation_tests.utils.assumeNotNROBecauseOfClientSideUpdate
 import com.mapbox.navigation.instrumentation_tests.utils.assumeNotNROBecauseToBuilderIsRequiredForTest
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.RouteRequestResult
@@ -44,7 +44,6 @@ import com.mapbox.navigation.testing.utils.withoutInternet
 import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
-import org.junit.Assume.assumeFalse
 import org.junit.Rule
 import org.junit.Test
 import java.util.concurrent.TimeUnit
@@ -239,11 +238,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
 
     @Test
     fun refresh_online_ev_route_offline() = sdkTest {
-        // TODO: https://mapbox.atlassian.net/browse/NAVAND-6480
-        assumeFalse(
-            "NRO doesn't support client side update",
-            NATIVE_ROUTE_OBJECT_DEFAULT,
-        )
+        assumeNotNROBecauseOfClientSideUpdate()
 
         val originalTestRoute = setupBerlinEvRoute()
 

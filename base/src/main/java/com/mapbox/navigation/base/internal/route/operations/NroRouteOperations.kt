@@ -9,6 +9,7 @@ import com.mapbox.directions.route.DirectionsRouteContext
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.CongestionNumericOverride
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObjectException
+import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.route.NavigationRouteData
 import com.mapbox.navigation.base.internal.route.parsing.models.ParsedRouteData
 import com.mapbox.navigation.base.internal.route.parsing.models.toRouteModelsParsingResult
@@ -34,8 +35,11 @@ internal class NroRouteOperations(
         logD(LOG_CATEGORY) {
             "Refreshing native route model"
         }
-        return directionsRouteContext
-            .refreshRoute(refreshResponse, legIndex, legGeometryIndex)
+        return directionsRouteContext.let {
+            PerformanceTracker.trackPerformanceSync("DirectionsRouteContext#refreshRoute") {
+                it.refreshRoute(refreshResponse, legIndex, legGeometryIndex)
+            }
+        }
             .mapValue {
                 val updatedRouteModel = it.toRouteModelsParsingResult(
                     routeOptions = parsedRouteData.routeOptions,
