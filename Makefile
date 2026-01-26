@@ -201,8 +201,8 @@ publish-local:
 
 .PHONY: upload-to-sdk-registry-snapshot
 upload-to-sdk-registry-snapshot:
-	./gradlew mapboxSDKRegistryUpload -Psnapshot=true -PVERSION_NAME=$(VERSION_NAME)
-	./gradlew mapboxSDKRegistryUpload -Psnapshot=true -PVERSION_NAME=$(VERSION_NAME) -PndkMajor=27
+	./gradlew mapboxSDKRegistryUpload -Psnapshot=true -PVERSION_NAME=$(VERSION_NAME) $(additional_gradle_parameters)
+	./gradlew mapboxSDKRegistryUpload -Psnapshot=true -PVERSION_NAME=$(VERSION_NAME) -PndkMajor=27 $(additional_gradle_parameters)
 
 .PHONY: upload-to-sdk-registry
 upload-to-sdk-registry:

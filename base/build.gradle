@@ -9,6 +9,9 @@ apply from: "../gradle/kdoc-settings.gradle"
 version = project.ext.versionName
 group = project.ext.mapboxArtifactGroupId
 
+def nroDefault = project.findProperty("nroDefault")?.toString() ?: "false"
+println("Native Route Object default is set to: $nroDefault")
+
 android {
     namespace 'com.mapbox.navigation.base'
     compileSdkVersion androidVersions.compileSdkVersion
@@ -29,7 +32,7 @@ android {
         consumerProguardFiles 'proguard-rules.pro', "../proguard/proguard-project.pro"
 
         buildConfigField 'String', "MAPBOX_NAVIGATION_VERSION_NAME", String.format("\"%s\"", project.ext.versionName)
-        buildConfigField 'boolean', "NATIVE_ROUTE_OBJECT_DEFAULT", project.findProperty("nroDefault")?.toString() ?: "false"
+        buildConfigField 'boolean', "NATIVE_ROUTE_OBJECT_DEFAULT", nroDefault
     }
 
     testOptions {
