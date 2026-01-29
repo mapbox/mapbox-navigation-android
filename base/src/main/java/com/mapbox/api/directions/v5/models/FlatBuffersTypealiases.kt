@@ -6,6 +6,7 @@ internal typealias FBAmenity = com.mapbox.directions.generated.Amenity
 internal typealias FBAmenityType = com.mapbox.directions.generated.AmenityType
 internal typealias FBBannerComponentSubType =
     com.mapbox.directions.generated.BannerComponentSubType
+
 internal typealias FBBannerComponentType = com.mapbox.directions.generated.BannerComponentType
 internal typealias FBBannerComponents = com.mapbox.directions.generated.BannerComponents
 internal typealias FBBannerInstructions = com.mapbox.directions.generated.BannerInstructions
@@ -27,18 +28,23 @@ internal typealias FBIncidentType = com.mapbox.directions.generated.IncidentType
 internal typealias FBInterchange = com.mapbox.directions.generated.Interchange
 internal typealias FBIntersectionLaneAccess =
     com.mapbox.directions.generated.IntersectionLaneAccess
+
 internal typealias FBIntersectionLanes = com.mapbox.directions.generated.IntersectionLanes
 internal typealias FBJunction = com.mapbox.directions.generated.Junction
 internal typealias FBLaneIndication = com.mapbox.directions.generated.LaneIndication
 internal typealias FBLaneIndicationEnumWrapper =
     com.mapbox.directions.generated.LaneIndicationEnumWrapper
+
 internal typealias FBLanePaymentMethod = com.mapbox.directions.generated.LanePaymentMethod
 internal typealias FBLanePaymentMethodEnumWrapper =
     com.mapbox.directions.generated.LanePaymentMethodEnumWrapper
+
 internal typealias FBLaneDesignatedVehicleType =
     com.mapbox.directions.generated.LaneDesignatedVehicleType
+
 internal typealias FBLaneDesignatedVehicleTypeEnumWrapper =
     com.mapbox.directions.generated.LaneDesignatedVehicleTypeEnumWrapper
+
 internal typealias FBLegAnnotation = com.mapbox.directions.generated.LegAnnotation
 internal typealias FBLegStep = com.mapbox.directions.generated.LegStep
 internal typealias FBManeuverModifier = com.mapbox.directions.generated.ManeuverModifier
@@ -52,6 +58,7 @@ internal typealias FBNotification = com.mapbox.directions.generated.Notification
 internal typealias FBNotificationDetails = com.mapbox.directions.generated.NotificationDetails
 internal typealias FBNotificationRefreshType =
     com.mapbox.directions.generated.NotificationRefreshType
+
 internal typealias FBNotificationSubtype = com.mapbox.directions.generated.NotificationSubtype
 internal typealias FBNotificationType = com.mapbox.directions.generated.NotificationType
 internal typealias FBPaymentMethods = com.mapbox.directions.generated.PaymentMethods
@@ -73,3 +80,5 @@ internal typealias FBTrafficCodes = com.mapbox.directions.generated.TrafficCodes
 internal typealias FBTransportMode = com.mapbox.directions.generated.TransportMode
 internal typealias FBVoiceInstructions = com.mapbox.directions.generated.VoiceInstructions
 internal typealias FBCoordinate = com.mapbox.directions.generated.Coordinate
+internal typealias FBCongestionLevelEnumWrapper =
+    com.mapbox.directions.generated.CongestionLevelEnumWrapper

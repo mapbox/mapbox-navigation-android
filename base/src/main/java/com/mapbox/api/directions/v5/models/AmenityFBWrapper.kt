@@ -9,7 +9,7 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class AmenityFBWrapper(
+internal class AmenityFBWrapper private constructor(
     private val fb: FBAmenity,
 ) : Amenity(), BaseFBWrapper {
 
@@ -33,10 +33,18 @@ internal class AmenityFBWrapper(
         NotSupportedForNativeRouteObject("Amenity#toBuilder()")
     }
 
-    private companion object {
+    internal companion object {
+
+        internal fun wrap(fb: FBAmenity?): Amenity? {
+            return when {
+                fb == null -> null
+                fb.isNull -> null
+                else -> AmenityFBWrapper(fb)
+            }
+        }
 
         @AmenityTypeCriteria
-        fun Byte.fbAmenityTypeCriteria(
+        private fun Byte.fbAmenityTypeCriteria(
             propertyName: String,
             unrecognized: FlexBuffers.Map?,
         ): String {

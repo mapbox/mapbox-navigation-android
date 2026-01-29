@@ -9,7 +9,7 @@ import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import com.mapbox.navigation.base.internal.StateOfCharge
 import java.nio.ByteBuffer
 
-internal class LegAnnotationFBWrapper(
+internal class LegAnnotationFBWrapper private constructor(
     private val fb: FBLegAnnotation,
 ) : LegAnnotation(), BaseFBWrapper {
 
@@ -19,16 +19,17 @@ internal class LegAnnotationFBWrapper(
     override val unrecognizedPropertiesLength: Int
         get() = fb.unrecognizedPropertiesLength
 
-    internal val stateOfCharge get(): StateOfCharge? {
-        return unrecognizeFlexBufferMap?.let {
-            val soc = it["state_of_charge"]
-            if (soc.isVector) {
-                FBStateOfCharge(soc.asVector())
-            } else {
-                null
+    internal val stateOfCharge
+        get(): StateOfCharge? {
+            return unrecognizeFlexBufferMap?.let {
+                val soc = it["state_of_charge"]
+                if (soc.isVector) {
+                    FBStateOfCharge(soc.asVector())
+                } else {
+                    null
+                }
             }
         }
-    }
 
     override fun distance(): List<Double>? {
         return FlatbuffersListWrapper.get(fb.distanceLength) {
@@ -67,7 +68,7 @@ internal class LegAnnotationFBWrapper(
 
     override fun maxspeed(): List<MaxSpeed?>? {
         return FlatbuffersListWrapper.get(fb.maxspeedLength) {
-            fb.maxspeed(it)?.let { maxSpeed -> MaxSpeedFBWrapper(maxSpeed) }
+            MaxSpeedFBWrapper.wrap(fb.maxspeed(it))
         }
     }
 
@@ -127,18 +128,31 @@ internal class LegAnnotationFBWrapper(
             ")"
     }
 
-    private companion object {
-        fun com.mapbox.directions.generated.CongestionLevelEnumWrapper.toCongestionLevelString():
-            String? = when (this.value) {
-            FBCongestionLevel.Low -> "low"
-            FBCongestionLevel.Moderate -> "moderate"
-            FBCongestionLevel.Heavy -> "heavy"
-            FBCongestionLevel.Severe -> "severe"
-            FBCongestionLevel.UnknownCongestion -> "unknown"
-            FBCongestionLevel.Unknown -> this.unrecognizedValue ?: throw IllegalStateException(
-                "Unknown congestion level with no unrecognized value",
-            )
-            else -> unhandledEnumMapping("congestion", this.value)
+    internal companion object {
+
+        internal fun wrap(fb: FBLegAnnotation?): LegAnnotation? {
+            return fb?.let { LegAnnotationFBWrapper(it) }
+        }
+
+        private fun FBCongestionLevelEnumWrapper.toCongestionLevelString(): String? {
+            return if (this.isNull) {
+                null
+            } else {
+                when (this.value) {
+                    FBCongestionLevel.Low -> "low"
+                    FBCongestionLevel.Moderate -> "moderate"
+                    FBCongestionLevel.Heavy -> "heavy"
+                    FBCongestionLevel.Severe -> "severe"
+                    FBCongestionLevel.UnknownCongestion -> "unknown"
+                    FBCongestionLevel.Unknown ->
+                        this.unrecognizedValue
+                            ?: throw IllegalStateException(
+                                "Unknown congestion level with no unrecognized value",
+                            )
+
+                    else -> unhandledEnumMapping("congestion", this.value)
+                }
+            }
         }
     }
 }

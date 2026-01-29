@@ -8,7 +8,7 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class BannerViewFBWrapper(
+internal class BannerViewFBWrapper private constructor(
     private val fb: FBBannerView,
 ) : BannerView(), BaseFBWrapper {
 
@@ -22,7 +22,7 @@ internal class BannerViewFBWrapper(
 
     override fun components(): List<BannerComponents?>? {
         return FlatbuffersListWrapper.get(fb.componentsLength) {
-            fb.components(it)?.let { component -> BannerComponentsFBWrapper(component) }
+            BannerComponentsFBWrapper.wrap(fb.components(it))
         }
     }
 
@@ -60,5 +60,11 @@ internal class BannerViewFBWrapper(
             "type=${type()}, " +
             "modifier=${modifier()}" +
             ")"
+    }
+
+    internal companion object {
+        internal fun wrap(fb: FBBannerView?): BannerView? {
+            return fb?.let { BannerViewFBWrapper(it) }
+        }
     }
 }

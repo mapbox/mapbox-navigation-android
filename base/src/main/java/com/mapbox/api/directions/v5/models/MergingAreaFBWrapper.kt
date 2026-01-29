@@ -7,7 +7,7 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class MergingAreaFBWrapper(
+internal class MergingAreaFBWrapper private constructor(
     private val fb: FBMergingArea,
 ) : MergingArea(), BaseFBWrapper {
 
@@ -44,10 +44,14 @@ internal class MergingAreaFBWrapper(
         return "MergingArea(type=${type()})"
     }
 
-    private companion object {
+    internal companion object {
+
+        internal fun wrap(fb: FBMergingArea?): MergingArea? {
+            return fb?.let { MergingAreaFBWrapper(it) }
+        }
 
         @Type
-        fun Byte.fbToMergingAreaType(
+        private fun Byte.fbToMergingAreaType(
             propertyName: String,
             unrecognized: FlexBuffers.Map? = null,
         ): String? {

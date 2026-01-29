@@ -7,7 +7,7 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class RestStopFBWrapper(
+internal class RestStopFBWrapper private constructor(
     private val fb: FBRestStop,
 ) : RestStop(), BaseFBWrapper {
 
@@ -29,9 +29,7 @@ internal class RestStopFBWrapper(
 
     override fun amenities(): List<Amenity?>? {
         return FlatbuffersListWrapper.get(fb.amenitiesLength) {
-            fb.amenities(it)?.let { amenity ->
-                AmenityFBWrapper(amenity)
-            }
+            AmenityFBWrapper.wrap(fb.amenities(it))
         }
     }
 
@@ -66,5 +64,11 @@ internal class RestStopFBWrapper(
             "guideMap=${guideMap()}, " +
             "name=${name()}" +
             ")"
+    }
+
+    internal companion object {
+        internal fun wrap(fb: FBRestStop?): RestStop? {
+            return fb?.let { RestStopFBWrapper(it) }
+        }
     }
 }

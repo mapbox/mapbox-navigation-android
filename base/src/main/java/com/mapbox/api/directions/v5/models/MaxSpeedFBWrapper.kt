@@ -6,7 +6,7 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class MaxSpeedFBWrapper(
+internal class MaxSpeedFBWrapper private constructor(
     private val fb: FBMaxSpeed,
 ) : MaxSpeed(), BaseFBWrapper {
 
@@ -59,5 +59,15 @@ internal class MaxSpeedFBWrapper(
             "unknown=${unknown()}, " +
             "none=${none()}" +
             ")"
+    }
+
+    internal companion object {
+        internal fun wrap(fb: FBMaxSpeed?): MaxSpeed? {
+            return when {
+                fb == null -> null
+                fb.isNull -> null
+                else -> MaxSpeedFBWrapper(fb)
+            }
+        }
     }
 }

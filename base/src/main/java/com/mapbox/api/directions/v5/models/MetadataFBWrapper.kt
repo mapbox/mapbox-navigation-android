@@ -5,7 +5,9 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class MetadataFBWrapper(private val fb: FBResponseMetadata) : Metadata(), BaseFBWrapper {
+internal class MetadataFBWrapper private constructor(
+    private val fb: FBResponseMetadata,
+) : Metadata(), BaseFBWrapper {
 
     override val unrecognized: ByteBuffer?
         get() = fb.unrecognizedPropertiesAsByteBuffer
@@ -44,5 +46,11 @@ internal class MetadataFBWrapper(private val fb: FBResponseMetadata) : Metadata(
 
     override fun toString(): String {
         return "Metadata(infoMap=${infoMap()})"
+    }
+
+    internal companion object {
+        internal fun wrap(fb: FBResponseMetadata?): Metadata? {
+            return fb?.let { MetadataFBWrapper(it) }
+        }
     }
 }

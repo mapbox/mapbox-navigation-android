@@ -6,7 +6,7 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class TollCollectionFBWrapper(
+internal class TollCollectionFBWrapper private constructor(
     private val fb: FBTollCollection,
 ) : TollCollection(), BaseFBWrapper {
 
@@ -53,5 +53,11 @@ internal class TollCollectionFBWrapper(
             "type=${type()}, " +
             "name=${name()}" +
             ")"
+    }
+
+    internal companion object {
+        internal fun wrap(fb: FBTollCollection?): TollCollection? {
+            return fb?.let { TollCollectionFBWrapper(it) }
+        }
     }
 }

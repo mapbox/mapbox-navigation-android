@@ -5,7 +5,7 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class CongestionFBWrapper(
+internal class CongestionFBWrapper private constructor(
     private val fb: FBCongestion,
 ) : Congestion(), BaseFBWrapper {
 
@@ -39,5 +39,15 @@ internal class CongestionFBWrapper(
 
     override fun toString(): String {
         return "Congestion(value=${value()})"
+    }
+
+    internal companion object {
+        internal fun wrap(fb: FBCongestion?): Congestion? {
+            return when {
+                fb == null -> null
+                fb.isNull -> null
+                else -> CongestionFBWrapper(fb)
+            }
+        }
     }
 }

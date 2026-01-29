@@ -5,7 +5,7 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class TollCostFBWrapper(
+internal class TollCostFBWrapper private constructor(
     private val fb: FBTollCost,
 ) : TollCost(), BaseFBWrapper {
 
@@ -18,7 +18,7 @@ internal class TollCostFBWrapper(
     override fun currency(): String? = fb.currency
 
     override fun paymentMethods(): PaymentMethods? {
-        return fb.paymentMethods?.let { PaymentMethodsFBWrapper(it) }
+        return PaymentMethodsFBWrapper.wrap(fb.paymentMethods)
     }
 
     override fun toBuilder(): Builder? {
@@ -46,5 +46,15 @@ internal class TollCostFBWrapper(
             "currency=${currency()}, " +
             "paymentMethods=${paymentMethods()}" +
             ")"
+    }
+
+    internal companion object {
+        internal fun wrap(fb: FBTollCost?): TollCost? {
+            return when {
+                fb == null -> null
+                fb.isNull -> null
+                else -> TollCostFBWrapper(fb)
+            }
+        }
     }
 }

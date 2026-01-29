@@ -5,7 +5,7 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class MapboxShieldFBWrapper(
+internal class MapboxShieldFBWrapper private constructor(
     private val fb: FBMapboxShield,
 ) : MapboxShield(), BaseFBWrapper {
 
@@ -50,5 +50,11 @@ internal class MapboxShieldFBWrapper(
             "name=${name()}, " +
             "textColor=${textColor()}" +
             ")"
+    }
+
+    internal companion object {
+        internal fun wrap(fb: FBMapboxShield?): MapboxShield? {
+            return fb?.let { MapboxShieldFBWrapper(it) }
+        }
     }
 }

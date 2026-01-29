@@ -78,10 +78,10 @@ internal fun DirectionsRouteContext.toRouteModelsParsingResult(
     val routeContext = FBDirectionsRouteContext.getRootAsDirectionsRouteContext(
         this.getData().buffer,
     )
-    val route = DirectionsRouteFBWrapper(
+    val route = DirectionsRouteFBWrapper.wrap(
         fb = routeContext.route,
         routeOptions = routeOptions,
-    )
+    ) ?: throw IllegalStateException("route returned by getRootAsDirectionsRouteContext is null")
     val data = ParsedRouteData(
         route = route,
         routesWaypoint = route.waypoints()?.filterNotNull() ?: getWaypointsFromResponse(
@@ -103,5 +103,5 @@ private fun getWaypointsFromResponse(
     routeContext: com.mapbox.directions.generated.DirectionsRouteContext,
 ): List<DirectionsWaypoint>? =
     FlatbuffersListWrapper.get(routeContext.waypointsLength) {
-        routeContext.waypoints(it)?.let { DirectionsWaypointFBWrapper(it) as DirectionsWaypoint }
+        DirectionsWaypointFBWrapper.wrap(routeContext.waypoints(it)) as? DirectionsWaypoint
     }?.filterNotNull()

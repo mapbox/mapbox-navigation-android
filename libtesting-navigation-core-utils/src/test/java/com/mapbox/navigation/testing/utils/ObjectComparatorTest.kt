@@ -1,6 +1,11 @@
 package com.mapbox.navigation.testing.utils
 
+import com.google.gson.JsonArray
+import com.google.gson.JsonNull
+import com.google.gson.JsonObject
+import com.google.gson.JsonPrimitive
 import com.mapbox.api.directions.v5.models.DirectionsResponse
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.Incident
 import com.mapbox.navigation.testing.factories.createDirectionsResponse
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
@@ -546,6 +551,136 @@ class ObjectComparatorTest {
         )
     }
 
+    @Test
+    fun `compare directions routes with difference in charging waypoint metadata`() {
+        val route1 = createDirectionsRoute(
+            waypoints = listOf(
+                createWaypoint(),
+                createWaypoint(
+                    unrecognizedProperties = mapOf(
+                        "charging_metadata" to JsonObject().apply {
+                            add("name", JsonPrimitive("test_charging"))
+                            add("restrictions", JsonObject())
+                            add("testArray", JsonArray())
+                        },
+                    ),
+                ),
+            )
+        )
+        val route2 = createDirectionsRoute(
+            waypoints = listOf(
+                createWaypoint(),
+                createWaypoint(
+                    unrecognizedProperties = mapOf(
+                        "charging_metadata" to JsonObject().apply {
+                            add("name", JsonPrimitive("test_charging"))
+                            add("restrictions", JsonNull.INSTANCE)
+                            add("testArray", JsonNull.INSTANCE)
+                        },
+                    ),
+                ),
+            )
+        )
+
+
+        val result = findDiff(
+            DirectionsRoute::class.java,
+            route1,
+            route2,
+        )
+
+        val paths = result.differences.map { it.path }.sorted()
+        assertEquals(
+            listOf(
+                "waypoints[1].unrecognizedJsonProperties.charging_metadata.restrictions",
+                "waypoints[1].unrecognizedJsonProperties.charging_metadata.testArray",
+            ),
+            paths,
+        )
+    }
+
+    @Test
+    fun `compare directions routes with difference in charging waypoint null-empty arrays`() {
+        val route1 = createDirectionsRoute(
+            waypoints = listOf(
+                createWaypoint(),
+                createWaypoint(
+                    unrecognizedProperties = mapOf(
+                        "charging_metadata" to JsonObject().apply {
+                            add("testArray", JsonArray())
+                        },
+                    ),
+                ),
+            )
+        )
+        val route2 = createDirectionsRoute(
+            waypoints = listOf(
+                createWaypoint(),
+                createWaypoint(
+                    unrecognizedProperties = mapOf(
+                        "charging_metadata" to JsonObject().apply {
+                            add("testArray", JsonNull.INSTANCE)
+                        },
+                    ),
+                ),
+            )
+        )
+
+        val result = findDiff(
+            DirectionsRoute::class.java,
+            route1,
+            route2,
+            nullAndEmptyArraysAreTheSame = true,
+        )
+
+        val paths = result.differences.map { it.path }.sorted()
+        assertEquals(
+            emptyList<String>(),
+            paths,
+        )
+    }
+
+    @Test
+    fun `null and empty json objects are equals`() {
+        val route1 = createDirectionsRoute(
+            waypoints = listOf(
+                createWaypoint(),
+                createWaypoint(
+                    unrecognizedProperties = mapOf(
+                        "charging_metadata" to JsonObject().apply {
+                            add("restrictions", JsonObject())
+                        },
+                    ),
+                ),
+            )
+        )
+        val route2 = createDirectionsRoute(
+            waypoints = listOf(
+                createWaypoint(),
+                createWaypoint(
+                    unrecognizedProperties = mapOf(
+                        "charging_metadata" to JsonObject().apply {
+                            add("restrictions", JsonNull.INSTANCE)
+                        },
+                    ),
+                ),
+            )
+        )
+
+
+        val result = findDiff(
+            DirectionsRoute::class.java,
+            route1,
+            route2,
+            nullAndEmptyJsonObjectsAreTheSame = true,
+        )
+
+        val paths = result.differences.map { it.path }.sorted()
+        assertEquals(
+            emptyList<String>(),
+            paths,
+        )
+    }
 
     private class TestData(
         val name: String = "test",

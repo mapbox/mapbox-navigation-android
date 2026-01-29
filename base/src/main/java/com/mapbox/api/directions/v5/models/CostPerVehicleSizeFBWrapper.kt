@@ -5,7 +5,7 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class CostPerVehicleSizeFBWrapper(
+internal class CostPerVehicleSizeFBWrapper private constructor(
     private val fb: FBCostPerVehicleSize,
 ) : CostPerVehicleSize(), BaseFBWrapper {
 
@@ -53,5 +53,11 @@ internal class CostPerVehicleSizeFBWrapper(
             "large=${large()}, " +
             "jumbo=${jumbo()}" +
             ")"
+    }
+
+    internal companion object {
+        internal fun wrap(fb: FBCostPerVehicleSize?): CostPerVehicleSize? {
+            return fb?.let { CostPerVehicleSizeFBWrapper(it) }
+        }
     }
 }

@@ -5,7 +5,7 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class TrafficCodesFBWrapper(
+internal class TrafficCodesFBWrapper private constructor(
     private val fb: FBTrafficCodes,
 ) : TrafficCodes(), BaseFBWrapper {
 
@@ -44,5 +44,11 @@ internal class TrafficCodesFBWrapper(
             "jarticCauseCode=${jarticCauseCode()}, " +
             "jarticRegulationCode=${jarticRegulationCode()}" +
             ")"
+    }
+
+    internal companion object {
+        internal fun wrap(fb: FBTrafficCodes?): TrafficCodes? {
+            return fb?.let { TrafficCodesFBWrapper(it) }
+        }
     }
 }

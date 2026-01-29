@@ -5,7 +5,7 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class NotificationDetailsFBWrapper(
+internal class NotificationDetailsFBWrapper private constructor(
     private val fb: FBNotificationDetails,
 ) : NotificationDetails(), BaseFBWrapper {
 
@@ -50,5 +50,11 @@ internal class NotificationDetailsFBWrapper(
             "unit=${unit()}, " +
             "message=${message()}" +
             ")"
+    }
+
+    internal companion object {
+        internal fun wrap(fb: FBNotificationDetails?): NotificationDetails? {
+            return fb?.let { NotificationDetailsFBWrapper(it) }
+        }
     }
 }

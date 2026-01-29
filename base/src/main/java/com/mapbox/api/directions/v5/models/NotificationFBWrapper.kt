@@ -10,7 +10,7 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class NotificationFBWrapper(
+internal class NotificationFBWrapper private constructor(
     private val fb: FBNotification,
 ) : Notification(), BaseFBWrapper {
 
@@ -42,7 +42,7 @@ internal class NotificationFBWrapper(
     override fun geometryIndexEnd(): Int? = fb.geometryIndexEnd
 
     override fun details(): NotificationDetails? {
-        return fb.details?.let { NotificationDetailsFBWrapper(it) }
+        return NotificationDetailsFBWrapper.wrap(fb.details)
     }
 
     override fun reason(): String? = fb.reason
@@ -83,10 +83,18 @@ internal class NotificationFBWrapper(
             ")"
     }
 
-    private companion object {
+    internal companion object {
+
+        internal fun wrap(fb: FBNotification?): Notification? {
+            return when {
+                fb == null -> null
+                fb.isNull -> null
+                else -> NotificationFBWrapper(fb)
+            }
+        }
 
         @DirectionsCriteria.NotificationsSubtypeCriteria
-        fun Byte.fbToNotificationsSubtypeCriteria(
+        private fun Byte.fbToNotificationsSubtypeCriteria(
             propertyName: String,
             unrecognized: FlexBuffers.Map?,
         ): String? {
@@ -120,7 +128,7 @@ internal class NotificationFBWrapper(
         }
 
         @NotificationsRefreshTypeCriteria
-        fun Byte.fbToNotificationsRefreshTypeCriteria(
+        private fun Byte.fbToNotificationsRefreshTypeCriteria(
             propertyName: String,
             unrecognized: FlexBuffers.Map?,
         ): String {
@@ -138,7 +146,7 @@ internal class NotificationFBWrapper(
         }
 
         @NotificationsTypeCriteria
-        fun Byte.fbToNotificationsTypeCriteria(
+        private fun Byte.fbToNotificationsTypeCriteria(
             propertyName: String,
             unrecognized: FlexBuffers.Map?,
         ): String {

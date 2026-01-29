@@ -9,6 +9,7 @@ inline fun <reified T> assertNoDiffs(
     emptyAndNullArraysAreTheSame: Boolean = false,
     doubleComparisonEpsilon: Double = 0.000001,
     nullAndEmptyStringsAreTheSame: Boolean = false,
+    nullAndEmptyJsonObjectsAreTheSame: Boolean = false,
     tag: String = "",
 ) {
     val result = findDiff(
@@ -19,6 +20,7 @@ inline fun <reified T> assertNoDiffs(
         nullAndEmptyArraysAreTheSame = emptyAndNullArraysAreTheSame,
         doubleComparisonEpsilon = doubleComparisonEpsilon,
         nullAndEmptyStringsAreTheSame = nullAndEmptyStringsAreTheSame,
+        nullAndEmptyJsonObjectsAreTheSame = nullAndEmptyJsonObjectsAreTheSame,
     )
     if (result.differences.isNotEmpty()) {
         val tag = if (tag.isNotEmpty()) "$tag: " else ""
@@ -59,6 +61,7 @@ fun <T> findDiff(
     visitedPathCallback: (String) -> Unit = {},
     doubleComparisonEpsilon: Double = 0.000001,
     nullAndEmptyStringsAreTheSame: Boolean = false,
+    nullAndEmptyJsonObjectsAreTheSame: Boolean = false,
 ): FindDiffResult {
     // Use IdentityHashMap-based set to track visited objects by identity, not equals()
     val visited = mutableSetOf<IdentityWrapper>()
@@ -73,6 +76,7 @@ fun <T> findDiff(
         visitedPathCallback,
         doubleComparisonEpsilon,
         nullAndEmptyStringsAreTheSame,
+        nullAndEmptyJsonObjectsAreTheSame,
     )
     return FindDiffResult(differences)
 }
@@ -89,6 +93,7 @@ private fun findDiffInternal(
     visitedPathCallback: (String) -> Unit,
     doubleComparisonEpsilon: Double,
     nullAndEmptyStringsAreTheSame: Boolean,
+    nullAndEmptyJsonObjectsAreTheSame: Boolean,
 ): List<Difference> {
     val differences = mutableListOf<Difference>()
     
@@ -226,6 +231,7 @@ private fun findDiffInternal(
                         visitedPathCallback,
                         doubleComparisonEpsilon,
                         nullAndEmptyStringsAreTheSame,
+                        nullAndEmptyJsonObjectsAreTheSame,
                     )
                     differences.addAll(elementDifferences)
                     // Always add the element path since we visited it
@@ -257,7 +263,138 @@ private fun findDiffInternal(
             return differences
         }
         
-        // For other collections (Set, Map), compare directly using equals
+        // Handle Maps - compare entry by entry
+        if (expected is Map<*, *> && actual is Map<*, *>) {
+            val expectedMap = expected
+            val actualMap = actual
+            
+            // Add the map field name since we're visiting it
+            visitedPathCallback(fieldName)
+            
+            // Get all keys from both maps
+            val allKeys = (expectedMap.keys + actualMap.keys).toSet()
+            
+            // Compare each key's value
+            for (key in allKeys) {
+                val keyString = key.toString()
+                val expectedValue = expectedMap[key]
+                val actualValue = actualMap[key]
+                val entryPath = "$fieldName.$keyString"
+                
+                // Handle missing keys
+                if (!expectedMap.containsKey(key)) {
+                    visitedPathCallback(entryPath)
+                    differences.add(
+                        Difference(
+                            path = entryPath,
+                            expectedValueString = "null",
+                            actualValueString = actualValue?.toString() ?: "null"
+                        )
+                    )
+                    continue
+                }
+                if (!actualMap.containsKey(key)) {
+                    visitedPathCallback(entryPath)
+                    differences.add(
+                        Difference(
+                            path = entryPath,
+                            expectedValueString = expectedValue?.toString() ?: "null",
+                            actualValueString = "null"
+                        )
+                    )
+                    continue
+                }
+                
+                // Handle null values
+                if (expectedValue == null && actualValue == null) {
+                    visitedPathCallback(entryPath)
+                    continue
+                }
+                if (nullAndEmptyStringsAreTheSame &&
+                    areNullAndEmptyStringEquivalents(expectedValue, actualValue)
+                ) {
+                    visitedPathCallback(entryPath)
+                    continue
+                }
+                if (expectedValue == null || actualValue == null) {
+                    visitedPathCallback(entryPath)
+                    differences.add(
+                        Difference(
+                            path = entryPath,
+                            expectedValueString = expectedValue?.toString() ?: "null",
+                            actualValueString = actualValue?.toString() ?: "null"
+                        )
+                    )
+                    continue
+                }
+                
+                // Check if this is a Gson JsonElement
+                if (isJsonElement(expectedValue) || isJsonElement(actualValue)) {
+                    val jsonDifferences = compareJsonElements(
+                        expectedValue,
+                        actualValue,
+                        entryPath,
+                        visitedPathCallback,
+                        nullAndEmptyArraysAreTheSame,
+                        nullAndEmptyJsonObjectsAreTheSame,
+                    )
+                    differences.addAll(jsonDifferences)
+                    continue
+                }
+                
+                // Determine if values are complex objects or simple types
+                val expectedClass = expectedValue::class.java
+                val actualClass = actualValue::class.java
+                
+                // Find common base class to handle different implementations
+                val valueType = findCommonSuperclass(expectedClass, actualClass)
+                val isComplexValue = !isPrimitiveOrSimpleType(valueType)
+                
+                if (isComplexValue) {
+                    // Recursively compare complex values to find specific field differences
+                    val valueDifferences = findDiffInternal(
+                        valueType,
+                        expectedValue,
+                        actualValue,
+                        entryPath,
+                        ignoreGetters,
+                        mutableSetOf(),  // Fresh visited set
+                        nullAndEmptyArraysAreTheSame,
+                        visitedPathCallback,
+                        doubleComparisonEpsilon,
+                        nullAndEmptyStringsAreTheSame,
+                        nullAndEmptyJsonObjectsAreTheSame,
+                    )
+                    differences.addAll(valueDifferences)
+                    visitedPathCallback(entryPath)
+                } else {
+                    // Compare simple values directly
+                    visitedPathCallback(entryPath)
+                    if (nullAndEmptyStringsAreTheSame &&
+                        areNullAndEmptyStringEquivalents(expectedValue, actualValue)
+                    ) {
+                        continue
+                    }
+                    if (!areValuesEqual(
+                            expectedValue,
+                            actualValue,
+                            doubleComparisonEpsilon,
+                            nullAndEmptyStringsAreTheSame
+                        )) {
+                        differences.add(
+                            Difference(
+                                path = entryPath,
+                                expectedValueString = expectedValue.toString(),
+                                actualValueString = actualValue.toString()
+                            )
+                        )
+                    }
+                }
+            }
+            return differences
+        }
+        
+        // For other collections (Set), compare directly using equals
         visitedPathCallback(fieldName)
         val valuesDiffer = !areValuesEqual(
             expected,
@@ -418,7 +555,8 @@ private fun findDiffInternal(
                         nullAndEmptyArraysAreTheSame,
                         visitedPathCallback,
                         doubleComparisonEpsilon,
-                    nullAndEmptyStringsAreTheSame,
+                        nullAndEmptyStringsAreTheSame,
+                        nullAndEmptyJsonObjectsAreTheSame,
                     )
                     differences.addAll(nestedDifferences)
                     // Always add the path since we visited it (already added above)
@@ -446,6 +584,205 @@ private fun findDiffInternal(
                     // Path already added above
                 }
             }
+        }
+    }
+    
+    return differences
+}
+
+private fun isJsonElement(value: Any): Boolean {
+    return try {
+        val jsonElementClass = Class.forName("com.google.gson.JsonElement")
+        jsonElementClass.isInstance(value)
+    } catch (e: ClassNotFoundException) {
+        false
+    }
+}
+
+@Suppress("UNCHECKED_CAST")
+private fun compareJsonElements(
+    expected: Any,
+    actual: Any,
+    pathPrefix: String,
+    visitedPathCallback: (String) -> Unit,
+    nullAndEmptyArraysAreTheSame: Boolean = false,
+    nullAndEmptyJsonObjectsAreTheSame: Boolean = false,
+): List<Difference> {
+    val differences = mutableListOf<Difference>()
+    
+    try {
+        val jsonObjectClass = Class.forName("com.google.gson.JsonObject")
+        val jsonArrayClass = Class.forName("com.google.gson.JsonArray")
+        val jsonPrimitiveClass = Class.forName("com.google.gson.JsonPrimitive")
+        val jsonNullClass = Class.forName("com.google.gson.JsonNull")
+        
+        visitedPathCallback(pathPrefix)
+        
+        // Handle null and empty array equivalence for JsonElements
+        if (nullAndEmptyArraysAreTheSame) {
+            val expectedIsEmptyJsonArray = jsonArrayClass.isInstance(expected) && 
+                (jsonArrayClass.getMethod("size").invoke(expected) as Int) == 0
+            val actualIsEmptyJsonArray = jsonArrayClass.isInstance(actual) && 
+                (jsonArrayClass.getMethod("size").invoke(actual) as Int) == 0
+            val expectedIsJsonNull = jsonNullClass.isInstance(expected)
+            val actualIsJsonNull = jsonNullClass.isInstance(actual)
+            
+            if ((expectedIsJsonNull && actualIsEmptyJsonArray) || 
+                (actualIsJsonNull && expectedIsEmptyJsonArray)) {
+                return differences
+            }
+        }
+        
+        // Handle null and empty JsonObject equivalence
+        if (nullAndEmptyJsonObjectsAreTheSame) {
+            val expectedIsEmptyJsonObject = jsonObjectClass.isInstance(expected) && 
+                (jsonObjectClass.getMethod("size").invoke(expected) as Int) == 0
+            val actualIsEmptyJsonObject = jsonObjectClass.isInstance(actual) && 
+                (jsonObjectClass.getMethod("size").invoke(actual) as Int) == 0
+            val expectedIsJsonNull = jsonNullClass.isInstance(expected)
+            val actualIsJsonNull = jsonNullClass.isInstance(actual)
+            
+            if ((expectedIsJsonNull && actualIsEmptyJsonObject) || 
+                (actualIsJsonNull && expectedIsEmptyJsonObject)) {
+                return differences
+            }
+        }
+        
+        // Check if types are different
+        if (expected::class.java != actual::class.java) {
+            differences.add(
+                Difference(
+                    path = pathPrefix,
+                    expectedValueString = expected.toString(),
+                    actualValueString = actual.toString()
+                )
+            )
+            return differences
+        }
+        
+        when {
+            jsonObjectClass.isInstance(expected) && jsonObjectClass.isInstance(actual) -> {
+                // Compare JsonObject
+                val expectedObj = expected
+                val actualObj = actual
+                
+                // Get entrySet method
+                val entrySetMethod = jsonObjectClass.getMethod("entrySet")
+                val expectedEntries = entrySetMethod.invoke(expectedObj) as Set<Map.Entry<String, Any>>
+                val actualEntries = entrySetMethod.invoke(actualObj) as Set<Map.Entry<String, Any>>
+                
+                val expectedMap = expectedEntries.associate { it.key to it.value }
+                val actualMap = actualEntries.associate { it.key to it.value }
+                
+                val allKeys = (expectedMap.keys + actualMap.keys).toSet()
+                
+                for (key in allKeys) {
+                    val expectedValue = expectedMap[key]
+                    val actualValue = actualMap[key]
+                    val entryPath = "$pathPrefix.$key"
+                    
+                    if (expectedValue == null && actualValue == null) {
+                        visitedPathCallback(entryPath)
+                        continue
+                    }
+                    if (expectedValue == null || actualValue == null) {
+                        visitedPathCallback(entryPath)
+                        differences.add(
+                            Difference(
+                                path = entryPath,
+                                expectedValueString = expectedValue?.toString() ?: "null",
+                                actualValueString = actualValue?.toString() ?: "null"
+                            )
+                        )
+                        continue
+                    }
+                    
+                    // Recursively compare nested JsonElements
+                    val nestedDiffs = compareJsonElements(
+                        expectedValue,
+                        actualValue,
+                        entryPath,
+                        visitedPathCallback,
+                        nullAndEmptyArraysAreTheSame,
+                        nullAndEmptyJsonObjectsAreTheSame,
+                    )
+                    differences.addAll(nestedDiffs)
+                }
+            }
+            jsonArrayClass.isInstance(expected) && jsonArrayClass.isInstance(actual) -> {
+                // Compare JsonArray
+                val sizeMethod = jsonArrayClass.getMethod("size")
+                val getMethod = jsonArrayClass.getMethod("get", Int::class.java)
+                
+                val expectedSize = sizeMethod.invoke(expected) as Int
+                val actualSize = sizeMethod.invoke(actual) as Int
+                
+                if (expectedSize != actualSize) {
+                    differences.add(
+                        Difference(
+                            path = pathPrefix,
+                            expectedValueString = "JsonArray with $expectedSize elements",
+                            actualValueString = "JsonArray with $actualSize elements"
+                        )
+                    )
+                    return differences
+                }
+                
+                for (i in 0 until expectedSize) {
+                    val expectedElement = getMethod.invoke(expected, i)!!
+                    val actualElement = getMethod.invoke(actual, i)!!
+                    val elementPath = "$pathPrefix[$i]"
+                    
+                    val nestedDiffs = compareJsonElements(
+                        expectedElement,
+                        actualElement,
+                        elementPath,
+                        visitedPathCallback,
+                        nullAndEmptyArraysAreTheSame,
+                        nullAndEmptyJsonObjectsAreTheSame,
+                    )
+                    differences.addAll(nestedDiffs)
+                }
+            }
+            jsonPrimitiveClass.isInstance(expected) && jsonPrimitiveClass.isInstance(actual) -> {
+                // Compare JsonPrimitive - use string representation
+                if (expected.toString() != actual.toString()) {
+                    differences.add(
+                        Difference(
+                            path = pathPrefix,
+                            expectedValueString = expected.toString(),
+                            actualValueString = actual.toString()
+                        )
+                    )
+                }
+            }
+            jsonNullClass.isInstance(expected) && jsonNullClass.isInstance(actual) -> {
+                // Both are JsonNull - they're equal, do nothing
+            }
+            else -> {
+                // Different types or unexpected JsonElement types
+                if (expected.toString() != actual.toString()) {
+                    differences.add(
+                        Difference(
+                            path = pathPrefix,
+                            expectedValueString = expected.toString(),
+                            actualValueString = actual.toString()
+                        )
+                    )
+                }
+            }
+        }
+    } catch (e: Exception) {
+        // Fallback to string comparison if reflection fails
+        visitedPathCallback(pathPrefix)
+        if (expected.toString() != actual.toString()) {
+            differences.add(
+                Difference(
+                    path = pathPrefix,
+                    expectedValueString = expected.toString(),
+                    actualValueString = actual.toString()
+                )
+            )
         }
     }
     
