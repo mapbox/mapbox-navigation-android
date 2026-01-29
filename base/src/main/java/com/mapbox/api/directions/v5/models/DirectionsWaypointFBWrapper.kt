@@ -8,7 +8,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class DirectionsWaypointFBWrapper(
+internal class DirectionsWaypointFBWrapper private constructor(
     private val fb: FBDirectionsWaypoint,
 ) : DirectionsWaypoint(), BaseFBWrapper {
 
@@ -57,5 +57,15 @@ internal class DirectionsWaypointFBWrapper(
             "location=${location()}, " +
             "distance=${distance()}" +
             ")"
+    }
+
+    internal companion object {
+        internal fun wrap(fb: FBDirectionsWaypoint?): DirectionsWaypoint? {
+            return when {
+                fb == null -> null
+                fb.isNull -> null
+                else -> DirectionsWaypointFBWrapper(fb)
+            }
+        }
     }
 }

@@ -5,7 +5,7 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class JunctionFBWrapper(
+internal class JunctionFBWrapper private constructor(
     private val fb: FBJunction,
 ) : Junction(), BaseFBWrapper {
 
@@ -39,5 +39,11 @@ internal class JunctionFBWrapper(
 
     override fun toString(): String {
         return "Junction(name=${name()})"
+    }
+
+    internal companion object {
+        internal fun wrap(fb: FBJunction?): Junction? {
+            return fb?.let { JunctionFBWrapper(it) }
+        }
     }
 }

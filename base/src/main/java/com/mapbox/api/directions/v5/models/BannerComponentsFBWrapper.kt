@@ -7,7 +7,7 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class BannerComponentsFBWrapper(
+internal class BannerComponentsFBWrapper private constructor(
     private val fb: FBBannerComponents,
 ) : BannerComponents(), BaseFBWrapper {
 
@@ -58,7 +58,7 @@ internal class BannerComponentsFBWrapper(
     override fun imageBaseUrl(): String? = fb.imageBaseUrl
 
     override fun mapboxShield(): MapboxShield? {
-        return fb.mapboxShield?.let { MapboxShieldFBWrapper(it) }
+        return MapboxShieldFBWrapper.wrap(fb.mapboxShield)
     }
 
     override fun imageUrl(): String? = fb.imageUrl
@@ -107,5 +107,15 @@ internal class BannerComponentsFBWrapper(
             "active=${active()}, " +
             "activeDirection=${activeDirection()}" +
             ")"
+    }
+
+    internal companion object {
+        internal fun wrap(fb: FBBannerComponents?): BannerComponents? {
+            return when {
+                fb == null -> null
+                fb.isNull -> null
+                else -> BannerComponentsFBWrapper(fb)
+            }
+        }
     }
 }

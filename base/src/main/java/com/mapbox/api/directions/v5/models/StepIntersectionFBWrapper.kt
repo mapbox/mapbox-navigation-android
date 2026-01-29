@@ -7,7 +7,7 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class StepIntersectionFBWrapper(
+internal class StepIntersectionFBWrapper private constructor(
     private val fb: FBStepIntersection,
 ) : StepIntersection(), BaseFBWrapper {
 
@@ -47,7 +47,12 @@ internal class StepIntersectionFBWrapper(
 
     override fun geometries(): List<String?>? {
         return FlatbuffersListWrapper.get(fb.geometriesLength) {
-            fb.geometries(it)?.value
+            val geometry = fb.geometries(it)
+            when {
+                geometry == null -> null
+                geometry.isNull -> null
+                else -> geometry.value
+            }
         }
     }
 
@@ -75,7 +80,7 @@ internal class StepIntersectionFBWrapper(
 
     override fun lanes(): List<IntersectionLanes?>? {
         return FlatbuffersListWrapper.get(fb.lanesLength) {
-            fb.lanes(it)?.let { IntersectionLanesFBWrapper(it) }
+            IntersectionLanesFBWrapper.wrap(fb.lanes(it))
         }
     }
 
@@ -86,15 +91,17 @@ internal class StepIntersectionFBWrapper(
     override fun adminIndex(): Int? = fb.adminIndex
 
     override fun restStop(): RestStop? {
-        return fb.restStop?.let { RestStopFBWrapper(it) }
+        return RestStopFBWrapper.wrap(fb.restStop)
     }
+
     override fun tollCollection(): TollCollection? {
-        return fb.tollCollection?.let { TollCollectionFBWrapper(it) }
+        return TollCollectionFBWrapper.wrap(fb.tollCollection)
     }
 
     override fun mapboxStreetsV8(): MapboxStreetsV8? {
-        return fb.mapboxStreetsV8?.let { MapboxStreetsV8FBWrapper(it) }
+        return MapboxStreetsV8FBWrapper.wrap(fb.mapboxStreetsV8)
     }
+
     override fun tunnelName(): String? = fb.tunnelName
 
     override fun railwayCrossing(): Boolean? = fb.railwayCrossing
@@ -106,14 +113,15 @@ internal class StepIntersectionFBWrapper(
     override fun yieldSign(): Boolean? = fb.yieldSign
 
     override fun interchange(): Interchange? {
-        return fb.interchange?.let { InterchangeFBWrapper(it) }
+        return InterchangeFBWrapper.wrap(fb.interchange)
     }
 
     override fun junction(): Junction? {
-        return fb.junction?.let { JunctionFBWrapper(it) }
+        return JunctionFBWrapper.wrap(fb.junction)
     }
+
     override fun mergingArea(): MergingArea? {
-        return fb.mergingArea?.let { MergingAreaFBWrapper(it) }
+        return MergingAreaFBWrapper.wrap(fb.mergingArea)
     }
 
     override fun duration(): Double? = fb.duration
@@ -170,14 +178,28 @@ internal class StepIntersectionFBWrapper(
             ")"
     }
 
-    private companion object {
-        fun FBRoadClassEnumWrapper.toRoadClassString(): String? = when (this.value) {
-            FBRoadClass.Toll -> "toll"
-            FBRoadClass.Ferry -> "ferry"
-            FBRoadClass.Motorway -> "motorway"
-            FBRoadClass.Restricted -> "restricted"
-            FBRoadClass.Tunnel -> "tunnel"
-            else -> this.unrecognizedValue
+    internal companion object {
+
+        internal fun wrap(fb: FBStepIntersection?): StepIntersection? {
+            return when {
+                fb == null -> null
+                fb.isNull -> null
+                else -> StepIntersectionFBWrapper(fb)
+            }
         }
+
+        private fun FBRoadClassEnumWrapper.toRoadClassString(): String? =
+            if (this.isNull) {
+                null
+            } else {
+                when (this.value) {
+                    FBRoadClass.Toll -> "toll"
+                    FBRoadClass.Ferry -> "ferry"
+                    FBRoadClass.Motorway -> "motorway"
+                    FBRoadClass.Restricted -> "restricted"
+                    FBRoadClass.Tunnel -> "tunnel"
+                    else -> this.unrecognizedValue
+                }
+            }
     }
 }

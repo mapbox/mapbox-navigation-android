@@ -5,7 +5,7 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class AdminFBWrapper(
+internal class AdminFBWrapper private constructor(
     private val fb: FBAdmin,
 ) : Admin(), BaseFBWrapper {
 
@@ -48,5 +48,15 @@ internal class AdminFBWrapper(
             "countryCode=${countryCode()}, " +
             "countryCodeAlpha3=${countryCodeAlpha3()}" +
             ")"
+    }
+
+    internal companion object {
+        internal fun wrap(fb: FBAdmin?): Admin? {
+            return when {
+                fb == null -> null
+                fb.isNull -> null
+                else -> AdminFBWrapper(fb)
+            }
+        }
     }
 }

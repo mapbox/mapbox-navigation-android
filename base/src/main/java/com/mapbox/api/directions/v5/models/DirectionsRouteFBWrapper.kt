@@ -6,7 +6,7 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class DirectionsRouteFBWrapper(
+internal class DirectionsRouteFBWrapper private constructor(
     private val fb: FBDirectionsRoute,
     private val routeOptions: RouteOptions? = null,
 ) : DirectionsRoute(), BaseFBWrapper {
@@ -52,13 +52,13 @@ internal class DirectionsRouteFBWrapper(
 
     override fun legs(): List<RouteLeg?>? {
         return FlatbuffersListWrapper.get(fb.legsLength) {
-            fb.legs(it)?.let { leg -> RouteLegFBWrapper(leg) }
+            RouteLegFBWrapper.wrap(fb.legs(it))
         }
     }
 
     override fun waypoints(): List<DirectionsWaypoint?>? {
         return FlatbuffersListWrapper.get(fb.waypointsLength) {
-            fb.waypoints(it)?.let { DirectionsWaypointFBWrapper(it) }
+            DirectionsWaypointFBWrapper.wrap(fb.waypoints(it))
         }
     }
 
@@ -71,7 +71,7 @@ internal class DirectionsRouteFBWrapper(
 
     override fun tollCosts(): List<TollCost?>? {
         return FlatbuffersListWrapper.get(fb.tollCostsLength) {
-            fb.tollCosts(it)?.let { tollCost -> TollCostFBWrapper(tollCost) }
+            TollCostFBWrapper.wrap(fb.tollCosts(it))
         }
     }
 
@@ -111,5 +111,18 @@ internal class DirectionsRouteFBWrapper(
             "requestUuid=${requestUuid()}, " +
             "tollCosts=${tollCosts()}" +
             ")"
+    }
+
+    internal companion object {
+        internal fun wrap(
+            fb: FBDirectionsRoute?,
+            routeOptions: RouteOptions? = null,
+        ): DirectionsRoute? {
+            return when {
+                fb == null -> null
+                fb.isNull -> null
+                else -> DirectionsRouteFBWrapper(fb, routeOptions)
+            }
+        }
     }
 }

@@ -6,7 +6,7 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class DirectionsResponseFBWrapper(
+internal class DirectionsResponseFBWrapper private constructor(
     private val fb: FBDirectionsResponse,
 ) : DirectionsResponse(), BaseFBWrapper {
 
@@ -22,22 +22,20 @@ internal class DirectionsResponseFBWrapper(
 
     override fun waypoints(): List<DirectionsWaypoint?>? {
         return FlatbuffersListWrapper.get(fb.waypointsLength) {
-            fb.waypoints(it)?.let { waypoint ->
-                DirectionsWaypointFBWrapper(waypoint)
-            }
+            DirectionsWaypointFBWrapper.wrap(fb.waypoints(it))
         }
     }
 
     override fun routes(): List<DirectionsRoute?> {
         return FlatbuffersListWrapper.get(fb.routesLength) {
-            DirectionsRouteFBWrapper(fb.routes(it))
+            DirectionsRouteFBWrapper.wrap(fb.routes(it))
         } ?: emptyList() // TODO: https://mapbox.atlassian.net/browse/NAVAND-6540
     }
 
     override fun uuid(): String? = fb.uuid
 
     override fun metadata(): Metadata? {
-        return fb.metadata?.let { MetadataFBWrapper(it) }
+        return MetadataFBWrapper.wrap(fb.metadata)
     }
 
     override fun toBuilder(): Builder? {
@@ -69,5 +67,11 @@ internal class DirectionsResponseFBWrapper(
             "uuid=${uuid()}, " +
             "metadata=${metadata()}" +
             ")"
+    }
+
+    internal companion object {
+        internal fun wrap(fb: FBDirectionsResponse?): DirectionsResponse? {
+            return fb?.let { DirectionsResponseFBWrapper(it) }
+        }
     }
 }

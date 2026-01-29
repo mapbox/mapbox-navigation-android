@@ -6,7 +6,8 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class RouteLegFBWrapper(private val fb: FBRouteLeg) : RouteLeg(), BaseFBWrapper {
+internal class RouteLegFBWrapper
+private constructor(private val fb: FBRouteLeg) : RouteLeg(), BaseFBWrapper {
 
     override val unrecognized: ByteBuffer?
         get() = fb.unrecognizedPropertiesAsByteBuffer
@@ -16,7 +17,7 @@ internal class RouteLegFBWrapper(private val fb: FBRouteLeg) : RouteLeg(), BaseF
 
     override fun viaWaypoints(): List<SilentWaypoint?>? {
         return FlatbuffersListWrapper.get(fb.viaWaypointsLength) {
-            fb.viaWaypoints(it)?.let { waypoint -> SilentWaypointFBWrapper(waypoint) }
+            SilentWaypointFBWrapper.wrap(fb.viaWaypoints(it))
         }
     }
 
@@ -30,36 +31,35 @@ internal class RouteLegFBWrapper(private val fb: FBRouteLeg) : RouteLeg(), BaseF
 
     override fun admins(): List<Admin?>? {
         return FlatbuffersListWrapper.get(fb.adminsLength) {
-            fb.admins(it)?.let { admin -> AdminFBWrapper(admin) }
+            AdminFBWrapper.wrap(fb.admins(it))
         }
     }
 
     override fun steps(): List<LegStep?>? {
         return FlatbuffersListWrapper.get(fb.stepsLength) {
-            fb.steps(it)?.let { step -> LegStepFBWrapper(step) }
+            LegStepFBWrapper.wrap(fb.steps(it))
         }
     }
 
     override fun incidents(): List<Incident?>? {
         return FlatbuffersListWrapper.get(fb.incidentsLength) {
-            fb.incidents(it)?.let { incident -> IncidentFBWrapper(incident) }
+            IncidentFBWrapper.wrap(fb.incidents(it))
         }
     }
+
     override fun annotation(): LegAnnotation? {
-        return fb.annotation?.let { LegAnnotationFBWrapper(it) }
+        return LegAnnotationFBWrapper.wrap(fb.annotation)
     }
 
     override fun closures(): List<Closure?>? {
         return FlatbuffersListWrapper.get(fb.closuresLength) {
-            fb.closures(it)?.let { closure -> ClosureFBWrapper(closure) }
+            ClosureFBWrapper.wrap(fb.closures(it))
         }
     }
 
     override fun notifications(): List<Notification?>? {
         return FlatbuffersListWrapper.get(fb.notificationsLength) {
-            fb.notifications(it)?.let { notification ->
-                NotificationFBWrapper(notification)
-            }
+            NotificationFBWrapper.wrap(fb.notifications(it))
         }
     }
 
@@ -97,5 +97,15 @@ internal class RouteLegFBWrapper(private val fb: FBRouteLeg) : RouteLeg(), BaseF
             "closures=${closures()}, " +
             "notifications=${notifications()}" +
             ")"
+    }
+
+    internal companion object {
+        internal fun wrap(fb: FBRouteLeg?): RouteLeg? {
+            return when {
+                fb == null -> null
+                fb.isNull -> null
+                else -> RouteLegFBWrapper(fb)
+            }
+        }
     }
 }

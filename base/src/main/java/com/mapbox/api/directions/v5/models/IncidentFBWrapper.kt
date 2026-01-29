@@ -7,7 +7,7 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class IncidentFBWrapper(
+internal class IncidentFBWrapper private constructor(
     private val fb: FBIncident,
 ) : Incident(), BaseFBWrapper {
 
@@ -41,7 +41,7 @@ internal class IncidentFBWrapper(
     override fun closed(): Boolean? = fb.closed
 
     override fun congestion(): Congestion? {
-        return fb.congestion?.let { CongestionFBWrapper(it) }
+        return CongestionFBWrapper.wrap(fb.congestion)
     }
 
     override fun description(): String? = fb.description
@@ -71,7 +71,7 @@ internal class IncidentFBWrapper(
     }
 
     override fun trafficCodes(): TrafficCodes? {
-        return fb.trafficCodes?.let { TrafficCodesFBWrapper(it) }
+        return TrafficCodesFBWrapper.wrap(fb.trafficCodes)
     }
 
     override fun geometryIndexStart(): Int? = fb.geometryIndexStart
@@ -146,5 +146,15 @@ internal class IncidentFBWrapper(
             "numLanesBlocked=${numLanesBlocked()}, " +
             "affectedRoadNames=${affectedRoadNames()}" +
             ")"
+    }
+
+    internal companion object {
+        internal fun wrap(fb: FBIncident?): Incident? {
+            return when {
+                fb == null -> null
+                fb.isNull -> null
+                else -> IncidentFBWrapper(fb)
+            }
+        }
     }
 }

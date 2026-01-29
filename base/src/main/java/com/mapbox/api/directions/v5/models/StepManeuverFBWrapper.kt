@@ -8,7 +8,7 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class StepManeuverFBWrapper(
+internal class StepManeuverFBWrapper private constructor(
     private val fb: FBStepManeuver,
 ) : StepManeuver(), BaseFBWrapper {
 
@@ -66,5 +66,11 @@ internal class StepManeuverFBWrapper(
             "modifier=${modifier()}, " +
             "exit=${exit()}" +
             ")"
+    }
+
+    internal companion object {
+        internal fun wrap(fb: FBStepManeuver?): StepManeuver? {
+            return fb?.let { StepManeuverFBWrapper(it) }
+        }
     }
 }

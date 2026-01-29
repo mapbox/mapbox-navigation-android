@@ -5,7 +5,7 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class BannerInstructionsFBWrapper(
+internal class BannerInstructionsFBWrapper private constructor(
     private val fb: FBBannerInstructions,
 ) : BannerInstructions(), BaseFBWrapper {
 
@@ -18,19 +18,19 @@ internal class BannerInstructionsFBWrapper(
     override fun distanceAlongGeometry(): Double = fb.distanceAlongGeometry
 
     override fun primary(): BannerText {
-        return BannerTextFBWrapper(fb.primary)
+        return BannerTextFBWrapper.wrap(fb.primary)!!
     }
 
     override fun secondary(): BannerText? {
-        return fb.secondary?.let { BannerTextFBWrapper(it) }
+        return BannerTextFBWrapper.wrap(fb.secondary)
     }
 
     override fun sub(): BannerText? {
-        return fb.sub?.let { BannerTextFBWrapper(it) }
+        return BannerTextFBWrapper.wrap(fb.sub)
     }
 
     override fun view(): BannerView? {
-        return fb.view?.let { BannerViewFBWrapper(it) }
+        return BannerViewFBWrapper.wrap(fb.view)
     }
 
     override fun toBuilder(): Builder? {
@@ -61,5 +61,15 @@ internal class BannerInstructionsFBWrapper(
             "sub=${sub()}, " +
             "view=${view()}" +
             ")"
+    }
+
+    internal companion object {
+        internal fun wrap(fb: FBBannerInstructions?): BannerInstructions? {
+            return when {
+                fb == null -> null
+                fb.isNull -> null
+                else -> BannerInstructionsFBWrapper(fb)
+            }
+        }
     }
 }

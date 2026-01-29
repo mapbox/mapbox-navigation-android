@@ -7,7 +7,7 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class LegStepFBWrapper(
+internal class LegStepFBWrapper private constructor(
     private val fb: FBLegStep,
 ) : LegStep(), BaseFBWrapper {
 
@@ -74,22 +74,18 @@ internal class LegStepFBWrapper(
     override fun rotaryPronunciation(): String? = fb.rotaryPronunciation
 
     override fun maneuver(): StepManeuver {
-        return StepManeuverFBWrapper(fb.maneuver)
+        return StepManeuverFBWrapper.wrap(fb.maneuver)!!
     }
 
     override fun voiceInstructions(): List<VoiceInstructions?>? {
         return FlatbuffersListWrapper.get(fb.voiceInstructionsLength) {
-            fb.voiceInstructions(it)?.let { instruction ->
-                VoiceInstructionsFBWrapper(instruction)
-            }
+            VoiceInstructionsFBWrapper.wrap(fb.voiceInstructions(it))
         }
     }
 
     override fun bannerInstructions(): List<BannerInstructions?>? {
         return FlatbuffersListWrapper.get(fb.bannerInstructionsLength) {
-            fb.bannerInstructions(it)?.let { instructions ->
-                BannerInstructionsFBWrapper(instructions)
-            }
+            BannerInstructionsFBWrapper.wrap(fb.bannerInstructions(it))
         } ?: emptyList() // TODO: https://mapbox.atlassian.net/browse/NAVAND-6540
     }
 
@@ -107,9 +103,7 @@ internal class LegStepFBWrapper(
 
     override fun intersections(): List<StepIntersection?>? {
         return FlatbuffersListWrapper.get(fb.intersectionsLength) {
-            fb.intersections(it)?.let { intersections ->
-                StepIntersectionFBWrapper(intersections)
-            }
+            StepIntersectionFBWrapper.wrap(fb.intersections(it))
         }
     }
 
@@ -158,5 +152,15 @@ internal class LegStepFBWrapper(
             "intersections=${intersections()}, " +
             "exits=${exits()}" +
             ")"
+    }
+
+    internal companion object {
+        internal fun wrap(fb: FBLegStep?): LegStep? {
+            return when {
+                fb == null -> null
+                fb.isNull -> null
+                else -> LegStepFBWrapper(fb)
+            }
+        }
     }
 }

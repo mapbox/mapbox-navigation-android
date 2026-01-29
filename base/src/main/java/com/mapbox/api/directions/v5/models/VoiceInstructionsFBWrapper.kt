@@ -5,7 +5,7 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class VoiceInstructionsFBWrapper(
+internal class VoiceInstructionsFBWrapper private constructor(
     private val fb: FBVoiceInstructions,
 ) : VoiceInstructions(), BaseFBWrapper {
 
@@ -47,5 +47,15 @@ internal class VoiceInstructionsFBWrapper(
             "announcement=${announcement()}, " +
             "ssmlAnnouncement=${ssmlAnnouncement()}" +
             ")"
+    }
+
+    internal companion object {
+        internal fun wrap(fb: FBVoiceInstructions?): VoiceInstructions? {
+            return when {
+                fb == null -> null
+                fb.isNull -> null
+                else -> VoiceInstructionsFBWrapper(fb)
+            }
+        }
     }
 }

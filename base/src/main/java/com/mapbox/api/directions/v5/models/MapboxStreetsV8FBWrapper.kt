@@ -5,7 +5,7 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class MapboxStreetsV8FBWrapper(
+internal class MapboxStreetsV8FBWrapper private constructor(
     private val fb: FBMapboxStreetsV8,
 ) : MapboxStreetsV8(), BaseFBWrapper {
 
@@ -39,5 +39,11 @@ internal class MapboxStreetsV8FBWrapper(
 
     override fun toString(): String {
         return "MapboxStreetsV8(roadClass=${roadClass()})"
+    }
+
+    internal companion object {
+        internal fun wrap(fb: FBMapboxStreetsV8?): MapboxStreetsV8? {
+            return fb?.let { MapboxStreetsV8FBWrapper(it) }
+        }
     }
 }

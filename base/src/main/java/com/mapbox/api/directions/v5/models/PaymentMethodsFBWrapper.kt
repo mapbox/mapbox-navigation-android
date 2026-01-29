@@ -5,7 +5,7 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class PaymentMethodsFBWrapper(
+internal class PaymentMethodsFBWrapper private constructor(
     private val fb: FBPaymentMethods,
 ) : PaymentMethods(), BaseFBWrapper {
 
@@ -16,15 +16,15 @@ internal class PaymentMethodsFBWrapper(
         get() = fb.unrecognizedPropertiesLength
 
     override fun etc(): CostPerVehicleSize? {
-        return fb.etc?.let { CostPerVehicleSizeFBWrapper(it) }
+        return CostPerVehicleSizeFBWrapper.wrap(fb.etc)
     }
 
     override fun etc2(): CostPerVehicleSize? {
-        return fb.etc2?.let { CostPerVehicleSizeFBWrapper(it) }
+        return CostPerVehicleSizeFBWrapper.wrap(fb.etc2)
     }
 
     override fun cash(): CostPerVehicleSize? {
-        return fb.cash?.let { CostPerVehicleSizeFBWrapper(it) }
+        return CostPerVehicleSizeFBWrapper.wrap(fb.cash)
     }
 
     override fun toBuilder(): Builder? {
@@ -53,5 +53,11 @@ internal class PaymentMethodsFBWrapper(
             "etc2=${etc2()}, " +
             "cash=${cash()}" +
             ")"
+    }
+
+    internal companion object {
+        internal fun wrap(fb: FBPaymentMethods?): PaymentMethods? {
+            return fb?.let { PaymentMethodsFBWrapper(it) }
+        }
     }
 }

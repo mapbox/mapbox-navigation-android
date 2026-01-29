@@ -9,7 +9,7 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class BannerTextFBWrapper(
+internal class BannerTextFBWrapper private constructor(
     private val fb: FBBannerText,
 ) : BannerText(), BaseFBWrapper {
 
@@ -23,7 +23,7 @@ internal class BannerTextFBWrapper(
 
     override fun components(): List<BannerComponents?>? {
         return FlatbuffersListWrapper.get(fb.componentsLength) {
-            fb.components(it)?.let { BannerComponentsFBWrapper(it) }
+            BannerComponentsFBWrapper.wrap(fb.components(it))
         }
     }
 
@@ -75,5 +75,11 @@ internal class BannerTextFBWrapper(
             "degrees=${degrees()}, " +
             "drivingSide=${drivingSide()}" +
             ")"
+    }
+
+    internal companion object {
+        internal fun wrap(fb: FBBannerText?): BannerText? {
+            return fb?.let { BannerTextFBWrapper(it) }
+        }
     }
 }

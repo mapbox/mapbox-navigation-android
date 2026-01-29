@@ -5,7 +5,7 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class ClosureFBWrapper(
+internal class ClosureFBWrapper private constructor(
     private val fb: FBClosure,
 ) : Closure(), BaseFBWrapper {
 
@@ -54,5 +54,15 @@ internal class ClosureFBWrapper(
             "geometryIndexStart=${geometryIndexStart()}, " +
             "geometryIndexEnd=${geometryIndexEnd()}" +
             ")"
+    }
+
+    internal companion object {
+        internal fun wrap(fb: FBClosure?): Closure? {
+            return when {
+                fb == null -> null
+                fb.isNull -> null
+                else -> ClosureFBWrapper(fb)
+            }
+        }
     }
 }

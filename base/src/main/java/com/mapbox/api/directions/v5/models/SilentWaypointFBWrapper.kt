@@ -4,7 +4,7 @@ import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
 import com.mapbox.auto.value.gson.SerializableJsonElement
 import java.nio.ByteBuffer
 
-internal class SilentWaypointFBWrapper(
+internal class SilentWaypointFBWrapper private constructor(
     private val fb: FBSilentWaypoint,
 ) : SilentWaypoint(), BaseFBWrapper {
 
@@ -42,5 +42,15 @@ internal class SilentWaypointFBWrapper(
             "distanceFromStart=${distanceFromStart()}, " +
             "geometryIndex=${geometryIndex()}" +
             ")"
+    }
+
+    internal companion object {
+        internal fun wrap(fb: FBSilentWaypoint?): SilentWaypoint? {
+            return when {
+                fb == null -> null
+                fb.isNull -> null
+                else -> SilentWaypointFBWrapper(fb)
+            }
+        }
     }
 }

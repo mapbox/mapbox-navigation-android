@@ -9,7 +9,7 @@ import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
-internal class IntersectionLanesFBWrapper(
+internal class IntersectionLanesFBWrapper private constructor(
     private val fb: FBIntersectionLanes,
 ) : IntersectionLanes(), BaseFBWrapper {
 
@@ -34,8 +34,12 @@ internal class IntersectionLanesFBWrapper(
     override fun indications(): List<String?>? {
         return FlatbuffersListWrapper.get(fb.indicationsLength) { index ->
             fb.indications(index)?.let { indication ->
-                indication.value.fbToLineIndication("indications") {
-                    indication.unrecognizedValue
+                if (indication.isNull) {
+                    null
+                } else {
+                    indication.value.fbToLineIndication("indications") {
+                        indication.unrecognizedValue
+                    }
                 }
             }
         }
@@ -48,9 +52,7 @@ internal class IntersectionLanesFBWrapper(
     }
 
     override fun access(): IntersectionLaneAccess? {
-        return fb.access?.let {
-            IntersectionLaneAccessFBWrapper(it)
-        }
+        return IntersectionLaneAccessFBWrapper.wrap(fb.access)
     }
 
     override fun toBuilder(): Builder? {
@@ -84,30 +86,43 @@ internal class IntersectionLanesFBWrapper(
             ")"
     }
 
-    private companion object {
+    internal companion object {
+
+        internal fun wrap(fb: FBIntersectionLanes?): IntersectionLanes? {
+            return when {
+                fb == null -> null
+                fb.isNull -> null
+                else -> IntersectionLanesFBWrapper(fb)
+            }
+        }
 
         @DirectionsCriteria.PaymentMethodsCriteria
-        fun FBLanePaymentMethodEnumWrapper.fbToPaymentMethodCriteria(
+        private fun FBLanePaymentMethodEnumWrapper.fbToPaymentMethodCriteria(
             propertyName: String,
         ): String? {
-            return when (this.value) {
-                FBLanePaymentMethod.General -> DirectionsCriteria.PAYMENT_METHOD_GENERAL
-                FBLanePaymentMethod.Etc -> DirectionsCriteria.PAYMENT_METHOD_ETC
-                FBLanePaymentMethod.Etcx -> DirectionsCriteria.PAYMENT_METHOD_ETCX
-                FBLanePaymentMethod.Cash -> DirectionsCriteria.PAYMENT_METHOD_CASH
-                FBLanePaymentMethod.ExactCash -> DirectionsCriteria.PAYMENT_METHOD_EXACT_CASH
-                FBLanePaymentMethod.Coins -> DirectionsCriteria.PAYMENT_METHOD_COINS
-                FBLanePaymentMethod.Notes -> DirectionsCriteria.PAYMENT_METHOD_NOTES
-                FBLanePaymentMethod.DebitCards -> DirectionsCriteria.PAYMENT_METHOD_DEBIT_CARDS
-                FBLanePaymentMethod.PassCard -> DirectionsCriteria.PAYMENT_METHOD_PASS_CARD
-                FBLanePaymentMethod.CreditCards -> DirectionsCriteria.PAYMENT_METHOD_CREDIT_CARDS
-                FBLanePaymentMethod.Video -> DirectionsCriteria.PAYMENT_METHOD_VIDEO
-                FBLanePaymentMethod.Cryptocurrencies ->
-                    DirectionsCriteria.PAYMENT_METHOD_CRYPTOCURRENCIES
-                FBLanePaymentMethod.App -> DirectionsCriteria.PAYMENT_METHOD_APP
-                FBLanePaymentMethod.Etc2 -> DirectionsCriteria.PAYMENT_METHOD_ETC2
-                FBLanePaymentMethod.Unknown -> this.unrecognizedValue
-                else -> unhandledEnumMapping(propertyName, this.value)
+            return if (this.isNull) {
+                null
+            } else {
+                when (this.value) {
+                    FBLanePaymentMethod.General -> DirectionsCriteria.PAYMENT_METHOD_GENERAL
+                    FBLanePaymentMethod.Etc -> DirectionsCriteria.PAYMENT_METHOD_ETC
+                    FBLanePaymentMethod.Etcx -> DirectionsCriteria.PAYMENT_METHOD_ETCX
+                    FBLanePaymentMethod.Cash -> DirectionsCriteria.PAYMENT_METHOD_CASH
+                    FBLanePaymentMethod.ExactCash -> DirectionsCriteria.PAYMENT_METHOD_EXACT_CASH
+                    FBLanePaymentMethod.Coins -> DirectionsCriteria.PAYMENT_METHOD_COINS
+                    FBLanePaymentMethod.Notes -> DirectionsCriteria.PAYMENT_METHOD_NOTES
+                    FBLanePaymentMethod.DebitCards -> DirectionsCriteria.PAYMENT_METHOD_DEBIT_CARDS
+                    FBLanePaymentMethod.PassCard -> DirectionsCriteria.PAYMENT_METHOD_PASS_CARD
+                    FBLanePaymentMethod.CreditCards ->
+                        DirectionsCriteria.PAYMENT_METHOD_CREDIT_CARDS
+                    FBLanePaymentMethod.Video -> DirectionsCriteria.PAYMENT_METHOD_VIDEO
+                    FBLanePaymentMethod.Cryptocurrencies ->
+                        DirectionsCriteria.PAYMENT_METHOD_CRYPTOCURRENCIES
+                    FBLanePaymentMethod.App -> DirectionsCriteria.PAYMENT_METHOD_APP
+                    FBLanePaymentMethod.Etc2 -> DirectionsCriteria.PAYMENT_METHOD_ETC2
+                    FBLanePaymentMethod.Unknown -> this.unrecognizedValue
+                    else -> unhandledEnumMapping(propertyName, this.value)
+                }
             }
         }
     }
