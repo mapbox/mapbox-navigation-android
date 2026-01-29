@@ -2,6 +2,7 @@ package com.mapbox.api.directions.v5.models
 
 import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
 import com.mapbox.api.directions.v5.models.utils.FlatbuffersListWrapper
+import com.mapbox.api.directions.v5.models.utils.unhandledEnumMapping
 import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
@@ -18,7 +19,7 @@ internal class IntersectionLaneAccessFBWrapper(
 
     override fun designated(): List<String?>? {
         return FlatbuffersListWrapper.get(fb.designatedLength) {
-            fb.designated(it)?.toVehicleType()
+            fb.designated(it)?.toVehicleType("designated")
         }
     }
 
@@ -47,14 +48,16 @@ internal class IntersectionLaneAccessFBWrapper(
     }
 
     private companion object {
-        fun FBLaneDesignatedVehicleTypeEnumWrapper.toVehicleType(): String? {
+        fun FBLaneDesignatedVehicleTypeEnumWrapper.toVehicleType(propertyName: String): String? {
             return when (this.value) {
+                FBLaneDesignatedVehicleType.Unknown -> this.unrecognizedValue
                 FBLaneDesignatedVehicleType.Bus -> IntersectionLaneAccess.BUS
                 FBLaneDesignatedVehicleType.Hov -> IntersectionLaneAccess.HOV
                 FBLaneDesignatedVehicleType.Taxi -> IntersectionLaneAccess.TAXI
                 FBLaneDesignatedVehicleType.Motorcycle -> IntersectionLaneAccess.MOTORCYCLE
-                FBLaneDesignatedVehicleType.Emergency -> "emergency"
-                else -> this.unrecognizedValue
+                FBLaneDesignatedVehicleType.Bicycle -> IntersectionLaneAccess.BICYCLE
+                FBLaneDesignatedVehicleType.Moped -> IntersectionLaneAccess.MOPED
+                else -> unhandledEnumMapping(propertyName, this.value)
             }
         }
     }
