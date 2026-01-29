@@ -1001,37 +1001,52 @@ class CoreRerouteTest(
             historyRecorderRule = mapboxHistoryTestRule,
             customConfig = getTestCustomConfig(),
         ) { mapboxNavigation ->
-            val mockRoute = RoutesProvider.dc_short_alternative_has_more_legs(context)
-            mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
+            val mockSingleLegPrimaryRoute = RoutesProvider
+                .dc_short_alternative_after_parssing_waypoint(context)
+            val mockMultiLegAlternative = RoutesProvider
+                .dc_short_two_legs_with_alternative(context)
+            mockWebServerRule.requestHandlers.addAll(
+                mockSingleLegPrimaryRoute.mockRequestHandlers +
+                    mockMultiLegAlternative.mockRequestHandlers,
+            )
 
-            val routes = mapboxNavigation.requestRoutes(
+            val singleLegPrimary = mapboxNavigation.requestRoutes(
                 RouteOptions.builder()
                     .applyDefaultNavigationOptions()
                     .applyLanguageAndVoiceUnitOptions(context)
                     .baseUrl(mockWebServerRule.baseUrl)
                     .waypointsPerRoute(true)
-                    .coordinatesList(mockRoute.routeWaypoints).build(),
-            ).getSuccessfulResultOrThrowException().routes
+                    .coordinatesList(mockSingleLegPrimaryRoute.routeWaypoints)
+                    .build(),
+            ).getSuccessfulResultOrThrowException().routes.single()
+            val multiLegAlternative = mapboxNavigation.requestRoutes(
+                RouteOptions.builder()
+                    .applyDefaultNavigationOptions()
+                    .applyLanguageAndVoiceUnitOptions(context)
+                    .baseUrl(mockWebServerRule.baseUrl)
+                    .waypointsPerRoute(true)
+                    .coordinatesList(mockMultiLegAlternative.routeWaypoints)
+                    .build(),
+            ).getSuccessfulResultOrThrowException().routes.first()
 
-            mockLocationReplayerRule.playRoute(
-                routes[1].directionsRoute,
-                eventsToDrop = 15,
-            )
+            mockLocationReplayerRule.playGeometry("aowdiA`kw|qCeS]sXSc[?")
+
             mapboxNavigation.startTripSession()
-            mapboxNavigation.setNavigationRoutes(routes)
+            mapboxNavigation.setNavigationRoutes(
+                listOf(
+                    singleLegPrimary,
+                    multiLegAlternative,
+                ),
+            )
 
-            mapboxNavigation.routeProgressUpdates()
-                .filter { it.currentLegProgress?.legIndex == 0 && it.currentRouteGeometryIndex > 5 }
-                .first()
-
-            val rerouteResult = mapboxNavigation.routesUpdates().filter {
-                (it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE).also {
-                    if (it) {
-                        assertEquals(1, mapboxNavigation.currentLegIndex())
-                    }
-                }
-            }.first()
-            assertEquals(routes[1], rerouteResult.navigationRoutes.first())
+            val rerouteResult = mapboxNavigation.routesUpdates().first {
+                it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
+            }
+            assertEquals(
+                multiLegAlternative,
+                rerouteResult.navigationRoutes.first(),
+            )
+            assertEquals(1, mapboxNavigation.currentLegIndex())
         }
     }
 
