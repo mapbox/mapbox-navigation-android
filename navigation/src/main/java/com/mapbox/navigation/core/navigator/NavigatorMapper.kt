@@ -232,22 +232,30 @@ internal fun NavigationStatus.getCurrentBannerInstructions(
         primaryRouteIndices,
     ) { route, nativeBanner, primaryRouteIndices ->
         route.directionsRoute.legs()?.let { legs ->
-            if (legs.size > 0) {
-                val currentLeg = legs[primaryRouteIndices.legIndex]
-                currentLeg.steps()?.let { steps ->
-                    if (steps.size > 0) {
-                        val currentStep = steps[primaryRouteIndices.stepIndex]
-                        currentStep.bannerInstructions()?.let { banners ->
-                            nativeBanner.mapToDirectionsApi(banners[nativeBanner.index])
-                        }
-                    } else {
-                        logW("Steps cannot be null or empty", LOG_CATEGORY)
-                        null
-                    }
-                }
-            } else {
+            val legIndex = primaryRouteIndices.legIndex
+            val stepIndex = primaryRouteIndices.stepIndex
+            if (legs.isEmpty()) {
                 logW("Legs cannot be null or empty", LOG_CATEGORY)
-                null
+                return@let null
+            }
+            if (legIndex !in legs.indices) {
+                logW("Leg index should be in [0; ${legs.size})", LOG_CATEGORY)
+                return@let null
+            }
+            val currentLeg = legs[primaryRouteIndices.legIndex]
+            currentLeg.steps()?.let { steps ->
+                if (steps.isEmpty()) {
+                    logW("Steps cannot be null or empty", LOG_CATEGORY)
+                    return@let null
+                }
+                if (stepIndex !in steps.indices) {
+                    logW("Step index should be in [0; ${steps.size})", LOG_CATEGORY)
+                    return@let null
+                }
+                val currentStep = steps[primaryRouteIndices.stepIndex]
+                currentStep.bannerInstructions()?.let { banners ->
+                    nativeBanner.mapToDirectionsApi(banners[nativeBanner.index])
+                }
             }
         }
     }
@@ -285,6 +293,7 @@ internal fun RouteState.convertState(): RouteProgressState {
     return when (this) {
         RouteState.INVALID ->
             throw IllegalArgumentException("invalid route progress state not supported")
+
         RouteState.INITIALIZED -> RouteProgressState.INITIALIZED
         RouteState.TRACKING -> RouteProgressState.TRACKING
         RouteState.COMPLETE -> RouteProgressState.COMPLETE
@@ -324,6 +333,7 @@ internal fun NavigationStatus.prepareSpeedLimitInfo(): SpeedLimitInfo {
     val speedLimitUnit = when (speedLimit.localeUnit) {
         SpeedLimitUnit.KILOMETRES_PER_HOUR ->
             com.mapbox.navigation.base.speed.model.SpeedUnit.KILOMETERS_PER_HOUR
+
         SpeedLimitUnit.MILES_PER_HOUR ->
             com.mapbox.navigation.base.speed.model.SpeedUnit.MILES_PER_HOUR
     }

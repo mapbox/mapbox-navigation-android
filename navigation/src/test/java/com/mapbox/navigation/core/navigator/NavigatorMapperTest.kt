@@ -19,6 +19,7 @@ import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.location.CorrectedLocationData
 import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.testing.FileUtils
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.factories.createFixedLocation
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.DRSensorFusionState
@@ -47,9 +48,13 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Ignore
+import org.junit.Rule
 import org.junit.Test
 
 class NavigatorMapperTest {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     private val enhancedLocation: Location = mockk(relaxed = true)
     private val keyPoints: List<Location> = mockk(relaxed = true)
@@ -787,6 +792,121 @@ class NavigatorMapperTest {
             111f.toDouble(),
             result?.distanceAlongGeometry(),
         )
+    }
+
+    @Test
+    fun `getCurrentBannerInstructions returns null when legIndex is out of bounds - negative`() {
+        val statusWithInvalidLegIndex = mockk<NavigationStatus> {
+            every { bannerInstruction } returns nativeBannerInstructions
+            every { primaryRouteIndices } returns mockk {
+                every { legIndex } returns -1
+                every { stepIndex } returns 0
+            }
+        }
+
+        val result = statusWithInvalidLegIndex.getCurrentBannerInstructions(route)
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `getCurrentBannerInstructions returns null when legIndex is out of bounds - too large`() {
+        val statusWithInvalidLegIndex = mockk<NavigationStatus> {
+            every { bannerInstruction } returns nativeBannerInstructions
+            every { primaryRouteIndices } returns mockk {
+                every { legIndex } returns 999
+                every { stepIndex } returns 0
+            }
+        }
+
+        val result = statusWithInvalidLegIndex.getCurrentBannerInstructions(route)
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `getCurrentBannerInstructions returns null when stepIndex is out of bounds - negative`() {
+        val statusWithInvalidStepIndex = mockk<NavigationStatus> {
+            every { bannerInstruction } returns nativeBannerInstructions
+            every { primaryRouteIndices } returns mockk {
+                every { legIndex } returns 0
+                every { stepIndex } returns -1
+            }
+        }
+
+        val result = statusWithInvalidStepIndex.getCurrentBannerInstructions(route)
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `getCurrentBannerInstructions returns null when stepIndex is out of bounds - too large`() {
+        val statusWithInvalidStepIndex = mockk<NavigationStatus> {
+            every { bannerInstruction } returns nativeBannerInstructions
+            every { primaryRouteIndices } returns mockk {
+                every { legIndex } returns 0
+                every { stepIndex } returns 999
+            }
+        }
+
+        val result = statusWithInvalidStepIndex.getCurrentBannerInstructions(route)
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `getCurrentBannerInstructions returns null when both indices are out of bounds`() {
+        val statusWithInvalidIndices = mockk<NavigationStatus> {
+            every { bannerInstruction } returns nativeBannerInstructions
+            every { primaryRouteIndices } returns mockk {
+                every { legIndex } returns 999
+                every { stepIndex } returns 999
+            }
+        }
+
+        val result = statusWithInvalidIndices.getCurrentBannerInstructions(route)
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `getCurrentBannerInstructions returns null when legs are empty`() {
+        val routeWithEmptyLegs: NavigationRoute = mockk(relaxed = true) {
+            every { directionsRoute.legs() } returns emptyList()
+        }
+        val statusForEmptyLegs = mockk<NavigationStatus> {
+            every { bannerInstruction } returns nativeBannerInstructions
+            every { primaryRouteIndices } returns mockk {
+                every { legIndex } returns 0
+                every { stepIndex } returns 0
+            }
+        }
+
+        val result = statusForEmptyLegs.getCurrentBannerInstructions(routeWithEmptyLegs)
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `getCurrentBannerInstructions returns null when steps are empty`() {
+        val routeWithEmptySteps: NavigationRoute = mockk(relaxed = true) {
+            every { directionsRoute.legs() } returns listOf(
+                mockk {
+                    every { steps() } returns emptyList()
+                },
+            )
+        }
+        val statusForEmptySteps = mockk<NavigationStatus> {
+            every { bannerInstruction } returns nativeBannerInstructions
+            every { primaryRouteIndices } returns mockk {
+                every { legIndex } returns 0
+                every { stepIndex } returns 0
+            }
+        }
+
+        val result = statusForEmptySteps.getCurrentBannerInstructions(routeWithEmptySteps)
+
+        assertNull(result)
     }
 
     @Test
