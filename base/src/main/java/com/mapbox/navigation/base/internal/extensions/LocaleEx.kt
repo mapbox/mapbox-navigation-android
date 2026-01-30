@@ -38,7 +38,15 @@ object LocaleEx {
      */
     @JvmStatic
     fun getLocaleDirectionsRoute(directionsRoute: DirectionsRoute, context: Context): Locale {
-        return directionsRoute.voiceLanguage()
+        return getVoiceLocale(directionsRoute.voiceLanguage(), context)
+    }
+
+    /**
+     * Provide [Locale] based on voice language or default device's location if non-specified
+     */
+    @JvmStatic
+    fun getVoiceLocale(voiceLanguage: String?, context: Context): Locale {
+        return voiceLanguage
             ?.let { Locale.forLanguageTag(it) }
             ?: context.inferDeviceLocale()
     }
