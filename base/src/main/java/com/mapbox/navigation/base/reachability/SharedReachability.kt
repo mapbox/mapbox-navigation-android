@@ -6,13 +6,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.scan
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 
 /**
  * This class is responsible for managing the lifecycle of the [PlatformReachability] instance.
@@ -29,14 +25,14 @@ class SharedReachability {
     /**
      * Returns state flow with network status.
      */
-    val networkStatus: StateFlow<NetworkStatus> = _networkStatus
+    val networkStatus = _networkStatus.asStateFlow()
 
     private val _isReachable = MutableStateFlow(false)
 
     /**
      * Returns state flow with network reachability state. True if network available.
      */
-    val isReachable: StateFlow<Boolean> = _isReachable
+    val isReachable = _isReachable.asStateFlow()
 
     private val reachability: PlatformReachability = PlatformReachability.create(null)
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -46,34 +42,22 @@ class SharedReachability {
     }
 
     init {
+        onReachabilityUpdate(reachability.currentNetworkStatus())
+        reachability.addListener(reachabilityChangedListener)
         scope.launch {
-            onReachabilityUpdate(reachability.currentNetworkStatus())
-        }
-        combine(
-            _networkStatus.subscriptionCount,
-            _isReachable.subscriptionCount,
-        ) { statusCount, reachableCount -> statusCount + reachableCount }
-            .map { count -> count > 0 }
-            .distinctUntilChanged()
-            .scan(false) { previous, current ->
-                if (previous && !current) {
+            suspendCancellableCoroutine { continuation ->
+                continuation.invokeOnCancellation {
                     reachability.removeListener(reachabilityChangedListener)
                 }
-                if (current) {
-                    reachability.addListener(reachabilityChangedListener)
-                }
-                current
             }
-            .launchIn(scope)
+        }
     }
 
     private fun onReachabilityUpdate(status: NetworkStatus) {
-        scope.launch {
-            val isReachable = reachability.isReachable()
-            _networkStatus.tryEmit(reachability.currentNetworkStatus())
-            _isReachable.tryEmit(isReachable)
-            Log.i(TAG, "onReachabilityUpdate: ${status::class.simpleName}, $isReachable")
-        }
+        val isReachable = reachability.isReachable()
+        _networkStatus.value = reachability.currentNetworkStatus()
+        _isReachable.value = isReachable
+        Log.i(TAG, "onReachabilityUpdate: ${status::class.simpleName}, $isReachable")
     }
 
     companion object {
