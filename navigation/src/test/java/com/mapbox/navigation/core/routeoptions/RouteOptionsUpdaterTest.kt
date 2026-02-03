@@ -63,6 +63,15 @@ class RouteOptionsUpdaterTest {
         routeRefreshAdapter = RouteOptionsUpdater()
     }
 
+    /**
+     * Tests that when the current location has no bearing information (location.bearing = null),
+     * the updated route options have null bearings for all waypoints.
+     *
+     * Scenario: Vehicle's compass/heading is unavailable (GPS doesn't provide bearing)
+     * Expected: bearingsList = [null, null] (no directional constraints)
+     *
+     * This ensures the router won't apply directional constraints when heading is unknown.
+     */
     @Test
     fun new_options_return_with_null_bearings() {
         val routeOptions = provideRouteOptionsWithCoordinates()
@@ -88,6 +97,22 @@ class RouteOptionsUpdaterTest {
         MapboxRouteOptionsUpdateCommonTest.checkImmutableFields(routeOptions, newRouteOptions)
     }
 
+    /**
+     * Tests that bearing information is correctly preserved and updated during reroute.
+     *
+     * Scenario: Original route has bearings [10°±10°, 20°±20°, 30°±30°, 40°±40°]
+     *           Currently at coordinate 3, heading 11°, only destination ahead
+     *
+     * Expected: bearingsList = [
+     *   Bearing(11°, 10°),  // Current angle + original tolerance
+     *   Bearing(40°, 40°)   // Preserved destination bearing
+     * ]
+     *
+     * This ensures the new route respects:
+     * - Current vehicle direction (11°)
+     * - Original tolerance (10°) from the first waypoint
+     * - Destination approach constraint (40° ± 40°)
+     */
     @Test
     fun new_options_return_with_bearings() {
         val routeOptions = provideRouteOptionsWithCoordinatesAndBearings()
@@ -120,6 +145,19 @@ class RouteOptionsUpdaterTest {
         MapboxRouteOptionsUpdateCommonTest.checkImmutableFields(routeOptions, newRouteOptions)
     }
 
+    /**
+     * Tests that zLevel (road layer) is correctly set for reroute when original route had no layers.
+     *
+     * Scenario: Original route had no layer specification, but current location is on layer 3
+     *           (e.g., upper deck of highway). 2 waypoints remaining.
+     *
+     * Expected: layersList = [3, null, null]
+     *   - First element (3): Current zLevel from location matcher
+     *   - Remaining elements (null): Let router decide layers for waypoints
+     *
+     * This ensures routes on multi-level roads (bridges, stacked highways) start from
+     * the correct physical level.
+     */
     @Test
     fun `new options return with current layer and nulls`() {
         val routeOptions = provideRouteOptionsWithCoordinates()
@@ -143,6 +181,20 @@ class RouteOptionsUpdaterTest {
         MapboxRouteOptionsUpdateCommonTest.checkImmutableFields(routeOptions, newRouteOptions)
     }
 
+    /**
+     * Tests that zLevel (layers) is only applied for driving profiles, not for cycling/walking.
+     *
+     * Rationale: Multi-level roads (bridges, stacked highways) are only relevant for vehicles.
+     * Cyclists and pedestrians don't use different road levels in the same way.
+     *
+     * Test matrix:
+     * - PROFILE_CYCLING: layersList = null (no layers)
+     * - PROFILE_DRIVING: layersList = [3, null, null] (includes zLevel)
+     * - PROFILE_DRIVING_TRAFFIC: layersList = [3, null, null] (includes zLevel)
+     * - PROFILE_WALKING: layersList = null (no layers)
+     *
+     * This prevents unnecessary layer information for non-driving modes.
+     */
     @Test
     fun `new options return without layer for profiles other than driving`() {
         listOf(
@@ -182,6 +234,19 @@ class RouteOptionsUpdaterTest {
         }
     }
 
+    /**
+     * Tests that existing layer constraints from the original route are preserved during reroute.
+     *
+     * Scenario: Original route specified layers [0, 1, 2, 4] for waypoints
+     *           Currently at coordinate 2, on layer 3, with 2 waypoints remaining
+     *
+     * Expected: layersList = [3, 2, 4]
+     *   - First element (3): Current zLevel
+     *   - Remaining (2, 4): Preserved from original route (layers for coords 2 and 3)
+     *
+     * This ensures that if the original route had specific layer requirements
+     * (e.g., must arrive at parking garage level 4), they are maintained.
+     */
     @Test
     fun `new options return with current layer and previous layers`() {
         val routeOptions = provideRouteOptionsWithCoordinatesAndLayers()
@@ -205,6 +270,16 @@ class RouteOptionsUpdaterTest {
         MapboxRouteOptionsUpdateCommonTest.checkImmutableFields(routeOptions, newRouteOptions)
     }
 
+    /**
+     * Tests error handling when there are no remaining waypoints (already at destination).
+     *
+     * Scenario: remainingWaypoints = 0 (arrived at destination)
+     *
+     * Expected: RouteOptionsResult.Error
+     *
+     * Rationale: Cannot create a valid route with no destination. This prevents
+     * attempting to reroute when the trip is already complete.
+     */
     @Test
     fun new_options_invalid_remaining_points() {
         val routeOptions = provideRouteOptionsWithCoordinatesAndBearings()
@@ -218,6 +293,18 @@ class RouteOptionsUpdaterTest {
         assertTrue(newRouteOptions is RouteOptionsUpdater.RouteOptionsResult.Error)
     }
 
+    /**
+     * Tests error handling when the next coordinate index cannot be determined.
+     *
+     * Scenario: The function indexOfNextRequestedCoordinate() returns null,
+     *           meaning the next waypoint position in the route cannot be calculated.
+     *
+     * Expected: RouteOptionsResult.Error
+     *
+     * Rationale: Without knowing which coordinate to route to next, we cannot
+     * build valid route options. This can happen with corrupted route data or
+     * invalid waypoint configurations.
+     */
     @Test
     fun index_of_next_coordinate_is_null() {
         mockkStatic(::indexOfNextRequestedCoordinate) {
@@ -235,6 +322,21 @@ class RouteOptionsUpdaterTest {
         }
     }
 
+    /**
+     * Tests error handling for various invalid input combinations.
+     *
+     * Validates three error scenarios:
+     * 1. routeOptions = null (no original route)
+     * 2. routeOptions exists, but routeProgress = null and locationMatcherResult = null
+     * 3. routeOptions and routeProgress exist, but locationMatcherResult = null
+     *
+     * Expected: All scenarios return RouteOptionsResult.Error
+     *
+     * Rationale: All three inputs are required to calculate updated route options:
+     * - routeOptions: Original route parameters to modify
+     * - routeProgress: Current position along the route
+     * - locationMatcherResult: Current location and heading information
+     */
     @Test
     fun no_options_on_invalid_input() {
         val invalidInput = listOf<Triple<RouteOptions?, RouteProgress?, LocationMatcherResult?>>(
@@ -257,6 +359,17 @@ class RouteOptionsUpdaterTest {
         }
     }
 
+    /**
+     * Tests that missing route options results in a non-retryable error.
+     *
+     * Scenario: routeOptions = null, but routeProgress and location are available
+     *
+     * Expected: PreRouterFailure with retryable = false
+     *
+     * Rationale: Without an original route, there's nothing to update. This is a
+     * fundamental missing requirement, not a transient condition, so retrying won't help.
+     * The error message: "Cannot reroute as there is no active route available."
+     */
     @Test
     fun no_route_options_has_route_progress_and_location_non_retryable() {
         val actual = routeRefreshAdapter.update(null, mockk(), mockk())
@@ -267,6 +380,16 @@ class RouteOptionsUpdaterTest {
         )
     }
 
+    /**
+     * Tests that all null inputs results in a non-retryable error.
+     *
+     * Scenario: routeOptions = null, routeProgress = null, locationMatcherResult = null
+     *
+     * Expected: PreRouterFailure with retryable = false
+     *
+     * Rationale: Similar to the previous test, but validates that even when everything
+     * is missing, the primary error is still "no active route available" (not missing location).
+     */
     @Test
     fun no_route_options_no_route_progress_no_location_non_retryable() {
         val actual = routeRefreshAdapter.update(null, null, null)
@@ -277,6 +400,18 @@ class RouteOptionsUpdaterTest {
         )
     }
 
+    /**
+     * Tests that missing route progress/location results in a RETRYABLE error.
+     *
+     * Scenario: routeOptions exists, but routeProgress = null and locationMatcherResult = null
+     *
+     * Expected: PreRouterFailure with retryable = true
+     *
+     * Rationale: Unlike missing route options (permanent), missing progress/location might
+     * be a transient condition (e.g., waiting for GPS fix). Marking it retryable allows
+     * the system to try again when location becomes available.
+     * Error message: "Cannot combine RouteOptions, routeProgress and locationMatcherResult cannot be null."
+     */
     @Test
     fun has_route_options_no_route_progress_no_location_retryable() {
         val actual = routeRefreshAdapter.update(mockk(), null, null)
@@ -291,6 +426,20 @@ class RouteOptionsUpdaterTest {
         )
     }
 
+    /**
+     * Tests that time-based constraints (arriveBy/departAt) are removed during reroute.
+     *
+     * Scenario: Original route had arriveBy="2021-01-01T01:01" and departAt="2021-02-02T02:02"
+     *
+     * Expected: Both arriveBy and departAt are set to null in updated route options
+     *
+     * Rationale: Time-based routing constraints (arrive by 5 PM, depart at 9 AM) are no longer
+     * valid after going off-route. The original timing is invalidated by the deviation.
+     * A fresh route should be calculated based on current time, not past constraints.
+     *
+     * Note: This is mentioned in RouteOptionsUpdater documentation:
+     * "depart_at/arrive_by parameters are cleared as they are not applicable in update/re-route scenario"
+     */
     @Test
     fun new_options_skip_arriveBy_departAt() {
         val routeOptions = provideRouteOptionsWithCoordinatesAndArriveByDepartAt()
@@ -312,6 +461,25 @@ class RouteOptionsUpdaterTest {
         MapboxRouteOptionsUpdateCommonTest.checkImmutableFields(routeOptions, newRouteOptions)
     }
 
+    /**
+     * Tests reroute for map-matched routes with NavigateToFinalDestination strategy.
+     *
+     * Context: Map-matched routes come from the Map Matching API (not Directions API),
+     * typically used for replaying GPS traces or specific path requirements.
+     *
+     * Scenario: Map-matched route with waypoints at [1,1], [2,2], [3,3], [4,4]
+     *           Current location: [11.11, 22.22]
+     *           Strategy: NavigateToFinalDestination
+     *
+     * Expected: coordinatesList = [
+     *   Point(11.11, 22.22),  // Current location
+     *   COORDINATE_4           // Final destination only
+     * ]
+     *
+     * Rationale: When rerouting a map-matched route with NavigateToFinalDestination strategy,
+     * ignore all intermediate waypoints and route directly to the final destination.
+     * This allows the route to be "salvaged" even though the original path is lost.
+     */
     @Test
     fun `new options return origin and destination for map matched route with NavigateToFinalDestination strategy`() {
         val routeOptions = provideRouteOptionsWithCoordinates()
@@ -352,6 +520,22 @@ class RouteOptionsUpdaterTest {
         MapboxRouteOptionsUpdateCommonTest.checkImmutableFields(routeOptions, newRouteOptions)
     }
 
+    /**
+     * Tests that bearings are correctly updated for map-matched routes with NavigateToFinalDestination.
+     *
+     * Scenario: Map-matched route with bearings [10°±10°, 20°±20°, 30°±30°, 40°±40°]
+     *           Current bearing: 11°
+     *           Strategy: NavigateToFinalDestination (route to final waypoint only)
+     *
+     * Expected: bearingsList = [
+     *   Bearing(11°, 10°),  // Current angle + original tolerance
+     *   Bearing(40°, 40°)   // Final destination bearing preserved
+     * ]
+     *
+     * Rationale: Similar to coordinates, when using NavigateToFinalDestination strategy,
+     * only the origin and final destination bearings are kept. Intermediate bearings
+     * are discarded along with their waypoints.
+     */
     @Test
     fun `new options return with bearings for map matched route with NavigateToFinalDestination strategy`() {
         val routeOptions = provideRouteOptionsWithCoordinatesAndBearings()
@@ -395,6 +579,28 @@ class RouteOptionsUpdaterTest {
         MapboxRouteOptionsUpdateCommonTest.checkImmutableFields(routeOptions, newRouteOptions)
     }
 
+    /**
+     * Comprehensive test for map-matched routes: validates all MapMatchingOptions are correctly
+     * transformed to updated RouteOptions during reroute.
+     *
+     * Tests the complete flow:
+     * 1. Creates MapMatchingOptions with all possible parameters
+     * 2. Converts to RouteOptions via URL serialization
+     * 3. Updates the options using RouteOptionsUpdater
+     * 4. Verifies all parameters are correctly transformed
+     *
+     * Key transformations validated:
+     * - Coordinates: current location + final destination only
+     * - Bearings: current bearing + final destination bearing
+     * - Waypoint indices: [0, 1] (origin and destination)
+     * - Waypoint names: ";four" (null for origin, "four" for destination)
+     * - Radiuses: ";44" (null for origin, 44.0 for destination)
+     * - Layers: "3;" (current zLevel + null for destination)
+     * - Unrecognized properties: cleared (empty map)
+     *
+     * This is an integration test ensuring the full transformation pipeline works correctly
+     * for map-matched routes with NavigateToFinalDestination strategy.
+     */
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     @Test
     fun `all MapMatchingOptions are mapped and updated as expected`() {
@@ -473,6 +679,19 @@ class RouteOptionsUpdaterTest {
         assertEquals(expectedRouteOptions, newRouteOptions)
     }
 
+    /**
+     * Tests that zLevel is correctly handled for map-matched routes with NavigateToFinalDestination.
+     *
+     * Scenario: Map-matched route with NavigateToFinalDestination strategy
+     *           Current zLevel: 3
+     *
+     * Expected: layersList = [3, null]
+     *   - First element: Current zLevel (3)
+     *   - Second element: null (let router decide layer for destination)
+     *
+     * Rationale: For map-matched routes navigating to final destination, only 2 waypoints
+     * remain (current + destination), so only 2 layer values are needed.
+     */
     @Test
     fun `new options return with current layer and nulls for map matched route with NavigateToFinalDestination strategy`() {
         val routeOptions = provideRouteOptionsWithCoordinates()
@@ -507,6 +726,20 @@ class RouteOptionsUpdaterTest {
         MapboxRouteOptionsUpdateCommonTest.checkImmutableFields(routeOptions, newRouteOptions)
     }
 
+    /**
+     * Tests error handling for invalid responseOriginAPI parameter.
+     *
+     * Scenario: responseOriginAPI = "invalidResponseOriginAPI" (not DIRECTIONS_API or MAP_MATCHING_API)
+     *
+     * Expected: RouteOptionsResult.Error with message "Invalid responseOriginAPI = invalidResponseOriginAPI"
+     *
+     * Rationale: The responseOriginAPI parameter determines how route options are processed.
+     * Only two valid values are supported:
+     * - ResponseOriginAPI.DIRECTIONS_API: Standard Directions API routes
+     * - ResponseOriginAPI.MAP_MATCHING_API: Map-matched routes
+     *
+     * Invalid values indicate a programming error and should fail fast.
+     */
     @Test
     fun `new options invalid responseOriginAPI`() {
         val routeOptions = provideRouteOptionsWithCoordinates()
@@ -525,6 +758,23 @@ class RouteOptionsUpdaterTest {
         )
     }
 
+    /**
+     * Tests that rerouting is properly rejected when RerouteDisabled strategy is used.
+     *
+     * Scenario: Map-matched route with RerouteDisabled strategy
+     *
+     * Expected: RouteOptionsResult.Error with message "Reroute disabled for the current map matched route."
+     *
+     * Rationale: Map-matched routes represent specific GPS traces or paths. The RerouteDisabled
+     * strategy explicitly indicates that deviations should not trigger new route requests.
+     * This is useful when:
+     * - Replaying historical GPS traces
+     * - Following a pre-defined specific path
+     * - In scenarios where deviating from the exact path is acceptable without rerouting
+     *
+     * The updater respects this configuration and returns an error instead of attempting
+     * to create new route options.
+     */
     @Test
     fun `new options map matched route with RerouteDisabled strategy`() {
         val routeOptions = provideRouteOptionsWithCoordinates()
@@ -544,6 +794,26 @@ class RouteOptionsUpdaterTest {
         )
     }
 
+    /**
+     * Tests that waypoint indices are correctly updated for map-matched routes.
+     *
+     * Scenario: Map-matched route with waypointIndices = [0, 3]
+     *           (waypoints at coordinate index 0 and 3)
+     *           Strategy: NavigateToFinalDestination
+     *
+     * Expected: waypointIndicesList = [0, 1]
+     *   - Index 0: Current location (new origin)
+     *   - Index 1: Final destination
+     *
+     * Rationale: For map-matched routes with NavigateToFinalDestination, the coordinate
+     * list is reduced to just 2 points (current location + final destination).
+     * The waypoint indices must be updated to reflect this new 2-point geometry:
+     * - Original: 4 coordinates with waypoints at indices [0, 3]
+     * - Updated: 2 coordinates with waypoints at indices [0, 1]
+     *
+     * Waypoint indices tell the router which coordinates in the list are actual
+     * waypoints vs. intermediate shape points.
+     */
     @Test
     fun new_options_return_with_valid_waypoints_for_map_matched_route() {
         val routeOptions = provideRouteOptionsWithCoordinates().toBuilder()
@@ -589,6 +859,23 @@ class RouteOptionsUpdaterTest {
         MapboxRouteOptionsUpdateCommonTest.checkImmutableFields(routeOptions, newRouteOptions)
     }
 
+    /**
+     * Tests that the generated equals(), hashCode(), and toString() methods work correctly
+     * for RouteOptionsResult sealed class implementations.
+     *
+     * Validates:
+     * - RouteOptionsResult.Success: equals/hashCode/toString implementations
+     * - RouteOptionsResult.Error: equals/hashCode/toString implementations
+     *
+     * Uses:
+     * - EqualsVerifier: Ensures equals() and hashCode() follow the Java contract
+     * - ToStringVerifier: Ensures toString() includes all fields and works correctly
+     *
+     * This is important for:
+     * - Comparing results in tests
+     * - Using results as map keys or in collections
+     * - Debugging (readable toString output)
+     */
     @Test
     fun testGeneratedEqualsHashcodeToStringFunctions() {
         listOf(

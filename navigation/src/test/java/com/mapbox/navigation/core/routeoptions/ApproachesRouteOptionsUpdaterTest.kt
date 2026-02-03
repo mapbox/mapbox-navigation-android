@@ -21,6 +21,94 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
+/**
+ * This is a parameterized test that verifies how RouteOptionsUpdater handles the approachesList parameter during reroute operations.
+ *
+ *   What is approaches?
+ *
+ *   The approaches parameter in the Mapbox Directions API specifies how you want to arrive at each waypoint:
+ *
+ *   - null - Unrestricted (approach from any direction)
+ *   - DirectionsCriteria.APPROACH_UNRESTRICTED - Same as null
+ *   - DirectionsCriteria.APPROACH_CURB - Arrive so destination is on your right (useful for pickups/dropoffs)
+ *
+ *   Each coordinate in your route can have a different approach constraint.
+ *
+ *   What the Test Validates
+ *
+ *   The test verifies that when RouteOptionsUpdater creates new route options during a reroute, it correctly updates the approaches list by:
+ *
+ *   1. Setting the origin approach to null (current location has no approach constraint)
+ *   2. Preserving the remaining waypoint approaches from the original route
+ *
+ *   Test Cases
+ *
+ *   The test uses 3 parameterized test cases:
+ *
+ *   Test Case 1: Empty approaches list
+ *
+ *   approachesList = []
+ *   nextCoordinateIndex = 2
+ *   Expected result = null (no approaches)
+ *   - If the original route had no approaches, the new route shouldn't have any either
+ *
+ *   Test Case 2: Mid-route (index 1)
+ *
+ *   Original approaches = [null, CURB, UNRESTRICTED, CURB]
+ *   nextCoordinateIndex = 1
+ *   Expected result = [null, CURB, UNRESTRICTED, CURB]
+ *   - You're at coordinate 1 (still have 3 waypoints ahead)
+ *   - Result: [null (new origin), CURB, UNRESTRICTED, CURB] - all remaining approaches preserved
+ *
+ *   Test Case 3: Near destination (index 3)
+ *
+ *   Original approaches = [null, CURB, UNRESTRICTED, CURB]
+ *   nextCoordinateIndex = 3
+ *   Expected result = [null, CURB]
+ *   - You're at coordinate 3 (only final waypoint ahead)
+ *   - Result: [null (new origin), CURB (final destination)] - only the last approach preserved
+ *
+ *   How It Works
+ *
+ *   Looking at RouteOptionsUpdater.kt:115-124:
+ *
+ *   .approachesList(
+ *       let approachesList@{
+ *           val approachesList = routeOptions.approachesList()
+ *           if (approachesList.isNullOrEmpty()) {
+ *               return@approachesList emptyList<String>()
+ *           }
+ *           mutableListOf<String?>() +
+ *               null +                                          // Origin = null
+ *               approachesList.takeLast(remainingCoordinates)   // Remaining waypoints
+ *       },
+ *   )
+ *
+ *   Algorithm:
+ *   1. If original list is empty → return empty list
+ *   2. Otherwise:
+ *     - Create new list with null first (current location)
+ *     - Add the last N approach values (where N = remaining coordinates)
+ *
+ *   Practical Example
+ *
+ *   Original Route:
+ *   - Origin → Waypoint 1 (CURB) → Waypoint 2 (UNRESTRICTED) → Destination (CURB)
+ *   - approaches = [null, CURB, UNRESTRICTED, CURB]
+ *
+ *   You go off-route at coordinate 1:
+ *   - Remaining: Waypoint 1, Waypoint 2, Destination
+ *   - New route should maintain: CURB, UNRESTRICTED, CURB
+ *
+ *   Result:
+ *   New approaches = [null, CURB, UNRESTRICTED, CURB]
+ *                     ↑     ↑     ↑              ↑
+ *                 Current  W1     W2         Destination
+ *                 location
+ *
+ *   This ensures that when rerouting, you still arrive at your waypoints from the correct side of the road!
+ */
+
 @ExperimentalMapboxNavigationAPI
 @RunWith(Parameterized::class)
 class ApproachesRouteOptionsUpdaterTest(
