@@ -1,7 +1,9 @@
 package com.mapbox.navigation.ui.maps.route.arrow.model
 
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.drawable.Drawable
+import android.util.DisplayMetrics
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.appcompat.content.res.AppCompatResources
@@ -179,6 +181,12 @@ class RouteArrowOptions private constructor(
             null,
         )
 
+        private val defaultDensityContext = context.createConfigurationContext(
+            Configuration(context.resources.configuration).apply {
+                densityDpi = DisplayMetrics.DENSITY_DEFAULT
+            },
+        )
+
         /**
          * Indicates the color of the arrow shaft.
          *
@@ -305,11 +313,11 @@ class RouteArrowOptions private constructor(
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         fun build(): RouteArrowOptions {
             val arrowHeadIcon = AppCompatResources.getDrawable(
-                context,
+                defaultDensityContext,
                 arrowHeadIconDrawable,
             )
             val arrowHeadCasingIcon = AppCompatResources.getDrawable(
-                context,
+                defaultDensityContext,
                 arrowHeadIconCasingDrawable,
             )
             val routeArrowAboveLayerId: String = aboveLayerId ?: TOP_LEVEL_ROUTE_LINE_LAYER_ID

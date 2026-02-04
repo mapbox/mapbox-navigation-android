@@ -70,6 +70,7 @@ class RouteArrowUtilsRoboTest {
             } returns ExpectedFactory.createNone()
             every { getStyleImage(RouteLayerConstants.ARROW_HEAD_ICON_CASING) } returns mockImage
             every { getStyleImage(RouteLayerConstants.ARROW_HEAD_ICON) } returns mockImage
+            every { pixelRatio } returns 1.0f
         }
 
         RouteArrowUtils.initializeLayers(style, options)
@@ -207,6 +208,7 @@ class RouteArrowUtilsRoboTest {
             } returns ExpectedFactory.createNone()
             every { getStyleImage(RouteLayerConstants.ARROW_HEAD_ICON_CASING) } returns mockImage
             every { getStyleImage(RouteLayerConstants.ARROW_HEAD_ICON) } returns mockImage
+            every { pixelRatio } returns 1.0f
         }
 
         RouteArrowUtils.initializeLayers(style, options)
@@ -269,6 +271,7 @@ class RouteArrowUtilsRoboTest {
             } returns ExpectedFactory.createNone()
             every { getStyleImage(RouteLayerConstants.ARROW_HEAD_ICON_CASING) } returns mockImage
             every { getStyleImage(RouteLayerConstants.ARROW_HEAD_ICON) } returns mockImage
+            every { pixelRatio } returns 1.0f
         }
 
         RouteArrowUtils.initializeLayers(style, options)

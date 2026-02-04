@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.maps.route.arrow.api
 
 import android.content.Context
+import android.content.res.Configuration
 import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
@@ -53,13 +54,21 @@ class MapboxRouteArrowViewTest {
     @get:Rule
     val loggerRule = LoggingFrontendTestRule()
 
-    private val ctx: Context = mockk()
+    private val ctx: Context = mockk {
+        every { resources } returns mockk {
+            every { configuration } returns Configuration()
+        }
+        every { createConfigurationContext(any()) } returns mockk()
+    }
 
     @Before
     fun setUp() {
         mockkStatic(AppCompatResources::class)
         mockkStatic(Style::sdkStyleManager)
-        every { AppCompatResources.getDrawable(any(), any()) } returns mockk(relaxed = true)
+        every { AppCompatResources.getDrawable(any(), any()) } returns mockk {
+            every { intrinsicWidth } returns 24
+            every { intrinsicHeight } returns 24
+        }
     }
 
     @After
