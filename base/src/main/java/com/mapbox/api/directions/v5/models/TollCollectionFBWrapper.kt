@@ -1,7 +1,6 @@
 package com.mapbox.api.directions.v5.models
 
 import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
-import com.mapbox.api.directions.v5.models.utils.unhandledEnumMapping
 import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
@@ -17,12 +16,10 @@ internal class TollCollectionFBWrapper private constructor(
         get() = fb.unrecognizedPropertiesLength
 
     override fun type(): String? {
-        return when (fb.type) {
+        return when (fb.type ?: return null) {
             FBTollCollectionType.TollBooth -> "toll_booth"
             FBTollCollectionType.TollGantry -> "toll_gantry"
             FBTollCollectionType.Unknown -> unrecognizeFlexBufferMap?.get("type")?.asString()
-            null -> null
-            else -> unhandledEnumMapping("type", fb.type)
         }
     }
 

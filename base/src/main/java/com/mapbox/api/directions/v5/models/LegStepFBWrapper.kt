@@ -2,7 +2,6 @@ package com.mapbox.api.directions.v5.models
 
 import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
 import com.mapbox.api.directions.v5.models.utils.FlatbuffersListWrapper
-import com.mapbox.api.directions.v5.models.utils.unhandledEnumMapping
 import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
@@ -24,22 +23,18 @@ internal class LegStepFBWrapper private constructor(
     override fun durationTypical(): Double? = fb.durationTypical
 
     override fun speedLimitUnit(): String? {
-        return when (fb.speedLimitUnit) {
-            null -> null
+        return when (FBSpeedLimitUnit.fromByteOrThrow(fb.speedLimitUnit ?: return null)) {
             FBSpeedLimitUnit.Kmph -> SpeedLimit.KMPH
             FBSpeedLimitUnit.Mph -> SpeedLimit.MPH
             FBSpeedLimitUnit.Unknown -> unrecognizeFlexBufferMap?.get("speedLimitUnit")?.asString()
-            else -> unhandledEnumMapping("speedLimitUnit", fb.speedLimitUnit)
         }
     }
 
     override fun speedLimitSign(): String? {
-        return when (fb.speedLimitSign) {
-            null -> null
+        return when (FBSpeedLimitSign.fromByteOrThrow(fb.speedLimitSign ?: return null)) {
             FBSpeedLimitSign.Mutcd -> LegStep.MUTCD
             FBSpeedLimitSign.Vienna -> LegStep.VIENNA
             FBSpeedLimitSign.Unknown -> unrecognizeFlexBufferMap?.get("speedLimitSign")?.asString()
-            else -> unhandledEnumMapping("speedLimitSign", fb.speedLimitSign)
         }
     }
 
@@ -52,7 +47,7 @@ internal class LegStepFBWrapper private constructor(
     override fun destinations(): String? = fb.destinations
 
     override fun mode(): String {
-        return when (fb.mode) {
+        return when (FBTransportMode.fromByteOrThrow(fb.mode)) {
             FBTransportMode.Driving -> "driving"
             FBTransportMode.Walking -> "walking"
             FBTransportMode.Cycling -> "cycling"
@@ -63,7 +58,6 @@ internal class LegStepFBWrapper private constructor(
                 ?: throw IllegalStateException(
                     "LegStep#mode is Unknown but mode is not found in unrecognized map",
                 )
-            else -> unhandledEnumMapping("mode", fb.mode)
         }
     }
 
@@ -90,12 +84,10 @@ internal class LegStepFBWrapper private constructor(
     }
 
     override fun drivingSide(): String? {
-        val drivingSide = fb.drivingSide ?: return null
-        return when (drivingSide) {
+        return when (FBDrivingSide.fromByteOrThrow(fb.drivingSide ?: return null)) {
             FBDrivingSide.Left -> "left"
             FBDrivingSide.Right -> "right"
             FBDrivingSide.Unknown -> unrecognizeFlexBufferMap?.get("driving_side")?.asString()
-            else -> unhandledEnumMapping("driving_side", fb.drivingSide)
         }
     }
 
