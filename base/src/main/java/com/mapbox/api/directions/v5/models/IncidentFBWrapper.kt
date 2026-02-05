@@ -2,7 +2,6 @@ package com.mapbox.api.directions.v5.models
 
 import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
 import com.mapbox.api.directions.v5.models.utils.FlatbuffersListWrapper
-import com.mapbox.api.directions.v5.models.utils.unhandledEnumMapping
 import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
@@ -34,7 +33,6 @@ internal class IncidentFBWrapper private constructor(
             FBIncidentType.RoadHazard -> Incident.INCIDENT_ROAD_HAZARD
             FBIncidentType.Weather -> Incident.INCIDENT_WEATHER
             FBIncidentType.Unknown -> unrecognizeFlexBufferMap?.get("type")?.asString()
-            else -> unhandledEnumMapping("type", fb.type)
         }
     }
 
@@ -49,14 +47,13 @@ internal class IncidentFBWrapper private constructor(
     override fun longDescription(): String? = fb.longDescription
 
     override fun impact(): String? {
-        val impact = fb.impact ?: return null
-        return when (impact) {
+        return when (FBIncidentImpact.fromByteOrThrow(fb.impact ?: return null)) {
             FBIncidentImpact.Critical -> Incident.IMPACT_CRITICAL
             FBIncidentImpact.Major -> Incident.IMPACT_MAJOR
             FBIncidentImpact.Minor -> Incident.IMPACT_MINOR
             FBIncidentImpact.Low -> Incident.IMPACT_LOW
+            FBIncidentImpact.UnknownImpact -> Incident.IMPACT_UNKNOWN
             FBIncidentImpact.Unknown -> unrecognizeFlexBufferMap?.get("impact")?.asString()
-            else -> unhandledEnumMapping("impact", fb.impact)
         }
     }
 

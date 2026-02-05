@@ -18,9 +18,6 @@ package com.mapbox.api.directions.v5.models.utils {
   public final class ConstantsKt {
   }
 
-  public final class UnhandedEnumMappingKt {
-  }
-
   public final class UtilsKt {
   }
 

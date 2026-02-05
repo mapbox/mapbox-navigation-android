@@ -1,7 +1,6 @@
 package com.mapbox.api.directions.v5.models
 
 import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
-import com.mapbox.api.directions.v5.models.utils.unhandledEnumMapping
 import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
@@ -19,12 +18,10 @@ internal class MaxSpeedFBWrapper private constructor(
     override fun speed(): Int? = fb.speed
 
     override fun unit(): String? {
-        val unit = fb.unit ?: return null
-        return when (unit) {
+        return when (FBSpeedLimitUnit.fromByteOrThrow(fb.unit ?: return null)) {
             FBSpeedLimitUnit.Kmph -> SpeedLimit.KMPH
             FBSpeedLimitUnit.Mph -> SpeedLimit.MPH
             FBSpeedLimitUnit.Unknown -> unrecognizeFlexBufferMap?.get("unit")?.asString()
-            else -> unhandledEnumMapping("unit", fb.unit)
         }
     }
 
