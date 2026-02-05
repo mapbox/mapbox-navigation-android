@@ -1,13 +1,11 @@
 package com.mapbox.navigation.instrumentation_tests.core
 
 import android.location.Location
-import android.util.Log
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
-import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -25,30 +23,22 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForUpdate
-import com.mapbox.navigation.testing.ui.utils.coroutines.stopRecording
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
-import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracking
-import com.mapbox.navigation.testing.utils.nativeRerouteControllerNoRetryConfig
 import com.mapbox.navigation.testing.utils.readRawFileText
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.runBlocking
 import okhttp3.HttpUrl
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assume.assumeFalse
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 import java.net.URI
 
 private const val KEY_ENGINE = "engine"
@@ -60,6 +50,12 @@ private const val VALUE_ELECTRIC = "electric"
 private const val KEY_WAYPOINTS_POWER = "waypoints.charging_station_power"
 private const val KEY_WAYPOINTS_CURRENT_TYPE = "waypoints.charging_station_current_type"
 private const val KEY_WAYPOINTS_STATION_ID = "waypoints.charging_station_id"
+private val evDataKeys = setOf(
+    KEY_EV_INITIAL_CHARGE,
+    KEY_ENERGY_CONSUMPTION_CURVE,
+    KEY_EV_PRECONDITIONING_TIME,
+    KEY_AUXILIARY_CONSUMPTION,
+)
 private val userProvidedCpoiKeys = setOf(
     KEY_WAYPOINTS_POWER,
     KEY_WAYPOINTS_CURRENT_TYPE,
@@ -67,31 +63,7 @@ private val userProvidedCpoiKeys = setOf(
 )
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-@RunWith(Parameterized::class)
-class EVRerouteTest(
-    private val runOptions: RerouteTestRunOptions,
-) : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
-
-    data class RerouteTestRunOptions(
-        val nativeReroute: Boolean,
-    ) {
-        override fun toString(): String {
-            return if (nativeReroute) {
-                "native reroute"
-            } else {
-                "platform reroute"
-            }
-        }
-    }
-
-    companion object {
-        @JvmStatic
-        @Parameterized.Parameters(name = "{0}")
-        fun data() = listOf(
-            RerouteTestRunOptions(nativeReroute = false),
-            RerouteTestRunOptions(nativeReroute = true),
-        )
-    }
+class EVRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
 
     @get:Rule
     val mapboxNavigationRule = MapboxNavigationRule()
@@ -99,26 +71,15 @@ class EVRerouteTest(
     @get:Rule
     val mockLocationReplayerRule = MockLocationReplayerRule(mockLocationUpdatesRule)
 
-    @get:Rule
-    val mapboxHistoryTestRule = MapboxHistoryTestRule()
-
     private lateinit var mapboxNavigation: MapboxNavigation
     private val twoCoordinates = listOf(
         Point.fromLngLat(11.5852259, 48.1760993),
         Point.fromLngLat(10.3406374, 49.16479),
     )
-
-    private val threeCoordinates = listOf(
-        Point.fromLngLat(11.585226, 48.176099),
-        Point.fromLngLat(11.063842, 48.39023),
-        Point.fromLngLat(10.32645, 49.069138),
-    )
-
     private val offRouteLocationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
         latitude = twoCoordinates[0].latitude() + 0.004
         longitude = twoCoordinates[0].longitude()
     }
-
     private lateinit var routeHandler: MockDirectionsRequestHandler
     private val initialEnergyConsumptionCurve = "0,300;20,160;80,140;120,180"
     private val initialInitialCharge = "18000"
@@ -142,19 +103,12 @@ class EVRerouteTest(
                             .build(),
                     )
                     .navigatorPredictionMillis(0L)
-                    .deviceProfile(
-                        DeviceProfile.Builder().customConfig(
-                            getTestCustomConfig(),
-                        ).build(),
-                    )
                     .build(),
             )
             mockWebServerRule.requestHandlers.clear()
-            mapboxHistoryTestRule.historyRecorder = mapboxNavigation.historyRecorder
-            mapboxNavigation.historyRecorder.startRecording()
             routeHandler = MockDirectionsRequestHandler(
                 "driving-traffic",
-                readRawFileText(activity, R.raw.ev_route_response_for_reroute_1),
+                readRawFileText(activity, R.raw.ev_route_response_for_refresh),
                 twoCoordinates,
                 relaxedExpectedCoordinates = true,
             )
@@ -162,27 +116,9 @@ class EVRerouteTest(
         }
     }
 
-    @After
-    fun after() {
-        runBlocking {
-            val path = mapboxNavigation.historyRecorder.stopRecording()
-            Log.i("Test history file", "history file recorder: $path")
-        }
-    }
-
-    private fun getTestCustomConfig(): String = if (runOptions.nativeReroute) {
-        nativeRerouteControllerNoRetryConfig
-    } else {
-        ""
-    }
-
     @Test
     fun ev_reroute_parameters_for_ev_route_with_no_ev_data() = sdkTest {
-        val requestedRoutes = requestRoutes(
-            twoCoordinates,
-            electric = true,
-            waypointsPerRoute = true,
-        )
+        val requestedRoutes = requestRoutes(twoCoordinates, electric = true)
 
         mapboxNavigation.startTripSession()
         stayOnInitialPosition()
@@ -207,12 +143,11 @@ class EVRerouteTest(
         )
         checkDoesNotHaveParameters(url1, userProvidedCpoiKeys)
 
-        val newInitialCharge = "18000"
+        val newInitialCharge = "17900"
         val newRequestedRoutes = requestRoutes(
             twoCoordinates,
             electric = true,
             initialCharge = newInitialCharge,
-            waypointsPerRoute = true,
         )
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(newRequestedRoutes)
         mapboxNavigation.moveAlongTheRouteUntilTracking(
@@ -239,11 +174,7 @@ class EVRerouteTest(
 
     @Test
     fun ev_reroute_parameters_for_ev_route_with_ev_data() = sdkTest {
-        val requestedRoutes = requestRoutes(
-            twoCoordinates,
-            electric = true,
-            waypointsPerRoute = true,
-        )
+        val requestedRoutes = requestRoutes(twoCoordinates, electric = true)
 
         val consumptionCurve = "0,300;20,120;40,150"
         val initialCharge = "80"
@@ -277,16 +208,7 @@ class EVRerouteTest(
 
     @Test
     fun ev_reroute_parameters_for_ev_route_with_ev_data_updates() = sdkTest {
-        assumeFalse(
-            "https://mapbox.atlassian.net/browse/NAVAND-6915",
-            runOptions.nativeReroute,
-        )
-
-        val requestedRoutes = requestRoutes(
-            twoCoordinates,
-            electric = true,
-            waypointsPerRoute = true,
-        )
+        val requestedRoutes = requestRoutes(twoCoordinates, electric = true)
 
         mapboxNavigation.startTripSession()
 
@@ -313,7 +235,7 @@ class EVRerouteTest(
 
         val consumptionCurve = "0,301;20,121;40,151"
         val initialCharge = "80"
-        val preconditioningTime = "10"
+        val preconditioningTime = "11"
         val auxiliaryConsumption = "299"
         val firstEvData = mapOf(
             KEY_ENERGY_CONSUMPTION_CURVE to consumptionCurve,

@@ -6,6 +6,7 @@ import androidx.annotation.WorkerThread
 import com.mapbox.api.directions.v5.models.DirectionsRouteFBWrapper
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.DirectionsWaypointFBWrapper
+import com.mapbox.api.directions.v5.models.FBDirectionsRouteContext
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.utils.FlatbuffersListWrapper
 import com.mapbox.directions.route.DirectionsRouteContext
@@ -74,18 +75,21 @@ internal fun DirectionsRouteContext.toRouteModelsParsingResult(
     @RouterOrigin routerOrigin: String,
     @ResponseOriginAPI responseOriginApi: String,
 ): RouteModelParsingResult {
+    val routeContext = FBDirectionsRouteContext.getRootAsDirectionsRouteContext(
+        this.getData().buffer,
+    )
     val route = DirectionsRouteFBWrapper.wrap(
+        fb = routeContext.route,
         routeOptions = routeOptions,
-        bindgenContext = this,
     ) ?: throw IllegalStateException("route returned by getRootAsDirectionsRouteContext is null")
     val data = ParsedRouteData(
         route = route,
         routesWaypoint = route.waypoints()?.filterNotNull() ?: getWaypointsFromResponse(
-            route.fbContext,
+            routeContext,
         ),
-        requestUUID = route.fbContext.uuid,
+        requestUUID = routeContext.uuid,
         routeOptions = routeOptions,
-        routeIndex = route.fbContext.route.routeIndex.toInt(),
+        routeIndex = routeContext.route.routeIndex.toInt(),
         routerOrigin = routerOrigin,
         responseOriginAPI = responseOriginApi,
     )

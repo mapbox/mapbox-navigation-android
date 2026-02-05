@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.maps.internal.ui
 
 import android.content.Context
-import android.content.res.Configuration
 import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.maps.MapboxMap
@@ -39,12 +38,7 @@ class RouteArrowComponentTest {
     @get:Rule
     val coroutineRule = MainCoroutineRule()
 
-    private val context = mockk<Context> {
-        every { resources } returns mockk {
-            every { configuration } returns Configuration()
-        }
-        every { createConfigurationContext(any()) } returns mockk()
-    }
+    private val context = mockk<Context>()
     private val routeArrowOptions by lazy { RouteArrowOptions.Builder(context).build() }
 
     @Before

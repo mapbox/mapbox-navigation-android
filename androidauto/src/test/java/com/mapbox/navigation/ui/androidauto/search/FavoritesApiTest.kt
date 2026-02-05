@@ -7,7 +7,7 @@ import com.mapbox.search.common.AsyncOperationTask
 import com.mapbox.search.common.CompletionCallback
 import com.mapbox.search.record.FavoriteRecord
 import com.mapbox.search.record.FavoritesDataProvider
-import com.mapbox.search.result.NewSearchResultType
+import com.mapbox.search.result.SearchResultType
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -28,16 +28,16 @@ class FavoritesApiTest {
     fun getPlaces() = coroutineRule.runBlockingTest {
         val expectedItemList = listOf(
             FavoriteRecord(
-                id = "id",
-                name = "name",
-                descriptionText = "description",
-                address = null,
-                routablePoints = null,
-                categories = null,
-                makiIcon = null,
+                "id",
+                "name",
+                "description",
+                null,
+                null,
+                null,
+                null,
                 coordinate = Point.fromLngLat(-33.0, -44.0),
-                metadata = null,
-                NewSearchResultType.POI,
+                SearchResultType.POI,
+                null,
             ),
         )
         val callbackSlot = slot<CompletionCallback<List<FavoriteRecord>>>()

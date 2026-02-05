@@ -4,6 +4,7 @@ import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
 import com.mapbox.api.directions.v5.models.utils.FlatbuffersListWrapper
 import com.mapbox.api.directions.v5.models.utils.fbToManeuverModifierType
 import com.mapbox.api.directions.v5.models.utils.fbToStepManeuverType
+import com.mapbox.api.directions.v5.models.utils.unhandledEnumMapping
 import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
@@ -36,10 +37,12 @@ internal class BannerTextFBWrapper private constructor(
     override fun degrees(): Double? = fb.degrees
 
     override fun drivingSide(): String? {
-        return when (FBDrivingSide.fromByteOrThrow(fb.drivingSide ?: return null)) {
+        val drivingSide = fb.drivingSide ?: return null
+        return when (drivingSide) {
             FBDrivingSide.Left -> "left"
             FBDrivingSide.Right -> "right"
             FBDrivingSide.Unknown -> unrecognizeFlexBufferMap?.get("driving_side")?.asString()
+            else -> unhandledEnumMapping("driving_side", fb.drivingSide)
         }
     }
 

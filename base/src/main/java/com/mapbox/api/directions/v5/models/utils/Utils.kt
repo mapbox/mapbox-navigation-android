@@ -8,7 +8,6 @@ import com.mapbox.api.directions.v5.models.FBManeuverModifier
 import com.mapbox.api.directions.v5.models.FBManeuverType
 import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver
-import com.mapbox.directions.generated.ManeuverType
 import com.mapbox.geojson.Point
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -28,11 +27,11 @@ internal fun FBCoordinate.toPoint(): Point {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 @StepManeuver.StepManeuverType
-internal fun ManeuverType?.fbToStepManeuverType(
+internal fun Byte?.fbToStepManeuverType(
     propertyName: String,
     unrecognized: FlexBuffers.Map?,
 ): String? {
-    return when (this ?: return null) {
+    return when (this) {
         FBManeuverType.Turn -> StepManeuver.TURN
         FBManeuverType.NewName -> StepManeuver.NEW_NAME
         FBManeuverType.Depart -> StepManeuver.DEPART
@@ -50,6 +49,8 @@ internal fun ManeuverType?.fbToStepManeuverType(
         FBManeuverType.ExitRoundabout -> StepManeuver.EXIT_ROUNDABOUT
         FBManeuverType.ExitRotary -> StepManeuver.EXIT_ROTARY
         FBManeuverType.Unknown -> unrecognized?.get(propertyName)?.asString()
+        null -> null
+        else -> unhandledEnumMapping(propertyName, this)
     }
 }
 
@@ -59,7 +60,7 @@ internal fun Byte.fbToManeuverModifierType(
     propertyName: String,
     unrecognized: FlexBuffers.Map?,
 ): String? {
-    return when (FBManeuverModifier.fromByteOrThrow(this)) {
+    return when (this) {
         FBManeuverModifier.Straight -> ManeuverModifier.STRAIGHT
         FBManeuverModifier.Left -> ManeuverModifier.LEFT
         FBManeuverModifier.Right -> ManeuverModifier.RIGHT
@@ -69,15 +70,17 @@ internal fun Byte.fbToManeuverModifierType(
         FBManeuverModifier.SharpRight -> ManeuverModifier.SHARP_RIGHT
         FBManeuverModifier.Uturn -> ManeuverModifier.UTURN
         FBManeuverModifier.Unknown -> unrecognized?.get(propertyName)?.asString()
+        else -> unhandledEnumMapping(propertyName, this)
     }
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 @ManeuverModifier.Type
 internal inline fun Byte.fbToLineIndication(
+    propertyName: String,
     unrecognizedGetter: () -> String?,
 ): String? {
-    return when (FBLaneIndication.fromByteOrThrow(this)) {
+    return when (this) {
         FBLaneIndication.Unknown -> unrecognizedGetter()
         FBLaneIndication.Straight -> ManeuverModifier.STRAIGHT
         FBLaneIndication.Left -> ManeuverModifier.LEFT
@@ -88,5 +91,6 @@ internal inline fun Byte.fbToLineIndication(
         FBLaneIndication.SharpRight -> ManeuverModifier.SHARP_RIGHT
         FBLaneIndication.Uturn -> ManeuverModifier.UTURN
         FBLaneIndication.None -> null
+        else -> unhandledEnumMapping(propertyName, this)
     }
 }

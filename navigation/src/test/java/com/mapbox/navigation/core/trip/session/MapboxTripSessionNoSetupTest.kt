@@ -89,7 +89,7 @@ class MapboxTripSessionNoSetupTest {
         }
         every { Looper.getMainLooper() } returns mockk()
         mockkObject(ThreadUtils)
-        every { ThreadUtils.prepareHandlerThread(any(), any()) } returns mockk {
+        every { ThreadUtils.prepareHandlerThread(any()) } returns mockk {
             every { looper } returns mockk()
         }
     }

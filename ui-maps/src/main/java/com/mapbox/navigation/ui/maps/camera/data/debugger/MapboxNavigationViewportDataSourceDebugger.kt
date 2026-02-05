@@ -84,7 +84,6 @@ class MapboxNavigationViewportDataSourceDebugger @JvmOverloads constructor(
                 mapView.addView(mapPaddingBorder)
                 mapView.addView(userPaddingBorder)
                 mapView.addView(cameraCenter)
-                mapView.addView(mapWidthLabel)
                 cameraChangedSubscription = mapboxMap.subscribeCameraChangedCoalesced(
                     cameraChangeCallback,
                 )
@@ -92,7 +91,6 @@ class MapboxNavigationViewportDataSourceDebugger @JvmOverloads constructor(
                 mapView.removeView(cameraCenter)
                 mapView.removeView(userPaddingBorder)
                 mapView.removeView(mapPaddingBorder)
-                mapView.removeView(mapWidthLabel)
                 cameraChangedSubscription?.cancel()
                 mapboxMap.getStyle()?.removeStyleLayer(pointsLayerId)
                 mapboxMap.getStyle()?.removeStyleSource(pointsSourceId)
@@ -101,7 +99,6 @@ class MapboxNavigationViewportDataSourceDebugger @JvmOverloads constructor(
             updateMapCameraCenter(initialCameraState.center)
             updateMapPadding(initialCameraState.padding)
             updateUserPadding()
-            updateMapWidthLabel()
             updatePoints()
         }
 
@@ -150,14 +147,11 @@ class MapboxNavigationViewportDataSourceDebugger @JvmOverloads constructor(
         setBackgroundColor(Color.RED)
     }
 
-    private val mapWidthLabel = ScaleIndicatorView(context)
-
     @OptIn(MapboxExperimental::class)
     private val cameraChangeCallback = CameraChangedCoalescedCallback {
         mapView.post {
             updateMapCameraCenter(it.cameraState.center)
             updateMapPadding(it.cameraState.padding)
-            updateMapWidthLabel()
         }
     }
     private var cameraChangedSubscription: Cancelable? = null
@@ -222,13 +216,6 @@ class MapboxNavigationViewportDataSourceDebugger @JvmOverloads constructor(
         userPaddingBorder.layoutParams = params
         userPaddingBorder.x = padding.left.toFloat()
         userPaddingBorder.y = padding.top.toFloat()
-    }
-
-    private fun updateMapWidthLabel() {
-        if (!enabled) {
-            return
-        }
-        mapWidthLabel.update(mapboxMap, mapView)
     }
 
     private fun updatePoints() {

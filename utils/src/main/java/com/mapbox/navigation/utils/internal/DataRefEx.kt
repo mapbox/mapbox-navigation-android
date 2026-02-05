@@ -12,7 +12,7 @@ fun DataRef.isNotEmpty(): Boolean {
 
 fun DataRef.toReader(): Reader {
     val stream = ByteBufferBackedInputStream(buffer)
-    return InputStreamReader(stream, Charsets.UTF_8)
+    return InputStreamReader(stream)
 }
 
 fun String.toDataRef(): DataRef {

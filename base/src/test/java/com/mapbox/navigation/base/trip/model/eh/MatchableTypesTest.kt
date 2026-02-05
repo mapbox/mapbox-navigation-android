@@ -18,10 +18,7 @@ class MatchableTypesTest {
                 .withPrefabTestPoint()
                 .verify()
 
-            ToStringVerifier
-                .forClass(it)
-                .withPrefabTestPoint()
-                .verify()
+            ToStringVerifier.forClass(it).verify()
         }
     }
 }

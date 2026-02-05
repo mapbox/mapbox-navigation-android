@@ -1,9 +1,6 @@
 package com.mapbox.navigation.ui.maps.route.arrow.model
 
 import android.content.Context
-import android.content.res.Configuration
-import android.content.res.Resources
-import android.util.DisplayMetrics
 import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -13,7 +10,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
-import io.mockk.verify
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -24,17 +20,12 @@ import org.junit.Test
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class RouteArrowOptionsTest {
 
-    private val ctx: Context = mockk {
-        every { resources } returns mockk {
-            every { configuration } returns Configuration()
-        }
-        every { createConfigurationContext(any()) } returns mockk()
-    }
+    private val ctx: Context = mockk()
 
     @Before
     fun setUp() {
         mockkStatic(AppCompatResources::class)
-        every { AppCompatResources.getDrawable(any(), any()) } returns mockk {
+        every { AppCompatResources.getDrawable(any(), any()) } returns mockk(relaxed = true) {
             every { intrinsicWidth } returns 24
             every { intrinsicHeight } returns 24
         }
@@ -296,36 +287,5 @@ class RouteArrowOptionsTest {
         assertEquals(headExpression, options.arrowHeadScaleExpression)
         assertEquals(headCasingExpression, options.arrowHeadCasingScaleExpression)
         assertEquals(fadingConfig, options.fadeOnHighZoomsConfig)
-    }
-
-    @Test
-    fun arrowDrawablesLoadedUsingDensityIndependentContext() {
-        val customArrowHeadDrawable = android.R.drawable.ic_menu_add
-        val customArrowHeadCasingDrawable = android.R.drawable.ic_menu_close_clear_cancel
-        val originalConfig = Configuration()
-        val mockResources = mockk<Resources> {
-            every { configuration } returns originalConfig
-        }
-        val densityIndependentContext = mockk<Context>()
-        val context = mockk<Context> {
-            every { resources } returns mockResources
-            every {
-                createConfigurationContext(
-                    match { it.densityDpi == DisplayMetrics.DENSITY_DEFAULT },
-                )
-            } returns densityIndependentContext
-        }
-
-        RouteArrowOptions.Builder(context)
-            .withArrowHeadIconDrawable(customArrowHeadDrawable)
-            .withArrowHeadIconCasingDrawable(customArrowHeadCasingDrawable)
-            .build()
-
-        verify {
-            AppCompatResources.getDrawable(densityIndependentContext, customArrowHeadDrawable)
-        }
-        verify {
-            AppCompatResources.getDrawable(densityIndependentContext, customArrowHeadCasingDrawable)
-        }
     }
 }

@@ -12,7 +12,6 @@ import androidx.annotation.StringDef
     RouterFailureType.NETWORK_ERROR,
     RouterFailureType.AUTHENTICATION_ERROR,
     RouterFailureType.ROUTE_CREATION_ERROR,
-    RouterFailureType.ROUTE_EXPIRY_ERROR,
     RouterFailureType.RESPONSE_PARSING_ERROR,
     RouterFailureType.ROUTER_RECREATION_ERROR,
     RouterFailureType.MISSING_TILES_ERROR,
@@ -51,11 +50,6 @@ annotation class RouterFailureType {
          * NoRoute, NoSegment, NoChargersNearby. Fallback to onboard router unsupported
          */
         const val ROUTE_CREATION_ERROR = "ROUTE_CREATION_ERROR"
-
-        /**
-         * Route refresh update failed due to server losing the route cache due to expiry.
-         */
-        const val ROUTE_EXPIRY_ERROR = "ROUTE_EXPIRY_ERROR"
 
         /**
          * Server returned response with a route which could not be parsed.

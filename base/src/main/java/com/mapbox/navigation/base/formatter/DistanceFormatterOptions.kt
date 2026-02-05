@@ -78,7 +78,7 @@ class DistanceFormatterOptions private constructor(
         private val applicationContext: Context = applicationContext.applicationContext
         private var locale: Locale = applicationContext.inferDeviceLocale()
         private var unitType: UnitType? = null
-        private var roundingIncrement = Rounding.INCREMENT_DISTANCE_DEPENDENT
+        private var roundingIncrement = Rounding.INCREMENT_FIFTY
 
         /**
          * Policy for the various units of measurement.

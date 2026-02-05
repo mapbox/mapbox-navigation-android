@@ -188,19 +188,18 @@ internal class StepIntersectionFBWrapper private constructor(
             }
         }
 
-        private fun FBRoadClassEnumWrapper.toRoadClassString(): String? {
-            return if (this.isNull) {
+        private fun FBRoadClassEnumWrapper.toRoadClassString(): String? =
+            if (this.isNull) {
                 null
             } else {
-                when (FBRoadClass.fromByteOrThrow(this.value)) {
+                when (this.value) {
                     FBRoadClass.Toll -> "toll"
                     FBRoadClass.Ferry -> "ferry"
                     FBRoadClass.Motorway -> "motorway"
                     FBRoadClass.Restricted -> "restricted"
                     FBRoadClass.Tunnel -> "tunnel"
-                    FBRoadClass.Unknown -> this.unrecognizedValue
+                    else -> this.unrecognizedValue
                 }
             }
-        }
     }
 }

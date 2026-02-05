@@ -13,9 +13,6 @@ class RouteLineDistancesIndexTest {
             .withPrefabTestPoint()
             .verify()
 
-        ToStringVerifier
-            .forClass(RouteLineDistancesIndex::class.java)
-            .withPrefabTestPoint()
-            .verify()
+        ToStringVerifier.forClass(RouteLineDistancesIndex::class.java).verify()
     }
 }

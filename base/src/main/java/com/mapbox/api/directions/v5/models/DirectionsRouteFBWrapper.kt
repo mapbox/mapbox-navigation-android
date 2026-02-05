@@ -3,16 +3,12 @@ package com.mapbox.api.directions.v5.models
 import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
 import com.mapbox.api.directions.v5.models.utils.FlatbuffersListWrapper
 import com.mapbox.auto.value.gson.SerializableJsonElement
-import com.mapbox.directions.route.DirectionsRouteContext
-import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
 internal class DirectionsRouteFBWrapper private constructor(
     private val fb: FBDirectionsRoute,
-    private val routeOptions: RouteOptions?,
-    val fbContext: FBDirectionsRouteContext,
-    val context: DirectionsRouteContext,
+    private val routeOptions: RouteOptions? = null,
 ) : DirectionsRoute(), BaseFBWrapper {
 
     internal val stepsCountWithGeometry: Int by lazy {
@@ -34,13 +30,6 @@ internal class DirectionsRouteFBWrapper private constructor(
 
     internal val refreshTtl: Int? get() = fb.refreshTtl
 
-    internal val geometryNumeric
-        get(): List<Point>? =
-            FlatbuffersListWrapper.get(fb.geometryNumericLength) {
-                val coordinate = fb.geometryNumeric(it)!!
-                Point.fromLngLat(coordinate.longitude, coordinate.latitude)
-            }
-
     override val unrecognized: ByteBuffer?
         get() = fb.unrecognizedPropertiesAsByteBuffer
 
@@ -58,8 +47,6 @@ internal class DirectionsRouteFBWrapper private constructor(
     override fun geometry(): String? = _geometry
 
     override fun weight(): Double? = fb.weight
-
-    override fun weightTypical(): Double? = fb.weightTypical
 
     override fun weightName(): String? = fb.weightName
 
@@ -116,7 +103,6 @@ internal class DirectionsRouteFBWrapper private constructor(
             "durationTypical=${durationTypical()}, " +
             "geometry=${geometry()}, " +
             "weight=${weight()}, " +
-            "weightTypical=${weightTypical()}, " +
             "weightName=${weightName()}, " +
             "legs=${legs()}, " +
             "waypoints=${waypoints()}, " +
@@ -129,16 +115,13 @@ internal class DirectionsRouteFBWrapper private constructor(
 
     internal companion object {
         internal fun wrap(
-            routeOptions: RouteOptions?,
-            bindgenContext: DirectionsRouteContext,
-        ): DirectionsRouteFBWrapper? {
-            val routeContext = FBDirectionsRouteContext.getRootAsDirectionsRouteContext(
-                bindgenContext.getData().buffer,
-            )
-            val fb = routeContext.route
+            fb: FBDirectionsRoute?,
+            routeOptions: RouteOptions? = null,
+        ): DirectionsRoute? {
             return when {
+                fb == null -> null
                 fb.isNull -> null
-                else -> DirectionsRouteFBWrapper(fb, routeOptions, routeContext, bindgenContext)
+                else -> DirectionsRouteFBWrapper(fb, routeOptions)
             }
         }
     }

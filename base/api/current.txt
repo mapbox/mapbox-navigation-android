@@ -18,6 +18,9 @@ package com.mapbox.api.directions.v5.models.utils {
   public final class ConstantsKt {
   }
 
+  public final class UnhandedEnumMappingKt {
+  }
+
   public final class UtilsKt {
   }
 
@@ -91,7 +94,6 @@ package com.mapbox.navigation.base.formatter {
   }
 
   public final class Rounding {
-    field public static final int INCREMENT_DISTANCE_DEPENDENT = -1; // 0xffffffff
     field public static final int INCREMENT_FIFTY = 50; // 0x32
     field public static final int INCREMENT_FIVE = 5; // 0x5
     field public static final int INCREMENT_ONE_HUNDRED = 100; // 0x64
@@ -100,7 +102,7 @@ package com.mapbox.navigation.base.formatter {
     field public static final com.mapbox.navigation.base.formatter.Rounding INSTANCE;
   }
 
-  @IntDef({com.mapbox.navigation.base.formatter.Rounding.INCREMENT_DISTANCE_DEPENDENT, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_FIVE, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_TEN, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_TWENTY_FIVE, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_FIFTY, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_ONE_HUNDRED}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface Rounding.Increment {
+  @IntDef({com.mapbox.navigation.base.formatter.Rounding.INCREMENT_FIVE, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_TEN, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_TWENTY_FIVE, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_FIFTY, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_ONE_HUNDRED}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface Rounding.Increment {
   }
 
   public enum UnitType {
@@ -1398,7 +1400,7 @@ package com.mapbox.navigation.base.route {
     property public final java.net.URL url;
   }
 
-  @StringDef({com.mapbox.navigation.base.route.RouterFailureType.Companion.THROTTLING_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.INPUT_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.NETWORK_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.AUTHENTICATION_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.ROUTE_CREATION_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.ROUTE_EXPIRY_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.RESPONSE_PARSING_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.ROUTER_RECREATION_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.MISSING_TILES_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.UNKNOWN_ERROR}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public @interface RouterFailureType {
+  @StringDef({com.mapbox.navigation.base.route.RouterFailureType.Companion.THROTTLING_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.INPUT_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.NETWORK_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.AUTHENTICATION_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.ROUTE_CREATION_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.RESPONSE_PARSING_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.ROUTER_RECREATION_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.MISSING_TILES_ERROR, com.mapbox.navigation.base.route.RouterFailureType.Companion.UNKNOWN_ERROR}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public @interface RouterFailureType {
     field public static final String AUTHENTICATION_ERROR = "AUTHENTICATION_ERROR";
     field public static final com.mapbox.navigation.base.route.RouterFailureType.Companion Companion;
     field public static final String INPUT_ERROR = "INPUT_ERROR";
@@ -1407,7 +1409,6 @@ package com.mapbox.navigation.base.route {
     field public static final String RESPONSE_PARSING_ERROR = "RESPONSE_PARSING_ERROR";
     field public static final String ROUTER_RECREATION_ERROR = "ROUTER_RECREATION_ERROR";
     field public static final String ROUTE_CREATION_ERROR = "ROUTE_CREATION_ERROR";
-    field public static final String ROUTE_EXPIRY_ERROR = "ROUTE_EXPIRY_ERROR";
     field public static final String THROTTLING_ERROR = "THROTTLING_ERROR";
     field public static final String UNKNOWN_ERROR = "UNKNOWN_ERROR";
   }
@@ -1420,7 +1421,6 @@ package com.mapbox.navigation.base.route {
     field public static final String RESPONSE_PARSING_ERROR = "RESPONSE_PARSING_ERROR";
     field public static final String ROUTER_RECREATION_ERROR = "ROUTER_RECREATION_ERROR";
     field public static final String ROUTE_CREATION_ERROR = "ROUTE_CREATION_ERROR";
-    field public static final String ROUTE_EXPIRY_ERROR = "ROUTE_EXPIRY_ERROR";
     field public static final String THROTTLING_ERROR = "THROTTLING_ERROR";
     field public static final String UNKNOWN_ERROR = "UNKNOWN_ERROR";
   }

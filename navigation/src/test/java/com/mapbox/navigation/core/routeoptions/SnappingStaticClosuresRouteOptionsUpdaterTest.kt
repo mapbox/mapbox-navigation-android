@@ -23,46 +23,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
-/**
- * Tests for the `snappingIncludeStaticClosures` parameter handling in RouteOptionsUpdater.
- *
- * ## What is snappingIncludeStaticClosures?
- *
- * This parameter controls whether the Directions API should consider **permanently closed roads**
- * when snapping GPS coordinates to the road network during route calculation.
- *
- * ### Use Case: Escaping from Closed Roads
- *
- * When rerouting, you might be located on a road that's permanently closed (construction,
- * road closure, etc.). To allow the router to find a valid route OUT of the closed area,
- * the origin point of the reroute must allow snapping to closed roads.
- *
- * ### Parameter Format
- *
- * The parameter is a semicolon-delimited string with one boolean per waypoint:
- * - Example: "true;false;false" for 3 waypoints
- *   - Waypoint 0 (origin): Include static closures = true
- *   - Waypoint 1: Include static closures = false
- *   - Waypoint 2 (destination): Include static closures = false
- *
- * ### RouteOptionsUpdater Behavior
- *
- * During reroute, the updater:
- * 1. Always sets the FIRST element to `true` (current location = origin)
- * 2. Preserves the remaining values from the original route
- * 3. Only applies this for PROFILE_DRIVING_TRAFFIC routes
- *
- * This ensures you can navigate out of closed sections while still avoiding them
- * for the rest of the route.
- *
- * ## Test Coverage
- *
- * This parameterized test validates that the snappingIncludeStaticClosures parameter
- * is correctly updated across different scenarios:
- * - Different positions along the route
- * - Routes with and without the parameter
- * - Different routing profiles
- */
 @ExperimentalMapboxNavigationAPI
 @RunWith(Parameterized::class)
 class SnappingStaticClosuresRouteOptionsUpdaterTest(
@@ -79,22 +39,9 @@ class SnappingStaticClosuresRouteOptionsUpdaterTest(
 
     companion object {
 
-        /**
-         * Parameterized test cases for snappingIncludeStaticClosures handling.
-         *
-         * Each test case contains:
-         * 1. RouteOptions: Original route with snappingIncludeStaticClosures configuration
-         * 2. remainingWaypoints: How many waypoints are left on the route
-         * 3. legIndex: Current leg of the route
-         * 4. expectedSnappingStaticClosures: Expected string value after update
-         */
         @JvmStatic
         @Parameterized.Parameters
         fun params() = listOf(
-            // Test Case 1: At beginning of route, all waypoints remain
-            // Original: [true, false, true, false]
-            // Position: Leg 0, 3 waypoints remaining (at coordinate 1)
-            // Expected: "true;false;true;false" (first element already true, rest preserved)
             arrayOf(
                 provideRouteOptionsWithCoordinates()
                     .toBuilder()
@@ -111,21 +58,12 @@ class SnappingStaticClosuresRouteOptionsUpdaterTest(
                 0,
                 "true;false;true;false",
             ),
-            // Test Case 2: Near destination, no snapping closures in original route
-            // Original: null (no snapping closures specified)
-            // Position: Leg 2, 1 waypoint remaining (at coordinate 3)
-            // Expected: "true;" (origin=true, destination=null)
-            // Note: For driving traffic profile, origin is always set to true
             arrayOf(
                 provideRouteOptionsWithCoordinates(),
                 1,
                 2,
                 "true;",
             ),
-            // Test Case 3: Mid-route with snapping closures
-            // Original: [true, false, false, false]
-            // Position: Leg 1, 2 waypoints remaining (at coordinate 2)
-            // Expected: "true;false;false" (origin=true + last 2 values from original)
             arrayOf(
                 provideRouteOptionsWithCoordinates()
                     .toBuilder()
@@ -142,10 +80,6 @@ class SnappingStaticClosuresRouteOptionsUpdaterTest(
                 1,
                 "true;false;false",
             ),
-            // Test Case 4: Approaching destination with mixed snapping closures
-            // Original: [true, false, true, false]
-            // Position: Leg 2, 1 waypoint remaining (at coordinate 3)
-            // Expected: "true;false" (origin=true + last value from original)
             arrayOf(
                 provideRouteOptionsWithCoordinates().toBuilder()
                     .snappingIncludeStaticClosuresList(
@@ -161,11 +95,6 @@ class SnappingStaticClosuresRouteOptionsUpdaterTest(
                 2,
                 "true;false",
             ),
-            // Test Case 5: Non-driving profile (cycling)
-            // Original: null (cycling profile)
-            // Position: Leg 2, 1 waypoint remaining
-            // Expected: null (snapping closures not applied to cycling profile)
-            // Rationale: Static closures are only relevant for driving profiles
             arrayOf(
                 provideRouteOptionsWithCoordinates().toBuilder()
                     .snappingIncludeStaticClosuresList(null)
@@ -186,32 +115,6 @@ class SnappingStaticClosuresRouteOptionsUpdaterTest(
         routeRefreshAdapter = RouteOptionsUpdater()
     }
 
-    /**
-     * Main test that validates snappingIncludeStaticClosures parameter is correctly updated.
-     *
-     * Test Flow:
-     * 1. Create RouteProgress with current position (remainingWaypoints, legIndex)
-     * 2. Call RouteOptionsUpdater.update() to generate new route options
-     * 3. Extract the snappingIncludeStaticClosures string from result
-     * 4. Verify it matches the expected format
-     *
-     * The test validates the critical update rule:
-     * - First element (origin) is always set to "true" for driving profiles
-     * - Remaining elements are preserved from the original route
-     * - Non-driving profiles don't include this parameter (null)
-     *
-     * ## Why This Matters
-     *
-     * Example Scenario:
-     * - You're navigating and end up on a permanently closed road (construction zone)
-     * - Original route: snappingIncludeStaticClosures = "false;false;false;false"
-     * - You go off-route and need to reroute
-     * - Without this logic: Router can't snap your location to the closed road → routing fails
-     * - With this logic: Updated to "true;false;false" → Router can snap to closed road at origin,
-     *   find a valid path out, then avoid closures for the rest of the route
-     *
-     * This allows you to "escape" from closed roads while still avoiding them elsewhere.
-     */
     @Test
     fun snappingClosuresOptions() {
         val routeProgress: RouteProgress = mockk(relaxed = true) {

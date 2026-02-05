@@ -94,7 +94,7 @@ class DomainTilesOptions private constructor(
          * Returns a Builder representing default configuration for HD tiles.
          */
         fun defaultHdTilesOptionsBuilder(): Builder = Builder(
-            tilesBaseUri = URI("https://api.mapbox.com"),
+            tilesBaseUri = URI("https://api-3dln-tiles-production.mapbox.com"),
             tilesDataset = "mapbox",
             tilesProfile = "",
             tilesVersion = "",

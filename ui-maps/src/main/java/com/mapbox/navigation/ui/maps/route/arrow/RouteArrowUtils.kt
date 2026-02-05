@@ -22,7 +22,7 @@ import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.VA
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.util.StyleManager
-import com.mapbox.navigation.ui.utils.internal.extensions.toScaledBitmap
+import com.mapbox.navigation.ui.utils.internal.extensions.getBitmap
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMisc
@@ -144,7 +144,7 @@ internal object RouteArrowUtils {
                 arrowHeadCasingDrawable.mutate(),
                 options.arrowCasingColor,
             )
-            val arrowHeadCasingBitmap = arrowHeadCasingDrawable.toScaledBitmap(style.pixelRatio)
+            val arrowHeadCasingBitmap = arrowHeadCasingDrawable.getBitmap()
             style.addImage(RouteLayerConstants.ARROW_HEAD_ICON_CASING, arrowHeadCasingBitmap)
         }
 
@@ -160,7 +160,7 @@ internal object RouteArrowUtils {
                 arrowHeadDrawable.mutate(),
                 options.arrowColor,
             )
-            val arrowHeadBitmap = arrowHeadDrawable.toScaledBitmap(style.pixelRatio)
+            val arrowHeadBitmap = arrowHeadDrawable.getBitmap()
             style.addImage(RouteLayerConstants.ARROW_HEAD_ICON, arrowHeadBitmap)
         }
 

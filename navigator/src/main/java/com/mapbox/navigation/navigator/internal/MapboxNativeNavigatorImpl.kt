@@ -141,7 +141,7 @@ class MapboxNativeNavigatorImpl(
         roadObjectsStore = PerformanceTracker.trackPerformanceSync(
             "${sectionPrefix}roadObjectsStore",
         ) {
-            navigator.roadObjectsStore()
+            navigator.roadObjectStore()
         }
         experimental = PerformanceTracker.trackPerformanceSync("${sectionPrefix}experimental") {
             navigator.experimental
@@ -211,12 +211,8 @@ class MapboxNativeNavigatorImpl(
      */
     override suspend fun updateLocation(rawLocation: FixLocation): Boolean =
         suspendCancellableCoroutine { continuation ->
-            PerformanceTracker.trackPerformanceSync(
-                "MapboxNativeNavigatorImpl#updateLocation",
-            ) {
-                navigator.updateLocation(rawLocation) {
-                    continuation.resume(it)
-                }
+            navigator.updateLocation(rawLocation) {
+                continuation.resume(it)
             }
         }
 

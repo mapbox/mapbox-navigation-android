@@ -60,7 +60,7 @@ class DomainTilesOptionsTest {
         val config = DomainTilesOptions.defaultHdTilesOptions()
 
         assertEquals(
-            URI("https://api.mapbox.com"),
+            URI("https://api-3dln-tiles-production.mapbox.com"),
             configFromBuilder.tilesBaseUri,
         )
         assertEquals("mapbox", configFromBuilder.tilesDataset)

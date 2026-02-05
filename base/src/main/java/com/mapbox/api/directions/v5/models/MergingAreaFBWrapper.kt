@@ -2,8 +2,8 @@ package com.mapbox.api.directions.v5.models
 
 import com.google.flatbuffers.FlexBuffers
 import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
+import com.mapbox.api.directions.v5.models.utils.unhandledEnumMapping
 import com.mapbox.auto.value.gson.SerializableJsonElement
-import com.mapbox.directions.generated.MergingAreaType
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
@@ -51,7 +51,7 @@ internal class MergingAreaFBWrapper private constructor(
         }
 
         @Type
-        private fun MergingAreaType.fbToMergingAreaType(
+        private fun Byte.fbToMergingAreaType(
             propertyName: String,
             unrecognized: FlexBuffers.Map? = null,
         ): String? {
@@ -60,6 +60,7 @@ internal class MergingAreaFBWrapper private constructor(
                 FBMergingAreaType.FromRight -> TYPE_FROM_RIGHT
                 FBMergingAreaType.FromBothSides -> TYPE_FROM_BOTH_SIDES
                 FBMergingAreaType.Unknown -> unrecognized?.get(propertyName)?.asString()
+                else -> unhandledEnumMapping(propertyName, this)
             }
         }
     }

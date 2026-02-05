@@ -14,7 +14,6 @@ class ViewportDataTest {
             .verify()
 
         ToStringVerifier.forClass(ViewportData::class.java)
-            .withPrefabTestPoint()
             .verify()
     }
 }

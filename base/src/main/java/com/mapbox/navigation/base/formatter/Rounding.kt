@@ -6,12 +6,6 @@ import androidx.annotation.IntDef
  * Rounding
  */
 object Rounding {
-
-    /**
-     * Undefined rounding increment.
-     */
-    const val INCREMENT_DISTANCE_DEPENDENT = -1
-
     /**
      * Rounding increment 5
      *
@@ -52,7 +46,6 @@ object Rounding {
      */
     @Retention(AnnotationRetention.BINARY)
     @IntDef(
-        INCREMENT_DISTANCE_DEPENDENT,
         INCREMENT_FIVE,
         INCREMENT_TEN,
         INCREMENT_TWENTY_FIVE,

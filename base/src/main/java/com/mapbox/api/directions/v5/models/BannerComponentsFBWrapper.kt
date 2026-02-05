@@ -2,6 +2,7 @@ package com.mapbox.api.directions.v5.models
 
 import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
 import com.mapbox.api.directions.v5.models.utils.FlatbuffersListWrapper
+import com.mapbox.api.directions.v5.models.utils.unhandledEnumMapping
 import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
@@ -29,6 +30,7 @@ internal class BannerComponentsFBWrapper private constructor(
             FBBannerComponentType.GuidanceView -> GUIDANCE_VIEW
             FBBannerComponentType.Unknown -> unrecognizeFlexBufferMap?.get("type")?.asString()
                 ?: "unknown"
+            else -> unhandledEnumMapping("BannerComponents#type", fb.type)
         }
     }
 
@@ -44,8 +46,8 @@ internal class BannerComponentsFBWrapper private constructor(
             FBBannerComponentSubType.Sapaguidemap -> SAPAGUIDEMAP
             FBBannerComponentSubType.Signboard -> SIGNBOARD
             FBBannerComponentSubType.Tollbranch -> TOLLBRANCH
-            FBBannerComponentSubType.Unknown ->
-                unrecognizeFlexBufferMap?.get("subType")?.asString()
+            FBBannerComponentSubType.Unknown -> unrecognizeFlexBufferMap?.get("subType")?.asString()
+            else -> unhandledEnumMapping("BannerComponents#subType", fb.subType)
         }
     }
 

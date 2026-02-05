@@ -87,18 +87,6 @@ internal class EHorizonSubscriptionManagerImpl(
             override fun onRoadObjectRemoved(roadObjectId: String) {
                 notifyAllObservers { onRoadObjectRemoved(roadObjectId) }
             }
-
-            override fun onCustomRoadObjectMatched(id: String) {
-                // TODO: adopt in https://mapbox.atlassian.net/browse/NAVAND-6910
-            }
-
-            override fun onCustomRoadObjectAddingCancelled(id: String) {
-                // TODO: adopt in https://mapbox.atlassian.net/browse/NAVAND-6910
-            }
-
-            override fun onCustomRoadObjectMatchingFailed(id: String) {
-                // TODO: adopt in https://mapbox.atlassian.net/browse/NAVAND-6910
-            }
         }
 
     init {

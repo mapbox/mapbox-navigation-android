@@ -542,31 +542,6 @@ class RouterWrapperTests {
         }
 
     @Test
-    fun `route request directions api route expiry error`() =
-        coroutineRule.runBlockingTest {
-            routerWrapper.getRoute(routerOptions, signature, navigationRouterCallback)
-            getRouteSlot.captured.run(
-                ExpectedFactory.createError(
-                    listOf(
-                        createRouterError(
-                            message = "some test error message.",
-                            type = RouterErrorType.ROUTE_NOT_FOUND_ON_SERVER,
-                        ),
-                    ),
-                ),
-                nativeOriginOnboard,
-            )
-
-            val failures = slot<List<RouterFailure>>()
-            verify(exactly = 1) {
-                navigationRouterCallback.onFailure(capture(failures), routerOptions)
-            }
-            val failure: RouterFailure = failures.captured[0]
-            assertFalse(failure.isRetryable)
-            assertEquals(RouterFailureType.ROUTE_EXPIRY_ERROR, failure.type)
-        }
-
-    @Test
     fun `route request unknown error`() =
         coroutineRule.runBlockingTest {
             routerWrapper.getRoute(routerOptions, signature, navigationRouterCallback)

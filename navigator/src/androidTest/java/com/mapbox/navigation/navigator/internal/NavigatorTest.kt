@@ -108,7 +108,6 @@ class NavigatorTest {
                 null,
                 null,
                 RerouteStrategyForMatchRoute.REROUTE_DISABLED,
-                null,
             ),
             "",
         )

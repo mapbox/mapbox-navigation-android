@@ -3,7 +3,6 @@ package com.mapbox.navigation.ui.maps.internal.camera
 import androidx.annotation.RestrictTo
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
-import org.jetbrains.annotations.TestOnly
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 fun MapboxNavigationViewportDataSource.internalReevaluateRoute() {
@@ -21,13 +20,3 @@ var MapboxNavigationViewportDataSource.internalOptions
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     set(value) { internalOptions = value }
-
-@TestOnly
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-fun MapboxNavigationViewportDataSource.postManeuverFramingPointsStateForTests() =
-    postManeuverFramingPointsStateForTests()
-
-@TestOnly
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-fun MapboxNavigationViewportDataSource.averageIntersectionDistancesOnRouteForTests() =
-    averageIntersectionDistancesOnRouteForTests()

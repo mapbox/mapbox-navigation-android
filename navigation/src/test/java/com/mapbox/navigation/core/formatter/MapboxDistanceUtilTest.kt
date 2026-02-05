@@ -41,22 +41,6 @@ class MapboxDistanceUtilTest {
 
     @Config(qualifiers = "en")
     @Test
-    fun `formatDistance large value imperial with distance-dependent rounding increment`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            19312.1,
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
-            UnitType.IMPERIAL,
-            ctx,
-        )
-
-        assertEquals("12", result.distanceAsString)
-        assertEquals("mi", result.distanceSuffix)
-        assertEquals(UnitType.IMPERIAL, result.unitType)
-        assertEquals(12.0, result.distance, 0.1)
-    }
-
-    @Config(qualifiers = "en")
-    @Test
     fun `formatDistance large at lower bound value imperial with default locale`() {
         val result = MapboxDistanceUtil.formatDistance(
             4828.03,
@@ -77,22 +61,6 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             19312.1,
             Rounding.INCREMENT_FIFTY,
-            UnitType.IMPERIAL,
-            ctx,
-        )
-
-        assertEquals("12", result.distanceAsString)
-        assertEquals("mi", result.distanceSuffix)
-        assertEquals(UnitType.IMPERIAL, result.unitType)
-        assertEquals(12.0, result.distance, 0.1)
-    }
-
-    @Config(qualifiers = "en")
-    @Test
-    fun `formatDistance large value UK with distance-dependent rounding increment`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            19312.1,
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
             UnitType.IMPERIAL,
             ctx,
         )
@@ -125,22 +93,6 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             19312.1,
             Rounding.INCREMENT_FIFTY,
-            UnitType.METRIC,
-            ctx,
-        )
-
-        assertEquals("19", result.distanceAsString)
-        assertEquals("km", result.distanceSuffix)
-        assertEquals(UnitType.METRIC, result.unitType)
-        assertEquals(19.3121, result.distance, 0.0)
-    }
-
-    @Config(qualifiers = "en")
-    @Test
-    fun `formatDistance large value metric with distance-dependent rounding increment`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            19312.1,
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
             UnitType.METRIC,
             ctx,
         )
@@ -197,53 +149,6 @@ class MapboxDistanceUtilTest {
         assertEquals("m", result.distanceSuffix)
         assertEquals(UnitType.METRIC, result.unitType)
         assertEquals(50.0, result.distance, 0.0)
-    }
-
-    @Config(qualifiers = "en")
-    @Test
-    fun `formatDistance small value metric with default increment = 5`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            16.3,
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
-            UnitType.METRIC,
-            ctx,
-        )
-
-        assertEquals("15", result.distanceAsString)
-        assertEquals("m", result.distanceSuffix)
-        assertEquals(UnitType.METRIC, result.unitType)
-        assertEquals(15.0, result.distance, 0.0)
-    }
-
-    @Test
-    fun `formatDistance small value metric with default increment = 25`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            76.3,
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
-            UnitType.METRIC,
-            ctx,
-        )
-
-        assertEquals("75", result.distanceAsString)
-        assertEquals("m", result.distanceSuffix)
-        assertEquals(UnitType.METRIC, result.unitType)
-        assertEquals(75.0, result.distance, 0.0)
-    }
-
-    @Config(qualifiers = "en")
-    @Test
-    fun `formatDistance small value metric with default increment = 50`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            927.3,
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
-            UnitType.METRIC,
-            ctx,
-        )
-
-        assertEquals("900", result.distanceAsString)
-        assertEquals("m", result.distanceSuffix)
-        assertEquals(UnitType.METRIC, result.unitType)
-        assertEquals(900.0, result.distance, 0.0)
     }
 
     @Config(qualifiers = "en")
@@ -312,22 +217,6 @@ class MapboxDistanceUtilTest {
 
     @Config(qualifiers = "en")
     @Test
-    fun `formatDistance small value imperial with distance-dependent increment`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            118.0, // 387 feet
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
-            UnitType.IMPERIAL,
-            ctx,
-        )
-
-        assertEquals("350", result.distanceAsString)
-        assertEquals("ft", result.distanceSuffix)
-        assertEquals(UnitType.IMPERIAL, result.unitType)
-        assertEquals(350.0, result.distance, 0.1)
-    }
-
-    @Config(qualifiers = "en")
-    @Test
     fun `formatDistance small value imperial at lower bound with default locale`() {
         val result = MapboxDistanceUtil.formatDistance(
             0.0,
@@ -371,54 +260,6 @@ class MapboxDistanceUtilTest {
         assertEquals("yd", result.distanceSuffix)
         assertEquals(UnitType.IMPERIAL, result.unitType)
         assertEquals(110.0, result.distance, 0.1)
-    }
-
-    @Config(qualifiers = "en-rGB")
-    @Test
-    fun `formatDistance small value UK with default increment = 10`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            17.4, // 19 yards
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
-            UnitType.IMPERIAL,
-            ctx,
-        )
-
-        assertEquals("10", result.distanceAsString)
-        assertEquals("yd", result.distanceSuffix)
-        assertEquals(UnitType.IMPERIAL, result.unitType)
-        assertEquals(10.0, result.distance, 0.1)
-    }
-
-    @Config(qualifiers = "en-rGB")
-    @Test
-    fun `formatDistance small value UK with default increment = 25`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            79.5, // 87 yards
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
-            UnitType.IMPERIAL,
-            ctx,
-        )
-
-        assertEquals("75", result.distanceAsString)
-        assertEquals("yd", result.distanceSuffix)
-        assertEquals(UnitType.IMPERIAL, result.unitType)
-        assertEquals(75.0, result.distance, 0.1)
-    }
-
-    @Config(qualifiers = "en-rGB")
-    @Test
-    fun `formatDistance small value UK with default increment = 50`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            116.0, // 127 yards
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
-            UnitType.IMPERIAL,
-            ctx,
-        )
-
-        assertEquals("100", result.distanceAsString)
-        assertEquals("yd", result.distanceSuffix)
-        assertEquals(UnitType.IMPERIAL, result.unitType)
-        assertEquals(100.0, result.distance, 0.1)
     }
 
     @Config(qualifiers = "en-rGB")
@@ -492,22 +333,6 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             1100.5,
             Rounding.INCREMENT_FIFTY,
-            UnitType.METRIC,
-            ctx,
-        )
-
-        assertEquals("1.1", result.distanceAsString)
-        assertEquals("km", result.distanceSuffix)
-        assertEquals(UnitType.METRIC, result.unitType)
-        assertEquals(1.1005, result.distance, 0.0)
-    }
-
-    @Config(qualifiers = "en")
-    @Test
-    fun `formatDistance medium fractional value metric with distance-dependent increment`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            1100.5,
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
             UnitType.METRIC,
             ctx,
         )
@@ -600,22 +425,6 @@ class MapboxDistanceUtilTest {
 
     @Config(qualifiers = "en-rGB")
     @Test
-    fun `formatDistance medium value UK with distance-dependent increment`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            15000.0,
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
-            UnitType.IMPERIAL,
-            ctx,
-        )
-
-        assertEquals("9", result.distanceAsString)
-        assertEquals("mi", result.distanceSuffix)
-        assertEquals(UnitType.IMPERIAL, result.unitType)
-        assertEquals(9.3205679, result.distance, 0.00001)
-    }
-
-    @Config(qualifiers = "en-rGB")
-    @Test
     fun `formatDistance medium value at lower bound UK with default locale`() {
         val result = MapboxDistanceUtil.formatDistance(
             161.0,
@@ -652,22 +461,6 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             -19312.1,
             Rounding.INCREMENT_FIFTY,
-            UnitType.IMPERIAL,
-            ctx,
-        )
-
-        assertEquals("50", result.distanceAsString)
-        assertEquals("ft", result.distanceSuffix)
-        assertEquals(UnitType.IMPERIAL, result.unitType)
-        assertEquals(50.0, result.distance, 0.0)
-    }
-
-    @Config(qualifiers = "en")
-    @Test
-    fun `formatDistance invalid value imperial with distance-dependent increment`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            -19312.1,
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
             UnitType.IMPERIAL,
             ctx,
         )
@@ -728,22 +521,6 @@ class MapboxDistanceUtilTest {
 
     @Config(qualifiers = "en-rGB")
     @Test
-    fun `formatDistance invalid large value UK with distance-dependent increment`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            -19312.1,
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
-            UnitType.IMPERIAL,
-            ctx,
-        )
-
-        assertEquals("50", result.distanceAsString)
-        assertEquals("yd", result.distanceSuffix)
-        assertEquals(UnitType.IMPERIAL, result.unitType)
-        assertEquals(50.0, result.distance, 0.0)
-    }
-
-    @Config(qualifiers = "en-rGB")
-    @Test
     fun `formatDistance invalid medium value UK with default locale`() {
         val result = MapboxDistanceUtil.formatDistance(
             -353.0,
@@ -780,22 +557,6 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             -19312.1,
             Rounding.INCREMENT_FIFTY,
-            UnitType.METRIC,
-            ctx,
-        )
-
-        assertEquals("50", result.distanceAsString)
-        assertEquals("m", result.distanceSuffix)
-        assertEquals(UnitType.METRIC, result.unitType)
-        assertEquals(50.0, result.distance, 0.0)
-    }
-
-    @Config(qualifiers = "en")
-    @Test
-    fun `formatDistance invalid large value metric with distance-dependent increment`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            -19312.1,
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
             UnitType.METRIC,
             ctx,
         )
@@ -850,17 +611,6 @@ class MapboxDistanceUtilTest {
     }
 
     @Test
-    fun `formatDistance imperial with distance-dependent increment return small distance only`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            23.1, // 76 feet
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
-            UnitType.IMPERIAL,
-        )
-
-        assertEquals(50.0, result, 0.0)
-    }
-
-    @Test
     fun `formatDistance imperial return small at lower bound distance only`() {
         val result = MapboxDistanceUtil.formatDistance(
             0.0,
@@ -904,42 +654,6 @@ class MapboxDistanceUtilTest {
         )
 
         assertEquals(110.0, result, 0.0)
-    }
-
-    @Config(qualifiers = "en-rGB")
-    @Test
-    fun `formatDistance UK return small distance only with default increment = 10`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            17.4, // 19 yards
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
-            UnitType.IMPERIAL,
-        )
-
-        assertEquals(10.0, result, 0.1)
-    }
-
-    @Config(qualifiers = "en-rGB")
-    @Test
-    fun `formatDistance UK return small distance only with default increment = 25`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            79.5, // 87 yards
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
-            UnitType.IMPERIAL,
-        )
-
-        assertEquals(75.0, result, 0.1)
-    }
-
-    @Config(qualifiers = "en-rGB")
-    @Test
-    fun `formatDistance UK return small distance only with default increment = 50`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            116.0, // 127 yards
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
-            UnitType.IMPERIAL,
-        )
-
-        assertEquals(100.0, result, 0.1)
     }
 
     @Test
@@ -990,17 +704,6 @@ class MapboxDistanceUtilTest {
     }
 
     @Test
-    fun `formatDistance imperial return small distance only for negative with distance-dependent inc`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            -10.0,
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
-            UnitType.IMPERIAL,
-        )
-
-        assertEquals(50.0, result, 0.0)
-    }
-
-    @Test
     @Config(qualifiers = "en-rGB")
     fun `formatDistance UK return small distance only when input negative`() {
         val result = MapboxDistanceUtil.formatDistance(
@@ -1013,33 +716,10 @@ class MapboxDistanceUtilTest {
     }
 
     @Test
-    @Config(qualifiers = "en-rGB")
-    fun `formatDistance UK return small distance only for negative with distance-dependent inc`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            -10.0,
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
-            UnitType.IMPERIAL,
-        )
-
-        assertEquals(50.0, result, 0.0)
-    }
-
-    @Test
     fun `formatDistance imperial return medium distance only`() {
         val result = MapboxDistanceUtil.formatDistance(
             13000.0,
             Rounding.INCREMENT_FIFTY,
-            UnitType.IMPERIAL,
-        )
-
-        assertEquals(8.0778255, result, 0.00001)
-    }
-
-    @Test
-    fun `formatDistance imperial return medium distance only with distance-dependent increment`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            13000.0,
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
             UnitType.IMPERIAL,
         )
 
@@ -1074,18 +754,6 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             10456.3,
             Rounding.INCREMENT_FIFTY,
-            UnitType.IMPERIAL,
-        )
-
-        assertEquals(6.49724, result, 0.00001)
-    }
-
-    @Config(qualifiers = "en-rGB")
-    @Test
-    fun `formatDistance UK return medium distance only with distance-dependent increment`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            10456.3,
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
             UnitType.IMPERIAL,
         )
 
@@ -1138,35 +806,12 @@ class MapboxDistanceUtilTest {
         assertEquals(6.7108112, result, 0.000001)
     }
 
-    @Test
-    fun `formatDistance imperial return large distance only with distance-dependent increment`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            10800.0,
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
-            UnitType.IMPERIAL,
-        )
-
-        assertEquals(6.7108112, result, 0.000001)
-    }
-
     @Config(qualifiers = "en-rGB")
     @Test
     fun `formatDistance UK return large distance only`() {
         val result = MapboxDistanceUtil.formatDistance(
             10800.0,
             Rounding.INCREMENT_FIFTY,
-            UnitType.IMPERIAL,
-        )
-
-        assertEquals(6.7108089, result, 0.00001)
-    }
-
-    @Config(qualifiers = "en-rGB")
-    @Test
-    fun `formatDistance UK return large distance only with distance-dependent increment`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            10800.0,
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
             UnitType.IMPERIAL,
         )
 
@@ -1186,21 +831,10 @@ class MapboxDistanceUtilTest {
     }
 
     @Test
-    fun `formatDistance invalid large metric returns fifty`() {
+    fun `formatDistance imperial invalid large metric returns fifty`() {
         val result = MapboxDistanceUtil.formatDistance(
             -15000.0,
             Rounding.INCREMENT_FIFTY,
-            UnitType.METRIC,
-        )
-
-        assertEquals(50.0, result, 0.0)
-    }
-
-    @Test
-    fun `formatDistance invalid metric with distance-dependent increment returns fifty`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            -15000.0,
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
             UnitType.METRIC,
         )
 
@@ -1213,18 +847,6 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             -15000.0,
             Rounding.INCREMENT_FIFTY,
-            UnitType.IMPERIAL,
-        )
-
-        assertEquals(50.0, result, 0.0)
-    }
-
-    @Config(qualifiers = "en-rGB")
-    @Test
-    fun `formatDistance UK invalid with distance-dependent increment returns fifty`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            -15000.0,
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
             UnitType.IMPERIAL,
         )
 
@@ -1247,17 +869,6 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             -1500.0,
             Rounding.INCREMENT_FIFTY,
-            UnitType.IMPERIAL,
-        )
-
-        assertEquals(50.0, result, 0.0)
-    }
-
-    @Test
-    fun `formatDistance invalid imperial with distance-dependent increment returns fifty`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            -1500.0,
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
             UnitType.IMPERIAL,
         )
 
@@ -1321,41 +932,6 @@ class MapboxDistanceUtilTest {
         assertEquals(120.0, result, 0.0)
     }
 
-    @Config(qualifiers = "en")
-    @Test
-    fun `formatDistance metric return small distance only with default increment = 5`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            16.3,
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
-            UnitType.METRIC,
-        )
-
-        assertEquals(15.0, result, 0.0)
-    }
-
-    @Test
-    fun `formatDistance metric return small distance only with default increment = 25`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            76.3,
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
-            UnitType.METRIC,
-        )
-
-        assertEquals(75.0, result, 0.0)
-    }
-
-    @Config(qualifiers = "en")
-    @Test
-    fun `formatDistance metric return small distance only with default increment = 50`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            927.3,
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
-            UnitType.METRIC,
-        )
-
-        assertEquals(900.0, result, 0.0)
-    }
-
     @Test
     fun `formatDistance metric return small at lower bound distance only`() {
         val result = MapboxDistanceUtil.formatDistance(
@@ -1390,17 +966,6 @@ class MapboxDistanceUtilTest {
     }
 
     @Test
-    fun `formatDistance metric return small distance only for negative with distance-dependent inc`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            -10.0,
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
-            UnitType.METRIC,
-        )
-
-        assertEquals(50.0, result, 0.0)
-    }
-
-    @Test
     fun `formatDistance metric return small distance only with custom locale`() {
         val result = MapboxDistanceUtil.formatDistance(
             123.456,
@@ -1417,17 +982,6 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             2367.354,
             Rounding.INCREMENT_FIFTY,
-            UnitType.METRIC,
-        )
-
-        assertEquals(2.367354, result, 0.00001)
-    }
-
-    @Test
-    fun `formatDistance metric return medium distance only with distance-dependent increment`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            2367.354,
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
             UnitType.METRIC,
         )
 
@@ -1472,17 +1026,6 @@ class MapboxDistanceUtilTest {
         val result = MapboxDistanceUtil.formatDistance(
             10800.0,
             Rounding.INCREMENT_FIFTY,
-            UnitType.METRIC,
-        )
-
-        assertEquals(10.8, result, 0.0)
-    }
-
-    @Test
-    fun `formatDistance metric return large distance only with distance-dependent increment`() {
-        val result = MapboxDistanceUtil.formatDistance(
-            10800.0,
-            Rounding.INCREMENT_DISTANCE_DEPENDENT,
             UnitType.METRIC,
         )
 

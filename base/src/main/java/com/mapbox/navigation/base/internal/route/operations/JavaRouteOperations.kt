@@ -40,17 +40,18 @@ import com.mapbox.navigation.base.internal.route.NotificationsRefresher
 import com.mapbox.navigation.base.internal.route.WaypointsParser
 import com.mapbox.navigation.base.internal.route.parsing.models.ParsedRouteData
 import com.mapbox.navigation.base.internal.route.parsing.models.RouteModelParsingResult
+import com.mapbox.navigation.base.internal.route.routerOrigin
 import com.mapbox.navigation.base.internal.route.size
 import com.mapbox.navigation.base.internal.utils.Constants
 import com.mapbox.navigation.base.internal.utils.mapToNativeRouteOrigin
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
+import com.mapbox.navigation.base.internal.utils.toByteArray
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.ResponseOriginAPI
 import com.mapbox.navigation.base.route.RouteRefreshMetadata
 import com.mapbox.navigation.base.utils.DecodeUtils.stepGeometryToPoints
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
-import com.mapbox.navigation.utils.internal.toReader
 import com.mapbox.navigator.RouteInterface
 import kotlin.collections.set
 
@@ -334,9 +335,12 @@ private fun parseDirectionsRouteRefresh(
     dataRef: DataRef,
 ): Result<DirectionsRouteRefresh> {
     return Result.runCatching {
-        val route = dataRef.toReader().use { reader ->
-            DirectionsRefreshResponse.fromJson(reader).route()
-        }
+        /**
+         * TODO support DirectionsRefreshResponse creation from DataRef.
+         * See DirectionsResponse.fromJson(reader)
+         */
+        val route =
+            DirectionsRefreshResponse.fromJson(dataRef.toByteArray().decodeToString()).route()
         route ?: throw IllegalStateException("no route refresh returned")
     }
 }

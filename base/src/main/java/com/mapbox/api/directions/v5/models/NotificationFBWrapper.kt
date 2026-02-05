@@ -5,9 +5,8 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.DirectionsCriteria.NotificationsRefreshTypeCriteria
 import com.mapbox.api.directions.v5.DirectionsCriteria.NotificationsTypeCriteria
 import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
+import com.mapbox.api.directions.v5.models.utils.unhandledEnumMapping
 import com.mapbox.auto.value.gson.SerializableJsonElement
-import com.mapbox.directions.generated.NotificationRefreshType
-import com.mapbox.directions.generated.NotificationType
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
@@ -99,7 +98,7 @@ internal class NotificationFBWrapper private constructor(
             propertyName: String,
             unrecognized: FlexBuffers.Map?,
         ): String? {
-            return when (FBNotificationSubtype.fromByteOrThrow(this)) {
+            return when (this) {
                 FBNotificationSubtype.MaxHeight ->
                     DirectionsCriteria.NOTIFICATION_SUBTYPE_MAX_HEIGHT
                 FBNotificationSubtype.MaxWidth ->
@@ -124,11 +123,12 @@ internal class NotificationFBWrapper private constructor(
                 FBNotificationSubtype.EvStationUnavailable ->
                     DirectionsCriteria.NOTIFICATION_SUBTYPE_EV_STATION_UNAVAILABLE
                 FBNotificationSubtype.Unknown -> unrecognized?.get(propertyName)?.asString()
+                else -> unhandledEnumMapping(propertyName, this)
             }
         }
 
         @NotificationsRefreshTypeCriteria
-        private fun NotificationRefreshType.fbToNotificationsRefreshTypeCriteria(
+        private fun Byte.fbToNotificationsRefreshTypeCriteria(
             propertyName: String,
             unrecognized: FlexBuffers.Map?,
         ): String {
@@ -141,11 +141,12 @@ internal class NotificationFBWrapper private constructor(
                     ?: throw IllegalStateException(
                         "$propertyName is Unknown in fb, but missing in unrecognized map",
                     )
+                else -> unhandledEnumMapping(propertyName, this)
             }
         }
 
         @NotificationsTypeCriteria
-        private fun NotificationType.fbToNotificationsTypeCriteria(
+        private fun Byte.fbToNotificationsTypeCriteria(
             propertyName: String,
             unrecognized: FlexBuffers.Map?,
         ): String {
@@ -156,6 +157,7 @@ internal class NotificationFBWrapper private constructor(
                     ?: throw IllegalStateException(
                         "$propertyName is Unknown in fb, but missing in unrecognized map",
                     )
+                else -> unhandledEnumMapping(propertyName, this)
             }
         }
     }

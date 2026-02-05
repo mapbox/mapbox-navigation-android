@@ -2,13 +2,13 @@ package com.mapbox.navigation.ui.utils.internal.extensions
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.renderscript.Allocation
 import android.renderscript.Element
 import android.renderscript.RenderScript
 import android.renderscript.ScriptIntrinsicBlur
-import androidx.core.graphics.drawable.toBitmap
 import kotlin.math.roundToInt
 
 /**
@@ -17,21 +17,19 @@ import kotlin.math.roundToInt
  * @return Bitmap
  */
 fun Drawable.getBitmap(): Bitmap {
-    return toBitmap()
-}
-
-/**
- * Converts this [Drawable] to a [Bitmap] with dimensions multiplied by the given [scale] factor.
- *
- * @param scale the multiplier applied to both width and height (e.g., 2.0 doubles the size)
- * @return a new [Bitmap]
- */
-fun Drawable.toScaledBitmap(scale: Float): Bitmap {
-    return toBitmap(
-        (intrinsicWidth * scale).roundToInt(),
-        (intrinsicHeight * scale).roundToInt(),
-        Bitmap.Config.ARGB_8888,
-    )
+    return if (this is BitmapDrawable) {
+        this.bitmap
+    } else {
+        val bitmap = Bitmap.createBitmap(
+            intrinsicWidth,
+            intrinsicHeight,
+            Bitmap.Config.ARGB_8888,
+        )
+        val canvas = Canvas(bitmap)
+        setBounds(0, 0, canvas.width, canvas.height)
+        draw(canvas)
+        bitmap
+    }
 }
 
 /**

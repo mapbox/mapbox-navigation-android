@@ -4,6 +4,7 @@ import com.google.flatbuffers.FlexBuffers
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.DirectionsCriteria.AmenityTypeCriteria
 import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
+import com.mapbox.api.directions.v5.models.utils.unhandledEnumMapping
 import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
@@ -43,7 +44,7 @@ internal class AmenityFBWrapper private constructor(
         }
 
         @AmenityTypeCriteria
-        private fun FBAmenityType.fbAmenityTypeCriteria(
+        private fun Byte.fbAmenityTypeCriteria(
             propertyName: String,
             unrecognized: FlexBuffers.Map?,
         ): String {
@@ -72,6 +73,7 @@ internal class AmenityFBWrapper private constructor(
                     ?: throw IllegalStateException(
                         "$propertyName is Unknown in fb, but missing in unrecognized map",
                     )
+                else -> unhandledEnumMapping(propertyName, this)
             }
         }
     }

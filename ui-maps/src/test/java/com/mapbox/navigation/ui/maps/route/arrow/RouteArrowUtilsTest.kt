@@ -1,19 +1,15 @@
 package com.mapbox.navigation.ui.maps.route.arrow
 
 import android.content.Context
-import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.core.graphics.drawable.DrawableCompat
-import androidx.core.graphics.drawable.toBitmap
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.geojson.Point
 import com.mapbox.maps.Image
-import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.Style
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -43,16 +39,10 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import kotlin.math.roundToInt
 
 class RouteArrowUtilsTest {
 
-    private val ctx: Context = mockk {
-        every { resources } returns mockk {
-            every { configuration } returns Configuration()
-        }
-        every { createConfigurationContext(any()) } returns mockk()
-    }
+    private val ctx: Context = mockk()
 
     @get:Rule
     val loggerRule = LoggingFrontendTestRule()
@@ -61,21 +51,9 @@ class RouteArrowUtilsTest {
     fun setUp() {
         mockkStatic(AppCompatResources::class)
         mockkStatic(Style::sdkStyleManager)
-        mockkStatic(DrawableCompat::class)
-        mockkStatic(Drawable::toBitmap)
-        every { AppCompatResources.getDrawable(any(), any()) } returns mockk {
+        every { AppCompatResources.getDrawable(any(), any()) } returns mockk(relaxed = true) {
             every { intrinsicWidth } returns 24
             every { intrinsicHeight } returns 24
-            every { mutate() } returns this
-        }
-        every { DrawableCompat.wrap(any()) } answers { firstArg() }
-        every { any<Drawable>().toBitmap(any(), any(), any()) } answers {
-            val width = secondArg<Int>()
-            val height = thirdArg<Int>()
-            mockk<Bitmap> {
-                every { this@mockk.width } returns width
-                every { this@mockk.height } returns height
-            }
         }
     }
 
@@ -83,8 +61,6 @@ class RouteArrowUtilsTest {
     fun cleanUp() {
         unmockkStatic(AppCompatResources::class)
         unmockkStatic(Style::sdkStyleManager)
-        unmockkStatic(DrawableCompat::class)
-        unmockkStatic(Drawable::toBitmap)
     }
 
     @Test
@@ -279,7 +255,6 @@ class RouteArrowUtilsTest {
             } returns ExpectedFactory.createNone()
             every { getStyleImage(ARROW_HEAD_ICON_CASING) } returns null
             every { getStyleImage(ARROW_HEAD_ICON) } returns null
-            every { pixelRatio } returns 1.0f
         }
 
         RouteArrowUtils.initializeLayers(style, mockOptions)
@@ -331,7 +306,6 @@ class RouteArrowUtilsTest {
             } returns ExpectedFactory.createNone()
             every { getStyleImage(ARROW_HEAD_ICON_CASING) } returns null
             every { getStyleImage(ARROW_HEAD_ICON) } returns null
-            every { pixelRatio } returns 1.0f
         }
 
         RouteArrowUtils.initializeLayers(style, mockOptions)
@@ -383,7 +357,6 @@ class RouteArrowUtilsTest {
             } returns ExpectedFactory.createNone()
             every { getStyleImage(ARROW_HEAD_ICON_CASING) } returns null
             every { getStyleImage(ARROW_HEAD_ICON) } returns null
-            every { pixelRatio } returns 1.0f
         }
 
         RouteArrowUtils.initializeLayers(style, mockOptions)
@@ -435,7 +408,6 @@ class RouteArrowUtilsTest {
             } returns ExpectedFactory.createNone()
             every { getStyleImage(ARROW_HEAD_ICON_CASING) } returns null
             every { getStyleImage(ARROW_HEAD_ICON) } returns null
-            every { pixelRatio } returns 1.0f
         }
 
         RouteArrowUtils.initializeLayers(style, mockOptions)
@@ -671,36 +643,5 @@ class RouteArrowUtilsTest {
 
         // Should process arrow points normally
         assertEquals(4, result.size)
-    }
-
-    @OptIn(MapboxExperimental::class)
-    @Test
-    fun `initializeLayers scales arrow head bitmap by pixelRatio`() {
-        val pixelRatio = 2.0f
-        val intrinsicWidth = 24
-        val intrinsicHeight = 24
-        val options = RouteArrowOptions.Builder(ctx).build()
-        val style = mockk<Style>(relaxed = true) {
-            every { addPersistentStyleLayer(any(), any()) } returns ExpectedFactory.createNone()
-            every { addStyleSource(any(), any()) } returns ExpectedFactory.createNone()
-            every { styleSlots } returns listOf()
-            every { this@mockk.pixelRatio } returns pixelRatio
-        }
-
-        RouteArrowUtils.initializeLayers(style, options)
-
-        verify {
-            any<Drawable>().toBitmap(
-                (intrinsicWidth * pixelRatio).roundToInt(),
-                (intrinsicHeight * pixelRatio).roundToInt(),
-                any(),
-            )
-        }
-        verify {
-            style.addImage(ARROW_HEAD_ICON, any<Bitmap>())
-        }
-        verify {
-            style.addImage(ARROW_HEAD_ICON_CASING, any<Bitmap>())
-        }
     }
 }
