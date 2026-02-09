@@ -22,6 +22,7 @@ import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracking
 import com.mapbox.navigation.testing.utils.location.stayOnPosition
+import com.mapbox.navigation.testing.utils.nativeRerouteControllerNoRetryConfig
 import com.mapbox.navigation.testing.utils.offline.Tileset
 import com.mapbox.navigation.testing.utils.offline.unpackTiles
 import com.mapbox.navigation.testing.utils.routes.EvRoutesProvider
@@ -76,7 +77,7 @@ class EvOfflineRerouteTest(
     }
 
     private fun getTestCustomConfig(): String = if (runOptions.nativeReroute) {
-        "{\"features\": {\"useInternalReroute\": true }}"
+        nativeRerouteControllerNoRetryConfig
     } else {
         ""
     }
