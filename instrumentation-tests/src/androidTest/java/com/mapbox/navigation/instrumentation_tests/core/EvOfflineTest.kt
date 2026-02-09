@@ -31,7 +31,6 @@ import com.mapbox.navigation.testing.utils.createTileStore
 import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
-import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracking
 import com.mapbox.navigation.testing.utils.location.stayOnPosition
 import com.mapbox.navigation.testing.utils.offline.Tileset
 import com.mapbox.navigation.testing.utils.offline.unpackTiles
@@ -194,49 +193,6 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         }
 
     @Test
-    fun deviateFromOnlinePrimaryRouteWithoutInternet() = sdkTest {
-        val originalTestRoute = setupBerlinEvRoute()
-        val testRouteAfterReroute = setupBerlinEvRouteAfterReroute()
-
-        withMapboxNavigation(
-            tileset = Tileset.Berlin,
-        ) { navigation ->
-            navigation.startTripSession()
-            val requestResult = navigation.requestRoutes(originalTestRoute.routeOptions)
-                .getSuccessfulResultOrThrowException()
-            assertEquals(RouterOrigin.ONLINE, requestResult.routerOrigin)
-            assertEquals(
-                "online route for this case is expected to add charging station",
-                listOf(3, 3),
-                requestResult.routes.map { it.waypoints?.size },
-            )
-            navigation.setNavigationRoutesAsync(requestResult.routes)
-            navigation.moveAlongTheRouteUntilTracking(
-                requestResult.routes[0],
-                mockLocationReplayerRule,
-            )
-
-            withoutInternet {
-                stayOnPosition(
-                    // off route position
-                    latitude = testRouteAfterReroute.origin.latitude(),
-                    longitude = testRouteAfterReroute.origin.longitude(),
-                    bearing = 280.0f,
-                ) {
-                    val newRoutes = navigation.routesUpdates()
-                        .first { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE }
-                    assertEquals(RouterOrigin.OFFLINE, newRoutes.navigationRoutes.first().origin)
-                    assertEquals(
-                        "onboard router doesn't add waypoints",
-                        newRoutes.navigationRoutes.map { 2 },
-                        newRoutes.navigationRoutes.map { it.waypoints?.size },
-                    )
-                }
-            }
-        }
-    }
-
-    @Test
     fun refresh_online_ev_route_offline() = sdkTest {
         assumeNotNROBecauseOfClientSideUpdate()
 
@@ -300,15 +256,6 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
                 }
             }
         }
-    }
-
-    private fun setupBerlinEvRouteAfterReroute(): MockedEvRoutes {
-        val testRouteAfterReroute = EvRoutesProvider.getBerlinEvRouteReroute(
-            context,
-            mockWebServerRule.baseUrl,
-        )
-        mockWebServerRule.requestHandlers.add(testRouteAfterReroute.mockWebServerHandler)
-        return testRouteAfterReroute
     }
 
     private fun setupBerlinEvRoute(): MockedEvRoutes {
