@@ -4,8 +4,8 @@ import android.os.HandlerThread
 
 internal object ThreadUtils {
 
-    fun prepareHandlerThread(name: String): HandlerThread {
-        return HandlerThread(name).apply {
+    fun prepareHandlerThread(name: String, priority: Int): HandlerThread {
+        return HandlerThread(name, priority).apply {
             start()
         }
     }
