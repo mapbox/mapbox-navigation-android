@@ -1243,6 +1243,114 @@ class CoreRerouteTest(
         }
     }
 
+    @Test
+    fun replan_interrupts_ongoing_reroute_request() = sdkTest {
+        // Setting to 4s to ensure reroute is in progress when replan is called
+        val rerouteResponseDelay = 4_000L
+        // Delay before calling replan to ensure first reroute has started
+        val replanDelay = 1_000L
+
+        val mapboxNavigation = createMapboxNavigation()
+        val mockRoute = RoutesProvider.dc_short_with_alternative(context)
+        val mockReroute = RoutesProvider.dc_short_with_alternative_reroute(context)
+        val testData = prepareRouteAndRerouteWithAlternatives(
+            mockRoute = mockRoute,
+            mockReroute = mockReroute,
+            rerouteResponseDelay = rerouteResponseDelay,
+        )
+
+        mockLocationReplayerRule.loopUpdate(testData.originLocation, times = 120)
+
+        val rerouteStateTransitionAssertion = RerouteStateTransitionAssertion(
+            mapboxNavigation.getRerouteController()!!,
+        ) {
+            requiredState(RerouteState.Idle)
+            // First reroute starts (triggered by off-route)
+            requiredState(RerouteState.FetchingRoute)
+            // First reroute is interrupted by replan
+            requiredState(RerouteState.Interrupted)
+            requiredState(RerouteState.Idle)
+            // Second reroute starts (triggered by replan)
+            requiredState(RerouteState.FetchingRoute)
+            requiredState(RerouteState.RouteFetched(RouterOrigin.ONLINE))
+            requiredState(RerouteState.Idle)
+        }
+        val rerouteStatesV2 = mapboxNavigation.recordRerouteStatesV2()
+
+        // Set up reroute options adapter to modify route options during replan
+        mapboxNavigation.setRerouteOptionsAdapter(
+            object : RerouteOptionsAdapter {
+                override fun onRouteOptions(routeOptions: RouteOptions): RouteOptions {
+                    return routeOptions.toBuilder()
+                        .exclude(DirectionsCriteria.EXCLUDE_FERRY)
+                        .build()
+                }
+            },
+        )
+
+        val originalRoutes = mapboxNavigation.requestRoutes(
+            testData.originRouteOptions,
+        ).getSuccessfulResultOrThrowException().routes
+
+        // Start session and set original route
+        mapboxNavigation.startTripSession()
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(listOf(originalRoutes.first()))
+
+        mapboxNavigation.moveAlongTheRouteUntilTracking(
+            originalRoutes.first(),
+            mockLocationReplayerRule,
+        )
+
+        // Go off-route to trigger first reroute
+        mockLocationReplayerRule.stopAndClearEvents()
+        mockLocationReplayerRule.loopUpdate(testData.offRouteLocation, times = 120)
+        mapboxNavigation.offRouteUpdates().filter { it }.first()
+
+        // Wait for first reroute to be in FetchingRoute state
+        mapboxNavigation.getRerouteController()!!
+            .rerouteStates()
+            .first { it is RerouteState.FetchingRoute }
+
+        // Call replan while first reroute is in progress
+        delay(replanDelay)
+        mapboxNavigation.replanRoute()
+
+        // Wait for the replan reroute to complete
+        val rerouteUpdate = mapboxNavigation.routesUpdates().first {
+            it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
+        }
+
+        // Verify that the final route has the modified options from replan
+        assertEquals(
+            DirectionsCriteria.EXCLUDE_FERRY,
+            rerouteUpdate.navigationRoutes.first().routeOptions.exclude(),
+        )
+        assertEquals(
+            mockReroute.routeWaypoints,
+            rerouteUpdate.navigationRoutes.first().waypoints!!.map { it.location() },
+        )
+
+        rerouteStateTransitionAssertion.assert()
+
+        // V2 state assertions - check for interrupted replan scenario
+        // Expected: Idle → FetchingRoute → Interrupted → Idle → FetchingRoute → RouteFetched → Idle
+        assertTrue(
+            "Expected 7 V2 states but got ${rerouteStatesV2.size}: $rerouteStatesV2",
+            rerouteStatesV2.size == 7,
+        )
+        assertIs<RerouteStateV2.Idle>(rerouteStatesV2[0])
+        assertIs<RerouteStateV2.FetchingRoute>(rerouteStatesV2[1])
+        assertIs<RerouteStateV2.Interrupted>(rerouteStatesV2[2])
+        assertIs<RerouteStateV2.Idle>(rerouteStatesV2[3])
+        assertIs<RerouteStateV2.FetchingRoute>(rerouteStatesV2[4])
+        assertIs<RerouteStateV2.RouteFetched>(rerouteStatesV2[5])
+        assertEquals(
+            RouterOrigin.ONLINE,
+            (rerouteStatesV2[5] as RerouteStateV2.RouteFetched).routerOrigin,
+        )
+        assertIs<RerouteStateV2.Idle>(rerouteStatesV2[6])
+    }
+
     private fun createMapboxNavigation(customRefreshInterval: Long? = null): MapboxNavigation {
         var mapboxNavigation: MapboxNavigation? = null
 
