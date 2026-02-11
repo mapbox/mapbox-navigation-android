@@ -211,8 +211,12 @@ class MapboxNativeNavigatorImpl(
      */
     override suspend fun updateLocation(rawLocation: FixLocation): Boolean =
         suspendCancellableCoroutine { continuation ->
-            navigator.updateLocation(rawLocation) {
-                continuation.resume(it)
+            PerformanceTracker.trackPerformanceSync(
+                "MapboxNativeNavigatorImpl#updateLocation",
+            ) {
+                navigator.updateLocation(rawLocation) {
+                    continuation.resume(it)
+                }
             }
         }
 
