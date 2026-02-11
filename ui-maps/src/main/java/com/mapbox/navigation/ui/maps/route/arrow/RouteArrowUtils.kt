@@ -1,9 +1,6 @@
 package com.mapbox.navigation.ui.maps.route.arrow
 
-import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
 import androidx.core.graphics.drawable.DrawableCompat
-import androidx.core.graphics.drawable.toBitmap
 import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
@@ -25,10 +22,10 @@ import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils.VA
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.util.StyleManager
+import com.mapbox.navigation.ui.utils.internal.extensions.toScaledBitmap
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMisc
-import kotlin.math.roundToInt
 
 internal object RouteArrowUtils {
 
@@ -310,12 +307,4 @@ internal object RouteArrowUtils {
         styleManager.removeStyleSource(RouteLayerConstants.ARROW_SHAFT_SOURCE_ID)
         styleManager.removeStyleSource(RouteLayerConstants.ARROW_HEAD_SOURCE_ID)
     }
-}
-
-private fun Drawable.toScaledBitmap(pixelRatio: Float): Bitmap {
-    return toBitmap(
-        (intrinsicWidth * pixelRatio).roundToInt(),
-        (intrinsicHeight * pixelRatio).roundToInt(),
-        Bitmap.Config.ARGB_8888,
-    )
 }

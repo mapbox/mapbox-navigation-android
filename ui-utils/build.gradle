@@ -42,6 +42,7 @@ dependencies {
     api project(":utils")
     api dependenciesList.svgParser
     implementation dependenciesList.kotlinStdLib
+    implementation dependenciesList.androidXCoreKtx
     implementation dependenciesList.androidXAnnotation
     implementation dependenciesList.androidXLifecycleRuntime
     implementation(dependenciesList.androidXDataStore)
