@@ -141,7 +141,7 @@ class MapboxNativeNavigatorImpl(
         roadObjectsStore = PerformanceTracker.trackPerformanceSync(
             "${sectionPrefix}roadObjectsStore",
         ) {
-            navigator.roadObjectStore()
+            navigator.roadObjectsStore()
         }
         experimental = PerformanceTracker.trackPerformanceSync("${sectionPrefix}experimental") {
             navigator.experimental

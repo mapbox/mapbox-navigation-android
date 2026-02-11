@@ -23,6 +23,7 @@ import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.ProfileApplication
 import com.mapbox.navigator.ProfilePlatform
 import com.mapbox.navigator.RoadObjectMatcherConfig
+import com.mapbox.navigator.RoadObjectsMatcherOptions
 import com.mapbox.navigator.RouterFactory
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.RouterType
@@ -95,18 +96,29 @@ object NavigatorLoader {
     fun createRoadObjectMatcherConfig(
         roadObjectMatcherOptions: RoadObjectMatcherOptions,
     ): RoadObjectMatcherConfig {
-        val matchingGraphType = when (roadObjectMatcherOptions.matchingGraphType) {
-            NavigationTileDataDomain.NAVIGATION -> TileDataDomain.NAVIGATION
-            NavigationTileDataDomain.NAVIGATION_HD -> TileDataDomain.NAVIGATION_HD
-            NavigationTileDataDomain.MAPS -> TileDataDomain.MAPS
-            NavigationTileDataDomain.SEARCH -> TileDataDomain.SEARCH
-            NavigationTileDataDomain.ADAS -> TileDataDomain.ADAS
-        }
-
         return RoadObjectMatcherConfig(
             roadObjectMatcherOptions.openLRMaxDistanceToNode,
-            matchingGraphType,
+            mapRoadObjectMatcherType(roadObjectMatcherOptions.matchingGraphType),
         )
+    }
+
+    fun createRoadObjectMatcherOptions(
+        roadObjectMatcherOptions: RoadObjectMatcherOptions,
+    ): RoadObjectsMatcherOptions {
+        return RoadObjectsMatcherOptions(
+            roadObjectMatcherOptions.openLRMaxDistanceToNode,
+            mapRoadObjectMatcherType(roadObjectMatcherOptions.matchingGraphType),
+        )
+    }
+
+    private fun mapRoadObjectMatcherType(
+        matchingGraphType: NavigationTileDataDomain,
+    ): TileDataDomain = when (matchingGraphType) {
+        NavigationTileDataDomain.NAVIGATION -> TileDataDomain.NAVIGATION
+        NavigationTileDataDomain.NAVIGATION_HD -> TileDataDomain.NAVIGATION_HD
+        NavigationTileDataDomain.MAPS -> TileDataDomain.MAPS
+        NavigationTileDataDomain.SEARCH -> TileDataDomain.SEARCH
+        NavigationTileDataDomain.ADAS -> TileDataDomain.ADAS
     }
 
     fun createNativeRouterInterface(

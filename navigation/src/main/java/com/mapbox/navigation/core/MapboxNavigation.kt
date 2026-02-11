@@ -143,6 +143,7 @@ import com.mapbox.navigation.core.utils.PermissionsChecker
 import com.mapbox.navigation.core.utils.SystemLocaleWatcher
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.NavigatorLoader
+import com.mapbox.navigation.navigator.internal.NavigatorLoader.createRoadObjectMatcherOptions
 import com.mapbox.navigation.utils.internal.ConnectivityHandler
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.Time
@@ -362,6 +363,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         null,
         navigationOptions.enableSensors,
         RerouteStrategyForMatchRoute.REROUTE_DISABLED,
+        createRoadObjectMatcherOptions(navigationOptions.roadObjectMatcherOptions),
     )
 
     private val lowMemoryObserver = LowMemoryManager.Observer {
@@ -2212,6 +2214,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     @ExperimentalPreviewMapboxNavigationAPI
     @JvmOverloads
     fun getRoadGraphVersionInfo(
+        // TODO: remove parameter: https://mapbox.atlassian.net/browse/NAVAND-6910
         timeoutSeconds: Int? = null,
         callback: RoadGraphVersionInfoCallback,
     ) {
@@ -2227,7 +2230,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                     )
                 }
             },
-            timeoutSeconds,
         )
     }
 
