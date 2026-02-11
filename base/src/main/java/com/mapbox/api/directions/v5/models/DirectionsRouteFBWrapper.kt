@@ -48,6 +48,8 @@ internal class DirectionsRouteFBWrapper private constructor(
 
     override fun weight(): Double? = fb.weight
 
+    override fun weightTypical(): Double? = fb.weightTypical
+
     override fun weightName(): String? = fb.weightName
 
     override fun legs(): List<RouteLeg?>? {
@@ -103,6 +105,7 @@ internal class DirectionsRouteFBWrapper private constructor(
             "durationTypical=${durationTypical()}, " +
             "geometry=${geometry()}, " +
             "weight=${weight()}, " +
+            "weightTypical=${weightTypical()}, " +
             "weightName=${weightName()}, " +
             "legs=${legs()}, " +
             "waypoints=${waypoints()}, " +

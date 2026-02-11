@@ -52,6 +52,7 @@ class FeedbackMetadataTest {
             .verify()
 
         ToStringVerifier.forClass(FeedbackMetadata::class.java)
+            .withPrefabTestPoint()
             .verify()
     }
 
