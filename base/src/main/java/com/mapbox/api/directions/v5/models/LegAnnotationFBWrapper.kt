@@ -3,7 +3,6 @@ package com.mapbox.api.directions.v5.models
 import com.google.flatbuffers.FlexBuffers
 import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
 import com.mapbox.api.directions.v5.models.utils.FlatbuffersListWrapper
-import com.mapbox.api.directions.v5.models.utils.unhandledEnumMapping
 import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import com.mapbox.navigation.base.internal.StateOfCharge
@@ -138,7 +137,7 @@ internal class LegAnnotationFBWrapper private constructor(
             return if (this.isNull) {
                 null
             } else {
-                when (this.value) {
+                when (FBCongestionLevel.fromByteOrThrow(this.value)) {
                     FBCongestionLevel.Low -> "low"
                     FBCongestionLevel.Moderate -> "moderate"
                     FBCongestionLevel.Heavy -> "heavy"
@@ -149,8 +148,6 @@ internal class LegAnnotationFBWrapper private constructor(
                             ?: throw IllegalStateException(
                                 "Unknown congestion level with no unrecognized value",
                             )
-
-                    else -> unhandledEnumMapping("congestion", this.value)
                 }
             }
         }

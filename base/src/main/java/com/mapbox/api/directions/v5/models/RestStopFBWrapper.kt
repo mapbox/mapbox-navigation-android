@@ -2,7 +2,6 @@ package com.mapbox.api.directions.v5.models
 
 import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
 import com.mapbox.api.directions.v5.models.utils.FlatbuffersListWrapper
-import com.mapbox.api.directions.v5.models.utils.unhandledEnumMapping
 import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
@@ -18,12 +17,10 @@ internal class RestStopFBWrapper private constructor(
         get() = fb.unrecognizedPropertiesLength
 
     override fun type(): String? {
-        return when (fb.type) {
+        return when (fb.type ?: return null) {
             FBRestStopType.RestArea -> "rest_area"
             FBRestStopType.ServiceArea -> "service_area"
             FBRestStopType.Unknown -> unrecognizeFlexBufferMap?.get("type")?.asString()
-            null -> null
-            else -> unhandledEnumMapping("type", fb.type)
         }
     }
 
