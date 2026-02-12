@@ -1,5 +1,15 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.18.2 - 12 February, 2026
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.18.2` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.18.2))
+- Mapbox Navigation Native `v324.18.2`
+- Mapbox Core Common `v24.18.2`
+- Mapbox Java `v7.9.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.9.0))
+
+
 ## Navigation SDK Core Framework 3.18.1 - 30 January, 2026
 #### Features
 - Added support of route refresh in case native route object is enabled. 
@@ -13,6 +23,16 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Maps SDK `v11.18.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.18.1))
 - Mapbox Navigation Native `v324.18.1`
 - Mapbox Core Common `v24.18.1`
+- Mapbox Java `v7.9.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.9.0))
+
+
+## Navigation SDK Core Framework 3.18.2 - 12 February, 2026
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.18.2` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.18.2))
+- Mapbox Navigation Native `v324.18.2`
+- Mapbox Core Common `v24.18.2`
 - Mapbox Java `v7.9.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.9.0))
 
 
@@ -32,6 +52,16 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Java `v7.9.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.9.0))
 
 
+## Navigation SDK Core Framework 3.18.2 - 12 February, 2026
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.18.2` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.18.2))
+- Mapbox Navigation Native `v324.18.2`
+- Mapbox Core Common `v24.18.2`
+- Mapbox Java `v7.9.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.9.0))
+
+
 ## Navigation SDK Core Framework 3.18.1 - 30 January, 2026
 #### Features
 - Added support of route refresh in case native route object is enabled. 
@@ -45,6 +75,16 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Maps SDK `v11.18.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.18.1))
 - Mapbox Navigation Native `v324.18.1`
 - Mapbox Core Common `v24.18.1`
+- Mapbox Java `v7.9.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.9.0))
+
+
+## Navigation SDK Core Framework 3.18.2 - 12 February, 2026
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.18.2` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.18.2))
+- Mapbox Navigation Native `v324.18.2`
+- Mapbox Core Common `v24.18.2`
 - Mapbox Java `v7.9.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.9.0))
 
 
