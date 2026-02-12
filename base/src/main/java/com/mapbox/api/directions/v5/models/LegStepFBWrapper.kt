@@ -3,12 +3,20 @@ package com.mapbox.api.directions.v5.models
 import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
 import com.mapbox.api.directions.v5.models.utils.FlatbuffersListWrapper
 import com.mapbox.auto.value.gson.SerializableJsonElement
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
 internal class LegStepFBWrapper private constructor(
     private val fb: FBLegStep,
 ) : LegStep(), BaseFBWrapper {
+
+    internal val geometryNumeric
+        get(): List<Point>? =
+            FlatbuffersListWrapper.get(fb.geometryNumericLength) {
+                val coordinate = fb.geometryNumeric(it)!!
+                Point.fromLngLat(coordinate.longitude, coordinate.latitude)
+            }
 
     override val unrecognized: ByteBuffer?
         get() = fb.unrecognizedPropertiesAsByteBuffer

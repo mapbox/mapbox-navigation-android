@@ -5,6 +5,7 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.DirectionsRouteFBWrapper
 import com.mapbox.api.directions.v5.models.LegStep
+import com.mapbox.api.directions.v5.models.LegStepFBWrapper
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
@@ -46,6 +47,9 @@ object DecodeUtils {
     @JvmStatic
     fun DirectionsRoute.completeGeometryToPoints(): List<Point> {
         PerformanceTracker.trackPerformanceSync("DirectionsRoute.completeGeometryToPoints") {
+            if (this is DirectionsRouteFBWrapper) {
+                return geometryNumeric ?: emptyList()
+            }
             return completeGeometryDecodeCache.getOrDecode(geometry(), precision())
         }
     }
@@ -93,13 +97,21 @@ object DecodeUtils {
     @JvmStatic
     fun DirectionsRoute.stepsGeometryToPoints(): List<List<List<Point>>> {
         PerformanceTracker.trackPerformanceSync("DirectionsRoute.stepsGeometryToPoints") {
-            val precision = precision()
-            cacheRoute(route = this, precision)
-            return legs()?.map { leg ->
-                leg.steps()?.map { step ->
-                    stepsGeometryDecodeCache.getOrDecode(step.geometry(), precision)
+            if (this is DirectionsRouteFBWrapper) {
+                return legs()?.map { leg ->
+                    leg?.steps()?.map { step ->
+                        (step as LegStepFBWrapper).geometryNumeric ?: emptyList()
+                    }.orEmpty()
                 }.orEmpty()
-            }.orEmpty()
+            } else {
+                val precision = precision()
+                cacheRoute(route = this, precision)
+                return legs()?.map { leg ->
+                    leg.steps()?.map { step ->
+                        stepsGeometryDecodeCache.getOrDecode(step.geometry(), precision)
+                    }.orEmpty()
+                }.orEmpty()
+            }
         }
     }
 
@@ -127,6 +139,9 @@ object DecodeUtils {
     @JvmStatic
     fun DirectionsRoute.stepGeometryToPoints(legStep: LegStep): List<Point> {
         PerformanceTracker.trackPerformanceSync("DirectionsRoute.stepGeometryToPoints") {
+            if (legStep is LegStepFBWrapper) {
+                return legStep.geometryNumeric ?: emptyList()
+            }
             val precision = precision()
             cacheRoute(route = this, precision)
             return stepsGeometryDecodeCache.getOrDecode(legStep.geometry(), precision)

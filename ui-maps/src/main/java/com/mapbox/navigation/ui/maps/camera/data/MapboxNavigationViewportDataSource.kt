@@ -42,6 +42,7 @@ import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigation.utils.internal.toPoint
+import org.jetbrains.annotations.TestOnly
 import java.util.concurrent.CopyOnWriteArraySet
 import kotlin.math.max
 import kotlin.math.min
@@ -520,6 +521,12 @@ class MapboxNavigationViewportDataSource private constructor(
             )
         }
     }
+
+    @TestOnly
+    internal fun postManeuverFramingPointsStateForTests() = postManeuverFramingPoints
+
+    @TestOnly
+    internal fun averageIntersectionDistancesOnRouteForTests() = averageIntersectionDistancesOnRoute
 
     internal fun reevaluateRoute() {
         if (navigationRoutes.isEmpty()) {

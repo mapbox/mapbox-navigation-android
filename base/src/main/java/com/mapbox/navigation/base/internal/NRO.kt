@@ -4,15 +4,19 @@ import androidx.annotation.RestrictTo
 import com.google.gson.JsonArray
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerInstructionsFBWrapper
-import com.mapbox.api.directions.v5.models.DirectionsResponse
-import com.mapbox.api.directions.v5.models.DirectionsResponseFBWrapper
+import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.DirectionsRouteFBWrapper
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.LegAnnotationFBWrapper
 import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
+import java.nio.ByteBuffer
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-fun DirectionsResponse.isNativeRoute(): Boolean {
-    return this is DirectionsResponseFBWrapper
+fun DirectionsRoute.directionsRouteContextOrNull(): ByteBuffer? {
+    return if (this is DirectionsRouteFBWrapper) {
+        return this.fbContext.byteBuffer
+    } else {
+        null
+    }
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
