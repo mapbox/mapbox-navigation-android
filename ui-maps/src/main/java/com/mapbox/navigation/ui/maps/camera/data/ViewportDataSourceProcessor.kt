@@ -8,9 +8,12 @@ import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.Size
 import com.mapbox.navigation.base.internal.performance.PerformanceTracker
+import com.mapbox.navigation.base.internal.route.getCompoundManeuverGeometryPointsFromNroOrNull
+import com.mapbox.navigation.base.internal.route.getIntersectionsDistancesFromNroOrNull
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.utils.DecodeUtils.stepsGeometryToPoints
 import com.mapbox.navigation.ui.maps.internal.camera.OverviewMode
+import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
@@ -42,6 +45,15 @@ internal object ViewportDataSourceProcessor {
     ): List<List<List<Point>>> {
         if (!enabled) {
             return emptyList()
+        }
+
+        val nroResult = route.getCompoundManeuverGeometryPointsFromNroOrNull(
+            distanceToCoalesceCompoundManeuvers,
+            distanceToFrameAfterManeuver,
+        )
+        if (nroResult != null) {
+            logD(LOG_CATEGORY) { "computed compound maneuver geometry points via nro" }
+            return nroResult
         }
 
         return route.legs()?.mapIndexed { legIndex, leg ->
@@ -97,6 +109,15 @@ internal object ViewportDataSourceProcessor {
         if (!enabled) {
             return emptyList()
         }
+
+        val nroResult = route.getIntersectionsDistancesFromNroOrNull(
+            minimumMetersForIntersectionDensity,
+        )
+        if (nroResult != null) {
+            logD(LOG_CATEGORY) { "Computed intersections distances via NRO" }
+            return nroResult
+        }
+
         return route.legs()?.mapIndexed { legIndex, leg ->
             leg.steps()?.mapIndexed { stepIndex, step ->
                 val stepPoints = completeRoutePoints[legIndex][stepIndex]
