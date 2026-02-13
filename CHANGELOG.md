@@ -1,5 +1,28 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.19.0-rc.1 - 13 February, 2026
+#### Features
+
+
+#### Bug fixes and improvements
+- Introducing a new `RouterFailureType.ROUTE_EXPIRY_ERROR` router failure type to inform customers when an issue due to route expiry occurs. 
+- Fix route arrow scale when pixelRatio doesn't match density 
+- Improved internal flow of location updates for `LocationProviderSource.GPS`, which fixes delays in case main thread is blocked by the application.  
+
+#### Known issues :warning:
+
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.19.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.19.0-rc.1))
+- Mapbox Navigation Native `v324.19.0-rc.1`
+- Mapbox Core Common `v24.19.0-rc.1`
+- Mapbox Java `v7.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.0))
+
+
 ## Navigation SDK Core Framework 3.19.0-beta.1 - 30 January, 2026
 #### Features
 - Update `LaneIndicator` to include a new attribute `accessDesignated`, which contains a list of the designated supported access types for a lane. 
