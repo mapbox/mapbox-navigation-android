@@ -66,14 +66,14 @@ object RouteLayerConstants {
     internal val ARROW_HEAD_OFFSET = arrayOf(0.0, -7.0)
     internal const val MIN_ARROW_ZOOM = 10.0
     internal const val MAX_ARROW_ZOOM = 22.0
-    internal const val MIN_ZOOM_ARROW_SHAFT_SCALE = 2.6
-    internal const val MAX_ZOOM_ARROW_SHAFT_SCALE = 13.0
-    internal const val MIN_ZOOM_ARROW_SHAFT_CASING_SCALE = 3.4
-    internal const val MAX_ZOOM_ARROW_SHAFT_CASING_SCALE = 17.0
-    internal const val MIN_ZOOM_ARROW_HEAD_SCALE = 0.2
-    internal const val MAX_ZOOM_ARROW_HEAD_SCALE = 0.8
-    internal const val MIN_ZOOM_ARROW_HEAD_CASING_SCALE = 0.2
-    internal const val MAX_ZOOM_ARROW_HEAD_CASING_SCALE = 0.8
+    internal const val MIN_ZOOM_ARROW_SHAFT_SCALE = 2.9
+    internal const val MAX_ZOOM_ARROW_SHAFT_SCALE = 14.3
+    internal const val MIN_ZOOM_ARROW_SHAFT_CASING_SCALE = 4.4
+    internal const val MAX_ZOOM_ARROW_SHAFT_CASING_SCALE = 22.0
+    internal const val MIN_ZOOM_ARROW_HEAD_SCALE = 0.225
+    internal const val MAX_ZOOM_ARROW_HEAD_SCALE = 0.885
+    internal const val MIN_ZOOM_ARROW_HEAD_CASING_SCALE = 0.22
+    internal const val MAX_ZOOM_ARROW_HEAD_CASING_SCALE = 0.88
     internal const val OPAQUE = 1.0
     internal const val ARROW_HIDDEN_ZOOM_LEVEL = 14.0
     internal const val TRANSPARENT = 0.0
@@ -183,7 +183,7 @@ object RouteLayerConstants {
     internal val MANEUVER_ARROW_COLOR = Color.parseColor("#FFFFFF")
 
     @ColorInt
-    internal val MANEUVER_ARROW_CASING_COLOR = Color.parseColor("#2D3F53")
+    internal val MANEUVER_ARROW_CASING_COLOR = Color.parseColor("#054AAD")
 
     @ColorInt
     internal val ROUTE_CLOSURE_COLOR = Color.parseColor("#000000")
