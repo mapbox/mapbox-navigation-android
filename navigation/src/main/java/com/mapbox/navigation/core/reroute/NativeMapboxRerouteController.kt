@@ -35,7 +35,7 @@ internal typealias UpdateRoutes = (List<NavigationRoute>, legIndex: Int) -> Bool
 
 @OptIn(ExperimentalMapboxNavigationAPI::class)
 internal class NativeMapboxRerouteController(
-    rerouteEventsProvider: RerouteEventsProvider,
+    private val rerouteEventsProvider: RerouteEventsProvider,
     private val rerouteController: RerouteControllerInterface,
     private val rerouteDetector: RerouteDetectorInterface,
     private val getCurrentRoutes: () -> List<NavigationRoute>,
@@ -46,6 +46,7 @@ internal class NativeMapboxRerouteController(
 
     private val observers = CopyOnWriteArraySet<RerouteStateObserver>()
     private val observersV2 = CopyOnWriteArraySet<RerouteStateV2Observer>()
+    private var isEnabled = false
 
     /**
      * There's a private backing field for [state] so that it can become val
@@ -155,6 +156,24 @@ internal class NativeMapboxRerouteController(
     init {
         logD(TAG) { "Registering native reroute observer" }
         rerouteEventsProvider.addRerouteObserver(nativeRerouteObserver)
+        isEnabled = true
+    }
+
+    /**
+     * Native reroute controller is disabled when there is no observers
+     */
+    override fun setEnabled(enabled: Boolean) {
+        logD(TAG) { "Set reroute controller enabled = $enabled" }
+        if (enabled) {
+            // Avoid redundant observers in the case of subsequent calls to enable
+            if (!isEnabled) {
+                rerouteEventsProvider.addRerouteObserver(nativeRerouteObserver)
+            }
+        } else {
+            rerouteController.cancel()
+            rerouteEventsProvider.removeRerouteObserver(nativeRerouteObserver)
+        }
+        isEnabled = enabled
     }
 
     @Deprecated("native reroute controller interrupts reroute without external help")

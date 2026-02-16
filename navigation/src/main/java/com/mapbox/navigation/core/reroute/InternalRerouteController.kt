@@ -17,6 +17,8 @@ internal abstract class InternalRerouteController : RerouteController() {
     abstract fun rerouteOnParametersChange(callback: RouteReplanRoutesCallback)
     abstract fun setRerouteOptionsAdapter(rerouteOptionsAdapter: RerouteOptionsAdapter?)
 
+    abstract fun setEnabled(enabled: Boolean)
+
     sealed interface RoutesCallback
 
     @UiThread

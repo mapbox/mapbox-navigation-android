@@ -380,6 +380,10 @@ internal class MapboxRerouteController @VisibleForTesting constructor(
         compositeRerouteOptionsAdapter.externalOptionsAdapter = rerouteOptionsAdapter
     }
 
+    override fun setEnabled(enabled: Boolean) {
+        // No need for platform reroute controller
+    }
+
     private fun onRequestInterrupted() {
         if (stateV2 is RerouteStateV2.FetchingRoute) {
             stateV2 = RerouteStateV2.Interrupted()

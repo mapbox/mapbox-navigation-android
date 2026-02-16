@@ -1758,11 +1758,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      *
      * @param enabled true if rerouting should be enabled, false otherwise
      */
-    // TODO: support enable/disable for native reroute: https://mapbox.atlassian.net/browse/NAVAND-4492
     fun setRerouteEnabled(enabled: Boolean) {
         logI("Set reroute enabled = $enabled")
         if (enabled) {
             if (rerouteController == null) {
+                defaultRerouteController.setEnabled(true)
                 rerouteController = defaultRerouteController
             }
         } else {
@@ -1772,6 +1772,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 if (oldState == RerouteState.FetchingRoute) {
                     oldController.interrupt()
                 }
+                oldController.setEnabled(false)
                 rerouteController = null
             }
         }

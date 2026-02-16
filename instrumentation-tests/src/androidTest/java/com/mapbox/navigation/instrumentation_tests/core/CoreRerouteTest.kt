@@ -1351,6 +1351,234 @@ class CoreRerouteTest(
         assertIs<RerouteStateV2.Idle>(rerouteStatesV2[6])
     }
 
+    @Test
+    fun reroute_disabled_while_fetching_doesnt_apply_route() = sdkTest {
+        // Setting delay to ensure reroute is in progress when we disable it
+        val rerouteResponseDelay = 4_000L
+        // Delay before disabling reroute controller
+        val disableDelay = 1_000L
+
+        val mapboxNavigation = createMapboxNavigation()
+        val mockRoute = RoutesProvider.dc_very_short(context)
+        val originLocation = mockRoute.routeWaypoints.first()
+        val offRouteLocationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+            latitude = originLocation.latitude() + 0.002
+            longitude = originLocation.longitude()
+        }
+
+        mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
+        val rerouteRequestHandler = MockDirectionsRequestHandler(
+            profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+            jsonResponse = readRawFileText(context, R.raw.reroute_response_dc_very_short),
+            expectedCoordinates = listOf(
+                Point.fromLngLat(
+                    offRouteLocationUpdate.longitude,
+                    offRouteLocationUpdate.latitude,
+                ),
+                mockRoute.routeWaypoints.last(),
+            ),
+            relaxedExpectedCoordinates = true,
+        )
+        val responseModifier = DelayedResponseModifier(rerouteResponseDelay)
+        rerouteRequestHandler.jsonResponseModifier = responseModifier
+        mockWebServerRule.requestHandlers.add(rerouteRequestHandler)
+
+        val rerouteStates = mapboxNavigation.recordRerouteStates()
+        val rerouteStatesV2 = mapboxNavigation.recordRerouteStatesV2()
+
+        // Request and set up initial route
+        val originalRoutes = mapboxNavigation.requestRoutes(
+            RouteOptions.builder()
+                .applyDefaultNavigationOptions()
+                .applyLanguageAndVoiceUnitOptions(context)
+                .baseUrl(mockWebServerRule.baseUrl)
+                .coordinatesList(mockRoute.routeWaypoints)
+                .build(),
+        ).getSuccessfulResultOrThrowException().routes
+
+        mapboxNavigation.startTripSession()
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(originalRoutes)
+        mapboxNavigation.moveAlongTheRouteUntilTracking(
+            originalRoutes.first(),
+            mockLocationReplayerRule,
+        )
+
+        // Go off-route to trigger reroute
+        mockLocationReplayerRule.stopAndClearEvents()
+        mockLocationReplayerRule.loopUpdate(offRouteLocationUpdate, times = 120)
+        mapboxNavigation.offRouteUpdates().filter { it }.first()
+
+        // Wait for reroute to be in FetchingRoute state
+        mapboxNavigation.getRerouteController()!!
+            .rerouteStates()
+            .first { it is RerouteState.FetchingRoute }
+
+        // Disable reroute controller while it's fetching
+        delay(disableDelay)
+        mapboxNavigation.setRerouteEnabled(false)
+
+        // Allow the delayed response to complete
+        responseModifier.interruptDelay()
+        delay(1_000)
+
+        // Verify that reroute was interrupted
+        // Expected states: Idle -> FetchingRoute -> Interrupted -> Idle
+        assertTrue(
+            "Expected at least 4 states but got ${rerouteStates.size}: $rerouteStates",
+            rerouteStates.size >= 4,
+        )
+        assertEquals(RerouteState.Idle, rerouteStates[0])
+        assertEquals(RerouteState.FetchingRoute, rerouteStates[1])
+        assertEquals(RerouteState.Interrupted, rerouteStates[2])
+        assertEquals(RerouteState.Idle, rerouteStates[3])
+
+        assertTrue(
+            "Expected at least 4 V2 states but got ${rerouteStatesV2.size}: $rerouteStatesV2",
+            rerouteStatesV2.size >= 4,
+        )
+        assertIs<RerouteStateV2.Idle>(rerouteStatesV2[0])
+        assertIs<RerouteStateV2.FetchingRoute>(rerouteStatesV2[1])
+        assertIs<RerouteStateV2.Interrupted>(rerouteStatesV2[2])
+        assertIs<RerouteStateV2.Idle>(rerouteStatesV2[3])
+
+        // Verify that no reroute update was applied (original route is still active)
+        assertEquals(
+            "Original route should still be active after disabling reroute",
+            originalRoutes.first().id,
+            mapboxNavigation.getNavigationRoutes().first().id,
+        )
+
+        // Verify that reroute controller is now null
+        assertEquals(
+            "Reroute controller should be null after disabling",
+            null,
+            mapboxNavigation.getRerouteController(),
+        )
+    }
+
+    @Test
+    fun set_reroute_enabled_multiple_times_no_duplicate_notifications() = sdkTest {
+        val mapboxNavigation = createMapboxNavigation()
+        val mockRoute = RoutesProvider.dc_very_short(context)
+        val originLocation = mockRoute.routeWaypoints.first()
+
+        mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
+
+        // Request and set up initial route
+        val routes = mapboxNavigation.requestRoutes(
+            RouteOptions.builder()
+                .applyDefaultNavigationOptions()
+                .applyLanguageAndVoiceUnitOptions(context)
+                .baseUrl(mockWebServerRule.baseUrl)
+                .coordinatesList(mockRoute.routeWaypoints)
+                .build(),
+        ).getSuccessfulResultOrThrowException().routes
+
+        stayOnPosition(originLocation, bearing = 0.0f) {
+            mapboxNavigation.startTripSession()
+            mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
+        }
+
+        val rerouteStates = mutableListOf<RerouteState>()
+        val rerouteStatesV2 = mutableListOf<RerouteStateV2>()
+
+        // Register observers to track state changes
+        val controller = mapboxNavigation.getRerouteController()
+        assertTrue(
+            "Reroute controller should be enabled by default",
+            controller != null,
+        )
+        controller!!.registerRerouteStateObserver { state ->
+            rerouteStates.add(state)
+        }
+        controller.registerRerouteStateV2Observer { state ->
+            rerouteStatesV2.add(state)
+        }
+
+        // Get initial state
+        val initialStatesCount = rerouteStates.size
+        val initialStatesV2Count = rerouteStatesV2.size
+
+        // Call setRerouteEnabled(true) multiple times in sequence
+        // Since controller is already enabled, this should be no-op
+        repeat(3) {
+            mapboxNavigation.setRerouteEnabled(true)
+            delay(50)
+        }
+
+        // Verify no additional state notifications were sent
+        assertEquals(
+            "Calling setRerouteEnabled(true) multiple times should not emit duplicate states",
+            initialStatesCount,
+            rerouteStates.size,
+        )
+        assertEquals(
+            "Calling setRerouteEnabled(true) multiple times should not emit duplicate V2 states",
+            initialStatesV2Count,
+            rerouteStatesV2.size,
+        )
+
+        // Verify controller is still the same instance
+        val controller1 = mapboxNavigation.getRerouteController()
+        mapboxNavigation.setRerouteEnabled(true)
+        val controller2 = mapboxNavigation.getRerouteController()
+
+        assertEquals(
+            "Controller should be the same instance after multiple setRerouteEnabled(true) calls",
+            controller1,
+            controller2,
+        )
+
+        // Test disable -> enable sequence
+        mapboxNavigation.setRerouteEnabled(false)
+        assertEquals(
+            "Controller should be null after disabling",
+            null,
+            mapboxNavigation.getRerouteController(),
+        )
+
+        // Re-enable
+        mapboxNavigation.setRerouteEnabled(true)
+        val newController = mapboxNavigation.getRerouteController()
+        assertTrue("Controller should be non-null after re-enabling", newController != null)
+        assertEquals(
+            "Controller should be the same instance after disable/enable cycle (reused)",
+            controller1,
+            newController,
+        )
+
+        // Clear state lists and register new observers on new controller
+        rerouteStates.clear()
+        rerouteStatesV2.clear()
+        newController!!.registerRerouteStateObserver { state ->
+            rerouteStates.add(state)
+        }
+        newController.registerRerouteStateV2Observer { state ->
+            rerouteStatesV2.add(state)
+        }
+
+        val statesAfterReEnable = rerouteStates.size
+        val statesV2AfterReEnable = rerouteStatesV2.size
+
+        // Call setRerouteEnabled(true) multiple times again
+        // Should not create duplicate states with new controller
+        repeat(3) {
+            mapboxNavigation.setRerouteEnabled(true)
+            delay(50)
+        }
+
+        assertEquals(
+            "Calling setRerouteEnabled(true) after re-enabling should not emit duplicate states",
+            statesAfterReEnable,
+            rerouteStates.size,
+        )
+        assertEquals(
+            "Calling setRerouteEnabled(true) after re-enabling should not emit duplicate V2 states",
+            statesV2AfterReEnable,
+            rerouteStatesV2.size,
+        )
+    }
+
     private fun createMapboxNavigation(customRefreshInterval: Long? = null): MapboxNavigation {
         var mapboxNavigation: MapboxNavigation? = null
 
