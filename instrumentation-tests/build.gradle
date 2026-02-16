@@ -39,6 +39,19 @@ android {
         exclude "META-INF/AL2.0"
         exclude "META-INF/LGPL2.1"
     }
+
+    // App APK name when nroDefault=true (test APK moved in afterEvaluate to avoid read-only output)
+    def nroDefault = { project.findProperty("nroDefault")?.toString() ?: "false" }
+    applicationVariants.all { variant ->
+        if (nroDefault() == "true") {
+            variant.outputs.all { output ->
+                def name = output.outputFile?.name
+                if (name != null && name.endsWith('.apk')) {
+                    output.outputFileName = name.replace(".apk", "-nro.apk")
+                }
+            }
+        }
+    }
 }
 
 dependencies {
@@ -81,5 +94,57 @@ dependencies {
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions {
         freeCompilerArgs += '-opt-in=com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI'
+    }
+}
+
+afterEvaluate {
+    def nroDefault = project.findProperty("nroDefault")?.toString() ?: "false"
+    tasks.matching { it.name.matches(/assemble\w+(AndroidTest)?$/) }.configureEach { task ->
+        task.inputs.property("nroDefault", nroDefault)
+    }
+    def nroSuffix = nroDefault == "true" ? "nro-true" : "nro-false"
+    // Move app APK to variant-nro-true/ or variant-nro-false/ so both coexist in CI workspace
+    tasks.matching { it.name.matches(/assemble(\w+)$/) && !it.name.endsWith("AndroidTest") }.configureEach { task ->
+        task.doLast {
+            def variant = (task.name =~ /assemble(\w+)/)[0][1].toLowerCase()
+            def tempDir = file("build/outputs/apk/$variant")
+            def destDir = file("build/outputs/apk/${variant}-${nroSuffix}")
+            if (tempDir.exists()) {
+                tempDir.listFiles()?.each { apk ->
+                    if (apk.name.endsWith('.apk')) {
+                        destDir.mkdirs()
+                        def destFile = new File(destDir, apk.name)
+                        java.nio.file.Files.copy(apk.toPath(), destFile.toPath(),
+                                java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+                        apk.delete()
+                    }
+                }
+            }
+        }
+    }
+    // Move androidTest APK to variant-nro-true/ or variant-nro-false/
+    tasks.matching { it.name.matches(/assemble(\w+)AndroidTest/) }.configureEach { task ->
+        task.doLast {
+            def variant = (task.name =~ /assemble(\w+)AndroidTest/)[0][1].toLowerCase()
+            def tempDir = file("build/outputs/apk/androidTest/$variant")
+            def destDir = file("build/outputs/apk/androidTest/${variant}-${nroSuffix}")
+            if (tempDir.exists()) {
+                tempDir.listFiles()?.each { apk ->
+                    if (apk.name.endsWith('-androidTest.apk') || apk.name.endsWith('-androidTest-nro.apk')) {
+                        destDir.mkdirs()
+                        def destName = nroDefault == "true"
+                                ? apk.name.replace("-androidTest.apk", "-androidTest-nro.apk")
+                                : apk.name.replace("-androidTest-nro.apk", "-androidTest.apk")
+                        def destFile = new File(destDir, destName)
+                        java.nio.file.Files.copy(
+                                apk.toPath(),
+                                destFile.toPath(),
+                                java.nio.file.StandardCopyOption.REPLACE_EXISTING
+                        )
+                        apk.delete()
+                    }
+                }
+            }
+        }
     }
 }
