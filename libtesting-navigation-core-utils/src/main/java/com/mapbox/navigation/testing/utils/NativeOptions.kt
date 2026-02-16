@@ -6,10 +6,8 @@ const val nativeRerouteControllerNoRetryConfig =
                 "useInternalReroute": true
             },
             "navigation": {
-                "offRoadDetector":{
-                    "reroute": {
-                        "doNotRetryRerouteOnFailure": true
-                    }
+                "reroute": {
+                    "doNotRetryRerouteOnFailure": true
                 }
             }
         }"""
