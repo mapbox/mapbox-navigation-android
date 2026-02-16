@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.maps.internal.ui
 
-import android.util.Log
 import com.mapbox.android.gestures.Utils
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxMap
@@ -25,6 +24,7 @@ import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewDynamicOptionsBuilderBlock
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions
 import com.mapbox.navigation.ui.utils.internal.Provider
+import com.mapbox.navigation.utils.internal.logE
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -147,7 +147,7 @@ class RouteLineComponent(
                     routeLineApi.updateWithRouteProgress(routeProgress) { result ->
                         routeLineView.renderRouteLineUpdate(style, result).also {
                             result.error?.let {
-                                Log.e(TAG, it.errorMessage, it.throwable)
+                                logE(TAG) { "${it.errorMessage}: ${it.throwable}" }
                             }
                         }
                     }

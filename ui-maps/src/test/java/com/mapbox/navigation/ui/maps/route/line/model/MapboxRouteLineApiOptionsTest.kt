@@ -2,8 +2,11 @@ package com.mapbox.navigation.ui.maps.route.line.model
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.testing.BuilderTest
+import com.mapbox.navigation.utils.internal.LoggerProvider
+import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
+import org.junit.Before
 import org.junit.Test
 import kotlin.reflect.KClass
 
@@ -30,6 +33,11 @@ internal class MapboxRouteLineApiOptionsTest :
 
     override fun trigger() {
         //
+    }
+
+    @Before
+    fun setUp() {
+        LoggerProvider.setLoggerFrontend(mockk(relaxed = true))
     }
 
     @Test

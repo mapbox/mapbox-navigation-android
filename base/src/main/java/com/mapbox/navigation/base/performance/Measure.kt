@@ -1,7 +1,7 @@
 package com.mapbox.navigation.base.performance
 
-import android.util.Log
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.utils.internal.logI
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
@@ -83,7 +83,7 @@ internal class MeasureImpl internal constructor(
 
     init {
         timeMap[Measure.MARK_CREATED] = TimeSource.Monotonic.markNow()
-        Log.i(TAG, "${Measure.MARK_CREATED}: $name")
+        logI(TAG) { "${Measure.MARK_CREATED}: $name" }
     }
 
     override fun mark(event: String, block: () -> String): Double {
@@ -95,7 +95,7 @@ internal class MeasureImpl internal constructor(
             now
         }
         val elapsedSeconds = t0.elapsedNow().toDouble(DurationUnit.SECONDS)
-        Log.i(TAG, "mark: $name: $event message: $message, elapsed: $elapsedSeconds")
+        logI(TAG) { "mark: $name: $event message: $message, elapsed: $elapsedSeconds" }
         return elapsedSeconds
     }
 
@@ -107,7 +107,7 @@ internal class MeasureImpl internal constructor(
             now
         }
         val elapsedSeconds = t0.elapsedNow().toDouble(DurationUnit.SECONDS)
-        Log.i(TAG, "log: $name, message: $message, elapsed: $elapsedSeconds")
+        logI(TAG) { "log: $name, message: $message, elapsed: $elapsedSeconds" }
         return elapsedSeconds
     }
 

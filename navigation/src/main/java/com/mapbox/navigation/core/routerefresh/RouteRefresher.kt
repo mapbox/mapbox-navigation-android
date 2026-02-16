@@ -1,6 +1,5 @@
 package com.mapbox.navigation.core.routerefresh
 
-import android.util.Log
 import com.mapbox.bindgen.DataRef
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.internal.route.isExpired
@@ -16,6 +15,7 @@ import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshError
 import com.mapbox.navigation.core.internal.utils.CoroutineUtils.withTimeoutOrDefault
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
+import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -131,11 +131,10 @@ internal class RouteRefresher(
                             refreshRoute(routeData.first, routeProgressData)
                         } else {
                             // No RouteProgressData - no refresh. Should not happen in production.
-                            Log.w(
-                                RouteRefreshLog.LOG_CATEGORY,
+                            logW(RouteRefreshLog.LOG_CATEGORY) {
                                 "Can't refresh route ${routeData.first.id}: " +
-                                    "no route progress data for it",
-                            )
+                                    "no route progress data for it"
+                            }
                             RouteRefresherResult<RouteProgressData?>(
                                 routeData.first,
                                 routeProgressData,

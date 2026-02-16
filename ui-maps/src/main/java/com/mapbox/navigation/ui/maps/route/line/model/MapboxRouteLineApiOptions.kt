@@ -1,10 +1,10 @@
 package com.mapbox.navigation.ui.maps.route.line.model
 
-import android.util.Log
 import androidx.annotation.Keep
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.utils.Constants
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants
+import com.mapbox.navigation.utils.internal.logE
 
 /**
  * Options for configuration of [MapboxRouteLineApi].
@@ -325,32 +325,32 @@ class MapboxRouteLineApiOptions private constructor(
             val logTag = "Mbx${RouteLineColorResources::class.java.canonicalName}"
             return when {
                 lowCongestionRange.intersect(moderateCongestionRange).isNotEmpty() -> {
-                    Log.e(logTag, "Low and moderate ranges are overlapping.")
+                    logE(logTag) { "Low and moderate ranges are overlapping." }
                     true
                 }
 
                 lowCongestionRange.intersect(heavyCongestionRange).isNotEmpty() -> {
-                    Log.e(logTag, "Low and moderate ranges are overlapping.")
+                    logE(logTag) { "Low and moderate ranges are overlapping." }
                     true
                 }
 
                 lowCongestionRange.intersect(severeCongestionRange).isNotEmpty() -> {
-                    Log.e(logTag, "Low and severe ranges are overlapping.")
+                    logE(logTag) { "Low and severe ranges are overlapping." }
                     true
                 }
 
                 moderateCongestionRange.intersect(heavyCongestionRange).isNotEmpty() -> {
-                    Log.e(logTag, "Moderate and heavy ranges are overlapping.")
+                    logE(logTag) { "Moderate and heavy ranges are overlapping." }
                     true
                 }
 
                 moderateCongestionRange.intersect(severeCongestionRange).isNotEmpty() -> {
-                    Log.e(logTag, "Moderate and severe ranges are overlapping.")
+                    logE(logTag) { "Moderate and severe ranges are overlapping." }
                     true
                 }
 
                 heavyCongestionRange.intersect(severeCongestionRange).isNotEmpty() -> {
-                    Log.e(logTag, "Heavy and severe ranges are overlapping.")
+                    logE(logTag) { "Heavy and severe ranges are overlapping." }
                     true
                 }
 

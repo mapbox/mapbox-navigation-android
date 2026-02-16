@@ -1,7 +1,7 @@
 package com.mapbox.navigation.base.reachability
 
-import android.util.Log
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.utils.internal.logI
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -57,7 +57,7 @@ class SharedReachability {
         val isReachable = reachability.isReachable()
         _networkStatus.value = reachability.currentNetworkStatus()
         _isReachable.value = isReachable
-        Log.i(TAG, "onReachabilityUpdate: ${status::class.simpleName}, $isReachable")
+        logI(TAG) { "onReachabilityUpdate: ${status::class.simpleName}, $isReachable" }
     }
 
     companion object {

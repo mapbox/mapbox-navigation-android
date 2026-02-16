@@ -2,7 +2,6 @@ package com.mapbox.navigation.ui.components.maneuver.view
 
 import android.content.Context
 import android.util.AttributeSet
-import android.util.Log
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ContextThemeWrapper
@@ -15,6 +14,7 @@ import com.mapbox.navigation.tripdata.maneuver.model.SubManeuver
 import com.mapbox.navigation.tripdata.maneuver.model.TurnIconResources
 import com.mapbox.navigation.ui.components.R
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.logE
 
 /**
  * Default view to render the maneuver turn icon onto [MapboxManeuverView].
@@ -74,7 +74,7 @@ class MapboxTurnIconManeuver @JvmOverloads constructor(
             maneuver.drivingSide,
         ).fold(
             {
-                Log.e(TAG, it.errorMessage)
+                logE(TAG) { it.errorMessage }
             },
             {
                 renderIcon(it)
@@ -94,7 +94,7 @@ class MapboxTurnIconManeuver @JvmOverloads constructor(
                 m.drivingSide,
             ).fold(
                 {
-                    Log.e(TAG, it.errorMessage)
+                    logE(TAG) { it.errorMessage }
                 },
                 {
                     renderIcon(it)
