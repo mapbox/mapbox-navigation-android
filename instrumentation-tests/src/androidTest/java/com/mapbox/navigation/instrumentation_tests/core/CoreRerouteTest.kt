@@ -258,14 +258,12 @@ class CoreRerouteTest(
                 mockLocationReplayerRule.playRoute(
                     RoutesProvider.near_munich_with_waypoints_for_reroute(context),
                 )
-                if (!runOptions.nativeReroute) {
-                    navigation.offRouteUpdates().first { it }
-                    navigation
-                        .getRerouteController()?.let { ctrl ->
-                            ctrl.rerouteStates().first { it is RerouteState.FetchingRoute }
-                            ctrl.rerouteStatesV2().first { it is RerouteStateV2.FetchingRoute }
-                        }
-                }
+                navigation.offRouteUpdates().first { it }
+                navigation
+                    .getRerouteController()?.let { ctrl ->
+                        ctrl.rerouteStates().first { it is RerouteState.FetchingRoute }
+                        ctrl.rerouteStatesV2().first { it is RerouteStateV2.FetchingRoute }
+                    }
             }
         }
     }

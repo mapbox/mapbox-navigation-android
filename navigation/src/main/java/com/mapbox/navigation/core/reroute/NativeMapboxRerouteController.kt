@@ -157,6 +157,13 @@ internal class NativeMapboxRerouteController(
         logD(TAG) { "Registering native reroute observer" }
         rerouteEventsProvider.addRerouteObserver(nativeRerouteObserver)
         isEnabled = true
+        // Re-register the reroute observer when the navigator is recreated
+        rerouteEventsProvider.addNativeNavigatorRecreationObserver {
+            if (isEnabled) {
+                logD(TAG) { "Navigator recreated - re-registering native reroute observer" }
+                rerouteEventsProvider.addRerouteObserver(nativeRerouteObserver)
+            }
+        }
     }
 
     /**

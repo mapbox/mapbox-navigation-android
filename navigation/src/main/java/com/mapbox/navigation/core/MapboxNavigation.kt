@@ -709,11 +709,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             nativeRerouteController != null && nativeRerouteDetector != null
         ) {
             NativeMapboxRerouteController(
-                nativeNavigator,
-                nativeRerouteController,
-                nativeRerouteDetector,
-                directionsSession::routesPlusIgnored,
-                { routes, legIndex ->
+                rerouteEventsProvider = nativeNavigator,
+                rerouteController = nativeRerouteController,
+                rerouteDetector = nativeRerouteDetector,
+                getCurrentRoutes = directionsSession::routesPlusIgnored,
+                updateRoutes = { routes, legIndex ->
                     internalSetNavigationRoutes(routes, SetRoutes.Reroute(legIndex))
                     true
                 },

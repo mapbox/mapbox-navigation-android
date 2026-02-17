@@ -5,6 +5,8 @@ import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.route.nativeRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.internal.router.util.TestRouteFixtures
+import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
+import com.mapbox.navigation.navigator.internal.NativeNavigatorRecreationObserver
 import com.mapbox.navigation.navigator.internal.RerouteEventsProvider
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.NativeRouteParserRule
@@ -690,6 +692,7 @@ class NativeMapboxRerouteControllerTest {
 
 private fun createNativeMapboxRerouteController(
     rerouteEventsRegistration: RerouteEventsProvider = RerouteEventsRegistration(),
+    navigator: MapboxNativeNavigator = mockk(relaxed = true),
     rerouteController: RerouteControllerInterface = mockk(relaxed = true),
     rerouteDetector: RerouteDetectorInterface = mockk(relaxed = true),
     scope: CoroutineScope = TestScope(UnconfinedTestDispatcher()),
@@ -715,6 +718,11 @@ private class RerouteEventsRegistration : RerouteEventsProvider {
     }
 
     override fun removeRerouteObserver(nativeRerouteObserver: RerouteObserver) {
+    }
+
+    override fun addNativeNavigatorRecreationObserver(
+        nativeNavigatorRecreationObserver: NativeNavigatorRecreationObserver,
+    ) {
     }
 }
 

@@ -7,4 +7,7 @@ import com.mapbox.navigator.RerouteObserver
 interface RerouteEventsProvider {
     fun addRerouteObserver(nativeRerouteObserver: RerouteObserver)
     fun removeRerouteObserver(nativeRerouteObserver: RerouteObserver)
+    fun addNativeNavigatorRecreationObserver(
+        nativeNavigatorRecreationObserver: NativeNavigatorRecreationObserver,
+    )
 }

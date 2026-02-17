@@ -142,7 +142,7 @@ interface MapboxNativeNavigator : RerouteEventsProvider {
 
     fun setFallbackVersionsObserver(fallbackVersionsObserver: FallbackVersionsObserver?)
 
-    fun addNativeNavigatorRecreationObserver(
+    override fun addNativeNavigatorRecreationObserver(
         nativeNavigatorRecreationObserver: NativeNavigatorRecreationObserver,
     )
 
