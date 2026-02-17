@@ -43,7 +43,6 @@ import okhttp3.HttpUrl
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assume.assumeFalse
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -277,11 +276,6 @@ class EVRerouteTest(
 
     @Test
     fun ev_reroute_parameters_for_ev_route_with_ev_data_updates() = sdkTest {
-        assumeFalse(
-            "https://mapbox.atlassian.net/browse/NAVAND-6915",
-            runOptions.nativeReroute,
-        )
-
         val requestedRoutes = requestRoutes(
             twoCoordinates,
             electric = true,
