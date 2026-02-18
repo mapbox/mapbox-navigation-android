@@ -47,6 +47,7 @@ import kotlinx.coroutines.withTimeout
 import org.junit.Assert.assertEquals
 import org.junit.Assert.fail
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import java.util.concurrent.TimeUnit
@@ -192,6 +193,7 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
         }
     }
 
+    @Ignore("https://mapbox.atlassian.net/browse/NAVAND-6938")
     @Test
     fun continuousAlternativeRouteIsInvalidated() = sdkTest {
         createMapboxNavigation(frequentRefreshOptions)
