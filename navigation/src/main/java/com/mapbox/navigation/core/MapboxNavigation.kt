@@ -7,6 +7,7 @@ package com.mapbox.navigation.core
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.app.Application
+import android.os.HandlerThread
 import androidx.annotation.RequiresPermission
 import androidx.annotation.RestrictTo
 import androidx.annotation.UiThread
@@ -774,6 +775,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
         lowMemoryManager.addObserver(lowMemoryObserver)
     }
+
+    internal val locationInputHandlerThread: HandlerThread
+        get() = tripSessionLocationEngine.handlerThread
 
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     private fun createOfflineCacheHandle(config: ConfigHandle): CacheHandle? {

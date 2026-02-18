@@ -53,7 +53,7 @@ internal class TripSessionLocationEngine constructor(
     private var activeLocationProvider: LocationProvider? = null
     private var onRawLocationUpdate: (Location) -> Unit = { }
 
-    private val handlerThread = ThreadUtils.prepareHandlerThread(
+    internal val handlerThread = ThreadUtils.prepareHandlerThread(
         name = "locations inputs thread",
         priority = android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE,
     )

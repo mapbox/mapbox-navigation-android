@@ -571,6 +571,22 @@ class MapboxNativeNavigatorImpl(
         inputsService.updateWeatherData(data)
     }
 
+    override fun updateDetectedObjects(data: com.mapbox.navigator.DetectedObjects) {
+        inputsService.updateDetectedObjects(data)
+    }
+
+    override fun updateLaneChangeAssistData(data: com.mapbox.navigator.LaneChangeAssistData) {
+        inputsService.updateLaneChangeAssistData(data)
+    }
+
+    override fun updateLocalizedLaneData(laneData: com.mapbox.navigator.LocalizedLaneData) {
+        inputsService.updateLocalizedLaneData(laneData)
+    }
+
+    override fun updatePerceptionData(perceptionData: com.mapbox.navigator.PerceptionData) {
+        inputsService.updatePerceptionData(perceptionData)
+    }
+
     override fun setVehicleType(type: VehicleType) {
         navigator.config().mutableSettings().setVehicleType(type)
     }

@@ -211,15 +211,17 @@ interface MapboxNativeNavigator : RerouteEventsProvider {
         navigationOptions: PredictiveCacheNavigationOptions,
     ): List<PredictiveCacheController>
 
-    /**
-     * Asynchronously passes in the current sensor data of the user.
-     * The callback is scheduled using the `common::Scheduler` of the thread calling the `Navigator` constructor.
-     *
-     * @param data The current sensor data of user.
-     */
     fun updateWeatherData(data: WeatherData)
 
     fun updateLaneSensorInfo(data: LaneSensorInfo)
+
+    fun updateDetectedObjects(data: com.mapbox.navigator.DetectedObjects)
+
+    fun updateLaneChangeAssistData(data: com.mapbox.navigator.LaneChangeAssistData)
+
+    fun updateLocalizedLaneData(laneData: com.mapbox.navigator.LocalizedLaneData)
+
+    fun updatePerceptionData(perceptionData: com.mapbox.navigator.PerceptionData)
 
     fun setVehicleType(type: VehicleType)
 
