@@ -6,6 +6,7 @@ import androidx.annotation.UiThread
 import com.mapbox.android.gestures.AndroidGesturesManager
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.android.gestures.RotateGestureDetector
+import com.mapbox.android.gestures.StandardScaleGestureDetector
 import com.mapbox.annotation.MapboxExperimental
 import com.mapbox.common.Cancelable
 import com.mapbox.geojson.Point
@@ -17,6 +18,7 @@ import com.mapbox.maps.plugin.animation.CameraAnimatorType
 import com.mapbox.maps.plugin.animation.MapAnimationOwnerRegistry
 import com.mapbox.maps.plugin.gestures.GesturesPlugin
 import com.mapbox.maps.plugin.gestures.OnMoveListener
+import com.mapbox.maps.plugin.gestures.OnScaleListener
 import com.mapbox.maps.plugin.gestures.generated.GesturesSettings
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
@@ -283,6 +285,18 @@ class NavigationScaleGestureHandler internal constructor(
         }
     }
 
+    val onScaleListener: OnScaleListener = object : OnScaleListener {
+        override fun onScaleBegin(detector: StandardScaleGestureDetector) {
+            if (cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING) {
+                // do nothing, let the gesture happen
+            } else {
+                cameraStateManager.disable()
+            }
+        }
+        override fun onScale(detector: StandardScaleGestureDetector) {}
+        override fun onScaleEnd(detector: StandardScaleGestureDetector) {}
+    }
+
     private val onIndicatorPositionChangedListener =
         UserLocationIndicatorPositionObserver { point ->
             puckScreenPosition = point.also { adjustFocalPoint(it) }
@@ -340,6 +354,7 @@ class NavigationScaleGestureHandler internal constructor(
             setDefaultMutuallyExclusives = true,
         )
         gesturesPlugin.addOnMoveListener(onMoveListener)
+        gesturesPlugin.addOnScaleListener(onScaleListener)
         gesturesPlugin.addProtectedAnimationOwner(NAVIGATION_CAMERA_OWNER)
 
         userLocationIndicatorPositionProvider.addObserver(onIndicatorPositionChangedListener)
@@ -367,6 +382,7 @@ class NavigationScaleGestureHandler internal constructor(
             setDefaultMutuallyExclusives = true,
         )
         gesturesPlugin.removeOnMoveListener(onMoveListener)
+        gesturesPlugin.removeOnScaleListener(onScaleListener)
         gesturesPlugin.removeProtectedAnimationOwner(NAVIGATION_CAMERA_OWNER)
         gesturesPlugin.updateSettings { focalPoint = null }
 
