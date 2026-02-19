@@ -34,12 +34,14 @@ fun NavigationRoute.internalRefreshRoute(
     legIndex: Int,
     legGeometryIndex: Int,
     responseTimeElapsedSeconds: Long,
+    experimentalProperties: Map<String, String>? = null,
 ): Result<NavigationRoute> {
     return this.refresh(
         refreshResponse = refreshResponse,
         legIndex = legIndex,
         legGeometryIndex = legGeometryIndex,
         responseTimeElapsedSeconds = responseTimeElapsedSeconds,
+        experimentalProperties = experimentalProperties,
     )
 }
 

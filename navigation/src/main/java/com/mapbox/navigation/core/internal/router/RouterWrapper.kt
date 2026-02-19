@@ -430,7 +430,9 @@ internal class RouterWrapper(
                                 refreshResponse = dataRef,
                                 legIndex = refreshOptions.legIndex,
                                 legGeometryIndex = routeRefreshRequestData.legGeometryIndex ?: 0,
-                                responseTimeElapsedSeconds,
+                                responseTimeElapsedSeconds = responseTimeElapsedSeconds,
+                                experimentalProperties = routeRefreshRequestData
+                                    .experimentalProperties,
                             )
                         }.fold(
                             { refreshedRoute ->

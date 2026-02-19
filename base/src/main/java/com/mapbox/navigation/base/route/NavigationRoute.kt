@@ -30,6 +30,7 @@ import com.mapbox.navigation.base.internal.route.parsing.models.createResponsePa
 import com.mapbox.navigation.base.internal.utils.mapToSdk
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.internal.utils.refreshTtl
+import com.mapbox.navigation.base.route.NavigationRoute.Companion.deserializeFrom
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
@@ -125,6 +126,7 @@ class NavigationRoute internal constructor(
         legIndex: Int,
         legGeometryIndex: Int,
         responseTimeElapsedSeconds: Long,
+        experimentalProperties: Map<String, String>? = null,
     ): Result<NavigationRoute> {
         return operations.refresh(
             refreshResponse,
@@ -132,7 +134,7 @@ class NavigationRoute internal constructor(
             legGeometryIndex,
             responseTimeElapsedSeconds,
         ).map {
-            refresh(it)
+            refresh(it, experimentalProperties)
         }
     }
 
@@ -152,11 +154,21 @@ class NavigationRoute internal constructor(
 
     internal fun toDirectionsRefreshResponse() = operations.toDirectionsRefreshResponse()
 
-    private fun refresh(route: RouteUpdate): NavigationRoute = this.copy(
+    private fun refresh(
+        route: RouteUpdate,
+        experimentalProperties: Map<String, String>? = null,
+    ): NavigationRoute = this.copy(
         directionsRoute = route.routeModelsParsingResult.data.route,
         waypoints = route.routeModelsParsingResult.data.routesWaypoint,
         operations = route.routeModelsParsingResult.operations,
-        routeRefreshMetadata = route.routeRefreshMetadata,
+        routeRefreshMetadata = if (experimentalProperties != null) {
+            RouteRefreshMetadata(
+                isUpToDate = route.routeRefreshMetadata?.isUpToDate ?: true,
+                experimentalProperties = experimentalProperties,
+            )
+        } else {
+            route.routeRefreshMetadata
+        },
         expirationTimeElapsedSeconds = route.newExpirationTimeElapsedSeconds.update(
             expirationTimeElapsedSeconds,
         ),

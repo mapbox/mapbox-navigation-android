@@ -1363,7 +1363,9 @@ package com.mapbox.navigation.base.route {
   }
 
   @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class RouteRefreshMetadata {
+    method public java.util.Map<java.lang.String,java.lang.String>? getExperimentalProperties();
     method public boolean isUpToDate();
+    property public final java.util.Map<java.lang.String,java.lang.String>? experimentalProperties;
     property public final boolean isUpToDate;
   }
 
