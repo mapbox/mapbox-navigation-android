@@ -29,6 +29,7 @@ import com.mapbox.navigation.base.internal.accounts.SkuIdProvider
 import com.mapbox.navigation.base.internal.accounts.SkuIdProviderImpl
 import com.mapbox.navigation.base.internal.clearCache
 import com.mapbox.navigation.base.internal.extensions.internalAlternativeRouteIndices
+import com.mapbox.navigation.base.internal.nativeRerouteStrategyForMatchRoute
 import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.reroute.getRepeatRerouteAfterOffRouteDelaySeconds
 import com.mapbox.navigation.base.internal.route.parsing.setupParsing
@@ -162,7 +163,6 @@ import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.IncidentsOptions
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.PollingConfig
-import com.mapbox.navigator.RerouteStrategyForMatchRoute
 import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.navigator.TilesConfig
@@ -356,6 +356,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         InternalUtils.UNCONDITIONAL_POLLING_INTERVAL_MILLISECONDS / ONE_SECOND_IN_MILLIS,
     )
 
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
     private val navigatorConfig = NavigatorConfig(
         null,
         electronicHorizonOptions,
@@ -363,7 +364,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         incidentsOptions,
         null,
         navigationOptions.enableSensors,
-        RerouteStrategyForMatchRoute.REROUTE_DISABLED,
+        navigationOptions.nativeRerouteStrategyForMatchRoute(),
         createRoadObjectMatcherOptions(navigationOptions.roadObjectMatcherOptions),
     )
 

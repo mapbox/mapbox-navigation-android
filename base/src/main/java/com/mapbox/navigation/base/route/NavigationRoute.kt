@@ -27,6 +27,7 @@ import com.mapbox.navigation.base.internal.route.operations.RouteOperations
 import com.mapbox.navigation.base.internal.route.operations.RouteUpdate
 import com.mapbox.navigation.base.internal.route.parsing.models.DirectionsResponseParsingResult
 import com.mapbox.navigation.base.internal.route.parsing.models.createResponseParsingResult
+import com.mapbox.navigation.base.internal.route.toDirectionsResponse
 import com.mapbox.navigation.base.internal.utils.mapToSdk
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.internal.utils.refreshTtl
@@ -209,41 +210,9 @@ class NavigationRoute internal constructor(
             return try {
                 val model = MapMatchingResponse.fromJson(mapMatchingResponse)
                 val routeOptions = RouteOptions.fromUrl(URL(requestUrl))
-                val directionRoutes = model.matchings()?.mapIndexed { index, matching ->
-                    matching.toDirectionRoute()
-                        .toBuilder()
-                        .routeIndex("$index")
-                        .routeOptions(routeOptions)
-                        .waypoints(
-                            model.tracepoints()
-                                ?.filterNotNull()
-                                ?.filter {
-                                    it.waypointIndex() != null && it.matchingsIndex() == index
-                                }
-                                ?.map {
-                                    DirectionsWaypoint.builder()
-                                        .rawLocation(
-                                            it.location()!!.coordinates().toDoubleArray(),
-                                        )
-                                        .name(it.name() ?: "")
-                                        // TODO: NAVAND-1737 introduce distance in trace point
-                                        // .distance(it.distance)
-                                        .build()
-                                },
-                        )
-                        .build()
-                }?.toMutableList()
-                val directionsResponse = DirectionsResponse.builder()
-                    .routes(directionRoutes ?: emptyList())
-                    // TODO: NAVAND-1737 introduce uuid in map matching response model
-                    // .uuid(model.uuid())
-                    .code(model.code())
-                    .message(model.message())
-                    .build()
-                // TODO: NAVAND-1732 parse map matching response in NN without converting it
-                // to directions response
-                val routesResult = SDKRouteParser.default.parseDirectionsResponse(
-                    directionsResponse.toJson(),
+                val directionsResponse = model.toDirectionsResponse(routeOptions)
+                val routesResult = SDKRouteParser.default.parseMapMatchedResponse(
+                    mapMatchingResponse,
                     requestUrl,
                     RouterOrigin.ONLINE,
                     // map matched routes don't expire

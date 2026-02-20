@@ -22,6 +22,13 @@ interface SDKRouteParser {
         routerOrigin: String,
     ): Expected<String, List<RouteInterface>>
 
+    fun parseMapMatchedResponse(
+        response: String,
+        request: String,
+        @RouterOrigin
+        routerOrigin: String,
+    ): Expected<String, List<RouteInterface>>
+
     companion object {
         val default: SDKRouteParser = NativeRouteParserWrapper()
     }
@@ -46,6 +53,19 @@ private class NativeRouteParserWrapper : SDKRouteParser {
         routerOrigin: String,
     ): Expected<String, List<RouteInterface>> {
         return RouteParser.parseDirectionsResponse(
+            response,
+            request,
+            routerOrigin.mapToNativeRouteOrigin(),
+        )
+    }
+
+    override fun parseMapMatchedResponse(
+        response: String,
+        request: String,
+        @RouterOrigin
+        routerOrigin: String,
+    ): Expected<String, List<RouteInterface>> {
+        return RouteParser.parseMapMatchingResponse(
             response,
             request,
             routerOrigin.mapToNativeRouteOrigin(),

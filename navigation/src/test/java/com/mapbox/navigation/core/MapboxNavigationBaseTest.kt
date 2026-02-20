@@ -19,6 +19,7 @@ import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.internal.tilestore.NavigationTileStoreOwner
 import com.mapbox.navigation.base.options.LocationOptions
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.options.RerouteOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.notification.TripNotification
@@ -118,7 +119,9 @@ internal open class MapboxNavigationBaseTest {
     val billingController: BillingController = mockk(relaxUnitFun = true)
     val defaultRerouteController = mockk<InternalRerouteController>(relaxed = true)
     val tripSessionLocationEngine: TripSessionLocationEngine = mockk(relaxUnitFun = true)
-    val navigationOptions: NavigationOptions = mockk(relaxed = true)
+    val navigationOptions: NavigationOptions = mockk(relaxed = true) {
+        every { rerouteOptions } returns RerouteOptions.Builder().build()
+    }
     val arrivalProgressObserver: ArrivalProgressObserver = mockk(relaxUnitFun = true)
     val historyRecordingStateHandler: HistoryRecordingStateHandler = mockk(relaxed = true)
     val developerMetadataAggregator: DeveloperMetadataAggregator = mockk(relaxUnitFun = true)

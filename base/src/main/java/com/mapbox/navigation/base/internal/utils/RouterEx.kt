@@ -2,9 +2,14 @@
 
 package com.mapbox.navigation.base.internal.utils
 
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.route.Waypoint
+import com.mapbox.navigation.base.options.NavigateToFinalDestination
+import com.mapbox.navigation.base.options.RerouteDisabled
+import com.mapbox.navigation.base.options.RerouteStrategyForMapMatchedRoutes
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigator.RerouteStrategyForMatchRoute
 import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.RouterErrorType
 import com.mapbox.navigator.RouterOrigin
@@ -33,3 +38,11 @@ fun @receiver:com.mapbox.navigation.base.route.RouterOrigin String.mapToNativeRo
     }
 
 fun NavigationRoute.internalWaypoints(): List<Waypoint> = nativeWaypoints
+
+@OptIn(ExperimentalMapboxNavigationAPI::class)
+fun RerouteStrategyForMapMatchedRoutes.mapToNativeRerouteStrategy(): RerouteStrategyForMatchRoute =
+    when (this) {
+        is RerouteDisabled -> RerouteStrategyForMatchRoute.REROUTE_DISABLED
+        is NavigateToFinalDestination -> RerouteStrategyForMatchRoute.NAVIGATE_TO_FINAL_DESTINATION
+        else -> error("$this reroute strategy isn't supported")
+    }

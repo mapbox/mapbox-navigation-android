@@ -12,6 +12,7 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.SDKRouteParser
+import com.mapbox.navigation.base.internal.route.toDirectionsResponse
 import com.mapbox.navigation.base.internal.utils.mapToNativeRouteOrigin
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.ResponseOriginAPI
@@ -32,13 +33,13 @@ fun createNavigationRoute(
     routeInfo: RouteInfo = RouteInfo(emptyList()),
     nativeWaypoints: List<Waypoint>? = null,
     @RouterOrigin routerOrigin: String = RouterOrigin.ONLINE,
-    responseWaypoints: List<DirectionsWaypoint> = listOf(createWaypoint(), createWaypoint())
+    responseWaypoints: List<DirectionsWaypoint> = listOf(createWaypoint(), createWaypoint()),
 ): NavigationRoute {
     val response = createDirectionsResponse(
         routes = listOf(directionsRoute),
         uuid = directionsRoute.requestUuid(),
         routeOptions = directionsRoute.routeOptions(),
-        responseWaypoints = responseWaypoints
+        responseWaypoints = responseWaypoints,
     )
     return createNavigationRoutes(
         response = response,
@@ -46,7 +47,7 @@ fun createNavigationRoute(
         waypointsMapper = { waypoints, routeOptions ->
             nativeWaypoints ?: mapToNativeWaypoints(waypoints, routeOptions)
         },
-        routerOrigin = routerOrigin
+        routerOrigin = routerOrigin,
     ).first()
 }
 
@@ -58,10 +59,10 @@ fun createNavigationRoutes(
     routesInfoMapper: (DirectionsRoute) -> RouteInfo = { createRouteInfo() },
     waypointsMapper: (List<DirectionsWaypoint>, RouteOptions?) -> List<Waypoint> = ::mapToNativeWaypoints,
     @ResponseOriginAPI responseOriginAPI: String = DIRECTIONS_API,
-    ): List<NavigationRoute> {
+): List<NavigationRoute> {
     val parser = TestSDKRouteParser(
         routesInfoMapper = routesInfoMapper,
-        waypointsMapper = waypointsMapper
+        waypointsMapper = waypointsMapper,
     )
     return com.mapbox.navigation.base.internal.route.testing.createNavigationRouteForTest(
         response,
@@ -76,19 +77,19 @@ fun createNavigationRoutes(
 
 class TestSDKRouteParser(
     private val routesInfoMapper: (DirectionsRoute) -> RouteInfo = { createRouteInfo() },
-    private val waypointsMapper: (List<DirectionsWaypoint>, RouteOptions?) -> List<Waypoint> = ::mapToNativeWaypoints
+    private val waypointsMapper: (List<DirectionsWaypoint>, RouteOptions?) -> List<Waypoint> = ::mapToNativeWaypoints,
 ) : SDKRouteParser {
     override fun parseDirectionsResponse(
         response: String,
         request: String,
-        @RouterOrigin routerOrigin: String
+        @RouterOrigin routerOrigin: String,
     ): Expected<String, List<RouteInterface>> {
         val result = createRouteInterfacesFromDirectionRequestResponse(
             requestUri = request,
             response = response,
             routerOrigin = routerOrigin,
             routesInfoMapper = routesInfoMapper,
-            nativeWaypointsMapper = waypointsMapper
+            nativeWaypointsMapper = waypointsMapper,
         )
         return ExpectedFactory.createValue(result)
     }
@@ -96,7 +97,7 @@ class TestSDKRouteParser(
     override fun parseDirectionsResponse(
         response: DataRef,
         request: String,
-        @RouterOrigin routerOrigin: String
+        @RouterOrigin routerOrigin: String,
     ): Expected<String, List<RouteInterface>> {
         val buffer = response.buffer.asReadOnlyBuffer()
         buffer.position(0)
@@ -106,10 +107,21 @@ class TestSDKRouteParser(
             response = stringResponse,
             routerOrigin = routerOrigin,
             routesInfoMapper = routesInfoMapper,
-            nativeWaypointsMapper = waypointsMapper
+            nativeWaypointsMapper = waypointsMapper,
         )
         return ExpectedFactory.createValue(result)
     }
+
+    override fun parseMapMatchedResponse(
+        response: String,
+        request: String,
+        routerOrigin: String,
+    ): Expected<String, List<RouteInterface>> =
+        parseDirectionsResponse(
+            response.toDirectionsResponse(request).toJson(),
+            request,
+            routerOrigin,
+        )
 }
 
 fun createRouteInterfacesFromDirectionRequestResponse(
@@ -118,7 +130,7 @@ fun createRouteInterfacesFromDirectionRequestResponse(
     @RouterOrigin routerOrigin: String = RouterOrigin.ONLINE,
     routesInfoMapper: (DirectionsRoute) -> RouteInfo = { createRouteInfo() },
     nativeWaypointsMapper: (List<DirectionsWaypoint>, RouteOptions?) -> List<Waypoint> =
-        ::mapToNativeWaypoints
+        ::mapToNativeWaypoints,
 ): List<RouteInterface> {
     val responseModel = DirectionsResponse.fromJson(response)
     return responseModel.routes()
@@ -132,7 +144,7 @@ fun createRouteInterfacesFromDirectionRequestResponse(
                 routeInfo = routesInfoMapper(directionsRoute),
                 waypoints = nativeWaypointsMapper(
                     responseModel.waypoints() ?: directionsRoute.waypoints() ?: emptyList(),
-                    directionsRoute.routeOptions()
+                    directionsRoute.routeOptions(),
                 ),
                 routeGeometry = directionsRoute.completeGeometryToPoints(),
             )
@@ -143,7 +155,7 @@ fun createRouteInfo() = RouteInfo(emptyList())
 
 fun mapToNativeWaypoints(
     directionsWaypoints: List<DirectionsWaypoint>,
-    routeOptions: RouteOptions?
+    routeOptions: RouteOptions?,
 ): List<Waypoint> {
     return directionsWaypoints.mapIndexed { index: Int, directionsWaypoint ->
         createNativeWaypoint(
@@ -156,20 +168,23 @@ fun mapToNativeWaypoints(
                 directionsWaypoint.getUnrecognizedProperty("metadata")
                     ?.asJsonObject?.get("type")
                     ?.asString == "charging-station" -> WaypointType.EV_CHARGING_SERVER
+
                 directionsWaypoint.getUnrecognizedProperty("metadata")
                     ?.asJsonObject?.get("type")
                     ?.asString == "user-provided-charging-station" -> WaypointType.EV_CHARGING_USER
+
                 routeOptions?.waypointIndicesList()
                     ?.contains(index)?.not() == true -> WaypointType.SILENT
+
                 else -> WaypointType.REGULAR
-            }
+            },
         )
     }
 }
 
 fun createBearing(
     angle: Double = 20.0,
-    degrees: Double = 45.0
+    degrees: Double = 45.0,
 ) = Bearing.builder()
     .angle(angle)
     .degrees(degrees)

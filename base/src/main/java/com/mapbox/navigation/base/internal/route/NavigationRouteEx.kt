@@ -5,8 +5,11 @@ package com.mapbox.navigation.base.internal.route
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.WorkerThread
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
+import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.api.matching.v5.models.MapMatchingResponse
 import com.mapbox.bindgen.DataRef
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.CongestionNumericOverride
@@ -17,6 +20,7 @@ import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouterOrigin
+import java.net.URL
 
 private const val ROUTE_REFRESH_LOG_CATEGORY = "RouteRefresh"
 
@@ -90,3 +94,45 @@ fun NavigationRoute.isExpired(): Boolean {
  * At the moment, all fields are `val`s, so a simple re-instantiation is enough.
  */
 fun NavigationRoute.refreshNativePeer(): NavigationRoute = copy()
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+fun String.toDirectionsResponse(requestUrl: String): DirectionsResponse {
+    val model = MapMatchingResponse.fromJson(this)
+    val routeOptions = RouteOptions.fromUrl(URL(requestUrl))
+    return model.toDirectionsResponse(routeOptions)
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+fun MapMatchingResponse.toDirectionsResponse(routeOptions: RouteOptions): DirectionsResponse {
+    val directionRoutes = this.matchings()?.mapIndexed { index, matching ->
+        matching.toDirectionRoute()
+            .toBuilder()
+            .routeIndex("$index")
+            .routeOptions(routeOptions)
+            .waypoints(
+                this.tracepoints()
+                    ?.filterNotNull()
+                    ?.filter {
+                        it.waypointIndex() != null && it.matchingsIndex() == index
+                    }
+                    ?.map {
+                        DirectionsWaypoint.builder()
+                            .rawLocation(
+                                it.location()!!.coordinates().toDoubleArray(),
+                            )
+                            .name(it.name() ?: "")
+                            // TODO: NAVAND-1737 introduce distance in trace point
+                            // .distance(it.distance)
+                            .build()
+                    },
+            )
+            .build()
+    }?.toMutableList()
+    return DirectionsResponse.builder()
+        .routes(directionRoutes ?: emptyList())
+        // TODO: NAVAND-1737 introduce uuid in map matching response model
+        // .uuid(model.uuid())
+        .code(this.code())
+        .message(this.message())
+        .build()
+}

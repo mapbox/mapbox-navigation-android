@@ -130,6 +130,7 @@ internal class NativeMapboxRerouteController(
         }
 
         override fun onRerouteFailed(error: RerouteError) {
+            stateV2 = RerouteStateV2.FetchingRoute()
             setRerouteFailureState("onRerouteFailed", error)
             stateV2 = RerouteStateV2.Idle()
         }
