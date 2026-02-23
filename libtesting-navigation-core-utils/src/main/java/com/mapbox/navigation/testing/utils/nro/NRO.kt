@@ -1,4 +1,4 @@
-package com.mapbox.navigation.instrumentation_tests.utils
+package com.mapbox.navigation.testing.utils.nro
 
 import com.mapbox.navigation.base.BuildConfig.NATIVE_ROUTE_OBJECT_DEFAULT
 import org.junit.Assume.assumeFalse
@@ -27,5 +27,12 @@ fun assumeNotNROBecauseToBuilderIsRequiredForTest() {
     assumeNotNRO(
         "NRO doesn't let customers to create new models from existing" +
             " by calling toBuilder()",
+    )
+}
+
+fun assumeNotNROBecauseEmptyRefreshTllBreaksExpirationTime() {
+    assumeNotNRO(
+        "NRO doesn't handle empty refresh ttl well" +
+        ": https://mapbox.atlassian.net/browse/NAVAND-6952",
     )
 }
