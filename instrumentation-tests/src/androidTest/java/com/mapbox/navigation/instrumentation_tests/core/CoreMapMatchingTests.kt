@@ -67,6 +67,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
+import org.junit.Assume.assumeFalse
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -592,6 +593,12 @@ class CoreMapMatchingTests(
      */
     @Test
     fun offRouteOnDeserializedMapMatchedRoute() = sdkTest {
+        assumeFalse(
+            "this test didn't work great with native reroute, so we disable it because" +
+                "deserialization maybe going to be removed " +
+                "https://mapbox.atlassian.net/browse/NAVAND-6775 anyway",
+            runOptions.nativeReroute,
+        )
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
             customConfig = getTestCustomConfig(),

@@ -11,6 +11,7 @@ import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesExtra
@@ -282,15 +283,14 @@ class EVRerouteTest(
             waypointsPerRoute = true,
         )
 
+        mockLocationReplayerRule.playRoute(requestedRoutes.first().directionsRoute)
         mapboxNavigation.startTripSession()
 
-        stayOnInitialPosition()
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
-        mapboxNavigation.moveAlongTheRouteUntilTracking(
-            requestedRoutes.first(),
-            mockLocationReplayerRule,
-        )
-        stayOnPosition(offRouteLocationUpdate.latitude, offRouteLocationUpdate.longitude)
+        mapboxNavigation.routeProgressUpdates().first {
+            it.currentState == RouteProgressState.TRACKING
+        }
+        mapboxNavigation.replanRoute()
         waitForReroute()
 
         val noDataRefreshUrl = routeHandler.handledRequests.last().requestUrl!!
@@ -316,12 +316,11 @@ class EVRerouteTest(
             KEY_AUXILIARY_CONSUMPTION to auxiliaryConsumption,
         )
         mapboxNavigation.onEVDataUpdated(firstEvData)
+        mapboxNavigation.routeProgressUpdates().first {
+            it.currentState == RouteProgressState.TRACKING
+        }
         var oldRequestsCount = routeHandler.handledRequests.size
-        mapboxNavigation.moveAlongTheRouteUntilTracking(
-            requestedRoutes.first(),
-            mockLocationReplayerRule,
-        )
-        stayOnPosition(offRouteLocationUpdate.latitude, offRouteLocationUpdate.longitude)
+        mapboxNavigation.replanRoute()
         waitForNewRequest(oldRequestsCount)
 
         val firstUrl = routeHandler.handledRequests.last().requestUrl!!
@@ -335,12 +334,11 @@ class EVRerouteTest(
         mapboxNavigation.onEVDataUpdated(
             mapOf(KEY_EV_INITIAL_CHARGE to newInitialCharge),
         )
+        mapboxNavigation.routeProgressUpdates().first {
+            it.currentState == RouteProgressState.TRACKING
+        }
         oldRequestsCount = routeHandler.handledRequests.size
-        mapboxNavigation.moveAlongTheRouteUntilTracking(
-            requestedRoutes.first(),
-            mockLocationReplayerRule,
-        )
-        stayOnPosition(offRouteLocationUpdate.latitude, offRouteLocationUpdate.longitude)
+        mapboxNavigation.replanRoute()
         waitForNewRequest(oldRequestsCount)
 
         val urlWithTwiceUpdatedData = routeHandler.handledRequests.last().requestUrl!!
@@ -357,12 +355,11 @@ class EVRerouteTest(
         checkDoesNotHaveParameters(urlWithTwiceUpdatedData, userProvidedCpoiKeys)
 
         mapboxNavigation.onEVDataUpdated(emptyMap())
+        mapboxNavigation.routeProgressUpdates().first {
+            it.currentState == RouteProgressState.TRACKING
+        }
         oldRequestsCount = routeHandler.handledRequests.size
-        mapboxNavigation.moveAlongTheRouteUntilTracking(
-            requestedRoutes.first(),
-            mockLocationReplayerRule,
-        )
-        stayOnPosition(offRouteLocationUpdate.latitude, offRouteLocationUpdate.longitude)
+        mapboxNavigation.replanRoute()
         waitForNewRequest(oldRequestsCount)
 
         val urlAfterEmptyUpdate = routeHandler.handledRequests.last().requestUrl!!
