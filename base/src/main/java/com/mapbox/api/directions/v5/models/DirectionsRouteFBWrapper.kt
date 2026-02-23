@@ -1,5 +1,6 @@
 package com.mapbox.api.directions.v5.models
 
+import com.google.gson.JsonPrimitive
 import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
 import com.mapbox.api.directions.v5.models.utils.FlatbuffersListWrapper
 import com.mapbox.auto.value.gson.SerializableJsonElement
@@ -93,7 +94,28 @@ internal class DirectionsRouteFBWrapper private constructor(
     }
 
     override fun unrecognized(): Map<String, SerializableJsonElement?>? {
-        return super<BaseFBWrapper>.unrecognized()
+        val nroUnrecognizedProperties = super<BaseFBWrapper>.unrecognized()?.let {
+            // TODO: could be removed once change bellow is adopted
+            // https://github.com/mapbox/mapbox-sdk/pull/10279
+            if (it.contains("requestUuid")) {
+                it.toMutableMap().apply {
+                    remove("requestUuid")
+                }
+            } else {
+                it
+            }
+        }
+        val refreshTtlValue = fb.refreshTtl
+        return if (refreshTtlValue != null) {
+            nroUnrecognizedProperties.orEmpty() +
+                mapOf(
+                    "refresh_ttl" to SerializableJsonElement(
+                        JsonPrimitive(refreshTtlValue),
+                    ),
+                )
+        } else {
+            nroUnrecognizedProperties
+        }
     }
 
     override fun equals(other: Any?): Boolean {

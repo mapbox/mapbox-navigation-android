@@ -26,6 +26,7 @@ dependencies {
     api project(':libnavigation-android')
     api project(":ui-utils")
     api project(":libtesting-resources")
+    implementation dependenciesList.mapboxSdkGson
 
     // test
     api project(':libtesting-ui')

@@ -16,7 +16,6 @@ import com.mapbox.navigation.core.RoutesInvalidatedParams
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.routerefresh.RouteRefreshExtra
 import com.mapbox.navigation.instrumentation_tests.R
-import com.mapbox.navigation.instrumentation_tests.utils.assumeNotNROBecauseOfSerialization
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
@@ -35,6 +34,8 @@ import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracking
 import com.mapbox.navigation.testing.utils.location.stayOnPosition
 import com.mapbox.navigation.testing.utils.location.stayOnPositionAndWaitForUpdate
+import com.mapbox.navigation.testing.utils.nro.assumeNotNROBecauseEmptyRefreshTllBreaksExpirationTime
+import com.mapbox.navigation.testing.utils.nro.assumeNotNROBecauseOfSerialization
 import com.mapbox.navigation.testing.utils.readRawFileText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -149,6 +150,7 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
 
     @Test
     fun refreshTtlExpiresOnDifferentRefreshesForDifferentRoutes() = sdkTest {
+        assumeNotNROBecauseEmptyRefreshTllBreaksExpirationTime()
         createMapboxNavigation(frequentRefreshOptions)
         mockWebServerRule.requestHandlers.clear()
         mockWebServerRule.requestHandlers.add(
@@ -313,6 +315,7 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
 
     @Test
     fun refreshTtlUpdatedOnReroute() = sdkTest {
+        assumeNotNROBecauseEmptyRefreshTllBreaksExpirationTime()
         createMapboxNavigation(frequentRefreshOptions)
         mockWebServerRule.requestHandlers.clear()
         mockWebServerRule.requestHandlers.add(
@@ -401,6 +404,7 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
 
     @Test
     fun noRefreshTtlOnRefresh() = sdkTest {
+        assumeNotNROBecauseEmptyRefreshTllBreaksExpirationTime()
         createMapboxNavigation(frequentRefreshOptions)
         mockWebServerRule.requestHandlers.clear()
         mockWebServerRule.requestHandlers.add(

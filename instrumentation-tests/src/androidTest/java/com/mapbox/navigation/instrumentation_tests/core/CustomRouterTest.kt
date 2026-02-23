@@ -28,7 +28,6 @@ import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.routerefresh.RouteRefreshExtra
 import com.mapbox.navigation.instrumentation_tests.R
-import com.mapbox.navigation.instrumentation_tests.utils.assumeNotNROBecauseToBuilderIsRequiredForTest
 import com.mapbox.navigation.testing.router.MapboxNavigationTestRouteRefresher
 import com.mapbox.navigation.testing.router.MapboxNavigationTestRouter
 import com.mapbox.navigation.testing.router.RefreshOptions
@@ -52,6 +51,7 @@ import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracking
 import com.mapbox.navigation.testing.utils.location.stayOnPosition
+import com.mapbox.navigation.testing.utils.nro.assumeNotNROBecauseToBuilderIsRequiredForTest
 import com.mapbox.navigation.testing.utils.readRawFileText
 import com.mapbox.navigation.testing.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.utils.withMapboxNavigation

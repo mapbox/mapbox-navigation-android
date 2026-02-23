@@ -4,9 +4,12 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonNull
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
+import com.mapbox.api.directions.v5.models.DirectionsJsonObject
+import com.mapbox.api.directions.v5.models.TestDirectionsJsonObject
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.Incident
+import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.testing.factories.createDirectionsResponse
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createIncident
@@ -458,30 +461,30 @@ class ObjectComparatorTest {
 
     @Test
     fun `option to ignore null and empty arrays - disabled`() {
-        class Test(val items: List<String>?)
+        class Test(val items: List<String>?, val items2: Map<String, String>?)
 
         val result = findDiff(
             Test::class.java,
-            Test(emptyList()),
-            Test(null),
-            nullAndEmptyArraysAreTheSame = false,
+            Test(emptyList(), null),
+            Test(null, emptyMap()),
+            nullAndEmptyCollectionsAreTheSame = false,
         )
 
         assertEquals(
-            listOf("items"),
+            listOf("items", "items2"),
             result.differences.map { it.path },
         )
     }
 
     @Test
     fun `option to ignore null and empty arrays - enabled`() {
-        class Test(val items: List<String>?)
+        class Test(val items: List<String>?, val items2: Map<String, String>?)
 
         val result = findDiff<Test>(
             Test::class.java,
-            Test(emptyList()),
-            Test(null),
-            nullAndEmptyArraysAreTheSame = true,
+            Test(emptyList(), null),
+            Test(null, emptyMap()),
+            nullAndEmptyCollectionsAreTheSame = true,
         )
 
         assertEquals(emptyList<Difference>(), result.differences)
@@ -541,7 +544,7 @@ class ObjectComparatorTest {
                 double2 = -1.98,
                 double3 = Double.NaN,
             ),
-            nullAndEmptyArraysAreTheSame = false,
+            nullAndEmptyCollectionsAreTheSame = false,
             doubleComparisonEpsilon = 0.01,
         )
 
@@ -562,6 +565,7 @@ class ObjectComparatorTest {
                             add("name", JsonPrimitive("test_charging"))
                             add("restrictions", JsonObject())
                             add("testArray", JsonArray())
+                            add("testDouble", JsonPrimitive(0.004))
                         },
                     ),
                 ),
@@ -576,6 +580,7 @@ class ObjectComparatorTest {
                             add("name", JsonPrimitive("test_charging"))
                             add("restrictions", JsonNull.INSTANCE)
                             add("testArray", JsonNull.INSTANCE)
+                            add("testDouble", JsonPrimitive(0.002))
                         },
                     ),
                 ),
@@ -594,8 +599,67 @@ class ObjectComparatorTest {
             listOf(
                 "waypoints[1].unrecognizedJsonProperties.charging_metadata.restrictions",
                 "waypoints[1].unrecognizedJsonProperties.charging_metadata.testArray",
+                "waypoints[1].unrecognizedJsonProperties.charging_metadata.testDouble",
             ),
             paths,
+        )
+    }
+
+    @Test
+    fun `compare directions route ttl with the same expected value`() {
+        val route1 = createDirectionsRoute(
+            refreshTtl = 999,
+        )
+        val testObject = TestDirectionsJsonObject(
+            mapOf(
+                "refresh_ttl" to SerializableJsonElement(JsonPrimitive(999)),
+            )
+        )
+
+        val result = findDiff(
+            DirectionsJsonObject::class.java,
+            route1,
+            testObject,
+            nullAndEmptyJsonObjectsAreTheSame = true,
+            nullAndEmptyCollectionsAreTheSame = true,
+        )
+
+        val paths = result.differences.map { it.path }
+        assertEquals(
+            emptyList<String>(),
+            paths,
+        )
+    }
+
+    @Test
+    fun `compare directions route ttl with a different expected value`() {
+        val route1 = createDirectionsRoute(
+            refreshTtl = 122,
+        )
+        val testObject = TestDirectionsJsonObject(
+            mapOf(
+                "refresh_ttl" to SerializableJsonElement(JsonPrimitive(999)),
+            )
+        )
+
+        val result = findDiff(
+            DirectionsJsonObject::class.java,
+            route1,
+            testObject,
+        )
+
+        val differences = result.differences.sortedBy { it.path }
+        assertEquals(
+            listOf("unrecognizedJsonProperties.refresh_ttl"),
+            differences.map { it.path },
+        )
+        assertEquals(
+            listOf("999"),
+            differences.map { it.actualValueString },
+        )
+        assertEquals(
+            listOf("122"),
+            differences.map { it.expectedValueString },
         )
     }
 
@@ -630,7 +694,49 @@ class ObjectComparatorTest {
             DirectionsRoute::class.java,
             route1,
             route2,
-            nullAndEmptyArraysAreTheSame = true,
+            nullAndEmptyCollectionsAreTheSame = true,
+        )
+
+        val paths = result.differences.map { it.path }.sorted()
+        assertEquals(
+            emptyList<String>(),
+            paths,
+        )
+    }
+
+    @Test
+    fun `compare directions routes with difference in charging waypoint metadata and doubleComparisonEpsilon`() {
+        val route1 = createDirectionsRoute(
+            waypoints = listOf(
+                createWaypoint(),
+                createWaypoint(
+                    unrecognizedProperties = mapOf(
+                        "charging_metadata" to JsonObject().apply {
+                            add("testDouble", JsonPrimitive(0.004))
+                        },
+                    ),
+                ),
+            )
+        )
+        val route2 = createDirectionsRoute(
+            waypoints = listOf(
+                createWaypoint(),
+                createWaypoint(
+                    unrecognizedProperties = mapOf(
+                        "charging_metadata" to JsonObject().apply {
+                            add("testDouble", JsonPrimitive(0.002))
+                        },
+                    ),
+                ),
+            )
+        )
+
+
+        val result = findDiff(
+            DirectionsRoute::class.java,
+            route1,
+            route2,
+            doubleComparisonEpsilon = 0.003,
         )
 
         val paths = result.differences.map { it.path }.sorted()

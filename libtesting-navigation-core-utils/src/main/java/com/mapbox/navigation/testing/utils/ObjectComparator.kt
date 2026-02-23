@@ -6,7 +6,7 @@ inline fun <reified T> assertNoDiffs(
     expected: T,
     actual: T,
     ignoreGetters: List<String> = emptyList(),
-    emptyAndNullArraysAreTheSame: Boolean = false,
+    emptyAndNullCollectionsAreTheSame: Boolean = false,
     doubleComparisonEpsilon: Double = 0.000001,
     nullAndEmptyStringsAreTheSame: Boolean = false,
     nullAndEmptyJsonObjectsAreTheSame: Boolean = false,
@@ -17,7 +17,7 @@ inline fun <reified T> assertNoDiffs(
         expected = expected,
         actual = actual,
         ignoreGetters = ignoreGetters,
-        nullAndEmptyArraysAreTheSame = emptyAndNullArraysAreTheSame,
+        nullAndEmptyCollectionsAreTheSame = emptyAndNullCollectionsAreTheSame,
         doubleComparisonEpsilon = doubleComparisonEpsilon,
         nullAndEmptyStringsAreTheSame = nullAndEmptyStringsAreTheSame,
         nullAndEmptyJsonObjectsAreTheSame = nullAndEmptyJsonObjectsAreTheSame,
@@ -57,7 +57,7 @@ fun <T> findDiff(
     expected: T,
     actual: T,
     ignoreGetters: List<String> = emptyList(),
-    nullAndEmptyArraysAreTheSame: Boolean = false,
+    nullAndEmptyCollectionsAreTheSame: Boolean = false,
     visitedPathCallback: (String) -> Unit = {},
     doubleComparisonEpsilon: Double = 0.000001,
     nullAndEmptyStringsAreTheSame: Boolean = false,
@@ -72,7 +72,7 @@ fun <T> findDiff(
         "",
         ignoreGetters,
         visited,
-        nullAndEmptyArraysAreTheSame,
+        nullAndEmptyCollectionsAreTheSame,
         visitedPathCallback,
         doubleComparisonEpsilon,
         nullAndEmptyStringsAreTheSame,
@@ -337,6 +337,7 @@ private fun findDiffInternal(
                         visitedPathCallback,
                         nullAndEmptyArraysAreTheSame,
                         nullAndEmptyJsonObjectsAreTheSame,
+                        doubleComparisonEpsilon,
                     )
                     differences.addAll(jsonDifferences)
                     continue
@@ -607,6 +608,7 @@ private fun compareJsonElements(
     visitedPathCallback: (String) -> Unit,
     nullAndEmptyArraysAreTheSame: Boolean = false,
     nullAndEmptyJsonObjectsAreTheSame: Boolean = false,
+    doubleComparisonEpsilon: Double = 0.000001,
 ): List<Difference> {
     val differences = mutableListOf<Difference>()
     
@@ -705,6 +707,7 @@ private fun compareJsonElements(
                         visitedPathCallback,
                         nullAndEmptyArraysAreTheSame,
                         nullAndEmptyJsonObjectsAreTheSame,
+                        doubleComparisonEpsilon,
                     )
                     differences.addAll(nestedDiffs)
                 }
@@ -740,20 +743,43 @@ private fun compareJsonElements(
                         visitedPathCallback,
                         nullAndEmptyArraysAreTheSame,
                         nullAndEmptyJsonObjectsAreTheSame,
+                        doubleComparisonEpsilon,
                     )
                     differences.addAll(nestedDiffs)
                 }
             }
             jsonPrimitiveClass.isInstance(expected) && jsonPrimitiveClass.isInstance(actual) -> {
-                // Compare JsonPrimitive - use string representation
-                if (expected.toString() != actual.toString()) {
-                    differences.add(
-                        Difference(
-                            path = pathPrefix,
-                            expectedValueString = expected.toString(),
-                            actualValueString = actual.toString()
+                // Compare JsonPrimitive - check if they contain numeric values
+                val isNumberMethod = jsonPrimitiveClass.getMethod("isNumber")
+                val expectedIsNumber = isNumberMethod.invoke(expected) as Boolean
+                val actualIsNumber = isNumberMethod.invoke(actual) as Boolean
+                
+                if (expectedIsNumber && actualIsNumber) {
+                    // Both are numbers - extract as doubles and compare with epsilon
+                    val getAsDoubleMethod = jsonPrimitiveClass.getMethod("getAsDouble")
+                    val expectedDouble = getAsDoubleMethod.invoke(expected) as Double
+                    val actualDouble = getAsDoubleMethod.invoke(actual) as Double
+                    
+                    if (!areValuesEqual(expectedDouble, actualDouble, doubleComparisonEpsilon, false)) {
+                        differences.add(
+                            Difference(
+                                path = pathPrefix,
+                                expectedValueString = expected.toString(),
+                                actualValueString = actual.toString()
+                            )
                         )
-                    )
+                    }
+                } else {
+                    // Not both numbers - use string comparison
+                    if (expected.toString() != actual.toString()) {
+                        differences.add(
+                            Difference(
+                                path = pathPrefix,
+                                expectedValueString = expected.toString(),
+                                actualValueString = actual.toString()
+                            )
+                        )
+                    }
                 }
             }
             jsonNullClass.isInstance(expected) && jsonNullClass.isInstance(actual) -> {
