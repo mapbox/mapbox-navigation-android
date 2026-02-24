@@ -1489,7 +1489,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         tripSessionLocationEngine.destroy()
         routeAlternativesController.unregisterAll()
         navigationTelemetry.clearObservers()
-        internalSetNavigationRoutes(emptyList(), SetRoutes.CleanUp)
+        rerouteController?.interrupt()
 
         // using reset with callback = NULL to make sure it is run synchronously in NN
         navigator.reset(null)

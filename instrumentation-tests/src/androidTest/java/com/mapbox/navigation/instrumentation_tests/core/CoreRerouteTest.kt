@@ -1455,6 +1455,60 @@ class CoreRerouteTest(
     }
 
     @Test
+    fun destroy_during_reroute() = sdkTest {
+        val mapboxNavigation = createMapboxNavigation()
+        val mockRoute = RoutesProvider.dc_very_short(context)
+        val originLocation = mockRoute.routeWaypoints.first()
+        val offRouteLocationUpdate = mockLocationUpdatesRule.generateLocationUpdate {
+            latitude = originLocation.latitude() + 0.002
+            longitude = originLocation.longitude()
+        }
+
+        mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
+        val rerouteRequestHandler = MockDirectionsRequestHandler(
+            profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+            jsonResponse = readRawFileText(context, R.raw.reroute_response_dc_very_short),
+            expectedCoordinates = listOf(
+                Point.fromLngLat(
+                    offRouteLocationUpdate.longitude,
+                    offRouteLocationUpdate.latitude,
+                ),
+                mockRoute.routeWaypoints.last(),
+            ),
+            relaxedExpectedCoordinates = true,
+        )
+        val responseModifier = DelayedResponseModifier(5_000)
+        rerouteRequestHandler.jsonResponseModifier = responseModifier
+        mockWebServerRule.requestHandlers.add(rerouteRequestHandler)
+
+        val originalRoutes = mapboxNavigation.requestRoutes(
+            RouteOptions.builder()
+                .applyDefaultNavigationOptions()
+                .applyLanguageAndVoiceUnitOptions(context)
+                .baseUrl(mockWebServerRule.baseUrl)
+                .coordinatesList(mockRoute.routeWaypoints)
+                .build(),
+        ).getSuccessfulResultOrThrowException().routes
+
+        mapboxNavigation.startTripSession()
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(originalRoutes)
+        mapboxNavigation.moveAlongTheRouteUntilTracking(
+            originalRoutes.first(),
+            mockLocationReplayerRule,
+        )
+
+        mockLocationReplayerRule.stopAndClearEvents()
+        mockLocationReplayerRule.loopUpdate(offRouteLocationUpdate, times = 120)
+        mapboxNavigation.offRouteUpdates().filter { it }.first()
+
+        mapboxNavigation.getRerouteController()!!
+            .rerouteStates()
+            .first { it is RerouteState.FetchingRoute }
+
+        MapboxNavigationProvider.destroy()
+    }
+
+    @Test
     fun set_reroute_enabled_multiple_times_no_duplicate_notifications() = sdkTest {
         val mapboxNavigation = createMapboxNavigation()
         val mockRoute = RoutesProvider.dc_very_short(context)

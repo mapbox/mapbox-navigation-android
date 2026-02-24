@@ -382,19 +382,11 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
-    fun onDestroySetsRoutesToEmpty() = coroutineRule.runBlockingTest {
+    fun onDestroy_interrupt_reroute_controller() {
         createMapboxNavigation()
         mapboxNavigation.onDestroy()
 
-        verify(exactly = 1) {
-            directionsSession.setNavigationRoutesFinished(
-                DirectionsSessionRoutes(
-                    emptyList(),
-                    emptyList(),
-                    SetRoutes.CleanUp,
-                ),
-            )
-        }
+        verify(exactly = 1) { defaultRerouteController.interrupt() }
     }
 
     @Test
@@ -427,7 +419,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
-    fun unregisterAllBannerInstructionsObservers() {
+    fun onDestroyUnregisterAllBannerInstructionsObservers() {
         createMapboxNavigation()
         mapboxNavigation.onDestroy()
 
@@ -435,7 +427,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
-    fun unregisterAllVoiceInstructionsObservers() {
+    fun onDestroyUnregisterAllVoiceInstructionsObservers() {
         createMapboxNavigation()
         mapboxNavigation.onDestroy()
 

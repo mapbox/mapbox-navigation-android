@@ -22,10 +22,14 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.resetTripSessionAndWait
 import com.mapbox.navigation.testing.ui.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
+import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForUpdate
+import com.mapbox.navigation.testing.ui.utils.coroutines.startTripSessionAndWaitForFreeDriveState
+import com.mapbox.navigation.testing.ui.utils.coroutines.stopTripSessionAndWaitForIdleState
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.testing.utils.readRawFileText
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
@@ -33,6 +37,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.net.URI
+import java.util.concurrent.TimeUnit
 
 class MapboxNavigationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
 
@@ -156,6 +161,45 @@ class MapboxNavigationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::clas
             .first()
 
         assertEquals(1, mapboxNavigation.currentLegIndex())
+    }
+
+    @Test
+    fun destroy_during_active_session() = sdkTest {
+        mockWebServerRule.requestHandlers.clear()
+        mockWebServerRule.requestHandlers.add(
+            MockDirectionsRequestHandler(
+                DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                readRawFileText(activity, R.raw.multileg_route),
+                coordinates,
+            ),
+        )
+
+        mapboxNavigation.startTripSessionAndWaitForFreeDriveState()
+
+        val routes = mapboxNavigation.requestRoutes(
+            RouteOptions.builder()
+                .baseUrl(mockWebServerRule.baseUrl)
+                .applyDefaultNavigationOptions(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                .coordinatesList(coordinates)
+                .build(),
+        ).getSuccessfulResultOrThrowException().routes
+
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
+
+        MapboxNavigationProvider.destroy()
+
+        // Brief delay so any async post-destroy crash can occur before the process exits
+        delay(TimeUnit.SECONDS.toMillis(5))
+    }
+
+    @Test
+    fun destroy_during_stopped_session() = sdkTest {
+        mapboxNavigation.startTripSessionAndWaitForFreeDriveState()
+        mapboxNavigation.stopTripSessionAndWaitForIdleState()
+        MapboxNavigationProvider.destroy()
+
+        // Brief delay so any async post-destroy crash can occur before the process exits
+        delay(TimeUnit.SECONDS.toMillis(5))
     }
 
     private fun stayOnPosition(position: Point) {
