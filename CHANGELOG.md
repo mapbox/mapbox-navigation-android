@@ -1,18 +1,5 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
-## Navigation SDK Core Framework 3.17.2 - 25 February, 2026
-
-#### Bug fixes and improvements
-- Improved internal flow of location updates for `LocationProviderSource.GPS`, which fixes delays in case main thread is blocked by the application.  
-
-### Mapbox dependencies
-This release depends on, and has been tested with, the following Mapbox dependencies:
-- Mapbox Maps SDK `v11.17.2` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.17.2))
-- Mapbox Navigation Native `v324.17.2`
-- Mapbox Core Common `v24.17.2`
-- Mapbox Java `v7.9.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.9.0))
-
-
 ## Navigation SDK Core Framework 3.17.2 - 23 December, 2025
 #### Features
 
