@@ -64,6 +64,15 @@ class GeoDeeplinkParserTest(
                 point = Point.fromLngLat(-122.392937, 37.757527),
                 placeQuery = "Coffee Shop",
             ),
+            "geo:0,0?q=Porsche%20Service&sourceApplication%3DsmartApp" to GeoDeeplink(
+                point = null,
+                placeQuery = "Porsche Service",
+            ),
+            // URL-encoded '&' aka "%26" should not be ignored
+            "geo:0,0?q=Cake%20%26%20Bake" to GeoDeeplink(
+                point = null,
+                placeQuery = "Cake & Bake",
+            ),
 
             // Failure cases return null
             "geo:0,0" to null,

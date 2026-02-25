@@ -23,6 +23,8 @@ import java.net.URLDecoder
  *     geo:0,0?q=Coffee Shop@37.757527,-122.392937
  * - Parenthesis specifying the place query
  *     geo:0,0?q=54.356152,18.642736(ul. 3 maja 12, 80-802 Gdansk, Poland)
+ * - Additional query parameters after & are ignored
+ *     geo:0,0?q=Restaurants&sourceApplication=exampleApp
  */
 object GeoDeeplinkParser {
 
@@ -60,7 +62,7 @@ object GeoDeeplinkParser {
         val longitude = coordinates[1].toCoordinate()
             ?: coordinates[1].replace("%20", "").toCoordinate()
         return if (latitude != null && longitude != null && (latitude != 0.0 || longitude != 0.0)) {
-            Point.fromLngLat(longitude.toDouble(), latitude.toDouble())
+            Point.fromLngLat(longitude, latitude)
         } else {
             null
         }
@@ -90,6 +92,8 @@ object GeoDeeplinkParser {
 
     private fun List<String>.query(): String? = firstOrNull { it.startsWith("q=") }
         ?.substring("q=".length)
+        ?.split("&")
+        ?.firstOrNull()
 
     private fun String.removeCoordinates(): String? {
         val decode = URLDecoder.decode(this, "UTF-8")
