@@ -28,8 +28,11 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndW
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigation.testing.utils.ApproximateCoordinates
 import com.mapbox.navigation.testing.utils.assertions.waitUntilHasSize
+import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
+import com.mapbox.navigation.testing.utils.location.followGeometry
+import com.mapbox.navigation.testing.utils.location.stayOnPosition
 import com.mapbox.navigation.testing.utils.readRawFileText
 import com.mapbox.navigation.testing.utils.toApproximateCoordinates
 import kotlinx.coroutines.delay
@@ -51,6 +54,9 @@ class WaypointsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
 
     @get:Rule
     val mockLocationReplayerRule = MockLocationReplayerRule(mockLocationUpdatesRule)
+
+    @get:Rule
+    val mapboxHistoryTestRule = MapboxHistoryTestRule()
 
     private val evCoordinates = listOf(
         Point.fromLngLat(11.5852259, 48.1760993),
@@ -101,6 +107,8 @@ class WaypointsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
                     .build(),
             )
             mockWebServerRule.requestHandlers.clear()
+            mapboxHistoryTestRule.historyRecorder = mapboxNavigation.historyRecorder
+            mapboxNavigation.historyRecorder.startRecording()
         }
     }
 
@@ -156,7 +164,7 @@ class WaypointsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
     }
 
     @Test
-    fun leg_destination_non_ev_route() = sdkTest {
+    fun leg_destination_non_ev_route() = sdkTest(timeout = 60_000) {
         val coordinates = listOf(
             Point.fromLngLat(140.025878, 35.660315),
             Point.fromLngLat(140.02985194436837, 35.6621859075361),
@@ -166,22 +174,23 @@ class WaypointsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
             Point.fromLngLat(140.03969561587877, 35.67009382118668),
         )
         addResponseHandler(R.raw.route_response_with_many_waypoints, coordinates)
-        stayOnPosition(coordinates[0], 270f)
-        mapboxNavigation.startTripSession()
-        mapboxNavigation.flowLocationMatcherResult().filter {
-            abs(it.enhancedLocation.latitude - coordinates[0].latitude()) < 0.01 &&
-                abs(it.enhancedLocation.longitude - coordinates[0].longitude()) < 0.01
-        }.take(3).toList()
-        val routes = mapboxNavigation.requestRoutes(
-            generateRouteOptions(coordinates, electric = false, waypointsPerRoute = false)
-                .toBuilder()
-                .waypointIndicesList(listOf(0, 1, 3, 5))
-                .build(),
-        )
-            .getSuccessfulResultOrThrowException()
-            .routes
+        stayOnPosition(coordinates[0], 270f) {
+            mapboxNavigation.startTripSession()
+            mapboxNavigation.flowLocationMatcherResult().filter {
+                abs(it.enhancedLocation.latitude - coordinates[0].latitude()) < 0.01 &&
+                    abs(it.enhancedLocation.longitude - coordinates[0].longitude()) < 0.01
+            }.take(3).toList()
+            val routes = mapboxNavigation.requestRoutes(
+                generateRouteOptions(coordinates, electric = false, waypointsPerRoute = false)
+                    .toBuilder()
+                    .waypointIndicesList(listOf(0, 1, 3, 5))
+                    .build(),
+            )
+                .getSuccessfulResultOrThrowException()
+                .routes
 
-        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
+            mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
+        }
 
         val nextWaypoints = mutableListOf<LegWaypoint?>()
         mapboxNavigation.registerArrivalObserver(
@@ -197,26 +206,30 @@ class WaypointsTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java)
                 }
             },
         )
-        stayOnPosition(coordinates[1], 90f)
-        nextWaypoints.waitUntilHasSize(1)
+        followGeometry("cht_cAymwajGaCfFxUbG}LfWgOz[") {
+            nextWaypoints.waitUntilHasSize(1)
+        }
         var legWaypoint = nextWaypoints[0]!!
 
         checkLocation(coordinates[1], legWaypoint.location)
         assertEquals(LegWaypoint.REGULAR, legWaypoint.type)
 
-        stayOnPosition(coordinates[2], 270f)
-        delay(1000)
-        assertEquals(1, nextWaypoints.size)
+        followGeometry("gaj_cAa`rajGmBbDaAVkAW}BgCMgALeAzEeI") {
+            delay(1000)
+            assertEquals(1, nextWaypoints.size)
+        }
 
-        stayOnPosition(coordinates[3], 180f)
-        nextWaypoints.waitUntilHasSize(2)
+        followGeometry("{np_cAyxhbjG~IlNfP~V") {
+            nextWaypoints.waitUntilHasSize(2)
+        }
         legWaypoint = nextWaypoints[1]!!
         checkLocation(coordinates[3], legWaypoint.location)
         assertEquals(LegWaypoint.REGULAR, legWaypoint.type)
 
-        stayOnPosition(coordinates[4], 45f)
-        delay(1000)
-        assertEquals(2, nextWaypoints.size)
+        followGeometry("cg~_cAefkajGaNvYy@|AuFrL_CtH") {
+            delay(1000)
+            assertEquals(2, nextWaypoints.size)
+        }
     }
 
     @Test

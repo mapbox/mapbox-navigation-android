@@ -7,6 +7,10 @@ import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.core.internal.extensions.flowRouteProgress
+import com.mapbox.navigation.core.replay.MapboxReplayer
+import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
+import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
+import com.mapbox.navigation.core.replay.route.ReplayRouteOptions
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.coroutineScope
@@ -16,6 +20,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
+import kotlin.collections.forEach
 import kotlin.math.abs
 
 suspend fun BaseCoreNoCleanUpTest.stayOnPosition(
@@ -125,4 +130,32 @@ suspend fun MapboxNavigation.moveAlongTheRouteUntilTracking(
         .take(minEventsCount).toList()
 
     if (endReplay) mockLocationReplayerRule.stopAndClearEvents()
+}
+
+suspend fun BaseCoreNoCleanUpTest.followGeometry(
+    polyline6Geometry: String,
+    replayOptions: ReplayRouteOptions = ReplayRouteOptions.Builder().build(),
+    block: suspend () -> Unit,
+) {
+    val replayer = MapboxReplayer()
+    val mapper = ReplayRouteMapper(replayOptions)
+    val eventsToPlay = mapper.mapGeometry(polyline6Geometry)
+    replayer.pushEvents(eventsToPlay)
+    replayer.play()
+    replayer.registerObserver { events ->
+        events.forEach {
+            if (it is ReplayEventUpdateLocation) {
+                mockLocationUpdatesRule.pushLocationUpdate(
+                    mockLocationUpdatesRule.generateLocationUpdate {
+                        setUpLocation(it)
+                    }
+                )
+            }
+        }
+    }
+    try {
+        block()
+    } finally {
+        replayer.stop()
+    }
 }
