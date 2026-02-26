@@ -82,6 +82,13 @@ class EvOfflineRerouteTest(
         ""
     }
 
+    /**
+     * Verifies that when the user deviates from an online EV route while offline (no internet
+     * connection), the SDK falls back to the onboard router for rerouting. Asserts that:
+     * - The new route has [RouterOrigin.OFFLINE] origin.
+     * - The offline route does not include injected charging station waypoints, since the
+     *   onboard router does not support EV waypoint injection.
+     */
     @Test
     fun deviateFromOnlinePrimaryRouteWithoutInternet() = sdkTest {
         val originalTestRoute = setupBerlinEvRoute()

@@ -158,6 +158,12 @@ class CoreRerouteTest(
         }
     }
 
+    /**
+     * Verifies the basic end-to-end reroute flow. When the user deviates from the active route,
+     * the SDK detects the off-route condition, fetches a new route from the mock server, applies it,
+     * and transitions back to [RouteProgressState.TRACKING]. Validates both [RerouteState] (v1)
+     * and [RerouteStateV2] transition sequences.
+     */
     @Test
     fun reroute_completes() = sdkTest {
         val mockRoute = RoutesProvider.dc_very_short(context)
@@ -268,8 +274,22 @@ class CoreRerouteTest(
         }
     }
 
+    /**
+     * Verifies that an in-progress reroute fetch is **not** cancelled when the user returns to
+     * the original route while the request is still in-flight. The reroute response is
+     * artificially delayed by 10 seconds so the return-to-route event arrives before it completes.
+     *
+     * After going off-route the SDK starts fetching a reroute. The user then moves back onto the
+     * original route (off-route signal clears). The test waits 2 seconds and then releases the
+     * delayed response. The expected [RerouteState] sequence is only `Idle → FetchingRoute`
+     * (no [RerouteState.Interrupted]), confirming that the return-to-route did not cancel the
+     * ongoing request.
+     *
+     * See [reroute_states_when_the_user_returns_to_route] for the complementary test that
+     * validates the complete transition sequence including [RerouteStateV2.Deviation.RouteIgnored].
+     */
     @Test
-    fun reroute_is_cancelled_when_the_user_returns_to_route() = sdkTest {
+    fun reroute_is_not_cancelled_when_the_user_returns_to_route() = sdkTest {
         val mapboxNavigation = createMapboxNavigation()
         val mockRoute = RoutesProvider.dc_very_short(context)
         val originLocation = mockRoute.routeWaypoints.first()
@@ -339,6 +359,15 @@ class CoreRerouteTest(
         rerouteStateTransitionAssertion.assert()
     }
 
+    /**
+     * Verifies the complete [RerouteState] and [RerouteStateV2] transition sequence when the
+     * user returns to the original route while a reroute response is still in-flight. The
+     * platform controller fetches the route but ignores it upon return-to-route; [RerouteStateV2]
+     * reports [RerouteStateV2.Deviation.RouteIgnored] instead of applying the fetched route.
+     *
+     * Only runs for the platform reroute controller — the native controller interrupts the
+     * in-flight request rather than ignoring the response.
+     */
     @Test
     fun reroute_states_when_the_user_returns_to_route() = sdkTest {
         assumeFalse(
@@ -421,6 +450,12 @@ class CoreRerouteTest(
         assertSuccessfulRouteIgnoredRerouteStateTransition(rerouteStatesV2)
     }
 
+    /**
+     * Verifies that an in-progress reroute is not cancelled when alternative routes are updated
+     * during the reroute fetch. A slow reroute response delay ensures the alternative update
+     * arrives before the reroute completes. After both events, the reroute update must be
+     * applied with the expected [RerouteState] and [RerouteStateV2] transitions.
+     */
     @Test(timeout = 10_000)
     fun reroute_is_not_cancelled_when_alternatives_change() = sdkTest {
         // setting to 2s as NN router's default timeout at the time of creating the test is 5s
@@ -493,6 +528,12 @@ class CoreRerouteTest(
         assertSuccessfulRouteAppliedRerouteStateTransition(rerouteStatesV2)
     }
 
+    /**
+     * Verifies that an in-progress reroute is not cancelled when a route refresh completes
+     * during the reroute fetch. The refresh interval is configured shorter than the reroute
+     * response delay so a refresh event arrives before the reroute completes. After both
+     * events, the reroute update must be applied with the expected state transitions.
+     */
     @Test(timeout = 10_000)
     fun reroute_is_not_cancelled_when_route_refreshed() = sdkTest {
         // setting to 2s as NN router's default timeout at the time of creating the test is 5s
@@ -571,6 +612,13 @@ class CoreRerouteTest(
         assertSuccessfulRouteAppliedRerouteStateTransition(rerouteStatesV2)
     }
 
+    /**
+     * Verifies that a user-triggered reroute via the legacy [RerouteController.reroute] callback
+     * API correctly applies route option modifications from a registered [RerouteOptionsAdapter].
+     * The adapter adds [DirectionsCriteria.EXCLUDE_FERRY] to the options; after triggering the
+     * reroute, the resulting route must include that exclusion. [RerouteStateV2] transitions
+     * follow the replan (non-deviation) sequence.
+     */
     @Test
     fun user_triggers_reroute_to_change_route_options_current_api() = sdkTest {
         val mockRoute = RoutesProvider.dc_very_short(context)
@@ -633,6 +681,13 @@ class CoreRerouteTest(
         }
     }
 
+    /**
+     * Verifies that a user-triggered reroute via [MapboxNavigation.replanRoute] correctly
+     * applies route option modifications from a registered [RerouteOptionsAdapter]. The adapter
+     * adds [DirectionsCriteria.EXCLUDE_FERRY] to the options; after the replan, the resulting
+     * route must include that exclusion. [RerouteStateV2] transitions follow the replan
+     * (non-deviation) sequence.
+     */
     @Test
     fun user_triggers_reroute_to_change_route_options_new_api() = sdkTest {
         val mockRoute = RoutesProvider.dc_very_short(context)
@@ -691,6 +746,11 @@ class CoreRerouteTest(
         }
     }
 
+    /**
+     * Verifies reroute on a simple single-leg route when no alternatives are active. After going
+     * off-route, the SDK fetches a new route from the current position to the final destination,
+     * applies it, and resets the active leg index to 0.
+     */
     @Test
     fun reroute_on_single_leg_route_without_alternatives() = sdkTest {
         val mapboxNavigation = createMapboxNavigation()
@@ -747,6 +807,12 @@ class CoreRerouteTest(
         assertSuccessfulRouteAppliedRerouteStateTransition(rerouteStatesV2)
     }
 
+    /**
+     * Verifies reroute while on the second leg of a multi-leg route when no alternatives are
+     * active. The test navigates to the second leg before triggering an off-route condition.
+     * The resulting reroute should target only the remaining final destination and reset the
+     * active leg index to 0.
+     */
     @Test
     fun reroute_on_multieg_route_without_alternatives() = sdkTest {
         withMapboxNavigation(
@@ -827,6 +893,12 @@ class CoreRerouteTest(
         }
     }
 
+    /**
+     * Verifies that waypoint names and waypoint targets are correctly trimmed to the remaining
+     * unvisited waypoints in the reroute request for a multi-leg route. After advancing to the
+     * second leg and going off-route, the reroute request options must include only the name and
+     * target for the remaining destination waypoint — already-visited waypoints must be removed.
+     */
     @Test
     fun reroute_on_multileg_route_with_waypoint_names_and_targets_without_indices() = sdkTest {
         val mapboxNavigation = createMapboxNavigation()
@@ -913,6 +985,12 @@ class CoreRerouteTest(
         assertSuccessfulRouteAppliedRerouteStateTransition(rerouteStatesV2)
     }
 
+    /**
+     * Verifies that when the user follows an existing alternative route on a single-leg route,
+     * the SDK promotes that alternative to primary via a reroute update (without a new server
+     * request). The reroute update must contain the followed alternative as the new primary route,
+     * and the original primary must subsequently be removed as a passed alternative.
+     */
     @Test
     fun reroute_on_single_leg_route_with_alternatives() = sdkTest {
         withMapboxNavigation(
@@ -955,6 +1033,12 @@ class CoreRerouteTest(
         }
     }
 
+    /**
+     * Verifies that when the user follows an existing alternative route on the first leg of a
+     * multi-leg route, the SDK promotes that alternative to primary via a reroute update. The
+     * reroute update must contain the followed alternative as the new primary route with the
+     * active leg index reset to 0.
+     */
     @Test
     fun reroute_on_multileg_route_first_leg_with_alternatives() = sdkTest {
         withMapboxNavigation(
@@ -994,6 +1078,12 @@ class CoreRerouteTest(
         }
     }
 
+    /**
+     * Verifies that when the user deviates from a single-leg primary route and follows a
+     * multi-leg alternative route, the SDK correctly promotes the multi-leg alternative to
+     * primary via a reroute update. The leg index must advance to match the user's current
+     * position on the alternative (past the first waypoint).
+     */
     @Test
     fun reroute_from_single_leg_primary_to_multileg_alternative() = sdkTest {
         withMapboxNavigation(
@@ -1049,6 +1139,14 @@ class CoreRerouteTest(
         }
     }
 
+    /**
+     * Verifies the retryable error flow for the platform reroute controller. When a reroute
+     * attempt fails due to network unavailability, [RerouteState.Failed.isRetryable] and
+     * [RerouteStateV2.Failed.isRetryable] must both be `true`. A subsequent manual reroute
+     * trigger must succeed once connectivity is restored.
+     *
+     * Skipped for the native reroute controller which handles retries internally (NAVAND-4548).
+     */
     @Test
     fun reroute_with_retryable_error() = sdkTest {
         val mockRoute = RoutesProvider.dc_very_short(context)
@@ -1142,6 +1240,11 @@ class CoreRerouteTest(
         }
     }
 
+    /**
+     * Verifies that after the SDK marks an alternative route as "ignored" because its fork point
+     * has been passed, the user can still trigger a reroute onto that alternative's geometry.
+     * The resulting reroute update must promote the previously ignored alternative to primary.
+     */
     @Test
     fun reroute_from_primary_route_to_ignored_alternative() = sdkTest {
         withMapboxNavigation(
@@ -1194,6 +1297,12 @@ class CoreRerouteTest(
         }
     }
 
+    /**
+     * Verifies that custom unrecognized route option parameters (specifically `eta_model`) are
+     * preserved and forwarded in the reroute request URL. After triggering an off-route
+     * condition, the reroute request must include the same `eta_model` query parameter value
+     * as the original route request.
+     */
     @Test
     fun reroute_keeps_eta_model_parameter() = sdkTest {
         val mapboxNavigation = createMapboxNavigation()
@@ -1241,6 +1350,13 @@ class CoreRerouteTest(
         }
     }
 
+    /**
+     * Verifies that calling [MapboxNavigation.replanRoute] while a reroute is already in progress
+     * interrupts the first reroute and starts a new one with updated options from the
+     * [RerouteOptionsAdapter]. The expected V1 state sequence is:
+     * `Idle → FetchingRoute → Interrupted → Idle → FetchingRoute → RouteFetched → Idle`.
+     * The final route must include the adapter's modifications (ferry exclusion).
+     */
     @Test
     fun replan_interrupts_ongoing_reroute_request() = sdkTest {
         // Setting to 4s to ensure reroute is in progress when replan is called
@@ -1349,6 +1465,13 @@ class CoreRerouteTest(
         assertIs<RerouteStateV2.Idle>(rerouteStatesV2[6])
     }
 
+    /**
+     * Verifies that calling [MapboxNavigation.setRerouteEnabled] with `false` while a reroute
+     * fetch is in progress interrupts the fetch and prevents the new route from being applied.
+     * Expected state sequence: `Idle → FetchingRoute → Interrupted → Idle`. After disabling,
+     * the original route must remain active and [MapboxNavigation.getRerouteController] must
+     * return `null`.
+     */
     @Test
     fun reroute_disabled_while_fetching_doesnt_apply_route() = sdkTest {
         // Setting delay to ensure reroute is in progress when we disable it
@@ -1454,6 +1577,13 @@ class CoreRerouteTest(
         )
     }
 
+    /**
+     * Verifies that calling [MapboxNavigation.setRerouteEnabled] with `true` multiple times
+     * when reroute is already enabled is idempotent: no duplicate state notifications are emitted
+     * and the controller instance is not replaced. Also verifies that after a disable/enable
+     * cycle, the same controller instance is reused and no spurious state notifications are
+     * emitted upon re-registration.
+     */
     @Test
     fun destroy_during_reroute() = sdkTest {
         val mapboxNavigation = createMapboxNavigation()

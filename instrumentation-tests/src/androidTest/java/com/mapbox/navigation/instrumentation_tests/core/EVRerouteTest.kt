@@ -176,6 +176,14 @@ class EVRerouteTest(
         ""
     }
 
+    /**
+     * Verifies that when no EV data has been explicitly provided via
+     * [MapboxNavigation.onEVDataUpdated], the reroute request uses the EV parameters from the
+     * original route options (engine type, energy consumption curve, initial charge, auxiliary
+     * consumption, and pre-conditioning time). CPOI (charging station) waypoint parameters must
+     * not be included in the request. Also verifies the behavior persists after setting a new
+     * route with a different initial charge.
+     */
     @Test
     fun ev_reroute_parameters_for_ev_route_with_no_ev_data() = sdkTest {
         val requestedRoutes = requestRoutes(
@@ -237,6 +245,12 @@ class EVRerouteTest(
         checkDoesNotHaveParameters(url2, userProvidedCpoiKeys)
     }
 
+    /**
+     * Verifies that EV parameters provided via [MapboxNavigation.onEVDataUpdated] override the
+     * route option defaults in the reroute request. The reroute URL must include the updated
+     * consumption curve, initial charge, pre-conditioning time, and auxiliary consumption values.
+     * CPOI (charging station) waypoint parameters must not be included in the request.
+     */
     @Test
     fun ev_reroute_parameters_for_ev_route_with_ev_data() = sdkTest {
         val requestedRoutes = requestRoutes(
@@ -275,6 +289,12 @@ class EVRerouteTest(
         checkDoesNotHaveParameters(url, userProvidedCpoiKeys)
     }
 
+    /**
+     * Verifies that multiple sequential [MapboxNavigation.onEVDataUpdated] calls accumulate
+     * correctly and are reflected in subsequent reroute requests. Confirms that passing an
+     * empty map to [MapboxNavigation.onEVDataUpdated] does not reset previously set values —
+     * the last non-empty values must persist and appear in the next reroute request URL.
+     */
     @Test
     fun ev_reroute_parameters_for_ev_route_with_ev_data_updates() = sdkTest {
         val requestedRoutes = requestRoutes(
@@ -376,6 +396,12 @@ class EVRerouteTest(
         checkDoesNotHaveParameters(urlAfterEmptyUpdate, userProvidedCpoiKeys)
     }
 
+    /**
+     * Verifies that user-provided CPOI (Charging Point of Interest) data — station power,
+     * current type, and station IDs — is correctly forwarded in reroute requests on a
+     * 3-waypoint EV route. Both an initial reroute and a subsequent reroute from a different
+     * off-route position must include the full set of CPOI parameters.
+     */
     @Test
     fun ev_reroute_parameters_with_user_provided_cpoi_data() = sdkTest {
         val stationPower = ";3000;6500"
@@ -446,6 +472,12 @@ class EVRerouteTest(
         )
     }
 
+    /**
+     * Verifies that when rerouting from the second leg of a multi-leg EV route with
+     * user-provided CPOI data, only the CPOI parameters for the remaining charging stations
+     * (from the current waypoint onward) are included in the reroute request. Data for
+     * already-passed charging stations must be stripped from the request.
+     */
     @Test
     fun ev_reroute_parameters_on_second_leg_with_user_provided_cpoi_data() = sdkTest {
         val stationPower = ";3000;6500"
