@@ -104,6 +104,8 @@ internal class MapboxTripSession(
     @VisibleForTesting
     internal var primaryRoute: NavigationRoute? = null
 
+    private var notificationJob: Job? = null
+
     init {
         registerSetRoutesObservers()
     }
@@ -259,6 +261,7 @@ internal class MapboxTripSession(
     }
 
     private val mainJobController: JobControl = threadController.getMainScopeAndRootJob()
+    private val ioJobController: JobControl = threadController.getIOScopeAndRootJob()
 
     private val locationObservers = CopyOnWriteArraySet<LocationObserver>()
     private val routeProgressObservers = CopyOnWriteArraySet<RouteProgressObserver>()
@@ -529,6 +532,7 @@ internal class MapboxTripSession(
         tripService.stopService()
         tripSessionLocationEngine.stopLocationUpdates()
         mainJobController.job.cancelChildren()
+        ioJobController.job.cancelChildren()
         reset()
         state = TripSessionState.STOPPED
     }
@@ -863,7 +867,16 @@ internal class MapboxTripSession(
     private fun updateLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
         PerformanceTracker.trackPerformanceSync("MapboxTripSession#updateLocationMatcherResult") {
             this.locationMatcherResult = locationMatcherResult
-            locationObservers.forEach { it.onNewLocationMatcherResult(locationMatcherResult) }
+            locationObservers.forEach { observer ->
+                mainJobController.scope.launch {
+                    val observerName = observer.javaClass.name.takeLast(70)
+                    PerformanceTracker.trackPerformanceSync(
+                        "MapboxTripSession#locationObserver#$observerName",
+                    ) {
+                        observer.onNewLocationMatcherResult(locationMatcherResult)
+                    }
+                }
+            }
         }
     }
 
@@ -878,7 +891,9 @@ internal class MapboxTripSession(
                 "voice idx [${status.voiceInstruction?.index}]"
         }
 
-        val tripStatus = status.getTripStatusFrom(primaryRoute)
+        val tripStatus = PerformanceTracker.trackPerformanceSync(
+            "MapboxTripSession#processNativeStatus-getTripStatus",
+        ) { status.getTripStatusFrom(primaryRoute) }
         val locationMatcherResult = PerformanceTracker.trackPerformanceSync(
             "MapboxTripSession#processNativeStatus-prepare-location-matcher-result",
         ) {
@@ -904,14 +919,20 @@ internal class MapboxTripSession(
         var triggerObserver = false
         if (tripStatus.navigationStatus.routeState != RouteState.INVALID) {
             val nativeBannerInstruction = tripStatus.navigationStatus.bannerInstruction
-            val bannerInstructions =
-                tripStatus.navigationStatus.getCurrentBannerInstructions(primaryRoute)
-            triggerObserver = bannerInstructionEvent.isOccurring(
-                bannerInstructions,
-                nativeBannerInstruction?.index,
-            )
+            triggerObserver = PerformanceTracker.trackPerformanceSync(
+                "MapboxTripSession#processNativeStatus-getBannerInstructions",
+            ) {
+                val bannerInstructions =
+                    tripStatus.navigationStatus.getCurrentBannerInstructions(primaryRoute)
+                bannerInstructionEvent.isOccurring(
+                    bannerInstructions,
+                    nativeBannerInstruction?.index,
+                )
+            }
         }
-        val remainingWaypoints = tripStatus.calculateRemainingWaypoints()
+        val remainingWaypoints = PerformanceTracker.trackPerformanceSync(
+            "MapboxTripSession#processNativeStatus-calculateRemainingWaypoints",
+        ) { tripStatus.calculateRemainingWaypoints() }
         val latestBannerInstructionsWrapper = bannerInstructionEvent.latestInstructionWrapper
         val upcomingRoadObjects =
             PerformanceTracker.trackPerformanceSync(
@@ -959,10 +980,13 @@ internal class MapboxTripSession(
         shouldTriggerBannerInstructionsObserver: Boolean,
     ) {
         routeProgress = progress
-        PerformanceTracker.trackPerformanceSync(
-            "MapboxTripSession#updateRouteProgress-update-notification",
-        ) {
-            tripService.updateNotification(buildTripNotificationState(progress))
+        notificationJob?.cancel()
+        notificationJob = ioJobController.scope.launch {
+            PerformanceTracker.trackPerformanceSync(
+                "MapboxTripSession#updateRouteProgress-update-notification",
+            ) {
+                tripService.updateNotification(buildTripNotificationState(progress))
+            }
         }
         progress?.let { progress ->
             logD(
@@ -972,7 +996,16 @@ internal class MapboxTripSession(
             PerformanceTracker.trackPerformanceSync(
                 "MapboxTripSession#updateRouteProgress-dispatch-route-progress-update",
             ) {
-                routeProgressObservers.forEach { it.onRouteProgressChanged(progress) }
+                routeProgressObservers.forEach { observer ->
+                    mainJobController.scope.launch {
+                        val observerName = observer.javaClass.name.takeLast(70)
+                        PerformanceTracker.trackPerformanceSync(
+                            "MapboxTripSession#routeProgressObserver#$observerName",
+                        ) {
+                            observer.onRouteProgressChanged(progress)
+                        }
+                    }
+                }
             }
             if (shouldTriggerBannerInstructionsObserver) {
                 checkBannerInstructionEvent { bannerInstruction ->
