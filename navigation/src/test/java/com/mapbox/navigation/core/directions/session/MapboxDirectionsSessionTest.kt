@@ -15,6 +15,7 @@ import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshCallbac
 import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshError
 import com.mapbox.navigation.core.internal.router.Router
 import com.mapbox.navigation.core.internal.utils.mapToReason
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MapboxJavaObjectsFactory
 import com.mapbox.navigation.testing.factories.createNavigationRoute
 import io.mockk.clearMocks
@@ -29,12 +30,14 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 class MapboxDirectionsSessionTest {
 
+    @get:Rule
+    val logRule = LoggingFrontendTestRule()
     private lateinit var session: MapboxDirectionsSession
-
     private val router: Router = mockk(relaxUnitFun = true)
     private val routeOptions: RouteOptions = MapboxJavaObjectsFactory.routeOptions()
     private val signature = mockk<GetRouteSignature>()

@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.directions.session
 
+import android.os.SystemClock
 import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -12,6 +13,8 @@ import com.mapbox.navigation.core.internal.router.GetRouteSignature
 import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshCallback
 import com.mapbox.navigation.core.internal.router.Router
 import com.mapbox.navigation.core.internal.utils.initialLegIndex
+import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigation.utils.internal.logI
 import java.util.concurrent.CopyOnWriteArraySet
 
 /**
@@ -42,6 +45,7 @@ internal class MapboxDirectionsSession(
 
     internal companion object {
         internal const val DEFAULT_INITIAL_LEG_INDEX = 0
+        private const val LOG_CATEGORY = "MapboxDirectionsSession"
     }
 
     override fun setNavigationRoutesFinished(routes: DirectionsSessionRoutes) {
@@ -61,8 +65,34 @@ internal class MapboxDirectionsSession(
         PerformanceTracker.trackPerformanceSync(
             "MapboxDirectionsSession-dispatch-onRoutesChanged",
         ) {
-            onSetNavigationRoutesFinishedObservers.forEach {
-                it.onRoutesChanged(result)
+            val totalObservers = onSetNavigationRoutesFinishedObservers.size
+            logI(LOG_CATEGORY) {
+                "Notifying $totalObservers RoutesObserver(s) - STARTING"
+            }
+            onSetNavigationRoutesFinishedObservers.forEachIndexed { index, observer ->
+                val observerName = observer.javaClass.simpleName
+                logI(LOG_CATEGORY) {
+                    "Calling observer [${index + 1}/$totalObservers]: $observerName.onRoutesChanged"
+                }
+                val startTime = SystemClock.elapsedRealtime()
+                try {
+                    observer.onRoutesChanged(result)
+                    val duration = SystemClock.elapsedRealtime() - startTime
+                    logI(LOG_CATEGORY) {
+                        "Observer [${index + 1}/$totalObservers]: $observerName completed in" +
+                            " ${duration}ms"
+                    }
+                } catch (e: Exception) {
+                    val duration = SystemClock.elapsedRealtime() - startTime
+                    logE(LOG_CATEGORY) {
+                        "Observer [${index + 1}/$totalObservers]: $observerName threw exception" +
+                            " after ${duration}ms: $e"
+                    }
+                    throw e
+                }
+            }
+            logI(LOG_CATEGORY) {
+                "All $totalObservers observer(s) notified - COMPLETED"
             }
         }
     }

@@ -8,6 +8,7 @@ import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.app.Application
 import android.os.HandlerThread
+import android.os.SystemClock
 import androidx.annotation.RequiresPermission
 import androidx.annotation.RestrictTo
 import androidx.annotation.UiThread
@@ -1357,73 +1358,138 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 // do not interrupt reroute when primary route has not changed
             }
         }
-        threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
-            routeUpdateMutex.withLock {
-                val routesSetResult: Expected<RoutesSetError, RoutesSetSuccess>
-                if (
-                    setRoutesInfo is SetRoutes.Alternatives &&
-                    routes.first().id != directionsSession.routes.firstOrNull()?.id
-                ) {
-                    routesSetResult = ExpectedFactory.createError(
-                        RoutesSetError(
-                            "Alternatives ${routes.drop(1).map { it.id }} " +
-                                "are outdated. Primary route has changed " +
-                                "from ${routes.first().id} " +
-                                "to ${directionsSession.routes.firstOrNull()?.id}",
-                        ),
-                    )
-
-                    // Even though we are not setting new routes here,
-                    // we need to inform that the operation (setNavigationRoutesStarted) is finished
-                    directionsSession.setNavigationRoutesFinished(
-                        DirectionsSessionRoutes(
-                            acceptedRoutes = directionsSession.routes,
-                            ignoredRoutes = directionsSession.ignoredRoutes,
-                            setRoutesInfo = setRoutesInfo,
-                        ),
-                    )
-                } else {
-                    historyRecordingStateHandler.setRoutes(routes)
-                    when (val processedRoutes = setRoutesToTripSession(routes, setRoutesInfo)) {
-                        is NativeSetRouteValue -> {
-                            val directionsSessionRoutes = Utils.createDirectionsSessionRoutes(
-                                routes,
-                                processedRoutes,
-                                setRoutesInfo,
-                            )
-                            directionsSession.setNavigationRoutesFinished(directionsSessionRoutes)
-                            if (
-                                setRoutesInfo is SetRoutes.RefreshRoutes.ExternalRefresh &&
-                                setRoutesInfo.isManual
-                            ) {
-                                routeRefreshController.onRoutesRefreshedManually(
-                                    routes,
-                                )
-                            }
-                            routesSetResult = ExpectedFactory.createValue(
-                                RoutesSetSuccess(
-                                    directionsSessionRoutes.ignoredRoutes.associate {
-                                        it.navigationRoute.id to
-                                            RoutesSetError("invalid alternative")
-                                    },
+        val job = threadController.getMainScopeAndRootJob().scope
+            .launch(Dispatchers.Main.immediate) {
+                val routeIds = routes.map { it.id }
+                val reason = setRoutesInfo.mapToReason()
+                val hasCallback = callback != null
+                logI(LOG_CATEGORY) {
+                    "[$reason] Coroutine launched, waiting to acquire routeUpdateMutex; " +
+                        "hasCallback=$hasCallback; IDs: $routeIds; " +
+                        "Job: ${coroutineContext[kotlinx.coroutines.Job]}"
+                }
+                try {
+                    routeUpdateMutex.withLock {
+                        logI(LOG_CATEGORY) {
+                            "[$reason] Mutex acquired, starting route processing; IDs: $routeIds"
+                        }
+                        val routesSetResult: Expected<RoutesSetError, RoutesSetSuccess>
+                        if (
+                            setRoutesInfo is SetRoutes.Alternatives &&
+                            routes.first().id != directionsSession.routes.firstOrNull()?.id
+                        ) {
+                            routesSetResult = ExpectedFactory.createError(
+                                RoutesSetError(
+                                    "Alternatives ${routes.drop(1).map { it.id }} " +
+                                        "are outdated. Primary route has changed " +
+                                        "from ${routes.first().id} " +
+                                        "to ${directionsSession.routes.firstOrNull()?.id}",
                                 ),
                             )
-                        }
 
-                        is NativeSetRouteError -> {
-                            logE(
-                                "Routes with IDs ${routes.map { it.id }} " +
-                                    "will be ignored as they are not valid",
+                            // Even though we are not setting new routes here, we need to inform
+                            // that the operation (setNavigationRoutesStarted) is finished
+                            directionsSession.setNavigationRoutesFinished(
+                                DirectionsSessionRoutes(
+                                    acceptedRoutes = directionsSession.routes,
+                                    ignoredRoutes = directionsSession.ignoredRoutes,
+                                    setRoutesInfo = setRoutesInfo,
+                                ),
                             )
-                            routesSetResult = ExpectedFactory.createError(
-                                RoutesSetError(processedRoutes.error),
-                            )
-                            historyRecordingStateHandler.lastSetRoutesFailed()
+                        } else {
+                            logI(LOG_CATEGORY) {
+                                "[$reason] Setting routes to history recording handler"
+                            }
+                            historyRecordingStateHandler.setRoutes(routes)
+                            when (
+                                val processedRoutes =
+                                    setRoutesToTripSession(routes, setRoutesInfo)
+                            ) {
+                                is NativeSetRouteValue -> {
+                                    logI(LOG_CATEGORY) {
+                                        "[$reason] TripSession accepted routes, creating" +
+                                            " DirectionsSessionRoutes"
+                                    }
+                                    val directionsSessionRoutes =
+                                        Utils.createDirectionsSessionRoutes(
+                                            routes,
+                                            processedRoutes,
+                                            setRoutesInfo,
+                                        )
+                                    logI(LOG_CATEGORY) {
+                                        "[$reason] Notifying observers via" +
+                                            " setNavigationRoutesFinished - " +
+                                            "STARTING (this may block if observers do sync work)"
+                                    }
+                                    val observerStartTime = SystemClock.elapsedRealtime()
+                                    directionsSession.setNavigationRoutesFinished(
+                                        directionsSessionRoutes,
+                                    )
+                                    val observerDuration =
+                                        SystemClock.elapsedRealtime() - observerStartTime
+                                    logI(LOG_CATEGORY) {
+                                        "[$reason] Observer notification COMPLETED in" +
+                                            " ${observerDuration}ms"
+                                    }
+                                    if (
+                                        setRoutesInfo is SetRoutes.RefreshRoutes.ExternalRefresh &&
+                                        setRoutesInfo.isManual
+                                    ) {
+                                        routeRefreshController.onRoutesRefreshedManually(
+                                            routes,
+                                        )
+                                    }
+                                    routesSetResult = ExpectedFactory.createValue(
+                                        RoutesSetSuccess(
+                                            directionsSessionRoutes.ignoredRoutes.associate {
+                                                it.navigationRoute.id to
+                                                    RoutesSetError("invalid alternative")
+                                            },
+                                        ),
+                                    )
+                                }
+
+                                is NativeSetRouteError -> {
+                                    logE(
+                                        "[$reason] Routes with IDs ${routes.map { it.id }} " +
+                                            "will be ignored as they are not valid",
+                                    )
+                                    routesSetResult = ExpectedFactory.createError(
+                                        RoutesSetError(processedRoutes.error),
+                                    )
+                                    historyRecordingStateHandler.lastSetRoutesFailed()
+                                }
+                            }
+                        }
+                        callback?.onRoutesSet(routesSetResult)
+                        logI(LOG_CATEGORY) {
+                            "[$reason] Callback invoked successfully, releasing mutex"
                         }
                     }
+                    // Track when the Job was canceled to know if its work was completed or not
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    logE(LOG_CATEGORY) {
+                        "[$reason] Coroutine CANCELLED: $e; " +
+                            "Job: ${coroutineContext[kotlinx.coroutines.Job]}; " +
+                            "hasCallback=$hasCallback"
+                    }
+                    throw e
+                } catch (e: Exception) {
+                    logE(LOG_CATEGORY) {
+                        "[$reason] Coroutine threw exception: $e; " +
+                            "hasCallback=$hasCallback"
+                    }
+                    throw e
+                } finally {
+                    logI(LOG_CATEGORY) {
+                        "[$reason] Mutex released, coroutine completing/cancelled; " +
+                            "Job: ${coroutineContext[kotlinx.coroutines.Job]}"
+                    }
                 }
-                callback?.onRoutesSet(routesSetResult)
             }
+        logI(LOG_CATEGORY) {
+            "Coroutine Job created: $job; isActive=${job.isActive}; " + "isCompleted" +
+                "=${job.isCompleted}; isCancelled=${job.isCancelled}"
         }
     }
 
