@@ -1,0 +1,1 @@
+- Reduced main thread CPU usage in `MapboxTripSession` by dispatching route progress observer notifications asynchronously and moving the foreground notification update to an IO thread.

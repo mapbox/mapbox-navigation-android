@@ -172,6 +172,12 @@ internal open class MapboxNavigationBaseTest {
                 coroutineRule.createTestScope(),
             )
         }
+        every { threadController.getIOScopeAndRootJob() } answers {
+            JobControl(
+                mockk { every { children } returns sequenceOf() },
+                coroutineRule.createTestScope(),
+            )
+        }
 
         mockkObject(LoggerProvider)
         mockkObject(NavigatorLoader)

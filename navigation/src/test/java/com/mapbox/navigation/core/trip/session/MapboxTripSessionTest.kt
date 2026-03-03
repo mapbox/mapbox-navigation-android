@@ -962,6 +962,7 @@ class MapboxTripSessionTest {
                     primaryRouteId = "id#0",
                 ),
             )
+            runCurrent()
             assertTrue(routeProgresses.last().navigationRoute === originalRoute1)
 
             coroutineRule.testDispatcher.advanceTimeBy(501)
@@ -972,6 +973,7 @@ class MapboxTripSessionTest {
                     primaryRouteId = "id#0",
                 ),
             )
+            runCurrent()
             assertTrue(routeProgresses.last().navigationRoute === originalRoute1)
 
             coroutineRule.testDispatcher.advanceTimeBy(301)
@@ -983,6 +985,7 @@ class MapboxTripSessionTest {
                     primaryRouteId = "id#0",
                 ),
             )
+            runCurrent()
             assertTrue(routeProgresses.last().navigationRoute === refreshedRoute1)
 
             coroutineRule.testDispatcher.resumeDispatcher()
@@ -1448,6 +1451,7 @@ class MapboxTripSessionTest {
                     navigationStatusOrigin,
                     navigationStatus,
                 )
+                runCurrent()
                 verify(exactly = 1) { observer.onRouteProgressChanged(any()) }
             }
         }
@@ -1477,6 +1481,7 @@ class MapboxTripSessionTest {
                     navigationStatusOrigin,
                     navigationStatus,
                 )
+                runCurrent()
                 verify(exactly = 1) { observer.onRouteProgressChanged(any()) }
             }
         }
@@ -1506,6 +1511,7 @@ class MapboxTripSessionTest {
                     navigationStatusOrigin,
                     navigationStatus,
                 )
+                runCurrent()
                 verify(exactly = 1) { observer.onRouteProgressChanged(any()) }
             }
         }

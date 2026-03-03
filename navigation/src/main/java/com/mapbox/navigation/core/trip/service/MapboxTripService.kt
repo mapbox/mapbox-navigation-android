@@ -5,11 +5,13 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.SystemClock
+import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.trip.model.TripNotificationState
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.logI
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.concurrent.CopyOnWriteArraySet
@@ -95,6 +97,9 @@ internal class MapboxTripService(
     )
 
     private val serviceStarted = AtomicBoolean(false)
+    private val notificationChannel = Channel<TripNotificationState>(Channel.CONFLATED)
+
+    private val ioJobController = threadController.getIOScopeAndRootJob()
 
     private val mainJobController = threadController.getMainScopeAndRootJob()
     private var allowedNotificationTime = 0L
@@ -118,11 +123,23 @@ internal class MapboxTripService(
                 tripNotification.onTripSessionStarted()
                 initializeLambda()
                 currentTripNotification = tripNotification
+                startNotificationJob()
                 updateNotificationData()
                 allowedNotificationTime = SystemClock.elapsedRealtime() + 500
             }
             false -> {
                 logI("service already started", LOG_CATEGORY)
+            }
+        }
+    }
+
+    private fun startNotificationJob() {
+        notificationJob = ioJobController.scope.launch {
+            for (state in notificationChannel) {
+                delay(allowedNotificationTime - SystemClock.elapsedRealtime())
+                PerformanceTracker.trackPerformanceSync("MapboxTripService#updateNotification") {
+                    tripNotification.updateNotification(state)
+                }
             }
         }
     }
@@ -135,6 +152,7 @@ internal class MapboxTripService(
             true -> {
                 currentTripNotification = null
                 notificationJob?.cancel()
+                notificationJob = null
                 terminateLambda()
                 tripNotification.onTripSessionStopped()
             }
@@ -148,15 +166,7 @@ internal class MapboxTripService(
      * Update the trip's information in the notification bar
      */
     override fun updateNotification(tripNotificationState: TripNotificationState) {
-        notificationJob?.cancel()
-        if (SystemClock.elapsedRealtime() >= allowedNotificationTime) {
-            tripNotification.updateNotification(tripNotificationState)
-        } else {
-            notificationJob = mainJobController.scope.launch {
-                delay(allowedNotificationTime - SystemClock.elapsedRealtime())
-                tripNotification.updateNotification(tripNotificationState)
-            }
-        }
+        notificationChannel.trySend(tripNotificationState)
     }
 
     /**

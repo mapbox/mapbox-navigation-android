@@ -7,12 +7,15 @@ import com.mapbox.navigation.base.trip.model.TripNotificationState
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.LoggerFrontend
 import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
 import org.junit.After
 import org.junit.Assert.assertNotNull
 import org.junit.Before
@@ -37,11 +40,16 @@ class MapboxTripServiceTest {
 
     @Before
     fun setUp() {
+        val testScope = CoroutineScope(SupervisorJob() + coroutineRule.testDispatcher)
+        val threadController = mockk<ThreadController>().apply {
+            every { getMainScopeAndRootJob() } returns JobControl(SupervisorJob(), testScope)
+            every { getIOScopeAndRootJob() } returns JobControl(SupervisorJob(), testScope)
+        }
         service = MapboxTripService(
             tripNotification,
             initializeLambda,
             terminateLambda,
-            ThreadController(),
+            threadController,
         )
         every { tripNotification.getNotificationId() } answers { NOTIFICATION_ID }
         every { tripNotification.getNotification() } answers { notification }
@@ -136,27 +144,35 @@ class MapboxTripServiceTest {
     }
 
     @Test
-    fun tripNotification_updateNotificationWhenUpdateNotificationCalled() {
-        val routeProgress: RouteProgress = mockk {
-            every { bannerInstructions } returns null
-            every { currentLegProgress } returns null
+    fun tripNotification_updateNotificationWhenUpdateNotificationCalled() =
+        coroutineRule.runBlockingTest {
+            val routeProgress: RouteProgress = mockk {
+                every { bannerInstructions } returns null
+                every { currentLegProgress } returns null
+            }
+
+            service.startService()
+            service.updateNotification(buildTripNotificationState(routeProgress))
+            coroutineRule.testDispatcher.advanceTimeBy(500)
+
+            verify(exactly = 1) {
+                tripNotification.updateNotification(any<TripNotificationState>())
+            }
         }
-
-        service.updateNotification(buildTripNotificationState(routeProgress))
-
-        verify(exactly = 1) { tripNotification.updateNotification(any<TripNotificationState>()) }
-    }
 
     @Test
-    fun tripNotification_updateNotificationWhenUpdateNotificationCalledWhenRouteProgressNull() {
-        service.updateNotification(buildTripNotificationState(null))
+    fun tripNotification_updateNotificationWhenUpdateNotificationCalledWhenRouteProgressNull() =
+        coroutineRule.runBlockingTest {
+            service.startService()
+            service.updateNotification(buildTripNotificationState(null))
+            coroutineRule.testDispatcher.advanceTimeBy(500)
 
-        verify(exactly = 1) {
-            tripNotification.updateNotification(
-                any<TripNotificationState.TripNotificationFreeState>(),
-            )
+            verify(exactly = 1) {
+                tripNotification.updateNotification(
+                    any<TripNotificationState.TripNotificationFreeState>(),
+                )
+            }
         }
-    }
 
     @Test
     fun notificationDataObserverInvokedIfRegisteredBeforeServiceStart() {
