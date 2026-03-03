@@ -74,6 +74,7 @@ import com.mapbox.navigation.testing.utils.withoutInternet
 import com.mapbox.navigation.utils.internal.toPoint
 import com.mapbox.turf.TurfMeasurement
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNot
@@ -82,7 +83,6 @@ import kotlinx.coroutines.yield
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
-import org.junit.Assume.assumeFalse
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -370,10 +370,6 @@ class CoreRerouteTest(
      */
     @Test
     fun reroute_states_when_the_user_returns_to_route() = sdkTest {
-        assumeFalse(
-            "Native controller interrupts reroute instead of just ignoring the response",
-            runOptions.nativeReroute,
-        )
         val mapboxNavigation = createMapboxNavigation()
         val mockRoute = RoutesProvider.dc_very_short(context)
         val originLocation = mockRoute.routeWaypoints.first()
@@ -1178,11 +1174,6 @@ class CoreRerouteTest(
             historyRecorderRule = mapboxHistoryTestRule,
             customConfig = getTestCustomConfig(),
         ) { mapboxNavigation ->
-            // https://mapbox.atlassian.net/browse/NAVAND-4548
-            assumeFalse(
-                "Native rerouting has retries while platform implementation doesn't",
-                runOptions.nativeReroute,
-            )
 
             val rerouteStates = mapboxNavigation.recordRerouteStates()
             val rerouteStatesV2 = mapboxNavigation.recordRerouteStatesV2()
@@ -1206,19 +1197,19 @@ class CoreRerouteTest(
             withoutInternet {
                 stayOnPosition(offRouteLocationUpdate) {
                     mapboxNavigation.offRouteUpdates().filter { it }.first()
-                    val rerouteState = mapboxNavigation.getRerouteController()!!
-                        .rerouteStates()
-                        .filter { it is RerouteState.Failed || it is RerouteState.RouteFetched }
-                        .first()
-                    val failedState = assertIs<RerouteState.Failed>(rerouteState)
-                    assertTrue(failedState.isRetryable)
+                    val (state1, state2) = combine(
+                        mapboxNavigation.getRerouteController()!!.rerouteStates(),
+                        mapboxNavigation.getRerouteController()!!.rerouteStatesV2(),
 
-                    val rerouteStateV2 = mapboxNavigation.getRerouteController()!!
-                        .rerouteStatesV2()
-                        .filter { it is RerouteStateV2.Failed || it is RerouteStateV2.RouteFetched }
-                        .first()
-                    val failedStateV2 = assertIs<RerouteStateV2.Failed>(rerouteStateV2)
-                    assertTrue(failedStateV2.isRetryable)
+                    ) { v1, v2 -> Pair(v1, v2) }.first { (v1, v2) ->
+                        (v1 is RerouteState.Failed || v1 is RerouteState.RouteFetched) &&
+                            (v2 is RerouteStateV2.Failed || v2 is RerouteStateV2.RouteFetched)
+                    }
+                    val failedState1 = assertIs<RerouteState.Failed>(state1)
+                    assertTrue(failedState1.isRetryable)
+
+                    val failedState2 = assertIs<RerouteStateV2.Failed>(state2)
+                    assertTrue(failedState2.isRetryable)
                 }
             }
             assertRerouteFailedTransition(rerouteStates)

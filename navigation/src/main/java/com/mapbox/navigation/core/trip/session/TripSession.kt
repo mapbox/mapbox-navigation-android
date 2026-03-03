@@ -24,6 +24,7 @@ internal interface TripSession {
     val zLevel: Int?
     val locationMatcherResult: LocationMatcherResult?
     val isOffRoute: Boolean
+    val hadOffRouteDeviation: Boolean
     fun getRouteProgress(): RouteProgress?
     fun getState(): TripSessionState
 
@@ -82,4 +83,5 @@ internal interface TripSession {
         rerouteController: RerouteController,
     )
     fun resetOffRouteObserverForReroute()
+    fun resetOffRouteDeviationFlag()
 }

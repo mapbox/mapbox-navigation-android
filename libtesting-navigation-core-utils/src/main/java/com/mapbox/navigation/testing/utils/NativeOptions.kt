@@ -7,6 +7,7 @@ const val nativeRerouteControllerNoRetryConfig =
             },
             "navigation": {
                 "reroute": {
+                    "doNotCancelRerouteOnBackToRoute": true,
                     "doNotRetryRerouteOnFailure": true
                 }
             }

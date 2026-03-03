@@ -302,6 +302,8 @@ internal class MapboxTripSession(
             offRouteObservers.forEach { it.onOffRouteStateChanged(value) }
         }
 
+    override var hadOffRouteDeviation: Boolean = false
+
     private var offRouteObserverForReroute: OffRouteObserver? = null
 
     private var rawLocation: Location? = null
@@ -544,6 +546,7 @@ internal class MapboxTripSession(
         zLevel = null
         routeProgress = null
         isOffRoute = false
+        hadOffRouteDeviation = false
         eHorizonSubscriptionManager.reset()
     }
 
@@ -864,6 +867,10 @@ internal class MapboxTripSession(
         rerouteInvocationHandler = null
     }
 
+    override fun resetOffRouteDeviationFlag() {
+        hadOffRouteDeviation = false
+    }
+
     private fun updateLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
         PerformanceTracker.trackPerformanceSync("MapboxTripSession#updateLocationMatcherResult") {
             this.locationMatcherResult = locationMatcherResult
@@ -891,6 +898,7 @@ internal class MapboxTripSession(
                 "voice idx [${status.voiceInstruction?.index}]"
         }
 
+        hadOffRouteDeviation = hadOffRouteDeviation || status.routeState == RouteState.OFF_ROUTE
         val tripStatus = PerformanceTracker.trackPerformanceSync(
             "MapboxTripSession#processNativeStatus-getTripStatus",
         ) { status.getTripStatusFrom(primaryRoute) }

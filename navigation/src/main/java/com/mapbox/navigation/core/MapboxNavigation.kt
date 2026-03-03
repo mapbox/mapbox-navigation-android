@@ -716,8 +716,15 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 rerouteDetector = nativeRerouteDetector,
                 getCurrentRoutes = directionsSession::routesPlusIgnored,
                 updateRoutes = { routes, legIndex ->
-                    internalSetNavigationRoutes(routes, SetRoutes.Reroute(legIndex))
-                    true
+                    when {
+                        !tripSession.hadOffRouteDeviation ||
+                            (tripSession.hadOffRouteDeviation && tripSession.isOffRoute) -> {
+                            internalSetNavigationRoutes(routes, SetRoutes.Reroute(legIndex))
+                            tripSession.resetOffRouteDeviationFlag()
+                            true
+                        }
+                        else -> false
+                    }
                 },
                 scope = mainJobController.scope,
                 routeParser = parsing,
@@ -2583,6 +2590,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                     -> {
                         // No-op as these states are handled elsewhere.
                     }
+
                     else -> {
                         logW(LOG_CATEGORY) { "Unexpected state: $rerouteState" }
                     }
