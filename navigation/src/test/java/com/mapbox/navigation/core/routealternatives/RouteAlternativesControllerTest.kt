@@ -1064,6 +1064,58 @@ class RouteAlternativesControllerTest {
             verify(exactly = 0) { controllerInterface.removeObserver(any()) }
         }
 
+    @Test
+    fun `navigator updated after creation - re-registers observer on new native controller`() {
+        val newControllerInterface: RouteAlternativesControllerInterface = mockk(relaxed = true)
+        val newNavigator: MapboxNativeNavigator = mockk {
+            every { routeAlternativesController } returns newControllerInterface
+        }
+        val routeAlternativesController = createRouteAlternativesController()
+
+        routeAlternativesController.setRouteUpdateSuggestionListener { }
+        routeAlternativesController.navigatorUpdated(newNavigator)
+
+        verify(exactly = 1) { controllerInterface.removeObserver(any()) }
+        verify(exactly = 1) { newControllerInterface.setRouteAlternativesOptions(any()) }
+        verify(exactly = 1) { newControllerInterface.addObserver(any()) }
+    }
+
+    @Test
+    fun `navigator updated while paused - does not register observer on new native controller`() {
+        val newControllerInterface: RouteAlternativesControllerInterface = mockk(relaxed = true)
+        val newNavigator: MapboxNativeNavigator = mockk {
+            every { routeAlternativesController } returns newControllerInterface
+        }
+        val routeAlternativesController = createRouteAlternativesController()
+
+        routeAlternativesController.setRouteUpdateSuggestionListener { }
+        routeAlternativesController.pause()
+        // pause() already removed the observer - navigatorUpdated should not trigger another removal
+        routeAlternativesController.navigatorUpdated(newNavigator)
+
+        verify(exactly = 1) { controllerInterface.removeObserver(any()) }
+        verify(exactly = 1) { newControllerInterface.setRouteAlternativesOptions(any()) }
+        verify(exactly = 0) { newControllerInterface.addObserver(any()) }
+    }
+
+    @Test
+    fun `navigator updated after listener set to null - does not register observer on new native controller`() {
+        val newControllerInterface: RouteAlternativesControllerInterface = mockk(relaxed = true)
+        val newNavigator: MapboxNativeNavigator = mockk {
+            every { routeAlternativesController } returns newControllerInterface
+        }
+        val routeAlternativesController = createRouteAlternativesController()
+
+        routeAlternativesController.setRouteUpdateSuggestionListener { }
+        // setRouteUpdateSuggestionListener(null) already removed the observer - navigatorUpdated should not trigger another removal
+        routeAlternativesController.setRouteUpdateSuggestionListener(null)
+        routeAlternativesController.navigatorUpdated(newNavigator)
+
+        verify(exactly = 1) { controllerInterface.removeObserver(any()) }
+        verify(exactly = 1) { newControllerInterface.setRouteAlternativesOptions(any()) }
+        verify(exactly = 0) { newControllerInterface.addObserver(any()) }
+    }
+
     private val nativeInfoFork = com.mapbox.navigator.AlternativeRouteInfo(
         100.0, // distance
         200.0, // duration

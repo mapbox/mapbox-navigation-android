@@ -38,15 +38,30 @@ internal class RouteAlternativesController(
 
     private var observerProcessingJob: Job? = null
 
-    private val nativeRouteAlternativesController = navigator.routeAlternativesController
-        .apply {
-            setRouteAlternativesOptions(
-                com.mapbox.navigator.RouteAlternativesOptions(
-                    TimeUnit.MILLISECONDS.toSeconds(options.intervalMillis).toShort(),
-                    options.avoidManeuverSeconds.toFloat(),
-                ),
-            )
+    private var nativeRouteAlternativesController = setupNativeController(navigator)
+
+    fun navigatorUpdated(navigator: MapboxNativeNavigator) {
+        if (isCaRunning()) {
+            nativeRouteAlternativesController.removeObserver(nativeObserver)
         }
+
+        nativeRouteAlternativesController = setupNativeController(navigator)
+
+        if (isCaRunning()) {
+            nativeRouteAlternativesController.addObserver(nativeObserver)
+        }
+    }
+
+    private fun setupNativeController(
+        navigator: MapboxNativeNavigator,
+    ) = navigator.routeAlternativesController.apply {
+        setRouteAlternativesOptions(
+            com.mapbox.navigator.RouteAlternativesOptions(
+                TimeUnit.MILLISECONDS.toSeconds(options.intervalMillis).toShort(),
+                options.avoidManeuverSeconds.toFloat(),
+            ),
+        )
+    }
 
     private val metadataMap = mutableMapOf<String, AlternativeRouteMetadata>()
 
@@ -86,9 +101,9 @@ internal class RouteAlternativesController(
     }
 
     private fun updateNativeObserver(block: () -> Unit) {
-        val wasRunning = active && defaultAlternativesHandler != null
+        val wasRunning = isCaRunning()
         block()
-        val shouldBeRunning = active && defaultAlternativesHandler != null
+        val shouldBeRunning = isCaRunning()
         if (shouldBeRunning && !wasRunning) {
             nativeRouteAlternativesController.addObserver(nativeObserver)
         }
@@ -264,6 +279,9 @@ internal class RouteAlternativesController(
             }
         }
     }
+
+    private fun isCaRunning(): Boolean =
+        active && defaultAlternativesHandler != null
 
     private companion object {
         private const val LOG_CATEGORY = "RouteAlternativesController"

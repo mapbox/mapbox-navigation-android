@@ -18,6 +18,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.NavigationVersionSwitchObserver
 import com.mapbox.navigation.core.RoutesSetSuccess
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
@@ -36,6 +37,7 @@ import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.testing.utils.http.MockDynamicDirectionsRefreshHandler
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
+import com.mapbox.navigation.testing.utils.location.followGeometry
 import com.mapbox.navigation.testing.utils.location.stayOnPosition
 import com.mapbox.navigation.testing.utils.nro.assumeNotNROBecauseToBuilderIsRequiredForTest
 import com.mapbox.navigation.testing.utils.offline.Tileset
@@ -57,6 +59,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
@@ -120,6 +123,60 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
                 emptyList<NavigationRoute>(),
                 firstAlternativesCallback.navigationRoutes.drop(1),
             )
+        }
+    }
+
+    @Test
+    fun caAfterNavigatorRecreation() = sdkTest(timeout = 60_000) {
+        val testRouteOptions = setupMockServerForCAAfterWaypointInBerlin()
+        val version = context.unpackTiles(Tileset.Berlin)[TileDataDomain.NAVIGATION]
+        withMapboxNavigation(
+            historyRecorderRule = mapboxHistoryTestRule,
+            // make sure that navigator fallback on offline pack
+            useRealTiles = false,
+            tileStore = TileStore.create(),
+            tilesVersion = "",
+        ) { navigation ->
+            var navigatorFellBackToTilesVersion: String? = null
+            var versionSwitchCount = 0
+            navigation.registerNavigationVersionSwitchObserver(
+                object : NavigationVersionSwitchObserver {
+                    override fun onSwitchToFallbackVersion(tilesVersion: String?) {
+                        navigatorFellBackToTilesVersion = tilesVersion
+                        versionSwitchCount++
+                    }
+
+                    override fun onSwitchToTargetVersion(tilesVersion: String?) {
+                        navigatorFellBackToTilesVersion = tilesVersion
+                        versionSwitchCount++
+                    }
+                },
+            )
+            stayOnPosition(
+                testRouteOptions.coordinatesList().first(),
+                bearing = 355f,
+            ) {
+                navigation.startTripSession()
+                navigation.flowLocationMatcherResult().first { !it.isDegradedMapMatching }
+            }
+            assertEquals(
+                version,
+                navigatorFellBackToTilesVersion,
+            )
+            assertEquals(1, versionSwitchCount)
+
+            val testRoutes = navigation.requestRoutes(testRouteOptions)
+                .getSuccessfulResultOrThrowException()
+                .routes
+
+            followGeometry(testRoutes.first().directionsRoute.geometry()!!) {
+                navigation.setNavigationRoutes(testRoutes)
+                withTimeoutOrNull(10.seconds) {
+                    navigation.routesUpdates().first {
+                        it.reason == RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE
+                    }
+                } ?: fail("No alternatives were received after passing fork point")
+            }
         }
     }
 

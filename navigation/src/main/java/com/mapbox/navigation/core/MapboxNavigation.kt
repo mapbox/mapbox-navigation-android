@@ -2442,6 +2442,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             navigator.recreate(createTilesConfig(isFallback, tilesVersion))
 
             routerWrapper.resetRouter(navigator.getRouter())
+            routeAlternativesController.navigatorUpdated(navigator)
 
             etcGateAPI.experimental = navigator.experimental
 
