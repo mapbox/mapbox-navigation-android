@@ -12,6 +12,7 @@ import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
 import com.mapbox.maps.StyleObjectInfo
+import com.mapbox.maps.coroutine.awaitLoadStyle
 import com.mapbox.maps.extension.style.layers.generated.LineLayer
 import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
@@ -58,6 +59,7 @@ import org.junit.Test
 import java.util.concurrent.CountDownLatch
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlin.time.Duration.Companion.seconds
 
 class RouteLineLayersTest : BaseTest<BasicNavigationViewActivity>(
     BasicNavigationViewActivity::class.java,
@@ -546,10 +548,9 @@ class RouteLineLayersTest : BaseTest<BasicNavigationViewActivity>(
         countDownLatch3.await()
     }
 
-    @Ignore("https://mapbox.atlassian.net/browse/NAVAND-6938")
+    @Ignore("https://mapbox.atlassian.net/browse/NN-4662")
     @Test
     fun should_provide_valid_offset_for_alternative_route() {
-        val countDownLatch = CountDownLatch(1)
         sdkTest {
             val primaryRoute = createRoute(
                 responseJson = R.raw.route_response_japan_1,
@@ -613,39 +614,43 @@ class RouteLineLayersTest : BaseTest<BasicNavigationViewActivity>(
 
             assertEquals(1, alternativeMetadata.size)
 
+            activity.mapboxMap.setCamera(
+                CameraOptions.Builder()
+                    .center(
+                        alternativeMetadata
+                            .first()
+                            .forkIntersectionOfAlternativeRoute.location,
+                    )
+                    .zoom(16.0)
+                    .build(),
+            )
+            activity.mapboxMap.awaitLoadStyle(Style.STANDARD)
+
             routeLineView.renderRouteDrawDataAsync(
                 activity.mapboxMap,
                 activity.mapboxMap.style!!,
                 result,
             )
-            object : CountDownTimer(1000, 1000) {
-                override fun onTick(p0: Long) {
-                    // no-op
-                }
-
-                override fun onFinish() {
-                    val property = activity.binding.mapView.mapboxMap.style!!.getStyleLayerProperty(
-                        "mapbox-layerGroup-2-traffic",
-                        "line-trim-offset",
-                    )
-                    assertNotNull(property.value.contents)
-                    assertTrue(property.value.contents is ArrayList<*>)
-                    // the alternative route overlaps primary on ~92% + use reverse geometry - reverse the offset
-                    assertEquals(
-                        0.07368465583,
-                        ((property.value.contents as ArrayList<*>)[0] as Value).contents as Double,
-                        0.0000000001,
-                    )
-                    assertEquals(
-                        1.0,
-                        ((property.value.contents as ArrayList<*>)[1] as Value).contents as Double,
-                        0.0000000001,
-                    )
-                    countDownLatch.countDown()
-                }
-            }.start()
+            // delay to let human notice how alternative is rendered
+            delay(1.seconds)
+            val property = activity.binding.mapView.mapboxMap.style!!.getStyleLayerProperty(
+                "mapbox-layerGroup-2-traffic",
+                "line-trim-offset",
+            )
+            assertNotNull(property.value.contents)
+            assertTrue(property.value.contents is ArrayList<*>)
+            // the alternative route overlaps primary on ~92% + use reverse geometry - reverse the offset
+            assertEquals(
+                0.07368465583,
+                ((property.value.contents as ArrayList<*>)[0] as Value).contents as Double,
+                0.0000000001,
+            )
+            assertEquals(
+                1.0,
+                ((property.value.contents as ArrayList<*>)[1] as Value).contents as Double,
+                0.0000000001,
+            )
         }
-        countDownLatch.await()
     }
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)

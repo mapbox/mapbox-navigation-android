@@ -559,7 +559,7 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
         }
     }
 
-    @Ignore("https://mapbox.atlassian.net/browse/NAVAND-6938")
+    @Ignore("https://mapbox.atlassian.net/browse/NN-4663")
     @Test
     fun switch_from_multi_leg_primary_to_single_leg_CA_after_intermediate_waypoint_and_back() =
         sdkTest {
