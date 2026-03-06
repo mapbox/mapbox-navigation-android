@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import androidx.startup.Initializer
 import com.mapbox.common.MapboxSDKCommonInitializerImpl
 import com.mapbox.common.SdkInfoRegistryFactory
+import com.mapbox.navigator.MapboxNavigationNativeInitializerImpl
 
 class MapboxNavigationSDKInitializerImpl : Initializer<MapboxNavigationSDK> {
 
@@ -29,6 +30,9 @@ class MapboxNavigationSDKInitializerImpl : Initializer<MapboxNavigationSDK> {
     }
 
     override fun dependencies(): MutableList<Class<out Initializer<*>>> {
-        return mutableListOf(MapboxSDKCommonInitializerImpl::class.java)
+        return mutableListOf(
+            MapboxSDKCommonInitializerImpl::class.java,
+            MapboxNavigationNativeInitializerImpl::class.java,
+        )
     }
 }
