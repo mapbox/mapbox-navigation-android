@@ -1,5 +1,46 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.20.0-rc.1 - 06 March, 2026
+#### Features
+- Introduced unknown status charger counts in EvStationMarker and EvseGroup models. 
+- Added metadata passthrough support for route refresh to enable app-side correlation 
+- Default navigation arrow width set to match the route line width. 
+- Made the navigation arrowhead shape more pointed. 
+- Changed the navigation arrow casing (border) color. 
+- The `EvseGroup` model is extended with `powerType` property indicating electrical power configuration. 
+- The `EvStationMarker` model is extended with a `chargersGroups` property, which is a list of all charging groups at the station. 
+
+#### Bug fixes and improvements
+- Reduced main thread CPU usage in `MapboxTripSession` by dispatching route progress observer notifications asynchronously and moving the foreground notification update to an IO thread. 
+- Fixed a bug that caused the average speed zone to not update properly when a reroute occurred inside an active zone. 
+- Fixed a bug where, at the beginning of active guidance, users received a notification about a speed camera from the end of the route.  
+- SDK now supports dynamic access token update for voice guidance and map gpt 
+- Fix route arrow scale when pixelRatio doesn't match density 
+- Ignore query param at geo deeplink parsing 
+- Introducing a new `RouterFailureType.ROUTE_EXPIRY_ERROR` router failure type to inform customers when an issue due to route expiry occurs. 
+- Improved internal flow of location updates for `LocationProviderSource.GPS`, which fixes delays in case main thread is blocked by the application.  
+- Made default rounding increment in `DistanceFormatterOptions` dependent on distance numerical value. 
+
+#### Known issues :warning:
+
+- Alternative Route Gap at Fork Points.
+The `AlternativeRouteMetadata#forkIntersectionOfAlternativeRoute` property currently references a location slightly downstream (ahead) of the actual logical fork point. As a result, alternative routes may appear to start with a physical gap relative to the primary route at the junction.
+
+- Loss of Original Route After Waypoint.
+When a user switches from the primary to an alternative route after passing the first waypoint, the original primary route may be discarded by the navigator. This results in the UI displaying only the newly selected route, preventing the user from easily switching back to the previous path.
+
+- Bearing Discrepancy After Map Re-attachment.
+The location puck's visual bearing may diverge from the bearing reported by the navigator following a map detachment/re-attachment cycle. This synchronization lag occurs when the Nav Coordination MapComponent instance is destroyed and recreated, causing a temporary mismatch between the UI's orientation and the underlying navigation state.
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.20.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.20.0-rc.1))
+- Mapbox Navigation Native `v324.20.0-rc.1`
+- Mapbox Core Common `v24.20.0-rc.1`
+- Mapbox Java `v7.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.0))
+
+
 ## Navigation SDK Core Framework 3.19.0 - 27 February, 2026
 #### Features
 
