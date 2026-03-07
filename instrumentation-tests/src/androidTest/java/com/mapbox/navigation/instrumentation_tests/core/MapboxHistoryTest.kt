@@ -1,19 +1,12 @@
 package com.mapbox.navigation.instrumentation_tests.core
 
 import android.location.Location
-import androidx.test.espresso.Espresso
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
-import com.mapbox.navigation.base.options.HistoryRecorderOptions
-import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.route.NavigationRouterCallback
-import com.mapbox.navigation.base.route.RouterFailure
-import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.history.MapboxHistoryReader
 import com.mapbox.navigation.core.history.model.HistoryEvent
 import com.mapbox.navigation.core.history.model.HistoryEventGetStatus
@@ -22,17 +15,21 @@ import com.mapbox.navigation.core.history.model.HistoryEventSetRoute
 import com.mapbox.navigation.core.history.model.HistoryEventUpdateLocation
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
+import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
+import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
+import com.mapbox.navigation.testing.ui.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
+import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
 import com.mapbox.navigation.testing.ui.utils.coroutines.stopRecording
-import com.mapbox.navigation.testing.ui.utils.runOnMainSync
-import com.mapbox.navigation.testing.utils.idling.RouteProgressStateIdlingResource
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.testing.utils.routes.MockRoute
 import com.mapbox.navigation.testing.utils.routes.RoutesProvider
+import com.mapbox.navigation.testing.utils.withMapboxNavigation
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -42,6 +39,7 @@ import org.junit.Test
 import java.io.File
 import java.io.InputStream
 
+@OptIn(ExperimentalMapboxNavigationAPI::class)
 class MapboxHistoryTest : BaseCoreNoCleanUpTest() {
 
     @get:Rule
@@ -50,8 +48,6 @@ class MapboxHistoryTest : BaseCoreNoCleanUpTest() {
     @get:Rule
     val mockLocationReplayerRule = MockLocationReplayerRule(mockLocationUpdatesRule)
 
-    private lateinit var mapboxNavigation: MapboxNavigation
-    private lateinit var routeCompleteIdlingResource: RouteProgressStateIdlingResource
     private lateinit var testDirectory: File
 
     override fun setupMockLocation(): Location = mockLocationUpdatesRule.generateLocationUpdate {
@@ -70,140 +66,68 @@ class MapboxHistoryTest : BaseCoreNoCleanUpTest() {
         testDirectory.deleteRecursively()
     }
 
-    @Before
-    fun setup() {
-        Espresso.onIdle()
+    @Test
+    fun verify_history_files_are_recorded_and_readable() = sdkTest {
+        withMapboxNavigation { mapboxNavigation ->
+            val mockRoute = RoutesProvider.dc_very_short(context)
+            mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
+            val routeOptions = RouteOptions.builder()
+                .applyDefaultNavigationOptions()
+                .applyLanguageAndVoiceUnitOptions(context)
+                .baseUrl(mockWebServerRule.baseUrl)
+                .coordinatesList(mockRoute.routeWaypoints)
+                .build()
 
-        runOnMainSync {
-            mapboxNavigation = MapboxNavigationProvider.create(
-                NavigationOptions.Builder(context)
-                    .historyRecorderOptions(
-                        HistoryRecorderOptions.Builder()
-                            .build(),
-                    )
-                    .build(),
-            )
+            mapboxNavigation.historyRecorder.startRecording()
+            mapboxNavigation.historyRecorder.pushHistory(CUSTOM_EVENT_TYPE, CUSTOM_EVENT_PROPERTIES)
+            mapboxNavigation.startTripSession()
+
+            val routes = mapboxNavigation.requestRoutes(routeOptions)
+                .getSuccessfulResultOrThrowException()
+                .routes
+            mapboxNavigation.setNavigationRoutesAsync(routes)
+            mockLocationReplayerRule.playRoute(routes[0].directionsRoute)
+            mapboxNavigation.routeProgressUpdates()
+                .filter { it.currentState == RouteProgressState.COMPLETE }
+                .first()
+
+            val filePath = mapboxNavigation.historyRecorder.stopRecording()
+            assertNotNull(filePath)
+            verifyHistoryEvents(filePath!!, mockRoute, routeOptions)
         }
-        routeCompleteIdlingResource = RouteProgressStateIdlingResource(
-            mapboxNavigation,
-            RouteProgressState.COMPLETE,
-        )
     }
 
     @Test
-    fun verify_history_files_are_recorded_and_readable() {
-        // prepare
-        val mockRoute = RoutesProvider.dc_very_short(context)
-        mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
-        routeCompleteIdlingResource.register()
+    fun verify_history_files_are_recorded_and_readable_with_silent_waypoints() = sdkTest {
+        withMapboxNavigation { mapboxNavigation ->
+            val mockRoute = RoutesProvider.dc_very_short_two_legs_with_silent_waypoint(context)
+            mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
+            val routeOptions = RouteOptions.builder()
+                .applyDefaultNavigationOptions()
+                .applyLanguageAndVoiceUnitOptions(context)
+                .baseUrl(mockWebServerRule.baseUrl)
+                .coordinatesList(mockRoute.routeWaypoints)
+                .waypointIndicesList(listOf(0, 2))
+                .build()
 
-        val routeOptions = RouteOptions.builder()
-            .applyDefaultNavigationOptions()
-            .applyLanguageAndVoiceUnitOptions(context)
-            .baseUrl(mockWebServerRule.baseUrl)
-            .coordinatesList(mockRoute.routeWaypoints).build()
-
-        // execute
-        runOnMainSync {
             mapboxNavigation.historyRecorder.startRecording()
             mapboxNavigation.historyRecorder.pushHistory(CUSTOM_EVENT_TYPE, CUSTOM_EVENT_PROPERTIES)
-        }
-        runOnMainSync {
             mapboxNavigation.startTripSession()
-            mapboxNavigation.requestRoutes(
-                routeOptions,
-                object : NavigationRouterCallback {
-                    override fun onRoutesReady(
-                        routes: List<NavigationRoute>,
-                        @RouterOrigin routerOrigin: String,
-                    ) {
-                        mapboxNavigation.setNavigationRoutes(routes)
-                        mockLocationReplayerRule.playRoute(routes[0].directionsRoute)
-                    }
 
-                    override fun onFailure(
-                        reasons: List<RouterFailure>,
-                        routeOptions: RouteOptions,
-                    ) {
-                        // no impl
-                    }
+            val routes = mapboxNavigation.requestRoutes(routeOptions)
+                .getSuccessfulResultOrThrowException()
+                .routes
+            mapboxNavigation.setNavigationRoutesAsync(routes)
+            mockLocationReplayerRule.playRoute(routes[0].directionsRoute)
 
-                    override fun onCanceled(
-                        routeOptions: RouteOptions,
-                        @RouterOrigin routerOrigin: String,
-                    ) {
-                        // no impl
-                    }
-                },
-            )
+            mapboxNavigation.routeProgressUpdates()
+                .filter { it.currentState == RouteProgressState.COMPLETE }
+                .first()
+
+            val filePath = mapboxNavigation.historyRecorder.stopRecording()
+            assertNotNull(filePath)
+            verifyHistoryEvents(filePath!!, mockRoute, routeOptions)
         }
-
-        Espresso.onIdle()
-        routeCompleteIdlingResource.unregister()
-
-        val filePath = runBlocking { mapboxNavigation.historyRecorder.stopRecording() }
-
-        assertNotNull(filePath)
-        verifyHistoryEvents(filePath!!, mockRoute, routeOptions)
-    }
-
-    @Test
-    fun verify_history_files_are_recorded_and_readable_with_silent_waypoints() {
-        // prepare
-        val mockRoute = RoutesProvider.dc_very_short_two_legs_with_silent_waypoint(context)
-        mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
-        routeCompleteIdlingResource.register()
-
-        val routeOptions = RouteOptions.builder()
-            .applyDefaultNavigationOptions()
-            .applyLanguageAndVoiceUnitOptions(context)
-            .baseUrl(mockWebServerRule.baseUrl)
-            .coordinatesList(mockRoute.routeWaypoints)
-            .waypointIndicesList(listOf(0, 2))
-            .build()
-
-        // execute
-        runOnMainSync {
-            mapboxNavigation.historyRecorder.startRecording()
-            mapboxNavigation.historyRecorder.pushHistory(CUSTOM_EVENT_TYPE, CUSTOM_EVENT_PROPERTIES)
-        }
-        runOnMainSync {
-            mapboxNavigation.startTripSession()
-            mapboxNavigation.requestRoutes(
-                routeOptions,
-                object : NavigationRouterCallback {
-                    override fun onRoutesReady(
-                        routes: List<NavigationRoute>,
-                        @RouterOrigin routerOrigin: String,
-                    ) {
-                        mapboxNavigation.setNavigationRoutes(routes)
-                        mockLocationReplayerRule.playRoute(routes[0].directionsRoute)
-                    }
-
-                    override fun onFailure(
-                        reasons: List<RouterFailure>,
-                        routeOptions: RouteOptions,
-                    ) {
-                        // no impl
-                    }
-
-                    override fun onCanceled(
-                        routeOptions: RouteOptions,
-                        @RouterOrigin routerOrigin: String,
-                    ) {
-                        // no impl
-                    }
-                },
-            )
-        }
-
-        Espresso.onIdle()
-        routeCompleteIdlingResource.unregister()
-
-        val filePath = runBlocking { mapboxNavigation.historyRecorder.stopRecording() }
-
-        assertNotNull(filePath)
-        verifyHistoryEvents(filePath!!, mockRoute, routeOptions)
     }
 
     private fun verifyHistoryEvents(
@@ -306,27 +230,29 @@ class MapboxHistoryTest : BaseCoreNoCleanUpTest() {
 
     @Test
     fun verify_identifying_events_can_be_found() = sdkTest {
-        mapboxNavigation.startTripSession()
-        val firstJson = """{"identifier":"first"}"""
-        val secondJson = """{"identifier":"second"}"""
-        val thirdJson = """{"identifier":"third"}"""
+        withMapboxNavigation { mapboxNavigation ->
+            mapboxNavigation.startTripSession()
+            val firstJson = """{"identifier":"first"}"""
+            val secondJson = """{"identifier":"second"}"""
+            val thirdJson = """{"identifier":"third"}"""
 
-        val firstFile = startAndStopRecording(firstJson)
-        val secondFile = startAndStopRecording(secondJson)
-        val thirdFile = startAndStopRecording(thirdJson)
+            val firstFile = mapboxNavigation.startAndStopRecording(firstJson)
+            val secondFile = mapboxNavigation.startAndStopRecording(secondJson)
+            val thirdFile = mapboxNavigation.startAndStopRecording(thirdJson)
 
-        fun String.findCustomEvent() = MapboxHistoryReader(this).asSequence()
-            .filterIsInstance(HistoryEventPushHistoryRecord::class.java)
-            .last()
-        assertEquals(firstJson, firstFile.findCustomEvent().properties)
-        assertEquals(secondJson, secondFile.findCustomEvent().properties)
-        assertEquals(thirdJson, thirdFile.findCustomEvent().properties)
+            fun String.findCustomEvent() = MapboxHistoryReader(this).asSequence()
+                .filterIsInstance(HistoryEventPushHistoryRecord::class.java)
+                .last()
+            assertEquals(firstJson, firstFile.findCustomEvent().properties)
+            assertEquals(secondJson, secondFile.findCustomEvent().properties)
+            assertEquals(thirdJson, thirdFile.findCustomEvent().properties)
+        }
     }
 
-    private suspend fun startAndStopRecording(eventJson: String): String {
-        mapboxNavigation.historyRecorder.startRecording()
-        mapboxNavigation.historyRecorder.pushHistory(CUSTOM_EVENT_TYPE, eventJson)
-        return mapboxNavigation.historyRecorder.stopRecording()!!
+    private suspend fun MapboxNavigation.startAndStopRecording(eventJson: String): String {
+        historyRecorder.startRecording()
+        historyRecorder.pushHistory(CUSTOM_EVENT_TYPE, eventJson)
+        return historyRecorder.stopRecording()!!
     }
 
     private fun historyReaderFromAssetFile(

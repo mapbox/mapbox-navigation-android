@@ -2,7 +2,6 @@ package com.mapbox.navigation.instrumentation_tests.core
 
 import android.location.Location
 import android.os.Looper
-import androidx.test.espresso.Espresso
 import com.adevinta.android.barista.rule.cleardata.ClearFilesRule
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -83,7 +82,6 @@ import kotlinx.coroutines.yield
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -139,11 +137,6 @@ class CoreRerouteTest(
      */
     @get:Rule
     val clearFilesRule = ClearFilesRule()
-
-    @Before
-    fun setup() {
-        Espresso.onIdle()
-    }
 
     private val testInitialLocation by lazy {
         RoutesProvider.dc_very_short(context)

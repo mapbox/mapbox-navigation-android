@@ -1,19 +1,17 @@
 package com.mapbox.navigation.instrumentation_tests.ui
 
-import androidx.test.espresso.Espresso
-import com.mapbox.navigation.testing.utils.idling.ArrivalIdlingResource
+import com.mapbox.navigation.core.internal.extensions.flowOnFinalDestinationArrival
+import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
+import kotlinx.coroutines.flow.first
 import org.junit.Test
 
 class SanityUiRouteTest : SimpleMapViewNavigationTest() {
 
     @Test
-    fun route_completes() {
+    fun route_completes() = sdkTest {
         addRouteLine()
         addLocationPuck()
         addNavigationCamera()
-        val arrivalIdlingResource = ArrivalIdlingResource(mapboxNavigation)
-        arrivalIdlingResource.register()
-        Espresso.onIdle()
-        arrivalIdlingResource.unregister()
+        mapboxNavigation.flowOnFinalDestinationArrival().first()
     }
 }

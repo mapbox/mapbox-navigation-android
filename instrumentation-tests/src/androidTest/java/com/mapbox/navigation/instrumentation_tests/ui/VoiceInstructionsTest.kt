@@ -1,7 +1,6 @@
 package com.mapbox.navigation.instrumentation_tests.ui
 
 import android.location.Location
-import androidx.test.espresso.Espresso
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -22,7 +21,6 @@ import com.mapbox.navigation.testing.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.utils.routes.requestMockRoutes
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.net.URI
@@ -37,11 +35,6 @@ class VoiceInstructionsTest : BaseCoreNoCleanUpTest() {
 
     @get:Rule
     val mapboxHistoryTestRule = MapboxHistoryTestRule()
-
-    @Before
-    fun setup() {
-        Espresso.onIdle()
-    }
 
     override fun setupMockLocation(): Location {
         val mockRoute = RoutesProvider.dc_very_short(context)

@@ -1,7 +1,6 @@
 package com.mapbox.navigation.instrumentation_tests.core
 
 import android.location.Location
-import androidx.test.espresso.Espresso
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
@@ -62,8 +61,6 @@ class MapboxNavigationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::clas
 
     @Before
     fun setup() {
-        Espresso.onIdle()
-
         runOnMainSync {
             mapboxNavigation = MapboxNavigationProvider.create(
                 NavigationOptions.Builder(activity)
