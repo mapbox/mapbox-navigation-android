@@ -1,10 +1,10 @@
 package com.mapbox.navigation.instrumentation_tests.ui
 
 import android.content.Context
+import androidx.test.espresso.Espresso
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.common.location.Location
 import com.mapbox.maps.ImageHolder
-import com.mapbox.maps.coroutine.awaitStyle
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
@@ -25,7 +25,8 @@ import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.BasicNavigationViewActivity
 import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
-import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
+import com.mapbox.navigation.testing.ui.utils.runOnMainSync
+import com.mapbox.navigation.testing.utils.idling.MapStyleInitIdlingResource
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.testing.utils.routes.MockRoute
 import com.mapbox.navigation.testing.utils.routes.RoutesProvider
@@ -36,6 +37,7 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 
@@ -47,6 +49,8 @@ abstract class SimpleMapViewNavigationTest :
 
     @get:Rule
     val mockLocationReplayerRule = MockLocationReplayerRule(mockLocationUpdatesRule)
+
+    private lateinit var initIdlingResource: MapStyleInitIdlingResource
 
     protected lateinit var mockRoute: MockRoute
 
@@ -68,132 +72,147 @@ abstract class SimpleMapViewNavigationTest :
         }
 
     @Before
-    fun setup() = sdkTest {
-        activity.binding.mapView.mapboxMap.awaitStyle()
+    fun setup() {
+        initIdlingResource = MapStyleInitIdlingResource(activity.binding.mapView)
+        initIdlingResource.register()
+        Espresso.onIdle()
 
         mockRoute = getRoute(activity)
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
 
-        mapboxNavigation = MapboxNavigationProvider.create(
-            NavigationOptions.Builder(activity)
-                .build(),
-        )
-        mapboxNavigation.startTripSession()
-        mapboxNavigation.requestRoutes(
-            RouteOptions.builder()
-                .applyDefaultNavigationOptions()
-                .applyLanguageAndVoiceUnitOptions(activity)
-                .baseUrl(mockWebServerRule.baseUrl)
-                .coordinatesList(mockRoute.routeWaypoints).build(),
-            object : NavigationRouterCallback {
-                override fun onRoutesReady(
-                    routes: List<NavigationRoute>,
-                    @RouterOrigin routerOrigin: String,
-                ) {
-                    mapboxNavigation.setNavigationRoutes(routes)
-                    mockLocationReplayerRule.playRoute(routes[0].directionsRoute)
-                }
+        runOnMainSync {
+            mapboxNavigation = MapboxNavigationProvider.create(
+                NavigationOptions.Builder(activity)
+                    .build(),
+            )
+            mapboxNavigation.startTripSession()
+            mapboxNavigation.requestRoutes(
+                RouteOptions.builder()
+                    .applyDefaultNavigationOptions()
+                    .applyLanguageAndVoiceUnitOptions(activity)
+                    .baseUrl(mockWebServerRule.baseUrl)
+                    .coordinatesList(mockRoute.routeWaypoints).build(),
+                object : NavigationRouterCallback {
+                    override fun onRoutesReady(
+                        routes: List<NavigationRoute>,
+                        @RouterOrigin routerOrigin: String,
+                    ) {
+                        mapboxNavigation.setNavigationRoutes(routes)
+                        mockLocationReplayerRule.playRoute(routes[0].directionsRoute)
+                    }
 
-                override fun onFailure(
-                    reasons: List<RouterFailure>,
-                    routeOptions: RouteOptions,
-                ) {
-                    // no impl
-                }
+                    override fun onFailure(
+                        reasons: List<RouterFailure>,
+                        routeOptions: RouteOptions,
+                    ) {
+                        // no impl
+                    }
 
-                override fun onCanceled(
-                    routeOptions: RouteOptions,
-                    @RouterOrigin routerOrigin: String,
-                ) {
-                    // no impl
-                }
-            },
-        )
+                    override fun onCanceled(
+                        routeOptions: RouteOptions,
+                        @RouterOrigin routerOrigin: String,
+                    ) {
+                        // no impl
+                    }
+                },
+            )
+        }
     }
 
     protected fun addRouteLine() {
-        val apiOptions = MapboxRouteLineApiOptions.Builder().build()
-        val viewOptions = MapboxRouteLineViewOptions.Builder(activity)
-            .routeLineBelowLayerId(LocationComponentConstants.LOCATION_INDICATOR_LAYER)
-            .build()
-        routeLineView = MapboxRouteLineView(viewOptions)
-        routeLineApi = MapboxRouteLineApi(apiOptions)
+        runOnMainSync {
+            val apiOptions = MapboxRouteLineApiOptions.Builder().build()
+            val viewOptions = MapboxRouteLineViewOptions.Builder(activity)
+                .routeLineBelowLayerId(LocationComponentConstants.LOCATION_INDICATOR_LAYER)
+                .build()
+            routeLineView = MapboxRouteLineView(viewOptions)
+            routeLineApi = MapboxRouteLineApi(apiOptions)
 
-        mapboxNavigation.registerRoutesObserver {
-            routeLineApi.setNavigationRoutes(
-                it.navigationRoutes,
-            ) { result ->
-                routeLineView.renderRouteDrawData(
-                    activity.mapboxMap.getStyle()!!,
-                    result,
-                )
+            mapboxNavigation.registerRoutesObserver {
+                routeLineApi.setNavigationRoutes(
+                    it.navigationRoutes,
+                ) { result ->
+                    routeLineView.renderRouteDrawData(
+                        activity.mapboxMap.getStyle()!!,
+                        result,
+                    )
+                }
             }
         }
     }
 
     protected fun addNavigationCamera() {
-        mapboxNavigationViewportDataSource = MapboxNavigationViewportDataSource(
-            activity.mapboxMap,
-        )
-        navigationCamera = NavigationCamera(
-            activity.mapboxMap,
-            activity.binding.mapView.camera,
-            mapboxNavigationViewportDataSource,
-        )
-        navigationCamera.requestNavigationCameraToFollowing()
+        runOnMainSync {
+            mapboxNavigationViewportDataSource = MapboxNavigationViewportDataSource(
+                activity.mapboxMap,
+            )
+            navigationCamera = NavigationCamera(
+                activity.mapboxMap,
+                activity.binding.mapView.camera,
+                mapboxNavigationViewportDataSource,
+            )
+            navigationCamera.requestNavigationCameraToFollowing()
 
-        mapboxNavigation.registerRoutesObserver { result ->
-            mapboxNavigationViewportDataSource.onRouteChanged(result.navigationRoutes.first())
-            mapboxNavigationViewportDataSource.evaluate()
+            mapboxNavigation.registerRoutesObserver { result ->
+                mapboxNavigationViewportDataSource.onRouteChanged(result.navigationRoutes.first())
+                mapboxNavigationViewportDataSource.evaluate()
+            }
+
+            mapboxNavigation.registerRouteProgressObserver { routeProgress ->
+                mapboxNavigationViewportDataSource.onRouteProgressChanged(routeProgress)
+                mapboxNavigationViewportDataSource.evaluate()
+            }
+
+            mapboxNavigation.registerLocationObserver(
+                object : LocationObserver {
+
+                    override fun onNewRawLocation(rawLocation: Location) {}
+
+                    override fun onNewLocationMatcherResult(
+                        locationMatcherResult: LocationMatcherResult,
+                    ) {
+                        mapboxNavigationViewportDataSource.onLocationChanged(
+                            locationMatcherResult.enhancedLocation,
+                        )
+                        mapboxNavigationViewportDataSource.evaluate()
+                    }
+                },
+            )
         }
-
-        mapboxNavigation.registerRouteProgressObserver { routeProgress ->
-            mapboxNavigationViewportDataSource.onRouteProgressChanged(routeProgress)
-            mapboxNavigationViewportDataSource.evaluate()
-        }
-
-        mapboxNavigation.registerLocationObserver(
-            object : LocationObserver {
-
-                override fun onNewRawLocation(rawLocation: Location) {}
-
-                override fun onNewLocationMatcherResult(
-                    locationMatcherResult: LocationMatcherResult,
-                ) {
-                    mapboxNavigationViewportDataSource.onLocationChanged(
-                        locationMatcherResult.enhancedLocation,
-                    )
-                    mapboxNavigationViewportDataSource.evaluate()
-                }
-            },
-        )
     }
 
     protected fun addLocationPuck() {
-        navigationLocationProvider = NavigationLocationProvider()
-        locationPlugin = activity.binding.mapView.location
-        locationPlugin.setLocationProvider(navigationLocationProvider)
-        locationPlugin.locationPuck = LocationPuck2D(
-            bearingImage = ImageHolder.Companion.from(
-                R.drawable.mapbox_navigation_puck_icon,
-            ),
-        )
-        locationPlugin.enabled = true
-        mapboxNavigation.registerLocationObserver(
-            object : LocationObserver {
+        runOnMainSync {
+            navigationLocationProvider = NavigationLocationProvider()
+            locationPlugin = activity.binding.mapView.location
+            locationPlugin.setLocationProvider(navigationLocationProvider)
+            locationPlugin.locationPuck = LocationPuck2D(
+                bearingImage = ImageHolder.Companion.from(
+                    R.drawable.mapbox_navigation_puck_icon,
+                ),
+            )
+            locationPlugin.enabled = true
+            mapboxNavigation.registerLocationObserver(
+                object : LocationObserver {
 
-                override fun onNewRawLocation(rawLocation: Location) {}
+                    override fun onNewRawLocation(rawLocation: Location) {}
 
-                override fun onNewLocationMatcherResult(
-                    locationMatcherResult: LocationMatcherResult,
-                ) {
-                    navigationLocationProvider.changePosition(
-                        locationMatcherResult.enhancedLocation,
-                        locationMatcherResult.keyPoints,
-                    )
-                }
-            },
-        )
+                    override fun onNewLocationMatcherResult(
+                        locationMatcherResult: LocationMatcherResult,
+                    ) {
+                        navigationLocationProvider.changePosition(
+                            locationMatcherResult.enhancedLocation,
+                            locationMatcherResult.keyPoints,
+                        )
+                    }
+                },
+            )
+        }
+    }
+
+    @After
+    fun tearDown() {
+        initIdlingResource.unregister()
     }
 
     open fun getRoute(context: Context): MockRoute {

@@ -4,5 +4,11 @@ const val nativeRerouteControllerNoRetryConfig =
     """{
             "features": {
                 "useInternalReroute": true
+            },
+            "navigation": {
+                "reroute": {
+                    "doNotCancelRerouteOnBackToRoute": true,
+                    "doNotRetryRerouteOnFailure": true
+                }
             }
         }"""

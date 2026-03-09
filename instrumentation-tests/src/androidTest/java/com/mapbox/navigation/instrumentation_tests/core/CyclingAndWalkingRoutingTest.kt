@@ -1,6 +1,7 @@
 package com.mapbox.navigation.instrumentation_tests.core
 
 import android.location.Location
+import androidx.test.espresso.Espresso
 import com.adevinta.android.barista.rule.cleardata.ClearFilesRule
 import com.mapbox.api.directions.v5.DirectionsCriteria.PROFILE_CYCLING
 import com.mapbox.api.directions.v5.DirectionsCriteria.PROFILE_WALKING
@@ -42,6 +43,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
 import org.junit.Assume.assumeTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -77,6 +79,11 @@ class CyclingAndWalkingRoutingTest(private val directionsProfile: String) :
      */
     @get:Rule
     val clearFilesRule = ClearFilesRule()
+
+    @Before
+    fun setup() {
+        Espresso.onIdle()
+    }
 
     private val testInitialLocation by lazy {
         RoutesProvider.cycling_route_dc_very_short(context)

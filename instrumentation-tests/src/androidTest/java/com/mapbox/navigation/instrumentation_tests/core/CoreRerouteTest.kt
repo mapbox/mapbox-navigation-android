@@ -2,6 +2,7 @@ package com.mapbox.navigation.instrumentation_tests.core
 
 import android.location.Location
 import android.os.Looper
+import androidx.test.espresso.Espresso
 import com.adevinta.android.barista.rule.cleardata.ClearFilesRule
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -82,6 +83,7 @@ import kotlinx.coroutines.yield
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -137,6 +139,11 @@ class CoreRerouteTest(
      */
     @get:Rule
     val clearFilesRule = ClearFilesRule()
+
+    @Before
+    fun setup() {
+        Espresso.onIdle()
+    }
 
     private val testInitialLocation by lazy {
         RoutesProvider.dc_very_short(context)
@@ -447,9 +454,6 @@ class CoreRerouteTest(
      */
     @Test(timeout = 10_000)
     fun reroute_is_not_cancelled_when_alternatives_change() = sdkTest {
-        // Skip the Native Reroute version for this test
-        // https://mapbox.atlassian.net/browse/NAVAND-7066
-        if (runOptions.nativeReroute) return@sdkTest
         // setting to 2s as NN router's default timeout at the time of creating the test is 5s
         val rerouteResponseDelay = 2_000L
         // delay before setting alternatives
@@ -528,10 +532,6 @@ class CoreRerouteTest(
      */
     @Test(timeout = 10_000)
     fun reroute_is_not_cancelled_when_route_refreshed() = sdkTest {
-        // Skip the Native Reroute version for this test
-        // https://mapbox.atlassian.net/browse/NAVAND-7066
-        if (runOptions.nativeReroute) return@sdkTest
-
         // setting to 2s as NN router's default timeout at the time of creating the test is 5s
         val rerouteResponseDelay = 2_000L
         // setting to 1s to be less than reroute response delay
@@ -1350,9 +1350,6 @@ class CoreRerouteTest(
      */
     @Test
     fun replan_interrupts_ongoing_reroute_request() = sdkTest {
-        // Skip the Native Reroute version for this test
-        // https://mapbox.atlassian.net/browse/NAVAND-7066
-        if (runOptions.nativeReroute) return@sdkTest
         // Setting to 4s to ensure reroute is in progress when replan is called
         val rerouteResponseDelay = 4_000L
         // Delay before calling replan to ensure first reroute has started
@@ -1629,7 +1626,6 @@ class CoreRerouteTest(
             .rerouteStates()
             .first { it is RerouteState.FetchingRoute }
 
-        responseModifier.interruptDelay()
         MapboxNavigationProvider.destroy()
     }
 

@@ -156,16 +156,14 @@ class MapboxTripNotification constructor(
      * @param state with the latest progress data
      */
     override fun updateNotification(state: TripNotificationState) {
-        synchronized(this) {
-            if (this.state == State.STARTED) {
-                // RemoteView has an internal mActions, which stores every change and cannot be cleared.
-                // As we set new bitmaps, the mActions parcelable size will grow and eventually cause a crash.
-                // buildRemoteViews() will rebuild the RemoteViews and clear the stored mActions.
-                notificationView.buildRemoteViews(pendingCloseIntent)
-                updateNotificationViews(state)
-                notification = getNotificationBuilder().build()
-                notificationManager.notify(NOTIFICATION_ID, notification)
-            }
+        if (this.state == State.STARTED) {
+            // RemoteView has an internal mActions, which stores every change and cannot be cleared.
+            // As we set new bitmaps, the mActions parcelable size will grow and eventually cause a crash.
+            // buildRemoteViews() will rebuild the RemoteViews and clear the stored mActions.
+            notificationView.buildRemoteViews(pendingCloseIntent)
+            updateNotificationViews(state)
+            notification = getNotificationBuilder().build()
+            notificationManager.notify(NOTIFICATION_ID, notification)
         }
     }
 
@@ -193,20 +191,18 @@ class MapboxTripNotification constructor(
     }
 
     private fun cleanUp() {
-        synchronized(this) {
-            if (state == State.STARTED) {
-                currentManeuverType = null
-                currentManeuverModifier = null
-                currentInstructionText = null
-                currentDistanceText = null
-                notificationView.resetView()
-                unregisterReceivers()
-                try {
-                    notificationActionButtonChannel.cancel()
-                } catch (e: Exception) {
-                    e.ifChannelException {
-                        // Do nothing
-                    }
+        if (state == State.STARTED) {
+            currentManeuverType = null
+            currentManeuverModifier = null
+            currentInstructionText = null
+            currentDistanceText = null
+            notificationView.resetView()
+            unregisterReceivers()
+            try {
+                notificationActionButtonChannel.cancel()
+            } catch (e: Exception) {
+                e.ifChannelException {
+                    // Do nothing
                 }
             }
         }

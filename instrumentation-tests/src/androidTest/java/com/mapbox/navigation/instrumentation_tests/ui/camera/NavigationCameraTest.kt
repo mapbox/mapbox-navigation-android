@@ -1,7 +1,7 @@
 package com.mapbox.navigation.instrumentation_tests.ui.camera
 
 import com.mapbox.navigation.instrumentation_tests.ui.SimpleMapViewNavigationTest
-import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
+import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import org.junit.Test
 
 class NavigationCameraTest : SimpleMapViewNavigationTest() {
@@ -15,11 +15,19 @@ class NavigationCameraTest : SimpleMapViewNavigationTest() {
      * on some API levels (definitely 21-24, maybe later) and caused stack overflow.
      */
     @Test
-    fun navigation_camera_mode_changes_completes() = sdkTest {
+    fun navigation_camera_mode_changes_completes() {
         addNavigationCamera()
 
-        navigationCamera.requestNavigationCameraToFollowing()
-        navigationCamera.requestNavigationCameraToOverview()
-        navigationCamera.requestNavigationCameraToFollowing()
+        runOnMainSync {
+            navigationCamera.requestNavigationCameraToFollowing()
+        }
+
+        runOnMainSync {
+            navigationCamera.requestNavigationCameraToOverview()
+        }
+
+        runOnMainSync {
+            navigationCamera.requestNavigationCameraToFollowing()
+        }
     }
 }

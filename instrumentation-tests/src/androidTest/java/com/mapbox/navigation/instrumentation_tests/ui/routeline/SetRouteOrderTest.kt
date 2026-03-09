@@ -3,18 +3,19 @@ package com.mapbox.navigation.instrumentation_tests.ui.routeline
 import android.content.Context
 import android.location.Location
 import android.os.CountDownTimer
+import androidx.test.espresso.Espresso
+import androidx.test.espresso.IdlingRegistry
+import androidx.test.espresso.idling.CountingIdlingResource
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.bindgen.Expected
-import com.mapbox.maps.coroutine.awaitStyle
 import com.mapbox.navigation.base.internal.route.testing.createNavigationRouteForTest
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.BasicNavigationViewActivity
 import com.mapbox.navigation.testing.ui.BaseTest
-import com.mapbox.navigation.testing.ui.utils.coroutines.DEFAULT_TIMEOUT_FOR_SDK_TEST
-import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
+import com.mapbox.navigation.testing.utils.idling.MapStyleInitIdlingResource
 import com.mapbox.navigation.testing.utils.readRawFileText
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
@@ -28,19 +29,25 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineError
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import com.mapbox.navigation.utils.internal.logE
 import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.util.Timer
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 import kotlin.concurrent.timerTask
 
 class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
     BasicNavigationViewActivity::class.java,
 ) {
+
+    private val initIdlingResource: MapStyleInitIdlingResource by lazy {
+        MapStyleInitIdlingResource(activity.binding.mapView)
+    }
+
+    private val myResourceIdler =
+        CountingIdlingResource("MultipleRouteSetTestResource")
 
     override fun setupMockLocation(): Location {
         val shortRoute = getRoute(context, R.raw.short_route)
@@ -52,8 +59,15 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
     }
 
     @Before
-    fun setUp() = sdkTest {
-        activity.binding.mapView.mapboxMap.awaitStyle()
+    fun setUp() {
+        initIdlingResource.register()
+        IdlingRegistry.getInstance().register(myResourceIdler)
+        Espresso.onIdle()
+    }
+
+    @After
+    fun tearDown() {
+        initIdlingResource.unregister()
     }
 
     @Test
@@ -71,7 +85,7 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
                 throw RuntimeException("Previous set routes call wasn't cancelled as expected.")
             }
 
-        val latch = CountDownLatch(1)
+        myResourceIdler.increment()
         routeLineApi.setNavigationRoutes(listOf(longRoute), consumerLongRoute)
         Timer().schedule(
             timerTask {
@@ -100,7 +114,7 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
                                             7,
                                             (property.value.contents as ArrayList<*>).size,
                                         )
-                                        latch.countDown()
+                                        myResourceIdler.decrement()
                                     }
                                 }.start()
                             }
@@ -111,7 +125,7 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
             5,
         )
 
-        latch.await(DEFAULT_TIMEOUT_FOR_SDK_TEST, TimeUnit.MILLISECONDS)
+        Espresso.onIdle()
     }
 
     @Test
@@ -126,7 +140,6 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
         val longRoutes = listOf(longRoute)
         val shortRoutes = listOf(shortRoute)
 
-        val latch = CountDownLatch(1)
         val consumer =
             MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>> { value ->
                 // The first call to set routes with the long route should get cancelled
@@ -156,7 +169,7 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
                                             7,
                                             (property.value.contents as ArrayList<*>).size,
                                         )
-                                        latch.countDown()
+                                        myResourceIdler.decrement()
                                     }
                                 }.start()
                             }
@@ -167,6 +180,7 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
                 consumerCallCount += 1
             }
 
+        myResourceIdler.increment()
         routeLineApi.setNavigationRoutes(longRoutes, consumer)
         Timer().schedule(
             timerTask {
@@ -175,7 +189,7 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
             5,
         )
 
-        latch.await(DEFAULT_TIMEOUT_FOR_SDK_TEST, TimeUnit.MILLISECONDS)
+        Espresso.onIdle()
     }
 
     @Test
@@ -187,7 +201,6 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
         val route = getRoute(activity, R.raw.cross_country_route)
         var clearInvoked = false
 
-        val latch = CountDownLatch(2)
         val consumer = MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>> { value ->
             check(!clearInvoked)
             routeLineView.renderRouteDrawData(
@@ -210,7 +223,7 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
                                 assertNotNull(property.value.contents)
                                 assertTrue(property.value.contents is ArrayList<*>)
                                 assertEquals(625, (property.value.contents as ArrayList<*>).size)
-                                latch.countDown()
+                                myResourceIdler.decrement()
                             }
                         }.start()
                     }
@@ -227,12 +240,15 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
                     activity.binding.mapView.mapboxMap,
                     object : RoutesRenderedCallback {
                         override fun onRoutesRendered(result: RoutesRenderedResult) {
-                            latch.countDown()
+                            // callback is invoked when rendering is finished
+                            myResourceIdler.decrement()
                         }
                     },
                 )
             }
 
+        myResourceIdler.increment()
+        myResourceIdler.increment()
         routeLineApi.setNavigationRoutes(listOf(route), consumer)
         Timer().schedule(
             timerTask {
@@ -240,8 +256,7 @@ class SetRouteOrderTest : BaseTest<BasicNavigationViewActivity>(
             },
             5,
         )
-
-        latch.await(DEFAULT_TIMEOUT_FOR_SDK_TEST, TimeUnit.MILLISECONDS)
+        Espresso.onIdle()
     }
 
     private fun getRoute(context: Context, routeResourceId: Int): NavigationRoute {
