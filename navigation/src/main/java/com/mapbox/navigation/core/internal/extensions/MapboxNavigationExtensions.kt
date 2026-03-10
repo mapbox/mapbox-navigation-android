@@ -5,6 +5,7 @@ package com.mapbox.navigation.core.internal.extensions
 import androidx.annotation.UiThread
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.common.location.Location
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -17,6 +18,8 @@ import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.internal.HistoryRecordingStateChangeObserver
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
+import com.mapbox.navigation.core.routerefresh.RouteRefreshStateResult
+import com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.NavigationSessionState
@@ -196,4 +199,11 @@ fun MapboxNavigation.flowRerouteState(
         onSubscription()
         awaitClose { rerouteController.unregisterRerouteStateObserver(observer) }
     }
+}
+
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+fun MapboxNavigation.flowRouteRefreshState(): Flow<RouteRefreshStateResult> = callbackFlow {
+    val observer = RouteRefreshStatesObserver { trySend(it) }
+    routeRefreshController.registerRouteRefreshStateObserver(observer)
+    awaitClose { routeRefreshController.unregisterRouteRefreshStateObserver(observer) }
 }
