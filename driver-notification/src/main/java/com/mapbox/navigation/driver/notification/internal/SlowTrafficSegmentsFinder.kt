@@ -1,6 +1,7 @@
 package com.mapbox.navigation.driver.notification.internal
 
 import androidx.annotation.RestrictTo
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
@@ -8,6 +9,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.utils.internal.geometryPoints
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.util.IdentityHashMap
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -25,6 +27,22 @@ class SlowTrafficSegmentsFinder(
         it.geometryPoints(Constants.PRECISION_6)
     },
 ) {
+
+    private var cachedRoute: DirectionsRoute? = null
+    private val pointsCache = IdentityHashMap<RouteLeg, List<Point>>()
+
+    /**
+     * Returns cached geometry points for [leg], decoding them via [extractPoints] only on the
+     * first call per unique [route] instance. The cache is cleared when [route] changes.
+     */
+    @Synchronized
+    private fun getPoints(route: DirectionsRoute, leg: RouteLeg): List<Point> {
+        if (cachedRoute !== route) {
+            cachedRoute = route
+            pointsCache.clear()
+        }
+        return pointsCache.getOrPut(leg) { extractPoints(leg) }
+    }
 
     /**
      * Scans the route, starting from the user's current progress, to find continuous
@@ -76,7 +94,8 @@ class SlowTrafficSegmentsFinder(
                 0
             }
 
-            val geometry = Geometry.of(leg, extractPoints(leg)) ?: Geometry.Companion.EMPTY
+            val geometry =
+                Geometry.of(leg, getPoints(routeProgress.route, leg)) ?: Geometry.Companion.EMPTY
             var currentSegment: SlowTrafficSegment? = null
 
             for (geometryIndex in firstGeometryIndex until geometry.size) {
@@ -151,7 +170,13 @@ class SlowTrafficSegmentsFinder(
         }
     }
 
-    private fun List<IntRange>.rangeOf(congestion: Int?) = firstOrNull { it.contains(congestion) }
+    private fun List<IntRange>.rangeOf(congestion: Int?): IntRange? {
+        if (congestion == null) return null
+        for (i in indices) {
+            if (this[i].contains(congestion)) return this[i]
+        }
+        return null
+    }
 
     private companion object {
 
