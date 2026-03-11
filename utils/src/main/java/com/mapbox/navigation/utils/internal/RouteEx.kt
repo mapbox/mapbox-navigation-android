@@ -24,6 +24,31 @@ fun RouteLeg.geometryPoints(precision: Int): List<Point> {
     }
 }
 
+/**
+ * Returns the [Point] at [index] in the leg's geometry without decoding all steps.
+ * Decodes one step at a time and stops as soon as the target index is reached.
+ */
+fun RouteLeg.geometryPointAt(index: Int, precision: Int): Point? {
+    var remaining = index
+    val stepList = steps() ?: return null
+    for (i in stepList.indices) {
+        val geometry = stepList[i].geometry() ?: continue
+        val points = PolylineUtils.decode(geometry, precision)
+        // Mirror geometryPoints() deduplication logic:
+        // - First step: contributes all points (or unique set if size == 2)
+        // - Subsequent steps: first point is shared with previous step's last, skip it
+        val skip = if (i == 0) 0 else 1
+        val effective = if (points.size == 2) {
+            if (points[0] == points[1]) maxOf(1 - skip, 0) else (2 - skip)
+        } else {
+            points.size - skip
+        }
+        if (remaining < effective) return points[skip + remaining]
+        remaining -= effective
+    }
+    return null
+}
+
 fun RouteLeg.stepsGeometryToPoints(precision: Int): List<List<Point>> {
     return steps()?.map { step ->
         val geometry = step.geometry() ?: return@map emptyList()
