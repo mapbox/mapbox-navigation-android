@@ -432,6 +432,7 @@ package com.mapbox.navigation.ui.maps.camera.lifecycle {
     method @UiThread public void cleanup();
     method public com.mapbox.android.gestures.AndroidGesturesManager getCustomGesturesManager();
     method public com.mapbox.android.gestures.AndroidGesturesManager getInitialGesturesManager();
+    method public com.mapbox.maps.plugin.gestures.OnScaleListener getOnScaleListener();
     method @UiThread public void initialize();
     method public boolean isInitialized();
     method public void onAnimatorCancelling(com.mapbox.maps.plugin.animation.CameraAnimatorType type, android.animation.ValueAnimator animator, String? owner);
@@ -441,6 +442,7 @@ package com.mapbox.navigation.ui.maps.camera.lifecycle {
     property public final com.mapbox.android.gestures.AndroidGesturesManager customGesturesManager;
     property public final com.mapbox.android.gestures.AndroidGesturesManager initialGesturesManager;
     property public final boolean isInitialized;
+    property public final com.mapbox.maps.plugin.gestures.OnScaleListener onScaleListener;
   }
 
   public final class NavigationScaleGestureHandlerOptions {
