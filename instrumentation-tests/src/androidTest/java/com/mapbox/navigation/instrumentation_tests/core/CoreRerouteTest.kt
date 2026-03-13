@@ -1626,6 +1626,7 @@ class CoreRerouteTest(
             .rerouteStates()
             .first { it is RerouteState.FetchingRoute }
 
+        responseModifier.interruptDelay()
         MapboxNavigationProvider.destroy()
     }
 
