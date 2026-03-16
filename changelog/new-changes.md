@@ -1,0 +1,1 @@
+- Added `geometryPointAt(index, precision)` extension on `RouteLeg` that decodes leg geometry one step at a time and stops at the target index, avoiding allocation of all subsequent points.
