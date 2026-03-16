@@ -1,0 +1,1 @@
+- Fix crash in DefaultSoundPlayer when OnCompletionListener called twice
