@@ -1,5 +1,37 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.20.0 - 17 March, 2026
+#### Features
+
+- Introduced unknown status charger counts in EvStationMarker and EvseGroup models. 
+- Added metadata passthrough support for route refresh to enable app-side correlation 
+- Default navigation arrow width set to match the route line width. 
+- Made the navigation arrowhead shape more pointed. 
+- Changed the navigation arrow casing (border) color. 
+- The `EvseGroup` model is extended with `powerType` property indicating electrical power configuration. 
+- The `EvStationMarker` model is extended with a `chargersGroups` property, which is a list of all charging groups at the station. 
+
+#### Bug fixes and improvements
+
+- Fixed the case when ASZ notification for speed zones missed when route is built inside a speed zone. 
+- Reduced main thread CPU usage in `MapboxTripSession` by dispatching route progress observer notifications asynchronously and moving the foreground notification update to an IO thread. 
+- Fixed a bug that caused the average speed zone to not update properly when a reroute occurred inside an active zone. 
+- Fixed a bug where, at the beginning of active guidance, users received a notification about a speed camera from the end of the route.  
+- SDK now supports dynamic access token update for voice guidance and map gpt 
+- Fix route arrow scale when pixelRatio doesn't match density 
+- Ignore query param at geo deeplink parsing 
+- Introducing a new `RouterFailureType.ROUTE_EXPIRY_ERROR` router failure type to inform customers when an issue due to route expiry occurs. 
+- Improved internal flow of location updates for `LocationProviderSource.GPS`, which fixes delays in case main thread is blocked by the application.  
+- Made default rounding increment in `DistanceFormatterOptions` dependent on distance numerical value. 
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.20.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.20.1))
+- Mapbox Navigation Native `v324.20.1`
+- Mapbox Core Common `v24.20.1`
+- Mapbox Java `v7.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.0))
+
+
 ## Navigation SDK Core Framework 3.20.0-rc.1 - 06 March, 2026
 #### Features
 - Introduced unknown status charger counts in EvStationMarker and EvseGroup models. 
