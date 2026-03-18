@@ -1,6 +1,7 @@
 package com.mapbox.navigation.instrumentation_tests.core
 
 import android.location.Location
+import com.adevinta.android.barista.rule.cleardata.ClearFilesRule
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directionsrefresh.v1.models.DirectionsRouteRefresh
@@ -60,7 +61,6 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import java.io.InputStreamReader
@@ -74,6 +74,9 @@ import kotlin.time.Duration.Companion.seconds
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalMapboxNavigationAPI::class)
 class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
+
+    @get:Rule
+    val clearFilesRule = ClearFilesRule()
 
     @get:Rule
     val mockLocationReplayerRule = MockLocationReplayerRule(mockLocationUpdatesRule)
@@ -559,7 +562,6 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
         }
     }
 
-    @Ignore("https://mapbox.atlassian.net/browse/NN-4663")
     @Test
     fun switch_from_multi_leg_primary_to_single_leg_CA_after_intermediate_waypoint_and_back() =
         sdkTest {
