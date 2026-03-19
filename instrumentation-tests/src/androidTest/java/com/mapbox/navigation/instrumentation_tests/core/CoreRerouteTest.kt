@@ -447,9 +447,6 @@ class CoreRerouteTest(
      */
     @Test(timeout = 10_000)
     fun reroute_is_not_cancelled_when_alternatives_change() = sdkTest {
-        // Skip the Native Reroute version for this test
-        // https://mapbox.atlassian.net/browse/NAVAND-7066
-        if (runOptions.nativeReroute) return@sdkTest
         // setting to 2s as NN router's default timeout at the time of creating the test is 5s
         val rerouteResponseDelay = 2_000L
         // delay before setting alternatives
@@ -521,17 +518,86 @@ class CoreRerouteTest(
     }
 
     /**
+     * At the beginning, native reroute controller invokes the subsequent alternative request, and reroutes to it.
+     * Ensure the correct callback flow
+     */
+    @Test
+    fun reroute_after_subsequent_alternative_request() = sdkTest {
+        // Skipping platform as it doesn't support this behavior
+        if (!runOptions.nativeReroute) return@sdkTest
+
+        val mapboxNavigation = createMapboxNavigation(
+            customConfig = """
+            {
+                "features": {
+                    "useInternalReroute": true,
+                    "routeLatencyImprovement": {
+                        "doNotRequestAlternativesOnNewRoute": false
+                    }
+                }
+            }
+            """.trimIndent(),
+        )
+        val mockRoute = RoutesProvider.dc_short_with_alternative(context)
+        val mockReroute = RoutesProvider.dc_short_with_alternative_reroute(context)
+        val mockAlternative = RoutesProvider.dc_short_only_alternative(context)
+        val testData = prepareRouteAndRerouteWithAlternatives(
+            mockRoute = mockRoute,
+            mockReroute = mockReroute,
+            mockAlternative = mockAlternative,
+        )
+
+        mockLocationReplayerRule.loopUpdate(testData.originLocation, times = 120)
+
+        val rerouteStateTransitionAssertion = RerouteStateTransitionAssertion(
+            mapboxNavigation.getRerouteController()!!,
+        ) {
+            requiredState(RerouteState.Idle)
+            requiredState(RerouteState.FetchingRoute)
+            requiredState(RerouteState.RouteFetched(RouterOrigin.ONLINE))
+            requiredState(RerouteState.Idle)
+        }
+        val rerouteStatesV2 = mapboxNavigation.recordRerouteStatesV2()
+
+        val originalRoutes = mapboxNavigation.requestRoutes(
+            testData.originRouteOptions,
+        ).getSuccessfulResultOrThrowException().routes
+
+        // start session and set original route
+        mapboxNavigation.startTripSession()
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(listOf(originalRoutes.first()))
+        mapboxNavigation.moveAlongTheRouteUntilTracking(
+            originalRoutes.first(),
+            mockLocationReplayerRule,
+        )
+
+        // wait for OFF_ROUTE
+        mockLocationReplayerRule.stopAndClearEvents()
+        mockLocationReplayerRule.loopUpdate(testData.offRouteLocation, times = 120)
+        mapboxNavigation.offRouteUpdates().filter { it }.first()
+
+        // wait for reroute to complete meaning that refresh didn't cancel reroute
+        val routesUpdate = mapboxNavigation.routesUpdates().first {
+            it.reason == ROUTES_UPDATE_REASON_REROUTE
+        }
+
+        // assert
+        assertEquals(
+            mockReroute.routeWaypoints,
+            routesUpdate.navigationRoutes.first().waypoints!!.map { it.location() },
+        )
+        rerouteStateTransitionAssertion.assert()
+        assertSuccessfulRouteAppliedRerouteStateTransition(rerouteStatesV2)
+    }
+
+    /**
      * Verifies that an in-progress reroute is not cancelled when a route refresh completes
      * during the reroute fetch. The refresh interval is configured shorter than the reroute
      * response delay so a refresh event arrives before the reroute completes. After both
      * events, the reroute update must be applied with the expected state transitions.
      */
-    @Test(timeout = 10_000)
+    @Test
     fun reroute_is_not_cancelled_when_route_refreshed() = sdkTest {
-        // Skip the Native Reroute version for this test
-        // https://mapbox.atlassian.net/browse/NAVAND-7066
-        if (runOptions.nativeReroute) return@sdkTest
-
         // setting to 2s as NN router's default timeout at the time of creating the test is 5s
         val rerouteResponseDelay = 2_000L
         // setting to 1s to be less than reroute response delay
@@ -1350,9 +1416,6 @@ class CoreRerouteTest(
      */
     @Test
     fun replan_interrupts_ongoing_reroute_request() = sdkTest {
-        // Skip the Native Reroute version for this test
-        // https://mapbox.atlassian.net/browse/NAVAND-7066
-        if (runOptions.nativeReroute) return@sdkTest
         // Setting to 4s to ensure reroute is in progress when replan is called
         val rerouteResponseDelay = 4_000L
         // Delay before calling replan to ensure first reroute has started
@@ -1756,7 +1819,10 @@ class CoreRerouteTest(
         )
     }
 
-    private fun createMapboxNavigation(customRefreshInterval: Long? = null): MapboxNavigation {
+    private fun createMapboxNavigation(
+        customRefreshInterval: Long? = null,
+        customConfig: String? = null,
+    ): MapboxNavigation {
         var mapboxNavigation: MapboxNavigation? = null
 
         fun create(): MapboxNavigation {
@@ -1767,7 +1833,7 @@ class CoreRerouteTest(
                         .build(),
                 ).deviceProfile(
                     DeviceProfile.Builder().customConfig(
-                        getTestCustomConfig(),
+                        customConfig ?: getTestCustomConfig(),
                     ).build(),
                 )
                 .routingTilesOptions(
@@ -1818,6 +1884,7 @@ class CoreRerouteTest(
     private fun prepareRouteAndRerouteWithAlternatives(
         mockRoute: MockRoute,
         mockReroute: MockRoute,
+        mockAlternative: MockRoute? = null,
         rerouteResponseDelay: Long? = null,
     ): RerouteTestData {
         val originPoint = mockRoute.routeWaypoints.first()
@@ -1832,6 +1899,7 @@ class CoreRerouteTest(
             longitude = offRoutePoint.longitude()
         }
 
+        mockAlternative?.mockRequestHandlers?.let { mockWebServerRule.requestHandlers.addAll(it) }
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
         mockWebServerRule.requestHandlers.addAll(
             mockReroute.mockRequestHandlers.also { handlers ->
