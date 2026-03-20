@@ -31,6 +31,11 @@ interface StateOfCharge {
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+fun StateOfCharge.lastOrNull(): Double? {
+    return if (size > 0) get(size - 1) else null
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 fun LegAnnotation.stateOfCharge(): StateOfCharge? {
     return if (this is LegAnnotationFBWrapper) {
         this.stateOfCharge

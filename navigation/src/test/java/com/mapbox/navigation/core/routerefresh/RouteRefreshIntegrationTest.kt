@@ -13,6 +13,7 @@ import com.mapbox.navigation.base.internal.route.update
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.NavigationComponentProvider
 import com.mapbox.navigation.core.RoutesProgressDataProvider
 import com.mapbox.navigation.core.ev.EVDynamicDataHolder
@@ -96,6 +97,7 @@ internal open class RouteRefreshIntegrationTest {
                 }
                 every { currentRouteGeometryIndex } returns 0
                 every { internalAlternativeRouteIndices() } returns emptyMap()
+                every { currentState } returns RouteProgressState.TRACKING
             },
         )
     }
@@ -233,6 +235,7 @@ internal open class RouteRefreshIntegrationTest {
                 }
                 every { currentRouteGeometryIndex } returns index
                 every { internalAlternativeRouteIndices() } returns emptyMap()
+                every { currentState } returns RouteProgressState.TRACKING
             },
         )
     }

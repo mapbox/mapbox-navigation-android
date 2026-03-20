@@ -3,6 +3,7 @@ package com.mapbox.navigation.core
 import com.mapbox.navigation.base.internal.extensions.internalAlternativeRouteIndices
 import com.mapbox.navigation.base.internal.factory.RouteIndicesFactory
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.internal.RouteProgressData
 import com.mapbox.navigation.core.internal.RoutesProgressData
 import com.mapbox.navigation.testing.MainCoroutineRule
@@ -60,6 +61,7 @@ class RoutesProgressDataProviderTest {
                 false,
             ),
         )
+        every { currentState } returns RouteProgressState.TRACKING
     }
     private val expected = RoutesProgressData(
         RouteProgressData(
@@ -117,6 +119,7 @@ class RoutesProgressDataProviderTest {
             every { currentRouteGeometryIndex } returns routeIndex
             every { currentLegProgress } returns null
             every { internalAlternativeRouteIndices() } returns emptyMap()
+            every { currentState } returns RouteProgressState.TRACKING
         }
         val expected = RoutesProgressData(
             RouteProgressData(0, routeIndex, null),
@@ -140,6 +143,7 @@ class RoutesProgressDataProviderTest {
                 every { geometryIndex } returns legGeometryIndex1
             }
             every { internalAlternativeRouteIndices() } returns emptyMap()
+            every { currentState } returns RouteProgressState.TRACKING
         }
         val legIndex2 = 9
         val routeGeometryIndex2 = 44
@@ -149,8 +153,9 @@ class RoutesProgressDataProviderTest {
             every { currentLegProgress } returns mockk {
                 every { legIndex } returns legIndex2
                 every { geometryIndex } returns legGeometryIndex2
-                every { internalAlternativeRouteIndices() } returns emptyMap()
             }
+            every { internalAlternativeRouteIndices() } returns emptyMap()
+            every { currentState } returns RouteProgressState.TRACKING
         }
         val expected = RoutesProgressData(
             RouteProgressData(
@@ -177,8 +182,9 @@ class RoutesProgressDataProviderTest {
             every { currentLegProgress } returns mockk {
                 every { legIndex } returns legIndex1
                 every { geometryIndex } returns legGeometryIndex1
-                every { internalAlternativeRouteIndices() } returns emptyMap()
             }
+            every { internalAlternativeRouteIndices() } returns emptyMap()
+            every { currentState } returns RouteProgressState.TRACKING
         }
         val legIndex2 = 9
         val routeGeometryIndex2 = 44
@@ -188,8 +194,9 @@ class RoutesProgressDataProviderTest {
             every { currentLegProgress } returns mockk {
                 every { legIndex } returns legIndex2
                 every { geometryIndex } returns legGeometryIndex2
-                every { internalAlternativeRouteIndices() } returns emptyMap()
             }
+            every { internalAlternativeRouteIndices() } returns emptyMap()
+            every { currentState } returns RouteProgressState.TRACKING
         }
         val expected = RoutesProgressData(
             RouteProgressData(
@@ -219,8 +226,9 @@ class RoutesProgressDataProviderTest {
             every { currentLegProgress } returns mockk {
                 every { legIndex } returns legIndex1
                 every { geometryIndex } returns legGeometryIndex1
-                every { internalAlternativeRouteIndices() } returns emptyMap()
             }
+            every { internalAlternativeRouteIndices() } returns emptyMap()
+            every { currentState } returns RouteProgressState.TRACKING
         }
         val legIndex2 = 9
         val routeGeometryIndex2 = 44
@@ -230,8 +238,9 @@ class RoutesProgressDataProviderTest {
             every { currentLegProgress } returns mockk {
                 every { legIndex } returns legIndex2
                 every { geometryIndex } returns legGeometryIndex2
-                every { internalAlternativeRouteIndices() } returns emptyMap()
             }
+            every { internalAlternativeRouteIndices() } returns emptyMap()
+            every { currentState } returns RouteProgressState.TRACKING
         }
         val expected = RoutesProgressData(
             RouteProgressData(

@@ -15,11 +15,13 @@ class EVDynamicDataHolderTest {
     private val charge = "90"
     private val auxConsumption = "70"
     private val preConditioningTime = "10"
+    private val unconditionedChargingCurve = "0,30;50,100"
     private val initial = mapOf(
         "energy_consumption_curve" to JsonPrimitive(curve),
         "ev_initial_charge" to JsonPrimitive(charge),
         "auxiliary_consumption" to JsonPrimitive(auxConsumption),
         "ev_pre_conditioning_time" to JsonPrimitive(preConditioningTime),
+        "ev_unconditioned_charging_curve" to JsonPrimitive(unconditionedChargingCurve),
         "aaa" to JsonPrimitive("bbb"),
     )
 
@@ -35,6 +37,7 @@ class EVDynamicDataHolderTest {
             "ev_initial_charge" to charge,
             "auxiliary_consumption" to auxConsumption,
             "ev_pre_conditioning_time" to preConditioningTime,
+            "ev_unconditioned_charging_curve" to unconditionedChargingCurve,
         )
         assertEquals(expected, evDynamicDataHolder.currentData(initial))
         assertEquals(emptyMap<String, String>(), evDynamicDataHolder.updatedRawData().value)
@@ -60,6 +63,7 @@ class EVDynamicDataHolderTest {
             "ev_initial_charge" to charge,
             "auxiliary_consumption" to "80",
             "ev_pre_conditioning_time" to preConditioningTime,
+            "ev_unconditioned_charging_curve" to unconditionedChargingCurve,
         )
         evDynamicDataHolder.updateData(data)
 
@@ -98,6 +102,7 @@ class EVDynamicDataHolderTest {
             "ev_initial_charge" to "78",
             "auxiliary_consumption" to "80",
             "ev_pre_conditioning_time" to preConditioningTime,
+            "ev_unconditioned_charging_curve" to unconditionedChargingCurve,
         )
 
         evDynamicDataHolder.updateData(data1)
@@ -114,12 +119,14 @@ class EVDynamicDataHolderTest {
             "ev_initial_charge" to JsonPrimitive(charge),
             "auxiliary_consumption" to JsonObject(),
             "ev_pre_conditioning_time" to JsonPrimitive(preConditioningTime),
+            "ev_unconditioned_charging_curve" to JsonPrimitive(unconditionedChargingCurve),
             "aaa" to JsonPrimitive("bbb"),
         )
         val expected = mapOf(
             "energy_consumption_curve" to curve,
             "ev_initial_charge" to charge,
             "ev_pre_conditioning_time" to preConditioningTime,
+            "ev_unconditioned_charging_curve" to unconditionedChargingCurve,
         )
 
         assertEquals(expected, evDynamicDataHolder.currentData(initial))

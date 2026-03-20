@@ -17,6 +17,7 @@ internal class EVDynamicDataHolder {
         "ev_initial_charge",
         "auxiliary_consumption",
         "ev_pre_conditioning_time",
+        "ev_unconditioned_charging_curve",
     )
 
     fun updateData(data: Map<String, String>) {

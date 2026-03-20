@@ -64,6 +64,7 @@ class MapboxTripNotification constructor(
 ) : TripNotification {
 
     companion object {
+
         /**
          * Broadcast of [MapboxTripNotification] actions
          */
@@ -88,9 +89,10 @@ class MapboxTripNotification constructor(
     private var currentManeuverImage: Bitmap? = null
 
     private var currentInstructionText: String? = null
-    private var currentDistanceText: Double? = null
+    private var currentDistance: Double? = null
     private var currentFormattedDistance: SpannableString? = null
     private var currentFormattedTime: String? = null
+    private var isInFreeDriveMode: Boolean? = null
     private var pendingOpenIntent: PendingIntent? = null
     private var pendingDismissalIntent: PendingIntent? = null
     private var pendingCloseIntent: PendingIntent? = null
@@ -157,12 +159,15 @@ class MapboxTripNotification constructor(
      */
     override fun updateNotification(state: TripNotificationState) {
         synchronized(this) {
-            if (this.state == State.STARTED) {
+            if (this.state != State.STARTED) return
+
+            val contentChanged = computeNotificationContent(state)
+            if (contentChanged) {
                 // RemoteView has an internal mActions, which stores every change and cannot be cleared.
                 // As we set new bitmaps, the mActions parcelable size will grow and eventually cause a crash.
                 // buildRemoteViews() will rebuild the RemoteViews and clear the stored mActions.
                 notificationView.buildRemoteViews(pendingCloseIntent)
-                updateNotificationViews(state)
+                applyNotificationContent(state)
                 notification = getNotificationBuilder().build()
                 notificationManager.notify(NOTIFICATION_ID, notification)
             }
@@ -198,7 +203,8 @@ class MapboxTripNotification constructor(
                 currentManeuverType = null
                 currentManeuverModifier = null
                 currentInstructionText = null
-                currentDistanceText = null
+                currentDistance = null
+                isInFreeDriveMode = null
                 notificationView.resetView()
                 unregisterReceivers()
                 try {
@@ -313,44 +319,59 @@ class MapboxTripNotification constructor(
         }
     }
 
-    private fun updateNotificationViews(state: TripNotificationState) {
-        notificationView.setVisibility(GONE)
+    private fun computeNotificationContent(state: TripNotificationState): Boolean {
+        return when (state) {
+            is TripNotificationState.TripNotificationFreeState -> {
+                if (isInFreeDriveMode == true) {
+                    return false
+                }
+                isInFreeDriveMode = true
+                currentManeuverType = null
+                currentManeuverModifier = null
+                currentRoundaboutAngle = null
 
-        when (state) {
-            is TripNotificationState.TripNotificationFreeState -> setFreeDriveMode(true)
+                true
+            }
+
             is TripNotificationState.TripNotificationData -> {
-                updateDistanceText(state.distanceRemaining)
-                updateViewsWithArrival(state.durationRemaining)
-                updateInstructionText(state.bannerInstructions)
-                updateManeuverImage(state.bannerInstructions, state.drivingSide)
-                setFreeDriveMode(false)
+                val wasFreeDrive = isInFreeDriveMode != false
+                isInFreeDriveMode = false
+                val distanceChanged = computeDistance(state.distanceRemaining)
+                val timeChanged = computeArrivalTime(state.durationRemaining)
+                val instructionChanged = computeInstructionText(state.bannerInstructions)
+                val maneuverChanged =
+                    computeManeuverState(state.bannerInstructions, state.drivingSide)
+
+                wasFreeDrive || distanceChanged || timeChanged ||
+                    instructionChanged || maneuverChanged
             }
         }
     }
 
-    private fun setFreeDriveMode(isFreeDriveMode: Boolean) {
-        notificationView.setFreeDriveMode(isFreeDriveMode)
-        updateCurrentManeuverToDefault(isFreeDriveMode)
-    }
+    private fun applyNotificationContent(state: TripNotificationState) {
+        notificationView.setVisibility(GONE)
+        when (state) {
+            is TripNotificationState.TripNotificationFreeState -> {
+                notificationView.setFreeDriveMode(true)
+            }
 
-    private fun updateCurrentManeuverToDefault(isFreeDriveMode: Boolean) {
-        if (isFreeDriveMode) {
-            currentManeuverType = null
-            currentManeuverModifier = null
-            currentRoundaboutAngle = null
+            is TripNotificationState.TripNotificationData -> {
+                currentFormattedDistance?.let { notificationView.updateDistanceText(it) }
+                currentFormattedTime?.let { notificationView.updateArrivalTime(it) }
+                currentInstructionText?.let { notificationView.updateInstructionText(it) }
+                currentManeuverImage?.let { notificationView.updateImage(it) }
+                notificationView.setFreeDriveMode(false)
+            }
         }
     }
 
-    private fun isDistanceTextChanged(distanceRemaining: Double?): Boolean {
-        return currentDistanceText != distanceRemaining
-    }
-
-    private fun updateDistanceText(distanceRemaining: Double?) {
-        if (isDistanceTextChanged(distanceRemaining) && distanceRemaining != null) {
-            currentDistanceText = distanceRemaining
-            currentFormattedDistance = distanceFormatter.formatDistance(distanceRemaining)
-        }
-        currentFormattedDistance?.let { notificationView.updateDistanceText(it) }
+    private fun computeDistance(distanceRemaining: Double?): Boolean {
+        if (distanceRemaining == null || currentDistance == distanceRemaining) return false
+        currentDistance = distanceRemaining
+        val newFormatted = distanceFormatter.formatDistance(distanceRemaining)
+        if (newFormatted.toString() == currentFormattedDistance?.toString()) return false
+        currentFormattedDistance = newFormatted
+        return true
     }
 
     private fun generateArrivalTime(
@@ -369,20 +390,22 @@ class MapboxTripNotification constructor(
         }
     }
 
-    private fun updateViewsWithArrival(durationRemaining: Double?) {
-        generateArrivalTime(durationRemaining)?.let { currentFormattedTime = it }
-        currentFormattedTime?.let { notificationView.updateArrivalTime(it) }
+    private fun computeArrivalTime(durationRemaining: Double?): Boolean {
+        val newTime = generateArrivalTime(durationRemaining) ?: return false
+        if (newTime == currentFormattedTime) return false
+        currentFormattedTime = newTime
+        return true
     }
 
     private fun isInstructionTextChanged(primaryText: String): Boolean {
         return currentInstructionText.isNullOrEmpty() || currentInstructionText != primaryText
     }
 
-    private fun updateInstructionText(bannerInstructions: BannerInstructions?) {
-        bannerInstructions?.primary()?.text()
-            ?.takeIf { isInstructionTextChanged(it) }
-            ?.let { currentInstructionText = it }
-        currentInstructionText?.let { notificationView.updateInstructionText(it) }
+    private fun computeInstructionText(bannerInstructions: BannerInstructions?): Boolean {
+        val primaryText = bannerInstructions?.primary()?.text() ?: return false
+        if (!isInstructionTextChanged(primaryText)) return false
+        currentInstructionText = primaryText
+        return true
     }
 
     private fun isManeuverStateChanged(bannerInstruction: BannerInstructions): Boolean {
@@ -399,21 +422,24 @@ class MapboxTripNotification constructor(
             currentRoundaboutAngle != previousRoundaboutAngle
     }
 
-    private fun updateManeuverImage(bannerInstructions: BannerInstructions?, drivingSide: String?) {
-        if (bannerInstructions != null && isManeuverStateChanged(bannerInstructions)) {
-            turnIconHelper.retrieveTurnIcon(
-                currentManeuverType,
-                currentRoundaboutAngle,
-                currentManeuverModifier,
-                drivingSide = drivingSide ?: ManeuverModifier.RIGHT,
-            )?.let { turnIcon ->
-                turnIcon.icon
-                    ?.let { notificationView.getImageDrawable(it) }
-                    ?.let { getManeuverBitmap(it, turnIcon.shouldFlipIcon) }
-                    ?.let { currentManeuverImage = it }
-            }
+    private fun computeManeuverState(
+        bannerInstructions: BannerInstructions?,
+        drivingSide: String?,
+    ): Boolean {
+        if (bannerInstructions == null) return false
+        if (!isManeuverStateChanged(bannerInstructions)) return false
+        turnIconHelper.retrieveTurnIcon(
+            currentManeuverType,
+            currentRoundaboutAngle,
+            currentManeuverModifier,
+            drivingSide = drivingSide ?: ManeuverModifier.RIGHT,
+        )?.let { turnIcon ->
+            turnIcon.icon
+                ?.let { notificationView.getImageDrawable(it) }
+                ?.let { getManeuverBitmap(it, turnIcon.shouldFlipIcon) }
+                ?.let { currentManeuverImage = it }
         }
-        currentManeuverImage?.let { notificationView.updateImage(it) }
+        return true
     }
 
     private fun getManeuverBitmap(drawable: Drawable, shouldFlipIcon: Boolean): Bitmap? {

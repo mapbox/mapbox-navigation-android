@@ -66,8 +66,10 @@ class MapboxTripNotificationTest {
 
     private lateinit var notification: MapboxTripNotification
     private lateinit var mockedContext: Context
-    private lateinit var collapsedViews: RemoteViews
-    private lateinit var expandedViews: RemoteViews
+    private val collapsedViewsList = mutableListOf<RemoteViews>()
+    private val expandedViewsList = mutableListOf<RemoteViews>()
+    private val collapsedViews get() = collapsedViewsList.last()
+    private val expandedViews get() = expandedViewsList.last()
     private val navigationOptions: NavigationOptions = mockk(relaxed = true)
     private val interceptorOwner: TripNotificationInterceptorOwner = mockk(relaxed = true)
     private val distanceSpannable: SpannableString = mockk()
@@ -105,20 +107,22 @@ class MapboxTripNotificationTest {
 
     private fun mockRemoteViews() {
         mockkObject(RemoteViewsProvider)
-        collapsedViews = mockk(relaxUnitFun = true)
-        expandedViews = mockk(relaxUnitFun = true)
         every {
             RemoteViewsProvider.createRemoteViews(
                 any(),
                 R.layout.mapbox_notification_navigation_collapsed,
             )
-        } returns collapsedViews
+        } answers {
+            mockk<RemoteViews>(relaxUnitFun = true).also { collapsedViewsList.add(it) }
+        }
         every {
             RemoteViewsProvider.createRemoteViews(
                 any(),
                 R.layout.mapbox_notification_navigation_expanded,
             )
-        } returns expandedViews
+        } answers {
+            mockk<RemoteViews>(relaxUnitFun = true).also { expandedViewsList.add(it) }
+        }
     }
 
     @Test
@@ -405,30 +409,34 @@ class MapboxTripNotificationTest {
     }
 
     @Test
-    fun whenUpdateNotificationCalledTwiceWithSameDataThenRemoteViewUpdatedTwice() {
+    fun whenUpdateNotificationCalledTwiceWithSameDataThenSecondUpdateIsDeduplicated() {
         val state = mockk<TripNotificationState.TripNotificationData>(relaxed = true)
         val primaryText = { "Primary Text" }
-        val bannerText = mockBannerText(state, primaryText)
+        mockBannerText(state, primaryText)
         mockUpdateNotificationAndroidInteractions()
         notification.onTripSessionStarted()
+        val viewCountBeforeUpdate = collapsedViewsList.size
 
         notification.updateNotification(state)
 
-        verify(exactly = 1) { bannerText.text() }
-        verify(exactly = 1) { collapsedViews.setTextViewText(any(), primaryText()) }
-        verify(exactly = 1) { expandedViews.setTextViewText(any(), primaryText()) }
+        val firstCollapsed = collapsedViews
+        val firstExpanded = expandedViews
+        assertEquals(viewCountBeforeUpdate + 1, collapsedViewsList.size)
+        verify(exactly = 1) { firstCollapsed.setTextViewText(any(), primaryText()) }
+        verify(exactly = 1) { firstExpanded.setTextViewText(any(), primaryText()) }
 
         notification.updateNotification(state)
 
-        verify(exactly = 2) { bannerText.text() }
-        verify(exactly = 2) { collapsedViews.setTextViewText(any(), primaryText()) }
-        verify(exactly = 2) { expandedViews.setTextViewText(any(), primaryText()) }
+        // No new RemoteViews created — second call was deduplicated
+        assertEquals(viewCountBeforeUpdate + 1, collapsedViewsList.size)
+        verify(exactly = 1) { firstCollapsed.setTextViewText(any(), primaryText()) }
+        verify(exactly = 1) { firstExpanded.setTextViewText(any(), primaryText()) }
         assertEquals(notification.currentManeuverType, MANEUVER_TYPE)
         assertEquals(notification.currentManeuverModifier, MANEUVER_MODIFIER)
     }
 
     @Test
-    fun whenUpdateNotificationCalledTwiceWithDifferentDataThenRemoteViewUpdatedTwice() {
+    fun whenUpdateNotificationCalledTwiceWithDifferentDataThenEachUpdateGetsOwnRemoteViews() {
         val state = mockk<TripNotificationState.TripNotificationData>(relaxed = true)
         val initialPrimaryText = "Primary Text"
         val changedPrimaryText = "Changed Primary Text"
@@ -437,16 +445,30 @@ class MapboxTripNotificationTest {
         val bannerText = mockBannerText(state, primaryTextLambda)
         mockUpdateNotificationAndroidInteractions()
         notification.onTripSessionStarted()
+        val viewCountBeforeUpdate = collapsedViewsList.size
 
         notification.updateNotification(state)
+
+        val firstCollapsed = collapsedViews
+        val firstExpanded = expandedViews
+
         primaryText = changedPrimaryText
         notification.updateNotification(state)
 
+        // New RemoteViews created for changed content
+        val secondCollapsed = collapsedViews
+        val secondExpanded = expandedViews
+        assertEquals(viewCountBeforeUpdate + 2, collapsedViewsList.size)
         verify(exactly = 2) { bannerText.text() }
-        verify(exactly = 1) { collapsedViews.setTextViewText(any(), initialPrimaryText) }
-        verify(exactly = 1) { expandedViews.setTextViewText(any(), initialPrimaryText) }
-        verify(exactly = 1) { collapsedViews.setTextViewText(any(), changedPrimaryText) }
-        verify(exactly = 1) { expandedViews.setTextViewText(any(), changedPrimaryText) }
+        // Each set of views only got its own content
+        verify(exactly = 1) { firstCollapsed.setTextViewText(any(), initialPrimaryText) }
+        verify(exactly = 0) { firstCollapsed.setTextViewText(any(), changedPrimaryText) }
+        verify(exactly = 1) { firstExpanded.setTextViewText(any(), initialPrimaryText) }
+        verify(exactly = 0) { firstExpanded.setTextViewText(any(), changedPrimaryText) }
+        verify(exactly = 1) { secondCollapsed.setTextViewText(any(), changedPrimaryText) }
+        verify(exactly = 0) { secondCollapsed.setTextViewText(any(), initialPrimaryText) }
+        verify(exactly = 1) { secondExpanded.setTextViewText(any(), changedPrimaryText) }
+        verify(exactly = 0) { secondExpanded.setTextViewText(any(), initialPrimaryText) }
         assertEquals(notification.currentManeuverType, MANEUVER_TYPE)
         assertEquals(notification.currentManeuverModifier, MANEUVER_MODIFIER)
     }
@@ -460,20 +482,28 @@ class MapboxTripNotificationTest {
 
         notification.onTripSessionStarted()
         notification.updateNotification(state)
+
+        val firstCollapsed = collapsedViews
+        val firstExpanded = expandedViews
+
         notification.onTripSessionStopped()
         notification.onTripSessionStarted()
 
         verify(exactly = 1) { bannerText.text() }
-        verify(exactly = 1) { collapsedViews.setTextViewText(any(), primaryText()) }
-        verify(exactly = 1) { expandedViews.setTextViewText(any(), primaryText()) }
+        verify(exactly = 1) { firstCollapsed.setTextViewText(any(), primaryText()) }
+        verify(exactly = 1) { firstExpanded.setTextViewText(any(), primaryText()) }
         assertNull(notification.currentManeuverType)
         assertNull(notification.currentManeuverModifier)
 
         notification.updateNotification(state)
 
+        // New RemoteViews created — cache was cleared by stop
+        val secondCollapsed = collapsedViews
+        val secondExpanded = expandedViews
+        assertNotEquals(firstCollapsed, secondCollapsed)
         verify(exactly = 2) { bannerText.text() }
-        verify(exactly = 2) { collapsedViews.setTextViewText(any(), primaryText()) }
-        verify(exactly = 2) { expandedViews.setTextViewText(any(), primaryText()) }
+        verify(exactly = 1) { secondCollapsed.setTextViewText(any(), primaryText()) }
+        verify(exactly = 1) { secondExpanded.setTextViewText(any(), primaryText()) }
         assertEquals(notification.currentManeuverType, MANEUVER_TYPE)
         assertEquals(notification.currentManeuverModifier, MANEUVER_MODIFIER)
     }
@@ -485,13 +515,19 @@ class MapboxTripNotificationTest {
         val bannerText = mockBannerText(state, primaryText)
         mockUpdateNotificationAndroidInteractions()
 
+        val initCollapsed = collapsedViews
+        val initExpanded = expandedViews
+
         notification.onTripSessionStarted()
 
         notification.updateNotification(state)
 
+        val updateCollapsed = collapsedViews
+        val updateExpanded = expandedViews
+
         verify(exactly = 1) { bannerText.text() }
-        verify(exactly = 1) { collapsedViews.setTextViewText(any(), primaryText()) }
-        verify(exactly = 1) { expandedViews.setTextViewText(any(), primaryText()) }
+        verify(exactly = 1) { updateCollapsed.setTextViewText(any(), primaryText()) }
+        verify(exactly = 1) { updateExpanded.setTextViewText(any(), primaryText()) }
         assertEquals(notification.currentManeuverType, MANEUVER_TYPE)
         assertEquals(notification.currentManeuverModifier, MANEUVER_MODIFIER)
 
@@ -499,70 +535,73 @@ class MapboxTripNotificationTest {
         notification.onTripSessionStarted()
 
         verify(exactly = 1) { bannerText.text() }
-        verify(exactly = 1) { collapsedViews.setTextViewText(any(), primaryText()) }
-        verify(exactly = 1) { expandedViews.setTextViewText(any(), primaryText()) }
+        verify(exactly = 1) { updateCollapsed.setTextViewText(any(), primaryText()) }
+        verify(exactly = 1) { updateExpanded.setTextViewText(any(), primaryText()) }
 
         notification.onTripSessionStopped()
 
         verify(exactly = 1) { bannerText.text() }
-        verify(exactly = 1) { collapsedViews.setTextViewText(any(), primaryText()) }
-        verify(exactly = 1) { expandedViews.setTextViewText(any(), primaryText()) }
+        verify(exactly = 1) { updateCollapsed.setTextViewText(any(), primaryText()) }
+        verify(exactly = 1) { updateExpanded.setTextViewText(any(), primaryText()) }
         assertNull(notification.currentManeuverType)
         assertNull(notification.currentManeuverModifier)
 
-        // navigationIsStarting
-        verify(ordering = Ordering.ORDERED) {
-            collapsedViews.setViewVisibility(R.id.navigationIsStarting, View.VISIBLE)
-            collapsedViews.setViewVisibility(R.id.navigationIsStarting, View.GONE)
-            collapsedViews.setViewVisibility(R.id.navigationIsStarting, View.VISIBLE)
-        }
-        verify(exactly = 3) {
-            collapsedViews.setViewVisibility(R.id.navigationIsStarting, any())
+        // navigationIsStarting: VISIBLE on init views (1st start),
+        // GONE then VISIBLE on update views (update + 2nd start)
+        verify(exactly = 1) {
+            initCollapsed.setViewVisibility(R.id.navigationIsStarting, View.VISIBLE)
         }
         verify(ordering = Ordering.ORDERED) {
-            expandedViews.setViewVisibility(R.id.navigationIsStarting, View.VISIBLE)
-            expandedViews.setViewVisibility(R.id.navigationIsStarting, View.GONE)
-            expandedViews.setViewVisibility(R.id.navigationIsStarting, View.VISIBLE)
+            updateCollapsed.setViewVisibility(R.id.navigationIsStarting, View.GONE)
+            updateCollapsed.setViewVisibility(R.id.navigationIsStarting, View.VISIBLE)
         }
-        verify(exactly = 3) {
-            expandedViews.setViewVisibility(R.id.navigationIsStarting, any())
-        }
-        // etaContent
-        verify(ordering = Ordering.ORDERED) {
-            collapsedViews.setViewVisibility(R.id.etaContent, View.VISIBLE)
-            collapsedViews.setViewVisibility(R.id.etaContent, View.GONE)
-            collapsedViews.setViewVisibility(R.id.etaContent, View.GONE)
-        }
-        verify(exactly = 3) {
-            collapsedViews.setViewVisibility(R.id.etaContent, any())
+        verify(exactly = 1) {
+            initExpanded.setViewVisibility(R.id.navigationIsStarting, View.VISIBLE)
         }
         verify(ordering = Ordering.ORDERED) {
-            expandedViews.setViewVisibility(R.id.etaContent, View.VISIBLE)
-            expandedViews.setViewVisibility(R.id.etaContent, View.GONE)
-            expandedViews.setViewVisibility(R.id.etaContent, View.GONE)
+            updateExpanded.setViewVisibility(R.id.navigationIsStarting, View.GONE)
+            updateExpanded.setViewVisibility(R.id.navigationIsStarting, View.VISIBLE)
         }
-        verify(exactly = 3) {
-            expandedViews.setViewVisibility(R.id.etaContent, any())
-        }
-        // freeDriveText
+        // etaContent: all changes on update views
         verify(ordering = Ordering.ORDERED) {
-            collapsedViews.setViewVisibility(R.id.freeDriveText, View.GONE)
-            collapsedViews.setViewVisibility(R.id.freeDriveText, View.GONE)
-            collapsedViews.setViewVisibility(R.id.freeDriveText, View.GONE)
+            updateCollapsed.setViewVisibility(R.id.etaContent, View.VISIBLE)
+            updateCollapsed.setViewVisibility(R.id.etaContent, View.GONE)
+            updateCollapsed.setViewVisibility(R.id.etaContent, View.GONE)
         }
         verify(exactly = 3) {
-            collapsedViews.setViewVisibility(R.id.freeDriveText, any())
+            updateCollapsed.setViewVisibility(R.id.etaContent, any())
         }
         verify(ordering = Ordering.ORDERED) {
-            expandedViews.setViewVisibility(R.id.freeDriveText, View.GONE)
-            expandedViews.setViewVisibility(R.id.freeDriveText, View.GONE)
-            expandedViews.setViewVisibility(R.id.freeDriveText, View.GONE)
+            updateExpanded.setViewVisibility(R.id.etaContent, View.VISIBLE)
+            updateExpanded.setViewVisibility(R.id.etaContent, View.GONE)
+            updateExpanded.setViewVisibility(R.id.etaContent, View.GONE)
         }
         verify(exactly = 3) {
-            expandedViews.setViewVisibility(R.id.freeDriveText, any())
+            updateExpanded.setViewVisibility(R.id.etaContent, any())
         }
-        verify(exactly = 2) {
-            expandedViews.setTextViewText(R.id.endNavigationBtn, STOP_SESSION)
+        // freeDriveText: all changes on update views
+        verify(ordering = Ordering.ORDERED) {
+            updateCollapsed.setViewVisibility(R.id.freeDriveText, View.GONE)
+            updateCollapsed.setViewVisibility(R.id.freeDriveText, View.GONE)
+            updateCollapsed.setViewVisibility(R.id.freeDriveText, View.GONE)
+        }
+        verify(exactly = 3) {
+            updateCollapsed.setViewVisibility(R.id.freeDriveText, any())
+        }
+        verify(ordering = Ordering.ORDERED) {
+            updateExpanded.setViewVisibility(R.id.freeDriveText, View.GONE)
+            updateExpanded.setViewVisibility(R.id.freeDriveText, View.GONE)
+            updateExpanded.setViewVisibility(R.id.freeDriveText, View.GONE)
+        }
+        verify(exactly = 3) {
+            updateExpanded.setViewVisibility(R.id.freeDriveText, any())
+        }
+        // STOP_SESSION on each set of expanded views
+        verify(exactly = 1) {
+            initExpanded.setTextViewText(R.id.endNavigationBtn, STOP_SESSION)
+        }
+        verify(exactly = 1) {
+            updateExpanded.setTextViewText(R.id.endNavigationBtn, STOP_SESSION)
         }
     }
 
@@ -571,25 +610,32 @@ class MapboxTripNotificationTest {
         val nullRouteProgress = null
         mockUpdateNotificationAndroidInteractions()
 
+        val initCollapsed = collapsedViews
+        val initExpanded = expandedViews
+
         notification.onTripSessionStarted()
         notification.updateNotification(buildTripNotificationState(nullRouteProgress))
 
-        verify(ordering = Ordering.ORDERED) {
-            collapsedViews.setViewVisibility(R.id.navigationIsStarting, View.VISIBLE)
-            collapsedViews.setViewVisibility(R.id.navigationIsStarting, View.GONE)
+        val updateCollapsed = collapsedViews
+        val updateExpanded = expandedViews
+
+        // navigationIsStarting: VISIBLE on init views (start), GONE on update views (update)
+        verify(exactly = 1) {
+            initCollapsed.setViewVisibility(R.id.navigationIsStarting, View.VISIBLE)
         }
-        verify(exactly = 2) {
-            collapsedViews.setViewVisibility(R.id.navigationIsStarting, any())
+        verify(exactly = 1) {
+            updateCollapsed.setViewVisibility(R.id.navigationIsStarting, View.GONE)
         }
-        verify(ordering = Ordering.ORDERED) {
-            expandedViews.setViewVisibility(R.id.navigationIsStarting, View.VISIBLE)
-            expandedViews.setViewVisibility(R.id.navigationIsStarting, View.GONE)
+        verify(exactly = 1) {
+            initExpanded.setViewVisibility(R.id.navigationIsStarting, View.VISIBLE)
         }
-        verify(exactly = 2) {
-            expandedViews.setViewVisibility(R.id.navigationIsStarting, any())
+        verify(exactly = 1) {
+            updateExpanded.setViewVisibility(R.id.navigationIsStarting, View.GONE)
         }
-        verify(exactly = 0) { expandedViews.setTextViewText(any(), END_NAVIGATION) }
-        verify(exactly = 2) { expandedViews.setTextViewText(any(), STOP_SESSION) }
+        verify(exactly = 0) { updateExpanded.setTextViewText(any(), END_NAVIGATION) }
+        // STOP_SESSION on each set of expanded views
+        verify(exactly = 1) { initExpanded.setTextViewText(any(), STOP_SESSION) }
+        verify(exactly = 1) { updateExpanded.setTextViewText(any(), STOP_SESSION) }
     }
 
     @Test
