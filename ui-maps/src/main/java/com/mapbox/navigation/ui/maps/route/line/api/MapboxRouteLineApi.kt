@@ -70,12 +70,13 @@ import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.logW
-import com.mapbox.navigation.utils.internal.parallelMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -1624,4 +1625,12 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
             vanishing.vanishPointOffset
         }
     }
+
+    private fun List<RouteLineExpressionData>.parallelMap(
+        f: (RouteLineExpressionData) -> RouteLineExpressionData,
+        scope: CoroutineScope,
+    ): List<RouteLineExpressionData> =
+        runBlocking {
+            map { scope.async(Dispatchers.Default) { f(it) } }.awaitAll()
+        }
 }
