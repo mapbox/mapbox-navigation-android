@@ -25,6 +25,7 @@ class EvUtilsTest {
             null,
             null,
             emptyList(),
+            hashMapOf(),
         )
 
         assertEquals(expected, input.toEvStateData())
@@ -38,6 +39,8 @@ class EvUtilsTest {
             "auxiliary_consumption" to "5",
             "ev_pre_conditioning_time" to "7",
             "ev_unconditioned_charging_curve" to "5.0,6.0;7.0,8.0",
+            "ev_extra_param_1_key" to "extra_param_1_value",
+            "ev_extra_param_2_key" to "extra_param_2_value",
         )
         val expected = EvStateData(
             10,
@@ -45,6 +48,10 @@ class EvUtilsTest {
             5,
             7,
             listOf(CurveElement(5.0f, 6.0f), CurveElement(7.0f, 8.0f)),
+            hashMapOf(
+                "ev_extra_param_1_key" to "extra_param_1_value",
+                "ev_extra_param_2_key" to "extra_param_2_value",
+            ),
         )
 
         assertEquals(expected, input.toEvStateData())

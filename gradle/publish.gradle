@@ -69,6 +69,7 @@ registry {
     publishMessage = "cc @mapbox/navigation-android"
     publications = ["release"]
     additionalPackageSuffixes = ["-ndk27"]
+    sbom = true
 }
 
 task androidSourcesJar(type: Jar) {

@@ -4,13 +4,28 @@ import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigator.CurveElement
 import com.mapbox.navigator.EvStateData
 
+private const val EV_KEY_INITIAL_CHARGE = "ev_initial_charge"
+private const val EV_KEY_ENERGY_CONSUMPTION_CURVE = "energy_consumption_curve"
+private const val EV_KEY_AUX_CONSUMPTION = "auxiliary_consumption"
+private const val EV_KEY_PRE_CONDITIONING_TIME = "ev_pre_conditioning_time"
+private const val EV_KEY_UNCONDITIONED_CHARGING_CURVE = "ev_unconditioned_charging_curve"
+
 fun Map<String, String>.toEvStateData(): EvStateData {
+    val additionalParameters = HashMap(this).apply {
+        remove(EV_KEY_INITIAL_CHARGE)
+        remove(EV_KEY_ENERGY_CONSUMPTION_CURVE)
+        remove(EV_KEY_AUX_CONSUMPTION)
+        remove(EV_KEY_PRE_CONDITIONING_TIME)
+        remove(EV_KEY_UNCONDITIONED_CHARGING_CURVE)
+    }
+
     return EvStateData(
-        this["ev_initial_charge"]?.toIntOrNull() ?: 0,
-        this["energy_consumption_curve"]?.toCurveElements() ?: emptyList(),
-        this["auxiliary_consumption"]?.toIntOrNull(),
-        this["ev_pre_conditioning_time"]?.toIntOrNull(),
-        this["ev_unconditioned_charging_curve"]?.toCurveElements() ?: emptyList(),
+        this[EV_KEY_INITIAL_CHARGE]?.toIntOrNull() ?: 0,
+        this[EV_KEY_ENERGY_CONSUMPTION_CURVE]?.toCurveElements() ?: emptyList(),
+        this[EV_KEY_AUX_CONSUMPTION]?.toIntOrNull(),
+        this[EV_KEY_PRE_CONDITIONING_TIME]?.toIntOrNull(),
+        this[EV_KEY_UNCONDITIONED_CHARGING_CURVE]?.toCurveElements() ?: emptyList(),
+        additionalParameters,
     )
 }
 
