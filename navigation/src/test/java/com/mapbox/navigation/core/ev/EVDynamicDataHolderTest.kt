@@ -12,12 +12,14 @@ class EVDynamicDataHolderTest {
 
     private val evDynamicDataHolder = EVDynamicDataHolder()
     private val curve = "0,40;50,120"
+    private val freeflowCurve = "0,30;50,100"
     private val charge = "90"
     private val auxConsumption = "70"
     private val preConditioningTime = "10"
     private val unconditionedChargingCurve = "0,30;50,100"
     private val initial = mapOf(
         "energy_consumption_curve" to JsonPrimitive(curve),
+        "ev_freeflow_consumption_curve" to JsonPrimitive(freeflowCurve),
         "ev_initial_charge" to JsonPrimitive(charge),
         "auxiliary_consumption" to JsonPrimitive(auxConsumption),
         "ev_pre_conditioning_time" to JsonPrimitive(preConditioningTime),
@@ -34,6 +36,7 @@ class EVDynamicDataHolderTest {
     fun `currentData() with no updates and EV fallback`() {
         val expected = mapOf(
             "energy_consumption_curve" to curve,
+            "ev_freeflow_consumption_curve" to freeflowCurve,
             "ev_initial_charge" to charge,
             "auxiliary_consumption" to auxConsumption,
             "ev_pre_conditioning_time" to preConditioningTime,
@@ -60,6 +63,7 @@ class EVDynamicDataHolderTest {
         )
         val expected = mapOf(
             "energy_consumption_curve" to "3,300",
+            "ev_freeflow_consumption_curve" to freeflowCurve,
             "ev_initial_charge" to charge,
             "auxiliary_consumption" to "80",
             "ev_pre_conditioning_time" to preConditioningTime,
@@ -99,6 +103,7 @@ class EVDynamicDataHolderTest {
             "aaa" to "bbb",
             "eee" to "fff",
             "energy_consumption_curve" to "4,400",
+            "ev_freeflow_consumption_curve" to freeflowCurve,
             "ev_initial_charge" to "78",
             "auxiliary_consumption" to "80",
             "ev_pre_conditioning_time" to preConditioningTime,
@@ -116,6 +121,7 @@ class EVDynamicDataHolderTest {
         val initial = mapOf(
             "engine" to JsonPrimitive("electric"),
             "energy_consumption_curve" to JsonPrimitive(curve),
+            "ev_freeflow_consumption_curve" to JsonPrimitive(freeflowCurve),
             "ev_initial_charge" to JsonPrimitive(charge),
             "auxiliary_consumption" to JsonObject(),
             "ev_pre_conditioning_time" to JsonPrimitive(preConditioningTime),
@@ -124,12 +130,25 @@ class EVDynamicDataHolderTest {
         )
         val expected = mapOf(
             "energy_consumption_curve" to curve,
+            "ev_freeflow_consumption_curve" to freeflowCurve,
             "ev_initial_charge" to charge,
             "ev_pre_conditioning_time" to preConditioningTime,
             "ev_unconditioned_charging_curve" to unconditionedChargingCurve,
         )
 
         assertEquals(expected, evDynamicDataHolder.currentData(initial))
+    }
+
+    @Test
+    fun `currentData() with ev_freeflow_consumption_curve absent from initial but present in update`() {
+        val updatedFreeflowCurve = "0,25;50,90"
+        evDynamicDataHolder.updateData(
+            mapOf("ev_freeflow_consumption_curve" to updatedFreeflowCurve),
+        )
+
+        val result = evDynamicDataHolder.currentData(emptyMap())
+
+        assertEquals(updatedFreeflowCurve, result["ev_freeflow_consumption_curve"])
     }
 
     @Test

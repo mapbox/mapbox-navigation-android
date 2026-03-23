@@ -53,6 +53,7 @@ import java.net.URI
 
 private const val KEY_ENGINE = "engine"
 private const val KEY_ENERGY_CONSUMPTION_CURVE = "energy_consumption_curve"
+private const val KEY_EV_FREEFLOW_CONSUMPTION_CURVE = "ev_freeflow_consumption_curve"
 private const val KEY_EV_INITIAL_CHARGE = "ev_initial_charge"
 private const val KEY_AUXILIARY_CONSUMPTION = "auxiliary_consumption"
 private const val KEY_EV_PRECONDITIONING_TIME = "ev_pre_conditioning_time"
@@ -121,6 +122,7 @@ class EVRerouteTest(
 
     private lateinit var routeHandler: MockDirectionsRequestHandler
     private val initialEnergyConsumptionCurve = "0,300;20,160;80,140;120,180"
+    private val initialFreeflowConsumptionCurve = "0,200;60,130;120,160"
     private val initialInitialCharge = "18000"
     private val initialAuxiliaryConsumption = "300"
     private val initialEvPreconditioningTime = "10"
@@ -208,6 +210,7 @@ class EVRerouteTest(
             mapOf(
                 KEY_ENGINE to VALUE_ELECTRIC,
                 KEY_ENERGY_CONSUMPTION_CURVE to initialEnergyConsumptionCurve,
+                KEY_EV_FREEFLOW_CONSUMPTION_CURVE to initialFreeflowConsumptionCurve,
                 KEY_EV_INITIAL_CHARGE to initialInitialCharge,
                 KEY_AUXILIARY_CONSUMPTION to initialAuxiliaryConsumption,
                 KEY_EV_PRECONDITIONING_TIME to initialEvPreconditioningTime,
@@ -237,6 +240,7 @@ class EVRerouteTest(
             mapOf(
                 KEY_ENGINE to VALUE_ELECTRIC,
                 KEY_ENERGY_CONSUMPTION_CURVE to initialEnergyConsumptionCurve,
+                KEY_EV_FREEFLOW_CONSUMPTION_CURVE to initialFreeflowConsumptionCurve,
                 KEY_EV_INITIAL_CHARGE to newInitialCharge,
                 KEY_AUXILIARY_CONSUMPTION to initialAuxiliaryConsumption,
                 KEY_EV_PRECONDITIONING_TIME to initialEvPreconditioningTime,
@@ -260,11 +264,13 @@ class EVRerouteTest(
         )
 
         val consumptionCurve = "0,300;20,120;40,150"
+        val freeflowConsumptionCurve = "0,200;60,130;120,160"
         val initialCharge = "80"
         val preconditioningTime = "10"
         val auxiliaryConsumption = "300"
         val evData = mapOf(
             KEY_ENERGY_CONSUMPTION_CURVE to consumptionCurve,
+            KEY_EV_FREEFLOW_CONSUMPTION_CURVE to freeflowConsumptionCurve,
             KEY_EV_INITIAL_CHARGE to initialCharge,
             KEY_EV_PRECONDITIONING_TIME to preconditioningTime,
             KEY_AUXILIARY_CONSUMPTION to auxiliaryConsumption,
@@ -319,6 +325,7 @@ class EVRerouteTest(
             mapOf(
                 KEY_ENGINE to VALUE_ELECTRIC,
                 KEY_ENERGY_CONSUMPTION_CURVE to initialEnergyConsumptionCurve,
+                KEY_EV_FREEFLOW_CONSUMPTION_CURVE to initialFreeflowConsumptionCurve,
                 KEY_EV_PRECONDITIONING_TIME to initialEvPreconditioningTime,
                 KEY_EV_INITIAL_CHARGE to initialInitialCharge,
                 KEY_EV_INITIAL_CHARGE to initialInitialCharge,
@@ -326,11 +333,13 @@ class EVRerouteTest(
         )
 
         val consumptionCurve = "0,301;20,121;40,151"
+        val freeflowConsumptionCurve = "0,201;60,131;120,161"
         val initialCharge = "80"
         val preconditioningTime = "10"
         val auxiliaryConsumption = "299"
         val firstEvData = mapOf(
             KEY_ENERGY_CONSUMPTION_CURVE to consumptionCurve,
+            KEY_EV_FREEFLOW_CONSUMPTION_CURVE to freeflowConsumptionCurve,
             KEY_EV_INITIAL_CHARGE to initialCharge,
             KEY_EV_PRECONDITIONING_TIME to preconditioningTime,
             KEY_AUXILIARY_CONSUMPTION to auxiliaryConsumption,
@@ -367,6 +376,7 @@ class EVRerouteTest(
             mapOf(
                 KEY_ENGINE to VALUE_ELECTRIC,
                 KEY_ENERGY_CONSUMPTION_CURVE to consumptionCurve,
+                KEY_EV_FREEFLOW_CONSUMPTION_CURVE to freeflowConsumptionCurve,
                 KEY_EV_INITIAL_CHARGE to newInitialCharge,
                 KEY_AUXILIARY_CONSUMPTION to auxiliaryConsumption,
                 KEY_EV_PRECONDITIONING_TIME to preconditioningTime,
@@ -388,6 +398,7 @@ class EVRerouteTest(
             mapOf(
                 KEY_ENGINE to VALUE_ELECTRIC,
                 KEY_ENERGY_CONSUMPTION_CURVE to consumptionCurve,
+                KEY_EV_FREEFLOW_CONSUMPTION_CURVE to freeflowConsumptionCurve,
                 KEY_EV_INITIAL_CHARGE to newInitialCharge,
                 KEY_AUXILIARY_CONSUMPTION to auxiliaryConsumption,
                 KEY_EV_PRECONDITIONING_TIME to preconditioningTime,
@@ -594,6 +605,7 @@ class EVRerouteTest(
                             KEY_ENGINE to VALUE_ELECTRIC,
                             KEY_EV_INITIAL_CHARGE to initialCharge,
                             KEY_ENERGY_CONSUMPTION_CURVE to initialEnergyConsumptionCurve,
+                            KEY_EV_FREEFLOW_CONSUMPTION_CURVE to initialFreeflowConsumptionCurve,
                             KEY_EV_PRECONDITIONING_TIME to initialEvPreconditioningTime,
                             KEY_AUXILIARY_CONSUMPTION to initialAuxiliaryConsumption,
                             "ev_min_charge_at_charging_station" to "6000",

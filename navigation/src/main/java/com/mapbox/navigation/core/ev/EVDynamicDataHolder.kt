@@ -14,6 +14,7 @@ internal class EVDynamicDataHolder {
 
     private val evRefreshKeys = setOf(
         "energy_consumption_curve",
+        "ev_freeflow_consumption_curve",
         "ev_initial_charge",
         "auxiliary_consumption",
         "ev_pre_conditioning_time",

@@ -62,9 +62,11 @@ class EvAlternativesTest : BaseCoreNoCleanUpTest() {
             navigation.setNavigationRoutesAsync(routes)
 
             val newChargeLevel = "957"
+            val newFreeflowConsumptionCurve = "0,200;60,130;120,160"
             navigation.onEVDataUpdated(
                 mapOf(
                     "ev_initial_charge" to newChargeLevel,
+                    "ev_freeflow_consumption_curve" to newFreeflowConsumptionCurve,
                 ),
             )
             val newAlternative = navigation.routesUpdates()
@@ -78,6 +80,11 @@ class EvAlternativesTest : BaseCoreNoCleanUpTest() {
                 .getUnrecognizedProperty("ev_initial_charge")
                 ?.asString
             assertEquals(newChargeLevel, alternativeRouteInitialChargeLevel)
+
+            val alternativeRouteFreeflowConsumptionCurve = newAlternative.routeOptions
+                .getUnrecognizedProperty("ev_freeflow_consumption_curve")
+                ?.asString
+            assertEquals(newFreeflowConsumptionCurve, alternativeRouteFreeflowConsumptionCurve)
         }
     }
 }

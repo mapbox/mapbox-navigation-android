@@ -4,6 +4,7 @@ import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.bindgen.DataRef
 import com.mapbox.geojson.Point
 import com.mapbox.navigator.ActiveGuidanceInfo
+import com.mapbox.navigator.AlternativeRouteInfo
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.BannerSection
 import com.mapbox.navigator.CorrectedLocationData
@@ -70,6 +71,7 @@ fun createNavigationStatus(
     nextWaypointIndex: Int = 0,
     layer: Int = 0,
     alternativeRouteIndices: List<RouteIndices> = emptyList(),
+    altRoutesRemainingInfo: List<AlternativeRouteInfo> = emptyList(),
     isSyntheticLocation: Boolean = false,
     correctedLocationData: CorrectedLocationData? = null,
     hdMatchingResult: HdMatchingResult? = null,
@@ -100,6 +102,7 @@ fun createNavigationStatus(
             )
         },
         alternativeRouteIndices,
+        altRoutesRemainingInfo,
         locatedAlternativeId,
         voiceInstruction,
         bannerInstruction,
