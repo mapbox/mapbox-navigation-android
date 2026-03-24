@@ -140,7 +140,7 @@ class SlowTrafficSegmentsFinder(
     ): SlowTrafficSegment {
         val legFreeFlowSpeed = geometry.freeFlowSpeed(geometryIndex)
         val freeFlowDurationSec = when {
-            legFreeFlowSpeed != null -> {
+            legFreeFlowSpeed != null && legFreeFlowSpeed > 0 -> {
                 // Speed is km/h, but distance is in the meters.
                 // Applying conversion of the speed from km/h -> m/s
                 geometry.distance(geometryIndex) * KM_PER_H_TO_M_PER_SEC_RATE / legFreeFlowSpeed

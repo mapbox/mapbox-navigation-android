@@ -340,6 +340,32 @@ class SlowTrafficSegmentsFinderTest {
         Assert.assertTrue(segments.isEmpty())
     }
 
+    @Test
+    fun `handles zero freeflow speed without NaN crash`() = runBlocking {
+        val annotation = mockk<LegAnnotation> {
+            every { congestionNumeric() } returns listOf(
+                lowCongestion,
+                severeCongestion,
+                severeCongestion,
+                lowCongestion,
+            )
+            every { distance() } returns listOf(50.0, 0.0, 80.0, 30.0)
+            every { duration() } returns listOf(5.0, 0.0, 18.0, 3.0)
+            every { freeflowSpeed() } returns listOf(36, 0, 15, 36)
+        }
+        val routeProgress = prepareRouteProgressFrom(annotation)
+
+        val segments = finder.findSlowTrafficSegments(
+            routeProgress = routeProgress,
+            targetCongestionsRanges = listOf(SEVERE_CONGESTION_RANGE),
+        )
+
+        Assert.assertEquals(1, segments.size)
+        val segment = segments.first()
+        Assert.assertEquals(1..2, segment.geometryRange)
+        Assert.assertEquals(80.0, segment.distanceMeters, 0.01)
+    }
+
     private fun prepareRouteProgressFrom(vararg annotation: LegAnnotation): RouteProgress {
         val legs = annotation.map {
             mockk<RouteLeg> { every { annotation() } returns it }
