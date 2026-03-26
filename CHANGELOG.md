@@ -1,5 +1,25 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.21.0-rc.1 - 25 March, 2026
+
+#### Bug fixes and improvements
+- Added `geometryPointAt(index, precision)` extension on `RouteLeg` that decodes leg geometry one step at a time and stops at the target index, avoiding allocation of all subsequent points. 
+- Fixed an issue where requesting road cameras using `RoadCamerasProvider` could potential stall the main thread. 
+- Fix redundant leg geometry decoding in `SlowTrafficSegmentsFinder` by caching decoded points per route instance, and eliminate iterator allocations in congestion range lookup. 
+- Added a minimum speed threshold for applying avoid-maneuver-radius for continuou alternative route, so that Nav SDK can suggest alternatives with maneuver being close in case of low speed. 
+- Improved off-road mode detection in parking aisles that are marked as tunnels. 
+- Improved ADAS cache performance. 
+- Fixed a crash that could occur after navigation shutdown. 
+- Improved performance on routes with a large number of road alerts. 
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.21.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.21.0-rc.1))
+- Mapbox Navigation Native `v324.21.0-rc.1`
+- Mapbox Core Common `v24.21.0-rc.1`
+- Mapbox Java `v7.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.0))
+
+
 ## Navigation SDK Core Framework 3.20.0 - 17 March, 2026
 #### Features
 
