@@ -1,9 +1,7 @@
 package com.mapbox.navigation.voicefeedback
 
-import androidx.annotation.RestrictTo
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.voicefeedback.internal.audio.microphone.AudioRecordMicrophone
-import com.mapbox.navigation.voicefeedback.internal.audio.microphone.Microphone
 import java.util.Locale
 
 /**
@@ -38,8 +36,10 @@ class FeedbackAgentOptions private constructor(
          */
         fun endpoint(endpoint: FeedbackAgentEndpoint): Builder = apply { this.endpoint = endpoint }
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        internal fun microphone(microphone: Microphone): Builder =
+        /**
+         * @param microphone A custom audio source input.
+         */
+        fun microphone(microphone: Microphone): Builder =
             apply { this.microphone = microphone }
 
         /**
@@ -48,6 +48,9 @@ class FeedbackAgentOptions private constructor(
         fun build() = FeedbackAgentOptions(language, endpoint, microphone)
     }
 
+    /**
+     * Indicates whether some other object is "equal to" this one.
+     */
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -61,6 +64,9 @@ class FeedbackAgentOptions private constructor(
         return true
     }
 
+    /**
+     * Returns a hash code value for the object.
+     */
     override fun hashCode(): Int {
         var result = language.hashCode()
         result = 31 * result + endpoint.hashCode()

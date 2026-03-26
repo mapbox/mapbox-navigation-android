@@ -76,6 +76,7 @@ package com.mapbox.navigation.voicefeedback {
     method public com.mapbox.navigation.voicefeedback.FeedbackAgentOptions build();
     method public com.mapbox.navigation.voicefeedback.FeedbackAgentOptions.Builder endpoint(com.mapbox.navigation.voicefeedback.FeedbackAgentEndpoint endpoint);
     method public com.mapbox.navigation.voicefeedback.FeedbackAgentOptions.Builder language(java.util.Locale language);
+    method public com.mapbox.navigation.voicefeedback.FeedbackAgentOptions.Builder microphone(com.mapbox.navigation.voicefeedback.Microphone microphone);
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class FeedbackAgentSession implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
@@ -101,6 +102,50 @@ package com.mapbox.navigation.voicefeedback {
   public final class FeedbackExtKt {
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static void postVoiceFeedback(com.mapbox.navigation.core.MapboxNavigation, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.SubType String feedbackSubType, String description, String screenshot, com.mapbox.navigation.core.telemetry.events.FeedbackMetadata? feedbackMetadata = null, com.mapbox.navigation.core.internal.telemetry.UserFeedbackCallback userFeedbackCallback);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static void postVoiceFeedback(com.mapbox.navigation.core.MapboxNavigation, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.SubType String feedbackSubType, String description, String screenshot, com.mapbox.navigation.core.internal.telemetry.UserFeedbackCallback userFeedbackCallback);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public interface Microphone extends com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+    method public com.mapbox.navigation.voicefeedback.Microphone.Config getConfig();
+    method public kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.voicefeedback.Microphone.State> getState();
+    method public void stop();
+    method public suspend Object? stream(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.voicefeedback.Microphone.State.Streaming,kotlin.Unit> consumer, kotlin.coroutines.Continuation<? super kotlin.Unit>);
+    property public abstract com.mapbox.navigation.voicefeedback.Microphone.Config config;
+    property public abstract kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.voicefeedback.Microphone.State> state;
+  }
+
+  public static final class Microphone.Config {
+    ctor public Microphone.Config(int sampleRateHz = 16000);
+    method public int component1();
+    method public com.mapbox.navigation.voicefeedback.Microphone.Config copy(int sampleRateHz);
+    method public int getSampleRateHz();
+    property public final int sampleRateHz;
+  }
+
+  public abstract static sealed class Microphone.State {
+  }
+
+  public static final class Microphone.State.Disconnected extends com.mapbox.navigation.voicefeedback.Microphone.State {
+    field public static final com.mapbox.navigation.voicefeedback.Microphone.State.Disconnected INSTANCE;
+  }
+
+  public static final class Microphone.State.Error extends com.mapbox.navigation.voicefeedback.Microphone.State {
+    ctor public Microphone.State.Error(String reason);
+    method public String getReason();
+    property public final String reason;
+  }
+
+  public static final class Microphone.State.Idle extends com.mapbox.navigation.voicefeedback.Microphone.State {
+    field public static final com.mapbox.navigation.voicefeedback.Microphone.State.Idle INSTANCE;
+  }
+
+  public static final class Microphone.State.Streaming extends com.mapbox.navigation.voicefeedback.Microphone.State {
+    ctor public Microphone.State.Streaming(int chunkId, byte[] byteArray, int bytesRead);
+    method public byte[] getByteArray();
+    method public int getBytesRead();
+    method public int getChunkId();
+    property public final byte[] byteArray;
+    property public final int bytesRead;
+    property public final int chunkId;
   }
 
 }

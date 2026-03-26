@@ -39,8 +39,14 @@ sealed interface ASRState {
             return elapsedNs.toDuration(DurationUnit.NANOSECONDS)
         }
 
+        /**
+         * Indicates whether some other object is "equal to" this one.
+         */
         override fun equals(other: Any?): Boolean = other is Listening && text == other.text
 
+        /**
+         * Returns a hash code value for the object.
+         */
         override fun hashCode(): Int = text.hashCode()
 
         /**
@@ -55,8 +61,14 @@ sealed interface ASRState {
      * @param error A [Throwable] describing the cause of the failure.
      */
     class Error(val error: Throwable) : ASRState {
+        /**
+         * Indicates whether some other object is "equal to" this one.
+         */
         override fun equals(other: Any?): Boolean = other is Error && error == other.error
 
+        /**
+         * Returns a hash code value for the object.
+         */
         override fun hashCode(): Int = error.hashCode()
 
         /**
@@ -81,6 +93,9 @@ sealed interface ASRState {
         val text: String,
         val feedbackType: String,
     ) : ASRState {
+        /**
+         * Indicates whether some other object is "equal to" this one.
+         */
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (other !is Result) return false
@@ -91,6 +106,9 @@ sealed interface ASRState {
             return true
         }
 
+        /**
+         * Returns a hash code value for the object.
+         */
         override fun hashCode(): Int {
             var result = text.hashCode()
             result = 31 * result + feedbackType.hashCode()

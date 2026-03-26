@@ -17,8 +17,14 @@ class FeedbackAgentEndpoint private constructor(
     val streamingAsrApiHost: String,
 ) {
     companion object {
+        /**
+         * Name for production endpoints.
+         */
         const val PRODUCTION = "production"
 
+        /**
+         * Name for testing endpoints.
+         */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         const val TESTING = "testing"
 
@@ -62,6 +68,9 @@ class FeedbackAgentEndpoint private constructor(
             "streamingAsrApiHost=$streamingAsrApiHost)"
     }
 
+    /**
+     * Indicates whether some other object is "equal to" this one.
+     */
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -75,6 +84,9 @@ class FeedbackAgentEndpoint private constructor(
         return true
     }
 
+    /**
+     * Returns a hash code value for the object.
+     */
     override fun hashCode(): Int {
         var result = name.hashCode()
         result = 31 * result + streamingApiHost.hashCode()

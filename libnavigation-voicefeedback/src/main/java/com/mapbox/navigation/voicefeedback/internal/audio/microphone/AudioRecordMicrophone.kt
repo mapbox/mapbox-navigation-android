@@ -16,6 +16,7 @@ import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.logW
+import com.mapbox.navigation.voicefeedback.Microphone
 import com.mapbox.navigation.voicefeedback.internal.audio.AudioInfoRetriever
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,7 +29,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 
 /**
- * A [Microphone] that uses the Android [AudioRecord] API to stream audio from the
+ * A [com.mapbox.navigation.voicefeedback.Microphone] that uses the Android [AudioRecord] API to stream audio from the
  * device's microphone. This implementation is suitable for real-time audio streaming.
  *
  * Requires the `Manifest.permission.RECORD_AUDIO` permission.

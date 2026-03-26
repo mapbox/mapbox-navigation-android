@@ -1,4 +1,4 @@
-package com.mapbox.navigation.voicefeedback.internal.audio.microphone
+package com.mapbox.navigation.voicefeedback
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
  * The microphone can be used to stream audio data from the platform to the Mapbox SDK.
  */
 @ExperimentalPreviewMapboxNavigationAPI
-internal interface Microphone : MapboxNavigationObserver {
+interface Microphone : MapboxNavigationObserver {
 
     /**
      * Configuration setting for the microphone.

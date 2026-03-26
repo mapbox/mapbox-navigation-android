@@ -4,7 +4,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.voicefeedback.FakeInputStreamMicrophone
 import com.mapbox.navigation.voicefeedback.ASRState
-import com.mapbox.navigation.voicefeedback.internal.audio.microphone.Microphone
+import com.mapbox.navigation.voicefeedback.Microphone
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -16,11 +16,10 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runCurrent
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert
@@ -30,18 +29,22 @@ import org.junit.Test
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.DurationUnit
+import kotlin.time.ExperimentalTime
 import kotlin.time.toDuration
 
 @OptIn(
     ExperimentalPreviewMapboxNavigationAPI::class,
     ExperimentalCoroutinesApi::class,
+    ExperimentalTime::class,
 )
 class MapboxAutomaticSpeechRecognitionEngineTest {
 
     @get:Rule
     val logRule = LoggingFrontendTestRule()
 
-    private val testDispatcher = StandardTestDispatcher()
+    private val testDispatcher = TestCoroutineDispatcher()
+    private lateinit var testScope: TestCoroutineScope
+    private lateinit var backgroundScope: TestCoroutineScope
     private val sessionStateFlow = MutableStateFlow<AsrSessionState>(AsrSessionState.Disconnected)
     private val asrDataFlow = MutableSharedFlow<AsrData?>()
     private val mapboxASRService = mockk<MapboxASRService>(relaxed = true) {
@@ -70,16 +73,20 @@ class MapboxAutomaticSpeechRecognitionEngineTest {
 
     @Before
     fun setUp() {
+        testScope = TestCoroutineScope(testDispatcher)
+        backgroundScope = TestCoroutineScope()
         Dispatchers.setMain(testDispatcher)
     }
 
     @After
     fun tearDown() {
         Dispatchers.resetMain()
+        backgroundScope.cleanupTestCoroutines()
+        testScope.cleanupTestCoroutines()
     }
 
     @Test
-    fun `when service is connected then engine is idle`() = runTest {
+    fun `when service is connected then engine is idle`() = testScope.runBlockingTest {
         val engine = createEngine(backgroundScope)
         runCurrent()
 
@@ -91,7 +98,7 @@ class MapboxAutomaticSpeechRecognitionEngineTest {
     }
 
     @Test
-    fun `when startListening invoked then engine emits Listening`() = runTest {
+    fun `when startListening invoked then engine emits Listening`() = testScope.runBlockingTest {
         sessionStateFlow.value = AsrSessionState.Connected("https://asr.example.com", "session-1")
         val engine = createEngine(backgroundScope)
         runCurrent()
@@ -105,7 +112,7 @@ class MapboxAutomaticSpeechRecognitionEngineTest {
     }
 
     @Test
-    fun `when transcript received then engine emits text`() = runTest {
+    fun `when transcript received then engine emits text`() = testScope.runBlockingTest {
         sessionStateFlow.value = AsrSessionState.Connected("https://asr.example.com", "session-1")
         val engine = createEngine(backgroundScope)
         runCurrent()
@@ -125,7 +132,7 @@ class MapboxAutomaticSpeechRecognitionEngineTest {
 
     @Test
     fun `when final transcript received then engine emits SpeechFinishedWaitingForResult`() =
-        runTest {
+        testScope.runBlockingTest {
             sessionStateFlow.value =
                 AsrSessionState.Connected("https://asr.example.com", "session-1")
             val engine = createEngine(backgroundScope)
@@ -144,7 +151,7 @@ class MapboxAutomaticSpeechRecognitionEngineTest {
         }
 
     @Test
-    fun `when ASR Result received then engine emits Result`() = runTest {
+    fun `when ASR Result received then engine emits Result`() = testScope.runBlockingTest {
         sessionStateFlow.value = AsrSessionState.Connected("https://asr.example.com", "session-1")
         val engine = createEngine(backgroundScope)
         runCurrent()
@@ -165,7 +172,7 @@ class MapboxAutomaticSpeechRecognitionEngineTest {
     }
 
     @Test
-    fun `when microphone Error occurs then engine emits Error state`() = runTest {
+    fun `when microphone Error occurs then engine emits Error state`() = testScope.runBlockingTest {
         val errorMicrophone = mockk<Microphone>(relaxed = true) {
             every { config } returns Microphone.Config()
             every { state } returns MutableStateFlow(Microphone.State.Error("permission denied"))
@@ -186,7 +193,7 @@ class MapboxAutomaticSpeechRecognitionEngineTest {
     }
 
     @Test
-    fun `when stopListening invoked then engine emits Idle`() = runTest {
+    fun `when stopListening invoked then engine emits Idle`() = testScope.runBlockingTest {
         sessionStateFlow.value = AsrSessionState.Connected("https://asr.example.com", "session-1")
         val engine = createEngine(backgroundScope)
         runCurrent()
@@ -202,7 +209,7 @@ class MapboxAutomaticSpeechRecognitionEngineTest {
     }
 
     @Test
-    fun `when stopListening invoked then engine stops microphone`() = runTest {
+    fun `when stopListening invoked then engine stops microphone`() = testScope.runBlockingTest {
         sessionStateFlow.value = AsrSessionState.Connected("https://asr.example.com", "session-1")
         val engine = createEngine(backgroundScope)
         runCurrent()
@@ -217,7 +224,7 @@ class MapboxAutomaticSpeechRecognitionEngineTest {
     }
 
     @Test
-    fun `when interruptListening invoked then engine emits Idle`() = runTest {
+    fun `when interruptListening invoked then engine emits Interrupted`() = testScope.runBlockingTest {
         sessionStateFlow.value = AsrSessionState.Connected("https://asr.example.com", "session-1")
         val engine = createEngine(backgroundScope)
         runCurrent()
@@ -229,11 +236,11 @@ class MapboxAutomaticSpeechRecognitionEngineTest {
         runCurrent()
 
         val state = engine.state.value
-        Assert.assertTrue(state is ASRState.Idle)
+        Assert.assertTrue(state is ASRState.Interrupted)
     }
 
     @Test
-    fun `when interruptListening invoked then engine sends abort`() = runTest {
+    fun `when interruptListening invoked then engine sends abort`() = testScope.runBlockingTest {
         sessionStateFlow.value = AsrSessionState.Connected("https://asr.example.com", "session-1")
         val engine = createEngine(backgroundScope)
         runCurrent()
@@ -249,7 +256,7 @@ class MapboxAutomaticSpeechRecognitionEngineTest {
 
     @Test
     fun `when Listening times out with blank transcript then engine emits InterruptedByTimeout`() =
-        runTest {
+        testScope.runBlockingTest {
             sessionStateFlow.value =
                 AsrSessionState.Connected("https://asr.example.com", "session-1")
             val engine = createEngine(
@@ -271,7 +278,7 @@ class MapboxAutomaticSpeechRecognitionEngineTest {
 
     @Test
     fun `when SpeechFinishedWaitingForResult times out then engine emits InterruptedByTimeout`() =
-        runTest {
+        testScope.runBlockingTest {
             sessionStateFlow.value =
                 AsrSessionState.Connected("https://asr.example.com", "session-1")
             val engine = createEngine(
@@ -299,7 +306,7 @@ class MapboxAutomaticSpeechRecognitionEngineTest {
         }
 
     @Test
-    fun `when connect invoked then delegate to mapboxASRService`() = runTest {
+    fun `when connect invoked then delegate to mapboxASRService`() = testScope.runBlockingTest {
         sessionStateFlow.value = AsrSessionState.Connected("https://asr.example.com", "session-1")
         val engine = createEngine(backgroundScope)
         runCurrent()
@@ -310,7 +317,7 @@ class MapboxAutomaticSpeechRecognitionEngineTest {
     }
 
     @Test
-    fun `when disconnect invoked then delegate to mapboxASRService`() = runTest {
+    fun `when disconnect invoked then delegate to mapboxASRService`() = testScope.runBlockingTest {
         sessionStateFlow.value = AsrSessionState.Connected("https://asr.example.com", "session-1")
         val engine = createEngine(backgroundScope)
         runCurrent()

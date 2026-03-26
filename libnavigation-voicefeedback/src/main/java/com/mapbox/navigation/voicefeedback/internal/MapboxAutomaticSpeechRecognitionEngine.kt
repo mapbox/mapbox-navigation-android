@@ -4,7 +4,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.voicefeedback.ASRState
-import com.mapbox.navigation.voicefeedback.internal.audio.microphone.Microphone
+import com.mapbox.navigation.voicefeedback.Microphone
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope

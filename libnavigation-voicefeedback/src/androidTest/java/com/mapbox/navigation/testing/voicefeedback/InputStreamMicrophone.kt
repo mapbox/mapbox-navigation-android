@@ -5,7 +5,7 @@ import android.media.AudioRecord
 import android.util.Log
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.voicefeedback.internal.audio.microphone.Microphone
+import com.mapbox.navigation.voicefeedback.Microphone
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow

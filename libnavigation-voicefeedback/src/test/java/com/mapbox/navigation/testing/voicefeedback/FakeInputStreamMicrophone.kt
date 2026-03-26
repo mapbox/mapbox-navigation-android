@@ -2,13 +2,13 @@ package com.mapbox.navigation.testing.voicefeedback
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.voicefeedback.internal.audio.microphone.Microphone
+import com.mapbox.navigation.voicefeedback.Microphone
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.io.InputStream
 
 /**
- * JVM-compatible test double for [com.mapbox.navigation.feedback.voice.internal.audio.microphone.Microphone] that streams audio from an [java.io.InputStream].
+ * JVM-compatible test double for [com.mapbox.navigation.voicefeedback.Microphone] that streams audio from an [java.io.InputStream].
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class FakeInputStreamMicrophone(
