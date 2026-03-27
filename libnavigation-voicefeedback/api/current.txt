@@ -1,0 +1,152 @@
+// Signature format: 3.0
+package com.mapbox.navigation.voicefeedback {
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public sealed interface ASRState {
+  }
+
+  public static final class ASRState.Error implements com.mapbox.navigation.voicefeedback.ASRState {
+    ctor public ASRState.Error(Throwable error);
+    method public Throwable getError();
+    property public final Throwable error;
+  }
+
+  public static final class ASRState.Idle implements com.mapbox.navigation.voicefeedback.ASRState {
+    field public static final com.mapbox.navigation.voicefeedback.ASRState.Idle INSTANCE;
+  }
+
+  public static final class ASRState.Interrupted implements com.mapbox.navigation.voicefeedback.ASRState {
+    field public static final com.mapbox.navigation.voicefeedback.ASRState.Interrupted INSTANCE;
+  }
+
+  public static final class ASRState.InterruptedByTimeout implements com.mapbox.navigation.voicefeedback.ASRState {
+    field public static final com.mapbox.navigation.voicefeedback.ASRState.InterruptedByTimeout INSTANCE;
+  }
+
+  public static final class ASRState.Listening implements com.mapbox.navigation.voicefeedback.ASRState {
+    ctor public ASRState.Listening(String text);
+    method public String getText();
+    property public final String text;
+  }
+
+  public static final class ASRState.NoResult implements com.mapbox.navigation.voicefeedback.ASRState {
+    field public static final com.mapbox.navigation.voicefeedback.ASRState.NoResult INSTANCE;
+  }
+
+  public static final class ASRState.Result implements com.mapbox.navigation.voicefeedback.ASRState {
+    ctor public ASRState.Result(String text, String feedbackType);
+    method public String getFeedbackType();
+    method public String getText();
+    property public final String feedbackType;
+    property public final String text;
+  }
+
+  public static final class ASRState.SpeechFinishedWaitingForResult implements com.mapbox.navigation.voicefeedback.ASRState {
+    field public static final com.mapbox.navigation.voicefeedback.ASRState.SpeechFinishedWaitingForResult INSTANCE;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class FeedbackAgentEndpoint {
+    method public String getName();
+    method public String getStreamingApiHost();
+    method public String getStreamingAsrApiHost();
+    property public final String name;
+    property public final String streamingApiHost;
+    property public final String streamingAsrApiHost;
+    field public static final com.mapbox.navigation.voicefeedback.FeedbackAgentEndpoint.Companion Companion;
+    field public static final String PRODUCTION = "production";
+    field @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP) public static final String TESTING = "testing";
+  }
+
+  public static final class FeedbackAgentEndpoint.Companion {
+    method public com.mapbox.navigation.voicefeedback.FeedbackAgentEndpoint custom(String name, String streamingApiHost, String streamingAsrApiHost);
+    method public com.mapbox.navigation.voicefeedback.FeedbackAgentEndpoint getProduction();
+    method public com.mapbox.navigation.voicefeedback.FeedbackAgentEndpoint getTesting();
+    property public final com.mapbox.navigation.voicefeedback.FeedbackAgentEndpoint Production;
+    property public final com.mapbox.navigation.voicefeedback.FeedbackAgentEndpoint Testing;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class FeedbackAgentOptions {
+    method public com.mapbox.navigation.voicefeedback.FeedbackAgentEndpoint getEndpoint();
+    method public java.util.Locale getLanguage();
+    property public final com.mapbox.navigation.voicefeedback.FeedbackAgentEndpoint endpoint;
+    property public final java.util.Locale language;
+  }
+
+  public static final class FeedbackAgentOptions.Builder {
+    ctor public FeedbackAgentOptions.Builder();
+    method public com.mapbox.navigation.voicefeedback.FeedbackAgentOptions build();
+    method public com.mapbox.navigation.voicefeedback.FeedbackAgentOptions.Builder endpoint(com.mapbox.navigation.voicefeedback.FeedbackAgentEndpoint endpoint);
+    method public com.mapbox.navigation.voicefeedback.FeedbackAgentOptions.Builder language(java.util.Locale language);
+    method public com.mapbox.navigation.voicefeedback.FeedbackAgentOptions.Builder microphone(com.mapbox.navigation.voicefeedback.Microphone microphone);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class FeedbackAgentSession implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+    method public void connect();
+    method public void disconnect();
+    method public kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.voicefeedback.ASRState> getAsrState();
+    method public com.mapbox.navigation.voicefeedback.FeedbackAgentOptions getOptions();
+    method public void interruptListening();
+    method public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public void startListening();
+    method public void stopListening();
+    property public final kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.voicefeedback.ASRState> asrState;
+    property public final com.mapbox.navigation.voicefeedback.FeedbackAgentOptions options;
+  }
+
+  public static final class FeedbackAgentSession.Builder {
+    ctor public FeedbackAgentSession.Builder();
+    method public com.mapbox.navigation.voicefeedback.FeedbackAgentSession build();
+    method public com.mapbox.navigation.voicefeedback.FeedbackAgentSession.Builder options(com.mapbox.navigation.voicefeedback.FeedbackAgentOptions options);
+  }
+
+  public final class FeedbackExtKt {
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static void postVoiceFeedback(com.mapbox.navigation.core.MapboxNavigation, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.SubType String feedbackSubType, String description, String screenshot, com.mapbox.navigation.core.telemetry.events.FeedbackMetadata? feedbackMetadata = null, com.mapbox.navigation.core.internal.telemetry.UserFeedbackCallback userFeedbackCallback);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static void postVoiceFeedback(com.mapbox.navigation.core.MapboxNavigation, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.SubType String feedbackSubType, String description, String screenshot, com.mapbox.navigation.core.internal.telemetry.UserFeedbackCallback userFeedbackCallback);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public interface Microphone extends com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+    method public com.mapbox.navigation.voicefeedback.Microphone.Config getConfig();
+    method public kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.voicefeedback.Microphone.State> getState();
+    method public void stop();
+    method public suspend Object? stream(kotlin.jvm.functions.Function1<? super com.mapbox.navigation.voicefeedback.Microphone.State.Streaming,kotlin.Unit> consumer, kotlin.coroutines.Continuation<? super kotlin.Unit>);
+    property public abstract com.mapbox.navigation.voicefeedback.Microphone.Config config;
+    property public abstract kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.voicefeedback.Microphone.State> state;
+  }
+
+  public static final class Microphone.Config {
+    ctor public Microphone.Config(int sampleRateHz = 16000);
+    method public int component1();
+    method public com.mapbox.navigation.voicefeedback.Microphone.Config copy(int sampleRateHz);
+    method public int getSampleRateHz();
+    property public final int sampleRateHz;
+  }
+
+  public abstract static sealed class Microphone.State {
+  }
+
+  public static final class Microphone.State.Disconnected extends com.mapbox.navigation.voicefeedback.Microphone.State {
+    field public static final com.mapbox.navigation.voicefeedback.Microphone.State.Disconnected INSTANCE;
+  }
+
+  public static final class Microphone.State.Error extends com.mapbox.navigation.voicefeedback.Microphone.State {
+    ctor public Microphone.State.Error(String reason);
+    method public String getReason();
+    property public final String reason;
+  }
+
+  public static final class Microphone.State.Idle extends com.mapbox.navigation.voicefeedback.Microphone.State {
+    field public static final com.mapbox.navigation.voicefeedback.Microphone.State.Idle INSTANCE;
+  }
+
+  public static final class Microphone.State.Streaming extends com.mapbox.navigation.voicefeedback.Microphone.State {
+    ctor public Microphone.State.Streaming(int chunkId, byte[] byteArray, int bytesRead);
+    method public byte[] getByteArray();
+    method public int getBytesRead();
+    method public int getChunkId();
+    property public final byte[] byteArray;
+    property public final int bytesRead;
+    property public final int chunkId;
+  }
+
+}
+
