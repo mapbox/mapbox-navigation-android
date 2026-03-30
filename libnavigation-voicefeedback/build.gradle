@@ -51,6 +51,7 @@ dependencies {
     testImplementation project(':libtesting-navigation-util')
 
     // Instrumentation tests
+    androidTestImplementation project(':libtesting-ui')
     androidTestImplementation dependenciesList.androidxTestJunit
     androidTestImplementation dependenciesList.junit
     androidTestImplementation(dependenciesList.barista) {

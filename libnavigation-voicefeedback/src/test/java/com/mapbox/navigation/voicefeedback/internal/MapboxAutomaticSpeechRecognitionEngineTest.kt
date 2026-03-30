@@ -76,6 +76,7 @@ class MapboxAutomaticSpeechRecognitionEngineTest {
         testScope = TestCoroutineScope(testDispatcher)
         backgroundScope = TestCoroutineScope()
         Dispatchers.setMain(testDispatcher)
+        sessionStateFlow.value = AsrSessionState.Disconnected
     }
 
     @After
@@ -95,6 +96,28 @@ class MapboxAutomaticSpeechRecognitionEngineTest {
 
         val state = engine.state.first { it != null }
         Assert.assertTrue(state is ASRState.Idle)
+    }
+
+    @Test
+    fun `when service is connecting then engine state is null`() = testScope.runBlockingTest {
+        val engine = createEngine(backgroundScope)
+        runCurrent()
+
+        sessionStateFlow.value = AsrSessionState.Connecting("https://asr.example.com", "sid")
+        runCurrent()
+
+        Assert.assertNull(engine.state.value)
+    }
+
+    @Test
+    fun `when service is disconnected then engine state is null`() = testScope.runBlockingTest {
+        val engine = createEngine(backgroundScope)
+        runCurrent()
+
+        sessionStateFlow.value = AsrSessionState.Disconnected
+        runCurrent()
+
+        Assert.assertNull(engine.state.value)
     }
 
     @Test
