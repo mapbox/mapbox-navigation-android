@@ -5,6 +5,7 @@ import com.mapbox.common.TilesetDescriptor
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigator.PredictiveCacheController
 
 class PredictiveCache(private val mapboxNavigation: MapboxNavigation) {
@@ -80,6 +81,10 @@ class PredictiveCache(private val mapboxNavigation: MapboxNavigation) {
                         key.tilesetDescriptor,
                         key.locationOptions,
                     )
+            } else {
+                logD(LOG_CATEGORY) {
+                    "Skip creating predictive cache controller for map: $key"
+                }
             }
         }
     }
@@ -123,5 +128,31 @@ class PredictiveCache(private val mapboxNavigation: MapboxNavigation) {
         val tileStore: TileStore,
         val tilesetDescriptor: TilesetDescriptor,
         val locationOptions: PredictiveCacheLocationOptions,
-    )
+    ) {
+
+        // TODO(NAVAND-7127) skipping tile store in equals/hashCode can potentially lead to bugs
+        //  if TileStore's have different paths.
+        //  We should ensure that we work with the same instance of TileStore
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as PredictiveCacheControllerKey
+
+            if (styleUri != other.styleUri) return false
+            if (locationOptions != other.locationOptions) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = styleUri.hashCode()
+            result = 31 * result + locationOptions.hashCode()
+            return result
+        }
+    }
+
+    private companion object {
+        const val LOG_CATEGORY = "PredictiveCache"
+    }
 }

@@ -72,9 +72,6 @@ package com.mapbox.navigation.ui.maps {
     method public void onError(String? message);
   }
 
-  public final class PredictiveCacheControllerKt {
-  }
-
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RouteArrowConfig {
     method public com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions getOptions();
     method public void setOptions(com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions);
