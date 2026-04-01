@@ -7,6 +7,7 @@ libnavigator \
 libtrip-notification \
 libnavigation-core \
 libnavigation-copilot \
+libnavigation-voicefeedback \
 
 CORE_MODULES = $(RELEASED_CORE_MODULES)
 
@@ -137,6 +138,7 @@ core-check-api: assemble-core-release
 	./gradlew :libtrip-notification:checkApi -PhidePackage=com.mapbox.navigation.trip.notification.internal
 	./gradlew :libnavigation-core:checkApi -PhidePackage=com.mapbox.navigation.core.internal
 	./gradlew :libnavigation-copilot:checkApi -PhidePackage=com.mapbox.navigation.copilot.internal
+	./gradlew :libnavigation-voicefeedback:checkApi -PhidePackage=com.mapbox.navigation.voicefeedback.internal
 
 .PHONY: core-update-api
 core-update-api: assemble-core-release
@@ -148,6 +150,7 @@ core-update-api: assemble-core-release
 	./gradlew :libtrip-notification:updateApi -PhidePackage=com.mapbox.navigation.trip.notification.internal
 	./gradlew :libnavigation-core:updateApi -PhidePackage=com.mapbox.navigation.core.internal
 	./gradlew :libnavigation-copilot:updateApi -PhidePackage=com.mapbox.navigation.copilot.internal
+	./gradlew :libnavigation-voicefeedback:updateApi -PhidePackage=com.mapbox.navigation.voicefeedback.internal
 
 .PHONY: assemble-ui-debug
 assemble-ui-debug:
