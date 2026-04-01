@@ -1,5 +1,20 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.19.3 - 01 April, 2026
+#### Features
+
+
+#### Bug fixes and improvements
+- Fixed an issue where `RouteLineColorResources.routeClosureColor` wasn't being applied to the route correctly when there is a road closure.
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.19.3` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.19.3))
+- Mapbox Navigation Native `v324.19.3`
+- Mapbox Core Common `v24.19.3`
+- Mapbox Java `v7.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.0))
+
+
 ## Navigation SDK Core Framework 3.19.2 - 27 March, 2026
 
 ### Mapbox dependencies
