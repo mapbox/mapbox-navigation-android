@@ -10,7 +10,6 @@ private const val EV_KEY_AUX_CONSUMPTION = "auxiliary_consumption"
 private const val EV_KEY_PRE_CONDITIONING_TIME = "ev_pre_conditioning_time"
 private const val EV_KEY_UNCONDITIONED_CHARGING_CURVE = "ev_unconditioned_charging_curve"
 private const val EV_FREEFLOW_CONSUMPTION_CURVE = "ev_freeflow_consumption_curve"
-private const val EV_CURVE_BLENDING_RATIO = "ev_curve_blending_ratio"
 
 fun Map<String, String>.toEvStateData(): EvStateData {
     val additionalParameters = HashMap(this).apply {
@@ -20,14 +19,12 @@ fun Map<String, String>.toEvStateData(): EvStateData {
         remove(EV_KEY_PRE_CONDITIONING_TIME)
         remove(EV_KEY_UNCONDITIONED_CHARGING_CURVE)
         remove(EV_FREEFLOW_CONSUMPTION_CURVE)
-        remove(EV_CURVE_BLENDING_RATIO)
     }
 
     return EvStateData(
         this[EV_KEY_INITIAL_CHARGE]?.toIntOrNull() ?: 0,
         this[EV_KEY_ENERGY_CONSUMPTION_CURVE]?.toCurveElements() ?: emptyList(),
         this[EV_FREEFLOW_CONSUMPTION_CURVE]?.toCurveElements(),
-        this[EV_CURVE_BLENDING_RATIO]?.toCurveElements(),
         this[EV_KEY_AUX_CONSUMPTION]?.toIntOrNull(),
         this[EV_KEY_PRE_CONDITIONING_TIME]?.toIntOrNull(),
         this[EV_KEY_UNCONDITIONED_CHARGING_CURVE]?.toCurveElements() ?: emptyList(),
