@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.internal
 import com.mapbox.common.TileStore
 import com.mapbox.common.TilesetDescriptor
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
+import com.mapbox.navigation.base.options.PredictiveCacheMapsOptions
 import com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.utils.internal.logD
@@ -79,7 +80,7 @@ class PredictiveCache(private val mapboxNavigation: MapboxNavigation) {
                     mapboxNavigation.navigator.createMapsPredictiveCacheController(
                         key.tileStore,
                         key.tilesetDescriptor,
-                        key.locationOptions,
+                        key.options.predictiveCacheLocationOptions,
                     )
             } else {
                 logD(LOG_CATEGORY) {
@@ -127,7 +128,7 @@ class PredictiveCache(private val mapboxNavigation: MapboxNavigation) {
         val styleUri: String,
         val tileStore: TileStore,
         val tilesetDescriptor: TilesetDescriptor,
-        val locationOptions: PredictiveCacheLocationOptions,
+        val options: PredictiveCacheMapsOptions,
     ) {
 
         // TODO(NAVAND-7127) skipping tile store in equals/hashCode can potentially lead to bugs
@@ -140,14 +141,14 @@ class PredictiveCache(private val mapboxNavigation: MapboxNavigation) {
             other as PredictiveCacheControllerKey
 
             if (styleUri != other.styleUri) return false
-            if (locationOptions != other.locationOptions) return false
+            if (options != other.options) return false
 
             return true
         }
 
         override fun hashCode(): Int {
             var result = styleUri.hashCode()
-            result = 31 * result + locationOptions.hashCode()
+            result = 31 * result + options.hashCode()
             return result
         }
     }

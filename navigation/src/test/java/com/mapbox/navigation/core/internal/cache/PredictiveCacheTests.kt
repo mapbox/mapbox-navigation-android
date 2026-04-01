@@ -2,7 +2,7 @@ package com.mapbox.navigation.core.internal.cache
 
 import com.mapbox.common.TileStore
 import com.mapbox.common.TilesetDescriptor
-import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
+import com.mapbox.navigation.base.options.PredictiveCacheMapsOptions
 import com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.internal.PredictiveCache
@@ -16,6 +16,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -47,8 +48,8 @@ class PredictiveCacheTests {
     fun `size of map controllers is correct`() {
         val map1 = mockk<Any>()
         val map2 = mockk<Any>()
-        val options1 = mockk<PredictiveCacheLocationOptions>(relaxed = true)
-        val options2 = mockk<PredictiveCacheLocationOptions>(relaxed = true)
+        val options1 = mockk<PredictiveCacheMapsOptions>(relaxed = true)
+        val options2 = mockk<PredictiveCacheMapsOptions>(relaxed = true)
         val tilesetDescriptor1 = mockk<TilesetDescriptor>()
         val tilesetDescriptor2 = mockk<TilesetDescriptor>()
 
@@ -100,8 +101,8 @@ class PredictiveCacheTests {
     fun `map controllers are empty after removing all`() {
         val map = mockk<Any>()
 
-        val options1 = mockk<PredictiveCacheLocationOptions>(relaxed = true)
-        val options2 = mockk<PredictiveCacheLocationOptions>(relaxed = true)
+        val options1 = mockk<PredictiveCacheMapsOptions>(relaxed = true)
+        val options2 = mockk<PredictiveCacheMapsOptions>(relaxed = true)
         val tilesetDescriptor1 = mockk<TilesetDescriptor>()
         val tilesetDescriptor2 = mockk<TilesetDescriptor>()
 
@@ -182,7 +183,7 @@ class PredictiveCacheTests {
             navigator.createMapsPredictiveCacheController(
                 tileStore,
                 predictiveCacheControllerKey1.tilesetDescriptor,
-                predictiveCacheControllerKey1.locationOptions,
+                predictiveCacheControllerKey1.options.predictiveCacheLocationOptions,
             )
         }
 
@@ -190,7 +191,7 @@ class PredictiveCacheTests {
             navigator.createMapsPredictiveCacheController(
                 tileStore,
                 predictiveCacheControllerKey2.tilesetDescriptor,
-                predictiveCacheControllerKey2.locationOptions,
+                predictiveCacheControllerKey2.options.predictiveCacheLocationOptions,
             )
         }
 
@@ -198,7 +199,7 @@ class PredictiveCacheTests {
             navigator.createMapsPredictiveCacheController(
                 tileStore,
                 predictiveCacheControllerKey3.tilesetDescriptor,
-                predictiveCacheControllerKey3.locationOptions,
+                predictiveCacheControllerKey3.options.predictiveCacheLocationOptions,
             )
         }
 
@@ -238,7 +239,7 @@ class PredictiveCacheTests {
 
     @Test
     fun `PredictiveCacheControllerKey equal when styleUri and locationOptions match regardless of TilesetDescriptor`() {
-        val locationOptions = mockk<PredictiveCacheLocationOptions>(relaxed = true)
+        val locationOptions = mockk<PredictiveCacheMapsOptions>(relaxed = true)
         val key1 = PredictiveCache.PredictiveCacheControllerKey(
             "mapbox://style",
             tileStore,
@@ -258,7 +259,7 @@ class PredictiveCacheTests {
 
     @Test
     fun `PredictiveCacheControllerKey not equal when styleUri differs`() {
-        val locationOptions = mockk<PredictiveCacheLocationOptions>(relaxed = true)
+        val locationOptions = mockk<PredictiveCacheMapsOptions>(relaxed = true)
         val key1 = PredictiveCache.PredictiveCacheControllerKey(
             "mapbox://style-a",
             tileStore,
@@ -272,7 +273,7 @@ class PredictiveCacheTests {
             locationOptions,
         )
 
-        assert(key1 != key2)
+        assertNotEquals(key1, key2)
     }
 
     @Test
@@ -290,13 +291,13 @@ class PredictiveCacheTests {
             mockk(relaxed = true),
         )
 
-        assert(key1 != key2)
+        assertNotEquals(key1, key2)
     }
 
     @Test
     fun `duplicate controller not created when same styleUri and locationOptions but different TilesetDescriptor`() {
         val map = mockk<Any>()
-        val locationOptions = mockk<PredictiveCacheLocationOptions>(relaxed = true)
+        val locationOptions = mockk<PredictiveCacheMapsOptions>(relaxed = true)
 
         val key1 = PredictiveCache.PredictiveCacheControllerKey(
             "mapbox://style",
@@ -324,7 +325,7 @@ class PredictiveCacheTests {
     @Test
     fun `duplicate controller not created when same key passed twice in one call`() {
         val map = mockk<Any>()
-        val locationOptions = mockk<PredictiveCacheLocationOptions>(relaxed = true)
+        val locationOptions = mockk<PredictiveCacheMapsOptions>(relaxed = true)
 
         val key1 = PredictiveCache.PredictiveCacheControllerKey(
             "mapbox://style",
@@ -351,11 +352,11 @@ class PredictiveCacheTests {
         styleUri: String,
         tileStore: TileStore = this.tileStore,
         tilesetDescriptor: TilesetDescriptor = mockk(),
-        locationOptions: PredictiveCacheLocationOptions = mockk(),
+        options: PredictiveCacheMapsOptions = mockk(relaxed = true),
     ) = PredictiveCache.PredictiveCacheControllerKey(
         styleUri,
         tileStore,
         tilesetDescriptor,
-        locationOptions,
+        options,
     )
 }

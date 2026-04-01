@@ -259,7 +259,7 @@ class PredictiveCacheController @VisibleForTesting internal constructor(
                         styleURI,
                         tileStore,
                         tilesetDescriptor,
-                        options.predictiveCacheLocationOptions,
+                        options,
                     )
                 }
 
