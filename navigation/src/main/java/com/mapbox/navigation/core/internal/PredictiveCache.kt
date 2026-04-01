@@ -7,20 +7,24 @@ import com.mapbox.navigation.base.options.PredictiveCacheMapsOptions
 import com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.utils.internal.logD
-import com.mapbox.navigator.PredictiveCacheController
+import com.mapbox.navigation.utils.internal.logW
+import com.mapbox.navigator.PredictiveCacheControllerInterface
 
 class PredictiveCache(private val mapboxNavigation: MapboxNavigation) {
 
     internal val cachedNavigationPredictiveCacheControllers =
-        mutableSetOf<PredictiveCacheController>()
-    internal val cachedMapsPredictiveCacheControllers =
-        mutableMapOf<Any, MutableMap<PredictiveCacheControllerKey, PredictiveCacheController>>()
-    internal val cachedSearchPredictiveCacheControllers =
-        mutableSetOf<Pair<TilesetDescriptor, PredictiveCacheController>>()
+        mutableSetOf<PredictiveCacheControllerInterface>()
+    internal val cachedMapsPredictiveCacheControllers = mutableMapOf<
+        Any, MutableMap<PredictiveCacheControllerKey, PredictiveCacheControllerInterface>,
+        >()
+    internal val cachedSearchPredictiveCacheControllers = mutableSetOf<
+        Pair<TilesetDescriptor, PredictiveCacheControllerInterface>,
+        >()
 
     internal val navPredictiveCacheOptions = mutableSetOf<PredictiveCacheNavigationOptions>()
     internal val searchPredictiveCacheLocationOptions = mutableSetOf<
-        Pair<TileStore, List<Pair<TilesetDescriptor, PredictiveCacheLocationOptions>>>,>()
+        Pair<TileStore, List<Pair<TilesetDescriptor, PredictiveCacheLocationOptions>>>,
+        >()
 
     init {
         // recreate controllers with the same options but with a new navigator instance
@@ -76,12 +80,17 @@ class PredictiveCache(private val mapboxNavigation: MapboxNavigation) {
 
         predictiveCacheControllerKeys.forEach { key ->
             if (!controllersMap.containsKey(key)) {
-                controllersMap[key] =
-                    mapboxNavigation.navigator.createMapsPredictiveCacheController(
-                        key.tileStore,
-                        key.tilesetDescriptor,
-                        key.options.predictiveCacheLocationOptions,
-                    )
+                val controller = mapboxNavigation.navigator.createMapsPredictiveCacheController(
+                    key.tileStore,
+                    key.tilesetDescriptor,
+                    key.options.predictiveCacheLocationOptions,
+                )
+
+                if (controller != null) {
+                    controllersMap[key] = controller
+                } else {
+                    logW("Unable to create predictive cache controller for $key", LOG_CATEGORY)
+                }
             } else {
                 logD(LOG_CATEGORY) {
                     "Skip creating predictive cache controller for map: $key"
@@ -96,12 +105,19 @@ class PredictiveCache(private val mapboxNavigation: MapboxNavigation) {
             List<Pair<TilesetDescriptor, PredictiveCacheLocationOptions>>,
     ) {
         val searchDescriptorsToPredictiveCacheControllers =
-            searchDescriptorsAndOptions.map {
-                it.first to mapboxNavigation.navigator.createSearchPredictiveCacheController(
+            searchDescriptorsAndOptions.mapNotNull {
+                val controller = mapboxNavigation.navigator.createSearchPredictiveCacheController(
                     tileStore,
                     it.first,
                     it.second,
                 )
+
+                if (controller != null) {
+                    it.first to controller
+                } else {
+                    logW("Unable to create predictive cache controller for $it", LOG_CATEGORY)
+                    null
+                }
             }
 
         searchDescriptorsToPredictiveCacheControllers.forEach {

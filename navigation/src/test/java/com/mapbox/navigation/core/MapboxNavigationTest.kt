@@ -411,14 +411,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
-    fun onDestroyCallsNativeNavigatorReset() {
-        createMapboxNavigation()
-        mapboxNavigation.onDestroy()
-
-        verify(exactly = 1) { navigator.reset(null) }
-    }
-
-    @Test
     fun onDestroyUnregisterAllBannerInstructionsObservers() {
         createMapboxNavigation()
         mapboxNavigation.onDestroy()
@@ -2474,16 +2466,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
 
         verify(exactly = 1) {
             routeRefreshController.unregisterRoutesInvalidatedObserver(routesInvalidatedObserver)
-        }
-    }
-
-    @Test
-    fun destroy_resetAdasisMessageCallback() {
-        createMapboxNavigation()
-        mapboxNavigation.onDestroy()
-
-        verify(exactly = 1) {
-            navigator.resetAdasisMessageCallback()
         }
     }
 

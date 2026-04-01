@@ -1,6 +1,7 @@
 package com.mapbox.navigation.navigator.internal
 
 import androidx.annotation.RestrictTo
+import androidx.annotation.UiThread
 import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.common.TileStore
@@ -21,14 +22,14 @@ import com.mapbox.navigator.GraphAccessorInterface
 import com.mapbox.navigator.InputsServiceHandleInterface
 import com.mapbox.navigator.LaneSensorInfo
 import com.mapbox.navigator.NavigationStatus
-import com.mapbox.navigator.Navigator
+import com.mapbox.navigator.NavigatorInterface
 import com.mapbox.navigator.NavigatorObserver
-import com.mapbox.navigator.PredictiveCacheController
+import com.mapbox.navigator.PredictiveCacheControllerInterface
 import com.mapbox.navigator.RerouteControllerInterface
 import com.mapbox.navigator.RerouteDetectorInterface
 import com.mapbox.navigator.ResetCallback
 import com.mapbox.navigator.RoadObjectMatcher
-import com.mapbox.navigator.RoadObjectsStore
+import com.mapbox.navigator.RoadObjectsStoreInterface
 import com.mapbox.navigator.RoadObjectsStoreObserver
 import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteAlternativesControllerInterface
@@ -45,7 +46,10 @@ import com.mapbox.navigator.WeatherData
 
 /**
  * Provides API to work with native Navigator class. Exposed for internal usage only.
+ *
+ * Class is not thread-safe and supposed to be accessed only from the main thread.
  */
+@UiThread
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 interface MapboxNativeNavigator : RerouteEventsProvider {
 
@@ -160,11 +164,6 @@ interface MapboxNativeNavigator : RerouteEventsProvider {
 
     fun getRelevantVoiceInstructions(observer: VoiceInstructionsCallback)
 
-    /**
-     * Unregister native observers
-     */
-    fun unregisterAllObservers()
-
     fun pause()
     fun resume()
     fun shutdown()
@@ -172,44 +171,44 @@ interface MapboxNativeNavigator : RerouteEventsProvider {
     // Predictive cache
 
     /**
-     * Creates a Maps [PredictiveCacheController].
+     * Creates a Maps [PredictiveCacheControllerInterface].
      *
      * @param tileStore Maps [TileStore]
      * @param tilesetDescriptor Maps tilesetDescriptor [TilesetDescriptor]
      * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions]
      *
-     * @return [PredictiveCacheController]
+     * @return [PredictiveCacheControllerInterface], or null if the navigator has been shut down
      */
     fun createMapsPredictiveCacheController(
         tileStore: TileStore,
         tilesetDescriptor: TilesetDescriptor,
         predictiveCacheLocationOptions: PredictiveCacheLocationOptions,
-    ): PredictiveCacheController
+    ): PredictiveCacheControllerInterface?
 
     /**
-     * Creates a Search [PredictiveCacheController].
+     * Creates a Search [PredictiveCacheControllerInterface].
      *
      * @param tileStore Search [TileStore]
      * @param searchTilesetDescriptor Search tilesetDescriptor [TilesetDescriptor]
      * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions]
      *
-     * @return [PredictiveCacheController]
+     * @return [PredictiveCacheControllerInterface], or null if the navigator has been shut down
      */
     fun createSearchPredictiveCacheController(
         tileStore: TileStore,
         searchTilesetDescriptor: TilesetDescriptor,
         predictiveCacheLocationOptions: PredictiveCacheLocationOptions,
-    ): PredictiveCacheController
+    ): PredictiveCacheControllerInterface?
 
     /**
-     * Creates a Navigation [PredictiveCacheController].
+     * Creates a Navigation [PredictiveCacheControllerInterface].
      *
      * @param navigationOptions [PredictiveCacheNavigationOptions]
-     * @return [PredictiveCacheController]
+     * @return List of [PredictiveCacheControllerInterface] objects, or an empty list if the navigator has been shut down
      */
     fun createNavigationPredictiveCacheController(
         navigationOptions: PredictiveCacheNavigationOptions,
-    ): List<PredictiveCacheController>
+    ): List<PredictiveCacheControllerInterface>
 
     fun updateWeatherData(data: WeatherData)
 
@@ -250,13 +249,13 @@ interface MapboxNativeNavigator : RerouteEventsProvider {
 
     val eventsMetadataProvider: EventsMetadataInterface
 
-    val navigator: Navigator
+    val navigator: NavigatorInterface
 
     val routeAlternativesController: RouteAlternativesControllerInterface
 
     val graphAccessor: GraphAccessorInterface
 
-    val roadObjectsStore: RoadObjectsStore
+    val roadObjectsStore: RoadObjectsStoreInterface
 
     val cache: CacheHandle
 

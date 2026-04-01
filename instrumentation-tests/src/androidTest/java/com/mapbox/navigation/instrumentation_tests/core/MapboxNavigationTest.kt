@@ -8,8 +8,13 @@ import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.trip.model.RouteProgressState
+import com.mapbox.navigation.base.trip.model.eh.EHorizonPosition
+import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectEnterExitInfo
+import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectPassInfo
+import com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfo
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
+import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
 import com.mapbox.navigation.testing.ui.BaseTest
@@ -199,6 +204,20 @@ class MapboxNavigationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::clas
         delay(TimeUnit.SECONDS.toMillis(5))
     }
 
+    @Test
+    fun unregister_observers_after_destroy() = sdkTest {
+        mapboxNavigation.registerEHorizonObserver(EMPTY_EH_OBSERVER)
+        MapboxNavigationProvider.destroy()
+
+        // Delay for the NN stuff to complete
+        delay(TimeUnit.SECONDS.toMillis(1))
+
+        mapboxNavigation.unregisterEHorizonObserver(EMPTY_EH_OBSERVER)
+
+        // Brief delay so any async post-destroy crash can occur before the process exits
+        delay(TimeUnit.SECONDS.toMillis(5))
+    }
+
     private fun stayOnPosition(position: Point) {
         mockLocationReplayerRule.loopUpdate(
             mockLocationUpdatesRule.generateLocationUpdate {
@@ -207,5 +226,26 @@ class MapboxNavigationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::clas
             },
             times = 120,
         )
+    }
+
+    private companion object {
+        val EMPTY_EH_OBSERVER = object : EHorizonObserver {
+            override fun onPositionUpdated(
+                position: EHorizonPosition,
+                distances: List<RoadObjectDistanceInfo>,
+            ) {}
+
+            override fun onRoadObjectEnter(objectEnterExitInfo: RoadObjectEnterExitInfo) {}
+
+            override fun onRoadObjectExit(objectEnterExitInfo: RoadObjectEnterExitInfo) {}
+
+            override fun onRoadObjectPassed(objectPassInfo: RoadObjectPassInfo) {}
+
+            override fun onRoadObjectAdded(roadObjectId: String) {}
+
+            override fun onRoadObjectUpdated(roadObjectId: String) {}
+
+            override fun onRoadObjectRemoved(roadObjectId: String) {}
+        }
     }
 }

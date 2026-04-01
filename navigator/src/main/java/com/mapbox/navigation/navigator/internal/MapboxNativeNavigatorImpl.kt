@@ -2,7 +2,6 @@ package com.mapbox.navigation.navigator.internal
 
 import androidx.annotation.RestrictTo
 import com.mapbox.annotation.MapboxExperimental
-import com.mapbox.api.directionsrefresh.v1.models.DirectionsRefreshResponse
 import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
@@ -20,10 +19,10 @@ import com.mapbox.navigation.navigator.internal.utils.toEvStateData
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigator.ADASISv2MessageCallback
 import com.mapbox.navigator.AdasisConfig
-import com.mapbox.navigator.AdasisFacadeBuilder
-import com.mapbox.navigator.AdasisFacadeHandle
+import com.mapbox.navigator.AdasisFacadeHandleInterface
 import com.mapbox.navigator.CacheDataDomain
 import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ConfigHandle
@@ -36,10 +35,9 @@ import com.mapbox.navigator.GraphAccessor
 import com.mapbox.navigator.HistoryRecorderHandle
 import com.mapbox.navigator.InputsServiceHandle
 import com.mapbox.navigator.LaneSensorInfo
-import com.mapbox.navigator.NavigationStatus
-import com.mapbox.navigator.Navigator
+import com.mapbox.navigator.NavigatorInterface
 import com.mapbox.navigator.NavigatorObserver
-import com.mapbox.navigator.PredictiveCacheController
+import com.mapbox.navigator.PredictiveCacheControllerInterface
 import com.mapbox.navigator.PredictiveCacheControllerOptions
 import com.mapbox.navigator.RefreshRouteResult
 import com.mapbox.navigator.RerouteControllerInterface
@@ -48,7 +46,7 @@ import com.mapbox.navigator.RerouteObserver
 import com.mapbox.navigator.ResetCallback
 import com.mapbox.navigator.RoadObjectMatcher
 import com.mapbox.navigator.RoadObjectMatcherConfig
-import com.mapbox.navigator.RoadObjectsStore
+import com.mapbox.navigator.RoadObjectsStoreInterface
 import com.mapbox.navigator.RoadObjectsStoreObserver
 import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteAlternativesControllerInterface
@@ -72,7 +70,7 @@ import kotlin.coroutines.resume
 /**
  * Default implementation of [MapboxNativeNavigator] interface.
  */
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, MapboxExperimental::class)
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 class MapboxNativeNavigatorImpl(
     tilesConfig: TilesConfig,
@@ -83,16 +81,18 @@ class MapboxNativeNavigatorImpl(
     override val eventsMetadataProvider: EventsMetadataInterface,
 ) : MapboxNativeNavigator {
 
-    override lateinit var navigator: Navigator
+    override lateinit var navigator: NavigatorInterface
     override lateinit var graphAccessor: GraphAccessor
     override lateinit var roadObjectMatcher: RoadObjectMatcher
-    override lateinit var roadObjectsStore: RoadObjectsStore
+    override lateinit var roadObjectsStore: RoadObjectsStoreInterface
     override lateinit var experimental: Experimental
     override lateinit var cache: CacheHandle
     override lateinit var routeAlternativesController: RouteAlternativesControllerInterface
     override lateinit var telemetry: Telemetry
 
-    private lateinit var adasisFacade: AdasisFacadeHandle
+    private lateinit var adasisFacade: AdasisFacadeHandleInterface
+
+    private var isShutdown = false
 
     override val inputsService: InputsServiceHandle =
         NavigatorLoader.createInputService(config, historyRecorderComposite)
@@ -105,6 +105,7 @@ class MapboxNativeNavigatorImpl(
     }
 
     private fun init(tilesConfig: TilesConfig) {
+        isShutdown = false
         val sectionPrefix = "$PERF_TRACKER_SECTION_NAME#init-"
         val cacheHandle = PerformanceTracker.trackPerformanceSync("${sectionPrefix}cacheHandle") {
             NavigatorLoader.createCacheHandle(
@@ -115,7 +116,7 @@ class MapboxNativeNavigatorImpl(
         }
 
         adasisFacade = PerformanceTracker.trackPerformanceSync("${sectionPrefix}adasisFacade") {
-            AdasisFacadeBuilder.build(config, cacheHandle, historyRecorderComposite)
+            NavigatorLoader.createAdasisFacade(config, cacheHandle, historyRecorderComposite)
         }
 
         navigator = PerformanceTracker.trackPerformanceSync("${sectionPrefix}navigator") {
@@ -131,12 +132,12 @@ class MapboxNativeNavigatorImpl(
 
         cache = cacheHandle
         graphAccessor = PerformanceTracker.trackPerformanceSync("${sectionPrefix}graphAccessor") {
-            GraphAccessor(cacheHandle)
+            NavigatorLoader.createGraphAccessor(cacheHandle)
         }
         roadObjectMatcher = PerformanceTracker.trackPerformanceSync(
             "${sectionPrefix}roadObjectMatcher",
         ) {
-            RoadObjectMatcher(cacheHandle, roadObjectMatcherConfig)
+            NavigatorLoader.createRoadObjectMatcher(cacheHandle, roadObjectMatcherConfig)
         }
         roadObjectsStore = PerformanceTracker.trackPerformanceSync(
             "${sectionPrefix}roadObjectsStore",
@@ -156,9 +157,6 @@ class MapboxNativeNavigatorImpl(
         }
     }
 
-    /**
-     * Recreate native objects and notify listeners.
-     */
     override fun recreate(tilesConfig: TilesConfig) {
         val storeNavSessionState = navigator.storeNavigationSession()
 
@@ -173,44 +171,47 @@ class MapboxNativeNavigatorImpl(
         }
     }
 
-    /**
-     * Get router
-     */
     override fun getRouter(): RouterInterface {
+        if (warnIfShutdown("getRouter")) throw IllegalStateException("Navigator is shut down")
         return navigator.router
     }
 
     override fun getRerouteDetector(): RerouteDetectorInterface? {
+        if (warnIfShutdown("getRerouteDetector")) return null
         return navigator.rerouteDetector
     }
 
     override fun getRerouteController(): RerouteControllerInterface? {
+        if (warnIfShutdown("getRerouteController")) return null
         return navigator.rerouteController
     }
 
     override suspend fun resetRideSession() = suspendCancellableCoroutine<Unit> {
+        if (warnIfShutdown("resetRideSession")) {
+            it.resume(Unit)
+            return@suspendCancellableCoroutine
+        }
         navigator.reset {
             it.resume(Unit)
         }
     }
 
     override fun startNavigationSession() {
+        if (warnIfShutdown("startNavigationSession")) return
         navigator.startNavigationSession()
     }
 
     override fun stopNavigationSession() {
+        if (warnIfShutdown("stopNavigationSession")) return
         navigator.stopNavigationSession()
     }
 
-    /**
-     * Passes in the current raw location of the user.
-     *
-     * @param rawLocation The current raw [FixLocation] of user.
-     *
-     * @return true if the raw location was usable, false if not.
-     */
     override suspend fun updateLocation(rawLocation: FixLocation): Boolean =
         suspendCancellableCoroutine { continuation ->
+            if (warnIfShutdown("updateLocation")) {
+                continuation.resume(false)
+                return@suspendCancellableCoroutine
+            }
             PerformanceTracker.trackPerformanceSync(
                 "MapboxNativeNavigatorImpl#updateLocation",
             ) {
@@ -222,11 +223,13 @@ class MapboxNativeNavigatorImpl(
 
     private val currentNavigatorObservers = mutableListOf<NavigatorObserver>()
     override fun addNavigatorObserver(navigatorObserver: NavigatorObserver) {
+        if (warnIfShutdown("addNavigatorObserver")) return
         currentNavigatorObservers.add(navigatorObserver)
         navigator.addObserver(navigatorObserver)
     }
 
     override fun removeNavigatorObserver(navigatorObserver: NavigatorObserver) {
+        if (warnIfShutdown("removeNavigatorObserver")) return
         navigator.removeObserver(navigatorObserver)
         currentNavigatorObservers.remove(navigatorObserver)
     }
@@ -239,6 +242,10 @@ class MapboxNativeNavigatorImpl(
         alternatives: List<NavigationRoute>,
         reason: SetRoutesReason,
     ): Expected<String, SetRoutesResult> = suspendCancellableCoroutine { continuation ->
+        if (warnIfShutdown("setRoutes")) {
+            continuation.resume(ExpectedFactory.createError("Navigator is shut down"))
+            return@suspendCancellableCoroutine
+        }
         navigator.setRoutes(
             primaryRoute?.let { route ->
                 SetRoutesParams(
@@ -263,6 +270,10 @@ class MapboxNativeNavigatorImpl(
     override suspend fun setAlternativeRoutes(
         routes: List<NavigationRoute>,
     ): List<RouteAlternative> = suspendCancellableCoroutine { continuation ->
+        if (warnIfShutdown("setAlternativeRoutes")) {
+            continuation.resume(emptyList())
+            return@suspendCancellableCoroutine
+        }
         navigator.setAlternativeRoutes(
             routes.map { it.nativeRoute() },
         ) { result ->
@@ -277,19 +288,14 @@ class MapboxNativeNavigatorImpl(
         }
     }
 
-    /**
-     * Updates annotations so that subsequent calls to getStatus will
-     * reflect the most current annotations for the route.
-     *
-     * This methods manufactures a [DirectionsRefreshResponse] to adhere to requirements from
-     * https://github.com/mapbox/mapbox-navigation-native/pull/5420 where the full response has to be provided
-     * to [Navigator.refreshRoute], not only the annotations/incidents collections.
-     */
     override suspend fun refreshRoute(
         route: NavigationRoute,
         refreshResponse: DataRef?,
         geometryIndex: Int?,
     ): Expected<String, List<RouteAlternative>> {
+        if (warnIfShutdown("refreshRoute")) {
+            return ExpectedFactory.createError("Navigator is shut down")
+        }
         val callback = {
                 continuation: Continuation<Expected<String, List<RouteAlternative>>>,
                 expected: Expected<String, RefreshRouteResult>,
@@ -359,17 +365,12 @@ class MapboxNativeNavigatorImpl(
         }
     }
 
-    /**
-     * Follows a new leg of the already loaded directions.
-     * Returns an initialized navigation status if no errors occurred
-     * otherwise, it returns an invalid navigation status state.
-     *
-     * @param legIndex new leg index
-     *
-     * @return an initialized [NavigationStatus] if no errors, invalid otherwise
-     */
     override suspend fun updateLegIndex(legIndex: Int): Boolean =
         suspendCancellableCoroutine { continuation ->
+            if (warnIfShutdown("updateLegIndex")) {
+                continuation.resume(false)
+                return@suspendCancellableCoroutine
+            }
             navigator.changeLeg(legIndex) {
                 continuation.resume(it)
             }
@@ -378,37 +379,38 @@ class MapboxNativeNavigatorImpl(
     // EV
 
     override fun onEVDataUpdated(data: Map<String, String>) {
+        if (warnIfShutdown("onEVDataUpdated")) return
         navigator.onEvDataUpdated(data.toEvStateData())
     }
 
     // EH
 
-    /**
-     * Sets the Electronic Horizon observer
-     *
-     * @param eHorizonObserver
-     */
     override fun setElectronicHorizonObserver(eHorizonObserver: ElectronicHorizonObserver?) {
+        if (warnIfShutdown("setElectronicHorizonObserver")) return
         navigator.setElectronicHorizonObserver(eHorizonObserver)
     }
 
     override fun addRoadObjectsStoreObserver(roadObjectsStoreObserver: RoadObjectsStoreObserver) {
+        if (warnIfShutdown("addRoadObjectsStoreObserver")) return
         roadObjectsStore.addObserver(roadObjectsStoreObserver)
     }
 
     override fun removeRoadObjectsStoreObserver(
         roadObjectsStoreObserver: RoadObjectsStoreObserver,
     ) {
+        if (warnIfShutdown("removeRoadObjectsStoreObserver")) return
         roadObjectsStore.removeObserver(roadObjectsStoreObserver)
     }
 
     override fun setFallbackVersionsObserver(fallbackVersionsObserver: FallbackVersionsObserver?) {
+        if (warnIfShutdown("setFallbackVersionsObserver")) return
         navigator.setFallbackVersionsObserver(fallbackVersionsObserver)
     }
 
     override fun addNativeNavigatorRecreationObserver(
         nativeNavigatorRecreationObserver: NativeNavigatorRecreationObserver,
     ) {
+        if (warnIfShutdown("addNativeNavigatorRecreationObserver")) return
         nativeNavigatorRecreationObservers.add(nativeNavigatorRecreationObserver)
     }
 
@@ -422,6 +424,7 @@ class MapboxNativeNavigatorImpl(
     override fun addVoiceInstructionsAvailabilityObserver(
         observer: VoiceInstructionsAvailabilityObserver,
     ) {
+        if (warnIfShutdown("addVoiceInstructionsAvailabilityObserver")) return
         navigator.voiceInstructionsRetriever.subscribe(observer)
     }
 
@@ -429,11 +432,13 @@ class MapboxNativeNavigatorImpl(
     override fun removeVoiceInstructionsAvailabilityObserver(
         observer: VoiceInstructionsAvailabilityObserver,
     ) {
+        if (warnIfShutdown("removeVoiceInstructionsAvailabilityObserver")) return
         navigator.voiceInstructionsRetriever.unsubscribe(observer)
     }
 
     @OptIn(MapboxExperimental::class)
     override fun getRelevantVoiceInstructions(observer: VoiceInstructionsCallback) {
+        if (warnIfShutdown("getRelevantVoiceInstructions")) return
         navigator.voiceInstructionsRetriever.getRelevantVoiceInstructions(observer)
     }
 
@@ -446,41 +451,43 @@ class MapboxNativeNavigatorImpl(
         currentNavigatorObservers.clear()
     }
 
-    override fun unregisterAllObservers() {
-        unregisterAllNativeNavigatorObservers()
-        roadObjectsStore.removeAllCustomRoadObjects()
-        nativeNavigatorRecreationObservers.clear()
-    }
-
     override fun pause() {
+        if (warnIfShutdown("pause")) return
         navigator.pause()
     }
 
     override fun resume() {
+        if (warnIfShutdown("resume")) return
         navigator.resume()
     }
 
     override fun shutdown() {
+        if (warnIfShutdown("shutdown")) return
+
+        // using reset with callback = NULL to make sure it is run synchronously in NN
+        reset(null)
+        unregisterAllNativeNavigatorObservers()
+        roadObjectsStore.removeAllCustomRoadObjects()
+        nativeNavigatorRecreationObservers.clear()
+        resetAdasisMessageCallback()
+
+        isShutdown = true
         navigator.shutdown()
     }
 
-    /**
-     * Creates a Maps [PredictiveCacheController].
-     *
-     * @param tileStore Maps [TileStore]
-     * @param tilesetDescriptor Maps tilesetDescriptor [TilesetDescriptor]
-     * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions]
-     *
-     * @return [PredictiveCacheController]
-     */
     override fun createMapsPredictiveCacheController(
         tileStore: TileStore,
         tilesetDescriptor: TilesetDescriptor,
         predictiveCacheLocationOptions: PredictiveCacheLocationOptions,
-    ): PredictiveCacheController {
+    ): PredictiveCacheControllerInterface? {
+        if (warnIfShutdown("createMapsPredictiveCacheController")) {
+            return null
+        }
+
         logD(LOG_CATEGORY) {
             "createMapsPredictiveCacheController($predictiveCacheLocationOptions)"
         }
+
         return navigator.createPredictiveCacheController(
             tileStore,
             listOf(tilesetDescriptor),
@@ -488,20 +495,15 @@ class MapboxNativeNavigatorImpl(
         )
     }
 
-    /**
-     * Creates a search [PredictiveCacheController].
-     *
-     * @param tileStore Maps [TileStore]
-     * @param searchTilesetDescriptor Search tilesetDescriptor [TilesetDescriptor]
-     * @param predictiveCacheLocationOptions [PredictiveCacheLocationOptions]
-     *
-     * @return [PredictiveCacheController]
-     */
     override fun createSearchPredictiveCacheController(
         tileStore: TileStore,
         searchTilesetDescriptor: TilesetDescriptor,
         predictiveCacheLocationOptions: PredictiveCacheLocationOptions,
-    ): PredictiveCacheController {
+    ): PredictiveCacheControllerInterface? {
+        if (warnIfShutdown("createSearchPredictiveCacheController")) {
+            return null
+        }
+
         logD(LOG_CATEGORY) {
             "createSearchPredictiveCacheController($predictiveCacheLocationOptions)"
         }
@@ -513,15 +515,11 @@ class MapboxNativeNavigatorImpl(
         )
     }
 
-    /**
-     * Creates a Navigation [PredictiveCacheController].
-     *
-     * @param navigationOptions [PredictiveCacheNavigationOptions]
-     * @return [PredictiveCacheController]
-     */
     override fun createNavigationPredictiveCacheController(
         navigationOptions: PredictiveCacheNavigationOptions,
-    ): List<PredictiveCacheController> {
+    ): List<PredictiveCacheControllerInterface> {
+        if (warnIfShutdown("createNavigationPredictiveCacheController")) return emptyList()
+
         logD(LOG_CATEGORY) {
             "createNavigationPredictiveCacheController($navigationOptions)"
         }
@@ -577,30 +575,37 @@ class MapboxNativeNavigatorImpl(
     }
 
     override fun updateLaneSensorInfo(data: LaneSensorInfo) {
+        if (warnIfShutdown("updateLaneSensorInfo")) return
         inputsService.updateLaneSensorInfo(data)
     }
 
     override fun updateWeatherData(data: WeatherData) {
+        if (warnIfShutdown("updateWeatherData")) return
         inputsService.updateWeatherData(data)
     }
 
     override fun updateDetectedObjects(data: com.mapbox.navigator.DetectedObjects) {
+        if (warnIfShutdown("updateDetectedObjects")) return
         inputsService.updateDetectedObjects(data)
     }
 
     override fun updateLaneChangeAssistData(data: com.mapbox.navigator.LaneChangeAssistData) {
+        if (warnIfShutdown("updateLaneChangeAssistData")) return
         inputsService.updateLaneChangeAssistData(data)
     }
 
     override fun updateLocalizedLaneData(laneData: com.mapbox.navigator.LocalizedLaneData) {
+        if (warnIfShutdown("updateLocalizedLaneData")) return
         inputsService.updateLocalizedLaneData(laneData)
     }
 
     override fun updatePerceptionData(perceptionData: com.mapbox.navigator.PerceptionData) {
+        if (warnIfShutdown("updatePerceptionData")) return
         inputsService.updatePerceptionData(perceptionData)
     }
 
     override fun setVehicleType(type: VehicleType) {
+        if (warnIfShutdown("setVehicleType")) return
         navigator.config().mutableSettings().setVehicleType(type)
     }
 
@@ -608,35 +613,52 @@ class MapboxNativeNavigatorImpl(
         callback: ADASISv2MessageCallback,
         adasisConfig: AdasisConfig,
     ) {
+        if (warnIfShutdown("setAdasisMessageCallback")) return
         adasisFacade.setAdasisMessageCallback(callback, adasisConfig)
     }
 
     override fun resetAdasisMessageCallback() {
+        if (warnIfShutdown("resetAdasisMessageCallback")) return
         adasisFacade.resetAdasisMessageCallback()
     }
 
     override fun triggerResetOfEhProvider() {
+        if (warnIfShutdown("triggerResetOfEhProvider")) return
         adasisFacade.triggerResetOfEhProvider()
     }
 
     override fun setUserLanguages(languages: List<String>) {
+        if (warnIfShutdown("setUserLanguages")) return
         navigator.config().mutableSettings().setUserLanguages(languages)
     }
 
     override fun setTestingContext(testingContext: TestingContext) {
+        if (warnIfShutdown("setTestingContext")) return
         navigator.config().mutableSettings().setTestingContext(testingContext)
     }
 
     override fun reset(callback: ResetCallback?) {
+        if (warnIfShutdown("reset")) return
         navigator.reset(callback)
     }
 
     override fun addRerouteObserver(nativeRerouteObserver: RerouteObserver) {
+        if (warnIfShutdown("addRerouteObserver")) return
         navigator.addRerouteObserver(nativeRerouteObserver)
     }
 
     override fun removeRerouteObserver(nativeRerouteObserver: RerouteObserver) {
+        if (warnIfShutdown("removeRerouteObserver")) return
         navigator.removeRerouteObserver(nativeRerouteObserver)
+    }
+
+    private fun warnIfShutdown(method: String): Boolean {
+        return if (isShutdown) {
+            logW("$method called after the navigator was shut down, ignoring.", LOG_CATEGORY)
+            true
+        } else {
+            false
+        }
     }
 
     private companion object {

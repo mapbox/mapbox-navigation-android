@@ -1,6 +1,7 @@
 package com.mapbox.navigation.navigator.internal
 
 import androidx.annotation.VisibleForTesting
+import com.mapbox.annotation.MapboxExperimental
 import com.mapbox.common.SdkInformation
 import com.mapbox.common.TileDataDomain
 import com.mapbox.navigation.base.BuildConfig
@@ -10,18 +11,23 @@ import com.mapbox.navigation.base.options.NavigationTileDataDomain
 import com.mapbox.navigation.base.options.RoadObjectMatcherOptions
 import com.mapbox.navigation.utils.internal.getOrPutJsonObject
 import com.mapbox.navigation.utils.internal.logE
+import com.mapbox.navigator.AdasisFacadeBuilder
 import com.mapbox.navigator.AdasisFacadeHandle
+import com.mapbox.navigator.AdasisFacadeHandleInterface
 import com.mapbox.navigator.BillingProductType
 import com.mapbox.navigator.CacheFactory
 import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ConfigFactory
 import com.mapbox.navigator.ConfigHandle
+import com.mapbox.navigator.GraphAccessor
 import com.mapbox.navigator.HistoryRecorderHandle
 import com.mapbox.navigator.InputsServiceHandle
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorConfig
+import com.mapbox.navigator.NavigatorInterface
 import com.mapbox.navigator.ProfileApplication
 import com.mapbox.navigator.ProfilePlatform
+import com.mapbox.navigator.RoadObjectMatcher
 import com.mapbox.navigator.RoadObjectMatcherConfig
 import com.mapbox.navigator.RoadObjectsMatcherOptions
 import com.mapbox.navigator.RouterFactory
@@ -37,6 +43,7 @@ import org.json.JSONObject
  * This class is expected to gain more responsibility as we define [customConfig].
  * The custom config can be exposed through the [DeviceProfile]
  */
+@OptIn(MapboxExperimental::class)
 object NavigatorLoader {
 
     fun createConfig(
@@ -72,15 +79,16 @@ object NavigatorLoader {
         historyRecorderComposite: HistoryRecorderHandle?,
         offlineCacheHandle: CacheHandle?,
         inputsServiceHandle: InputsServiceHandle,
-        adasisFacade: AdasisFacadeHandle,
-    ): Navigator {
+        adasisFacade: AdasisFacadeHandleInterface,
+    ): NavigatorInterface {
         return Navigator(
             config,
             cacheHandle,
             historyRecorderComposite,
             RouterType.HYBRID,
             inputsServiceHandle,
-            adasisFacade,
+            // TODO(NN-4796) make Navigator accept interface types
+            adasisFacade as AdasisFacadeHandle,
             offlineCacheHandle,
         )
     }
@@ -141,6 +149,25 @@ object NavigatorLoader {
         return InputsServiceHandle.build(config, historyRecorder)
     }
 
+    internal fun createAdasisFacade(
+        config: ConfigHandle,
+        cacheHandle: CacheHandle,
+        historyRecorder: HistoryRecorderHandle?,
+    ): AdasisFacadeHandleInterface {
+        return AdasisFacadeBuilder.build(config, cacheHandle, historyRecorder)
+    }
+
+    internal fun createGraphAccessor(cacheHandle: CacheHandle): GraphAccessor {
+        return GraphAccessor(cacheHandle)
+    }
+
+    internal fun createRoadObjectMatcher(
+        cacheHandle: CacheHandle,
+        config: RoadObjectMatcherConfig,
+    ): RoadObjectMatcher {
+        return RoadObjectMatcher(cacheHandle, config)
+    }
+
     private fun buildHistoryRecorder(
         historyDir: String?,
         config: ConfigHandle,
@@ -192,7 +219,6 @@ object NavigatorLoader {
             DeviceType.AUTOMOBILE -> {
                 SettingsProfile(ProfileApplication.AUTO, ProfilePlatform.ANDROID)
             }
-            else -> throw NotImplementedError("Unknown device profile")
         }
     }
 

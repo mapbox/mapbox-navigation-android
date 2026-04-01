@@ -1564,10 +1564,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         navigationTelemetry.clearObservers()
         rerouteController?.interrupt()
 
-        // using reset with callback = NULL to make sure it is run synchronously in NN
-        navigator.reset(null)
-
-        navigator.unregisterAllObservers()
         navigator.shutdown()
 
         navigationVersionSwitchObservers.clear()
@@ -1586,7 +1582,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             ReachabilityService.removeReachabilityObserver(it)
             reachabilityObserverId = null
         }
-        navigator.resetAdasisMessageCallback()
         historyRecorders.forEach { it.unregisterAllHistoryRecordingEnabledObservers() }
 
         clearCaches()
