@@ -165,6 +165,7 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
                                 ?.map { originalLeg ->
                                     originalLeg.toBuilder()
                                         .incidents(originalLeg.incidents().orEmpty())
+                                        .closures(originalLeg.closures().orEmpty())
                                         .build()
                                 },
                         )
