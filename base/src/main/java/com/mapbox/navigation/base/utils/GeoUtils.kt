@@ -1,5 +1,7 @@
 package com.mapbox.navigation.base.utils
 
+import androidx.annotation.WorkerThread
+import com.mapbox.bindgen.Expected
 import com.mapbox.geojson.CoordinateContainer
 import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.LineString
@@ -13,6 +15,14 @@ private typealias CoreGeoUtils = com.mapbox.navigator.GeoUtils
 internal object CoreGeoUtilsWrapper {
     fun getTopoLinkId(geometry: Geometry, startIndex: Int, endIndex: Int): Long {
         return CoreGeoUtils.getTopoLinkId(geometry, startIndex, endIndex)
+    }
+
+    fun getWayId(edgeId: Long): Expected<String, Long> {
+        return CoreGeoUtils.getWayId(edgeId)
+    }
+
+    fun getWayId(shape: Geometry, startIndex: Int, endIndex: Int): Expected<String, List<Long>> {
+        return CoreGeoUtils.getWayId(shape, startIndex, endIndex)
     }
 }
 
@@ -86,6 +96,70 @@ object GeoUtils {
     @JvmOverloads
     fun getTopoLinkId(points: List<Point>, startIndex: Int = 0, endIndex: Int = points.size): Long {
         return getTopoLinkId(LineString.fromLngLats(points), startIndex, endIndex)
+    }
+
+    /**
+     * Provides the OSM way id for the given directed edge.
+     *
+     * May perform blocking access to the on-device routing graph / tiles.
+     *
+     * @param edgeId Directed edge id
+     * @return OSM way id on success (including 0 when that is the real way id). On failure, the
+     * error string describes the reason (e.g. no graph reader, invalid id, missing tile).
+     */
+    @WorkerThread
+    fun getWayId(edgeId: Long): Expected<String, Long> {
+        return CoreGeoUtilsWrapper.getWayId(edgeId)
+    }
+
+    /**
+     * Provides the OSM way ids encountered along a polyline span, map-matched to the routing graph.
+     *
+     * Returns an ordered list of distinct consecutive way ids along the matched path. On any failure
+     * the result is an error (e.g. no graph reader, invalid span, search failure, missing tile).
+     *
+     * May perform blocking graph search and tile IO.
+     *
+     * @param geometry [LineString] object representing the polyline span
+     * @param startIndex start index of the span (inclusive)
+     * @param endIndex end index of the span (exclusive); span must contain at least two points
+     *
+     * @throws IndexOutOfBoundsException if [startIndex] or [endIndex] are outside the bounds of [geometry]
+     * @throws IllegalArgumentException if [startIndex] > [endIndex]
+     */
+    @WorkerThread
+    fun getWayId(
+        geometry: LineString,
+        startIndex: Int,
+        endIndex: Int,
+    ): Expected<String, List<Long>> {
+        checkIndices(geometry, startIndex, endIndex)
+        return CoreGeoUtilsWrapper.getWayId(geometry, startIndex, endIndex)
+    }
+
+    /**
+     * Provides the OSM way ids encountered along a polyline span, map-matched to the routing graph.
+     *
+     * Returns an ordered list of distinct consecutive way ids along the matched path. On any failure
+     * the result is an error (e.g. no graph reader, invalid span, search failure, missing tile).
+     *
+     * May perform blocking graph search and tile IO.
+     *
+     * @param points a list of [Point] representing the polyline span
+     * @param startIndex start index of the span (inclusive). Defaults to 0
+     * @param endIndex end index of the span (exclusive). Defaults to the size of the [points] list
+     *
+     * @throws IndexOutOfBoundsException if [startIndex] or [endIndex] are outside the bounds of [points]
+     * @throws IllegalArgumentException if [startIndex] > [endIndex]
+     */
+    @WorkerThread
+    @JvmOverloads
+    fun getWayId(
+        points: List<Point>,
+        startIndex: Int = 0,
+        endIndex: Int = points.size,
+    ): Expected<String, List<Long>> {
+        return getWayId(LineString.fromLngLats(points), startIndex, endIndex)
     }
 
     private fun checkIndices(

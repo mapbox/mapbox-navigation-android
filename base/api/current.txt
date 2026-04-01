@@ -2391,6 +2391,11 @@ package com.mapbox.navigation.base.utils {
     method public long getTopoLinkId(java.util.List<com.mapbox.geojson.Point> points, int startIndex = 0, int endIndex = points.size);
     method public long getTopoLinkId(java.util.List<com.mapbox.geojson.Point> points, int startIndex = 0);
     method public long getTopoLinkId(java.util.List<com.mapbox.geojson.Point> points);
+    method @WorkerThread public com.mapbox.bindgen.Expected<java.lang.String,java.lang.Long> getWayId(long edgeId);
+    method @WorkerThread public com.mapbox.bindgen.Expected<java.lang.String,java.util.List<java.lang.Long>> getWayId(com.mapbox.geojson.LineString geometry, int startIndex, int endIndex);
+    method @WorkerThread public com.mapbox.bindgen.Expected<java.lang.String,java.util.List<java.lang.Long>> getWayId(java.util.List<com.mapbox.geojson.Point> points, int startIndex = 0, int endIndex = points.size);
+    method @WorkerThread public com.mapbox.bindgen.Expected<java.lang.String,java.util.List<java.lang.Long>> getWayId(java.util.List<com.mapbox.geojson.Point> points, int startIndex = 0);
+    method @WorkerThread public com.mapbox.bindgen.Expected<java.lang.String,java.util.List<java.lang.Long>> getWayId(java.util.List<com.mapbox.geojson.Point> points);
     field public static final com.mapbox.navigation.base.utils.GeoUtils INSTANCE;
   }
 
