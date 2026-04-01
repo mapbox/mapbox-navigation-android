@@ -477,12 +477,16 @@ class MapboxNativeNavigatorImpl(
         tileStore: TileStore,
         tilesetDescriptor: TilesetDescriptor,
         predictiveCacheLocationOptions: PredictiveCacheLocationOptions,
-    ): PredictiveCacheController =
-        navigator.createPredictiveCacheController(
+    ): PredictiveCacheController {
+        logD(LOG_CATEGORY) {
+            "createMapsPredictiveCacheController($predictiveCacheLocationOptions)"
+        }
+        return navigator.createPredictiveCacheController(
             tileStore,
             listOf(tilesetDescriptor),
             predictiveCacheLocationOptions.toPredictiveLocationTrackerOptions(),
         )
+    }
 
     /**
      * Creates a search [PredictiveCacheController].
@@ -497,12 +501,17 @@ class MapboxNativeNavigatorImpl(
         tileStore: TileStore,
         searchTilesetDescriptor: TilesetDescriptor,
         predictiveCacheLocationOptions: PredictiveCacheLocationOptions,
-    ): PredictiveCacheController =
-        navigator.createPredictiveCacheController(
+    ): PredictiveCacheController {
+        logD(LOG_CATEGORY) {
+            "createSearchPredictiveCacheController($predictiveCacheLocationOptions)"
+        }
+
+        return navigator.createPredictiveCacheController(
             tileStore,
             listOf(searchTilesetDescriptor),
             predictiveCacheLocationOptions.toPredictiveLocationTrackerOptions(),
         )
+    }
 
     /**
      * Creates a Navigation [PredictiveCacheController].
@@ -513,6 +522,10 @@ class MapboxNativeNavigatorImpl(
     override fun createNavigationPredictiveCacheController(
         navigationOptions: PredictiveCacheNavigationOptions,
     ): List<PredictiveCacheController> {
+        logD(LOG_CATEGORY) {
+            "createNavigationPredictiveCacheController($navigationOptions)"
+        }
+
         val coreLocationOptions = navigationOptions.predictiveCacheLocationOptions
             .toPredictiveLocationTrackerOptions()
 

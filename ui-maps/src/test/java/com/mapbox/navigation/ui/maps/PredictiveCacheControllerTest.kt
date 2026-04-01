@@ -203,18 +203,18 @@ class PredictiveCacheControllerTest {
             assertEquals(2, capturedKeys1.size)
             assertEquals("mapbox://test_test", capturedKeys1[0].styleUri)
             assertEquals(mockTilesetDescriptor1, capturedKeys1[0].tilesetDescriptor)
-            assertEquals(locationOptions1, capturedKeys1[0].locationOptions)
+            assertEquals(locationOptions1, capturedKeys1[0].options.predictiveCacheLocationOptions)
             assertEquals(mockedTileStore, capturedKeys1[0].tileStore)
             assertEquals("mapbox://test_test", capturedKeys1[1].styleUri)
             assertEquals(mockTilesetDescriptor2, capturedKeys1[1].tilesetDescriptor)
-            assertEquals(locationOptions2, capturedKeys1[1].locationOptions)
+            assertEquals(locationOptions2, capturedKeys1[1].options.predictiveCacheLocationOptions)
             assertEquals(mockedTileStore, capturedKeys1[1].tileStore)
 
             val capturedKeys3 = slotPredictiveCacheControllerKeys3.captured
             assertEquals(1, capturedKeys3.size)
             assertEquals("mapbox://test_explicit_options", capturedKeys3[0].styleUri)
             assertEquals(mockTilesetDescriptor3, capturedKeys3[0].tilesetDescriptor)
-            assertEquals(locationOptions3, capturedKeys3[0].locationOptions)
+            assertEquals(locationOptions3, capturedKeys3[0].options.predictiveCacheLocationOptions)
             assertEquals(mockedTileStore, capturedKeys3[0].tileStore)
 
             // "non_valid://test_test
@@ -311,11 +311,11 @@ class PredictiveCacheControllerTest {
             assertEquals(2, capturedKeys1.size)
             assertEquals("mapbox://test_test", capturedKeys1[0].styleUri)
             assertEquals(mockTilesetDescriptor1, capturedKeys1[0].tilesetDescriptor)
-            assertEquals(locationOptions1, capturedKeys1[0].locationOptions)
+            assertEquals(locationOptions1, capturedKeys1[0].options.predictiveCacheLocationOptions)
             assertEquals(mockedTileStore, capturedKeys1[0].tileStore)
             assertEquals("mapbox://test_test", capturedKeys1[1].styleUri)
             assertEquals(mockTilesetDescriptor2, capturedKeys1[1].tilesetDescriptor)
-            assertEquals(locationOptions2, capturedKeys1[1].locationOptions)
+            assertEquals(locationOptions2, capturedKeys1[1].options.predictiveCacheLocationOptions)
             assertEquals(mockedTileStore, capturedKeys1[1].tileStore)
 
             verify(exactly = 0) { errorHandler.onError(any()) }

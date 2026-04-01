@@ -17,11 +17,9 @@ import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.internal.PredictiveCache
+import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logW
-
-private const val LOG_CATEGORY = "PredictiveCacheController"
-private const val MAPBOX_URL_PREFIX = "mapbox://"
 
 /**
  * Predictive caching is a system that downloads necessary visual map and guidance data resources
@@ -59,6 +57,8 @@ private const val MAPBOX_URL_PREFIX = "mapbox://"
  * It makes sense to delete any folders used previously for caching including a default one.
  * - `OnboardRouterOptions` enabled you to specify a path where nav-tiles will be saved and if a
  * custom directory was used, it should be cleared as well.
+ *
+ * TODO(NAVAND-7127) accept TileStore instance as a parameter
  */
 @UiThread
 class PredictiveCacheController @VisibleForTesting internal constructor(
@@ -135,6 +135,10 @@ class PredictiveCacheController @VisibleForTesting internal constructor(
         cacheCurrentMapStyle: Boolean = true,
         styles: List<String> = emptyList(),
     ) {
+        logD(LOG_CATEGORY) {
+            "createStyleMapControllers($map, $cacheCurrentMapStyle, $styles)"
+        }
+
         val tileStore = MapboxOptions.mapsOptions.tileStore
         if (tileStore == null) {
             handleError("TileStore instance not configured for the Map.")
@@ -153,15 +157,19 @@ class PredictiveCacheController @VisibleForTesting internal constructor(
             createMapsController(styleURI, map, tileStore)
         }
 
-        if (cacheCurrentMapStyle) {
-            map.style?.styleURI?.let { styleURI ->
+        if (!cacheCurrentMapStyle) {
+            return
+        }
+
+        map.style?.styleURI?.let { styleURI ->
+            if (!styles.contains(styleURI)) {
                 createMapsController(styleURI, map, tileStore, null)
             }
         }
 
         val styleLoadedCallback = StyleLoadedCallback {
-            if (cacheCurrentMapStyle) {
-                map.style?.styleURI?.let { styleURI ->
+            map.style?.styleURI?.let { styleURI ->
+                if (!styles.contains(styleURI)) {
                     createMapsController(styleURI, map, tileStore, null)
                 }
             }
@@ -223,8 +231,6 @@ class PredictiveCacheController @VisibleForTesting internal constructor(
         tileStore: TileStore,
         predictiveCacheMapOptions: List<PredictiveCacheMapsOptions>? = null,
     ) {
-        val offlineManager = OfflineManagerProvider.provideOfflineManager()
-
         if (!styleURI.startsWith(MAPBOX_URL_PREFIX)) {
             val message =
                 """
@@ -232,12 +238,13 @@ class PredictiveCacheController @VisibleForTesting internal constructor(
                     Only styles hosted on Mapbox Services are supported.
                 """.trimIndent()
             handleError(message)
-        } else {
-            val predictiveCacheControllerKeys =
-                (
-                    predictiveCacheMapOptions
-                        ?: predictiveCacheOptions.predictiveCacheMapsOptionsList
-                    ).map { options ->
+            return
+        }
+
+        val offlineManager = OfflineManagerProvider.provideOfflineManager()
+        val predictiveCacheControllerKeys =
+            (predictiveCacheMapOptions ?: predictiveCacheOptions.predictiveCacheMapsOptionsList)
+                .map { options ->
                     val descriptorOptions = TilesetDescriptorOptions.Builder()
                         .styleURI(styleURI)
                         .minZoom(options.minZoom)
@@ -252,12 +259,11 @@ class PredictiveCacheController @VisibleForTesting internal constructor(
                         styleURI,
                         tileStore,
                         tilesetDescriptor,
-                        options.predictiveCacheLocationOptions,
+                        options,
                     )
                 }
 
-            predictiveCache.createMapsControllers(map, predictiveCacheControllerKeys)
-        }
+        predictiveCache.createMapsControllers(map, predictiveCacheControllerKeys)
     }
 
     private fun createSearchControllers() {
@@ -284,6 +290,10 @@ class PredictiveCacheController @VisibleForTesting internal constructor(
     }
 
     private companion object {
+
+        private const val LOG_CATEGORY = "PredictiveCacheController"
+        private const val MAPBOX_URL_PREFIX = "mapbox://"
+
         fun tryToRetrieveMapboxNavigation(): MapboxNavigation {
             return if (MapboxNavigationProvider.isCreated()) {
                 MapboxNavigationProvider.retrieve()
