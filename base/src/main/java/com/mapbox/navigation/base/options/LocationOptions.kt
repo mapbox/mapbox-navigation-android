@@ -1,13 +1,16 @@
 package com.mapbox.navigation.base.options
 
+import android.os.HandlerThread
 import androidx.annotation.StringDef
 import com.mapbox.common.location.AccuracyLevel
 import com.mapbox.common.location.DeviceLocationProviderFactory
 import com.mapbox.common.location.IntervalSettings
 import com.mapbox.common.location.LocationProvider
 import com.mapbox.common.location.LocationProviderRequest
-import com.mapbox.navigation.base.options.LocationOptions.LocationProviderSource
-import com.mapbox.navigation.base.options.LocationOptions.LocationProviderType
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.options.LocationOptions.Companion.DEFAULT_REQUEST
+import com.mapbox.navigation.base.options.LocationOptions.LocationProviderSource.Companion.FUSED
+import com.mapbox.navigation.base.options.LocationOptions.LocationProviderSource.Companion.GPS
 
 /**
  * Location updates related config.
@@ -29,6 +32,8 @@ class LocationOptions private constructor(
     val locationProviderFactory: DeviceLocationProviderFactory?,
     @LocationProviderType.Type val locationProviderType: String,
     val locationProviderSource: LocationProviderSource,
+    @ExperimentalPreviewMapboxNavigationAPI
+    val handlerThread: HandlerThread?,
 ) {
 
     /**
@@ -135,6 +140,9 @@ class LocationOptions private constructor(
         private var request = DEFAULT_REQUEST
         private var locationProviderFactory: DeviceLocationProviderFactory? = null
 
+        @ExperimentalPreviewMapboxNavigationAPI
+        private var handlerThread: HandlerThread? = null
+
         /**
          * Set [LocationProviderRequest] that will be used for creating [LocationProvider].
          * If not set, default request will be used (see [DEFAULT_REQUEST]).
@@ -202,14 +210,25 @@ class LocationOptions private constructor(
         }
 
         /**
+         * Sets an external [HandlerThread] to be used for delivering location updates.
+         * If not set, [TripSessionLocationEngine] will create and manage its own thread.
+         * The caller is responsible for the lifecycle of the provided thread.
+         */
+        @ExperimentalPreviewMapboxNavigationAPI
+        fun handlerThread(handlerThread: HandlerThread?): Builder =
+            apply { this.handlerThread = handlerThread }
+
+        /**
          * Build [LocationOptions] object.
          */
+        @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         fun build(): LocationOptions {
             return LocationOptions(
                 request,
                 locationProviderFactory,
                 locationProviderType,
                 locationProviderSource ?: LocationProviderSource.BEST,
+                handlerThread,
             )
         }
     }
@@ -217,6 +236,7 @@ class LocationOptions private constructor(
     /**
      * Indicates whether some other object is "equal to" this one.
      */
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -227,6 +247,7 @@ class LocationOptions private constructor(
         if (locationProviderFactory != other.locationProviderFactory) return false
         if (locationProviderType != other.locationProviderType) return false
         if (locationProviderSource != other.locationProviderSource) return false
+        if (handlerThread != other.handlerThread) return false
 
         return true
     }
@@ -234,23 +255,27 @@ class LocationOptions private constructor(
     /**
      * Returns a hash code value for the object.
      */
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun hashCode(): Int {
         var result = request.hashCode()
         result = 31 * result + (locationProviderFactory?.hashCode() ?: 0)
         result = 31 * result + locationProviderType.hashCode()
         result = 31 * result + locationProviderSource.hashCode()
+        result = 31 * result + (handlerThread?.hashCode() ?: 0)
         return result
     }
 
     /**
      * Returns a string representation of the object.
      */
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun toString(): String {
         return "LocationOptions(" +
             "request=$request, " +
             "locationProviderFactory=$locationProviderFactory, " +
             "locationProviderType='$locationProviderType', " +
-            "locationProviderSource=$locationProviderSource" +
+            "locationProviderSource=$locationProviderSource, " +
+            "handlerThread=$handlerThread" +
             ")"
     }
 }

@@ -215,6 +215,11 @@ class MapboxNativeNavigatorImpl(
             PerformanceTracker.trackPerformanceSync(
                 "MapboxNativeNavigatorImpl#updateLocation",
             ) {
+                PerformanceTracker.trackPerformanceSync(
+                    "location.monotonicTimestampNanoseconds = " +
+                        "${rawLocation.monotonicTimestampNanoseconds}",
+                ) {}
+
                 navigator.updateLocation(rawLocation) {
                     continuation.resume(it)
                 }

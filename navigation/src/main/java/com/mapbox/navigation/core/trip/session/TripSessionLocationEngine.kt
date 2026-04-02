@@ -14,6 +14,7 @@ import com.mapbox.common.location.LocationErrorCode
 import com.mapbox.common.location.LocationObserver
 import com.mapbox.common.location.LocationProvider
 import com.mapbox.common.location.LocationServiceFactory
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.LocationOptions
 import com.mapbox.navigation.base.options.LocationOptions.LocationProviderSource.Companion.BEST
 import com.mapbox.navigation.base.options.LocationOptions.LocationProviderSource.Companion.FUSED
@@ -53,7 +54,11 @@ internal class TripSessionLocationEngine constructor(
     private var activeLocationProvider: LocationProvider? = null
     private var onRawLocationUpdate: (Location) -> Unit = { }
 
-    internal val handlerThread = ThreadUtils.prepareHandlerThread(
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    private val isHandlerThreadOwned = locationOptions.handlerThread == null
+
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    internal val handlerThread = locationOptions.handlerThread ?: ThreadUtils.prepareHandlerThread(
         name = "locations inputs thread",
         priority = android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE,
     )
@@ -157,7 +162,7 @@ internal class TripSessionLocationEngine constructor(
 
     fun destroy() {
         LocationServiceFactory.getOrCreate().setUserDefinedDeviceLocationProviderFactory(null)
-        handlerThread.quit()
+        if (isHandlerThreadOwned) handlerThread.quit()
     }
 
     private fun logIfLocationIsNotFreshEnough(location: Location) {
