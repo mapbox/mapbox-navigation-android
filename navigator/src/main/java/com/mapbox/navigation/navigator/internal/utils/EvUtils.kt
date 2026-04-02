@@ -25,6 +25,7 @@ fun Map<String, String>.toEvStateData(): EvStateData {
         this[EV_KEY_INITIAL_CHARGE]?.toIntOrNull() ?: 0,
         this[EV_KEY_ENERGY_CONSUMPTION_CURVE]?.toCurveElements() ?: emptyList(),
         this[EV_FREEFLOW_CONSUMPTION_CURVE]?.toCurveElements(),
+        null, // TODO: https://mapbox.atlassian.net/browse/NAVAND-7128
         this[EV_KEY_AUX_CONSUMPTION]?.toIntOrNull(),
         this[EV_KEY_PRE_CONDITIONING_TIME]?.toIntOrNull(),
         this[EV_KEY_UNCONDITIONED_CHARGING_CURVE]?.toCurveElements() ?: emptyList(),
