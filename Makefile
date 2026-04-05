@@ -108,7 +108,7 @@ assemble-core-debug:
 
 .PHONY: assemble-core-release
 assemble-core-release:
-	$(call run-gradle-tasks,$(CORE_MODULES),assembleRelease $(additional_gradle_parameters))
+	$(call run-gradle-tasks,$(CORE_MODULES),assembleRelease $(if $(VERSION_NAME),-PVERSION_NAME=$(VERSION_NAME),) $(additional_gradle_parameters))
 
 .PHONY: core-unit-tests
 core-unit-tests:
@@ -170,7 +170,7 @@ assemble-ui-debug:
 
 .PHONY: assemble-ui-release
 assemble-ui-release:
-	$(call run-gradle-tasks,$(UI_MODULES),assembleRelease $(additional_gradle_parameters))
+	$(call run-gradle-tasks,$(UI_MODULES),assembleRelease $(if $(VERSION_NAME),-PVERSION_NAME=$(VERSION_NAME),) $(additional_gradle_parameters))
 
 .PHONY: ui-unit-tests
 ui-unit-tests:
@@ -206,8 +206,8 @@ upload-to-sdk-registry-snapshot:
 
 .PHONY: upload-to-sdk-registry
 upload-to-sdk-registry:
-	./gradlew mapboxSDKRegistryUpload
-	./gradlew mapboxSDKRegistryUpload -PndkMajor=27
+	./gradlew mapboxSDKRegistryUpload $(if $(VERSION_NAME),-PVERSION_NAME=$(VERSION_NAME),)
+	./gradlew mapboxSDKRegistryUpload $(if $(VERSION_NAME),-PVERSION_NAME=$(VERSION_NAME),) -PndkMajor=27
 
 .PHONY: publish-to-sdk-registry
 publish-to-sdk-registry:
@@ -215,7 +215,14 @@ publish-to-sdk-registry:
 		echo "GITHUB_TOKEN env variable has to be set"; \
 	else \
 		python3 -m pip install git-pull-request; \
-		./gradlew mapboxSDKRegistryPublishAll; \
+		output=$$(./gradlew mapboxSDKRegistryPublishAll $(if $(VERSION_NAME),-PVERSION_NAME=$(VERSION_NAME),) --stacktrace --info 2>&1); \
+		exit_code=$$?; \
+		echo "$$output"; \
+		if [ $$exit_code -ne 0 ] && echo "$$output" | grep -q "nothing to commit"; then \
+			if [ "$$GITHUB_ACTIONS" = "true" ]; then echo "::warning title=SDK Registry Already Published::SDK Registry configs already published — skipping"; else echo "SDK Registry configs already published — skipping"; fi; \
+		elif [ $$exit_code -ne 0 ]; then \
+			exit $$exit_code; \
+		fi; \
 	fi
 
 .PHONY: ui-check-api
