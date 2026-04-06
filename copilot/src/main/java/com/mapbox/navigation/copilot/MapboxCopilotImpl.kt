@@ -379,7 +379,7 @@ internal class MapboxCopilotImpl(
         }
 
     private fun CopilotSession.deleteCopilotSession() =
-        mainJobController.scope.launch(Dispatchers.IO) {
+        mainJobController.scope.launch {
             delete(File(filepaths.copilotAbsolutePath(), saveFilename()))
         }
 
