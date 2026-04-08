@@ -215,6 +215,7 @@ class MapboxNavigationViewportDataSource private constructor(
 ) : ViewportDataSource {
 
     internal companion object {
+
         private const val LOG_CATEGORY = "MapboxNavigationViewportDataSource"
         internal val NULL_ISLAND_POINT = Point.fromLngLat(0.0, 0.0)
         internal val EMPTY_EDGE_INSETS = EdgeInsets(0.0, 0.0, 0.0, 0.0)
@@ -337,7 +338,7 @@ class MapboxNavigationViewportDataSource private constructor(
         cameraForOverview = overviewViewportDataSource.viewportData,
     )
         set(value) {
-            if (value != field) {
+            if (!value.isStandstill(field)) {
                 field = value
                 viewportDataSourceUpdateObservers.forEach {
                     it.viewportDataSourceUpdated(value)
