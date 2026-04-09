@@ -10,16 +10,10 @@ import com.mapbox.geojson.utils.PolylineUtils
 fun RouteLeg.geometryPoints(precision: Int): List<Point> {
     val legGeometry = this.stepsGeometryToPoints(precision)
 
-    return legGeometry.fold(mutableListOf<Point>()) { accumulator, stepPoints ->
+    return legGeometry.fold(mutableListOf()) { accumulator, stepPoints ->
         // remove last point: the first point of next step is the same
         accumulator.removeLastOrNull()
-        // edge case when step geometry contains only 2 points that might be the same
-        // it must be squashed to 1 point
-        if (stepPoints.size == 2) {
-            accumulator.addAll(stepPoints.toSet())
-        } else {
-            accumulator.addAll(stepPoints)
-        }
+        accumulator.addAll(stepPoints)
         accumulator
     }
 }
@@ -34,15 +28,8 @@ fun RouteLeg.geometryPointAt(index: Int, precision: Int): Point? {
     for (i in stepList.indices) {
         val geometry = stepList[i].geometry() ?: continue
         val points = PolylineUtils.decode(geometry, precision)
-        // Mirror geometryPoints() deduplication logic:
-        // - First step: contributes all points (or unique set if size == 2)
-        // - Subsequent steps: first point is shared with previous step's last, skip it
         val skip = if (i == 0) 0 else 1
-        val effective = if (points.size == 2) {
-            if (points[0] == points[1]) maxOf(1 - skip, 0) else (2 - skip)
-        } else {
-            points.size - skip
-        }
+        val effective = points.size - skip
         if (remaining < effective) return points[skip + remaining]
         remaining -= effective
     }

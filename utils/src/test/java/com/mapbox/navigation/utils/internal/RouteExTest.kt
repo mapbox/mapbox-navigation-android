@@ -24,8 +24,10 @@ class RouteExTest {
             assertEquals(
                 listOf(
                     Point.fromLngLat(1.0, 2.0),
+                    Point.fromLngLat(1.0, 2.0),
                     Point.fromLngLat(3.0, 4.0),
                     Point.fromLngLat(5.0, 6.0),
+                    Point.fromLngLat(7.0, 8.0),
                     Point.fromLngLat(7.0, 8.0),
                 ),
                 result,

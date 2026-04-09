@@ -212,7 +212,8 @@ private class Geometry(
     /**
      * Note: there will be `size + 1` number of points, because each geometry consists of 2 points.
      */
-    fun point(index: Int): Point = points[index]
+    fun point(index: Int): Point =
+        points[index.coerceIn(points.indices)]
 
     companion object {
 

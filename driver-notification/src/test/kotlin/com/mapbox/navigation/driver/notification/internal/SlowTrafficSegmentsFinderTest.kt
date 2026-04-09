@@ -2,8 +2,10 @@ package com.mapbox.navigation.driver.notification.internal
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegAnnotation
+import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.geojson.Point
+import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.internal.utils.Constants
 import com.mapbox.navigation.base.internal.utils.Constants.CongestionRange.HEAVY_CONGESTION_RANGE
 import com.mapbox.navigation.base.internal.utils.Constants.CongestionRange.SEVERE_CONGESTION_RANGE
@@ -364,6 +366,91 @@ class SlowTrafficSegmentsFinderTest {
         val segment = segments.first()
         Assert.assertEquals(1..2, segment.geometryRange)
         Assert.assertEquals(80.0, segment.distanceMeters, 0.01)
+    }
+
+    @Test
+    fun `geometry point does not throw when index equals points array size`() = runBlocking {
+        // Geometry.point(geometryIndex + 1) is called for every slow annotation.
+        // Check if no exception when annotation index is higher than points count for some reason
+        val finderWithShortPoints = SlowTrafficSegmentsFinder(
+            extractPoints = { leg ->
+                List(leg.annotation()!!.distance()!!.size - 1) {
+                    Point.fromLngLat(10.0, 20.0)
+                }
+            },
+        )
+        val annotation = mockk<LegAnnotation> {
+            every { congestionNumeric() } returns listOf(lowCongestion, severeCongestion)
+            every { distance() } returns listOf(50.0, 80.0)
+            every { duration() } returns listOf(5.0, 18.0)
+            every { freeflowSpeed() } returns listOf(36, 17)
+        }
+        val routeProgress = prepareRouteProgressFrom(annotation)
+
+        val segments = finderWithShortPoints.findSlowTrafficSegments(
+            routeProgress = routeProgress,
+            targetCongestionsRanges = listOf(SEVERE_CONGESTION_RANGE),
+        )
+
+        Assert.assertEquals(1, segments.size)
+    }
+
+    @Test
+    fun `find slow traffic segment when last arrive step points are the same`() = runBlocking {
+        val p0 = Point.fromLngLat(10.000, 20.0)
+        val p1 = Point.fromLngLat(10.001, 20.0)
+        val p2 = Point.fromLngLat(10.002, 20.0)
+        val p3 = Point.fromLngLat(10.003, 20.0)
+
+        val step1 = mockk<LegStep> {
+            every { geometry() } returns PolylineUtils.encode(listOf(p0, p1, p2), 6)
+        }
+        val step2 = mockk<LegStep> {
+            every { geometry() } returns PolylineUtils.encode(listOf(p2, p3), 6)
+        }
+        val arriveStep = mockk<LegStep> {
+            // Identical endpoints — the arrive maneuver pattern that triggers the collapse
+            every { geometry() } returns PolylineUtils.encode(listOf(p3, p3), 6)
+        }
+
+        val annotation = mockk<LegAnnotation> {
+            every { congestionNumeric() } returns listOf(
+                lowCongestion,
+                lowCongestion,
+                severeCongestion,
+                severeCongestion, // last annotation is slow traffic — triggers the off-by-one crash
+            )
+            every { distance() } returns listOf(50.0, 60.0, 70.0, 80.0)
+            every { duration() } returns listOf(5.0, 6.0, 15.0, 18.0)
+            every { freeflowSpeed() } returns listOf(36, 36, 17, 16)
+        }
+
+        val leg = mockk<RouteLeg> {
+            every { annotation() } returns annotation
+            every { steps() } returns listOf(step1, step2, arriveStep)
+        }
+        val route = mockk<DirectionsRoute> { every { legs() } returns listOf(leg) }
+        val legProgress = mockk<RouteLegProgress> {
+            every { legIndex } returns 0
+            every { geometryIndex } returns 0
+        }
+        val routeProgress = mockk<RouteProgress> {
+            every { this@mockk.route } returns route
+            every { currentLegProgress } returns legProgress
+        }
+
+        // Must not throw IndexOutOfBoundsException
+        val segments = SlowTrafficSegmentsFinder().findSlowTrafficSegments(
+            routeProgress = routeProgress,
+            targetCongestionsRanges = listOf(SEVERE_CONGESTION_RANGE),
+        )
+
+        Assert.assertEquals(1, segments.size)
+        val segment = segments.first()
+        Assert.assertEquals(2..3, segment.geometryRange)
+        Assert.assertEquals(110.0, segment.distanceToSegmentMeters, 0.01)
+        Assert.assertEquals(150.0, segment.distanceMeters, 0.01)
+        Assert.assertEquals(33.seconds, segment.duration)
     }
 
     private fun prepareRouteProgressFrom(vararg annotation: LegAnnotation): RouteProgress {
