@@ -2828,6 +2828,8 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                 any<InternalRerouteController.DeviationRoutesCallback>(),
             )
         }
+
+        mapboxNavigation.onDestroy()
     }
 
     private fun interceptRefreshObserver(): RouteRefreshObserver {

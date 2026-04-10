@@ -59,9 +59,12 @@ import com.mapbox.navigator.RoutesChangeInfo
 import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.VoiceInstructionsAvailabilityObserver
 import com.mapbox.navigator.VoiceInstructionsCallback
-import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.TimeUnit
@@ -306,7 +309,10 @@ internal class MapboxTripSession(
 
     private var offRouteObserverForReroute: OffRouteObserver? = null
 
-    private var rawLocation: Location? = null
+    // MutableStateFlow is used to ensure that observers receive only the latest location
+    // and location updates bursts (rapidly received large number of locations) are ignored
+    private val rawLocationState = MutableStateFlow<Location?>(null)
+    private var rawLocationJob: Job? = null
     override var zLevel: Int? = null
         private set
     private var routeProgress: RouteProgress? = null
@@ -344,22 +350,22 @@ internal class MapboxTripSession(
 
     // worker thread
     private val onRawLocationUpdate: (Location) -> Unit = { rawLocation ->
+        rawLocationState.value = rawLocation
+    }
+
+    private suspend fun publishRawLocation(rawLocation: Location) {
         val locationHash = rawLocation.hashCode()
-        mainJobController.scope.launch {
-            this@MapboxTripSession.rawLocation = rawLocation
-            locationObservers.forEach { it.onNewRawLocation(rawLocation) }
-        }
-        mainJobController.scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            val monotonicStart = System.nanoTime()
-            navigator.updateLocation(rawLocation.toFixLocation())
-            val diffMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - monotonicStart)
-            logD(
-                "updateRawLocation; system elapsed time: ${System.nanoTime()}; " +
-                    "location ($locationHash) elapsed time: ${rawLocation.monotonicTimestamp}," +
-                    "notify NN for $diffMillis ms",
-                LOG_CATEGORY,
-            )
-        }
+        locationObservers.forEach { it.onNewRawLocation(rawLocation) }
+        val monotonicStart = System.nanoTime()
+        navigator.updateLocation(rawLocation.toFixLocation())
+        val diffMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - monotonicStart)
+        logD(
+            "updateRawLocation; system elapsed time: ${System.nanoTime()}; " +
+                "location ($locationHash) elapsed time: " +
+                "${rawLocation.monotonicTimestamp}," +
+                "notify NN for $diffMillis ms",
+            LOG_CATEGORY,
+        )
     }
 
     @OptIn(MapboxExperimental::class)
@@ -464,7 +470,7 @@ internal class MapboxTripSession(
     /**
      * Return raw location
      */
-    override fun getRawLocation() = rawLocation
+    override fun getRawLocation() = rawLocationState.value
 
     /**
      * Provide route progress
@@ -488,6 +494,10 @@ internal class MapboxTripSession(
                 tripService.startService()
             }
             state = TripSessionState.STARTED
+            rawLocationJob = rawLocationState
+                .filterNotNull()
+                .onEach { publishRawLocation(it) }
+                .launchIn(mainJobController.scope)
         }
         tripSessionLocationEngine.startLocationUpdates(withReplayEnabled, onRawLocationUpdate)
     }
@@ -533,6 +543,8 @@ internal class MapboxTripSession(
         navigator.removeNavigatorObserver(navigatorObserver)
         tripService.stopService()
         tripSessionLocationEngine.stopLocationUpdates()
+        rawLocationJob?.cancel()
+        rawLocationJob = null
         mainJobController.job.cancelChildren()
         ioJobController.job.cancelChildren()
         reset()
@@ -542,7 +554,7 @@ internal class MapboxTripSession(
     private fun reset() {
         updateLegIndexJob?.cancel()
         locationMatcherResult = null
-        rawLocation = null
+        rawLocationState.value = null
         zLevel = null
         routeProgress = null
         isOffRoute = false
@@ -555,7 +567,7 @@ internal class MapboxTripSession(
      */
     override fun registerLocationObserver(locationObserver: LocationObserver) {
         locationObservers.add(locationObserver)
-        rawLocation?.let { locationObserver.onNewRawLocation(it) }
+        rawLocationState.value?.let { locationObserver.onNewRawLocation(it) }
         locationMatcherResult?.let { locationObserver.onNewLocationMatcherResult(it) }
     }
 

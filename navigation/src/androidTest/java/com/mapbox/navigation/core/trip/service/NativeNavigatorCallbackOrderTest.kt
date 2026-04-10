@@ -188,6 +188,7 @@ internal class NativeNavigatorCallbackOrderTest :
                 }
             },
         )
+        waitForStatusUpdatesToBegin()
         navigator.setRoutesAndWaitForResult(
             SetRoutesParams(route.nativeRoute(), 0, emptyList<RouteInterface>()),
             SetRoutesReason.NEW_ROUTE,

@@ -416,6 +416,31 @@ class MapboxTripSessionTest {
     }
 
     @Test
+    fun locationBurstOnlyDeliversLatest() = coroutineRule.runBlockingTest {
+        tripSession.start(true)
+        val observer: LocationObserver = mockk(relaxUnitFun = true)
+        tripSession.registerLocationObserver(observer)
+
+        // Pause the dispatcher. Location updates will accumulate without being processed.
+        coroutineRule.testDispatcher.pauseDispatcher()
+
+        val burstLocations = (1..10).map { mockLocation() }
+        burstLocations.forEach { locationUpdateAnswers.invoke(it) }
+
+        coroutineRule.testDispatcher.resumeDispatcher()
+        parentJob.cancelAndJoin()
+
+        // The observer should only receive the last location, not all 10
+        verify(exactly = 1) { observer.onNewRawLocation(burstLocations.last()) }
+        burstLocations.dropLast(1).forEach {
+            verify(exactly = 0) { observer.onNewRawLocation(it) }
+        }
+        assertEquals(burstLocations.last(), tripSession.getRawLocation())
+
+        tripSession.stop()
+    }
+
+    @Test
     fun locationObserverImmediate() = coroutineRule.runBlockingTest {
         tripSession.start(true)
         val observer: LocationObserver = mockk(relaxUnitFun = true)
