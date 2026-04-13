@@ -1,8 +1,12 @@
 package com.mapbox.navigation.driver.notification.internal
 
 import androidx.annotation.RestrictTo
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import kotlin.collections.orEmpty
+import com.mapbox.navigation.driver.notification.internal.SlowTrafficLogger.logSegment
+import com.mapbox.navigation.driver.notification.internal.SlowTrafficLogger.logSummary
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * Calls [SlowTrafficSegmentsFinder.findSlowTrafficSegments] and creates multiple summaries of
@@ -30,7 +34,8 @@ import kotlin.collections.orEmpty
 suspend fun SlowTrafficSegmentsFinder.findAndSummarizeSlowTrafficSegments(
     routeProgress: RouteProgress,
     targetCongestionsRanges: List<IntRange>,
-): List<SlowTrafficSegmentsSummary> {
+): List<SlowTrafficSegmentsSummary> = withContext(Dispatchers.Default) {
+    val shouldLog = SlowTrafficLogger.shouldLogNow()
     val segments = findSlowTrafficSegments(
         routeProgress = routeProgress,
         targetCongestionsRanges = targetCongestionsRanges,
@@ -39,8 +44,12 @@ suspend fun SlowTrafficSegmentsFinder.findAndSummarizeSlowTrafficSegments(
     val summaries = mutableListOf<SlowTrafficSegmentsSummary>()
     var currentSummary: SlowTrafficSegmentsSummary? = null
     var traitsMap: MutableMap<IntRange, SlowTrafficTraits>? = null
+    var currentPoints: MutableList<Point>? = null
+    var eventIndex = 0
+    var longestSegmentDistance = 0.0
+    var dominantCongestionRange: IntRange = IntRange.EMPTY
 
-    for (segment in segments) {
+    for ((segmentIndex, segment) in segments.withIndex()) {
         val segmentTraits = segment.toTraits()
 
         val isContiguous = currentSummary != null &&
@@ -48,17 +57,38 @@ suspend fun SlowTrafficSegmentsFinder.findAndSummarizeSlowTrafficSegments(
             segment.geometryRange.first == currentSummary.geometryRange.last + 1
         if (currentSummary == null || !isContiguous) {
             if (currentSummary != null) {
-                summaries.add(currentSummary, traitsMap.orEmpty())
+                summaries.add(
+                    currentSummary,
+                    traitsMap.orEmpty(),
+                    currentPoints.orEmpty(),
+                    dominantCongestionRange,
+                )
+                eventIndex++
                 traitsMap = null
+                currentPoints = null
+                longestSegmentDistance = 0.0
+                dominantCongestionRange = IntRange.EMPTY
             }
             currentSummary = SlowTrafficSegmentsSummary(
                 legIndex = segment.legIndex,
                 geometryRange = segment.geometryRange,
                 distanceToSegmentMeters = segment.distanceToSegmentMeters,
                 traits = emptySet(),
+                points = emptyList(),
+                dominantCongestionRange = IntRange.EMPTY,
             )
         }
+        if (segment.distanceMeters > longestSegmentDistance) {
+            longestSegmentDistance = segment.distanceMeters
+            dominantCongestionRange = segment.congestionRange
+        }
+        if (shouldLog) logSegment(segmentIndex, segment, isNew = currentPoints == null, eventIndex)
         traitsMap = traitsMap ?: mutableMapOf()
+
+        // Skip the first point of subsequent segments to avoid duplicating the boundary
+        // point that is shared between adjacent segments (last point of A == first point of B).
+        val pointsToAdd = if (currentPoints == null) segment.points else segment.points.drop(1)
+        currentPoints = (currentPoints ?: mutableListOf()).apply { addAll(pointsToAdd) }
 
         currentSummary = currentSummary.copy(
             geometryRange = currentSummary.geometryRange.first..segment.geometryRange.last,
@@ -69,8 +99,12 @@ suspend fun SlowTrafficSegmentsFinder.findAndSummarizeSlowTrafficSegments(
         traitsMap[segment.congestionRange] = existingTraits.add(segmentTraits)
     }
 
-    currentSummary?.let { summaries.add(it, traitsMap.orEmpty()) }
-    return summaries
+    currentSummary?.let {
+        summaries.add(it, traitsMap.orEmpty(), currentPoints.orEmpty(), dominantCongestionRange)
+    }
+
+    if (shouldLog) summaries.forEachIndexed { index, summary -> logSummary(index, summary) }
+    summaries
 }
 
 private fun SlowTrafficSegment.toTraits(): SlowTrafficTraits {
@@ -85,8 +119,16 @@ private fun SlowTrafficSegment.toTraits(): SlowTrafficTraits {
 private fun MutableList<SlowTrafficSegmentsSummary>.add(
     new: SlowTrafficSegmentsSummary,
     traits: Map<IntRange, SlowTrafficTraits>,
+    points: List<Point>,
+    dominantCongestionRange: IntRange,
 ) {
-    add(new.copy(traits = traits.values.toSet()))
+    add(
+        new.copy(
+            traits = traits.values.toSet(),
+            points = points,
+            dominantCongestionRange = dominantCongestionRange,
+        ),
+    )
 }
 
 private fun SlowTrafficTraits.add(

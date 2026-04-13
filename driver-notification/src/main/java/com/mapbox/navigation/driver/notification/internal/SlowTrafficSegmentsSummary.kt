@@ -1,6 +1,7 @@
 package com.mapbox.navigation.driver.notification.internal
 
 import androidx.annotation.RestrictTo
+import com.mapbox.geojson.Point
 
 /**
  * A summary of multiple continuous slow traffic segments of a route, defined by
@@ -25,6 +26,9 @@ import androidx.annotation.RestrictTo
  * ```
  * The [traits] property would be a Set containing 2 entries: {MODERATE, HEAVY},
  * summarizing 4 moderate and 3 heavy subsegments, without describing their number or order.
+ *
+ * @param dominantCongestionRange the congestion range of the single longest individual segment
+ * within this summary
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 data class SlowTrafficSegmentsSummary(
@@ -32,4 +36,6 @@ data class SlowTrafficSegmentsSummary(
     val geometryRange: IntRange,
     val distanceToSegmentMeters: Double,
     val traits: Set<SlowTrafficTraits>,
+    val points: List<Point>,
+    val dominantCongestionRange: IntRange,
 )
