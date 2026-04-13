@@ -1,5 +1,18 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.21.1 - 13 April, 2026
+
+#### Bug fixes and improvements
+- Bugfix for the speed zone not being handled properly when the AG has started within the zone. 
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.21.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.21.1))
+- Mapbox Navigation Native `v324.21.1`
+- Mapbox Core Common `v24.21.1`
+- Mapbox Java `v7.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.0))
+
+
 ## Navigation SDK Core Framework 3.21.0 - 02 April, 2026
 #### Features
 - `GeoUtils`: added `getWayId` overloads to retrieve OSM way id(s) by directed edge id or polyline span 
