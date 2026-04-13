@@ -9,6 +9,7 @@ import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHand
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandlerOptions
 import com.mapbox.navigation.ui.maps.internal.camera.lifecycle.CameraStateManager
 import com.mapbox.navigation.ui.maps.internal.camera.lifecycle.UserLocationIndicatorPositionProvider
+import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 object NavigationScaleGestureHandlerFactory {
@@ -21,6 +22,7 @@ object NavigationScaleGestureHandlerFactory {
         userLocationIndicatorPositionProvider: UserLocationIndicatorPositionProvider,
         scaleGestureActionListener: NavigationScaleGestureActionListener?,
         options: NavigationScaleGestureHandlerOptions,
+        isActive: StateFlow<Boolean>,
     ): NavigationScaleGestureHandler {
         return NavigationScaleGestureHandler(
             context,
@@ -30,6 +32,7 @@ object NavigationScaleGestureHandlerFactory {
             userLocationIndicatorPositionProvider,
             scaleGestureActionListener,
             options,
+            isActive,
         )
     }
 }
