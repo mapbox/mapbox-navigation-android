@@ -616,7 +616,7 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
         assertTrue(incident2.distanceToStart!! > incident1.distanceToStart!!)
 
         val distanceDiff = 170.4787
-        stayOnPosition(positionAlongTheRoute)
+        stayOnPosition(positionAlongTheRoute, bearing = 220f)
         val upcomingRoadObjectsAlongTheRoute = mapboxNavigation.routeProgressUpdates()
             .first {
                 it.currentState == RouteProgressState.TRACKING &&
