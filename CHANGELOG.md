@@ -1,5 +1,21 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.19.6 - 13 April, 2026
+#### Features
+
+
+#### Bug fixes and improvements
+- Bugfix for the speed zone not being handled properly when the AG has started within the zone. 
+- Fix 2-finger pan gestures to respect gestureThresholds. 
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.19.6` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.19.6))
+- Mapbox Navigation Native `v324.19.6`
+- Mapbox Core Common `v24.19.6`
+- Mapbox Java `v7.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.0))
+
+
 ## Navigation SDK Core Framework 3.19.5 - 03 April, 2026
 
 #### Bug fixes and improvements
