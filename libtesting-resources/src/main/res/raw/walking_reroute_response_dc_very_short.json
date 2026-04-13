@@ -1,0 +1,607 @@
+{
+  "routes": [
+    {
+      "weight_name": "pedestrian",
+      "weight": 162.018,
+      "duration": 151.607,
+      "distance": 233.534,
+      "legs": [
+        {
+          "via_waypoints": [],
+          "annotation": {
+            "speed": [
+              1.7,
+              1.9,
+              1.7,
+              1.7,
+              1.4,
+              1.6,
+              1.6,
+              1.6,
+              1.7,
+              1.4,
+              1.4,
+              1.3,
+              1.4,
+              1.6,
+              1.4
+            ],
+            "distance": [
+              6.8,
+              30.2,
+              14.8,
+              13.5,
+              12.7,
+              4.5,
+              30.6,
+              1.9,
+              12.5,
+              6.6,
+              6.3,
+              18.4,
+              45.4,
+              24.4,
+              4.9
+            ],
+            "duration": [
+              4.065,
+              15.934,
+              8.863,
+              8.13,
+              8.937,
+              2.822,
+              19.403,
+              1.199,
+              7.465,
+              5.704,
+              4.39,
+              13.78,
+              31.91,
+              15.486,
+              3.485
+            ]
+          },
+          "admins": [
+            {
+              "iso_3166_1_alpha3": "USA",
+              "iso_3166_1": "US"
+            }
+          ],
+          "weight": 162.018,
+          "duration": 151.607,
+          "steps": [
+            {
+              "bannerInstructions": [
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "Pennsylvania Avenue Northwest"
+                      }
+                    ],
+                    "type": "turn",
+                    "modifier": "left",
+                    "text": "Pennsylvania Avenue Northwest"
+                  },
+                  "distanceAlongGeometry": 140.379
+                }
+              ],
+              "voiceInstructions": [
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Walk south on <say-as interpret-as=\"address\">14th Street Northwest</say-as> for 500 feet.</prosody></amazon:effect></speak>",
+                  "announcement": "Walk south on 14th Street Northwest for 500 feet.",
+                  "distanceAlongGeometry": 140.379
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">In 300 feet, Turn left onto <say-as interpret-as=\"address\">Pennsylvania Avenue Northwest</say-as>.</prosody></amazon:effect></speak>",
+                  "announcement": "In 300 feet, Turn left onto Pennsylvania Avenue Northwest.",
+                  "distanceAlongGeometry": 91.44
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Turn left.</prosody></amazon:effect></speak>",
+                  "announcement": "Turn left.",
+                  "distanceAlongGeometry": 6.8
+                }
+              ],
+              "intersections": [
+                {
+                  "entry": [
+                    true
+                  ],
+                  "bearings": [
+                    180
+                  ],
+                  "duration": 4.1,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 4.305,
+                  "geometry_index": 0,
+                  "location": [
+                    -77.031954,
+                    38.896721
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    0,
+                    97,
+                    180
+                  ],
+                  "duration": 15.934,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 2,
+                  "weight": 19.917,
+                  "geometry_index": 1,
+                  "location": [
+                    -77.031954,
+                    38.89666
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    0,
+                    92,
+                    180
+                  ],
+                  "duration": 8.863,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 2,
+                  "weight": 9.306,
+                  "geometry_index": 2,
+                  "location": [
+                    -77.031954,
+                    38.896389
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true,
+                    true,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    0,
+                    101,
+                    180,
+                    282
+                  ],
+                  "duration": 8.13,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 2,
+                  "weight": 8.536,
+                  "geometry_index": 3,
+                  "location": [
+                    -77.031953,
+                    38.896256
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true,
+                    true,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    0,
+                    93,
+                    180,
+                    282
+                  ],
+                  "duration": 8.937,
+                  "traffic_signal": true,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 2,
+                  "weight": 8.937,
+                  "geometry_index": 4,
+                  "location": [
+                    -77.031954,
+                    38.896134
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true,
+                    true,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    0,
+                    89,
+                    180,
+                    269
+                  ],
+                  "duration": 23.424,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 2,
+                  "weight": 23.424,
+                  "geometry_index": 5,
+                  "location": [
+                    -77.031955,
+                    38.89602
+                  ]
+                },
+                {
+                  "entry": [
+                    false,
+                    true,
+                    true,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    0,
+                    86,
+                    179,
+                    266
+                  ],
+                  "duration": 7.465,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 2,
+                  "weight": 7.838,
+                  "geometry_index": 8,
+                  "location": [
+                    -77.031954,
+                    38.895688
+                  ]
+                },
+                {
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "location": [
+                    -77.031951,
+                    38.895576
+                  ],
+                  "geometry_index": 9,
+                  "admin_index": 0,
+                  "weight": 5.704,
+                  "is_urban": true,
+                  "traffic_signal": true,
+                  "turn_duration": 1,
+                  "turn_weight": 1,
+                  "duration": 5.704,
+                  "bearings": [
+                    89,
+                    179,
+                    266,
+                    359
+                  ],
+                  "out": 1,
+                  "in": 3,
+                  "entry": [
+                    true,
+                    true,
+                    true,
+                    false
+                  ]
+                },
+                {
+                  "bearings": [
+                    90,
+                    180,
+                    270,
+                    359
+                  ],
+                  "entry": [
+                    false,
+                    true,
+                    false,
+                    false
+                  ],
+                  "in": 3,
+                  "traffic_signal": true,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "geometry_index": 10,
+                  "location": [
+                    -77.03195,
+                    38.895516
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "depart",
+                "instruction": "Walk south on 14th Street Northwest.",
+                "bearing_after": 180,
+                "bearing_before": 0,
+                "location": [
+                  -77.031954,
+                  38.896721
+                ]
+              },
+              "name": "14th Street Northwest",
+              "duration": 86.946,
+              "distance": 140.379,
+              "driving_side": "right",
+              "weight": 92.357,
+              "mode": "walking",
+              "geometry": "adaeiAb`t|qCxB?|O?hGArF@bF@nA?dPA`@?~EEvBAnB?"
+            },
+            {
+              "bannerInstructions": [
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "You will arrive at your destination"
+                      }
+                    ],
+                    "type": "arrive",
+                    "modifier": "straight",
+                    "text": "You will arrive at your destination"
+                  },
+                  "distanceAlongGeometry": 93.154
+                },
+                {
+                  "primary": {
+                    "components": [
+                      {
+                        "type": "text",
+                        "text": "You have arrived at your destination"
+                      }
+                    ],
+                    "type": "arrive",
+                    "modifier": "straight",
+                    "text": "You have arrived at your destination"
+                  },
+                  "distanceAlongGeometry": 7.083
+                }
+              ],
+              "voiceInstructions": [
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">In 300 feet, You will arrive at your destination.</prosody></amazon:effect></speak>",
+                  "announcement": "In 300 feet, You will arrive at your destination.",
+                  "distanceAlongGeometry": 91.454
+                },
+                {
+                  "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">You have arrived at your destination.</prosody></amazon:effect></speak>",
+                  "announcement": "You have arrived at your destination.",
+                  "distanceAlongGeometry": 7.083
+                }
+              ],
+              "intersections": [
+                {
+                  "entry": [
+                    false,
+                    true,
+                    true,
+                    true
+                  ],
+                  "in": 0,
+                  "bearings": [
+                    0,
+                    91,
+                    182,
+                    272
+                  ],
+                  "duration": 13.78,
+                  "turn_weight": 5,
+                  "traffic_signal": true,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 1,
+                  "weight": 18.78,
+                  "geometry_index": 11,
+                  "location": [
+                    -77.03195,
+                    38.89546
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    true,
+                    false,
+                    true
+                  ],
+                  "in": 2,
+                  "bearings": [
+                    90,
+                    180,
+                    271,
+                    359
+                  ],
+                  "duration": 31.91,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 31.91,
+                  "geometry_index": 12,
+                  "location": [
+                    -77.031737,
+                    38.895456
+                  ]
+                },
+                {
+                  "entry": [
+                    true,
+                    false
+                  ],
+                  "in": 1,
+                  "bearings": [
+                    89,
+                    270
+                  ],
+                  "duration": 15.486,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "weight": 15.486,
+                  "geometry_index": 13,
+                  "location": [
+                    -77.031214,
+                    38.895455
+                  ]
+                },
+                {
+                  "bearings": [
+                    106,
+                    269
+                  ],
+                  "entry": [
+                    true,
+                    false
+                  ],
+                  "in": 1,
+                  "traffic_signal": true,
+                  "mapbox_streets_v8": {
+                    "class": "primary"
+                  },
+                  "is_urban": true,
+                  "admin_index": 0,
+                  "out": 0,
+                  "geometry_index": 14,
+                  "location": [
+                    -77.030932,
+                    38.895457
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "turn",
+                "instruction": "Turn left onto Pennsylvania Avenue Northwest.",
+                "modifier": "left",
+                "bearing_after": 91,
+                "bearing_before": 180,
+                "location": [
+                  -77.03195,
+                  38.89546
+                ]
+              },
+              "name": "Pennsylvania Avenue Northwest",
+              "duration": 64.661,
+              "distance": 93.154,
+              "driving_side": "right",
+              "weight": 69.661,
+              "mode": "walking",
+              "geometry": "gu~diAz_t|qCFiL@u_@CsPVmB"
+            },
+            {
+              "bannerInstructions": [],
+              "voiceInstructions": [],
+              "intersections": [
+                {
+                  "bearings": [
+                    286
+                  ],
+                  "entry": [
+                    true
+                  ],
+                  "in": 0,
+                  "admin_index": 0,
+                  "geometry_index": 15,
+                  "location": [
+                    -77.030877,
+                    38.895445
+                  ]
+                }
+              ],
+              "maneuver": {
+                "type": "arrive",
+                "instruction": "You have arrived at your destination.",
+                "bearing_after": 0,
+                "bearing_before": 106,
+                "location": [
+                  -77.030877,
+                  38.895445
+                ]
+              },
+              "name": "Pennsylvania Avenue Northwest",
+              "duration": 0,
+              "distance": 0,
+              "driving_side": "right",
+              "weight": 0,
+              "mode": "walking",
+              "geometry": "it~diAx|q|qC??"
+            }
+          ],
+          "distance": 233.534,
+          "summary": "14th Street Northwest, Pennsylvania Avenue Northwest"
+        }
+      ],
+      "geometry": "adaeiAb`t|qCxB?|O?hGArF@bF@nA?dPA`@?~EEvBAnB?FiL@u_@CsPVmB",
+      "voiceLocale": "en-US"
+    }
+  ],
+  "waypoints": [
+    {
+      "distance": 0.329,
+      "name": "14th Street Northwest",
+      "location": [
+        -77.031954,
+        38.896721
+      ]
+    },
+    {
+      "distance": 4.203,
+      "name": "Pennsylvania Avenue Northwest",
+      "location": [
+        -77.030877,
+        38.895445
+      ]
+    }
+  ],
+  "code": "Ok",
+  "uuid": "ZPkzpSgqrNch6rOH0Z7oKUv19uNpnRMcNLLsr3t8VyBIvmewH26VOw=="
+}

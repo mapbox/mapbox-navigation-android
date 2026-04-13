@@ -406,7 +406,18 @@
             }
           ],
           "distance": 174.997,
-          "summary": "14th Street Northwest, Pennsylvania Avenue Northwest"
+          "summary": "14th Street Northwest, Pennsylvania Avenue Northwest",
+          "notifications": [
+            {
+              "type": "alert",
+              "subtype": "battery_preconditioning_range",
+              "refresh_type": "dynamic",
+              "geometry_index_start": 50,
+              "geometry_index_end": 100,
+              "initial_temp": -5,
+              "final_temp": 10
+            }
+          ]
         }
       ],
       "geometry": "ag}diAh`t|qCkf@GyEEFsK@k`@CsPVmB",

@@ -15,6 +15,20 @@ internal class NotificationFBWrapper private constructor(
     private val fb: FBNotification,
 ) : Notification(), BaseFBWrapper {
 
+    override val platformAddedUnrecognizedProperties: Map<String, Any?>?
+        get() {
+            val result = mutableMapOf<String, Any?>()
+            if (fb.initialTemp != null) {
+                result["initial_temp"] = fb.initialTemp
+            }
+            if (fb.finalTemp != null) {
+                result["final_temp"] = fb.finalTemp
+            }
+            return result.ifEmpty {
+                null
+            }
+        }
+
     override val unrecognized: ByteBuffer?
         get() = fb.unrecognizedPropertiesAsByteBuffer
 
@@ -80,7 +94,8 @@ internal class NotificationFBWrapper private constructor(
             "geometryIndexEnd=${geometryIndexEnd()}, " +
             "details=${details()}, " +
             "reason=${reason()}, " +
-            "chargingStationId=${chargingStationId()}" +
+            "chargingStationId=${chargingStationId()}, " +
+            "unrecognized=${unrecognized()}" +
             ")"
     }
 
@@ -123,6 +138,9 @@ internal class NotificationFBWrapper private constructor(
                     DirectionsCriteria.NOTIFICATION_SUBTYPE_EV_INSUFFICIENT_CHARGE
                 FBNotificationSubtype.EvStationUnavailable ->
                     DirectionsCriteria.NOTIFICATION_SUBTYPE_EV_STATION_UNAVAILABLE
+                // battery_preconditioning_range is not stable yet.
+                // It is not currently available in the backend or in mapbox-java.
+                FBNotificationSubtype.BatteryPreconditioningRange -> "battery_preconditioning_range"
                 FBNotificationSubtype.Unknown -> unrecognized?.get(propertyName)?.asString()
             }
         }

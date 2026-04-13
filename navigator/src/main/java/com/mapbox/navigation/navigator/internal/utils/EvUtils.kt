@@ -32,6 +32,11 @@ fun Map<String, String>.toEvStateData(): EvStateData {
         this[EV_KEY_PRE_CONDITIONING_TIME]?.toIntOrNull(),
         this[EV_KEY_UNCONDITIONED_CHARGING_CURVE]?.toCurveElements() ?: emptyList(),
         additionalParameters,
+        // TODO: https://mapbox.atlassian.net/browse/NAVAND-7151
+        /* evBatteryTemp */ null,
+        /* evBatteryChargePowerAtTemp */ null,
+        /* evBatteryChargePowerOptimalTemp */ null,
+        /* evBatteryHeating */ null,
     )
 }
 

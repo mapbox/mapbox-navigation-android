@@ -17,6 +17,9 @@ internal interface BaseFBWrapper {
 
     val unrecognizedPropertiesLength: Int
 
+    val platformAddedUnrecognizedProperties: Map<String, Any?>?
+        get() = null
+
     val unrecognizeFlexBufferMap: FlexBuffers.Map?
         get() {
             if (unrecognizedPropertiesLength <= 0) {
@@ -36,18 +39,31 @@ internal interface BaseFBWrapper {
         }
 
     fun unrecognizedMap(): Map<String, Any?>? {
-        return unrecognizeFlexBufferMap?.run {
+        val result = unrecognizeFlexBufferMap?.run {
             traverseFlexMap(this)
+        }
+        val platformAdded = platformAddedUnrecognizedProperties
+        return when {
+            platformAdded.isNullOrEmpty() -> result
+            result.isNullOrEmpty() -> platformAdded
+            else -> result + platformAdded
         }
     }
 
     fun unrecognized(): Map<String, SerializableJsonElement?>? {
-        return unrecognizeFlexBufferMap?.run {
+        val result = unrecognizeFlexBufferMap?.run {
             traverseFlexMapToJsonElements(this)
                 ?.filter { it.value != null }
                 ?.mapValues {
                     SerializableJsonElement(it.value)
                 }
+        }
+        val platformAdded = platformAddedUnrecognizedProperties
+            ?.mapValues { SerializableJsonElement(it.value.toJsonElement()) }
+        return when {
+            platformAdded.isNullOrEmpty() -> result
+            result.isNullOrEmpty() -> platformAdded
+            else -> result + platformAdded
         }
     }
 
@@ -167,4 +183,22 @@ internal interface BaseFBWrapper {
             }
         }
     }
+}
+
+private fun Any?.toJsonElement(): JsonElement? = when (this) {
+    null -> null
+    is Boolean -> JsonPrimitive(this)
+    is Number -> JsonPrimitive(this)
+    is String -> JsonPrimitive(this)
+    is Map<*, *> -> {
+        val jsonObject = JsonObject()
+        forEach { (key, value) -> jsonObject.add(key.toString(), value.toJsonElement()) }
+        jsonObject
+    }
+    is Iterable<*> -> {
+        val jsonArray = JsonArray()
+        forEach { jsonArray.add(it.toJsonElement()) }
+        jsonArray
+    }
+    else -> JsonPrimitive(toString())
 }

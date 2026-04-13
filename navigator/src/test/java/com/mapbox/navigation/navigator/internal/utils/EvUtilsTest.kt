@@ -28,6 +28,10 @@ class EvUtilsTest {
             null,
             emptyList(),
             hashMapOf(),
+            null,
+            null,
+            null,
+            null,
         )
 
         assertEquals(expected, input.toEvStateData())
@@ -58,6 +62,10 @@ class EvUtilsTest {
                 "ev_extra_param_1_key" to "extra_param_1_value",
                 "ev_extra_param_2_key" to "extra_param_2_value",
             ),
+            null,
+            null,
+            null,
+            null,
         )
 
         assertEquals(expected, input.toEvStateData())
