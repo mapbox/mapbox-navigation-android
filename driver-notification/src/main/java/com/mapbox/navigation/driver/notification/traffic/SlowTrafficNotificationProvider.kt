@@ -88,11 +88,13 @@ class SlowTrafficNotificationProvider(
         ) {
             lastUpdate = SystemClock.elapsedRealtime()
             val segment = slowTrafficSegmentsFinder.findSlowTrafficSegments(
-                routeProgress,
+                route = routeProgress.route,
                 targetCongestionsRanges = listOf(options.slowTrafficCongestionRange),
+                currentLeg = routeProgress.currentLegProgress?.legIndex ?: 0,
+                firstGeometryIndex = routeProgress.currentLegProgress?.geometryIndex ?: 0,
                 legsLimit = 1,
                 segmentsLimit = 1,
-            ).firstOrNull()
+            ).firstOrNull { it.distanceFromRouteStartMeters >= routeProgress.distanceTraveled }
 
             if (segment == null ||
                 segment.duration - segment.freeFlowDuration < minTrafficDelay
@@ -104,7 +106,7 @@ class SlowTrafficNotificationProvider(
                 segment.geometryRange,
                 segment.freeFlowDuration,
                 segment.duration,
-                segment.distanceMeters,
+                segment.lengthMeters,
             )
         }
         return null

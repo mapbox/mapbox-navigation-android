@@ -54,8 +54,8 @@ object SlowTrafficLogger {
                 "impact=${duration - freeFlowDuration}, " +
                 "duration=$duration, " +
                 "freeFlowDuration=$freeFlowDuration, " +
-                "distanceToStart=${segment.distanceToSegmentMeters.toInt()}m, " +
-                "length=${segment.distanceMeters.toInt()}m, " +
+                "distanceFromRouteStart=${segment.distanceFromRouteStartMeters.toInt()}m, " +
+                "length=${segment.lengthMeters.toInt()}m, " +
                 "congestion=${segment.congestionRange}, " +
                 "segment[legIndex=${segment.legIndex} geometryRange=${segment.geometryRange}]"
         }
@@ -71,7 +71,7 @@ object SlowTrafficLogger {
                     Triple(
                         duration + trait.duration.inWholeSeconds,
                         freeFlow + trait.freeFlowDuration.inWholeSeconds,
-                        len + trait.distanceMeters,
+                        len + trait.lengthMeters,
                     )
                 }
             val totalDuration = durationSec.seconds
@@ -80,7 +80,7 @@ object SlowTrafficLogger {
                 "impact=${totalDuration - totalFreeFlowDuration}, " +
                 "duration=$totalDuration, " +
                 "freeFlowDuration=$totalFreeFlowDuration, " +
-                "distanceToStart=${summary.distanceToSegmentMeters.toInt()}m, " +
+                "distanceFromRouteStart=${summary.distanceFromRouteStartMeters.toInt()}m, " +
                 "length=${totalLength.toInt()}m"
         }
     }

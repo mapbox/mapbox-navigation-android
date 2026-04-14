@@ -5,7 +5,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.utils.internal.geometryPoints
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -45,63 +44,61 @@ class SlowTrafficSegmentsFinder(
     }
 
     /**
-     * Scans the route, starting from the user's current progress, to find continuous
-     * stretches of traffic congestion.
+     * Scans the route to find continuous stretches of traffic congestion.
      *
-     * This function begins its search from the current leg and geometry index specified in
-     * the [routeProgress]. It iterates forward from that point, evaluating each geometry
-     * segment's congestion level.
+     * A "slow traffic segment" is a continuous sequence of geometry points where the congestion
+     * value falls within one of the provided [targetCongestionsRanges]. A segment ends when a
+     * point outside all ranges is encountered, or when the congestion switches to a different
+     * range within [targetCongestionsRanges].
      *
-     * A "slow traffic segment" is considered a continuous sequence of geometry points where the
-     * congestion value is within one of the provided [targetCongestionsRanges]. When a point
-     * with a congestion level outside these ranges is encountered, the segment is considered
-     * complete and is added to the results.
-     * The segment is also considered complete if the next point belongs to another range within
-     * [targetCongestionsRanges].
+     * Callers are responsible for filtering segments that are behind the user's current position
+     * using [SlowTrafficSegment.distanceFromRouteStartMeters].
      *
-     * @param routeProgress The current progress along the route. The search for traffic
-     * will begin from this point forward.
+     * @param route The route to scan.
      * @param targetCongestionsRanges A list of integer ranges that define what constitutes
      * "slow traffic". See also [com.mapbox.navigation.base.internal.utils.Constants.CongestionRange].
-     * @param legsLimit An optional optimization parameter to limit how many legs of the route
-     * are scanned, starting from the current one.
-     * @param segmentsLimit An optional optimization parameter to stop the search after a
-     * certain number of slow segments have been found.
-     * @return A list of [SlowTrafficSegment] objects representing the identified stretches of
-     * congestion. The list is ordered by their appearance on the route.
+     * @param currentLeg Index of the leg to start scanning from. Legs before this index are
+     * skipped (geometry is not decoded for them). Their distance is taken from [RouteLeg.distance]
+     * so that [SlowTrafficSegment.distanceFromRouteStartMeters] remains absolute.
+     * @param firstGeometryIndex Index of the geometry point within [currentLeg] to start scanning
+     * from. Geometry points before this index are skipped, but their distances are still accumulated
+     * so that [SlowTrafficSegment.distanceFromRouteStartMeters] remains absolute.
+     * @param legsLimit Maximum number of legs to scan, starting from [currentLeg].
+     * @param segmentsLimit Maximum number of segments to return. Scanning stops as soon as this
+     * count is reached.
+     * @return A list of [SlowTrafficSegment] objects ordered by their appearance on the route.
      */
     suspend fun findSlowTrafficSegments(
-        routeProgress: RouteProgress,
+        route: DirectionsRoute,
         targetCongestionsRanges: List<IntRange>,
+        currentLeg: Int = 0,
+        firstGeometryIndex: Int = 0,
         legsLimit: Int = Int.MAX_VALUE,
         segmentsLimit: Int = Int.MAX_VALUE,
     ): List<SlowTrafficSegment> = withContext(Dispatchers.Default) {
         val result = mutableListOf<SlowTrafficSegment>()
+        val legs = route.legs().orEmpty()
 
-        val currentLegProgress = routeProgress.currentLegProgress
-        val firstLegIndex = currentLegProgress?.legIndex ?: 0
-        val legs = routeProgress.route.legs()
-            ?.drop(firstLegIndex)
-            .orEmpty()
-            .take(legsLimit)
+        // Accumulate distance for skipped legs using the leg-level distance field,
+        // avoiding geometry decoding for legs the user has already passed.
+        var accumulatedDistance = legs.take(currentLeg).sumOf { it.distance() ?: 0.0 }
 
-        var accumulatedDistance = 0.0
-        legs.forEachIndexed { legListIndex, leg ->
-            val currentLegIndex = firstLegIndex + legListIndex
-            val firstGeometryIndex = if (currentLegIndex == firstLegIndex) {
-                currentLegProgress?.geometryIndex ?: 0
-            } else {
-                0
-            }
-
-            val geometry =
-                Geometry.of(leg, getPoints(routeProgress.route, leg)) ?: Geometry.Companion.EMPTY
+        val legRange = currentLeg until minOf(currentLeg + legsLimit, legs.size)
+        for (legIndex in legRange) {
+            val leg = legs[legIndex]
+            val geometry = Geometry.of(leg, getPoints(route, leg)) ?: Geometry.EMPTY
             var currentSegment: SlowTrafficSegment? = null
 
-            for (geometryIndex in firstGeometryIndex until geometry.size) {
-                if (segmentsLimit <= result.size) {
-                    return@withContext result
-                }
+            val startIndex =
+                (if (legIndex == currentLeg) firstGeometryIndex else 0).coerceIn(0, geometry.size)
+            // Accumulate distances for geometry points skipped within the current leg.
+            for (i in 0 until startIndex) {
+                accumulatedDistance += geometry.distance(i)
+            }
+
+            for (geometryIndex in startIndex until geometry.size) {
+                if (result.size >= segmentsLimit) return@withContext result
+
                 val congestion = geometry.congestion(geometryIndex)
                 val congestionRange = targetCongestionsRanges.rangeOf(congestion)
 
@@ -116,10 +113,10 @@ class SlowTrafficSegmentsFinder(
                     if (currentSegment == null) {
                         currentSegment = SlowTrafficSegment(
                             congestionRange = congestionRange,
-                            legIndex = currentLegIndex,
+                            legIndex = legIndex,
                             geometryRange = geometryIndex..geometryIndex,
-                            distanceToSegmentMeters = accumulatedDistance,
-                            distanceMeters = 0.0,
+                            distanceFromRouteStartMeters = accumulatedDistance,
+                            lengthMeters = 0.0,
                             freeFlowDuration = Duration.ZERO,
                             duration = Duration.ZERO,
                         )
@@ -128,7 +125,7 @@ class SlowTrafficSegmentsFinder(
                 }
                 accumulatedDistance += geometry.distance(geometryIndex)
             }
-            // Last congestion, if any, at the end of the leg
+            // Last congestion segment, if any, at the end of the leg
             currentSegment?.let { result.add(it) }
         }
         result
@@ -146,10 +143,10 @@ class SlowTrafficSegmentsFinder(
                 geometry.distance(geometryIndex) * KM_PER_H_TO_M_PER_SEC_RATE / legFreeFlowSpeed
             }
 
-            0.0 < this.distanceMeters -> {
+            0.0 < this.lengthMeters -> {
                 // Adding average duration based on the previous geometry
                 val avgTimePerMeter =
-                    this.freeFlowDuration.inWholeSeconds.toDouble() / this.distanceMeters
+                    this.freeFlowDuration.inWholeSeconds.toDouble() / this.lengthMeters
                 geometry.distance(geometryIndex) * avgTimePerMeter
             }
 
@@ -159,7 +156,7 @@ class SlowTrafficSegmentsFinder(
         return this.copy(
             freeFlowDuration = this.freeFlowDuration + freeFlowDurationSec.seconds,
             duration = this.duration + geometry.duration(geometryIndex),
-            distanceMeters = this.distanceMeters + geometry.distance(geometryIndex),
+            lengthMeters = this.lengthMeters + geometry.distance(geometryIndex),
             geometryRange = geometryRange.first..geometryIndex,
         ).apply {
             // Each geometry consists of 2 points
@@ -187,7 +184,7 @@ class SlowTrafficSegmentsFinder(
 }
 
 /**
- * A wrapper around the 4 lists of [RouteLeg] for code readability
+ * A wrapper around the annotation lists of [RouteLeg] for code readability.
  */
 private class Geometry(
     private val distances: List<Double>,
@@ -212,8 +209,7 @@ private class Geometry(
     /**
      * Note: there will be `size + 1` number of points, because each geometry consists of 2 points.
      */
-    fun point(index: Int): Point =
-        points[index.coerceIn(points.indices)]
+    fun point(index: Int): Point = points[index.coerceIn(points.indices)]
 
     companion object {
 

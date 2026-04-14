@@ -48,10 +48,10 @@ class SlowTrafficSegmentsFinderTest {
             every { duration() } returns listOf(5.0, 6.0, 15.0, 18.0, 20.0, 4.0, 3.0)
             every { freeflowSpeed() } returns listOf(36, 36, 17, 16, 15, 36, 36)
         }
-        val routeProgress = prepareRouteProgressFrom(annotation)
+        val route = prepareRouteFrom(annotation)
 
         val segments = finder.findSlowTrafficSegments(
-            routeProgress = routeProgress,
+            route = route,
             targetCongestionsRanges = listOf(SEVERE_CONGESTION_RANGE),
         )
 
@@ -61,14 +61,14 @@ class SlowTrafficSegmentsFinderTest {
         Assert.assertEquals(0, segment.legIndex)
         Assert.assertEquals(2..4, segment.geometryRange)
         // The distance before the segment starts is 50.0 + 60.0
-        Assert.assertEquals(110.0, segment.distanceToSegmentMeters, 0.01)
+        Assert.assertEquals(110.0, segment.distanceFromRouteStartMeters, 0.01)
 
         Assert.assertEquals(
             SEVERE_CONGESTION_RANGE,
             segment.congestionRange,
         )
         // Total distance of the slow part: 70.0 + 80.0 + 90.0
-        Assert.assertEquals(240.0, segment.distanceMeters, 0.01)
+        Assert.assertEquals(240.0, segment.lengthMeters, 0.01)
         // Total duration of the slow part: 15.0 + 18.0 + 20.0
         Assert.assertEquals(53.seconds, segment.duration)
 
@@ -91,10 +91,10 @@ class SlowTrafficSegmentsFinderTest {
             every { duration() } returns listOf(1.0, 12.0, 13.0, 4.0, 5.0, 16.0, 7.0)
             every { freeflowSpeed() } returns listOf(36, 15, 15, 36, 36, 15, 36)
         }
-        val routeProgress = prepareRouteProgressFrom(annotation)
+        val route = prepareRouteFrom(annotation)
 
         val segments = finder.findSlowTrafficSegments(
-            routeProgress = routeProgress,
+            route = route,
             targetCongestionsRanges = listOf(SEVERE_CONGESTION_RANGE),
         )
 
@@ -103,15 +103,15 @@ class SlowTrafficSegmentsFinderTest {
         val firstSegment = segments[0]
         Assert.assertEquals(0, firstSegment.legIndex)
         Assert.assertEquals(1..2, firstSegment.geometryRange)
-        Assert.assertEquals(10.0, firstSegment.distanceToSegmentMeters, 0.01)
-        Assert.assertEquals(50.0, firstSegment.distanceMeters, 0.01)
+        Assert.assertEquals(10.0, firstSegment.distanceFromRouteStartMeters, 0.01)
+        Assert.assertEquals(50.0, firstSegment.lengthMeters, 0.01)
         Assert.assertEquals(25.seconds, firstSegment.duration)
 
         val secondSegment = segments[1]
         Assert.assertEquals(0, secondSegment.legIndex)
         Assert.assertEquals(5..5, secondSegment.geometryRange)
-        Assert.assertEquals(150.0, secondSegment.distanceToSegmentMeters, 0.01)
-        Assert.assertEquals(60.0, secondSegment.distanceMeters, 0.01)
+        Assert.assertEquals(150.0, secondSegment.distanceFromRouteStartMeters, 0.01)
+        Assert.assertEquals(60.0, secondSegment.lengthMeters, 0.01)
         Assert.assertEquals(16.seconds, secondSegment.duration)
     }
 
@@ -130,10 +130,10 @@ class SlowTrafficSegmentsFinderTest {
             every { duration() } returns listOf(1.0, 8.0, 9.0, 15.0, 18.0, 6.0)
             every { freeflowSpeed() } returns listOf(36, 25, 25, 15, 15, 36)
         }
-        val routeProgress = prepareRouteProgressFrom(annotation)
+        val route = prepareRouteFrom(annotation)
 
         val segments = finder.findSlowTrafficSegments(
-            routeProgress = routeProgress,
+            route = route,
             targetCongestionsRanges = listOf(
                 HEAVY_CONGESTION_RANGE,
                 SEVERE_CONGESTION_RANGE,
@@ -145,15 +145,15 @@ class SlowTrafficSegmentsFinderTest {
         Assert.assertEquals(HEAVY_CONGESTION_RANGE, segments.first().congestionRange)
         Assert.assertEquals(0, segments.first().legIndex)
         Assert.assertEquals(1..2, segments.first().geometryRange)
-        Assert.assertEquals(10.0, segments.first().distanceToSegmentMeters, 0.01)
-        Assert.assertEquals(50.0, segments.first().distanceMeters, 0.01)
+        Assert.assertEquals(10.0, segments.first().distanceFromRouteStartMeters, 0.01)
+        Assert.assertEquals(50.0, segments.first().lengthMeters, 0.01)
         Assert.assertEquals(17.seconds, segments.first().duration)
 
         Assert.assertEquals(SEVERE_CONGESTION_RANGE, segments.last().congestionRange)
         Assert.assertEquals(0, segments.last().legIndex)
         Assert.assertEquals(3..4, segments.last().geometryRange)
-        Assert.assertEquals(60.0, segments.last().distanceToSegmentMeters, 0.01)
-        Assert.assertEquals(90.0, segments.last().distanceMeters, 0.01)
+        Assert.assertEquals(60.0, segments.last().distanceFromRouteStartMeters, 0.01)
+        Assert.assertEquals(90.0, segments.last().lengthMeters, 0.01)
         Assert.assertEquals(33.seconds, segments.last().duration)
     }
 
@@ -172,10 +172,10 @@ class SlowTrafficSegmentsFinderTest {
             every { duration() } returns listOf(1.0, 8.0, 9.0, 15.0, 18.0, 6.0)
             every { freeflowSpeed() } returns listOf(36, 25, 25, 15, 15, 36)
         }
-        val routeProgress = prepareRouteProgressFrom(annotation)
+        val route = prepareRouteFrom(annotation)
 
         val summaries = finder.findAndSummarizeSlowTrafficSegments(
-            routeProgress = routeProgress,
+            route = route,
             targetCongestionsRanges = listOf(
                 HEAVY_CONGESTION_RANGE,
                 SEVERE_CONGESTION_RANGE,
@@ -185,17 +185,17 @@ class SlowTrafficSegmentsFinderTest {
         Assert.assertEquals(1, summaries.size)
         val summary = summaries.first()
         Assert.assertEquals(1..4, summary.geometryRange)
-        Assert.assertEquals(10.0, summary.distanceToSegmentMeters, 0.01)
+        Assert.assertEquals(10.0, summary.distanceFromRouteStartMeters, 0.01)
         Assert.assertEquals(2, summary.traits.size)
 
         val moderateTraits =
             summary.traits.first { it.congestionRange == HEAVY_CONGESTION_RANGE }
-        Assert.assertEquals(50.0, moderateTraits.distanceMeters, 0.01)
+        Assert.assertEquals(50.0, moderateTraits.lengthMeters, 0.01)
         Assert.assertEquals(17.seconds, moderateTraits.duration)
 
         val severeTraits =
             summary.traits.first { it.congestionRange == SEVERE_CONGESTION_RANGE }
-        Assert.assertEquals(90.0, severeTraits.distanceMeters, 0.01)
+        Assert.assertEquals(90.0, severeTraits.lengthMeters, 0.01)
         Assert.assertEquals(33.seconds, severeTraits.duration)
     }
 
@@ -212,10 +212,10 @@ class SlowTrafficSegmentsFinderTest {
             every { duration() } returns listOf(5.0, 6.0, 15.0, 18.0)
             every { freeflowSpeed() } returns listOf(36, 36, 17, 16)
         }
-        val routeProgress = prepareRouteProgressFrom(annotation)
+        val route = prepareRouteFrom(annotation)
 
         val segments = finder.findSlowTrafficSegments(
-            routeProgress = routeProgress,
+            route = route,
             targetCongestionsRanges = listOf(SEVERE_CONGESTION_RANGE),
         )
 
@@ -223,8 +223,8 @@ class SlowTrafficSegmentsFinderTest {
         val segment = segments.first()
         Assert.assertEquals(0, segment.legIndex)
         Assert.assertEquals(2..3, segment.geometryRange)
-        Assert.assertEquals(110.0, segment.distanceToSegmentMeters, 0.01)
-        Assert.assertEquals(150.0, segment.distanceMeters, 0.01)
+        Assert.assertEquals(110.0, segment.distanceFromRouteStartMeters, 0.01)
+        Assert.assertEquals(150.0, segment.lengthMeters, 0.01)
         Assert.assertEquals(33.seconds, segment.duration)
     }
 
@@ -250,10 +250,10 @@ class SlowTrafficSegmentsFinderTest {
             every { duration() } returns listOf(5.0, 6.0, 20.0)
             every { freeflowSpeed() } returns listOf(36, 36, 15)
         }
-        val routeProgress = prepareRouteProgressFrom(annotation1, annotation2)
+        val route = prepareRouteFrom(annotation1, annotation2)
 
         val segments = finder.findSlowTrafficSegments(
-            routeProgress = routeProgress,
+            route = route,
             targetCongestionsRanges = listOf(SEVERE_CONGESTION_RANGE),
         )
 
@@ -262,8 +262,8 @@ class SlowTrafficSegmentsFinderTest {
         val firstSegment = segments[0]
         Assert.assertEquals(0, firstSegment.legIndex)
         Assert.assertEquals(1..1, firstSegment.geometryRange)
-        Assert.assertEquals(100.0, firstSegment.distanceToSegmentMeters, 0.01)
-        Assert.assertEquals(200.0, firstSegment.distanceMeters, 0.01)
+        Assert.assertEquals(100.0, firstSegment.distanceFromRouteStartMeters, 0.01)
+        Assert.assertEquals(200.0, firstSegment.lengthMeters, 0.01)
 
         val secondSegment = segments[1]
         Assert.assertEquals(1, secondSegment.legIndex)
@@ -272,10 +272,10 @@ class SlowTrafficSegmentsFinderTest {
         val leg2PreSegmentDistance = 50.0 + 60.0
         Assert.assertEquals(
             leg1TotalDistance + leg2PreSegmentDistance,
-            secondSegment.distanceToSegmentMeters,
+            secondSegment.distanceFromRouteStartMeters,
             0.01,
         )
-        Assert.assertEquals(70.0, secondSegment.distanceMeters, 0.01)
+        Assert.assertEquals(70.0, secondSegment.lengthMeters, 0.01)
     }
 
     @Test
@@ -294,10 +294,10 @@ class SlowTrafficSegmentsFinderTest {
             every { duration() } returns listOf(1.0, 12.0, 3.0, 14.0, 5.0, 16.0, 7.0)
             every { freeflowSpeed() } returns listOf(36, 15, 36, 15, 36, 15, 36)
         }
-        val routeProgress = prepareRouteProgressFrom(annotation)
+        val route = prepareRouteFrom(annotation)
 
         val segments = finder.findSlowTrafficSegments(
-            routeProgress = routeProgress,
+            route = route,
             targetCongestionsRanges = listOf(SEVERE_CONGESTION_RANGE),
             segmentsLimit = 2,
         )
@@ -331,10 +331,10 @@ class SlowTrafficSegmentsFinderTest {
             every { duration() } returns listOf(5.0, 16.0, 7.0)
             every { freeflowSpeed() } returns listOf(36, 15, 36)
         }
-        val routeProgress = prepareRouteProgressFrom(annotation1, annotation2)
+        val route = prepareRouteFrom(annotation1, annotation2)
 
         val segments = finder.findSlowTrafficSegments(
-            routeProgress = routeProgress,
+            route = route,
             targetCongestionsRanges = listOf(SEVERE_CONGESTION_RANGE),
             legsLimit = 1,
         )
@@ -355,17 +355,17 @@ class SlowTrafficSegmentsFinderTest {
             every { duration() } returns listOf(5.0, 0.0, 18.0, 3.0)
             every { freeflowSpeed() } returns listOf(36, 0, 15, 36)
         }
-        val routeProgress = prepareRouteProgressFrom(annotation)
+        val route = prepareRouteFrom(annotation)
 
         val segments = finder.findSlowTrafficSegments(
-            routeProgress = routeProgress,
+            route = route,
             targetCongestionsRanges = listOf(SEVERE_CONGESTION_RANGE),
         )
 
         Assert.assertEquals(1, segments.size)
         val segment = segments.first()
         Assert.assertEquals(1..2, segment.geometryRange)
-        Assert.assertEquals(80.0, segment.distanceMeters, 0.01)
+        Assert.assertEquals(80.0, segment.lengthMeters, 0.01)
     }
 
     @Test
@@ -385,10 +385,10 @@ class SlowTrafficSegmentsFinderTest {
             every { duration() } returns listOf(5.0, 18.0)
             every { freeflowSpeed() } returns listOf(36, 17)
         }
-        val routeProgress = prepareRouteProgressFrom(annotation)
+        val route = prepareRouteFrom(annotation)
 
         val segments = finderWithShortPoints.findSlowTrafficSegments(
-            routeProgress = routeProgress,
+            route = route,
             targetCongestionsRanges = listOf(SEVERE_CONGESTION_RANGE),
         )
 
@@ -441,32 +441,21 @@ class SlowTrafficSegmentsFinderTest {
 
         // Must not throw IndexOutOfBoundsException
         val segments = SlowTrafficSegmentsFinder().findSlowTrafficSegments(
-            routeProgress = routeProgress,
+            route = route,
             targetCongestionsRanges = listOf(SEVERE_CONGESTION_RANGE),
         )
 
         Assert.assertEquals(1, segments.size)
         val segment = segments.first()
         Assert.assertEquals(2..3, segment.geometryRange)
-        Assert.assertEquals(110.0, segment.distanceToSegmentMeters, 0.01)
-        Assert.assertEquals(150.0, segment.distanceMeters, 0.01)
+        Assert.assertEquals(110.0, segment.distanceFromRouteStartMeters, 0.01)
+        Assert.assertEquals(150.0, segment.lengthMeters, 0.01)
         Assert.assertEquals(33.seconds, segment.duration)
     }
 
-    private fun prepareRouteProgressFrom(vararg annotation: LegAnnotation): RouteProgress {
-        val legs = annotation.map {
-            mockk<RouteLeg> { every { annotation() } returns it }
-        }
-        val route = mockk<DirectionsRoute> { every { legs() } returns legs }
-        val legProgress = mockk<RouteLegProgress> {
-            every { legIndex } returns 0
-            every { geometryIndex } returns 0
-        }
-        val routeProgress = mockk<RouteProgress> {
-            every { this@mockk.route } returns route
-            every { currentLegProgress } returns legProgress
-        }
-        return routeProgress
+    private fun prepareRouteFrom(vararg annotation: LegAnnotation): DirectionsRoute {
+        val legs = annotation.map { ann -> mockk<RouteLeg> { every { annotation() } returns ann } }
+        return mockk<DirectionsRoute> { every { legs() } returns legs }
     }
 }
 

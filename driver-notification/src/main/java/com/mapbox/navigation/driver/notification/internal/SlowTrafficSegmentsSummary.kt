@@ -9,8 +9,8 @@ import com.mapbox.geojson.Point
  *
  * @param legIndex leg of the route with the slow traffic segment
  * @param geometryRange the range of geometry withing the leg affected by this slow traffic segment
- * @param distanceToSegmentMeters the distance to this slow traffic segment from the current user
- * position on the route
+ * @param distanceFromRouteStartMeters the cumulative distance from the start of the route to the
+ * beginning of this segment
  * @param traits specific traits, that characterize subsegments of this slow traffic segment with
  * different severity (moderate traffic, heavy, ...). **Please note** that this property
  * **does not** specify *how many* of the subsegments there are, it rather is a summary of
@@ -34,7 +34,7 @@ import com.mapbox.geojson.Point
 data class SlowTrafficSegmentsSummary(
     val legIndex: Int,
     val geometryRange: IntRange,
-    val distanceToSegmentMeters: Double,
+    val distanceFromRouteStartMeters: Double,
     val traits: Set<SlowTrafficTraits>,
     val points: List<Point>,
     val dominantCongestionRange: IntRange,

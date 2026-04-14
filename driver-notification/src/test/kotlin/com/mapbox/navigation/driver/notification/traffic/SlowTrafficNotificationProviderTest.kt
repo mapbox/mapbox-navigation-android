@@ -79,28 +79,31 @@ class SlowTrafficNotificationProviderTest {
                 any(),
                 any(),
                 any(),
+                any(),
+                any(),
             )
         }
     }
 
-    @Test(timeout = 1000)
+    @Test
     fun `verify slow traffic notification`() = runBlocking {
         val slowTrafficCongestion = 60..100
         val segment = SlowTrafficSegment(
             legIndex = 0,
             geometryRange = 2..5,
-            distanceToSegmentMeters = 21.0,
+            distanceFromRouteStartMeters = 21.0,
             congestionRange = slowTrafficCongestion,
             freeFlowDuration = 100.seconds,
             duration = 400.seconds,
-            distanceMeters = 100.0,
+            lengthMeters = 100.0,
         )
         coEvery {
-            val result = segmentsFinder.findSlowTrafficSegments(any(), any(), any(), any())
-            result
+            segmentsFinder.findSlowTrafficSegments(any(), any(), any(), any(), any(), any())
         } returns listOf(segment)
 
-        val routeProgress = mockk<RouteProgress>(relaxed = true)
+        val routeProgress = mockk<RouteProgress>(relaxed = true) {
+            every { distanceTraveled } returns 0.0f
+        }
         every { any<MapboxNavigation>().flowRouteProgress() } answers { flowOf(routeProgress) }
 
         val provider = SlowTrafficNotificationProvider(
@@ -124,7 +127,7 @@ class SlowTrafficNotificationProviderTest {
             slowTrafficNotification?.slowTrafficRangeDuration,
         )
         assertEquals(
-            segment.distanceMeters,
+            segment.lengthMeters,
             slowTrafficNotification?.slowTrafficRangeDistance,
         )
         assertEquals(

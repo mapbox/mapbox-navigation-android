@@ -12,12 +12,12 @@ import kotlin.time.Duration
  * free-flow conditions
  * @param duration the duration it takes to traverse the affected geometry range under current slow
  * traffic conditions
- * @param distanceMeters the distance of the affected geometry range in meters
+ * @param lengthMeters the length of the affected geometry range in meters
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 data class SlowTrafficTraits(
     val congestionRange: IntRange,
     val freeFlowDuration: Duration = Duration.Companion.ZERO,
     val duration: Duration = Duration.Companion.ZERO,
-    val distanceMeters: Double = 0.0,
+    val lengthMeters: Double = 0.0,
 )

@@ -1,8 +1,8 @@
 package com.mapbox.navigation.driver.notification.internal
 
 import androidx.annotation.RestrictTo
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.driver.notification.internal.SlowTrafficLogger.logSegment
 import com.mapbox.navigation.driver.notification.internal.SlowTrafficLogger.logSummary
 import kotlinx.coroutines.Dispatchers
@@ -25,19 +25,19 @@ import kotlinx.coroutines.withContext
  * segment provides a breakdown of the distance and duration for each specific congestion
  * range found within that segment.
  *
- * @param routeProgress same as in [SlowTrafficSegmentsFinder.findSlowTrafficSegments]
+ * @param route same as in [SlowTrafficSegmentsFinder.findSlowTrafficSegments]
  * @param targetCongestionsRanges same as in [SlowTrafficSegmentsFinder.findSlowTrafficSegments]
  * @return A list of [SlowTrafficSegmentsSummary] objects representing continuous stretches of
  * congestions. The list is ordered by their appearance on the route.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 suspend fun SlowTrafficSegmentsFinder.findAndSummarizeSlowTrafficSegments(
-    routeProgress: RouteProgress,
+    route: DirectionsRoute,
     targetCongestionsRanges: List<IntRange>,
 ): List<SlowTrafficSegmentsSummary> = withContext(Dispatchers.Default) {
     val shouldLog = SlowTrafficLogger.shouldLogNow()
     val segments = findSlowTrafficSegments(
-        routeProgress = routeProgress,
+        route = route,
         targetCongestionsRanges = targetCongestionsRanges,
     )
 
@@ -72,14 +72,14 @@ suspend fun SlowTrafficSegmentsFinder.findAndSummarizeSlowTrafficSegments(
             currentSummary = SlowTrafficSegmentsSummary(
                 legIndex = segment.legIndex,
                 geometryRange = segment.geometryRange,
-                distanceToSegmentMeters = segment.distanceToSegmentMeters,
+                distanceFromRouteStartMeters = segment.distanceFromRouteStartMeters,
                 traits = emptySet(),
                 points = emptyList(),
                 dominantCongestionRange = IntRange.EMPTY,
             )
         }
-        if (segment.distanceMeters > longestSegmentDistance) {
-            longestSegmentDistance = segment.distanceMeters
+        if (segment.lengthMeters > longestSegmentDistance) {
+            longestSegmentDistance = segment.lengthMeters
             dominantCongestionRange = segment.congestionRange
         }
         if (shouldLog) logSegment(segmentIndex, segment, isNew = currentPoints == null, eventIndex)
@@ -112,7 +112,7 @@ private fun SlowTrafficSegment.toTraits(): SlowTrafficTraits {
         congestionRange = this.congestionRange,
         freeFlowDuration = this.freeFlowDuration,
         duration = this.duration,
-        distanceMeters = this.distanceMeters,
+        lengthMeters = this.lengthMeters,
     )
 }
 
@@ -137,6 +137,6 @@ private fun SlowTrafficTraits.add(
     return this.copy(
         freeFlowDuration = this.freeFlowDuration + another.freeFlowDuration,
         duration = this.duration + another.duration,
-        distanceMeters = this.distanceMeters + another.distanceMeters,
+        lengthMeters = this.lengthMeters + another.lengthMeters,
     )
 }
