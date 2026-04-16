@@ -225,8 +225,8 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
                             mockedAlternativesResponse.routes()[it.routeIndex].legs()
                                 ?.map { originalLeg ->
                                     originalLeg.toBuilder()
-                                        .incidents(originalLeg.incidents().orEmpty())
-                                        .closures(originalLeg.closures().orEmpty())
+                                        .incidents(originalLeg.incidents())
+                                        .closures(originalLeg.closures())
                                         .build()
                                 },
                         )
