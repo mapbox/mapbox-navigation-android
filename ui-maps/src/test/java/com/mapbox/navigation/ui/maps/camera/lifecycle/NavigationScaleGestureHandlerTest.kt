@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.maps.camera.lifecycle
 import android.content.Context
 import android.graphics.RectF
 import com.mapbox.android.gestures.AndroidGesturesManager
+import com.mapbox.android.gestures.BaseGesture
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.android.gestures.RotateGestureDetector
 import com.mapbox.android.gestures.ShoveGestureDetector
@@ -16,6 +17,8 @@ import com.mapbox.maps.plugin.animation.CameraAnimatorType
 import com.mapbox.maps.plugin.animation.MapAnimationOwnerRegistry
 import com.mapbox.maps.plugin.gestures.GesturesPlugin
 import com.mapbox.maps.plugin.gestures.OnMoveListener
+import com.mapbox.maps.plugin.gestures.OnRotateListener
+import com.mapbox.maps.plugin.gestures.OnScaleListener
 import com.mapbox.maps.plugin.gestures.OnShoveListener
 import com.mapbox.maps.plugin.gestures.generated.GesturesSettings
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
@@ -63,7 +66,8 @@ class NavigationScaleGestureHandlerTest {
     private val initialRotateGestureDetector: RotateGestureDetector = mockk(relaxUnitFun = true)
     private val initialMoveGestureDetector: MoveGestureDetector = mockk(relaxUnitFun = true)
     private val initialShoveGestureDetector: ShoveGestureDetector = mockk(relaxUnitFun = true)
-    private val customGesturesManager: AndroidGesturesManager = mockk(relaxUnitFun = true)
+    private val initialDetectors = mutableListOf<BaseGesture<*>>()
+    private val customOnUpDetector: OnUpEventDetector = mockk(relaxUnitFun = true)
     private val customMoveGestureDetector: MoveGestureDetector = mockk(relaxUnitFun = true)
     private val customRotateGestureDetector: RotateGestureDetector = mockk(relaxUnitFun = true)
     private val customShoveDetector: ShoveGestureDetector = mockk(relaxUnitFun = true)
@@ -77,9 +81,11 @@ class NavigationScaleGestureHandlerTest {
         .build()
 
     private lateinit var controller: NavigationScaleGestureHandler
-    private val customGesturesInteractorSlot = slot<(AndroidGesturesManager) -> Unit>()
+    private val onUpEventCallbackSlot = slot<(AndroidGesturesManager) -> Unit>()
     private val onMoveListenerSlot = slot<OnMoveListener>()
     private val onShoveListenerSlot = slot<OnShoveListener>()
+    private val onScaleListenerSlot = slot<OnScaleListener>()
+    private val onRotateListenerSlot = slot<OnRotateListener>()
     private val onIndicatorPositionChangedListenerSlot = slot<OnIndicatorPositionChangedListener>()
 
     @OptIn(MapboxExperimental::class)
@@ -88,29 +94,30 @@ class NavigationScaleGestureHandlerTest {
     private val navigationCameraStateChangedObserverSlot =
         slot<NavigationCameraStateChangedObserver>()
     private val initialMoveThreshold = 1.0f
+    private val initialMultiFingerMoveThreshold = 1.5f
     private val initialMoveThresdholdRect = RectF(1.0f, 1.0f, 1.0f, 1.0f)
     private val initialShoveDeltaThreshold = 2.0f
 
     @Before
     fun setup() {
+        initialDetectors.clear()
         mockkObject(NavigationCameraLifecycleProvider)
         every { navigationCamera.state } returns NavigationCameraState.IDLE
         every {
-            NavigationCameraLifecycleProvider.getCustomGesturesManager(
+            NavigationCameraLifecycleProvider.getCustomOnUpDetector(
                 context,
-                capture(customGesturesInteractorSlot),
+                initialGesturesManager,
+                capture(onUpEventCallbackSlot),
             )
-        } returns customGesturesManager
-        every { customGesturesManager.moveGestureDetector } returns customMoveGestureDetector
+        } returns customOnUpDetector
         every { customMoveGestureDetector.pointersCount } returns 1
         every { customMoveGestureDetector.moveThreshold } returns initialMoveThreshold
         every { customMoveGestureDetector.moveThresholdRect } returns initialMoveThresdholdRect
-        every { customGesturesManager.rotateGestureDetector } returns customRotateGestureDetector
-        every { customGesturesManager.shoveGestureDetector } returns customShoveDetector
         every { customShoveDetector.pointersCount } returns 2
         every { customRotateGestureDetector.angleThreshold } returns 3.0f
         every { customShoveDetector.pixelDeltaThreshold } returns initialShoveDeltaThreshold
         every { gesturesPlugin.getGesturesManager() } returns initialGesturesManager
+        every { initialGesturesManager.getDetectors() } returns initialDetectors
         every { initialGesturesManager.rotateGestureDetector } returns initialRotateGestureDetector
         every { initialRotateGestureDetector.angleThreshold } returns 3.0f
         every { initialGesturesManager.moveGestureDetector } returns initialMoveGestureDetector
@@ -118,20 +125,14 @@ class NavigationScaleGestureHandlerTest {
         every { initialGesturesManager.shoveGestureDetector } returns initialShoveGestureDetector
         every { initialShoveGestureDetector.pointersCount } returns 2
         every { initialMoveGestureDetector.moveThreshold } returns initialMoveThreshold
+        every { initialMoveGestureDetector.multiFingerMoveThreshold } returns
+            initialMultiFingerMoveThreshold
         every { initialMoveGestureDetector.moveThresholdRect } returns initialMoveThresdholdRect
         every { initialShoveGestureDetector.pixelDeltaThreshold } returns initialShoveDeltaThreshold
-        val customManagerSlot = slot<AndroidGesturesManager>()
-        every {
-            gesturesPlugin.setGesturesManager(
-                capture(customManagerSlot),
-                attachDefaultListeners = true,
-                setDefaultMutuallyExclusives = true,
-            )
-        } answers {
-            every { gesturesPlugin.getGesturesManager() } returns customGesturesManager
-        }
         every { gesturesPlugin.addOnMoveListener(capture(onMoveListenerSlot)) } just Runs
         every { gesturesPlugin.addOnShoveListener(capture(onShoveListenerSlot)) } just Runs
+        every { gesturesPlugin.addOnScaleListener(capture(onScaleListenerSlot)) } just Runs
+        every { gesturesPlugin.addOnRotateListener(capture(onRotateListenerSlot)) } just Runs
         every {
             locationPlugin.addOnIndicatorPositionChangedListener(
                 capture(onIndicatorPositionChangedListenerSlot),
@@ -218,9 +219,12 @@ class NavigationScaleGestureHandlerTest {
             .onNavigationCameraStateChanged(NavigationCameraState.FOLLOWING)
 
         verify(exactly = 1) {
-            customMoveGestureDetector.moveThreshold = options.followingInitialMoveThreshold
-            customRotateGestureDetector.angleThreshold = options.followingRotationAngleThreshold
-            customShoveDetector.pixelDeltaThreshold = options.followingMultiFingerMoveThreshold
+            initialMoveGestureDetector.moveThreshold = options.followingInitialMoveThreshold
+            initialMoveGestureDetector.multiFingerMoveThreshold =
+                options.followingMultiFingerMoveThreshold
+            initialRotateGestureDetector.angleThreshold = options.followingRotationAngleThreshold
+            initialShoveGestureDetector.pixelDeltaThreshold =
+                options.followingMultiFingerMoveThreshold
         }
     }
 
@@ -233,10 +237,12 @@ class NavigationScaleGestureHandlerTest {
             .onNavigationCameraStateChanged(NavigationCameraState.FOLLOWING)
 
         verify(exactly = 1) {
-            customMoveGestureDetector.moveThreshold = initialMoveThreshold
-            customMoveGestureDetector.moveThresholdRect = initialMoveThresdholdRect
-            customRotateGestureDetector.angleThreshold = 3.0f
-            customShoveDetector.pixelDeltaThreshold = initialShoveDeltaThreshold
+            initialMoveGestureDetector.moveThreshold = initialMoveThreshold
+            initialMoveGestureDetector.moveThresholdRect = initialMoveThresdholdRect
+            initialMoveGestureDetector.multiFingerMoveThreshold =
+                initialMultiFingerMoveThreshold
+            initialRotateGestureDetector.angleThreshold = 3.0f
+            initialShoveGestureDetector.pixelDeltaThreshold = initialShoveDeltaThreshold
         }
     }
 
@@ -256,30 +262,17 @@ class NavigationScaleGestureHandlerTest {
         every { initialManager.rotateGestureDetector } returns initialRotateDetector
         every { initialManager.shoveGestureDetector } returns initialShoveDetector
         every { initialMoveDetector.moveThreshold } returns initialMoveThreshold
+        every { initialMoveDetector.multiFingerMoveThreshold } returns
+            initialMultiFingerMoveThreshold
         every { initialMoveDetector.moveThresholdRect } returns initialMoveThresdholdRect
         every { initialRotateDetector.angleThreshold } returns 3.0f
         every { initialShoveDetector.pixelDeltaThreshold } returns initialShoveDeltaThreshold
         every { sharedGesturesPlugin.getGesturesManager() } returns initialManager
 
-        val activeCustomManager: AndroidGesturesManager = mockk(relaxUnitFun = true)
-        val activeMoveDetector: MoveGestureDetector = mockk(relaxUnitFun = true)
-        val activeRotateDetector: RotateGestureDetector = mockk(relaxUnitFun = true)
-        val activeShoveDetector: ShoveGestureDetector = mockk(relaxUnitFun = true)
-        every { activeCustomManager.moveGestureDetector } returns activeMoveDetector
-        every { activeCustomManager.rotateGestureDetector } returns activeRotateDetector
-        every { activeCustomManager.shoveGestureDetector } returns activeShoveDetector
-
-        val inactiveCustomManager: AndroidGesturesManager = mockk(relaxUnitFun = true)
-        val inactiveMoveDetector: MoveGestureDetector = mockk(relaxUnitFun = true)
-        val inactiveRotateDetector: RotateGestureDetector = mockk(relaxUnitFun = true)
-        val inactiveShoveDetector: ShoveGestureDetector = mockk(relaxUnitFun = true)
-        every { inactiveCustomManager.moveGestureDetector } returns inactiveMoveDetector
-        every { inactiveCustomManager.rotateGestureDetector } returns inactiveRotateDetector
-        every { inactiveCustomManager.shoveGestureDetector } returns inactiveShoveDetector
-
         every {
-            NavigationCameraLifecycleProvider.getCustomGesturesManager(context, any())
-        } returnsMany listOf(activeCustomManager, inactiveCustomManager)
+            NavigationCameraLifecycleProvider.getCustomOnUpDetector(context, initialManager, any())
+        } returns mockk(relaxUnitFun = true)
+        every { initialManager.getDetectors() } returns mutableListOf()
 
         val activeObserverSlot = slot<NavigationCameraStateChangedObserver>()
         val inactiveObserverSlot = slot<NavigationCameraStateChangedObserver>()
@@ -329,22 +322,23 @@ class NavigationScaleGestureHandlerTest {
         )
 
         verify(exactly = 1) {
-            activeMoveDetector.moveThreshold = options.followingInitialMoveThreshold
+            initialMoveDetector.moveThreshold = options.followingInitialMoveThreshold
+            initialMoveDetector.multiFingerMoveThreshold = options.followingMultiFingerMoveThreshold
         }
         verify(exactly = 1) {
-            activeMoveDetector.moveThresholdRect = options.followingMultiFingerProtectedMoveArea
+            initialMoveDetector.moveThresholdRect = options.followingMultiFingerProtectedMoveArea
         }
         verify(exactly = 1) {
-            activeRotateDetector.angleThreshold = options.followingRotationAngleThreshold
+            initialRotateDetector.angleThreshold = options.followingRotationAngleThreshold
         }
         verify(exactly = 1) {
-            activeShoveDetector.pixelDeltaThreshold = options.followingMultiFingerMoveThreshold
+            initialShoveDetector.pixelDeltaThreshold = options.followingMultiFingerMoveThreshold
         }
 
-        verify(exactly = 0) { inactiveMoveDetector.moveThreshold = any() }
-        verify(exactly = 0) { inactiveMoveDetector.moveThresholdRect = any() }
-        verify(exactly = 0) { inactiveRotateDetector.angleThreshold = any() }
-        verify(exactly = 0) { inactiveShoveDetector.pixelDeltaThreshold = any() }
+        verify(exactly = 1) { initialMoveDetector.moveThreshold = any() }
+        verify(exactly = 1) { initialMoveDetector.moveThresholdRect = any() }
+        verify(exactly = 1) { initialRotateDetector.angleThreshold = any() }
+        verify(exactly = 1) { initialShoveDetector.pixelDeltaThreshold = any() }
     }
 
     @Test
@@ -387,35 +381,20 @@ class NavigationScaleGestureHandlerTest {
     }
 
     @Test
-    fun `initial gestures manager is available`() {
+    fun `custom on up detector is added on initialize`() {
         controller.initialize()
 
-        assertEquals(initialGesturesManager, controller.initialGesturesManager)
-    }
-
-    @Test
-    fun `custom gestures manager is available`() {
-        controller.initialize()
-
-        assertEquals(customGesturesManager, controller.customGesturesManager)
-    }
-
-    @Test
-    fun `custom gestures manager is set`() {
-        controller.initialize()
-
-        assertEquals(gesturesPlugin.getGesturesManager(), controller.customGesturesManager)
+        assertTrue(initialDetectors.contains(customOnUpDetector))
     }
 
     @Test
     fun `when up motion event and following, set gesture thresholds`() {
         every { navigationCamera.state } returns NavigationCameraState.FOLLOWING
-
         controller.initialize()
-        customGesturesInteractorSlot.captured.invoke(customGesturesManager)
+        onUpEventCallbackSlot.captured.invoke(initialGesturesManager)
 
         verify(exactly = 1) {
-            customMoveGestureDetector.moveThreshold = options.followingInitialMoveThreshold
+            initialMoveGestureDetector.moveThreshold = options.followingInitialMoveThreshold
         }
     }
 
@@ -428,13 +407,13 @@ class NavigationScaleGestureHandlerTest {
                 .toMutableList()
                 .apply { remove(NavigationCameraState.FOLLOWING) }
         for (state in states) {
-            clearMocks(customMoveGestureDetector, answers = false)
+            clearMocks(initialMoveGestureDetector, answers = false)
             every { navigationCamera.state } returns state
-            customGesturesInteractorSlot.captured.invoke(customGesturesManager)
+            onUpEventCallbackSlot.captured.invoke(initialGesturesManager)
 
-            verify(exactly = 1) { customMoveGestureDetector.moveThreshold = initialMoveThreshold }
+            verify(exactly = 1) { initialMoveGestureDetector.moveThreshold = initialMoveThreshold }
             verify(exactly = 1) {
-                customMoveGestureDetector.moveThresholdRect = initialMoveThresdholdRect
+                initialMoveGestureDetector.moveThresholdRect = initialMoveThresdholdRect
             }
         }
     }
@@ -486,13 +465,15 @@ class NavigationScaleGestureHandlerTest {
         every { navigationCamera.state } returns NavigationCameraState.FOLLOWING
         every { customMoveGestureDetector.pointersCount } returns 2
         every { customMoveGestureDetector.moveThreshold } returns 0f
+        every { customMoveGestureDetector.multiFingerMoveThreshold } returns 0f
         every { customMoveGestureDetector.moveThresholdRect } returns null
 
         controller.initialize()
         onMoveListenerSlot.captured.onMoveBegin(customMoveGestureDetector)
 
         verify(exactly = 1) {
-            customMoveGestureDetector.moveThreshold = options.followingMultiFingerMoveThreshold
+            customMoveGestureDetector.multiFingerMoveThreshold =
+                options.followingMultiFingerMoveThreshold
         }
         verify(exactly = 1) {
             customMoveGestureDetector.moveThresholdRect =
@@ -519,6 +500,7 @@ class NavigationScaleGestureHandlerTest {
         every { navigationCamera.state } returns NavigationCameraState.FOLLOWING
         every { customMoveGestureDetector.pointersCount } returns 2
         every { customMoveGestureDetector.moveThreshold } returns 0f
+        every { customMoveGestureDetector.multiFingerMoveThreshold } returns 0f
         every { customMoveGestureDetector.moveThresholdRect } returns null
 
         controller.initialize()
@@ -550,6 +532,9 @@ class NavigationScaleGestureHandlerTest {
         every { customMoveGestureDetector.pointersCount } returns 2
         every {
             customMoveGestureDetector.moveThreshold
+        } returns options.followingMultiFingerMoveThreshold
+        every {
+            customMoveGestureDetector.multiFingerMoveThreshold
         } returns options.followingMultiFingerMoveThreshold
         every {
             customMoveGestureDetector.moveThresholdRect
@@ -595,7 +580,8 @@ class NavigationScaleGestureHandlerTest {
             customMoveGestureDetector.moveThreshold = options.followingInitialMoveThreshold
         }
         verify(exactly = 1) {
-            customMoveGestureDetector.moveThresholdRect = null
+            customMoveGestureDetector.moveThresholdRect =
+                options.followingMultiFingerProtectedMoveArea
         }
     }
 
@@ -762,15 +748,11 @@ class NavigationScaleGestureHandlerTest {
 
         controller.cleanup()
 
-        verify(exactly = 1) {
-            gesturesPlugin.setGesturesManager(
-                initialGesturesManager,
-                attachDefaultListeners = true,
-                setDefaultMutuallyExclusives = true,
-            )
-        }
+        assertFalse(initialDetectors.contains(customOnUpDetector))
         verify(exactly = 1) { gesturesPlugin.removeOnMoveListener(onMoveListenerSlot.captured) }
         verify(exactly = 1) { gesturesPlugin.removeOnShoveListener(onShoveListenerSlot.captured) }
+        verify(exactly = 1) { gesturesPlugin.removeOnScaleListener(onScaleListenerSlot.captured) }
+        verify(exactly = 1) { gesturesPlugin.removeOnRotateListener(onRotateListenerSlot.captured) }
         verify(exactly = 1) {
             gesturesPlugin.removeProtectedAnimationOwner(NAVIGATION_CAMERA_OWNER)
         }
