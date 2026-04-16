@@ -4,8 +4,13 @@ import android.content.Context
 import com.mapbox.android.gestures.AndroidGesturesManager
 
 internal object NavigationCameraLifecycleProvider {
-    fun getCustomGesturesManager(
+    fun getCustomOnUpDetector(
         context: Context,
+        gesturesManager: AndroidGesturesManager,
         onUpEventCallback: (AndroidGesturesManager) -> Unit,
-    ): AndroidGesturesManager = LocationGesturesManager(context, onUpEventCallback)
+    ): OnUpEventDetector = OnUpEventDetector(
+        context = context,
+        gesturesManager = gesturesManager,
+        onUpEventCallback = onUpEventCallback,
+    )
 }
