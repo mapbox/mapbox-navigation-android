@@ -10,6 +10,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 /**
@@ -37,7 +38,7 @@ class DriverNotificationManager(
     private val mapboxNavigationFlow = MutableStateFlow<MapboxNavigation?>(null)
 
     private val jobControl = InternalJobControlFactory.createDefaultScopeJobControl()
-    private val providerJobs: MutableMap<DriverNotificationProvider, Job> = mutableMapOf()
+    private val providerJobs = mutableMapOf<DriverNotificationProvider, Job>()
 
     /**
      * Starts DriverNotificationManager.
@@ -52,6 +53,8 @@ class DriverNotificationManager(
      */
     fun stop() {
         logD("DriverNotificationManager stopped")
+        jobControl.job.cancel()
+        providerJobs.clear()
         MapboxNavigationApp.unregisterObserver(this)
     }
 
@@ -70,24 +73,23 @@ class DriverNotificationManager(
     /**
      * Called when the manager is detached from a `MapboxNavigation` instance.
      *
-     * This method cancels all active jobs and unregisters all attached
-     * notification providers.
+     * Sets the navigation flow to null, which causes active `collectLatest` blocks
+     * to cancel and call `provider.onDetached()` via their finally blocks.
+     * Provider registrations are preserved so they re-attach on the next `onAttached`.
      *
      * @param mapboxNavigation the `MapboxNavigation` instance
      */
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
-        jobControl.job.cancel()
-        providerJobs.keys.forEach {
-            it.onDetached(mapboxNavigation)
-        }
-        providerJobs.clear()
+        mapboxNavigationFlow.value = null
     }
 
     /**
      * Attaches one or more `DriverNotificationProvider` instances to the manager.
      *
-     * The attached providers will start generating notifications, which will
-     * be collected and exposed through the `observeDriverNotifications` method.
+     * Provider attachment is asynchronous – if `MapboxNavigation` is not yet available,
+     * the provider will be registered immediately but its `onAttached` and notification
+     * tracking will start once `MapboxNavigation` becomes available.
+     * If the provider is removed before that happens, the pending attachment is cancelled.
      *
      * @param driverNotificationProviders the providers to attach
      * @throws IllegalArgumentException if a provider of the same type is already attached
@@ -127,9 +129,6 @@ class DriverNotificationManager(
     fun observeDriverNotifications(): Flow<DriverNotification> = driverNotificationsFlow
 
     private fun addProvider(provider: DriverNotificationProvider) {
-        val mapboxNavigation = mapboxNavigationFlow.value
-            ?: throw IllegalStateException("MapboxNavigation is not attached")
-
         providerJobs.keys.forEach {
             if (it.javaClass == provider.javaClass) {
                 throw IllegalArgumentException(
@@ -138,17 +137,24 @@ class DriverNotificationManager(
             }
         }
 
-        provider.onAttached(mapboxNavigation)
         providerJobs[provider] = jobControl.scope.launch {
-            provider.trackNotifications().collect { driverNotificationsFlow.emit(it) }
+            // When mapboxNavigationFlow emits null or a new instance, collectLatest
+            // cancels the previous block – the finally calls provider.onDetached().
+            mapboxNavigationFlow.collectLatest { mapboxNavigation ->
+                if (mapboxNavigation != null) {
+                    try {
+                        provider.onAttached(mapboxNavigation)
+                        provider.trackNotifications().collect(driverNotificationsFlow)
+                    } finally {
+                        provider.onDetached(mapboxNavigation)
+                    }
+                }
+            }
         }
     }
 
     private fun removeProvider(provider: DriverNotificationProvider) {
-        val mapboxNavigation = mapboxNavigationFlow.value
-            ?: throw IllegalStateException("MapboxNavigation is not attached")
-        providerJobs[provider]?.cancel()
-        providerJobs.remove(provider)
-        provider.onDetached(mapboxNavigation)
+        // cancel triggers finally in collectLatest block, which calls provider.onDetached()
+        providerJobs.remove(provider)?.cancel()
     }
 }
