@@ -1,5 +1,23 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.21.2 - 17 April, 2026
+#### Features
+
+
+#### Bug fixes and improvements
+- Fix 2-finger pan gestures to respect gestureThresholds. 
+- Fix ASZ reported as passed when there are multiple alternatives with the same camera 
+- Add support for routes that go through the same speed zone multiple times. 
+- Fix for `multiFingerMoveThreshold` messes up `singleFingerMoveThreshold`.  
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.21.2` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.21.2))
+- Mapbox Navigation Native `v324.21.2`
+- Mapbox Core Common `v24.21.2`
+- Mapbox Java `v7.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.0))
+
+
 ## Navigation SDK Core Framework 3.21.1 - 13 April, 2026
 
 #### Bug fixes and improvements
