@@ -1,3 +1,29 @@
+## Navigation SDK Core Framework 3.22.0 - 17 April, 2026
+#### Features
+
+
+#### Bug fixes and improvements
+- Fixed an issue where predictive cache controller was not created for the current style in case `createStyleMapControllers` was invoked after the style had already been loaded. 
+- Fixed an issue where alternative routes stopped being updated after a navigator version switch. 
+- Fixed an issue where the map matcher incorrectly snapped to a tunnel after exiting a parking garage. 
+- Fixed an issue where speed estimation was inaccurate after a long device sleep when input locations lacked speed information. 
+- Fixed an issue where charging time was calculated incorrectly for alternative routes when the current route index was passed. 
+- Fixed an issue where route stickiness was applied to roads outside of the current route leg. 
+- Fixed an issue where alternative route fork point detection was inaccurate by introducing a geometry-based detection algorithm. 
+- Added a minimum speed threshold for applying avoid-maneuver-radius for continuou alternative route, so that Nav SDK can suggest alternatives with maneuver being close in case of low speed. 
+- Improved off-road mode detection in parking aisles that are marked as tunnels. 
+- Improved ADAS cache performance. 
+- Fixed a crash that could occur after navigation shutdown. 
+- Improved performance on routes with a large number of road alerts. 
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.22.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.22.0))
+- Mapbox Navigation Native `v324.22.0`
+- Mapbox Core Common `v24.22.0`
+- Mapbox Java `v7.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.0))
+
 ## Navigation SDK Core Framework 3.22.0-rc.1 - 13 April, 2026
 #### Features
 
