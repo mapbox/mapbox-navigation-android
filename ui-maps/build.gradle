@@ -65,6 +65,9 @@ dependencies {
     testImplementation project(':libtesting-navigation-base')
     testImplementation(dependenciesList.mapboxNavigator)
     testImplementation(dependenciesList.androidXAsyncInflater)
+    // TODO hardcoded in favour of 3.19.7 release.
+    // Remove once MapsSDK updates android-gestuers artifact to at least 0.10.0
+    implementation dependenciesList.mapboxAndroidGestures
 }
 
 dokkaHtmlPartial {
