@@ -206,8 +206,8 @@ upload-to-sdk-registry-snapshot:
 
 .PHONY: upload-to-sdk-registry
 upload-to-sdk-registry:
-	./gradlew mapboxSDKRegistryUpload
-	./gradlew mapboxSDKRegistryUpload -PndkMajor=27
+	./gradlew mapboxSDKRegistryUpload $(if $(VERSION_NAME),-PVERSION_NAME=$(VERSION_NAME),)
+	./gradlew mapboxSDKRegistryUpload $(if $(VERSION_NAME),-PVERSION_NAME=$(VERSION_NAME),) -PndkMajor=27
 
 .PHONY: publish-to-sdk-registry
 publish-to-sdk-registry:
@@ -215,7 +215,7 @@ publish-to-sdk-registry:
 		echo "GITHUB_TOKEN env variable has to be set"; \
 	else \
 		python3 -m pip install git-pull-request; \
-		./gradlew mapboxSDKRegistryPublishAll; \
+		./gradlew mapboxSDKRegistryPublishAll $(if $(VERSION_NAME),-PVERSION_NAME=$(VERSION_NAME),); \
 	fi
 
 .PHONY: ui-check-api
