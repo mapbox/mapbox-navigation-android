@@ -196,8 +196,8 @@ prepare-ui-coverage-reports: ui-unit-tests-release-jacoco
 
 .PHONY: publish-local
 publish-local:
-	./gradlew publishToMavenLocal
-	./gradlew publishToMavenLocal -PndkMajor=27
+	./gradlew publishToMavenLocal $(if $(VERSION_NAME),-PVERSION_NAME=$(VERSION_NAME),)
+	./gradlew publishToMavenLocal $(if $(VERSION_NAME),-PVERSION_NAME=$(VERSION_NAME),) -PndkMajor=27
 
 .PHONY: upload-to-sdk-registry-snapshot
 upload-to-sdk-registry-snapshot:
