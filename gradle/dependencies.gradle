@@ -240,7 +240,7 @@ ext {
       googleServices       : '4.4.2',
       mapboxSdkVersions    : '1.1.5',
       dokka                : '1.9.20',
-      mapboxSdkRegistry    : '1.5.6',
+      mapboxSdkRegistry    : '1.5.7',
       mapboxAccessToken    : '0.2.1',
       mapboxNativeDownload : '0.2.2',
       microbenchmark       : version.microbenchmark,
