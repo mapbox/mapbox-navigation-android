@@ -12,7 +12,7 @@ ext {
   // Release Train depends on these two lines below
   // https://github.com/mapbox/release-train/blob/bd530da200d62fb45166ef91d7d892d90a453fa6/backend/model/step/navcoreandroid/PrepareChangelogNavCore.py#L122-L124
 
-  def mapboxSdkVersionSuffix = '23.0-SNAPSHOT-04-16--02-05.git-8729722'
+  def mapboxSdkVersionSuffix = '23.0-rc.1'
   def mapboxNavigatorVersion = "324.${mapboxSdkVersionSuffix}"
 
   def ndkVersionSuffix = ""
@@ -35,7 +35,6 @@ ext {
       mapboxNavSdkCpp           : "0.${mapboxSdkVersionSuffix}",
       mapboxSearch              : "2.${mapboxSdkVersionSuffix}",
       mapboxBaseAndroid         : '0.12.0',
-      mapboxAndroidGestures     : '0.10.0',
       androidXActivity          : '1.7.1',
       androidXActivityCompose   : '1.9.2',
       androidXLifecycle         : '2.4.0',
@@ -103,7 +102,6 @@ ext {
       mapboxSdkDirectionsModels : "com.mapbox.mapboxsdk:mapbox-sdk-directions-models:${version.mapboxSdkServices}",
       mapboxSdkRefreshModels    : "com.mapbox.mapboxsdk:mapbox-sdk-directions-refresh-models:${version.mapboxSdkServices}",
       mapboxSdkGson             : "com.mapbox.mapboxsdk:auto-value-gson-runtime:${version.mapboxSdkGson}",
-      mapboxAndroidGestures     : "com.mapbox.mapboxsdk:mapbox-android-gestures:${version.mapboxAndroidGestures}",
       mapboxNavigator           : "com.mapbox.navigator:dash-native$ndkVersionSuffix:${version.mapboxNavigator}",
       mapboxCommonNative        : "com.mapbox.common:common$ndkVersionSuffix:${version.mapboxCommonNative}",
       mapboxSearch              : "com.mapbox.search:mapbox-search-android$ndkVersionSuffix:${version.mapboxSearch}",
