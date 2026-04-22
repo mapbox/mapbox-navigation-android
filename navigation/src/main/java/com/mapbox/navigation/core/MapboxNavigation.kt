@@ -1312,34 +1312,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     /**
-     * Requests HD graph data update and invokes the callback on result.
-     * Use this method if the frequency of application relaunch is too low
-     * to always get the latest HD graph data.
-     * Recreate [MapboxNavigation] instance in the callback when updates are available:
-     * ```
-     *   mapboxNavigation.requestHDGraphDataUpdate(object : RoadGraphDataUpdateCallback {
-     *       override fun onRoadGraphDataUpdateInfoAvailable(
-     *           isUpdateAvailable: Boolean,
-     *           versionInfo: RoadGraphVersionInfo?
-     *       ) {
-     *           if (isUpdateAvailable) {
-     *               val currentOptions = mapboxNavigation.navigationOptions
-     *               MapboxNavigationApp.disable()
-     *               MapboxNavigationApp.setup(currentOptions)
-     *           }
-     *       }
-     *   })
-     * ```
-     *
-     * @param callback callback to be invoked when the information about available
-     *   updates is received. See [RoadGraphDataUpdateCallback].
-     */
-    @ExperimentalPreviewMapboxNavigationAPI
-    fun requestHDGraphDataUpdate(callback: RoadGraphDataUpdateCallback) {
-        CacheHandleWrapper.requestHDGraphDataUpdate(navigator.cache, callback)
-    }
-
-    /**
      * Returns leg index the user is currently on. If no RouteProgress updates are available,
      * returns the value passed as `initialLegIndex` parameter to `setNavigationRoutes`.
      * If no routes are set, returns 0.
@@ -2321,36 +2293,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         callback: RoadGraphVersionInfoCallback,
     ) {
         navigator.cache.getCurrentRoadGraphVersionInfo(
-            { isVersionResolved, currentVersionInfo ->
-                if (!isVersionResolved || currentVersionInfo == null) {
-                    callback.onError(isTimeoutError = !isVersionResolved)
-                } else {
-                    callback.onVersionInfo(
-                        RoadGraphVersionInfoCallback.VersionInfo.createFromNative(
-                            currentVersionInfo,
-                        ),
-                    )
-                }
-            },
-        )
-    }
-
-    /**
-     * Retrieves current HD graph version information. The retrieval process waits for the
-     * tiles config to resolve.
-     *
-     * @param timeoutSeconds Request timeout in seconds, pass null for the infinite timeout.
-     * @param callback The callback to call when result request finished,
-     * either with success or error, or when timeout passed.
-     */
-    @ExperimentalPreviewMapboxNavigationAPI
-    @JvmOverloads
-    fun getHDGraphVersionInfo(
-        // TODO: remove parameter: https://mapbox.atlassian.net/browse/NAVAND-6910
-        timeoutSeconds: Int? = null,
-        callback: RoadGraphVersionInfoCallback,
-    ) {
-        navigator.cache.getCurrentHDGraphVersionInfo(
             { isVersionResolved, currentVersionInfo ->
                 if (!isVersionResolved || currentVersionInfo == null) {
                     callback.onError(isTimeoutError = !isVersionResolved)

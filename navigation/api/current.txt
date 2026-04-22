@@ -39,8 +39,6 @@ package com.mapbox.navigation.core {
     method public com.mapbox.navigation.core.trip.session.NavigationSessionState getNavigationSessionState();
     method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public com.mapbox.navigation.navigator.internal.MapboxNativeNavigator getNavigator();
     method public com.mapbox.navigation.core.reroute.RerouteController? getRerouteController();
-    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void getHDGraphVersionInfo(Integer? timeoutSeconds = null, com.mapbox.navigation.core.RoadGraphVersionInfoCallback callback);
-    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void getHDGraphVersionInfo(com.mapbox.navigation.core.RoadGraphVersionInfoCallback callback);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void getRoadGraphVersionInfo(Integer? timeoutSeconds = null, com.mapbox.navigation.core.RoadGraphVersionInfoCallback callback);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void getRoadGraphVersionInfo(com.mapbox.navigation.core.RoadGraphVersionInfoCallback callback);
     method public com.mapbox.navigation.core.trip.session.eh.RoadObjectMatcher getRoadObjectMatcher();
@@ -82,7 +80,6 @@ package com.mapbox.navigation.core {
     method public void registerVoiceInstructionsObserver(com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver voiceInstructionsObserver);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void replanRoute(com.mapbox.navigation.core.ReplanRoutesCallback? resultCallback = null);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void replanRoute();
-    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void requestHDGraphDataUpdate(com.mapbox.navigation.core.RoadGraphDataUpdateCallback callback);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public long requestMapMatching(com.mapbox.navigation.core.mapmatching.MapMatchingOptions mapMatchingOptions, com.mapbox.navigation.core.mapmatching.MapMatchingAPICallback callback);
     method public void requestRoadGraphDataUpdate(com.mapbox.navigation.core.RoadGraphDataUpdateCallback callback);
     method public long requestRoutes(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.NavigationRouterCallback callback);
