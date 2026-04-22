@@ -18,4 +18,16 @@ internal object CacheHandleWrapper {
             )
         }
     }
+
+    fun requestHDGraphDataUpdate(
+        cache: CacheHandleInterface,
+        callback: RoadGraphDataUpdateCallback,
+    ) {
+        cache.isHDGraphDataUpdateAvailable { isUpdateAvailable, newVersionInfo ->
+            callback.onRoadGraphDataUpdateInfoAvailable(
+                isUpdateAvailable,
+                newVersionInfo?.let { SDKRoadGraphVersionInfo(it.dataset, it.version) },
+            )
+        }
+    }
 }
