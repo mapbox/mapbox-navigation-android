@@ -54,4 +54,42 @@ class CacheHandleWrapperTest {
             callback.onRoadGraphDataUpdateInfoAvailable(expectedIsUpdateAvailable, null)
         }
     }
+
+    @Test
+    fun `requestHDGraphDataUpdate invokes callback with filled data`() {
+        val expectedIsUpdateAvailable = Random.nextBoolean()
+        val expectedDataset = "my dataset"
+        val expectedVersion = "my version"
+        val versionInfo = RoadGraphVersionInfo(expectedDataset, expectedVersion)
+
+        CacheHandleWrapper.requestHDGraphDataUpdate(cache, callback)
+
+        val nativeCallbacks = mutableListOf<RoadGraphUpdateAvailabilityCallback>()
+        verify(exactly = 1) {
+            cache.isHDGraphDataUpdateAvailable(capture(nativeCallbacks))
+        }
+        nativeCallbacks[0].run(expectedIsUpdateAvailable, versionInfo)
+        verify(exactly = 1) {
+            callback.onRoadGraphDataUpdateInfoAvailable(
+                expectedIsUpdateAvailable,
+                com.mapbox.navigation.core.RoadGraphVersionInfo(expectedDataset, expectedVersion),
+            )
+        }
+    }
+
+    @Test
+    fun `requestHDGraphDataUpdate invokes callback with null version info`() {
+        val expectedIsUpdateAvailable = Random.nextBoolean()
+
+        CacheHandleWrapper.requestHDGraphDataUpdate(cache, callback)
+
+        val nativeCallbacks = mutableListOf<RoadGraphUpdateAvailabilityCallback>()
+        verify(exactly = 1) {
+            cache.isHDGraphDataUpdateAvailable(capture(nativeCallbacks))
+        }
+        nativeCallbacks[0].run(expectedIsUpdateAvailable, null)
+        verify(exactly = 1) {
+            callback.onRoadGraphDataUpdateInfoAvailable(expectedIsUpdateAvailable, null)
+        }
+    }
 }
