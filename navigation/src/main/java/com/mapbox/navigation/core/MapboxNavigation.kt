@@ -1396,6 +1396,27 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                                     setRoutesInfo = setRoutesInfo,
                                 ),
                             )
+                        } else if (
+                            setRoutesInfo is SetRoutes.RefreshRoutes &&
+                            directionsSession.routes.isNotEmpty() &&
+                            routes.first().id != directionsSession.routes.first().id
+                        ) {
+                            routesSetResult = ExpectedFactory.createError(
+                                RoutesSetError(
+                                    "Refresh routes ${routes.map { it.id }} are outdated. " +
+                                        "Primary route has changed from ${routes.first().id} " +
+                                        "to ${directionsSession.routes.firstOrNull()?.id}",
+                                ),
+                            )
+                            // Even though we are not setting new routes here, we need to inform
+                            // that the operation (setNavigationRoutesStarted) is finished
+                            directionsSession.setNavigationRoutesFinished(
+                                DirectionsSessionRoutes(
+                                    acceptedRoutes = directionsSession.routes,
+                                    ignoredRoutes = directionsSession.ignoredRoutes,
+                                    setRoutesInfo = setRoutesInfo,
+                                ),
+                            )
                         } else {
                             logI(LOG_CATEGORY) {
                                 "[$reason] Setting routes to history recording handler"

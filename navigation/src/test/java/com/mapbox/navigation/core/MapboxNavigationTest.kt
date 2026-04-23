@@ -1593,6 +1593,93 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         }
 
     @Test
+    fun `stale refresh routes completed before reroute acquires mutex are not applied`() =
+        coroutineRule.runBlockingTest {
+            // Simulates race condition:
+            // 1. Reroute queues [route1, route0] (alternative became primary), holds mutex
+            //    while native processing runs (~500ms).
+            // 2. A refresh request that was in-flight before the reroute completes and
+            //    queues [route0, route1] (stale pre-reroute order) behind the mutex.
+            // 3. Reroute releases mutex → refresh coroutine wakes up with captured stale
+            //    routes and overrides the reroute result.
+            //
+            // Expected: stale refresh is discarded (primary route ID no longer matches).
+            val route0 = routeWithId("route#0")
+            val route1 = routeWithId("route#1")
+            val rerouteRoutes = listOf(route1, route0) // alternative became primary
+
+            coEvery { tripSession.setRoutes(rerouteRoutes, any()) } coAnswers {
+                delay(500L) // simulates slow native processing, keeping the mutex held
+                NativeSetRouteValue(rerouteRoutes, emptyList())
+            }
+            every {
+                defaultRerouteController.rerouteOnDeviation(
+                    any<InternalRerouteController.DeviationRoutesCallback>(),
+                )
+            } answers {
+                every { tripSession.isOffRoute } returns true
+                firstArg<InternalRerouteController.DeviationRoutesCallback>()
+                    .onNewRoutes(RerouteResult(rerouteRoutes, 0, RouterOrigin.ONLINE))
+            }
+
+            createMapboxNavigation()
+
+            every { directionsSession.ignoredRoutes } returns emptyList()
+            // Mirror real DirectionsSession: update routes when setNavigationRoutesFinished is called,
+            // so the staleness check sees the post-reroute primary when the refresh coroutine runs.
+            every { directionsSession.setNavigationRoutesFinished(any()) } answers {
+                val accepted = firstArg<DirectionsSessionRoutes>().acceptedRoutes
+                if (accepted.isNotEmpty()) {
+                    every { directionsSession.routes } returns accepted
+                }
+            }
+            val offRouteObservers = mutableListOf<OffRouteObserver>()
+            verify { tripSession.setOffRouteObserverForReroute(capture(offRouteObservers), any()) }
+
+            val staleRefreshResult = RoutesRefresherResult(
+                RouteRefresherResult(
+                    route0,
+                    RouteProgressData(0, 0, 0),
+                    RouteRefresherStatus.Success(mockk()),
+                ),
+                listOf(
+                    RouteRefresherResult(
+                        route1,
+                        RouteProgressData(0, 0, 0),
+                        RouteRefresherStatus.Success(mockk()),
+                    ),
+                ),
+            )
+
+            pauseDispatcher {
+                // Off-route detection triggers reroute, which synchronously calls back
+                // with rerouteRoutes. internalSetNavigationRoutes(rerouteRoutes, Reroute)
+                // is launched but queued (dispatcher is paused).
+                offRouteObservers.forEach { it.onOffRouteStateChanged(true) }
+                // Stale refresh completes while reroute processing is pending.
+                // internalSetNavigationRoutes(staleRefreshRoutes, RefreshRoutes) is queued
+                // behind the reroute coroutine on routeUpdateMutex.
+                interceptRefreshObserver().onRoutesRefreshed(staleRefreshResult)
+            }
+            // After dispatcher resumes: reroute coroutine runs first (acquires mutex, delays 500ms,
+            // then releases). Refresh coroutine then acquires mutex with stale captured routes.
+
+            coVerify(exactly = 1) {
+                directionsSession.setNavigationRoutesFinished(
+                    match {
+                        it.acceptedRoutes.firstOrNull() == route1 &&
+                            it.setRoutesInfo is SetRoutes.Reroute
+                    },
+                )
+            }
+            coVerify(exactly = 0) {
+                directionsSession.setNavigationRoutesFinished(
+                    match { it.acceptedRoutes.firstOrNull() == route0 },
+                )
+            }
+        }
+
+    @Test
     fun `set route - correct order of actions, result applied to alternatives controller`() =
         coroutineRule.runBlockingTest {
             createMapboxNavigation()
