@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mapbox_voice_feedback__share_your_feedback">Del tilbakemeldingen din</string>
+    <string name="mapbox_voice_feedback__listening">Lytter…</string>
+    <string name="mapbox_voice_feedback__processing">Behandler …</string>
+    <string name="mapbox_voice_feedback__success_title">Takk for at du delte</string>
+    <string name="mapbox_voice_feedback__success_description">Din tilbakemelding hjelper oss å bli bedre</string>
+    <string name="mapbox_voice_feedback__error_title">Oi! Noe gikk galt</string>
+    <string name="mapbox_voice_feedback__error_description">Prøv igjen</string>
+    <string name="mapbox_voice_feedback__speech_not_recognized_title">Uff da! Fikk ikke med meg det</string>
+    <string name="mapbox_voice_feedback__connecting">Ingen tilkobling</string>
+</resources>

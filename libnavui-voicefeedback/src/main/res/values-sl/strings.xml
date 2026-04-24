@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mapbox_voice_feedback__share_your_feedback">Delite svoje mnenje</string>
+    <string name="mapbox_voice_feedback__listening">Poslušanje…</string>
+    <string name="mapbox_voice_feedback__processing">Obdelava …</string>
+    <string name="mapbox_voice_feedback__success_title">Hvala, da ste delili</string>
+    <string name="mapbox_voice_feedback__success_description">Vaše povratne informacije nam pomagajo izboljšati naše storitve</string>
+    <string name="mapbox_voice_feedback__error_title">Ups! Nekaj je šlo narobe</string>
+    <string name="mapbox_voice_feedback__error_description">Poskusite znova</string>
+    <string name="mapbox_voice_feedback__speech_not_recognized_title">Ups! Tega nisem razumel</string>
+    <string name="mapbox_voice_feedback__connecting">Ni povezave</string>
+</resources>
