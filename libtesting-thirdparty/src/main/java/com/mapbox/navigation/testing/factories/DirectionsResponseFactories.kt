@@ -18,6 +18,7 @@ import com.mapbox.api.directions.v5.models.Incident
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.MaxSpeed
+import com.mapbox.api.directions.v5.models.Notification
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.StepIntersection
@@ -74,7 +75,8 @@ fun createRouteLeg(
     incidents: List<Incident>? = null,
     closures: List<Closure>? = null,
     steps: List<LegStep>? = listOf(createRouteStep()),
-    duration: Double? = null
+    duration: Double? = null,
+    notifications: List<Notification>? = null,
 ): RouteLeg {
     return RouteLeg.builder()
         .annotation(annotation)
@@ -82,6 +84,7 @@ fun createRouteLeg(
         .closures(closures)
         .duration(duration)
         .steps(steps)
+        .notifications(notifications)
         .build()
 }
 
