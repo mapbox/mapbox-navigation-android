@@ -1,5 +1,18 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.21.3 - 24 April, 2026
+
+#### Bug fixes and improvements
+- Fixed a bug that caused lost zone progress when switching to an alternative during driving in a speed zone.
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.21.3` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.21.3))
+- Mapbox Navigation Native `v324.21.3`
+- Mapbox Core Common `v24.21.3`
+- Mapbox Java `v7.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.0))
+
+
 ## Navigation SDK Core Framework 3.21.2 - 17 April, 2026
 #### Features
 
