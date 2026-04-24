@@ -15,6 +15,9 @@ package com.mapbox.api.directions.v5.models {
 
 package com.mapbox.api.directions.v5.models.utils {
 
+  public final class BaseFBWrapperKt {
+  }
+
   public final class ConstantsKt {
   }
 

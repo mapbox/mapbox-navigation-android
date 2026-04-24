@@ -7,6 +7,7 @@ import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.ui.maps.internal.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.route.callout.api.roundUpByAbs
 import com.mapbox.navigation.ui.maps.route.callout.model.RouteCallout
+import com.mapbox.navigation.utils.internal.logW
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
@@ -32,10 +33,15 @@ class MapboxRouteCalloutsApi {
     /**
      * Sets the routes that will be operated on.
      *
+     * Callouts are disabled when [alternativeRoutesMetadata] is empty while [newRoutes] contains
+     * alternatives. Since the metadata is required to locate the deviation point used to attach
+     * the callout to the correct geometry segment.
+     *
      * @param newRoutes one or more routes. The first route in the collection will be considered
      * the primary route and any additional routes will be alternate routes.
-     * @param alternativeRoutesMetadata if available, helps [MapboxRouteCalloutsApi] find
-     * the deviation point to extract different geometry segment the callout should be attaching to.
+     * @param alternativeRoutesMetadata helps [MapboxRouteCalloutsApi] find the deviation point to
+     * extract the geometry segment the callout should attach to. Required when [newRoutes]
+     * contains alternatives.
      * See [com.mapbox.navigation.core.MapboxNavigation.getAlternativeMetadataFor].
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -43,6 +49,15 @@ class MapboxRouteCalloutsApi {
         newRoutes: List<NavigationRoute>,
         alternativeRoutesMetadata: List<AlternativeRouteMetadata>,
     ): RouteCalloutData {
+        if (newRoutes.size > 1 && alternativeRoutesMetadata.isEmpty()) {
+            logW(LOG_CATEGORY) {
+                "alternativeRoutesMetadata is empty while alternative routes are present. " +
+                    "Route line annotation data which can be rendered on the map to visualize a " +
+                    "callout will not be enabled. Ensure to pass alternativeRoutesMetadata from " +
+                    "call location to enable callouts."
+            }
+            return RouteCalloutData(emptyList())
+        }
         return RouteCalloutData(createCallouts(newRoutes, alternativeRoutesMetadata))
     }
 
@@ -106,5 +121,9 @@ class MapboxRouteCalloutsApi {
             (primaryDuration - alternativeDuration).roundUpByAbs(DurationUnit.MINUTES)
 
         return durationDiff
+    }
+
+    private companion object {
+        private const val LOG_CATEGORY = "MapboxRouteCalloutsApi"
     }
 }

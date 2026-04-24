@@ -375,6 +375,10 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
      * This can be a long running task with long routes.
      * There is a cancel method which will cancel the background tasks.
      *
+     * Route callouts (see MapboxRouteLineApiOptions#isRouteCalloutsEnabled) are disabled in this
+     * overload because they require [alternativeRoutesMetadata] to render. To enable callout
+     * visualization on the map, use the overload that accepts [alternativeRoutesMetadata].
+     *
      * @param newRoutes one or more routes. The first route in the collection will be considered
      * the primary route and any additional routes will be alternate routes.
      * @param consumer a method that consumes the result of the operation.
@@ -383,6 +387,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         newRoutes: List<NavigationRoute>,
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>,
     ) {
+        logCalloutsDisabledWarning("setNavigationRoutes(newRoutes, consumer)")
         setNavigationRoutes(newRoutes, 0, consumer)
     }
 
@@ -392,10 +397,15 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
      * This can be a long running task with long routes.
      * There is a cancel method which will cancel the background tasks.
      *
+     * Route callouts (see MapboxRouteLineApiOptions#isRouteCalloutsEnabled) are disabled in this
+     * overload because they require [alternativeRoutesMetadata] to render. To enable callout
+     * visualization on the map, use the overload that accepts [alternativeRoutesMetadata].
+     *
      * @param newRoutes one or more routes. The first route in the collection will be considered
      * the primary route and any additional routes will be alternate routes.
      * @param activeLegIndex the index of the currently active leg of the primary route.
-     *  This is used when [MapboxRouteLineApiOptions.styleInactiveRouteLegsIndependently] is enabled.
+     *  This is used when [MapboxRouteLineApiOptions.styleInactiveRouteLegsIndependently] is
+     *  enabled.
      * @param consumer a method that consumes the result of the operation.
      */
     fun setNavigationRoutes(
@@ -403,6 +413,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         activeLegIndex: Int,
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>,
     ) {
+        logCalloutsDisabledWarning("setNavigationRoutes(newRoutes, activeLegIndex, consumer)")
         setNavigationRoutes(
             newRoutes = newRoutes,
             activeLegIndex = activeLegIndex,
@@ -419,8 +430,9 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
      *
      * @param newRoutes one or more routes. The first route in the collection will be considered
      * the primary route and any additional routes will be alternate routes.
-     * @param alternativeRoutesMetadata if available, the update will hide the portions of the alternative routes
-     * until the deviation point with the primary route. See [MapboxNavigation.getAlternativeMetadataFor].
+     * @param alternativeRoutesMetadata if available, the update will hide the portions of the
+     * alternative routes until the deviation point with the primary route. See
+     * [MapboxNavigation.getAlternativeMetadataFor].
      * @param consumer a method that consumes the result of the operation.
      */
     fun setNavigationRoutes(
@@ -440,9 +452,10 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
      * @param newRoutes one or more routes. The first route in the collection will be considered
      * the primary route and any additional routes will be alternate routes.
      * @param activeLegIndex the index of the currently active leg of the primary route.
-     *  This is used when [MapboxRouteLineApiOptions.styleInactiveRouteLegsIndependently] is enabled.
-     * @param alternativeRoutesMetadata if available, the update will hide the portions of the alternative routes
-     * until the deviation point with the primary route. See [MapboxNavigation.getAlternativeMetadataFor].
+     *  It is used when [MapboxRouteLineApiOptions.styleInactiveRouteLegsIndependently] is enabled.
+     * @param alternativeRoutesMetadata if available, the update will hide the portions of the
+     * alternative routes until the deviation point with the primary route. See
+     * [MapboxNavigation.getAlternativeMetadataFor].
      * @param consumer a method that consumes the result of the operation.
      */
     fun setNavigationRoutes(
@@ -463,6 +476,10 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
      * This can be a long running task with long routes.
      * There is a cancel method which will cancel the background tasks.
      *
+     * Route callouts (see MapboxRouteLineApiOptions#isRouteCalloutsEnabled) are disabled in this
+     * overload because they require [alternativeRoutesMetadata] to render. To enable callout
+     * visualization on the map, use the overload that accepts [alternativeRoutesMetadata].
+     *
      * @param newRoutes one or more routes. The first route in the collection will be considered
      * the primary route and any additional routes will be alternate routes.
      * @param consumer a method that consumes the result of the operation.
@@ -471,6 +488,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         newRoutes: List<NavigationRouteLine>,
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>,
     ) {
+        logCalloutsDisabledWarning("setNavigationRouteLines(newRoutes, consumer)")
         setNavigationRouteLines(
             newRoutes = newRoutes,
             alternativeRoutesMetadata = emptyList(),
@@ -1623,6 +1641,18 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
             0.0
         } else {
             vanishing.vanishPointOffset
+        }
+    }
+
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    private fun logCalloutsDisabledWarning(overload: String) {
+        if (!routeLineOptions.isRouteCalloutsEnabled) {
+            logW(LOG_CATEGORY) {
+                "$overload called without alternativeRoutesMetadata. Route line annotation data " +
+                    "which can be rendered on the map to visualize a callout will not be enabled " +
+                    "without it. Use the overload that accepts alternativeRoutesMetadata (from " +
+                    "MapboxNavigation.getAlternativeMetadataFor(...)) to enable callouts."
+            }
         }
     }
 

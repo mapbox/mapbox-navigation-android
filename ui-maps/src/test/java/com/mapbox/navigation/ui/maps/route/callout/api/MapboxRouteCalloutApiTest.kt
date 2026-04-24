@@ -3,11 +3,14 @@ package com.mapbox.navigation.ui.maps.route.callout.api
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.factories.createDirectionsResponse
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createNavigationRoutes
 import com.mapbox.navigation.ui.maps.internal.route.callout.api.MapboxRouteCalloutsApi
+import io.mockk.every
+import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
 import org.junit.Rule
@@ -30,10 +33,20 @@ class MapboxRouteCalloutApiTest {
     }
 
     @Test
-    fun `generate eta callouts for each route`() {
-        val routes = createMockRoutes(routeCount = 5)
+    fun `return empty callouts when metadata is empty and there are alternative routes`() {
+        val routes = createMockRoutes(routeCount = 3)
 
         val result = MapboxRouteCalloutsApi().setNavigationRoutes(routes, emptyList())
+
+        assertTrue(result.callouts.isEmpty())
+    }
+
+    @Test
+    fun `generate eta callouts for each route`() {
+        val routes = createMockRoutes(routeCount = 5)
+        val alternativesMetadata = createMockAlternativeRoutesMetadata(routes)
+
+        val result = MapboxRouteCalloutsApi().setNavigationRoutes(routes, alternativesMetadata)
 
         assertEquals(5, result.callouts.size)
     }
@@ -41,8 +54,9 @@ class MapboxRouteCalloutApiTest {
     @Test
     fun `only one eta callouts should be primary`() {
         val routes = createMockRoutes(routeCount = 5)
+        val alternativesMetadata = createMockAlternativeRoutesMetadata(routes)
 
-        val result = MapboxRouteCalloutsApi().setNavigationRoutes(routes, emptyList())
+        val result = MapboxRouteCalloutsApi().setNavigationRoutes(routes, alternativesMetadata)
 
         assertEquals(1, result.callouts.count { it.isPrimary })
     }
@@ -50,20 +64,25 @@ class MapboxRouteCalloutApiTest {
     @Test
     fun `first route callout should have duration difference 0`() {
         val routes = createMockRoutes(routeCount = 5)
+        val alternativesMetadata = createMockAlternativeRoutesMetadata(routes)
 
-        val result = MapboxRouteCalloutsApi().setNavigationRoutes(routes, emptyList())
+        val result = MapboxRouteCalloutsApi().setNavigationRoutes(routes, alternativesMetadata)
 
         assertEquals(0.seconds, result.callouts.first().durationDifferenceWithPrimary)
     }
 
     @Test
     fun `durationDifference callouts duration should be relative`() {
+        val durations = listOf(120.0, 60.0, 180.0)
         val routes = createMockRoutes(
             routeCount = 3,
-            durationList = listOf(120.0, 60.0, 180.0),
+            durationList = durations,
         )
+        val alternativesMetadata = createMockAlternativeRoutesMetadata(routes, durations)
 
-        val callouts = MapboxRouteCalloutsApi().setNavigationRoutes(routes, emptyList()).callouts
+        val callouts = MapboxRouteCalloutsApi()
+            .setNavigationRoutes(routes, alternativesMetadata)
+            .callouts
         val actualDuration = callouts.map { it.durationDifferenceWithPrimary }
 
         assertEquals(listOf(0.seconds, 60.seconds, (-60).seconds), actualDuration)
@@ -95,5 +114,21 @@ class MapboxRouteCalloutApiTest {
                 routes = routes,
             ),
         )
+    }
+
+    private fun createMockAlternativeRoutesMetadata(
+        routes: List<NavigationRoute>,
+        durationList: List<Double>? = null,
+    ): List<AlternativeRouteMetadata> {
+        return routes.drop(1).mapIndexed { index, route ->
+            val altDuration = durationList?.getOrNull(index + 1)
+                ?: route.directionsRoute.duration()
+            mockk<AlternativeRouteMetadata>(relaxed = true) {
+                every { navigationRoute } returns route
+                every { infoFromStartOfPrimary } returns mockk {
+                    every { duration } returns altDuration
+                }
+            }
+        }
     }
 }
