@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Voice Feedback button -->
+    <dimen name="mapbox_voice_feedback_button_icon_size">60dp</dimen>
+    <dimen name="mapbox_voice_feedback_button_padding">16dp</dimen>
+
+    <!-- Card styling -->
+    <dimen name="mapbox_voice_feedback_card_width">340dp</dimen>
+    <dimen name="mapbox_voice_feedback_card_corner_radius">16dp</dimen>
+    <dimen name="mapbox_voice_feedback_card_elevation">8dp</dimen>
+
+    <!-- Content padding -->
+    <dimen name="mapbox_voice_feedback_content_padding">16dp</dimen>
+
+    <!-- Close button -->
+    <dimen name="mapbox_voice_feedback_close_button_size">40dp</dimen>
+    <dimen name="mapbox_voice_feedback_close_icon_size">32dp</dimen>
+
+    <!-- Content block -->
+    <dimen name="mapbox_voice_feedback_header_top_margin">0dp</dimen>
+    <dimen name="mapbox_voice_feedback_header_text_size">20sp</dimen>
+    <dimen name="mapbox_voice_feedback_content_block_height">120dp</dimen>
+    <dimen name="mapbox_voice_feedback_description_text_size">18sp</dimen>
+    <dimen name="mapbox_voice_feedback_description_top_margin">4dp</dimen>
+
+    <!-- Info block -->
+    <dimen name="mapbox_voice_feedback_icon_size">48dp</dimen>
+    <dimen name="mapbox_voice_feedback_info_header_top_margin">16dp</dimen>
+    <dimen name="mapbox_voice_feedback_info_description_top_margin">4dp</dimen>
+    <dimen name="mapbox_voice_feedback_info_description_bottom_margin">16dp</dimen>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mapbox_voice_feedback__share_your_feedback">Deildu ábendingum þínum</string>
+    <string name="mapbox_voice_feedback__listening">Hlusta…</string>
+    <string name="mapbox_voice_feedback__processing">Í vinnslu…</string>
+    <string name="mapbox_voice_feedback__success_title">Takk fyrir að deila þessu</string>
+    <string name="mapbox_voice_feedback__success_description">Endurgjöf þín hjálpar okkur að bæta þjónustuna.</string>
+    <string name="mapbox_voice_feedback__error_title">Úbbs! Eitthvað fór úrskeiðis</string>
+    <string name="mapbox_voice_feedback__error_description">Vinsamlegast reyndu aftur</string>
+    <string name="mapbox_voice_feedback__speech_not_recognized_title">Úbbs! Ég náði því ekki</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mapbox_voice_feedback__share_your_feedback">Jaga oma tagasisidet</string>
+    <string name="mapbox_voice_feedback__listening">Kuulan…</string>
+    <string name="mapbox_voice_feedback__processing">Töötlemine…</string>
+    <string name="mapbox_voice_feedback__success_title">Aitäh jagamast</string>
+    <string name="mapbox_voice_feedback__success_description">Teie tagasiside aitab meil paremaks saada</string>
+    <string name="mapbox_voice_feedback__error_title">Oih! Midagi läks valesti</string>
+    <string name="mapbox_voice_feedback__error_description">Palun proovige uuesti</string>
+    <string name="mapbox_voice_feedback__speech_not_recognized_title">Oih! Ei saanud sellest aru</string>
+</resources>

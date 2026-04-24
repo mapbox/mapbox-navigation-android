@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mapbox_voice_feedback__share_your_feedback">의견을 공유해 주세요</string>
+    <string name="mapbox_voice_feedback__listening">듣는 중…</string>
+    <string name="mapbox_voice_feedback__processing">처리 중…</string>
+    <string name="mapbox_voice_feedback__success_title">공유해 주셔서 감사합니다</string>
+    <string name="mapbox_voice_feedback__success_description">귀하의 피드백은 저희가 개선하는 데 도움이 됩니다</string>
+    <string name="mapbox_voice_feedback__error_title">이런! 문제가 발생했습니다</string>
+    <string name="mapbox_voice_feedback__error_description">다시 시도해 주세요</string>
+    <string name="mapbox_voice_feedback__speech_not_recognized_title">이런! 잘 못 들었어요</string>
+</resources>

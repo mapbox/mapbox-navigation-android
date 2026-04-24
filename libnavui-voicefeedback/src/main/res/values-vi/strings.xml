@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mapbox_voice_feedback__share_your_feedback">Chia sẻ phản hồi của bạn</string>
+    <string name="mapbox_voice_feedback__listening">Đang lắng nghe…</string>
+    <string name="mapbox_voice_feedback__processing">Đang xử lý…</string>
+    <string name="mapbox_voice_feedback__success_title">Cảm ơn bạn đã chia sẻ</string>
+    <string name="mapbox_voice_feedback__success_description">Phản hồi của bạn giúp chúng tôi cải thiện</string>
+    <string name="mapbox_voice_feedback__error_title">Ôi! Đã xảy ra sự cố</string>
+    <string name="mapbox_voice_feedback__error_description">Vui lòng thử lại</string>
+    <string name="mapbox_voice_feedback__speech_not_recognized_title">Ôi! Tôi không nghe rõ điều đó</string>
+</resources>

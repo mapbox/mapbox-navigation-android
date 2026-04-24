@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mapbox_voice_feedback__share_your_feedback">Dalieties ar savu atsauksmi</string>
+    <string name="mapbox_voice_feedback__listening">Klausās…</string>
+    <string name="mapbox_voice_feedback__processing">Notiek apstrāde…</string>
+    <string name="mapbox_voice_feedback__success_title">Paldies, ka dalījāties</string>
+    <string name="mapbox_voice_feedback__success_description">Jūsu atsauksmes palīdz mums uzlaboties</string>
+    <string name="mapbox_voice_feedback__error_title">Ak! Kaut kas nogāja greizi</string>
+    <string name="mapbox_voice_feedback__error_description">Lūdzu, mēģiniet vēlreiz</string>
+    <string name="mapbox_voice_feedback__speech_not_recognized_title">Ups! Nesapratu to</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mapbox_voice_feedback__share_your_feedback">Comparte tus comentarios</string>
+    <string name="mapbox_voice_feedback__listening">Escuchando…</string>
+    <string name="mapbox_voice_feedback__processing">Procesando…</string>
+    <string name="mapbox_voice_feedback__success_title">Gracias por compartir</string>
+    <string name="mapbox_voice_feedback__success_description">Tus comentarios nos ayudan a mejorar</string>
+    <string name="mapbox_voice_feedback__error_title">¡Ups! Algo salió mal</string>
+    <string name="mapbox_voice_feedback__error_description">Por favor, inténtalo de nuevo</string>
+    <string name="mapbox_voice_feedback__speech_not_recognized_title">¡Ups! No entendí eso</string>
+</resources>

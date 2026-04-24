@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mapbox_voice_feedback__share_your_feedback">Bagikan masukan Anda</string>
+    <string name="mapbox_voice_feedback__listening">Mendengarkan…</string>
+    <string name="mapbox_voice_feedback__processing">Memproses…</string>
+    <string name="mapbox_voice_feedback__success_title">Terima kasih sudah berbagi</string>
+    <string name="mapbox_voice_feedback__success_description">Masukan Anda membantu kami untuk menjadi lebih baik</string>
+    <string name="mapbox_voice_feedback__error_title">Ups! Terjadi kesalahan</string>
+    <string name="mapbox_voice_feedback__error_description">Silakan coba lagi</string>
+    <string name="mapbox_voice_feedback__speech_not_recognized_title">Ups! Saya tidak menangkap itu</string>
+</resources>

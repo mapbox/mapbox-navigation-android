@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mapbox_voice_feedback__share_your_feedback">अपना फीडबैक साझा करें</string>
+    <string name="mapbox_voice_feedback__listening">सुन रहे हैं…</string>
+    <string name="mapbox_voice_feedback__processing">प्रोसेसिंग…</string>
+    <string name="mapbox_voice_feedback__success_title">Thank you for sharing.</string>
+    <string name="mapbox_voice_feedback__success_description">Your feedback helps us improve</string>
+    <string name="mapbox_voice_feedback__error_title">अरे! कुछ गड़बड़ हो गई है</string>
+    <string name="mapbox_voice_feedback__error_description">कृपया फिर से प्रयास करें</string>
+    <string name="mapbox_voice_feedback__speech_not_recognized_title">अरे! वह समझ में नहीं आया</string>
+</resources>

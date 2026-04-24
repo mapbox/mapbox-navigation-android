@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/mapbox_ic_mic">
+    <target
+        android:name="pulse_group"
+        android:animation="@animator/pulse_circle_animation" />
+</animated-vector>

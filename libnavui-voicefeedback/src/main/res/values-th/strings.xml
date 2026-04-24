@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mapbox_voice_feedback__share_your_feedback">แบ่งปันความคิดเห็นของคุณ</string>
+    <string name="mapbox_voice_feedback__listening">กำลังฟัง...</string>
+    <string name="mapbox_voice_feedback__processing">กำลังประมวลผล…</string>
+    <string name="mapbox_voice_feedback__success_title">ขอบคุณที่แบ่งปัน</string>
+    <string name="mapbox_voice_feedback__success_description">ความคิดเห็นของคุณช่วยให้เราพัฒนาขึ้น</string>
+    <string name="mapbox_voice_feedback__error_title">ขออภัย! เกิดข้อผิดพลาดบางอย่าง</string>
+    <string name="mapbox_voice_feedback__error_description">กรุณาลองใหม่อีกครั้ง</string>
+    <string name="mapbox_voice_feedback__speech_not_recognized_title">อุ๊ย! ฟังไม่ทันค่ะ</string>
+</resources>

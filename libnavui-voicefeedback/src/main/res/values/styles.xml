@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="MapboxStyleVoiceFeedbackButton">
+        <item name="voiceFeedbackButtonBackground">@drawable/mapbox_bg_button</item>
+        <item name="voiceFeedbackButtonIconTint">@color/colorOnSurface</item>
+        <item name="voiceFeedbackButtonIcon">@drawable/mapbox_ic_voice_feedback</item>
+    </style>
+
+    <style name="MapboxVoiceFeedbackHeaderText">
+        <item name="android:textColor">@color/mapbox_voice_feedback_text_primary</item>
+        <item name="android:textSize">@dimen/mapbox_voice_feedback_header_text_size</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="MapboxVoiceFeedbackDescriptionText">
+        <item name="android:textColor">@color/mapbox_voice_feedback_text_secondary</item>
+        <item name="android:textSize">@dimen/mapbox_voice_feedback_description_text_size</item>
+    </style>
+</resources>
