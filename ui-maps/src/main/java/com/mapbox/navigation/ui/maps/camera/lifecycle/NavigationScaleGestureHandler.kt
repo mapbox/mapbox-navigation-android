@@ -492,15 +492,16 @@ class NavigationScaleGestureHandler internal constructor(
      * @see initialize
      */
     @UiThread
-    fun cleanup() {
-        gesturesPlugin.getGesturesManager().getDetectors().remove(customOnUpDetector)
+    fun cleanup(shouldResetGestureManager: Boolean) {
+        if (shouldResetGestureManager) {
+            gesturesPlugin.getGesturesManager().getDetectors().remove(customOnUpDetector)
+        }
         gesturesPlugin.removeOnMoveListener(onMoveListener)
         gesturesPlugin.removeOnScaleListener(onScaleListener)
         gesturesPlugin.removeOnShoveListener(onShoveListener)
         gesturesPlugin.removeOnRotateListener(onRotateListener)
         gesturesPlugin.removeProtectedAnimationOwner(NAVIGATION_CAMERA_OWNER)
         gesturesPlugin.updateSettings { focalPoint = null }
-
         userLocationIndicatorPositionProvider.removeObserver(onIndicatorPositionChangedListener)
 
         cameraChangedSubscription?.cancel()

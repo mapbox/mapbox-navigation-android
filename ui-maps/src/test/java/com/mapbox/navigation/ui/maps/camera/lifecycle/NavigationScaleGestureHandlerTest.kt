@@ -746,7 +746,7 @@ class NavigationScaleGestureHandlerTest {
 
         assertTrue(controller.isInitialized)
 
-        controller.cleanup()
+        controller.cleanup(shouldResetGestureManager = true)
 
         assertFalse(initialDetectors.contains(customOnUpDetector))
         verify(exactly = 1) { gesturesPlugin.removeOnMoveListener(onMoveListenerSlot.captured) }
@@ -769,6 +769,24 @@ class NavigationScaleGestureHandlerTest {
                 navigationCameraStateChangedObserverSlot.captured,
             )
         }
+        assertFalse(controller.isInitialized)
+    }
+
+    @Test
+    fun `cleanup with shouldResetGestureManager false skips gesture manager reset`() {
+        controller.initialize()
+        clearMocks(gesturesPlugin)
+
+        controller.cleanup(shouldResetGestureManager = false)
+
+        verify(exactly = 0) {
+            gesturesPlugin.setGesturesManager(any(), any(), any())
+        }
+        verify(exactly = 1) { gesturesPlugin.removeOnMoveListener(onMoveListenerSlot.captured) }
+        verify(exactly = 1) {
+            gesturesPlugin.removeProtectedAnimationOwner(NAVIGATION_CAMERA_OWNER)
+        }
+        verify(exactly = 1) { cameraChangedTask.cancel() }
         assertFalse(controller.isInitialized)
     }
 }
