@@ -177,6 +177,7 @@ class RouterWrapperTests {
         } returns accessToken
 
         every { router.getRoute(any(), any(), any(), capture(getRouteSlot)) } returns 0L
+        every { router.getRouteMapMatched(any(), any(), any()) } returns 0L
         every { router.getRouteRefresh(any(), capture(refreshRouteSlot)) } returns 0L
 
         every { route.requestUuid() } returns UUID
@@ -186,6 +187,9 @@ class RouterWrapperTests {
         routerWrapper = RouterWrapper(
             router,
             ThreadController(),
+            createTestNavigationRoutesParsing(
+                parsingDispatcher = coroutineRule.testDispatcher,
+            ),
             createTestNavigationRoutesParsing(
                 parsingDispatcher = coroutineRule.testDispatcher,
             ),

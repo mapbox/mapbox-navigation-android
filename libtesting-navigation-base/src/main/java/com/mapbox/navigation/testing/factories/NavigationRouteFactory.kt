@@ -122,6 +122,17 @@ class TestSDKRouteParser(
             request,
             routerOrigin,
         )
+
+    override fun parseMapMatchedResponse(
+        response: DataRef,
+        request: String,
+        routerOrigin: String,
+    ): Expected<String, List<RouteInterface>> {
+        val buffer = response.buffer.asReadOnlyBuffer()
+        buffer.position(0)
+        val stringResponse = StandardCharsets.UTF_8.decode(buffer).toString()
+        return parseMapMatchedResponse(stringResponse, request, routerOrigin)
+    }
 }
 
 fun createRouteInterfacesFromDirectionRequestResponse(

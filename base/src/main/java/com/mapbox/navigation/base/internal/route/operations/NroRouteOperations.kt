@@ -11,8 +11,8 @@ import com.mapbox.navigation.base.internal.CongestionNumericOverride
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObjectException
 import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.route.NavigationRouteData
-import com.mapbox.navigation.base.internal.route.parsing.models.ParsedRouteData
-import com.mapbox.navigation.base.internal.route.parsing.models.toRouteModelsParsingResult
+import com.mapbox.navigation.base.internal.route.parsing.models.DirectionsParsedRouteData
+import com.mapbox.navigation.base.internal.route.parsing.parser.directions.toRouteModelsParsingResult
 import com.mapbox.navigation.base.internal.utils.refreshTtl
 import com.mapbox.navigation.base.route.RouteRefreshMetadata
 import com.mapbox.navigation.utils.internal.logD
@@ -21,7 +21,7 @@ private val LOG_CATEGORY = "NRO-ROUTE-OPERATIONS"
 
 internal class NroRouteOperations(
     val directionsRouteContext: DirectionsRouteContext,
-    val parsedRouteData: ParsedRouteData,
+    val parsedRouteData: DirectionsParsedRouteData,
 ) : RouteOperations {
 
     @OptIn(ExperimentalMapboxNavigationAPI::class)

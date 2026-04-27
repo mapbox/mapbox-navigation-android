@@ -4,8 +4,8 @@ package com.mapbox.navigation.base.internal.utils
 
 import com.mapbox.bindgen.DataRef
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
-import com.mapbox.navigation.base.internal.route.parsing.DirectionsResponseParsingSuccessfulResult
-import com.mapbox.navigation.base.internal.route.parsing.DirectionsResponseToParse
+import com.mapbox.navigation.base.internal.route.parsing.ResponseToParse
+import com.mapbox.navigation.base.internal.route.parsing.models.directions.NavigationRouteParsingSuccessfulResult
 import com.mapbox.navigation.base.internal.route.parsing.noTracking
 import com.mapbox.navigation.base.internal.route.parsing.setupParsing
 import com.mapbox.navigation.base.route.ResponseOriginAPI
@@ -20,7 +20,7 @@ suspend fun parseDirectionsResponse(
     requestUrl: String,
     @RouterOrigin routerOrigin: String,
     nativeRoute: Boolean,
-): Result<DirectionsResponseParsingSuccessfulResult> {
+): Result<NavigationRouteParsingSuccessfulResult> {
     val parsing = setupParsing(
         nativeRoute,
         Time.SystemClockImpl,
@@ -29,7 +29,7 @@ suspend fun parseDirectionsResponse(
         { null },
     )
     return parsing.parseDirectionsResponse(
-        DirectionsResponseToParse(
+        ResponseToParse(
             responseJson,
             requestUrl,
             routerOrigin = routerOrigin,

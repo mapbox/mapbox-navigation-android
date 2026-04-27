@@ -3,7 +3,7 @@ package com.mapbox.navigation.core.routealternatives
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.route.isExpired
-import com.mapbox.navigation.base.internal.route.parsing.RouteInterfacesParser
+import com.mapbox.navigation.base.internal.route.parsing.models.nn.RouteInterfacesParser
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouterOrigin

@@ -1,3 +1,5 @@
+@file:OptIn(com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI::class)
+
 package com.mapbox.navigation.core.directions.session
 
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -15,6 +17,7 @@ import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshCallbac
 import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshError
 import com.mapbox.navigation.core.internal.router.Router
 import com.mapbox.navigation.core.internal.utils.mapToReason
+import com.mapbox.navigation.core.mapmatching.MapMatchingOptions
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MapboxJavaObjectsFactory
 import com.mapbox.navigation.testing.factories.createNavigationRoute
@@ -68,6 +71,9 @@ class MapboxDirectionsSessionTest {
             routeCallback = routeListener.captured
             routeRequestId
         }
+        every {
+            router.getRouteMapMatched(any<MapMatchingOptions>(), any(), any())
+        } returns routeRequestId
         every {
             router.getRouteRefresh(route, routeRefreshRequestData, capture(refreshListener))
         } answers {

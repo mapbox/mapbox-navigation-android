@@ -5,8 +5,8 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.DataRef
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.RouterFailureFactory
-import com.mapbox.navigation.base.internal.route.parsing.DirectionsResponseToParse
-import com.mapbox.navigation.base.internal.route.parsing.NavigationRoutesParser
+import com.mapbox.navigation.base.internal.route.parsing.ResponseToParse
+import com.mapbox.navigation.base.internal.route.parsing.models.directions.NavigationRoutesParser
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.ResponseOriginAPI
@@ -346,7 +346,7 @@ internal class NativeMapboxRerouteController(
         origin: RouterOrigin,
     ): RerouteResponseParsingResult {
         return routeParser.parseDirectionsResponse(
-            DirectionsResponseToParse(
+            ResponseToParse(
                 routeResponse,
                 routeRequest,
                 origin.mapToSdkRouteOrigin(),

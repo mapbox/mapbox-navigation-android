@@ -14,7 +14,6 @@ class MapMatchingMatch internal constructor(
     val navigationRoute: NavigationRoute,
     val confidence: Double,
 ) {
-
     /**
      * Returns a hash code value for the object.
      */

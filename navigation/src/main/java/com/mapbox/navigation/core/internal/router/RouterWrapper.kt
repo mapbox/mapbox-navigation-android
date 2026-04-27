@@ -2,8 +2,6 @@
  * Tampering with any file that contains billing code is a violation of Mapbox Terms of Service and will result in enforcement of the penalties stipulated in the ToS.
  */
 
-@file:OptIn(ExperimentalMapboxNavigationAPI::class)
-
 package com.mapbox.navigation.core.internal.router
 
 import androidx.annotation.MainThread
@@ -13,13 +11,16 @@ import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.common.MapboxServices
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.internal.RouterFailureFactory
 import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.route.internalRefreshRoute
-import com.mapbox.navigation.base.internal.route.parsing.DirectionsResponseParsingSuccessfulResult
-import com.mapbox.navigation.base.internal.route.parsing.DirectionsResponseToParse
-import com.mapbox.navigation.base.internal.route.parsing.NavigationRoutesParser
+import com.mapbox.navigation.base.internal.route.parsing.ResponseToParse
+import com.mapbox.navigation.base.internal.route.parsing.models.directions.NavigationRouteParsingSuccessfulResult
+import com.mapbox.navigation.base.internal.route.parsing.models.directions.NavigationRoutesParser
+import com.mapbox.navigation.base.internal.route.parsing.models.mapmaptching.MapMatchingMatchParser
+import com.mapbox.navigation.base.internal.route.parsing.models.mapmaptching.MapMatchingMatchParsingSuccessfulResult
 import com.mapbox.navigation.base.internal.route.routeOptions
 import com.mapbox.navigation.base.internal.route.updateExpirationTime
 import com.mapbox.navigation.base.internal.utils.MapboxOptionsUtil
@@ -31,6 +32,10 @@ import com.mapbox.navigation.base.route.ResponseOriginAPI
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterFailureType
 import com.mapbox.navigation.base.route.RouterFailureType.Companion.RESPONSE_PARSING_ERROR
+import com.mapbox.navigation.core.mapmatching.MapMatchingAPICallback
+import com.mapbox.navigation.core.mapmatching.MapMatchingFailure
+import com.mapbox.navigation.core.mapmatching.MapMatchingOptions
+import com.mapbox.navigation.core.mapmatching.MapMatchingSuccessfulResult
 import com.mapbox.navigation.navigator.internal.mapToRoutingMode
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.Time
@@ -51,6 +56,12 @@ import java.net.URL
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.time.ExperimentalTime
 
+private interface RouteRequestCallback<T> {
+    fun onSuccess(result: T, routerOrigin: String)
+    fun onFailure(failures: List<RouterFailure>, routeOptions: RouteOptions)
+    fun onCanceled(routeOptions: RouteOptions, routerOrigin: String)
+}
+
 private class OngoingRequest(
     var parsingJob: Job?,
     val onCancel: () -> Unit,
@@ -62,6 +73,7 @@ internal class RouterWrapper(
     router: RouterInterface,
     private val threadController: ThreadController,
     private val navigationRoutesParser: NavigationRoutesParser,
+    private val mapMatchedRoutesParser: MapMatchingMatchParser,
 ) : Router {
 
     private val activeRouteRequests = mutableMapOf<Long, OngoingRequest>()
@@ -80,6 +92,7 @@ internal class RouterWrapper(
         oldRouter.cancelAll()
     }
 
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
     override fun getRoute(
         routeOptions: RouteOptions,
         signature: GetRouteSignature,
@@ -87,55 +100,117 @@ internal class RouterWrapper(
     ): Long {
         val accessToken = MapboxOptionsUtil.getTokenForService(MapboxServices.DIRECTIONS)
         val routeUrl = routeOptions.toUrl(accessToken).toString()
-        val requestOptions = GetRouteOptions(null) // using default timeout (5 seconds)
+        return requestRoute(
+            routeUrl = routeUrl,
+            routeOptionsForCallback = routeOptions,
+            callback = object : RouteRequestCallback<NavigationRouteParsingSuccessfulResult> {
+                override fun onSuccess(
+                    result: NavigationRouteParsingSuccessfulResult,
+                    routerOrigin: String,
+                ) = callback.onRoutesReady(result.routes, routerOrigin)
+                override fun onFailure(failures: List<RouterFailure>, routeOptions: RouteOptions) =
+                    callback.onFailure(failures, routeOptions)
+                override fun onCanceled(routeOptions: RouteOptions, routerOrigin: String) =
+                    callback.onCanceled(routeOptions, routerOrigin)
+            },
+            responseOriginAPI = ResponseOriginAPI.DIRECTIONS_API,
+            parseResponse = navigationRoutesParser::parseDirectionsResponse,
+            performanceSectionName = "RouterWrapper#getRoute()",
+            logRequestMessage = "requesting route for",
+            logResultMessage = "received result from router.getRoute for",
+        ) { routeCallback ->
+            router.getRoute(
+                routeUrl,
+                GetRouteOptions(null),
+                signature.toNativeSignature(),
+                routeCallback,
+            )
+        }
+    }
 
+    @OptIn(ExperimentalMapboxNavigationAPI::class, ExperimentalPreviewMapboxNavigationAPI::class)
+    override fun getRouteMapMatched(
+        mapMatchingOptions: MapMatchingOptions,
+        signature: GetRouteSignature,
+        callback: MapMatchingAPICallback,
+    ): Long {
+        val accessToken = MapboxOptionsUtil.getTokenForService(MapboxServices.DIRECTIONS)
+        val matchingUri = mapMatchingOptions.toURL(accessToken)
+        val routeOptionsForCallback = mapMatchingOptions.toRouteOptionsForCallback()
+        return requestRoute(
+            routeUrl = matchingUri,
+            routeOptionsForCallback = routeOptionsForCallback,
+            callback = object : RouteRequestCallback<MapMatchingMatchParsingSuccessfulResult> {
+                override fun onSuccess(
+                    result: MapMatchingMatchParsingSuccessfulResult,
+                    routerOrigin: String,
+                ) = callback.success(MapMatchingSuccessfulResult(result.matches))
+                override fun onFailure(failures: List<RouterFailure>, routeOptions: RouteOptions) =
+                    callback.failure(MapMatchingFailure())
+                override fun onCanceled(routeOptions: RouteOptions, routerOrigin: String) =
+                    callback.onCancel()
+            },
+            responseOriginAPI = ResponseOriginAPI.MAP_MATCHING_API,
+            parseResponse = mapMatchedRoutesParser::parseMapMatchedResponse,
+            performanceSectionName = "RouterWrapper#getRouteMapMatched()",
+            logRequestMessage = "requesting map-matched route for",
+            logResultMessage = "received result from router.getRouteMapMatched for",
+        ) { routeCallback ->
+            router.getRouteMapMatched(matchingUri, GetRouteOptions(null), routeCallback)
+        }
+    }
+
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
+    private fun <T> requestRoute(
+        routeUrl: String,
+        routeOptionsForCallback: RouteOptions,
+        callback: RouteRequestCallback<T>,
+        @ResponseOriginAPI responseOriginAPI: String,
+        parseResponse: suspend (ResponseToParse) -> Result<T>,
+        performanceSectionName: String,
+        logRequestMessage: String,
+        logResultMessage: String,
+        nativeInvoke: ((Expected<List<RouterError>, DataRef>, RouterOrigin) -> Unit) -> Long,
+    ): Long {
         val urlWithoutToken = URL(routeUrl.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM))
-        logI(LOG_CATEGORY) { "requesting route for $urlWithoutToken" }
+        logI(LOG_CATEGORY) { "$logRequestMessage $urlWithoutToken" }
         val originRouter = router
         var callbackInvoked = false
-        var id: Long? = null
+        val section = PerformanceTracker.asyncSectionStarted(performanceSectionName)
+        var requestId: Long = 0L
 
-        val getRouteSection = PerformanceTracker.asyncSectionStarted("RouterWrapper#getRoute()")
-
-        id = originRouter.getRoute(
-            routeUrl,
-            requestOptions,
-            signature.toNativeSignature(),
-        ) { result, origin ->
+        requestId = nativeInvoke { result, origin ->
             callbackInvoked = true
-            logD(LOG_CATEGORY) {
-                "received result from router.getRoute for $urlWithoutToken; origin: $origin"
-            }
-
+            logD(LOG_CATEGORY) { "$logResultMessage $urlWithoutToken; origin: $origin" }
             mainJobControl.scope.launch {
-                PerformanceTracker.asyncSectionCompleted(getRouteSection)
-
+                PerformanceTracker.asyncSectionCompleted(section)
                 endRouteRequest(
-                    id,
-                    routeOptions,
+                    requestId,
+                    routeOptionsForCallback,
                     routeUrl,
                     urlWithoutToken,
                     originRouter,
                     result,
                     origin,
-                    RouteRequestEnder(id, callback),
+                    RouteRequestEnder(requestId, callback),
+                    responseOriginAPI,
+                    parseResponse,
                 )
             }
         }
         if (!callbackInvoked) {
-            activeRouteRequests[id] = OngoingRequest(
+            activeRouteRequests[requestId] = OngoingRequest(
                 null,
                 {
-                    PerformanceTracker.asyncSectionCompleted(getRouteSection)
-
+                    PerformanceTracker.asyncSectionCompleted(section)
                     callback.onCanceled(
-                        routeOptions,
+                        routeOptionsForCallback,
                         com.mapbox.navigation.base.route.RouterOrigin.OFFLINE,
                     )
                 },
             )
         }
-        return id
+        return requestId
     }
 
     override fun getRouteRefresh(
@@ -253,7 +328,8 @@ internal class RouterWrapper(
         cancelAll()
     }
 
-    private fun endRouteRequest(
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
+    private fun <T> endRouteRequest(
         id: Long?,
         routeOptions: RouteOptions,
         routeUrl: String,
@@ -261,7 +337,9 @@ internal class RouterWrapper(
         originRouter: RouterInterface,
         result: Expected<List<RouterError>, DataRef>,
         origin: RouterOrigin,
-        requestEnder: RouteRequestEnder,
+        requestEnder: RouteRequestCallback<T>,
+        @ResponseOriginAPI responseOriginAPI: String,
+        parseResponse: suspend (ResponseToParse) -> Result<T>,
     ) {
         if (id != null && activeRouteRequests[id] == null) {
             logI(LOG_CATEGORY) { "Response for request $id has already been processed" }
@@ -329,22 +407,17 @@ internal class RouterWrapper(
                                     this@launch.coroutineContext[Job]
                             }
                         }
-                        navigationRoutesParser.parseDirectionsResponse(
-                            DirectionsResponseToParse(
+                        parseResponse(
+                            ResponseToParse(
                                 responseBody,
                                 routeUrl,
                                 origin.mapToSdkRouteOrigin(),
-                                ResponseOriginAPI.DIRECTIONS_API,
+                                responseOriginAPI,
                             ),
-                        ).onSuccess { response: DirectionsResponseParsingSuccessfulResult ->
-                            val routes = response.routes
+                        ).onSuccess { response ->
                             val routeOrigin = origin.mapToSdkRouteOrigin()
-
-                            logI(
-                                "Routes parsing completed: ${routes.map { it.id }}",
-                                LOG_CATEGORY,
-                            )
-                            requestEnder.onRoutesReady(routes, routeOrigin)
+                            logI("Routes parsing completed", LOG_CATEGORY)
+                            requestEnder.onSuccess(response, routeOrigin)
                         }.onFailure { throwable ->
                             requestEnder.onFailure(
                                 listOf(
@@ -454,20 +527,20 @@ internal class RouterWrapper(
         }
     }
 
-    private inner class RouteRequestEnder(
+    private inner class RouteRequestEnder<T>(
         private val id: Long?,
-        private val callback: NavigationRouterCallback,
-    ) : NavigationRouterCallback {
+        private val callback: RouteRequestCallback<T>,
+    ) : RouteRequestCallback<T> {
 
-        override fun onRoutesReady(routes: List<NavigationRoute>, routerOrigin: String) {
+        override fun onSuccess(result: T, routerOrigin: String) {
             if (removeRequest()) {
-                callback.onRoutesReady(routes, routerOrigin)
+                callback.onSuccess(result, routerOrigin)
             }
         }
 
-        override fun onFailure(reasons: List<RouterFailure>, routeOptions: RouteOptions) {
+        override fun onFailure(failures: List<RouterFailure>, routeOptions: RouteOptions) {
             if (removeRequest()) {
-                callback.onFailure(reasons, routeOptions)
+                callback.onFailure(failures, routeOptions)
             }
         }
 

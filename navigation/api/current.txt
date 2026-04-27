@@ -716,9 +716,6 @@ package com.mapbox.navigation.core.mapmatching {
     method public void success(com.mapbox.navigation.core.mapmatching.MapMatchingSuccessfulResult result);
   }
 
-  public final class MapMatchingAPIKt {
-  }
-
   @StringDef({com.mapbox.navigation.core.mapmatching.MapMatchingExtras.ANNOTATION_DISTANCE, com.mapbox.navigation.core.mapmatching.MapMatchingExtras.ANNOTATION_DURATION, com.mapbox.navigation.core.mapmatching.MapMatchingExtras.ANNOTATION_SPEED, com.mapbox.navigation.core.mapmatching.MapMatchingExtras.ANNOTATION_CONGESTION, com.mapbox.navigation.core.mapmatching.MapMatchingExtras.ANNOTATION_CONGESTION_NUMERIC}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public @interface MapMatchingAnnotations {
   }
 

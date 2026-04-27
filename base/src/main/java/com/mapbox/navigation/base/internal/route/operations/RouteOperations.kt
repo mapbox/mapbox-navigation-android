@@ -8,12 +8,12 @@ import com.mapbox.bindgen.DataRef
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.CongestionNumericOverride
 import com.mapbox.navigation.base.internal.route.NavigationRouteData
-import com.mapbox.navigation.base.internal.route.parsing.models.RouteModelParsingResult
+import com.mapbox.navigation.base.internal.route.parsing.models.directions.DirectionsRouteModelParsingResult
 import com.mapbox.navigation.base.route.RouteRefreshMetadata
 
 @OptIn(ExperimentalMapboxNavigationAPI::class)
 internal data class RouteUpdate(
-    val routeModelsParsingResult: RouteModelParsingResult,
+    val routeModelsParsingResult: DirectionsRouteModelParsingResult,
     val routeRefreshMetadata: RouteRefreshMetadata?,
     val newExpirationTimeElapsedSeconds: OptionallyRefreshedData<Long?>,
     val overriddenTraffic: OptionallyRefreshedData<CongestionNumericOverride?>,

@@ -9,6 +9,7 @@ import com.mapbox.api.directions.v5.DirectionsCriteria.PROFILE_WALKING
 import com.mapbox.api.directions.v5.DirectionsCriteria.ProfileCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.route.copyWithResponseOriginAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.ResponseOriginAPI
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -406,8 +407,7 @@ class RouteHistoryOptionsAdapterTest {
             response = createDirectionsResponse(
                 uuid = "history-test",
             ),
-            responseOriginAPI = ResponseOriginAPI.MAP_MATCHING_API,
-        )
+        ).map { it.copyWithResponseOriginAPI(ResponseOriginAPI.MAP_MATCHING_API) }
         val adapter = createRouteHistoryOptionsAdapter(
             latestRouteProgressProvider = {
                 createRouteProgress(

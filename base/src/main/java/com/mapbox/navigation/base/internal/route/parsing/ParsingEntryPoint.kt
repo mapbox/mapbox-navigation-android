@@ -5,8 +5,15 @@ package com.mapbox.navigation.base.internal.route.parsing
 import androidx.annotation.RestrictTo
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.SDKRouteParser
-import com.mapbox.navigation.base.internal.route.parsing.models.JavaRouteModelsParser
-import com.mapbox.navigation.base.internal.route.parsing.models.NRORouteModelsParser
+import com.mapbox.navigation.base.internal.route.parsing.models.directions.NavigationRoutesParser
+import com.mapbox.navigation.base.internal.route.parsing.models.mapmaptching.MapMatchingMatchParser
+import com.mapbox.navigation.base.internal.route.parsing.models.nn.RouteInterfacesParser
+import com.mapbox.navigation.base.internal.route.parsing.parser.directions.DirectionsRoutesParserJava
+import com.mapbox.navigation.base.internal.route.parsing.parser.directions.DirectionsRoutesParserNro
+import com.mapbox.navigation.base.internal.route.parsing.parser.directions.NnAndModelsParallelNavigationRoutesParser
+import com.mapbox.navigation.base.internal.route.parsing.parser.mapmatching.MapMatchedRoutesParserJava
+import com.mapbox.navigation.base.internal.route.parsing.parser.mapmatching.NnAndModelsParallelMapMatchedRoutesParser
+import com.mapbox.navigation.base.internal.route.parsing.parser.nn.JsonResponseOptimizedRouteInterfaceParser
 import com.mapbox.navigation.base.internal.utils.PrepareForParsingAction
 import com.mapbox.navigation.base.internal.utils.createImmediateNoOptimizationsParsingQueue
 import com.mapbox.navigation.base.internal.utils.createOptimizedRoutesParsingQueue
@@ -21,8 +28,10 @@ import kotlinx.coroutines.CoroutineDispatcher
 class ParsingEntryPoint(
     private val navigationRoutesParser: NavigationRoutesParser,
     private val routeInterfacesParser: RouteInterfacesParser,
+    private val mapMatchedRoutesParser: MapMatchingMatchParser,
 ) : NavigationRoutesParser by navigationRoutesParser,
-    RouteInterfacesParser by routeInterfacesParser
+    RouteInterfacesParser by routeInterfacesParser,
+    MapMatchingMatchParser by mapMatchedRoutesParser
 
 /**
  * Sets up parsing for production and test usage.
@@ -41,9 +50,9 @@ fun setupParsing(
     loggerFrontend: LoggerFrontend = LoggerProvider.getLoggerFrontend(),
 ): ParsingEntryPoint {
     val modelParser = if (nativeRoute) {
-        NRORouteModelsParser(loggerFrontend)
+        DirectionsRoutesParserNro(loggerFrontend)
     } else {
-        JavaRouteModelsParser(loggerFrontend)
+        DirectionsRoutesParserJava(loggerFrontend)
     }
     val parsingQueue = if (nativeRoute) {
         createImmediateNoOptimizationsParsingQueue()
@@ -60,6 +69,16 @@ fun setupParsing(
         loggerFrontend,
     )
 
+    val mapMatchedRoutesParser = NnAndModelsParallelMapMatchedRoutesParser(
+        routeParsingTracking,
+        parsingDispatcher,
+        time,
+        MapMatchedRoutesParserJava(),
+        nnParser,
+        parsingQueue,
+        loggerFrontend,
+    )
+
     val routeInterfacesParser = JsonResponseOptimizedRouteInterfaceParser(
         existingParsedRoutesLookup,
         parsingDispatcher,
@@ -71,5 +90,6 @@ fun setupParsing(
     return ParsingEntryPoint(
         navigationRoutesParser,
         routeInterfacesParser,
+        mapMatchedRoutesParser,
     )
 }

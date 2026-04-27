@@ -33,8 +33,6 @@ import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.internal.LowMemoryManager
 import com.mapbox.navigation.core.internal.SdkInfoProvider
 import com.mapbox.navigation.core.internal.router.RouterWrapper
-import com.mapbox.navigation.core.mapmatching.MapMatchingAPI
-import com.mapbox.navigation.core.mapmatching.MapMatchingAPIProvider
 import com.mapbox.navigation.core.navigator.CacheHandleWrapper
 import com.mapbox.navigation.core.preview.RoutesPreviewController
 import com.mapbox.navigation.core.reroute.InternalRerouteController
@@ -113,7 +111,6 @@ internal open class MapboxNavigationBaseTest {
     val routeRefreshController: RouteRefreshController = mockk(relaxed = true)
     val evDynamicDataHolder: EVDynamicDataHolder = mockk(relaxed = true)
     val routeAlternativesController: RouteAlternativesController = mockk(relaxed = true)
-    val mapMatchingAPI: MapMatchingAPI = mockk(relaxed = true)
     val routeProgress: RouteProgress = mockk(relaxed = true)
     val navigationSession: NavigationSession = mockk(relaxed = true)
     val billingController: BillingController = mockk(relaxUnitFun = true)
@@ -239,10 +236,6 @@ internal open class MapboxNavigationBaseTest {
         every {
             RouteAlternativesControllerProvider.create(any(), any(), any(), any(), any())
         } returns routeAlternativesController
-        mockkObject(MapMatchingAPIProvider)
-        every {
-            MapMatchingAPIProvider.provideMapMatchingAPI()
-        } returns mapMatchingAPI
 
         every { applicationContext.applicationContext } returns applicationContext
         every { navigator.addNavigatorObserver(capture(navigatorObserverSlot)) } answers {}

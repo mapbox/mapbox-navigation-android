@@ -6,7 +6,7 @@ import com.google.gson.JsonPrimitive
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.navigation.base.internal.route.parsing.DirectionsResponseToParse
+import com.mapbox.navigation.base.internal.route.parsing.ResponseToParse
 import com.mapbox.navigation.base.internal.route.testing.toDataRefJava
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.factories.createDirectionsResponse
@@ -191,7 +191,7 @@ class NavigationRouteEqualsTest(
         val parser = createTestNavigationRoutesParsing()
         route1 = runBlocking {
             parser.parseDirectionsResponse(
-                DirectionsResponseToParse.from(
+                ResponseToParse.from(
                     responseBody = directionsResponse1.toJson().toDataRefJava(),
                     routeRequest = routeOptions1.toUrl("***").toString(),
                     routerOrigin = RouterOrigin.ONLINE,
@@ -200,7 +200,7 @@ class NavigationRouteEqualsTest(
         }
         route2 = runBlocking {
             parser.parseDirectionsResponse(
-                DirectionsResponseToParse.from(
+                ResponseToParse.from(
                     responseBody = directionsResponse2.toJson().toDataRefJava(),
                     routeRequest = routeOptions2.toUrl("***").toString(),
                     routerOrigin = RouterOrigin.ONLINE,

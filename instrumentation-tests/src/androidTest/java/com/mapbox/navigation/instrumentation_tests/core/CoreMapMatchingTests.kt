@@ -6,6 +6,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.common.MapboxOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.base.trip.model.RouteProgressState
@@ -50,7 +51,7 @@ import org.junit.Test
 
 private const val TEST_WRONG_TOKEN = "wrong-token"
 
-@OptIn(ExperimentalMapboxNavigationAPI::class)
+@OptIn(ExperimentalMapboxNavigationAPI::class, ExperimentalPreviewMapboxNavigationAPI::class)
 class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
 
     private val useRealServer = false
@@ -108,6 +109,38 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
                 it.currentState == RouteProgressState.COMPLETE
             }
 
+            assertEquals(
+                listOf(
+                    Point.fromLngLat(-117.172877, 32.712021),
+                    Point.fromLngLat(-117.173337, 32.71253),
+                ),
+                result.matches.first().navigationRoute.waypoints?.map { it.location() },
+            )
+        }
+    }
+
+    /**
+     * Test: Same as [arriveOnMapMatchedRoute] but with NRO (Native Route Object) forced on via
+     * [NavigationOptions]. Ensures map-matched routes work and do not crash with NRO; runs on every
+     * build regardless of BuildConfig NRO default.
+     */
+    @Test
+    fun withNroEnabledReturnsRoutesNavigationCompletes() = sdkTest {
+        withMapboxNavigation(
+            historyRecorderRule = mapboxHistoryTestRule,
+            customConfig = "",
+        ) { navigation ->
+            val options = setupTestMapMatchingRoute()
+            val result = navigation.requestMapMatching(options).getSuccessfulOrThrowException()
+            assertEquals(1, result.matches.size)
+            navigation.setNavigationRoutes(listOf(result.matches.first().navigationRoute))
+            mockLocationReplayerRule.playRoute(
+                result.matches.first().navigationRoute.directionsRoute,
+            )
+            navigation.startTripSession()
+            navigation.routeProgressUpdates().first {
+                it.currentState == RouteProgressState.COMPLETE
+            }
             assertEquals(
                 listOf(
                     Point.fromLngLat(-117.172877, 32.712021),

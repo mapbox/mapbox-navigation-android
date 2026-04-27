@@ -13,7 +13,9 @@ import com.mapbox.api.matching.v5.models.MapMatchingResponse
 import com.mapbox.bindgen.DataRef
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.CongestionNumericOverride
+import com.mapbox.navigation.base.route.MapMatchingMatch
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.ResponseOriginAPI
 import com.mapbox.navigation.base.route.RouteRefreshMetadata
 import com.mapbox.navigation.utils.internal.Time
 import com.mapbox.navigation.utils.internal.logE
@@ -52,6 +54,17 @@ fun NavigationRoute.internalRefreshRoute(
 val NavigationRoute.routeOptions get() = this.routeOptions
 
 val NavigationRoute.overriddenTraffic get() = this.overriddenTraffic
+
+/**
+ * Creates a [MapMatchingMatch] from a [NavigationRoute] with optional confidence.
+ * Used when converting from native map matching flow where confidence may not be available.
+ */
+@OptIn(com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI::class)
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+fun mapMatchingMatchFrom(
+    navigationRoute: NavigationRoute,
+    confidence: Double = 1.0,
+): MapMatchingMatch = MapMatchingMatch(navigationRoute, confidence)
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 fun NavigationRoute.toDirectionsRefreshResponseInternal() = this.toDirectionsRefreshResponse()
@@ -94,6 +107,25 @@ fun NavigationRoute.isExpired(): Boolean {
  * At the moment, all fields are `val`s, so a simple re-instantiation is enough.
  */
 fun NavigationRoute.refreshNativePeer(): NavigationRoute = copy()
+
+/**
+ * Returns a copy of this route with the given [responseOriginAPI].
+ * For use in tests when a route must represent a map-matched origin without full parsing.
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+fun NavigationRoute.copyWithResponseOriginAPI(
+    @ResponseOriginAPI responseOriginAPI: String,
+): NavigationRoute = copy(
+    directionsRoute = directionsRoute,
+    waypoints = waypoints,
+    routeOptions = routeOptions,
+    nativeRoute = nativeRoute,
+    overriddenTraffic = overriddenTraffic,
+    expirationTimeElapsedSeconds = expirationTimeElapsedSeconds,
+    routeRefreshMetadata = routeRefreshMetadata,
+    operations = operationsForCopy,
+    responseOriginAPI = responseOriginAPI,
+)
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 fun String.toDirectionsResponse(requestUrl: String): DirectionsResponse {

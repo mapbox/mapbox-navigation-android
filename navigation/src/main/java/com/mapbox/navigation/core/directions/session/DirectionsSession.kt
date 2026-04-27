@@ -2,11 +2,14 @@ package com.mapbox.navigation.core.directions.session
 
 import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.core.SetRoutes
 import com.mapbox.navigation.core.internal.router.GetRouteSignature
 import com.mapbox.navigation.core.internal.utils.mapToReason
+import com.mapbox.navigation.core.mapmatching.MapMatchingAPICallback
+import com.mapbox.navigation.core.mapmatching.MapMatchingOptions
 
 internal interface DirectionsSession : RouteRefresh {
 
@@ -58,6 +61,22 @@ internal interface DirectionsSession : RouteRefresh {
         routeOptions: RouteOptions,
         signature: GetRouteSignature,
         routerCallback: NavigationRouterCallback,
+    ): Long
+
+    /**
+     * Fetch map-matched routes based on [MapMatchingOptions] via the native Map Matching API.
+     * Same flow and cancellation as [requestRoutes].
+     *
+     * @param mapMatchingOptions map matching options (same as for [MapboxNavigation.requestMapMatching])
+     * @param signature information about what triggered this route request
+     * @param callback Callback that gets notified with the results of the request
+     * @return requestID, see [cancelRouteRequest]
+     */
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    fun requestMapMatchedRoutes(
+        mapMatchingOptions: MapMatchingOptions,
+        signature: GetRouteSignature,
+        callback: MapMatchingAPICallback,
     ): Long
 
     /**

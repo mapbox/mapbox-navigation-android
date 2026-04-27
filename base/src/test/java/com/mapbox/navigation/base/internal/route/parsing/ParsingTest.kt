@@ -1,6 +1,7 @@
 package com.mapbox.navigation.base.internal.route.parsing
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse
+import com.mapbox.navigation.base.internal.route.parsing.models.nn.ContinuousAlternativesParsingSuccessfulResult
 import com.mapbox.navigation.base.internal.route.testing.toDataRefJava
 import com.mapbox.navigation.base.internal.utils.AlternativesParsingResult
 import com.mapbox.navigation.base.internal.utils.PrepareForParsingAction
@@ -177,7 +178,7 @@ class ParsingTest {
 
 private fun createTestResponseToParse(
     fixtureName: String,
-): DirectionsResponseToParse = DirectionsResponseToParse.from(
+): ResponseToParse = ResponseToParse.from(
     responseBody = FileUtils.loadJsonFixture(fixtureName)
         .toDataRefJava(),
     routeRequest = createRouteOptions().toUrl("***").toString(),

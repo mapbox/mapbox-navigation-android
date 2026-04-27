@@ -1,8 +1,9 @@
 @file:OptIn(ExperimentalMapboxNavigationAPI::class)
 
-package com.mapbox.navigation.base.internal.route.parsing.models
+package com.mapbox.navigation.base.internal.route.parsing.parser.directions
 
 import androidx.annotation.WorkerThread
+import com.mapbox.annotation.MapboxExperimental
 import com.mapbox.api.directions.v5.models.DirectionsRouteFBWrapper
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.DirectionsWaypointFBWrapper
@@ -13,7 +14,11 @@ import com.mapbox.directions.route.DirectionsRouteResponse
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.route.operations.NroRouteOperations
-import com.mapbox.navigation.base.internal.route.parsing.DirectionsResponseToParse
+import com.mapbox.navigation.base.internal.route.parsing.ResponseToParse
+import com.mapbox.navigation.base.internal.route.parsing.models.DirectionsParsedRouteData
+import com.mapbox.navigation.base.internal.route.parsing.models.directions.DirectionsResponseParsingResult
+import com.mapbox.navigation.base.internal.route.parsing.models.directions.DirectionsRouteModelParsingResult
+import com.mapbox.navigation.base.internal.route.parsing.models.directions.DirectionsRoutesParser
 import com.mapbox.navigation.base.route.DirectionsResponseParsingException
 import com.mapbox.navigation.base.route.ResponseOriginAPI
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -23,16 +28,14 @@ import java.net.URL
 
 private const val LOG_CATEGORY = "NRO-ROUTE-MODELS-PARSER"
 
-internal class NRORouteModelsParser(
+internal class DirectionsRoutesParserNro(
     private val logger: LoggerFrontend,
-) : RouteModelsParser {
+) : DirectionsRoutesParser {
     override fun parse(
-        response: DirectionsResponseToParse,
+        response: ResponseToParse,
     ): Result<DirectionsResponseParsingResult> {
-        logger.logD(LOG_CATEGORY) {
-            "parsing directions response"
-        }
         return Result.runCatching {
+            logger.logD(LOG_CATEGORY) { "parsing directions response" }
             PerformanceTracker.trackPerformanceSync(
                 "NRORouteModelsParser#parseDirectionsResponseNRO",
             ) {
@@ -42,13 +45,14 @@ internal class NRORouteModelsParser(
     }
 }
 
+@OptIn(MapboxExperimental::class)
 @WorkerThread
 private fun parseDirectionsResponseNRO(
-    directionsResponseToParse: DirectionsResponseToParse,
+    responseToParse: ResponseToParse,
 ): DirectionsResponseParsingResult {
-    val routeOptions = RouteOptions.fromUrl(URL(directionsResponseToParse.routeRequest))
+    val routeOptions = RouteOptions.fromUrl(URL(responseToParse.routeRequest))
     val parsingResult = DirectionsRouteResponse.parseDirectionsRoutesJson(
-        directionsResponseToParse.responseBody,
+        responseToParse.responseBody,
     )
     if (parsingResult.isError) {
         throw DirectionsResponseParsingException(
@@ -58,8 +62,8 @@ private fun parseDirectionsResponseNRO(
     val routes = parsingResult.value!!.map {
         it.toRouteModelsParsingResult(
             routeOptions,
-            directionsResponseToParse.routerOrigin,
-            directionsResponseToParse.responseOriginAPI,
+            responseToParse.routerOrigin,
+            responseToParse.responseOriginAPI,
         )
     }
     return DirectionsResponseParsingResult(
@@ -69,16 +73,17 @@ private fun parseDirectionsResponseNRO(
     )
 }
 
+@OptIn(MapboxExperimental::class)
 internal fun DirectionsRouteContext.toRouteModelsParsingResult(
     routeOptions: RouteOptions,
     @RouterOrigin routerOrigin: String,
     @ResponseOriginAPI responseOriginApi: String,
-): RouteModelParsingResult {
+): DirectionsRouteModelParsingResult {
     val route = DirectionsRouteFBWrapper.wrap(
         routeOptions = routeOptions,
         bindgenContext = this,
     ) ?: throw IllegalStateException("route returned by getRootAsDirectionsRouteContext is null")
-    val data = ParsedRouteData(
+    val data = DirectionsParsedRouteData(
         route = route,
         routesWaypoint = route.waypoints()?.filterNotNull() ?: getWaypointsFromResponse(
             route.fbContext,
@@ -89,7 +94,7 @@ internal fun DirectionsRouteContext.toRouteModelsParsingResult(
         routerOrigin = routerOrigin,
         responseOriginAPI = responseOriginApi,
     )
-    return RouteModelParsingResult(
+    return DirectionsRouteModelParsingResult(
         data,
         operations = NroRouteOperations(this, data),
     )

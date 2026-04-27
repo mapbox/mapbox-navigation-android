@@ -1,6 +1,6 @@
 package com.mapbox.navigation.core.routealternatives
 
-import com.mapbox.navigation.base.internal.route.parsing.RouteInterfacesParser
+import com.mapbox.navigation.base.internal.route.parsing.models.nn.RouteInterfacesParser
 import com.mapbox.navigation.base.internal.utils.AlternativesParsingResult
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.route.NavigationRoute

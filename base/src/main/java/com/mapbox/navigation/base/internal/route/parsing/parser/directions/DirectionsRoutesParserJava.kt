@@ -1,16 +1,18 @@
-@file:OptIn(ExperimentalMapboxNavigationAPI::class)
-
-package com.mapbox.navigation.base.internal.route.parsing.models
+package com.mapbox.navigation.base.internal.route.parsing.parser.directions
 
 import androidx.annotation.WorkerThread
 import com.mapbox.api.directions.v5.models.DirectionsResponse
-import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.route.operations.JavaRouteOperations
-import com.mapbox.navigation.base.internal.route.parsing.DirectionsResponseToParse
+import com.mapbox.navigation.base.internal.route.parsing.ResponseToParse
+import com.mapbox.navigation.base.internal.route.parsing.models.DirectionsParsedRouteData
+import com.mapbox.navigation.base.internal.route.parsing.models.directions.DirectionsResponseParsingResult
+import com.mapbox.navigation.base.internal.route.parsing.models.directions.DirectionsRouteModelParsingResult
+import com.mapbox.navigation.base.internal.route.parsing.models.directions.DirectionsRoutesParser
+import com.mapbox.navigation.base.internal.route.parsing.parser.getDirectionsRoute
+import com.mapbox.navigation.base.internal.route.parsing.parser.getDirectionsWaypoint
 import com.mapbox.navigation.base.route.ResponseOriginAPI
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.utils.internal.LoggerFrontend
@@ -21,16 +23,16 @@ import java.net.URL
 
 private const val LOG_CATEGORY = "JAVA-ROUTE-MODELS-PARSER"
 
-internal class JavaRouteModelsParser(
+internal class DirectionsRoutesParserJava(
     private val logger: LoggerFrontend = LoggerProvider.getLoggerFrontend(),
-) : RouteModelsParser {
+) : DirectionsRoutesParser {
+
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
     override fun parse(
-        response: DirectionsResponseToParse,
+        response: ResponseToParse,
     ): Result<DirectionsResponseParsingResult> {
-        logger.logD(LOG_CATEGORY) {
-            "parsing directions response"
-        }
         return Result.runCatching {
+            logger.logD(LOG_CATEGORY) { "parsing directions response" }
             PerformanceTracker.trackPerformanceSync(
                 "JavaRouteModelsParser#parseDirectionsResponseJava",
             ) {
@@ -42,7 +44,7 @@ internal class JavaRouteModelsParser(
 
 @WorkerThread
 private fun parseDirectionsResponseJava(
-    responseToParse: DirectionsResponseToParse,
+    responseToParse: ResponseToParse,
 ): DirectionsResponseParsingResult {
     val routeOptions = RouteOptions.fromUrl(URL(responseToParse.routeRequest))
     val response = responseToParse.responseBody.toReader().use { reader ->
@@ -52,29 +54,28 @@ private fun parseDirectionsResponseJava(
         response,
         routeOptions,
         responseToParse.routerOrigin,
-        responseToParse.responseOriginAPI,
     )
 }
 
+@OptIn(ExperimentalMapboxNavigationAPI::class)
 internal fun createResponseParsingResult(
     response: DirectionsResponse,
     routeOptions: RouteOptions,
     @RouterOrigin routerOrigin: String,
-    @ResponseOriginAPI responseOriginAPI: String,
 ): DirectionsResponseParsingResult = DirectionsResponseParsingResult(
     response.routes().mapIndexed { index, route ->
-        val route = getDirectionsRoute(response, index, routeOptions)
-        val waypoints = getDirectionsWaypoint(response, index)
-        val routeData = ParsedRouteData(
+        val route = response.getDirectionsRoute(index, routeOptions)
+        val waypoints = response.getDirectionsWaypoint(index)
+        val routeData = DirectionsParsedRouteData(
             route,
             waypoints,
             response.uuid(),
             routeOptions,
             routeIndex = index,
             routerOrigin = routerOrigin,
-            responseOriginAPI = responseOriginAPI,
+            responseOriginAPI = ResponseOriginAPI.DIRECTIONS_API,
         )
-        RouteModelParsingResult(
+        DirectionsRouteModelParsingResult(
             routeData,
             JavaRouteOperations(
                 routeData,
@@ -85,22 +86,3 @@ internal fun createResponseParsingResult(
     routeOptions,
     response.uuid(),
 )
-
-private fun getDirectionsRoute(
-    response: DirectionsResponse,
-    routeIndex: Int,
-    routeOptions: RouteOptions,
-): DirectionsRoute {
-    return response.routes()[routeIndex].toBuilder()
-        .requestUuid(response.uuid())
-        .routeIndex(routeIndex.toString())
-        .routeOptions(routeOptions)
-        .build()
-}
-
-private fun getDirectionsWaypoint(
-    directionsResponse: DirectionsResponse,
-    routeIndex: Int,
-): List<DirectionsWaypoint>? {
-    return directionsResponse.routes()[routeIndex].waypoints() ?: directionsResponse.waypoints()
-}

@@ -4,6 +4,7 @@ import android.os.SystemClock
 import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.route.routeOptions
@@ -13,6 +14,8 @@ import com.mapbox.navigation.core.internal.router.GetRouteSignature
 import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshCallback
 import com.mapbox.navigation.core.internal.router.Router
 import com.mapbox.navigation.core.internal.utils.initialLegIndex
+import com.mapbox.navigation.core.mapmatching.MapMatchingAPICallback
+import com.mapbox.navigation.core.mapmatching.MapMatchingOptions
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
 import java.util.concurrent.CopyOnWriteArraySet
@@ -151,6 +154,15 @@ internal class MapboxDirectionsSession(
         routerCallback: NavigationRouterCallback,
     ): Long {
         return router.getRoute(routeOptions, signature, routerCallback)
+    }
+
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    override fun requestMapMatchedRoutes(
+        mapMatchingOptions: MapMatchingOptions,
+        signature: GetRouteSignature,
+        callback: MapMatchingAPICallback,
+    ): Long {
+        return router.getRouteMapMatched(mapMatchingOptions, signature, callback)
     }
 
     override fun cancelRouteRequest(requestId: Long) {

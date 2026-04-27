@@ -1,10 +1,13 @@
 @file:OptIn(ExperimentalMapboxNavigationAPI::class)
 
-package com.mapbox.navigation.base.internal.route.parsing
+package com.mapbox.navigation.base.internal.route.parsing.parser.nn
 
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
-import com.mapbox.navigation.base.internal.route.parsing.models.DirectionsResponseParsingResult
-import com.mapbox.navigation.base.internal.route.parsing.models.RouteModelsParser
+import com.mapbox.navigation.base.internal.route.parsing.ResponseToParse
+import com.mapbox.navigation.base.internal.route.parsing.models.directions.DirectionsResponseParsingResult
+import com.mapbox.navigation.base.internal.route.parsing.models.directions.DirectionsRoutesParser
+import com.mapbox.navigation.base.internal.route.parsing.models.nn.ContinuousAlternativesParsingSuccessfulResult
+import com.mapbox.navigation.base.internal.route.parsing.models.nn.RouteInterfacesParser
 import com.mapbox.navigation.base.internal.utils.AlternativesInfo
 import com.mapbox.navigation.base.internal.utils.AlternativesParsingResult
 import com.mapbox.navigation.base.internal.utils.RouteParsingQueue
@@ -31,7 +34,7 @@ internal class JsonResponseOptimizedRouteInterfaceParser(
     private val existingParsedRoutesLookup: (id: String) -> NavigationRoute?,
     private val parsingDispatcher: CoroutineDispatcher,
     private val time: Time,
-    private val parser: RouteModelsParser,
+    private val parser: DirectionsRoutesParser,
     private val parsingQueue: RouteParsingQueue,
 ) : RouteInterfacesParser {
     override suspend fun parserContinuousAlternatives(
@@ -41,7 +44,7 @@ internal class JsonResponseOptimizedRouteInterfaceParser(
 
         return parsingQueue.parseAlternatives(
             AlternativesInfo(
-                RouteResponseInfo.Companion.fromResponses(
+                RouteResponseInfo.fromResponses(
                     routes.map { it.responseJsonRef.buffer },
                 ),
             ),
@@ -69,7 +72,7 @@ internal class JsonResponseOptimizedRouteInterfaceParser(
                         "parsing ${it.responseUuid}"
                     }
                     parser.parse(
-                        DirectionsResponseToParse(
+                        ResponseToParse(
                             it.responseJsonRef,
                             it.requestUri,
                             routerOrigin = it.routerOrigin.mapToSdkRouteOrigin(),
@@ -97,16 +100,17 @@ private fun RouteInterface.toNavigationRoute(
     val refreshTtl =
         parsedRoutes.routesParsingResult.getOrNull(routeIndex)?.data?.route?.refreshTtl()
     val routeOptions = parsedRoutes.routeOptions
+    val data = parsedRoutes.routesParsingResult[routeIndex].data
     return NavigationRoute(
         routeOptions = routeOptions,
         // TODO: test that route options are the same as with direct parsing
-        directionsRoute = parsedRoutes.routesParsingResult[routeIndex].data.route,
-        waypoints = parsedRoutes.routesParsingResult[routeIndex].data.routesWaypoint,
+        directionsRoute = data.route,
+        waypoints = data.routesWaypoint,
         nativeRoute = this,
         expirationTimeElapsedSeconds = refreshTtl?.plus(responseTimeElapsedSeconds),
         // TODO: adopt native parsing NAVAND-1732 to prevent response origin API being lost here
         // when existing route is reparsed
-        responseOriginAPI = parsedRoutes.routesParsingResult[routeIndex].data.responseOriginAPI,
+        responseOriginAPI = data.responseOriginAPI,
         // TODO: NAVAND-6774, move overriden traffic to native route
         overriddenTraffic = null,
         operations = parsedRoutes.routesParsingResult[routeIndex].operations,

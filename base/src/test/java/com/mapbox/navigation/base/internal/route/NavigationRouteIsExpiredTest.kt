@@ -3,7 +3,7 @@ package com.mapbox.navigation.base.internal.route
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.internal.route.parsing.DirectionsResponseToParse
+import com.mapbox.navigation.base.internal.route.parsing.ResponseToParse
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
@@ -54,7 +54,7 @@ class NavigationRouteIsExpiredTest {
             coroutineRule.testDispatcher,
         )
             .parseDirectionsResponse(
-                DirectionsResponseToParse(
+                ResponseToParse(
                     routeRequest = RouteOptions.builder()
                         .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
                         .coordinatesList(

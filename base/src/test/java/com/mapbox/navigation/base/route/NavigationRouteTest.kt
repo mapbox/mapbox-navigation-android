@@ -10,7 +10,7 @@ import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.internal.route.operations.RouteOperations
-import com.mapbox.navigation.base.internal.route.parsing.DirectionsResponseToParse
+import com.mapbox.navigation.base.internal.route.parsing.ResponseToParse
 import com.mapbox.navigation.base.internal.route.parsing.setupParsing
 import com.mapbox.navigation.base.internal.route.testing.toDataRefJava
 import com.mapbox.navigation.base.internal.route.updateExpirationTime
@@ -21,6 +21,7 @@ import com.mapbox.navigation.testing.factories.createClosure
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createNavigationRoute
 import com.mapbox.navigation.testing.factories.createRouteOptions
+import com.mapbox.navigation.testing.factories.createTestMapMatchingResponseParser
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -200,13 +201,7 @@ class NavigationRouteTest {
         val requestUrl = FileUtils.loadJsonFixture("kochelsee_map_matching_request.txt")
         val responseJson = FileUtils.loadJsonFixture("kochelsee_map_matching_response.json")
 
-        val result = NavigationRoute.createMatchedRoutes(
-            responseJson,
-            requestUrl,
-        )
-
-        assertNull(result.error)
-        val matches = result.value!!
+        val matches = createTestMapMatchingRoutes(responseJson, requestUrl)
 
         assertEquals(1, matches.size)
         val match = matches[0]
@@ -239,13 +234,10 @@ class NavigationRouteTest {
             "kochelsee_multiple_matches_map_matching_response.json",
         )
 
-        val result = NavigationRoute.createMatchedRoutes(
+        val matches = createTestMapMatchingRoutes(
             responseJson,
             requestUrl,
         )
-
-        assertNull(result.error)
-        val matches = result.value!!
 
         assertEquals(2, matches.size)
 
@@ -276,10 +268,23 @@ internal fun createRoute(
     routerOrigin: String,
 ): List<NavigationRoute> = runBlocking {
     setupParsing(nativeRoute = false).parseDirectionsResponse(
-        DirectionsResponseToParse.from(
+        ResponseToParse.from(
             responseBody = directionsResponseJson.toDataRefJava(),
             routeRequest = routeRequestUrl,
             routerOrigin = routerOrigin,
         ),
     ).getOrThrow().routes
+}
+
+private fun createTestMapMatchingRoutes(
+    responseJson: String,
+    requestUrl: String,
+): List<MapMatchingMatch> = runBlocking {
+    createTestMapMatchingResponseParser().parseMapMatchedResponse(
+        ResponseToParse.from(
+            responseBody = responseJson.toDataRefJava(),
+            routeRequest = requestUrl,
+            routerOrigin = RouterOrigin.ONLINE,
+        ),
+    ).getOrThrow().matches
 }

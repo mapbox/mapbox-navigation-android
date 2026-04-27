@@ -1,8 +1,10 @@
 package com.mapbox.navigation.base.internal.route.parsing
 
-import com.mapbox.navigation.base.internal.route.parsing.models.DirectionsResponseParsingResult
-import com.mapbox.navigation.base.internal.route.parsing.models.JavaRouteModelsParser
-import com.mapbox.navigation.base.internal.route.parsing.models.RouteModelsParser
+import com.mapbox.navigation.base.internal.route.parsing.models.directions.DirectionsResponseParsingResult
+import com.mapbox.navigation.base.internal.route.parsing.models.directions.DirectionsRoutesParser
+import com.mapbox.navigation.base.internal.route.parsing.models.nn.ContinuousAlternativesParsingSuccessfulResult
+import com.mapbox.navigation.base.internal.route.parsing.parser.directions.DirectionsRoutesParserJava
+import com.mapbox.navigation.base.internal.route.parsing.parser.nn.JsonResponseOptimizedRouteInterfaceParser
 import com.mapbox.navigation.base.internal.utils.AlternativesParsingResult
 import com.mapbox.navigation.base.internal.utils.createImmediateNoOptimizationsParsingQueue
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -189,7 +191,7 @@ class JsonResponseOptimizedParserTest {
         val routeLookup: (String) -> NavigationRoute? = { null }
 
         val parsingException = RuntimeException("Parsing failed")
-        val modelParser = RouteModelsParser { _ ->
+        val modelParser = DirectionsRoutesParser { _ ->
             Result.failure(parsingException)
         }
 
@@ -226,7 +228,7 @@ class JsonResponseOptimizedParserTest {
     }
 
     private fun createRouteInterfaceParser(
-        modelsParser: RouteModelsParser,
+        modelsParser: DirectionsRoutesParser,
         routeLookup: (String) -> NavigationRoute? = { null },
     ): JsonResponseOptimizedRouteInterfaceParser = JsonResponseOptimizedRouteInterfaceParser(
         existingParsedRoutesLookup = routeLookup,
@@ -251,12 +253,12 @@ class JsonResponseOptimizedParserTest {
     }
 }
 
-internal class JavaParserWrapper : RouteModelsParser {
-    val parser = JavaRouteModelsParser()
+internal class JavaParserWrapper : DirectionsRoutesParser {
+    val parser = DirectionsRoutesParserJava()
     val parsedResponses = mutableListOf<String>()
 
     override fun parse(
-        response: DirectionsResponseToParse,
+        response: ResponseToParse,
     ): Result<DirectionsResponseParsingResult> {
         return parser.parse(response).onSuccess {
             parsedResponses.add(it.responseUUID!!)

@@ -1,5 +1,6 @@
 package com.mapbox.navigation.testing.factories
 
+import com.mapbox.navigation.base.internal.route.parsing.models.mapmaptching.MapMatchingMatchParser
 import com.mapbox.navigation.base.internal.route.parsing.noTracking
 import com.mapbox.navigation.base.internal.route.parsing.setupParsing
 import com.mapbox.navigation.utils.internal.Time
@@ -17,6 +18,12 @@ fun createTestNavigationRoutesParsing(
 fun createTestRouteInterfaceParser(
     parsingDispatcher: CoroutineDispatcher,
 ) = setupTestParsing(
+    testParsingDispatcher = parsingDispatcher,
+)
+
+fun createTestMapMatchingResponseParser(
+    parsingDispatcher: CoroutineDispatcher = Dispatchers.Default,
+): MapMatchingMatchParser = setupTestParsing(
     testParsingDispatcher = parsingDispatcher,
 )
 

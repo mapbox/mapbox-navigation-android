@@ -9,7 +9,7 @@ import com.mapbox.navigation.base.route.ResponseOriginAPI
 import com.mapbox.navigation.base.route.RouterOrigin
 
 @RestrictTo(RestrictTo.Scope.LIBRARY)
-data class DirectionsResponseToParse(
+data class ResponseToParse(
     val responseBody: DataRef,
     val routeRequest: String,
     @RouterOrigin val routerOrigin: String,
@@ -22,7 +22,7 @@ data class DirectionsResponseToParse(
             routeRequest: String,
             @RouterOrigin routerOrigin: String,
             @ResponseOriginAPI responseOriginAPI: String = ResponseOriginAPI.DIRECTIONS_API,
-        ) = DirectionsResponseToParse(
+        ) = ResponseToParse(
             responseBody,
             routeRequest,
             routerOrigin,

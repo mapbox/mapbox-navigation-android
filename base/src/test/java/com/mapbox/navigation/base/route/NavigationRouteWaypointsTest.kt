@@ -6,7 +6,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.internal.route.parsing.DirectionsResponseToParse
+import com.mapbox.navigation.base.internal.route.parsing.ResponseToParse
 import com.mapbox.navigation.base.internal.route.testing.toDataRefJava
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.factories.createTestNavigationRoutesParsing
@@ -102,7 +102,7 @@ class NavigationRouteWaypointsTest(
 
         val parsedRoutes = runBlocking {
             createTestNavigationRoutesParsing().parseDirectionsResponse(
-                DirectionsResponseToParse.from(
+                ResponseToParse.from(
                     responseBody = testDirectionsResponse.toJson().toDataRefJava(),
                     routeRequest = testRouteOptions.toUrl("***").toString(),
                     routerOrigin = RouterOrigin.OFFLINE,

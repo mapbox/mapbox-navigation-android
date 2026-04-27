@@ -17,7 +17,6 @@ import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.CongestionNumericOverride
-import com.mapbox.navigation.base.internal.SDKRouteParser
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.toUpcomingRoadObjects
 import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.route.NavigationRouteData
@@ -25,9 +24,8 @@ import com.mapbox.navigation.base.internal.route.Waypoint
 import com.mapbox.navigation.base.internal.route.operations.JavaRouteOperations
 import com.mapbox.navigation.base.internal.route.operations.RouteOperations
 import com.mapbox.navigation.base.internal.route.operations.RouteUpdate
-import com.mapbox.navigation.base.internal.route.parsing.models.DirectionsResponseParsingResult
-import com.mapbox.navigation.base.internal.route.parsing.models.createResponseParsingResult
-import com.mapbox.navigation.base.internal.route.toDirectionsResponse
+import com.mapbox.navigation.base.internal.route.parsing.models.directions.DirectionsResponseParsingResult
+import com.mapbox.navigation.base.internal.route.parsing.models.mapmaptching.MapMatchedResponseParsingResult
 import com.mapbox.navigation.base.internal.utils.mapToSdk
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.internal.utils.refreshTtl
@@ -36,7 +34,6 @@ import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigator.RouteInterface
-import java.net.URL
 
 /**
  * Wraps a route object used across the Navigation SDK features.
@@ -70,6 +67,7 @@ class NavigationRoute internal constructor(
         .orEmpty(),
     internal val overriddenTraffic: CongestionNumericOverride? = null,
 ) {
+
     /**
      * The index of the route that this wrapper tracks from the collection of routes returned
      * in the original response.
@@ -193,51 +191,37 @@ class NavigationRoute internal constructor(
             }
         }
 
-        /**
-         * Creates new instances of [NavigationRoute] based on the routes found in the [mapMatchingResponse].
-         *
-         * Should not be called from UI thread. Contains serialisation and deserialisation under the hood.
-         *
-         * @param mapMatchingResponse response to be parsed into [NavigationRoute]s
-         * @param requestUrl url which were used to request [mapMatchingResponse]
-         */
         @ExperimentalPreviewMapboxNavigationAPI
-        @WorkerThread
-        internal fun createMatchedRoutes(
-            mapMatchingResponse: String,
-            requestUrl: String,
-        ): Expected<Throwable, List<MapMatchingMatch>> {
-            return try {
-                val model = MapMatchingResponse.fromJson(mapMatchingResponse)
-                val routeOptions = RouteOptions.fromUrl(URL(requestUrl))
-                val directionsResponse = model.toDirectionsResponse(routeOptions)
-                val routesResult = SDKRouteParser.default.parseMapMatchedResponse(
-                    mapMatchingResponse,
-                    requestUrl,
-                    RouterOrigin.ONLINE,
-                    // map matched routes don't expire
-                ).run {
-                    create(
-                        this,
-                        createResponseParsingResult(
-                            directionsResponse,
-                            routeOptions,
-                            RouterOrigin.ONLINE,
-                            ResponseOriginAPI.MAP_MATCHING_API,
-                        ),
-                        responseTimeElapsedSeconds = Long.MAX_VALUE,
-                        responseOriginAPI = ResponseOriginAPI.MAP_MATCHING_API,
-                    )
-                }
-                val matchesResult = routesResult.mapIndexed { index, navigationRoute ->
-                    MapMatchingMatch(
-                        navigationRoute,
-                        model.matchings()!![index].confidence(),
-                    )
-                }
-                ExpectedFactory.createValue(matchesResult)
-            } catch (t: Throwable) {
-                ExpectedFactory.createError(t)
+        internal fun createFromMapMatchingResult(
+            expected: Expected<String, List<RouteInterface>>,
+            parsingResult: MapMatchedResponseParsingResult,
+            responseTimeElapsedSeconds: Long?,
+        ): List<MapMatchingMatch> {
+            return expected.fold(
+                { error ->
+                    logE("NavigationRoute", "Failed to parse a route. Reason: $error")
+                    listOf()
+                },
+                { value -> value },
+            ).mapIndexed { index, routeInterface ->
+                val matchedData = parsingResult.routesParsingResult[index].data
+                val directionsData = matchedData.directionsData
+                val route = NavigationRoute(
+                    directionsRoute = directionsData.route,
+                    waypoints = directionsData.routesWaypoint,
+                    routeOptions = parsingResult.routeOptions,
+                    nativeRoute = routeInterface,
+                    expirationTimeElapsedSeconds = ifNonNull(
+                        directionsData.route.refreshTtl(),
+                        responseTimeElapsedSeconds,
+                    ) { refreshTtl, responseTimeElapsedSeconds ->
+                        refreshTtl + responseTimeElapsedSeconds
+                    },
+                    responseOriginAPI = directionsData.responseOriginAPI,
+                    overriddenTraffic = null,
+                    operations = parsingResult.routesParsingResult[index].operations,
+                )
+                MapMatchingMatch(route, matchedData.mapMatchingConfidence ?: 1.0)
             }
         }
 
@@ -257,16 +241,14 @@ class NavigationRoute internal constructor(
                     value
                 },
             ).mapIndexed { index, routeInterface ->
+                val data = directionsResponseParsingResult.routesParsingResult[index].data
                 NavigationRoute(
-                    directionsRoute = directionsResponseParsingResult
-                        .routesParsingResult[index].data.route,
-                    waypoints = directionsResponseParsingResult
-                        .routesParsingResult[index].data.routesWaypoint,
+                    directionsRoute = data.route,
+                    waypoints = data.routesWaypoint,
                     routeOptions = directionsResponseParsingResult.routeOptions,
                     nativeRoute = routeInterface,
                     expirationTimeElapsedSeconds = ifNonNull(
-                        directionsResponseParsingResult
-                            .routesParsingResult[index].data.route.refreshTtl(),
+                        data.route.refreshTtl(),
                         responseTimeElapsedSeconds,
                     ) { refreshTtl, responseTimeElapsedSeconds ->
                         refreshTtl + responseTimeElapsedSeconds
@@ -362,6 +344,7 @@ class NavigationRoute internal constructor(
         expirationTimeElapsedSeconds: Long? = this.expirationTimeElapsedSeconds,
         routeRefreshMetadata: RouteRefreshMetadata? = this.routeRefreshMetadata,
         operations: RouteOperations = this.operations,
+        responseOriginAPI: String = this.responseOriginAPI,
     ): NavigationRoute = NavigationRoute(
         directionsRoute = directionsRoute,
         waypoints = waypoints,
@@ -370,8 +353,11 @@ class NavigationRoute internal constructor(
         unavoidableClosures = this.unavoidableClosures,
         expirationTimeElapsedSeconds = expirationTimeElapsedSeconds,
         overriddenTraffic = overriddenTraffic,
-        responseOriginAPI = this.responseOriginAPI,
+        responseOriginAPI = responseOriginAPI,
         routeRefreshMetadata = routeRefreshMetadata,
         operations = operations,
     )
+
+    /** Exposed for [copyWithResponseOriginAPI] in NavigationRouteEx only. */
+    internal val operationsForCopy: RouteOperations get() = operations
 }

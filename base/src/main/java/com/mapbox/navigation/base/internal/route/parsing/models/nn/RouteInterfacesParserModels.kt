@@ -1,4 +1,4 @@
-package com.mapbox.navigation.base.internal.route.parsing
+package com.mapbox.navigation.base.internal.route.parsing.models.nn
 
 import androidx.annotation.RestrictTo
 import com.mapbox.navigation.base.internal.utils.AlternativesParsingResult
@@ -13,7 +13,7 @@ data class ContinuousAlternativesParsingSuccessfulResult(
 /**
  * Entry point for parsing multiple route interfaces into navigation routes.
  * This API is supposed to be used for continuous alternatives parsing.
- * @see [JsonResponseOptimizedRouteInterfaceParser]
+ * @see [com.mapbox.navigation.base.internal.route.parsing.parser.nn.JsonResponseOptimizedRouteInterfaceParser]
  */
 interface RouteInterfacesParser {
     suspend fun parserContinuousAlternatives(

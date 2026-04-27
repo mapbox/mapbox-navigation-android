@@ -38,8 +38,8 @@ import com.mapbox.navigation.base.internal.route.IncidentsRefresher
 import com.mapbox.navigation.base.internal.route.NavigationRouteData
 import com.mapbox.navigation.base.internal.route.NotificationsRefresher
 import com.mapbox.navigation.base.internal.route.WaypointsParser
-import com.mapbox.navigation.base.internal.route.parsing.models.ParsedRouteData
-import com.mapbox.navigation.base.internal.route.parsing.models.RouteModelParsingResult
+import com.mapbox.navigation.base.internal.route.parsing.models.DirectionsParsedRouteData
+import com.mapbox.navigation.base.internal.route.parsing.models.directions.DirectionsRouteModelParsingResult
 import com.mapbox.navigation.base.internal.route.size
 import com.mapbox.navigation.base.internal.utils.Constants
 import com.mapbox.navigation.base.internal.utils.mapToNativeRouteOrigin
@@ -57,7 +57,7 @@ import kotlin.collections.set
 private const val LOG_CATEGORY = "JAVA-ROUTES-OPERATIONS"
 
 internal class JavaRouteOperations(
-    private val routeData: ParsedRouteData,
+    private val routeData: DirectionsParsedRouteData,
     private val overriddenTraffic: CongestionNumericOverride? = null,
 ) : RouteOperations {
 
@@ -194,7 +194,7 @@ internal class JavaRouteOperations(
                     routesWaypoint = refreshedWaypoints,
                 )
                 RouteUpdate(
-                    RouteModelParsingResult(
+                    DirectionsRouteModelParsingResult(
                         refreshedRouteData,
                         JavaRouteOperations(
                             refreshedRouteData,
@@ -222,7 +222,7 @@ internal class JavaRouteOperations(
         )
         return Result.success(
             RouteUpdate(
-                RouteModelParsingResult(
+                DirectionsRouteModelParsingResult(
                     refreshedRouteData,
                     JavaRouteOperations(
                         refreshedRouteData,
@@ -314,7 +314,7 @@ internal class JavaRouteOperations(
                     unavoidableClosures = state.unavoidableClosures,
                     routeRefreshMetadata = RouteRefreshMetadata(isUpToDate = false),
                     operations = JavaRouteOperations(
-                        ParsedRouteData(
+                        DirectionsParsedRouteData(
                             state.directionRoute,
                             state.waypoints,
                             state.responseUUID,

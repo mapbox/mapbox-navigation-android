@@ -84,7 +84,6 @@ import com.mapbox.navigation.core.internal.utils.mapToReason
 import com.mapbox.navigation.core.internal.utils.paramsProvider
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.mapmatching.MapMatchingAPICallback
-import com.mapbox.navigation.core.mapmatching.MapMatchingAPIProvider
 import com.mapbox.navigation.core.mapmatching.MapMatchingOptions
 import com.mapbox.navigation.core.mapmatching.MapMatchingSuccessfulResult
 import com.mapbox.navigation.core.navigator.CacheHandleWrapper
@@ -334,8 +333,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private val routeUpdateMutex = Mutex()
 
-    private val mapMatchingAPI = MapMatchingAPIProvider.provideMapMatchingAPI()
-
     private val routesProgressDataProvider =
         NavigationComponentProvider.createRouteRefreshRequestDataProvider()
 
@@ -572,6 +569,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             RouterWrapper(
                 navigator.getRouter(),
                 threadController,
+                parsing,
                 parsing,
             )
         }
@@ -1077,17 +1075,24 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * Requests routes from
      * [Mapbox Map Matching API](https://docs.mapbox.com/api/navigation/map-matching/) and
      * transforms result to [NavigationRoute]s that could be used for [setNavigationRoutes].
+     * Uses the native router (same as [requestRoutes]); use [cancelMapMatchingRequest] to cancel.
+     *
      * @param mapMatchingOptions map matching options
      * @param callback listener that gets notified when request state changes
      * @return requestId, see [cancelMapMatchingRequest]
      * @see [MapMatchingMatch], [MapMatchingSuccessfulResult], [MapMatchingAPICallback]
      */
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
     @ExperimentalPreviewMapboxNavigationAPI
     fun requestMapMatching(
         mapMatchingOptions: MapMatchingOptions,
         callback: MapMatchingAPICallback,
     ): Long {
-        return mapMatchingAPI.requestMapMatching(mapMatchingOptions, callback)
+        return directionsSession.requestMapMatchedRoutes(
+            mapMatchingOptions,
+            GetRouteSignature(GetRouteSignature.Reason.NEW_ROUTE, GetRouteSignature.Origin.APP),
+            callback,
+        )
     }
 
     /**
@@ -1095,7 +1100,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      */
     @ExperimentalPreviewMapboxNavigationAPI
     fun cancelMapMatchingRequest(requestId: Long) {
-        mapMatchingAPI.cancel(requestId)
+        directionsSession.cancelRouteRequest(requestId)
     }
 
     /**
@@ -1569,7 +1574,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         billingController.onDestroy()
         directionsSession.shutdown()
         directionsSession.unregisterAllSetNavigationRoutesFinishedObserver()
-        mapMatchingAPI.cancelAll()
         tripSession.stop()
         tripSession.unregisterAllLocationObservers()
         tripSession.unregisterAllRouteProgressObservers()

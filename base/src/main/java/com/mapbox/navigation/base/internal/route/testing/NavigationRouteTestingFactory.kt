@@ -8,7 +8,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.BuildConfig.NATIVE_ROUTE_OBJECT_DEFAULT
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.SDKRouteParser
-import com.mapbox.navigation.base.internal.route.parsing.DirectionsResponseToParse
+import com.mapbox.navigation.base.internal.route.parsing.ResponseToParse
 import com.mapbox.navigation.base.internal.route.parsing.setupParsing
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.ResponseOriginAPI
@@ -39,7 +39,7 @@ fun createNavigationRouteForTest(
     ).let {
         runBlocking {
             it.parseDirectionsResponse(
-                DirectionsResponseToParse.from(
+                ResponseToParse.from(
                     responseBody = directionsResponse.toJson().toDataRefJava(),
                     routeRequest = routeOptions.toUrl("***").toString(),
                     routerOrigin = routerOrigin,
@@ -58,7 +58,7 @@ fun createNavigationRouteForTest(
 ): List<NavigationRoute> = setupParsing(nativeRoute = NATIVE_ROUTE_OBJECT_DEFAULT).let {
     runBlocking {
         it.parseDirectionsResponse(
-            DirectionsResponseToParse.from(
+            ResponseToParse.from(
                 responseBody = directionsResponse.toJson().toDataRefJava(),
                 routeRequest = routeOptions.toUrl("***").toString(),
                 routerOrigin = routerOrigin,
@@ -76,7 +76,7 @@ fun createNavigationRouteForTest(
 ) = setupParsing(nativeRoute = false).let {
     runBlocking {
         it.parseDirectionsResponse(
-            DirectionsResponseToParse.from(
+            ResponseToParse.from(
                 responseBody = directionsResponseJson.toDataRefJava(),
                 routeRequest = routeRequestUrl,
                 routerOrigin = routerOrigin,

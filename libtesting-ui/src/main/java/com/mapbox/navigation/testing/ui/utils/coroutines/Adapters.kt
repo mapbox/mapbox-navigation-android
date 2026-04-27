@@ -260,6 +260,15 @@ sealed class SetRoutesResult {
     ) : SetRoutesResult()
 }
 
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+fun MapMatchingRequestResult.getSuccessfulResultOrThrowException(): MapMatchingSuccessfulResult {
+    return when (this) {
+        is MapMatchingRequestResult.Success -> value
+        is MapMatchingRequestResult.Failure -> error("map matching failed")
+        MapMatchingRequestResult.Cancelled -> error("map matching cancelled")
+    }
+}
+
 fun RouteRequestResult.getSuccessfulResultOrThrowException(): RouteRequestResult.Success {
     return when (this) {
         is RouteRequestResult.Success -> this
