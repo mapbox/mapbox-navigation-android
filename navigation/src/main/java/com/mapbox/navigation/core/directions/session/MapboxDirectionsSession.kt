@@ -169,6 +169,10 @@ internal class MapboxDirectionsSession(
         router.cancelRouteRequest(requestId)
     }
 
+    override fun cancelMapMatchedRouteRequest(requestId: Long) {
+        router.cancelMapMatchedRouteRequest(requestId)
+    }
+
     /**
      * Registers [RoutesObserver]. Updated on each change of [routesUpdatedResult]
      */

@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMapboxNavigationAPI::class)
+@file:OptIn(ExperimentalMapboxNavigationAPI::class, ExperimentalPreviewMapboxNavigationAPI::class)
 
 package com.mapbox.navigation.core.internal.router
 
@@ -11,6 +11,7 @@ import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.MapboxServices
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
@@ -24,6 +25,8 @@ import com.mapbox.navigation.base.route.RouterFailureType
 import com.mapbox.navigation.base.route.RouterOrigin.Companion.OFFLINE
 import com.mapbox.navigation.base.route.RouterOrigin.Companion.ONLINE
 import com.mapbox.navigation.core.internal.router.util.TestRouteFixtures
+import com.mapbox.navigation.core.mapmatching.MapMatchingAPICallback
+import com.mapbox.navigation.core.mapmatching.MapMatchingOptions
 import com.mapbox.navigation.navigator.internal.mapToRoutingMode
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
@@ -160,8 +163,25 @@ class RouterWrapperTests {
 
     private val nativeOriginOnline: RouterOrigin = RouterOrigin.ONLINE
     private val nativeOriginOnboard: RouterOrigin = RouterOrigin.ONBOARD
-    private val getRouteSlot = slot<com.mapbox.navigator.RouterDataRefCallback>()
+    private val getRouteSlot = slot<RouterDataRefCallback>()
+    private val mapMatchedRouteSlot = slot<RouterDataRefCallback>()
     private val refreshRouteSlot = slot<RouterRefreshCallback>()
+    private val mapMatchingCallback: MapMatchingAPICallback = mockk(relaxed = true)
+    private val mapMatchingOptions = MapMatchingOptions.Builder()
+        .coordinates(
+            listOf(
+                Point.fromLngLat(-117.1800, 32.7155),
+                Point.fromLngLat(-117.1780, 32.7140),
+            ),
+        )
+        .build()
+    private val mapMatchingUrl = mapMatchingOptions.toURL(accessToken)
+
+    private val routerResultSuccessMapMatching: Expected<List<RouterError>, DataRef> =
+        ExpectedFactory.createValue(
+            testRouteFixtures.loadMapMatchingResponse().toDataRef(),
+        )
+
     private val routeSlot = slot<NavigationRoute>()
     private val refreshResponseSlot = slot<DataRef>()
 
@@ -177,7 +197,7 @@ class RouterWrapperTests {
         } returns accessToken
 
         every { router.getRoute(any(), any(), any(), capture(getRouteSlot)) } returns 0L
-        every { router.getRouteMapMatched(any(), any(), any()) } returns 0L
+        every { router.getRouteMapMatched(any(), any(), capture(mapMatchedRouteSlot)) } returns 0L
         every { router.getRouteRefresh(any(), capture(refreshRouteSlot)) } returns 0L
 
         every { route.requestUuid() } returns UUID
@@ -1415,6 +1435,144 @@ class RouterWrapperTests {
         assertEquals(expected.url, failure.url)
         assertTrue(failure.isRetryable)
     }
+
+    @Test
+    fun `get route map matched is called with expected url and options`() {
+        routerWrapper.getRouteMapMatched(mapMatchingOptions, signature, mapMatchingCallback)
+
+        verify {
+            router.getRouteMapMatched(
+                mapMatchingUrl,
+                GetRouteOptions(null),
+                any<RouterDataRefCallback>(),
+            )
+        }
+    }
+
+    @Test
+    fun `get route map matched uses latest token`() {
+        every {
+            MapboxOptionsUtil.getTokenForService(MapboxServices.DIRECTIONS)
+        } returns accessToken
+
+        routerWrapper.getRouteMapMatched(mapMatchingOptions, signature, mapMatchingCallback)
+
+        verify {
+            router.getRouteMapMatched(
+                mapMatchingOptions.toURL(accessToken),
+                GetRouteOptions(null),
+                any<RouterDataRefCallback>(),
+            )
+        }
+    }
+
+    @Test
+    fun `check map matched callback called on failure`() = coroutineRule.runBlockingTest {
+        routerWrapper.getRouteMapMatched(mapMatchingOptions, signature, mapMatchingCallback)
+        mapMatchedRouteSlot.captured.run(routerResultFailure, nativeOriginOnline)
+
+        verify(exactly = 1) { mapMatchingCallback.failure(any()) }
+        verify(exactly = 0) { mapMatchingCallback.success(any()) }
+        verify(exactly = 0) { mapMatchingCallback.onCancel() }
+    }
+
+    @Test
+    fun `check map matched callback called on success`() = coroutineRule.runBlockingTest {
+        routerWrapper.getRouteMapMatched(mapMatchingOptions, signature, mapMatchingCallback)
+        mapMatchedRouteSlot.captured.run(routerResultSuccessMapMatching, nativeOriginOnboard)
+
+        verify(exactly = 1) { mapMatchingCallback.success(any()) }
+        verify(exactly = 0) { mapMatchingCallback.failure(any()) }
+        verify(exactly = 0) { mapMatchingCallback.onCancel() }
+    }
+
+    @Test
+    fun `check map matched callback called on cancel`() = coroutineRule.runBlockingTest {
+        every { router.cancelRouteRequest(any()) } answers {
+            mapMatchedRouteSlot.captured.run(routerResultCancelled, nativeOriginOnboard)
+        }
+
+        routerWrapper.getRouteMapMatched(mapMatchingOptions, signature, mapMatchingCallback)
+        routerWrapper.cancelRouteRequest(REQUEST_ID)
+
+        verify(exactly = 1) { mapMatchingCallback.onCancel() }
+        verify(exactly = 0) { mapMatchingCallback.success(any()) }
+        verify(exactly = 0) { mapMatchingCallback.failure(any()) }
+    }
+
+    @Test
+    fun `check map matched cancel and NN callback afterwards - invoke only cancel`() {
+        every {
+            router.getRouteMapMatched(
+                any(),
+                any(),
+                capture(mapMatchedRouteSlot),
+            )
+        } returns REQUEST_ID
+        every { router.cancelRouteMapMatchedRequest(any()) } answers {}
+
+        routerWrapper.getRouteMapMatched(mapMatchingOptions, signature, mapMatchingCallback)
+        routerWrapper.cancelMapMatchedRouteRequest(REQUEST_ID)
+
+        verify(exactly = 1) { mapMatchingCallback.onCancel() }
+        verify(exactly = 1) { router.cancelRouteMapMatchedRequest(any()) }
+
+        clearMocks(mapMatchingCallback, answers = false)
+
+        mapMatchedRouteSlot.captured.run(routerResultSuccessMapMatching, nativeOriginOnline)
+
+        verify(exactly = 0) { mapMatchingCallback.onCancel() }
+        verify(exactly = 0) { mapMatchingCallback.success(any()) }
+        verify(exactly = 0) { mapMatchingCallback.failure(any()) }
+    }
+
+    @Test
+    fun `check map matched callback called on cancelAll`() = coroutineRule.runBlockingTest {
+        every { router.cancelAll() } answers {
+            mapMatchedRouteSlot.captured.run(routerResultCancelled, nativeOriginOnline)
+        }
+
+        routerWrapper.getRouteMapMatched(mapMatchingOptions, signature, mapMatchingCallback)
+        routerWrapper.cancelAll()
+
+        verify(exactly = 1) { mapMatchingCallback.onCancel() }
+    }
+
+    @Test
+    fun `check map matched cancelAll and NN callback afterwards - invoke only cancel`() {
+        every {
+            router.getRouteMapMatched(
+                any(),
+                any(),
+                capture(mapMatchedRouteSlot),
+            )
+        } returns REQUEST_ID
+        every { router.cancelAll() } answers {}
+
+        routerWrapper.getRouteMapMatched(mapMatchingOptions, signature, mapMatchingCallback)
+        routerWrapper.cancelAll()
+
+        verify(exactly = 1) { mapMatchingCallback.onCancel() }
+
+        clearMocks(mapMatchingCallback, answers = false)
+
+        mapMatchedRouteSlot.captured.run(routerResultSuccessMapMatching, nativeOriginOnline)
+
+        verify(exactly = 0) { mapMatchingCallback.onCancel() }
+        verify(exactly = 0) { mapMatchingCallback.success(any()) }
+        verify(exactly = 0) { mapMatchingCallback.failure(any()) }
+    }
+
+    @Test
+    fun `check map matched on failure callback is called when router reset`() =
+        coroutineRule.runBlockingTest {
+            routerWrapper.getRouteMapMatched(mapMatchingOptions, signature, mapMatchingCallback)
+            routerWrapper.resetRouter(mockk())
+            mapMatchedRouteSlot.captured.run(routerResultSuccessMapMatching, nativeOriginOnline)
+
+            verify(exactly = 1) { mapMatchingCallback.failure(any()) }
+            verify(exactly = 0) { mapMatchingCallback.success(any()) }
+        }
 
     @Test
     fun `check on failure callback is called on getRouteRefresh when router reset`() = runTest {

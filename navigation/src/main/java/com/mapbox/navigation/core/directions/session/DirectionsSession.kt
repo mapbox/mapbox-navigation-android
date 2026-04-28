@@ -70,7 +70,7 @@ internal interface DirectionsSession : RouteRefresh {
      * @param mapMatchingOptions map matching options (same as for [MapboxNavigation.requestMapMatching])
      * @param signature information about what triggered this route request
      * @param callback Callback that gets notified with the results of the request
-     * @return requestID, see [cancelRouteRequest]
+     * @return requestID, see [cancelMapMatchedRouteRequest]
      */
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     fun requestMapMatchedRoutes(
@@ -83,6 +83,11 @@ internal interface DirectionsSession : RouteRefresh {
      * Interrupts a route-fetching request if one is in progress.
      */
     fun cancelRouteRequest(requestId: Long)
+
+    /**
+     * Interrupts a route-fetching map-matching request if one is in progress.
+     */
+    fun cancelMapMatchedRouteRequest(requestId: Long)
 
     /**
      * Interrupts all requests if any are in progress.

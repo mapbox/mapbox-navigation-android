@@ -45,6 +45,10 @@ class TestRouteFixtures {
     fun loadRefreshedMultiLegRouteSecondLeg() =
         loadJsonFixture("multi_leg_route_refreshed_second_leg.json")
 
+    fun loadMapMatchingResponse() = loadJsonFixture(
+        "com.mapbox.navigation.core.mapmatching/map_matching_example_response.json",
+    )
+
     private fun loadJsonFixture(filename: String): String {
         val inputStream = javaClass.classLoader?.getResourceAsStream(filename)
         return inputStream?.let {

@@ -1100,7 +1100,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      */
     @ExperimentalPreviewMapboxNavigationAPI
     fun cancelMapMatchingRequest(requestId: Long) {
-        directionsSession.cancelRouteRequest(requestId)
+        directionsSession.cancelMapMatchedRouteRequest(requestId)
     }
 
     /**

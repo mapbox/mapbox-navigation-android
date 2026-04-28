@@ -71,6 +71,11 @@ internal interface Router {
     fun cancelRouteRequest(requestId: Long)
 
     /**
+     * Cancels a specific map-matched route request.
+     */
+    fun cancelMapMatchedRouteRequest(requestId: Long)
+
+    /**
      * Interrupts all in-progress requests.
      */
     fun cancelAll()

@@ -292,13 +292,22 @@ internal class RouterWrapper(
         return id
     }
 
-    override fun cancelRouteRequest(requestId: Long) {
+    private fun removeActiveRequest(requestId: Long) {
         activeRouteRequests[requestId]?.let {
             it.onCancel()
             activeRouteRequests.remove(requestId)
             it.parsingJob?.cancel()
         }
+    }
+
+    override fun cancelRouteRequest(requestId: Long) {
+        removeActiveRequest(requestId)
         router.cancelRouteRequest(requestId)
+    }
+
+    override fun cancelMapMatchedRouteRequest(requestId: Long) {
+        removeActiveRequest(requestId)
+        router.cancelRouteMapMatchedRequest(requestId)
     }
 
     override fun cancelRouteRefreshRequest(requestId: Long) {
