@@ -8,6 +8,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
+import com.mapbox.navigation.base.internal.route.Waypoint
 import com.mapbox.navigation.base.internal.utils.internalWaypoints
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
@@ -435,12 +436,22 @@ class EVRouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
         )
         assertEquals(updatedRoutes[0].directionsRoute.waypoints(), updatedRoutes[0].waypoints)
         val tolerance = 0.00001
+        val publicWaypoints = updatedRoutes[0].waypoints!!
+        val internalWaypoints = updatedRoutes[0].internalWaypoints()
+        // Build the expected list from the actual sources of truth, 1) twoCoordinates for
+        // user-provided endpoints, 2) public waypoints for server stations.
+        val expectedInternalWaypoints = internalWaypoints.mapIndexed { index, waypoint ->
+            val expectedPoint = when {
+                waypoint.type == Waypoint.EV_CHARGING_SERVER -> publicWaypoints[index].location()
+                index == 0 -> twoCoordinates.first()
+                else -> twoCoordinates.last()
+            }
+            waypoint.name to expectedPoint.toApproximateCoordinates(tolerance)
+        }
         assertEquals(
-            updatedRoutes[0].internalWaypoints().map {
+            expectedInternalWaypoints,
+            internalWaypoints.map {
                 it.name to it.location.toApproximateCoordinates(tolerance)
-            },
-            updatedRoutes[0].waypoints?.map {
-                it.name() to it.location().toApproximateCoordinates(tolerance)
             },
         )
         assertEquals(
