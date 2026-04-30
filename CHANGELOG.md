@@ -1,3 +1,32 @@
+## Navigation SDK Core Framework 3.23.0 - 30 April, 2026
+#### Features
+- Add `maxVoltage` to `EvseGroup.Connector` 
+- Allow passing `ttsEngineParams` at TTS `PlayerOptions` 
+- Insufficient charge detection can now check all remaining route legs via `EvBetterRouteNotificationOptions.checkInsufficientChargeOnRemainingLegs` 
+- Log request URL in online EV calls 
+
+
+#### Bug fixes and improvements
+- Fixed a bug that caused lost zone progress when switching to an alternative during driving in a speed zone. 
+- Fixed a crash that could occur when accessing navigation components after MapboxNavigation has been destroyed. 
+- Fix 2-finger pan gestures to respect gestureThresholds. 
+- Fix location updates burst blocking main thread 
+- Added support for exclude=tunnel in onboard router. 
+- Fix positioning issues after navigator recreation triggered by downloading an offline pack. 
+- Bugfix for the speed zone not being handled properly when the AG has started within the zone. 
+- Add support for routes that go through the same speed zone multiple times. 
+- Fix ASZ reported as passed when there are multiple alternatives with the same camera 
+- fix issue where user input state unexpectedly changes to `Idle` after transcript is finalized 
+- Fix for `multiFingerMoveThreshold` messes up `singleFingerMoveThreshold`. 
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.23.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.23.0))
+- Mapbox Navigation Native `v324.23.0`
+- Mapbox Core Common `v24.23.0`
+- Mapbox Java `v7.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.0))
+
 ## Navigation SDK Core Framework 3.23.0-rc.1 - 21 April, 2026
 #### Features
 - Add `maxVoltage` to `EvseGroup.Connector` 
