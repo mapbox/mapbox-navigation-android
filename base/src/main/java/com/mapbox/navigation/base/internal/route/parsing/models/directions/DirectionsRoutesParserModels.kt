@@ -7,7 +7,7 @@ import com.mapbox.navigation.base.internal.route.parsing.ResponseToParse
 import com.mapbox.navigation.base.internal.route.parsing.models.DirectionsParsedRouteData
 
 /**
- * Enty point for low level parsing, used as abstraction over the following parsing implementations:
+ * Entry point for low level parsing, used as abstraction over the following parsing implementations:
  * - [com.mapbox.navigation.base.internal.route.parsing.parser.directions.DirectionsRoutesParserNro]
  * - [com.mapbox.navigation.base.internal.route.parsing.parser.directions.DirectionsRoutesParserJava]
  */

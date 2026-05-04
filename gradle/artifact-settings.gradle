@@ -86,7 +86,8 @@ def getVersionName() {
             .start()
 
     def reader = new BufferedReader(new InputStreamReader(process.inputStream))
-    def version = reader.lines().toArray().first()
+    def tags = reader.lines().toArray()
+    def version = tags.length > 0 ? tags.first() : "${prefix}0.0.0"
 
     if (!version.isEmpty()) {
         version = version.substring(prefix.length())

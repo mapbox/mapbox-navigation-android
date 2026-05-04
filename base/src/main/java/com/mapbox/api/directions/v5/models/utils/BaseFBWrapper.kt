@@ -88,7 +88,7 @@ internal interface BaseFBWrapper {
             }
 
             value.isBoolean -> value.asBoolean()
-            value.isInt -> value.asInt()
+            value.isInt -> value.asUInt().toIntIfInBounds()
             value.isUInt -> value.asUInt()
             value.isString -> value.asString()
             value.isFloat -> value.asFloat()
@@ -142,7 +142,7 @@ internal interface BaseFBWrapper {
             }
 
             value.isBoolean -> JsonPrimitive(value.asBoolean())
-            value.isInt -> JsonPrimitive(value.asInt())
+            value.isInt -> JsonPrimitive(value.asUInt().toIntIfInBounds())
             value.isUInt -> JsonPrimitive(value.asUInt())
             value.isString -> JsonPrimitive(value.asString())
             value.isFloat -> JsonPrimitive(value.asFloat())
@@ -181,6 +181,17 @@ internal interface BaseFBWrapper {
                 override val key: String = flexMap.keys().get(it).toString()
                 override val value: JsonElement? = mapReferenceToJsonElement(flexMap.get(it))
             }
+        }
+    }
+
+    /**
+     * Flatbuffers Reference.isUInt wrongly returns false for large values like 9668004962568.
+     */
+    private fun Long.toIntIfInBounds(): Number {
+        return if (this in Int.MIN_VALUE..Int.MAX_VALUE) {
+            toInt()
+        } else {
+            this
         }
     }
 }

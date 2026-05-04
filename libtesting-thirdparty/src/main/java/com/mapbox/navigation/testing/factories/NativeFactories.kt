@@ -2,6 +2,7 @@ package com.mapbox.navigation.testing.factories
 
 import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.bindgen.DataRef
+import com.mapbox.directions.route.DirectionsRouteContext
 import com.mapbox.geojson.Point
 import com.mapbox.navigator.ActiveGuidanceInfo
 import com.mapbox.navigator.AlternativeRouteInfo
@@ -228,7 +229,7 @@ fun createRouteInterface(
         return responseJson.toDataRef()
     }
 
-    override fun getDirectionsRouteContextRef(): DataRef {
+    override fun getDirectionsRouteContext(): DirectionsRouteContext {
         TODO("Not yet implemented")
     }
 

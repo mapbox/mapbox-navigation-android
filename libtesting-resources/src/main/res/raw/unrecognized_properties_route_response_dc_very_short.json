@@ -6,6 +6,10 @@
       "unrecognized_int": 123,
       "unrecognized_double": 123.456,
       "unrecognized_null": null,
+      "unrecognized_long": 9668004962568,
+      "unrecognized_int_array": [-2147483648, 2147483647],
+      "unrecognized_long_array": [-9223372036854775808, 9223372036854775807],
+      "unrecognized_mixed_int_long_array": [-9223372036854775808, -2147483648, 2147483647, 9223372036854775807],
       "unrecognized_object": {
         "inner_key": "inner value",
         "inner_object": {
