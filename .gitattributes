@@ -1,3 +1,1 @@
 CHANGELOG.md merge=union
-libtesting-resources/src/main/assets/tileset_berlin.zip filter=lfs diff=lfs merge=lfs -text
-libtesting-resources/src/main/assets/tileset_helsinki_2025-11-05.zip filter=lfs diff=lfs merge=lfs -text
