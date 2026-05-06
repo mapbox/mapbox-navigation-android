@@ -31,7 +31,7 @@ ext {
       mapboxMapSdk              : '10.19.0',
       mapboxSdkServices         : '7.1.0',
       mapboxNavigator           : "${mapboxNavigatorVersion}",
-      mapboxCommonNative        : '23.11.4',
+      mapboxCommonNative        : '23.12.0',
       mapboxCrashMonitor        : '2.0.0',
       mapboxAnnotationPlugin    : '0.8.0',
       mapboxBaseAndroid         : '0.8.0',
@@ -75,6 +75,8 @@ ext {
       androidStartup            : '1.0.0',
       viewBinding               : '7.2.1',
       glide                     : '4.13.2',
+      kotlinDateTime            : '0.3.2',
+      kotlinSerialization       : '1.3.1',
   ]
   dependenciesList = [
       // mapbox
@@ -88,6 +90,7 @@ ext {
       mapboxNavigator           : "com.mapbox.navigator:mapbox-navigation-native$ndkVersionSuffix:${version.mapboxNavigator}",
       mapboxCommonNative        : "com.mapbox.common:common$ndkVersionSuffix:${version.mapboxCommonNative}",
       mapboxMapsAndroidAuto     : "com.mapbox.extension:maps-androidauto$ndkVersionSuffix:${version.mapboxMapsAndroidAuto}",
+      mapboxMapGptExpAndroid    : "com.mapbox.mapgpt.experimental:mapgpt$ndkVersionSuffix:${version.mapboxCommonNative}",
 
       /**
        * explicitly define Mapbox OkHttp dependency so that we are sure it's in sync with the Common SDK version we define
@@ -180,7 +183,10 @@ ext {
       viewBinding               : "androidx.databinding:viewbinding:${version.viewBinding}",
 
       // Test app crashlytics
-      firebaseCrashlyticsNdk    : "com.google.firebase:firebase-crashlytics-ndk:${version.firebaseCrashlytics}"
+      firebaseCrashlyticsNdk    : "com.google.firebase:firebase-crashlytics-ndk:${version.firebaseCrashlytics}",
+
+      kotlinXDateTime           : "org.jetbrains.kotlinx:kotlinx-datetime:${version.kotlinDateTime}",
+      kotlinSerialization       : "org.jetbrains.kotlinx:kotlinx-serialization-json:${version.kotlinSerialization}"
   ]
 
   pluginVersion = [
@@ -208,6 +214,7 @@ ext {
   pluginDependencies = [
       gradle               : "com.android.tools.build:gradle:${pluginVersion.gradle}",
       kotlin               : "org.jetbrains.kotlin:kotlin-gradle-plugin:${pluginVersion.kotlin}",
+      kotlinSerialization  : "org.jetbrains.kotlin:kotlin-serialization:${pluginVersion.kotlin}",
       checkstyle           : "com.puppycrawl.tools:checkstyle:${pluginVersion.checkstyle}",
       license              : "com.jaredsburrows:gradle-license-plugin:${pluginVersion.license}",
       // Used by license. Add this dependency explicitly,
