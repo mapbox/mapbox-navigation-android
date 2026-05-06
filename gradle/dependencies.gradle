@@ -22,7 +22,9 @@ ext {
     ndkMajorVersion = parentGradle.rootProject.findProperty("ndkMajor")
     parentGradle = parentGradle.parent
   }
-  if (ndkMajorVersion != null) {
+  // ndkMajor=23 is the default unsuffixed publication. Only emit a
+  // -ndkN suffix for non-default majors (currently 27).
+  if (ndkMajorVersion != null && ndkMajorVersion.toString() != "23") {
     ndkVersionSuffix = "-ndk$ndkMajorVersion"
   }
 
@@ -95,6 +97,7 @@ ext {
       // mapbox
       mapboxMapSdk              : "com.mapbox.maps:android$ndkVersionSuffix:${version.mapboxMapSdk}",
       mapboxMapsAndroidAuto     : "com.mapbox.extension:maps-androidauto$ndkVersionSuffix:${version.mapboxMapSdk}",
+      mapboxMapsExtensionCompose: "com.mapbox.extension:maps-compose$ndkVersionSuffix:${version.mapboxMapSdk}",
       mapboxSdkServices         : "com.mapbox.mapboxsdk:mapbox-sdk-services:${version.mapboxSdkServices}",
       mapboxSdkServicesCore     : "com.mapbox.mapboxsdk:mapbox-sdk-core:${version.mapboxSdkServices}",
       mapboxSdkGeoJSON          : "com.mapbox.mapboxsdk:mapbox-sdk-geojson:${version.mapboxSdkServices}",
