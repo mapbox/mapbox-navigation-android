@@ -196,27 +196,24 @@ prepare-ui-coverage-reports: ui-unit-tests-release-jacoco
 
 .PHONY: publish-local
 publish-local:
-	./gradlew publishToMavenLocal $(if $(VERSION_NAME),-PVERSION_NAME=$(VERSION_NAME),)
+	./gradlew publishToMavenLocal $(if $(VERSION_NAME),-PVERSION_NAME=$(VERSION_NAME),) $(if $(filter 27,$(NDK_MAJOR)),-PndkMajor=27,)
+ifeq ($(NDK_MAJOR),)
 	./gradlew publishToMavenLocal $(if $(VERSION_NAME),-PVERSION_NAME=$(VERSION_NAME),) -PndkMajor=27
+endif
 
 .PHONY: upload-to-sdk-registry-snapshot
 upload-to-sdk-registry-snapshot:
-	./gradlew mapboxSDKRegistryUpload -Psnapshot=true -PVERSION_NAME=$(VERSION_NAME) $(additional_gradle_parameters)
+	./gradlew mapboxSDKRegistryUpload -Psnapshot=true -PVERSION_NAME=$(VERSION_NAME) $(if $(filter 27,$(NDK_MAJOR)),-PndkMajor=27,) $(additional_gradle_parameters)
+ifeq ($(NDK_MAJOR),)
 	./gradlew mapboxSDKRegistryUpload -Psnapshot=true -PVERSION_NAME=$(VERSION_NAME) -PndkMajor=27 $(additional_gradle_parameters)
+endif
 
 .PHONY: upload-to-sdk-registry
 upload-to-sdk-registry:
-	./gradlew mapboxSDKRegistryUpload --continue $(if $(VERSION_NAME),-PVERSION_NAME=$(VERSION_NAME),)
+	./gradlew mapboxSDKRegistryUpload --continue $(if $(VERSION_NAME),-PVERSION_NAME=$(VERSION_NAME),) $(if $(filter 27,$(NDK_MAJOR)),-PndkMajor=27,)
+ifeq ($(NDK_MAJOR),)
 	./gradlew mapboxSDKRegistryUpload --continue $(if $(VERSION_NAME),-PVERSION_NAME=$(VERSION_NAME),) -PndkMajor=27
-
-.PHONY: publish-to-sdk-registry
-publish-to-sdk-registry:
-	@if [ -z "$(GITHUB_TOKEN)" ]; then \
-		echo "GITHUB_TOKEN env variable has to be set"; \
-	else \
-		python3 -m pip install git-pull-request; \
-		./gradlew mapboxSDKRegistryPublishAll $(if $(VERSION_NAME),-PVERSION_NAME=$(VERSION_NAME),); \
-	fi
+endif
 
 .PHONY: ui-check-api
 ui-check-api: assemble-ui-release
