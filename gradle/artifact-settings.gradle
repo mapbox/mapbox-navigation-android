@@ -20,7 +20,9 @@ ext {
         ndkMajorVersion = parentGradle.rootProject.findProperty("ndkMajor")
         parentGradle = parentGradle.parent
     }
-    if (ndkMajorVersion != null) {
+    // ndkMajor=23 is the default unsuffixed publication. Only emit a
+    // -ndkN suffix for non-default majors (currently 27).
+    if (ndkMajorVersion != null && ndkMajorVersion.toString() != "23") {
         ndkVersionSuffix = "-ndk$ndkMajorVersion"
     }
     
