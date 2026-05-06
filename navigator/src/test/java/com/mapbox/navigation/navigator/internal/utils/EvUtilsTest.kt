@@ -25,6 +25,7 @@ class EvUtilsTest {
             null,
             null,
             null,
+            null,
             emptyList(),
             hashMapOf(),
         )
@@ -48,6 +49,7 @@ class EvUtilsTest {
             10,
             listOf(CurveElement(1.0f, 2.0f), CurveElement(3.0f, 4.0f)),
             listOf(CurveElement(9.0f, 10.0f), CurveElement(11.0f, 12.0f)),
+            null,
             5,
             7,
             listOf(CurveElement(5.0f, 6.0f), CurveElement(7.0f, 8.0f)),
