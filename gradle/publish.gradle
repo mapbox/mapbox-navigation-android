@@ -59,12 +59,20 @@ afterEvaluate {
     }
 }
 
+// Priority:
+// 1. Project property: -Pmapbox.dryRun=false
+// 2. Environment variable: SDK_REGISTRY_DRYRUN=false
+// 3. Default value: true (prevents accidental uploads from local machines)
+def sdkRegistryDryRun = project.findProperty('mapbox.dryRun')?.toString()?.toBoolean()
+    ?: System.getenv('SDK_REGISTRY_DRYRUN')?.toBoolean()
+    ?: true
+
 registry {
     sdkName = project.ext.navSdkArtifactSettings[project.name].getV2()
     production = true
     snapshot = project.ext.snapshot
     override = snapshot
-    dryRun = false
+    dryRun = sdkRegistryDryRun
     publish = true
     publishMessage = "cc @mapbox/navigation-android"
     publications = ["release"]
