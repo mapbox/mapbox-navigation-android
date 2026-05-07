@@ -203,9 +203,9 @@ endif
 
 .PHONY: upload-to-sdk-registry-snapshot
 upload-to-sdk-registry-snapshot:
-	./gradlew mapboxSDKRegistryUpload -Psnapshot=true -PVERSION_NAME=$(VERSION_NAME) $(if $(filter 27,$(NDK_MAJOR)),-PndkMajor=27,) $(additional_gradle_parameters)
+	./gradlew mapboxSDKRegistryUpload -Psnapshot=true $(if $(VERSION_NAME),-PVERSION_NAME=$(VERSION_NAME),) $(if $(filter 27,$(NDK_MAJOR)),-PndkMajor=27,) $(additional_gradle_parameters)
 ifeq ($(NDK_MAJOR),)
-	./gradlew mapboxSDKRegistryUpload -Psnapshot=true -PVERSION_NAME=$(VERSION_NAME) -PndkMajor=27 $(additional_gradle_parameters)
+	./gradlew mapboxSDKRegistryUpload -Psnapshot=true $(if $(VERSION_NAME),-PVERSION_NAME=$(VERSION_NAME),) -PndkMajor=27 $(additional_gradle_parameters)
 endif
 
 .PHONY: upload-to-sdk-registry
