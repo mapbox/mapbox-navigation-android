@@ -11,6 +11,7 @@ import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.ResponseOriginAPI
 import com.mapbox.navigation.core.internal.router.mapToSdkRouterFailureType
+import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.RerouteEventsProvider
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
@@ -36,8 +37,8 @@ internal typealias UpdateRoutes = (List<NavigationRoute>, legIndex: Int) -> Bool
 @OptIn(ExperimentalMapboxNavigationAPI::class)
 internal class NativeMapboxRerouteController(
     private val rerouteEventsProvider: RerouteEventsProvider,
-    private val rerouteController: RerouteControllerInterface,
-    private val rerouteDetector: RerouteDetectorInterface,
+    private var rerouteController: RerouteControllerInterface,
+    private var rerouteDetector: RerouteDetectorInterface,
     private val getCurrentRoutes: () -> List<NavigationRoute>,
     private val updateRoutes: UpdateRoutes,
     private val scope: CoroutineScope,
@@ -163,6 +164,13 @@ internal class NativeMapboxRerouteController(
             if (isEnabled) {
                 logD(TAG) { "Navigator recreated - re-registering native reroute observer" }
                 rerouteEventsProvider.addRerouteObserver(nativeRerouteObserver)
+            }
+            val mapboxNativeNavigator = rerouteEventsProvider as? MapboxNativeNavigator
+            mapboxNativeNavigator?.getRerouteController()?.let {
+                rerouteController = it
+            }
+            mapboxNativeNavigator?.getRerouteDetector()?.let {
+                rerouteDetector = it
             }
         }
     }
