@@ -10,7 +10,7 @@ import kotlin.time.Duration
  * @param congestionRange a range of the congestion levels were incorporated into this
  * object. See [Constants.CongestionRange]
  * @param legIndex leg of the route with the slow traffic segment
- * @param geometryRange the range of geometry withing the leg affected by this slow traffic segment
+ * @param geometryRange the range of geometry within the leg affected by this slow traffic segment
  * @param distanceFromRouteStartMeters the distance from the start of the route to the
  * beginning of this segment
  * @param lengthMeters the length of the affected geometry range in meters

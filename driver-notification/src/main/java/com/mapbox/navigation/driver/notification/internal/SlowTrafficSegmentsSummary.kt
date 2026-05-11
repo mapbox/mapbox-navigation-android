@@ -8,7 +8,7 @@ import com.mapbox.geojson.Point
  * slow traffic ranges you can find in [SlowTrafficTraits.congestionRange].
  *
  * @param legIndex leg of the route with the slow traffic segment
- * @param geometryRange the range of geometry withing the leg affected by this slow traffic segment
+ * @param geometryRange the range of geometry within the leg affected by this slow traffic segment
  * @param distanceFromRouteStartMeters the cumulative distance from the start of the route to the
  * beginning of this segment
  * @param traits specific traits, that characterize subsegments of this slow traffic segment with
