@@ -1,3 +1,17 @@
+## Navigation SDK Core Framework 3.23.1 - 12 May, 2026
+#### Features
+
+
+#### Bug fixes and improvements
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.23.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.23.1))
+- Mapbox Navigation Native `v324.23.1`
+- Mapbox Core Common `v24.23.1`
+- Mapbox Java `v7.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.0))
+
 ## Navigation SDK Core Framework 3.23.0 - 30 April, 2026
 #### Features
 - Add `maxVoltage` to `EvseGroup.Connector` 
