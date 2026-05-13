@@ -1,3 +1,5 @@
+# Changelog for the Mapbox Navigation SDK Core Framework for Android
+
 ## Navigation SDK Core Framework 3.24.0-rc.1 - 05 May, 2026
 #### Features
 
@@ -7,7 +9,6 @@
 
 #### Other changes
 
-
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v11.24.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.24.0-rc.1))
@@ -15,12 +16,39 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Core Common `v24.24.0-rc.1`
 - Mapbox Java `v7.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.0))
 
-# Changelog for the Mapbox Navigation SDK Core Framework for Android
+
+## Navigation SDK Core Framework 3.23.1 - 12 May, 2026
+#### Features
+
+#### Bug fixes and improvements
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.23.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.23.1))
+- Mapbox Navigation Native `v324.23.1`
+- Mapbox Core Common `v24.23.1`
+- Mapbox Java `v7.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.0))
+
 
 ## Navigation SDK Core Framework 3.23.0 - 30 April, 2026
+#### Features
+- Add `maxVoltage` to `EvseGroup.Connector` [#13360](https://github.com/mapbox/navigation/pull/13360)
+- Allow passing `ttsEngineParams` at TTS `PlayerOptions` [#13434](https://github.com/mapbox/navigation/pull/13434)
+- Insufficient charge detection can now check all remaining route legs via `EvBetterRouteNotificationOptions.checkInsufficientChargeOnRemainingLegs` [#13453](https://github.com/mapbox/navigation/pull/13453)
+- Log request URL in online EV calls [#13527](https://github.com/mapbox/navigation/pull/13527)
 
 #### Bug fixes and improvements
 - Fixed a bug that caused lost zone progress when switching to an alternative during driving in a speed zone. [#13915](https://github.com/mapbox/navigation/pull/13915)
+- Fixed a crash that could occur when accessing navigation components after MapboxNavigation has been destroyed. [#13154](https://github.com/mapbox/navigation/pull/13154)
+- Fix 2-finger pan gestures to respect gestureThresholds. [#13355](https://github.com/mapbox/navigation/pull/13355)
+- Fix location updates burst blocking main thread [#13625](https://github.com/mapbox/navigation/pull/13625)
+- Added support for exclude=tunnel in onboard router. [#13630](https://github.com/mapbox/navigation/pull/13630)
+- Fix positioning issues after navigator recreation triggered by downloading an offline pack. [#13630](https://github.com/mapbox/navigation/pull/13630)
+- Bugfix for the speed zone not being handled properly when the AG has started within the zone. [#13657](https://github.com/mapbox/navigation/pull/13657)
+- Add support for routes that go through the same speed zone multiple times. [#13680](https://github.com/mapbox/navigation/pull/13680)
+- Fix ASZ reported as passed when there are multiple alternatives with the same camera [#13747](https://github.com/mapbox/navigation/pull/13747)
+- fix issue where user input state unexpectedly changes to `Idle` after transcript is finalized [#13756](https://github.com/mapbox/navigation/pull/13756)
+- Fix for `multiFingerMoveThreshold` messes up `singleFingerMoveThreshold`. [#13789](https://github.com/mapbox/navigation/pull/13789)
 
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
@@ -28,6 +56,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Navigation Native `v324.23.0`
 - Mapbox Core Common `v24.23.0`
 - Mapbox Java `v7.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.0))
+
 
 ## Navigation SDK Core Framework 3.23.0-rc.1 - 21 April, 2026
 #### Features
@@ -52,13 +81,13 @@ This release depends on, and has been tested with, the following Mapbox dependen
 
 #### Other changes
 
-
 ### Mapbox dependencies
 This release depends on, and has been tested with, the following Mapbox dependencies:
 - Mapbox Maps SDK `v11.23.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.23.0-rc.1))
 - Mapbox Navigation Native `v324.23.0-rc.1`
 - Mapbox Core Common `v24.23.0-rc.1`
 - Mapbox Java `v7.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.0))
+
 
 ## Navigation SDK Core Framework 3.22.1 - 17 April, 2026
 #### Features
@@ -84,6 +113,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Navigation Native `v324.22.0`
 - Mapbox Core Common `v24.22.0`
 - Mapbox Java `v7.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.0))
+
 
 ## Navigation SDK Core Framework 3.21.0 - 02 April, 2026
 #### Features
