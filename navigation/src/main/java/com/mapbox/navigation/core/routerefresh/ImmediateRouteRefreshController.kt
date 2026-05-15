@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.core.utils.routeRefresh.RouteRefreshUtils
 import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -16,6 +17,8 @@ internal class ImmediateRouteRefreshController(
     private val scope: CoroutineScope,
     private val listener: RouteRefresherListener,
     private val attemptListener: RoutesRefreshAttemptListener,
+    private val routeRefreshUtils: RouteRefreshUtils,
+    private val currentPrimaryRouteIdProvider: () -> String?,
 ) {
 
     @Throws(IllegalArgumentException::class)
@@ -46,6 +49,7 @@ internal class ImmediateRouteRefreshController(
                         RouteRefreshLog.LOG_CATEGORY,
                     )
                 }
+
                 is RoutesRefresherExecutorResult.Finished -> {
                     attemptListener.onRoutesRefreshAttemptFinished(result.value)
                     if (result.value.anySuccess()) {
@@ -53,7 +57,24 @@ internal class ImmediateRouteRefreshController(
                     } else {
                         stateHolder.onFailure(null)
                     }
-                    listener.onRoutesRefreshed(result.value)
+
+                    val currentPrimaryId = currentPrimaryRouteIdProvider()
+                    val refreshedPrimaryId = if (result.value.anySuccess()) {
+                        result.value.primaryRouteRefresherResult.route.id
+                    } else {
+                        null
+                    }
+
+                    if (routeRefreshUtils.isResultStale(currentPrimaryId, refreshedPrimaryId)) {
+                        logW(
+                            "Skipping stale immediate refresh result, as primary route" +
+                                " changed since refresh started. Refreshed " +
+                                "primary=$refreshedPrimaryId, current primary=$currentPrimaryId.",
+                            RouteRefreshLog.LOG_CATEGORY,
+                        )
+                    } else {
+                        listener.onRoutesRefreshed(result.value)
+                    }
                 }
             }
         }

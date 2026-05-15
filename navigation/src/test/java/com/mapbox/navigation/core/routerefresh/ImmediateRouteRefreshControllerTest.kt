@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.core.utils.routeRefresh.RouteRefreshUtils
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.LoggerFrontend
@@ -34,6 +35,9 @@ class ImmediateRouteRefreshControllerTest {
     private val clientCallback =
         mockk<(RoutesRefresherExecutorResult) -> Unit>(relaxed = true)
     private val routes = listOf<NavigationRoute>(mockk())
+    private val routeRefreshUtils by lazy { RouteRefreshUtils() }
+    private var currentPrimaryRouteId: String? = null
+    private val currentPrimaryRouteIdProvider: () -> String? = { currentPrimaryRouteId }
 
     private val sut = ImmediateRouteRefreshController(
         routeRefresherExecutor,
@@ -41,6 +45,8 @@ class ImmediateRouteRefreshControllerTest {
         coroutineRule.createTestScope(),
         listener,
         attemptListener,
+        routeRefreshUtils,
+        currentPrimaryRouteIdProvider,
     )
 
     @Test(expected = IllegalArgumentException::class)
@@ -69,7 +75,13 @@ class ImmediateRouteRefreshControllerTest {
 
     @Test
     fun routesRefreshFinishedSuccessfully() = coroutineRule.runBlockingTest {
-        val result = mockk<RoutesRefresherResult> { every { anySuccess() } returns true }
+        val refreshedRoute = mockk<NavigationRoute>(relaxed = true)
+        val result = mockk<RoutesRefresherResult> {
+            every { anySuccess() } returns true
+            every { primaryRouteRefresherResult } returns mockk {
+                every { route } returns refreshedRoute
+            }
+        }
         coEvery {
             routeRefresherExecutor.executeRoutesRefresh(any(), any())
         } returns RoutesRefresherExecutorResult.Finished(result)
@@ -102,11 +114,47 @@ class ImmediateRouteRefreshControllerTest {
         verify(exactly = 1) { attemptListener.onRoutesRefreshAttemptFinished(result) }
         verify(exactly = 1) { stateHolder.onFailure(null) }
         verify(exactly = 1) {
-            clientCallback(match { (it as RoutesRefresherExecutorResult.Finished).value == result })
+            clientCallback(
+                match { (it as RoutesRefresherExecutorResult.Finished).value == result },
+            )
         }
         verify(exactly = 1) { listener.onRoutesRefreshed(result) }
         verify(exactly = 0) { stateHolder.onCancel() }
     }
+
+    @Test
+    fun routesRefreshFinishedButStalePrimaryRouteSuppressesPublish() =
+        coroutineRule.runBlockingTest {
+            // Simulate a route swap that happened during the refresh, SDK now has a
+            // different primary route than the one carried by the refresh result.
+            currentPrimaryRouteId = "id#new"
+            val staleRoute = mockk<NavigationRoute>(relaxed = true) {
+                every { id } returns "id#stale"
+            }
+            val result = mockk<RoutesRefresherResult> {
+                every { anySuccess() } returns true
+                every { primaryRouteRefresherResult } returns mockk {
+                    every { route } returns staleRoute
+                }
+            }
+            coEvery {
+                routeRefresherExecutor.executeRoutesRefresh(any(), any())
+            } returns RoutesRefresherExecutorResult.Finished(result)
+
+            sut.requestRoutesRefresh(routes, clientCallback)
+
+            // attempt and state still happen
+            verify(exactly = 1) { attemptListener.onRoutesRefreshAttemptFinished(result) }
+            verify(exactly = 1) { stateHolder.onSuccess() }
+            // client callback still fires with Finished so the public API resolves
+            verify(exactly = 1) {
+                clientCallback(
+                    match { (it as RoutesRefresherExecutorResult.Finished).value == result },
+                )
+            }
+            // but the publish to observers is suppressed
+            verify(exactly = 0) { listener.onRoutesRefreshed(any()) }
+        }
 
     @Test
     fun routesRefreshFinishedWithError() = coroutineRule.runBlockingTest {

@@ -5,6 +5,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.core.utils.Delayer
+import com.mapbox.navigation.core.utils.routeRefresh.RouteRefreshUtils
 import com.mapbox.navigation.utils.internal.Time
 import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.logW
@@ -23,6 +24,8 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
     private val attemptListener: RoutesRefreshAttemptListener,
     private val parentScope: CoroutineScope,
     private val retryStrategy: RetryRouteRefreshStrategy,
+    private val routeRefreshUtils: RouteRefreshUtils,
+    private val currentPrimaryRouteIdProvider: () -> String?,
 ) {
 
     constructor(
@@ -33,6 +36,8 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
         listener: RouteRefresherListener,
         attemptListener: RoutesRefreshAttemptListener,
         timeProvider: Time,
+        routeRefreshUtils: RouteRefreshUtils,
+        currentPrimaryRouteIdProvider: () -> String?,
     ) : this(
         routeRefresherExecutor,
         Delayer(routeRefreshOptions.intervalMillis, timeProvider),
@@ -41,6 +46,8 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
         attemptListener,
         parentScope,
         RetryRouteRefreshStrategy(maxAttemptsCount = MAX_RETRY_COUNT),
+        routeRefreshUtils,
+        currentPrimaryRouteIdProvider,
     )
 
     // null if refreshes are paused
@@ -159,8 +166,26 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
                     RouteRefreshLog.LOG_CATEGORY,
                 )
             }
+
             is RoutesRefresherExecutorResult.Finished -> {
                 attemptListener.onRoutesRefreshAttemptFinished(routeRefresherResult.value)
+                val currentPrimaryId = currentPrimaryRouteIdProvider()
+                val refreshedPrimaryId = if (routeRefresherResult.value.anySuccess()) {
+                    routeRefresherResult.value.primaryRouteRefresherResult.route.id
+                } else {
+                    null
+                }
+
+                if (routeRefreshUtils.isResultStale(currentPrimaryId, refreshedPrimaryId)) {
+                    logW(
+                        "Skipping stale planned refresh result, as primary route changed" +
+                            " since refresh started. Refreshed primary=$refreshedPrimaryId, " +
+                            "current primary=$currentPrimaryId. The next planned refresh will" +
+                            " use the latest routes.",
+                        RouteRefreshLog.LOG_CATEGORY,
+                    )
+                    return
+                }
                 if (routeRefresherResult.value.anySuccess()) {
                     stateHolder.onSuccess()
                     listener.onRoutesRefreshed(routeRefresherResult.value)

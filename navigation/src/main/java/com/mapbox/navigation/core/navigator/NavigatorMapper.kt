@@ -254,7 +254,18 @@ internal fun NavigationStatus.getCurrentBannerInstructions(
                 }
                 val currentStep = steps[primaryRouteIndices.stepIndex]
                 currentStep.bannerInstructions()?.let { banners ->
-                    nativeBanner.mapToDirectionsApi(banners[nativeBanner.index])
+                    val bannerIndex = nativeBanner.index
+                    // We check the banner index is in bounds and not null to log a warning without
+                    // preventing a failure to surface it.
+                    if (banners.isEmpty() || bannerIndex !in banners.indices) {
+                        logW(
+                            "Banners cannot be null, empty or out of bounds, and index" +
+                                " should be less than ${banners.size} got $bannerIndex for route" +
+                                " ${route.id}",
+                            LOG_CATEGORY,
+                        )
+                    }
+                    nativeBanner.mapToDirectionsApi(banners[bannerIndex])
                 }
             }
         }

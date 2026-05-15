@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.routerefresh
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.utils.Delayer
+import com.mapbox.navigation.core.utils.routeRefresh.RouteRefreshUtils
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.LoggerFrontend
@@ -55,6 +56,9 @@ class PlannedRouteRefreshControllerTest {
     private var childScope: CoroutineScope? = null
     private val parentScope = coroutineRule.createTestScope()
     private val delayer = spyk(Delayer(interval, Time.SystemClockImpl))
+    private val routeRefreshUtils by lazy { RouteRefreshUtils() }
+    private var currentPrimaryRouteId: String? = null
+    private val currentPrimaryRouteIdProvider: () -> String? = { currentPrimaryRouteId }
     private lateinit var sut: PlannedRouteRefreshController
 
     @Before
@@ -72,6 +76,8 @@ class PlannedRouteRefreshControllerTest {
             attemptListener,
             parentScope,
             retryStrategy,
+            routeRefreshUtils,
+            currentPrimaryRouteIdProvider,
         )
     }
 
@@ -365,6 +371,52 @@ class PlannedRouteRefreshControllerTest {
             delayer.resumeDelay()
         }
         assertEquals(listOf(refreshedRoute1, refreshedRoute2), sut.routesToRefresh)
+    }
+
+    @Test
+    fun finishRequestStaleResultIsDropped() = coroutineRule.runBlockingTest {
+        // Simulate a reroute that swapped the primary route while the refresh was in flight.
+        currentPrimaryRouteId = "id#new"
+        val route1 = mockk<NavigationRoute>(relaxed = true)
+        val route2 = mockk<NavigationRoute>(relaxed = true)
+        val refreshedRoute1 = mockk<NavigationRoute>(relaxed = true) {
+            every { id } returns "id#stale"
+        }
+        val refreshedRoute2 = mockk<NavigationRoute>(relaxed = true)
+        val routes = listOf(route1, route2)
+        every {
+            RouteRefreshValidator.validateRoute(any())
+        } returns RouteRefreshValidator.RouteValidationResult.Valid
+
+        sut.startRoutesRefreshing(routes)
+        val result = mockk<RoutesRefresherResult> {
+            every { anySuccess() } returns true
+            every { primaryRouteRefresherResult } returns mockk {
+                every { route } returns refreshedRoute1
+            }
+            every { alternativesRouteRefresherResults } returns listOf(
+                mockk {
+                    every { route } returns refreshedRoute2
+                },
+            )
+        }
+        finishRequest(result)
+
+        // attempt accounting still happens
+        verify(exactly = 1) {
+            attemptListener.onRoutesRefreshAttemptFinished(result)
+        }
+        // but neither the success state nor the publish happen
+        verify(exactly = 0) {
+            stateHolder.onSuccess()
+            listener.onRoutesRefreshed(any())
+        }
+        childScopeDispatcher.scheduler.apply { advanceTimeBy(interval); runCurrent() }
+        coVerify(exactly = 0) {
+            executor.executeRoutesRefresh(listOf(refreshedRoute1, refreshedRoute2), any())
+        }
+        // routesToRefresh keeps its original value
+        assertEquals(routes, sut.routesToRefresh)
     }
 
     @Test
