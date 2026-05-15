@@ -51,7 +51,7 @@ import com.mapbox.navigator.WeatherData
  */
 @UiThread
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-interface MapboxNativeNavigator : RerouteEventsProvider {
+interface MapboxNativeNavigator : MapboxNativeRerouteInterface {
 
     /**
      * Reinitialize the navigator with a device profile
@@ -65,9 +65,9 @@ interface MapboxNativeNavigator : RerouteEventsProvider {
      */
     fun getRouter(): RouterInterface
 
-    fun getRerouteDetector(): RerouteDetectorInterface?
+    override fun getRerouteDetector(): RerouteDetectorInterface?
 
-    fun getRerouteController(): RerouteControllerInterface?
+    override fun getRerouteController(): RerouteControllerInterface?
 
     suspend fun resetRideSession()
 

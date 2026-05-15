@@ -365,6 +365,7 @@ internal open class MapboxNavigationBaseTest {
         every { navigator.telemetry } returns telemetry
         every { navigator.getRerouteDetector() } returns null
         every { navigator.getRerouteController() } returns null
+        every { navigator.nativeRerouteEnabled() } returns false
         every { navigator.reset(null) } just Runs
     }
 

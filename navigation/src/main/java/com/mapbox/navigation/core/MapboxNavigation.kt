@@ -700,19 +700,13 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             )
         }
 
-        val nativeRerouteController = nativeNavigator.getRerouteController()
-        val nativeRerouteDetector = nativeNavigator.getRerouteDetector()
         // NN initializes detector and controller in case reroute is enabled in custom config
         // {"features": {"useInternalReroute": true }}
         // until https://mapbox.atlassian.net/browse/NAVAND-3575 is completed
         // useInternalReroute is supposed to be used only for internal testing
-        defaultRerouteController = if (
-            nativeRerouteController != null && nativeRerouteDetector != null
-        ) {
+        defaultRerouteController = if (navigator.nativeRerouteEnabled()) {
             NativeMapboxRerouteController(
-                rerouteEventsProvider = nativeNavigator,
-                rerouteController = nativeRerouteController,
-                rerouteDetector = nativeRerouteDetector,
+                rerouteInterface = nativeNavigator,
                 getCurrentRoutes = directionsSession::routesPlusIgnored,
                 updateRoutes = { routes, legIndex ->
                     when {

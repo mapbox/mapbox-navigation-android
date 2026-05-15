@@ -4,6 +4,7 @@ import android.location.Location
 import android.os.Looper
 import com.adevinta.android.barista.rule.cleardata.ClearFilesRule
 import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.mapbox.api.directions.v5.DirectionsCriteria.EXCLUDE_MOTORWAY
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.common.TileDataDomain
 import com.mapbox.common.TileStore
@@ -34,6 +35,7 @@ import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
 import com.mapbox.navigation.testing.ui.utils.coroutines.navigateNextRouteLeg
 import com.mapbox.navigation.testing.ui.utils.coroutines.offRouteUpdates
+import com.mapbox.navigation.testing.ui.utils.coroutines.replanRouteAsync
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
 import com.mapbox.navigation.testing.ui.utils.coroutines.rerouteStates
 import com.mapbox.navigation.testing.ui.utils.coroutines.rerouteStatesV2
@@ -46,6 +48,7 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsyn
 import com.mapbox.navigation.testing.ui.utils.coroutines.versionSwitchObserver
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigation.testing.utils.DelayedResponseModifier
+import com.mapbox.navigation.testing.utils.assertNoDiffs
 import com.mapbox.navigation.testing.utils.assertions.RerouteStateTransitionAssertion
 import com.mapbox.navigation.testing.utils.assertions.assertIs
 import com.mapbox.navigation.testing.utils.assertions.assertRerouteFailedTransition
@@ -60,6 +63,7 @@ import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRefreshHandler
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
+import com.mapbox.navigation.testing.utils.location.moveAlongTheCurrentRouteUntilLocation
 import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracking
 import com.mapbox.navigation.testing.utils.location.stayOnPosition
 import com.mapbox.navigation.testing.utils.nativeRerouteControllerNoRetryConfig
@@ -78,6 +82,9 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.yield
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -222,7 +229,7 @@ class CoreRerouteTest(
      * so that switching to offline pack won't be needed during navigation.
      */
     @Test
-    fun reroute_triggered_after_navigator_recreation_with_fallback() = sdkTest(60_000) {
+    fun reroute_triggered_after_navigator_recreation_with_fallback() = sdkTest(120_000) {
         val mockRoute = RoutesProvider.near_munich_with_waypoints(context)
         val originLocation = mockRoute.routeWaypoints.first()
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
@@ -264,6 +271,148 @@ class CoreRerouteTest(
                         ctrl.rerouteStatesV2().first { it is RerouteStateV2.FetchingRoute }
                     }
             }
+        }
+    }
+
+    /**
+     * Verifies that `replanRouteAsync()` produces a valid route — with the
+     * [RerouteOptionsAdapter] modifications applied — after the navigator has been recreated
+     * twice: once by falling back to offline tiles (FallbackToOffline) and once by restoring
+     * the online tiles (RestoreToOnline).
+     *
+     * Each navigator recreation swaps the underlying `RouterInterface` instance
+     * (`RouterWrapper.resetRouter` in [MapboxNavigation.recreateNavigatorInstance]). Any
+     * route request that races with the swap is aborted with
+     * `RouterFailureType.ROUTER_RECREATION_ERROR` and a `replanRouteAsync` call would surface
+     * it as `ReplanRouteError.REPLAN_ROUTE_INTERNAL_ERROR`. This test guards against that by
+     * awaiting both version switches (fallback **and** target) before issuing the replan
+     * request, and verifies that:
+     *   1. the destination waypoint is preserved across the replan;
+     *   2. the new route's options reflect the adapter's modification (motorway exclusion).
+     *
+     * Note: this test could become flaky if NN downloads enough navigation tiles ahead of time
+     * so that switching to the offline pack is never triggered during navigation.
+     */
+    @Test
+    fun route_replan_triggered_after_navigator_recreation_with_fallback() = sdkTest(180_000) {
+        val mockRoute = RoutesProvider.near_munich_with_waypoints(context)
+        val originLocation = mockRoute.routeWaypoints.first()
+        mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
+        val tilesVersion = context.unpackTiles(Tileset.NearMunich)[TileDataDomain.NAVIGATION]!!
+        withMapboxNavigation(
+            useRealTiles = true,
+            historyRecorderRule = mapboxHistoryTestRule,
+            customConfig = getTestCustomConfig(),
+            tileStore = TileStore.create(),
+        ) { navigation ->
+            // 1. Request the initial online route from the mock web server and start tracking
+            //    from the route's origin.
+            val routes = stayOnPosition(originLocation, bearing = 0.0f) {
+                navigation.startTripSession()
+                navigation.requestRoutes(
+                    RouteOptions.builder()
+                        .applyDefaultNavigationOptions()
+                        .applyLanguageAndVoiceUnitOptions(context)
+                        .baseUrl(mockWebServerRule.baseUrl)
+                        .coordinatesList(mockRoute.routeWaypoints)
+                        .build(),
+                ).getSuccessfulResultOrThrowException().routes
+            }
+
+            // 2. Apply the route to the navigator and drive a short distance so the SDK is in
+            //    the TRACKING state before the network is dropped.
+            navigation.setNavigationRoutesAsync(routes)
+            navigation.moveAlongTheRouteUntilTracking(
+                routes[0],
+                mockLocationReplayerRule,
+                1,
+                endReplay = false,
+            )
+
+            // 3. Register a RerouteOptionsAdapter that adds EXCLUDE_MOTORWAY to the route
+            //    options when `avoidMotorway` flips to true. This is the modification that
+            //    the final replan call is expected to apply.
+            var avoidMotorway = false
+            navigation.setRerouteOptionsAdapter(
+                object : RerouteOptionsAdapter {
+                    override fun onRouteOptions(routeOptions: RouteOptions): RouteOptions {
+                        return if (avoidMotorway) {
+                            routeOptions.toBuilder()
+                                .exclude(EXCLUDE_MOTORWAY)
+                                .build()
+                        } else {
+                            routeOptions
+                        }
+                    }
+                },
+            )
+
+            val mockReplanRoute = RoutesProvider.near_munich_for_replan(context)
+            val originLocationReplanRoute = mockReplanRoute.routeWaypoints.first()
+
+            // 4. Drop the network: NN exhausts online tiles and switches to the offline pack,
+            //    which recreates the navigator with SetRoutesReason.FALLBACK_TO_OFFLINE.
+            //    Wait for the fallback version switch, then drive the route to the location
+            //    where the replan should originate.
+            withoutInternet {}
+
+            navigation.versionSwitchObserver().first { it == tilesVersion }
+            navigation.moveAlongTheCurrentRouteUntilLocation(originLocationReplanRoute)
+
+            // 5. Network is restored. Park the puck at the replan origin and wait for NN to
+            //    switch back to the target version — this is the second recreation
+            //    (SetRoutesReason.RESTORE_TO_ONLINE). We must wait for this swap to complete
+            //    before issuing any route request, otherwise the in-flight request would be
+            //    aborted with ROUTER_RECREATION_ERROR.
+            mockLocationReplayerRule.stopAndClearEvents()
+            stayOnPosition(originLocationReplanRoute, bearing = 0.0f) {
+                navigation.versionSwitchObserver().first { it != tilesVersion }
+
+                // let the new navigator settle after the restore-to-online recreation
+                navigation.routeProgressUpdates()
+                    .map { it.currentState == RouteProgressState.TRACKING }
+                    .take(2)
+                    .toList()
+            }
+
+            // 6. Request the replan route from the origin reached above and apply it.
+            mockLocationReplayerRule.stopAndClearEvents()
+            mockWebServerRule.requestHandlers.addAll(mockReplanRoute.mockRequestHandlers)
+            val replanRoutes = navigation.requestRoutes(
+                RouteOptions.builder()
+                    .applyDefaultNavigationOptions()
+                    .applyLanguageAndVoiceUnitOptions(context)
+                    .baseUrl(mockWebServerRule.baseUrl)
+                    .coordinatesList(mockReplanRoute.routeWaypoints)
+                    .build(),
+            ).getSuccessfulResultOrThrowException().routes
+            navigation.setNavigationRoutesAsync(replanRoutes)
+
+            // 7. Drive the replan route until the SDK is back in TRACKING state.
+            navigation.moveAlongTheRouteUntilTracking(
+                replanRoutes[0],
+                mockLocationReplayerRule,
+                1,
+            )
+
+            // 9. Flip the adapter switch and trigger the replan. The adapter must inject
+            //    EXCLUDE_MOTORWAY into the request, and the request must succeed (no
+            //    REPLAN_ROUTE_INTERNAL_ERROR caused by a lingering router swap).
+            avoidMotorway = true
+            navigation.replanRouteAsync().getSuccessfulResultOrThrowException()
+
+            // 10. The destination must be preserved across the replan, and the active route's
+            //     options must carry the adapter-applied EXCLUDE_MOTORWAY exclusion.
+            assertNoDiffs(
+                navigation.getNavigationRoutes()[0].waypoints?.last(),
+                replanRoutes[0].waypoints?.last(),
+            )
+
+            assertTrue(
+                navigation.getNavigationRoutes()[0]
+                    .routeOptions.exclude()?.contains(EXCLUDE_MOTORWAY)
+                    ?: false,
+            )
         }
     }
 

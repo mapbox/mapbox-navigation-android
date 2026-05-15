@@ -12,6 +12,9 @@ import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.replay.route.ReplayRouteOptions
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
+import com.mapbox.navigation.utils.internal.toPoint
+import com.mapbox.turf.TurfConstants
+import com.mapbox.turf.TurfMeasurement
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -130,6 +133,23 @@ suspend fun MapboxNavigation.moveAlongTheRouteUntilTracking(
         .take(minEventsCount).toList()
 
     if (endReplay) mockLocationReplayerRule.stopAndClearEvents()
+}
+
+/**
+ * Replays the given [route] and suspends until the enhanced location reaches [targetLocation]
+ * within [toleranceMeters].
+ */
+suspend fun MapboxNavigation.moveAlongTheCurrentRouteUntilLocation(
+    targetLocation: Point,
+    toleranceMeters: Double = 5.0,
+) {
+    flowLocationMatcherResult().first {
+        TurfMeasurement.distance(
+            it.enhancedLocation.toPoint(),
+            targetLocation,
+            TurfConstants.UNIT_METERS,
+        ) < toleranceMeters
+    }
 }
 
 suspend fun BaseCoreNoCleanUpTest.followGeometry(

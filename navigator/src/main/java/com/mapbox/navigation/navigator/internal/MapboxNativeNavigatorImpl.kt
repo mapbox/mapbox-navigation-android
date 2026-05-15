@@ -186,6 +186,11 @@ class MapboxNativeNavigatorImpl(
         return navigator.rerouteController
     }
 
+    override fun nativeRerouteEnabled(): Boolean {
+        if (warnIfShutdown("nativeRerouteEnabled")) return false
+        return getRerouteDetector() != null && getRerouteController() != null
+    }
+
     override suspend fun resetRideSession() = suspendCancellableCoroutine<Unit> {
         if (warnIfShutdown("resetRideSession")) {
             it.resume(Unit)

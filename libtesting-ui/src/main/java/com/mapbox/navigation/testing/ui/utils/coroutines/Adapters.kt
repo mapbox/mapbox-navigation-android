@@ -21,6 +21,8 @@ import com.mapbox.navigation.core.mapmatching.MapMatchingOptions
 import com.mapbox.navigation.core.mapmatching.MapMatchingSuccessfulResult
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.NavigationVersionSwitchObserver
+import com.mapbox.navigation.core.ReplanRouteError
+import com.mapbox.navigation.core.ReplanRoutesCallback
 import com.mapbox.navigation.core.RoutesInvalidatedObserver
 import com.mapbox.navigation.core.RoutesInvalidatedParams
 import com.mapbox.navigation.core.RoutesSetCallback
@@ -237,6 +239,43 @@ suspend fun MapboxNavigation.switchToAlternativeAsync(
     val callback = RoutesSetCallback { result -> continuation.resume(result) }
     switchToAlternativeRoute(alternativeRoute, callback)
 }
+
+@ExperimentalPreviewMapboxNavigationAPI
+sealed class ReplanRouteResult {
+    data class Success(
+        val routes: List<NavigationRoute>,
+        @RouterOrigin val routerOrigin: String,
+    ) : ReplanRouteResult()
+
+    data class Failure(
+        val error: ReplanRouteError,
+    ) : ReplanRouteResult()
+}
+
+@ExperimentalPreviewMapboxNavigationAPI
+fun ReplanRouteResult.getSuccessfulResultOrThrowException(): ReplanRouteResult.Success {
+    return when (this) {
+        is ReplanRouteResult.Success -> this
+        is ReplanRouteResult.Failure -> error("replanRoute failed: $error")
+    }
+}
+
+@ExperimentalPreviewMapboxNavigationAPI
+suspend fun MapboxNavigation.replanRouteAsync(): ReplanRouteResult =
+    suspendCoroutine { continuation ->
+        replanRoute(object : ReplanRoutesCallback {
+            override fun onNewRoutes(
+                routes: List<NavigationRoute>,
+                @RouterOrigin routerOrigin: String,
+            ) {
+                continuation.resume(ReplanRouteResult.Success(routes, routerOrigin))
+            }
+
+            override fun onFailure(failure: ReplanRouteError) {
+                continuation.resume(ReplanRouteResult.Failure(failure))
+            }
+        })
+    }
 
 sealed class RouteRequestResult {
     data class Success(

@@ -342,6 +342,29 @@ object RoutesProvider {
         )
     }
 
+    fun near_munich_for_replan(context: Context): MockRoute {
+        val jsonResponse = readRawFileText(
+            context,
+            R.raw.route_response_near_munich_for_replan,
+        )
+        val coordinates = listOf(
+            Point.fromLngLat(12.731377478833144, 48.300100047289206),
+            Point.fromLngLat(12.71200424574019, 48.309799792717286)
+        )
+        return MockRoute(
+            jsonResponse,
+            DirectionsResponse.fromJson(jsonResponse),
+            listOf(
+                MockDirectionsRequestHandler(
+                    profile = PROFILE_DRIVING_TRAFFIC,
+                    jsonResponse = jsonResponse,
+                    expectedCoordinates = coordinates,
+                ),
+            ),
+            coordinates,
+        )
+    }
+
     fun near_munich_with_waypoints_for_reroute(context: Context): DirectionsRoute {
         val jsonResponse = readRawFileText(
             context,

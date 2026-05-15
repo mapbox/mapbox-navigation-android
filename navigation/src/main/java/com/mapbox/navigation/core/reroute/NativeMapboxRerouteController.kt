@@ -11,8 +11,7 @@ import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.ResponseOriginAPI
 import com.mapbox.navigation.core.internal.router.mapToSdkRouterFailureType
-import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
-import com.mapbox.navigation.navigator.internal.RerouteEventsProvider
+import com.mapbox.navigation.navigator.internal.MapboxNativeRerouteInterface
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
@@ -36,18 +35,31 @@ internal typealias UpdateRoutes = (List<NavigationRoute>, legIndex: Int) -> Bool
 
 @OptIn(ExperimentalMapboxNavigationAPI::class)
 internal class NativeMapboxRerouteController(
-    private val rerouteEventsProvider: RerouteEventsProvider,
-    private var rerouteController: RerouteControllerInterface,
-    private var rerouteDetector: RerouteDetectorInterface,
+    private val rerouteInterface: MapboxNativeRerouteInterface,
     private val getCurrentRoutes: () -> List<NavigationRoute>,
     private val updateRoutes: UpdateRoutes,
     private val scope: CoroutineScope,
     private val routeParser: NavigationRoutesParser,
 ) : InternalRerouteController() {
 
+    private var rerouteOptionsAdapter: RerouteOptionsAdapter? = null
+    private var rerouteController = rerouteInterface.getRerouteController()
+    private var rerouteDetector = rerouteInterface.getRerouteDetector()
     private val observers = CopyOnWriteArraySet<RerouteStateObserver>()
     private val observersV2 = CopyOnWriteArraySet<RerouteStateV2Observer>()
     private var isEnabled = false
+
+    private fun requireNativeRerouteController(): RerouteControllerInterface {
+        return rerouteController
+            ?: throw IllegalStateException("Native reroute controller is null")
+    }
+
+    private fun requireNativeRerouteDetector(): RerouteDetectorInterface {
+        if (rerouteDetector == null) {
+            throw IllegalStateException("Native reroute detector is null")
+        }
+        return rerouteDetector!!
+    }
 
     /**
      * There's a private backing field for [state] so that it can become val
@@ -157,20 +169,18 @@ internal class NativeMapboxRerouteController(
 
     init {
         logD(TAG) { "Registering native reroute observer" }
-        rerouteEventsProvider.addRerouteObserver(nativeRerouteObserver)
+        rerouteInterface.addRerouteObserver(nativeRerouteObserver)
         isEnabled = true
         // Re-register the reroute observer when the navigator is recreated
-        rerouteEventsProvider.addNativeNavigatorRecreationObserver {
+        rerouteInterface.addNativeNavigatorRecreationObserver {
             if (isEnabled) {
                 logD(TAG) { "Navigator recreated - re-registering native reroute observer" }
-                rerouteEventsProvider.addRerouteObserver(nativeRerouteObserver)
+                rerouteInterface.addRerouteObserver(nativeRerouteObserver)
             }
-            val mapboxNativeNavigator = rerouteEventsProvider as? MapboxNativeNavigator
-            mapboxNativeNavigator?.getRerouteController()?.let {
-                rerouteController = it
-            }
-            mapboxNativeNavigator?.getRerouteDetector()?.let {
-                rerouteDetector = it
+            rerouteController = rerouteInterface.getRerouteController()
+            rerouteDetector = rerouteInterface.getRerouteDetector()
+            rerouteOptionsAdapter?.let {
+                setRerouteOptionsAdapter(it)
             }
         }
     }
@@ -179,15 +189,16 @@ internal class NativeMapboxRerouteController(
      * Native reroute controller is disabled when there is no observers
      */
     override fun setEnabled(enabled: Boolean) {
+        val rerouteController = requireNativeRerouteController()
         logD(TAG) { "Set reroute controller enabled = $enabled" }
         if (enabled) {
             // Avoid redundant observers in the case of subsequent calls to enable
             if (!isEnabled) {
-                rerouteEventsProvider.addRerouteObserver(nativeRerouteObserver)
+                rerouteInterface.addRerouteObserver(nativeRerouteObserver)
             }
         } else {
             rerouteController.cancel()
-            rerouteEventsProvider.removeRerouteObserver(nativeRerouteObserver)
+            rerouteInterface.removeRerouteObserver(nativeRerouteObserver)
         }
         isEnabled = enabled
     }
@@ -200,9 +211,9 @@ internal class NativeMapboxRerouteController(
     override fun rerouteOnDeviation(callback: DeviationRoutesCallback) {
     }
 
-    // TODO: https://mapbox.atlassian.net/browse/NAVAND-4496
     // test how route replan stops ongoing request
     override fun rerouteOnParametersChange(callback: RouteReplanRoutesCallback) {
+        val rerouteDetector = requireNativeRerouteDetector()
         logI(TAG) { "Forcing reroute because of parameters change" }
         stateV2 = RerouteStateV2.FetchingRoute()
         rerouteDetector.forceReroute(ForceRerouteReason.PARAMETERS_CHANGE) {
@@ -224,6 +235,7 @@ internal class NativeMapboxRerouteController(
                             )
                             stateV2 = RerouteStateV2.Idle()
                         }
+
                         is RerouteResponseParsingResult.RoutesAvailable -> {
                             stateV2 = RerouteStateV2.RouteFetched(
                                 parsingResult.newRoutes.firstOrNull()?.origin.orEmpty(),
@@ -247,6 +259,8 @@ internal class NativeMapboxRerouteController(
     }
 
     override fun setRerouteOptionsAdapter(rerouteOptionsAdapter: RerouteOptionsAdapter?) {
+        val rerouteController = requireNativeRerouteController()
+        this.rerouteOptionsAdapter = rerouteOptionsAdapter
         rerouteController.setOptionsAdapter(
             rerouteOptionsAdapter?.let {
                 RerouteOptionsAdapterWrapper(
@@ -257,6 +271,7 @@ internal class NativeMapboxRerouteController(
     }
 
     override fun reroute(callback: RerouteController.RoutesCallback) {
+        val rerouteDetector = requireNativeRerouteDetector()
         logI(TAG) { "Forcing reroute because of user request" }
         stateV2 = RerouteStateV2.FetchingRoute()
         rerouteDetector.forceReroute(ForceRerouteReason.USER_TRIGGERED) {
@@ -276,6 +291,7 @@ internal class NativeMapboxRerouteController(
                             )
                             stateV2 = RerouteStateV2.Idle()
                         }
+
                         is RerouteResponseParsingResult.RoutesAvailable -> {
                             stateV2 = RerouteStateV2.RouteFetched(
                                 parsingResult.newRoutes.firstOrNull()?.origin.orEmpty(),
@@ -375,6 +391,7 @@ internal class NativeMapboxRerouteController(
     internal class RerouteOptionsAdapterWrapper(
         private val origin: RerouteOptionsAdapter,
     ) : RouteOptionsAdapter {
+
         override fun modifyRouteRequestOptions(urlOptions: String): String {
             val originalUrl = try {
                 URL(urlOptions)
@@ -412,6 +429,7 @@ internal class NativeMapboxRerouteController(
     }
 
     companion object {
+
         private const val TAG = "NativeMapboxRerouteController"
     }
 }
