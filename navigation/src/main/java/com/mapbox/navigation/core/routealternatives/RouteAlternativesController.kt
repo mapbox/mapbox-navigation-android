@@ -1,8 +1,9 @@
 package com.mapbox.navigation.core.routealternatives
 
+import com.mapbox.navigation.base.internal.route.Waypoint
 import com.mapbox.navigation.base.internal.route.parsing.models.nn.RouteInterfacesParser
 import com.mapbox.navigation.base.internal.utils.AlternativesParsingResult
-import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
+import com.mapbox.navigation.base.internal.utils.internalWaypoints
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -30,9 +31,6 @@ internal class RouteAlternativesController(
     private val threadController: ThreadController,
     private val routeInterfacesParser: RouteInterfacesParser,
 ) : AlternativeMetadataProvider {
-
-    @RouterOrigin
-    private var lastUpdateOrigin: String = RouterOrigin.OFFLINE
 
     private val mainJobControl by lazy { threadController.getMainScopeAndRootJob() }
 
@@ -113,12 +111,14 @@ internal class RouteAlternativesController(
     }
 
     private val nativeObserver = object : RouteAlternativesObserver {
+        @Deprecated("Deprecated in Java")
         override fun onRouteAlternativesChanged(
             routeAlternatives: List<RouteAlternative>,
             removed: List<RouteAlternative>,
         ) {
         }
 
+        @Deprecated("Deprecated in Java")
         override fun onOnlinePrimaryRouteAvailable(onlinePrimaryRoute: RouteInterface) {}
 
         override fun onRouteAlternativesUpdated(
@@ -134,7 +134,7 @@ internal class RouteAlternativesController(
             observerProcessingJob = processRouteAlternatives(
                 onlinePrimaryRoute,
                 routeAlternatives,
-            ) { alternatives, origin ->
+            ) { alternatives ->
                 logD("${alternatives.size} alternatives available", LOG_CATEGORY)
 
                 val routeProgress = tripSession.getRouteProgress() ?: run {
@@ -142,7 +142,12 @@ internal class RouteAlternativesController(
                     return@processRouteAlternatives
                 }
 
-                defaultAlternativesHandler?.onRouteAlternatives(routeProgress, alternatives, origin)
+                val matchingAlternatives = alternatives
+                    .filterMatchingUpcomingWaypoints(routeProgress)
+                defaultAlternativesHandler?.onRouteAlternatives(
+                    routeProgress,
+                    matchingAlternatives,
+                )
             }
         }
 
@@ -159,7 +164,7 @@ internal class RouteAlternativesController(
     private fun processRouteAlternatives(
         onlinePrimaryRoute: RouteInterface?,
         nativeAlternatives: List<RouteAlternative>,
-        block: suspend (List<NavigationRoute>, String) -> Unit,
+        block: suspend (List<NavigationRoute>) -> Unit,
     ) = mainJobControl.scope.launch {
         val primaryRoutes = onlinePrimaryRoute?.let { listOf(it) } ?: emptyList()
         val allAlternatives = primaryRoutes + nativeAlternatives.map { it.route }
@@ -195,19 +200,7 @@ internal class RouteAlternativesController(
         } ?: return@launch
 
         processAlternativesMetadata(alternatives, nativeAlternatives)
-        val origin = getOrigin(nativeAlternatives)
-        block(alternatives, origin)
-        lastUpdateOrigin = origin
-    }
-
-    @RouterOrigin
-    private fun getOrigin(nativeAlternatives: List<RouteAlternative>): String {
-        val origin = nativeAlternatives.find {
-            // looking for the first new route,
-            // assuming all new routes come from the same request
-            it.isNew
-        }?.route?.routerOrigin?.mapToSdkRouteOrigin() ?: lastUpdateOrigin
-        return origin
+        block(alternatives)
     }
 
     fun processAlternativesMetadata(
@@ -224,13 +217,37 @@ internal class RouteAlternativesController(
         }
     }
 
+    private fun List<NavigationRoute>.filterMatchingUpcomingWaypoints(
+        routeProgress: RouteProgress,
+    ): List<NavigationRoute> {
+        val primaryUpcomingWaypoints = routeProgress.navigationRoute
+            .internalWaypoints()
+            .takeLast(routeProgress.remainingWaypoints)
+            .filter { it.type == Waypoint.REGULAR || it.type == Waypoint.SILENT }
+        return filter { alternative ->
+            // Continuous alternatives are generated from the current position,
+            // so every waypoint after the origin (index 0) is upcoming.
+            val alternativeUpcomingWaypoints = alternative.internalWaypoints()
+                .drop(1)
+                .filter { it.type == Waypoint.REGULAR || it.type == Waypoint.SILENT }
+            val matches = alternativeUpcomingWaypoints
+                .matchesByLocationAndType(primaryUpcomingWaypoints)
+            if (!matches) {
+                logI(LOG_CATEGORY) {
+                    "ignoring alternative ${alternative.id}: upcoming regular/silent " +
+                        "waypoints don't match the current primary route"
+                }
+            }
+            matches
+        }
+    }
+
     private class RouteAlternativesToRouteUpdateSuggestionsAdapter(
         private val suggestRouteUpdate: (UpdateRouteSuggestion) -> Unit,
     ) {
         fun onRouteAlternatives(
             routeProgress: RouteProgress,
             alternatives: List<NavigationRoute>,
-            @RouterOrigin routerOrigin: String,
         ) {
             when (routeProgress.navigationRoute.origin) {
                 RouterOrigin.ONLINE -> {
@@ -308,6 +325,14 @@ internal fun RouteAlternative.mapToMetadata(
         infoFromFork = infoFromFork.mapToPlatform(),
         infoFromStartOfPrimary = infoFromStart.mapToPlatform(),
     )
+}
+
+private fun List<Waypoint>.matchesByLocationAndType(other: List<Waypoint>): Boolean {
+    if (size != other.size) return false
+    return withIndex().all { (index, waypoint) ->
+        val otherWaypoint = other[index]
+        waypoint.location == otherWaypoint.location && waypoint.type == otherWaypoint.type
+    }
 }
 
 private fun RouteIntersection.mapToPlatform(): AlternativeRouteIntersection {

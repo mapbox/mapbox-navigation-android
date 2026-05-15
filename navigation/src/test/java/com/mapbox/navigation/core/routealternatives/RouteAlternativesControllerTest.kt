@@ -20,6 +20,7 @@ import com.mapbox.navigation.testing.NativeRouteParserRule
 import com.mapbox.navigation.testing.TestSystemClock
 import com.mapbox.navigation.testing.factories.createDirectionsResponse
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
+import com.mapbox.navigation.testing.factories.createNativeWaypoint
 import com.mapbox.navigation.testing.factories.createNavigationRoute
 import com.mapbox.navigation.testing.factories.createRouteInterface
 import com.mapbox.navigation.testing.factories.createRouteOptions
@@ -28,6 +29,7 @@ import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteAlternativesControllerInterface
 import com.mapbox.navigator.RouteIntersection
+import com.mapbox.navigator.WaypointType
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -293,7 +295,7 @@ class RouteAlternativesControllerTest {
         val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
         every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
         every { tripSession.getRouteProgress() } returns mockk(relaxed = true) {
-            every { navigationRoute } returns mockk {
+            every { navigationRoute } returns mockk(relaxed = true) {
                 every { directionsRoute } returns mockk(relaxed = true) {
                     every { duration() } returns 200.0
                 }
@@ -1116,6 +1118,176 @@ class RouteAlternativesControllerTest {
         verify(exactly = 0) { newControllerInterface.addObserver(any()) }
     }
 
+    @Test
+    fun `ignore alternative when upcoming destination waypoint doesn't match primary`() =
+        coroutineRule.runBlockingTest {
+            val origin = Point.fromLngLat(0.0, 0.0)
+            val destination = Point.fromLngLat(1.0, 1.0)
+            val differentDestination = Point.fromLngLat(2.0, 2.0)
+
+            val (matching, mismatched) = runWaypointFilterScenario(
+                primaryWaypoints = regularWaypoints(origin, destination),
+                remainingWaypoints = 1,
+                matchingAltWaypoints = regularWaypoints(origin, destination),
+                mismatchedAltWaypoints = regularWaypoints(origin, differentDestination),
+            )
+            assertTrue(matching)
+            assertFalse(mismatched)
+        }
+
+    @Test
+    fun `ignore alternative when an upcoming silent waypoint differs from the primary`() =
+        coroutineRule.runBlockingTest {
+            val origin = Point.fromLngLat(0.0, 0.0)
+            val silentA = Point.fromLngLat(0.5, 0.5)
+            val silentB = Point.fromLngLat(0.6, 0.6)
+            val destination = Point.fromLngLat(1.0, 1.0)
+
+            val (matching, mismatched) = runWaypointFilterScenario(
+                primaryWaypoints = listOf(
+                    createNativeWaypoint(location = origin, type = WaypointType.REGULAR),
+                    createNativeWaypoint(location = silentA, type = WaypointType.SILENT),
+                    createNativeWaypoint(location = destination, type = WaypointType.REGULAR),
+                ),
+                remainingWaypoints = 2,
+                matchingAltWaypoints = listOf(
+                    createNativeWaypoint(location = origin, type = WaypointType.REGULAR),
+                    createNativeWaypoint(location = silentA, type = WaypointType.SILENT),
+                    createNativeWaypoint(location = destination, type = WaypointType.REGULAR),
+                ),
+                mismatchedAltWaypoints = listOf(
+                    createNativeWaypoint(location = origin, type = WaypointType.REGULAR),
+                    createNativeWaypoint(location = silentB, type = WaypointType.SILENT),
+                    createNativeWaypoint(location = destination, type = WaypointType.REGULAR),
+                ),
+            )
+            assertTrue(matching)
+            assertFalse(mismatched)
+        }
+
+    @Test
+    fun `ignore EV charging waypoints when matching upcoming waypoints`() =
+        coroutineRule.runBlockingTest {
+            val origin = Point.fromLngLat(0.0, 0.0)
+            val destination = Point.fromLngLat(1.0, 1.0)
+            val evStationPrimary = Point.fromLngLat(0.4, 0.4)
+            val evStationAlt = Point.fromLngLat(0.5, 0.5)
+
+            // Primary has a server-added EV charging stop between origin and destination.
+            // The alternative has a different EV stop but matching regular waypoints -
+            // it must be kept because only regular/silent waypoints participate in matching.
+            val (matching, _) = runWaypointFilterScenario(
+                primaryWaypoints = listOf(
+                    createNativeWaypoint(location = origin, type = WaypointType.REGULAR),
+                    createNativeWaypoint(
+                        location = evStationPrimary,
+                        type = WaypointType.EV_CHARGING_SERVER,
+                    ),
+                    createNativeWaypoint(location = destination, type = WaypointType.REGULAR),
+                ),
+                remainingWaypoints = 2,
+                matchingAltWaypoints = listOf(
+                    createNativeWaypoint(location = origin, type = WaypointType.REGULAR),
+                    createNativeWaypoint(
+                        location = evStationAlt,
+                        type = WaypointType.EV_CHARGING_SERVER,
+                    ),
+                    createNativeWaypoint(location = destination, type = WaypointType.REGULAR),
+                ),
+                mismatchedAltWaypoints = null,
+            )
+            assertTrue(matching)
+        }
+
+    @Test
+    fun `compare only upcoming waypoints, ignoring already-passed ones`() =
+        coroutineRule.runBlockingTest {
+            val origin = Point.fromLngLat(0.0, 0.0)
+            val passedStop = Point.fromLngLat(0.3, 0.3)
+            val upcomingStop = Point.fromLngLat(0.7, 0.7)
+            val destination = Point.fromLngLat(1.0, 1.0)
+
+            // Primary has 4 waypoints, two have been passed. Alternative is freshly built
+            // from the current location, so its origin sits where the primary is and it
+            // only carries the upcoming stop and destination as further waypoints.
+            val (matching, _) = runWaypointFilterScenario(
+                primaryWaypoints = listOf(
+                    createNativeWaypoint(location = origin, type = WaypointType.REGULAR),
+                    createNativeWaypoint(location = passedStop, type = WaypointType.REGULAR),
+                    createNativeWaypoint(location = upcomingStop, type = WaypointType.REGULAR),
+                    createNativeWaypoint(location = destination, type = WaypointType.REGULAR),
+                ),
+                remainingWaypoints = 2,
+                matchingAltWaypoints = listOf(
+                    createNativeWaypoint(location = passedStop, type = WaypointType.REGULAR),
+                    createNativeWaypoint(location = upcomingStop, type = WaypointType.REGULAR),
+                    createNativeWaypoint(location = destination, type = WaypointType.REGULAR),
+                ),
+                mismatchedAltWaypoints = null,
+            )
+            assertTrue(matching)
+        }
+
+    private fun regularWaypoints(vararg points: Point): List<com.mapbox.navigator.Waypoint> =
+        points.map { createNativeWaypoint(location = it, type = WaypointType.REGULAR) }
+
+    /**
+     * Drives one update through the controller with a primary route built from
+     * [primaryWaypoints] / [remainingWaypoints] and up to two alternatives. Returns a pair
+     * of booleans indicating whether the matching alternative and the mismatched alternative
+     * (if any) survived the upcoming-waypoint filter.
+     */
+    private suspend fun runWaypointFilterScenario(
+        primaryWaypoints: List<com.mapbox.navigator.Waypoint>,
+        remainingWaypoints: Int,
+        matchingAltWaypoints: List<com.mapbox.navigator.Waypoint>,
+        mismatchedAltWaypoints: List<com.mapbox.navigator.Waypoint>?,
+    ): Pair<Boolean, Boolean> {
+        val routeAlternativesController = createRouteAlternativesController()
+        val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
+        every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
+
+        val primaryRoute = createNavigationRoute(
+            directionsRoute = createDirectionsRoute(requestUuid = "primary"),
+            nativeWaypoints = primaryWaypoints,
+        )
+        val routeProgress = mockk<RouteProgress>(relaxed = true) {
+            every { navigationRoute } returns primaryRoute
+            every { this@mockk.remainingWaypoints } returns remainingWaypoints
+        }
+        every { tripSession.getRouteProgress() } returns routeProgress
+
+        var updateSuggestion: UpdateRouteSuggestion? = null
+        routeAlternativesController.setRouteUpdateSuggestionListener { updateSuggestion = it }
+
+        val matchingAltUuid = "matchingAlt"
+        val mismatchedAltUuid = "mismatchedAlt"
+        val alternatives = mutableListOf(
+            createNativeAlternativeMock(
+                alternativeId = 1,
+                responseUuidOverride = matchingAltUuid,
+                nativeWaypoints = matchingAltWaypoints,
+            ),
+        )
+        if (mismatchedAltWaypoints != null) {
+            alternatives.add(
+                createNativeAlternativeMock(
+                    alternativeId = 2,
+                    responseUuidOverride = mismatchedAltUuid,
+                    nativeWaypoints = mismatchedAltWaypoints,
+                ),
+            )
+        }
+
+        nativeObserver.captured.onRouteAlternativesUpdated(null, alternatives, emptyList())
+
+        assertNotNull("no route update suggestion received", updateSuggestion)
+        val deliveredAltIds = updateSuggestion!!.newRoutes.drop(1).map { it.id }
+        val matchingKept = deliveredAltIds.any { it.startsWith(matchingAltUuid) }
+        val mismatchedKept = deliveredAltIds.any { it.startsWith(mismatchedAltUuid) }
+        return matchingKept to mismatchedKept
+    }
+
     private val nativeInfoFork = com.mapbox.navigator.AlternativeRouteInfo(
         100.0, // distance
         200.0, // duration
@@ -1165,6 +1337,8 @@ class RouteAlternativesControllerTest {
         routerOrigin: com.mapbox.navigator.RouterOrigin = com.mapbox.navigator.RouterOrigin.ONLINE,
         fileName: String = "route_alternative_from_native.json",
         routeIndex: Int = 0,
+        responseUuidOverride: String? = null,
+        nativeWaypoints: List<com.mapbox.navigator.Waypoint> = emptyList(),
     ): RouteAlternative {
         val responseJson = FileUtils.loadJsonFixture(fileName)
         val response = DirectionsResponse.fromJson(responseJson)
@@ -1172,9 +1346,10 @@ class RouteAlternativesControllerTest {
             responseJson = responseJson,
             requestURI = routeRequestUrl.toString(),
             routerOrigin = routerOrigin,
-            responseUUID = response.uuid()!!,
+            responseUUID = responseUuidOverride ?: response.uuid()!!,
             routeIndex = routeIndex,
             routeGeometry = response.routes()[0].completeGeometryToPoints(),
+            waypoints = nativeWaypoints,
         )
 
         return mockk {
