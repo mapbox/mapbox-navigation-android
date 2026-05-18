@@ -2,18 +2,19 @@ package com.mapbox.navigation.core.internal.router
 
 import com.mapbox.navigator.GetRouteOrigin
 import com.mapbox.navigator.GetRouteReason
-import com.mapbox.navigator.GetRouteSignature
+import com.mapbox.navigator.GetRouteSignature as NativeGetRouteSignature
 
 internal data class GetRouteSignature(
     val reason: Reason,
     val origin: Origin,
 ) {
 
-    fun toNativeSignature(): GetRouteSignature {
-        return GetRouteSignature(
+    fun toNativeSignature(): NativeGetRouteSignature {
+        return NativeGetRouteSignature(
             reason.toNativeReason(),
             origin.toNativeOrigin(),
             "",
+            // null,
         )
     }
 
