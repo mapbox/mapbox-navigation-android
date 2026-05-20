@@ -28,6 +28,7 @@ class GetRouteSignatureToNativeTest internal constructor(
                         GetRouteReason.NEW_ROUTE,
                         GetRouteOrigin.PLATFORM_SDK,
                         "",
+                        null,
                     ),
                 ),
                 arrayOf(
@@ -39,6 +40,7 @@ class GetRouteSignatureToNativeTest internal constructor(
                         GetRouteReason.NEW_ROUTE,
                         GetRouteOrigin.CUSTOMER,
                         "",
+                        null,
                     ),
                 ),
                 arrayOf(
@@ -50,6 +52,7 @@ class GetRouteSignatureToNativeTest internal constructor(
                         GetRouteReason.REROUTE_OTHER,
                         GetRouteOrigin.PLATFORM_SDK,
                         "",
+                        null,
                     ),
                 ),
                 arrayOf(
@@ -61,6 +64,7 @@ class GetRouteSignatureToNativeTest internal constructor(
                         GetRouteReason.REROUTE_BY_DEVIATION,
                         GetRouteOrigin.PLATFORM_SDK,
                         "",
+                        null,
                     ),
                 ),
             )
