@@ -141,7 +141,7 @@ suspend fun MapboxNavigation.moveAlongTheRouteUntilTracking(
  */
 suspend fun MapboxNavigation.moveAlongTheCurrentRouteUntilLocation(
     targetLocation: Point,
-    toleranceMeters: Double = 5.0,
+    toleranceMeters: Double = 20.0,
 ) {
     flowLocationMatcherResult().first {
         TurfMeasurement.distance(
