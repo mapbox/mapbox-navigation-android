@@ -36,3 +36,8 @@ fun assumeNotNROBecauseEmptyRefreshTllBreaksExpirationTime() {
         ": https://mapbox.atlassian.net/browse/NAVAND-6952",
     )
 }
+
+fun assumeNotNROBecauseOfRerouteIssueWhileOffline() {
+    assumeNotNRO("NRO reroute issue while offline " +
+        "https://mapbox.atlassian.net/browse/NN-4935")
+}

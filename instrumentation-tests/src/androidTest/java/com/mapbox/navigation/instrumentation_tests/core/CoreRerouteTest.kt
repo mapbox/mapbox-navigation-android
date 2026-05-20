@@ -16,6 +16,8 @@ import com.mapbox.navigation.base.internal.route.routeOptions
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
+import com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -24,12 +26,16 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE
+import com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_REASON_REFRESH
 import com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
+import com.mapbox.navigation.core.internal.PredictiveCache
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.core.reroute.RerouteOptionsAdapter
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.reroute.RerouteStateV2
+import com.mapbox.navigation.core.routerefresh.RouteRefreshExtra
 import com.mapbox.navigation.instrumentation_tests.R
+import com.mapbox.navigation.instrumentation_tests.utils.PredictiveCacheMonitor
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
@@ -67,11 +73,13 @@ import com.mapbox.navigation.testing.utils.location.moveAlongTheCurrentRouteUnti
 import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracking
 import com.mapbox.navigation.testing.utils.location.stayOnPosition
 import com.mapbox.navigation.testing.utils.nativeRerouteControllerNoRetryConfig
+import com.mapbox.navigation.testing.utils.nro.assumeNotNROBecauseOfRerouteIssueWhileOffline
 import com.mapbox.navigation.testing.utils.offline.Tileset
 import com.mapbox.navigation.testing.utils.offline.unpackTiles
 import com.mapbox.navigation.testing.utils.readRawFileText
 import com.mapbox.navigation.testing.utils.routes.MockRoute
 import com.mapbox.navigation.testing.utils.routes.RoutesProvider
+import com.mapbox.navigation.testing.utils.setTestRouteRefreshInterval
 import com.mapbox.navigation.testing.utils.withMapboxNavigation
 import com.mapbox.navigation.testing.utils.withoutInternet
 import com.mapbox.navigation.utils.internal.toPoint
@@ -85,6 +93,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.yield
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -98,6 +107,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlin.math.abs
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalMapboxNavigationAPI::class)
 @RunWith(Parameterized::class)
@@ -271,6 +281,168 @@ class CoreRerouteTest(
                         ctrl.rerouteStatesV2().first { it is RerouteStateV2.FetchingRoute }
                     }
             }
+        }
+    }
+
+    /**
+     * Regression test for the "refresh stops after back-online" bug
+     *
+     * The scenario reproduces a state where, after a short offline window with a deviation-
+     * driven reroute, the SDK ends up refreshes
+     */
+    @Test
+    fun route_refresh_resumes_after_offline_reroute_and_back_online() = sdkTest(120_000) {
+        assumeNotNROBecauseOfRerouteIssueWhileOffline()
+        val mockRoute = RoutesProvider.near_munich_with_waypoints(context)
+        val originLocation = mockRoute.routeWaypoints.first()
+        mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
+
+        val refreshOptions = RouteRefreshOptions.Builder()
+            .intervalMillis(30_000)
+            .build()
+            .also { it.setTestRouteRefreshInterval(5_000L) }
+
+        val tileStore = TileStore.create()
+        withMapboxNavigation(
+            useRealTiles = true,
+            historyRecorderRule = mapboxHistoryTestRule,
+            customConfig = getTestCustomConfigWithFastHybridFallback(),
+            tileStore = tileStore,
+            routeRefreshOptions = refreshOptions,
+        ) { navigation ->
+            val refreshStates = mutableListOf<String>()
+            navigation.routeRefreshController.registerRouteRefreshStateObserver { result ->
+                refreshStates.add(result.state)
+            }
+
+            // Need tiles to have successful offline reroute
+            PredictiveCache(navigation).apply {
+                createNavigationController(
+                    PredictiveCacheNavigationOptions.Builder()
+                        .predictiveCacheLocationOptions(
+                            PredictiveCacheLocationOptions.Builder()
+                                .routeBufferRadiusInMeters(300)
+                                .build(),
+                        )
+                        .build(),
+                )
+            }
+            val predictiveCacheMonitor = PredictiveCacheMonitor(
+                tileStore = tileStore,
+                descriptors = listOf(navigation.tilesetDescriptorFactory.getLatest()),
+            )
+
+            // 1. Online primary → TRACKING.
+            val routes = stayOnPosition(originLocation, bearing = 0.0f) {
+                navigation.startTripSession()
+                navigation.requestRoutes(
+                    RouteOptions.builder()
+                        .applyDefaultNavigationOptions()
+                        .applyLanguageAndVoiceUnitOptions(context)
+                        .baseUrl(mockWebServerRule.baseUrl)
+                        .coordinatesList(mockRoute.routeWaypoints)
+                        .build(),
+                ).getSuccessfulResultOrThrowException().routes
+            }
+
+            assert(routes.first().origin == RouterOrigin.ONLINE) {
+                "initial route must be ONLINE"
+            }
+
+            navigation.setNavigationRoutesAsync(routes)
+            navigation.moveAlongTheRouteUntilTracking(
+                routes[0],
+                mockLocationReplayerRule,
+                minEventsCount = 1,
+                endReplay = false,
+            )
+
+            val rerouteLocation =
+                RoutesProvider.near_munich_with_waypoints_for_reroute(context)
+                    .waypoints()!!
+                    .first()
+                    .location()
+
+            val mockBackOnlineRoute = RoutesProvider.near_munich_with_waypoints_back_online(context)
+            mockWebServerRule.requestHandlers.addAll(mockBackOnlineRoute.mockRequestHandlers)
+
+            val refreshHandler = MockDirectionsRefreshHandler(
+                testUuid = mockBackOnlineRoute.routeResponse.uuid()!!,
+                readRawFileText(
+                    context,
+                    R.raw.route_response_near_munich_with_waypoints_back_online_refresh,
+                ),
+                acceptedGeometryIndex = 0,
+            )
+            mockWebServerRule.requestHandlers.add(refreshHandler)
+
+            // 2. Short offline window: deviate so the hybrid router falls back to onboard
+            //    (timeoutToFallbackSeconds=1) and the next set lands as OFFLINE. We do NOT
+            //    wait for versionSwitchObserver — the offline window must stay short enough
+            //    that the navigator instance is preserved (no FallbackToOffline recreation).
+            navigation.moveAlongTheCurrentRouteUntilLocation(rerouteLocation)
+            mockLocationReplayerRule.stopAndClearEvents()
+
+            runCatching {
+                predictiveCacheMonitor.awaitCoversRoute(
+                    route = routes.first(),
+                    tag = "initial-online",
+                )
+            }
+            withoutInternet {
+                mockLocationReplayerRule.playRoute(
+                    RoutesProvider.near_munich_with_waypoints_for_reroute(context),
+                )
+                navigation.offRouteUpdates().first { it }
+                navigation.routesUpdates().first {
+                    it.reason == ROUTES_UPDATE_REASON_REROUTE &&
+                        it.navigationRoutes.first().origin == RouterOrigin.OFFLINE
+                }
+            }
+
+            // 3. Park the puck at its current position so the back-online response stays
+            //    geometrically relevant
+            mockLocationReplayerRule.stopAndClearEvents()
+            val parkLocation = navigation.flowLocationMatcherResult().first()
+                .enhancedLocation.toPoint()
+
+            // 4. Wait for an ONLINE-origin primary delivered by BackOnlineImpl (via
+            //    onLateOnlineRoutes → primary swap) OR by any subsequent reroute. Both are
+            //    acceptable as long as `origin == ONLINE`.
+            val refreshUpdate = stayOnPosition(parkLocation, bearing = 0.0f) {
+                val backOnlineUpdate = withTimeout(10.seconds) {
+                    navigation.routesUpdates().first {
+                        it.navigationRoutes.first().origin == RouterOrigin.ONLINE
+                    }
+                }
+
+                // 5. Assert a periodic refresh fires for the (now-online) primary within
+                val onlinePrimaryId = navigation.getNavigationRoutes().first().id
+                withTimeout(40.seconds) {
+                    navigation.routesUpdates().first {
+                        it.reason == ROUTES_UPDATE_REASON_REFRESH &&
+                            it.navigationRoutes.first().id == onlinePrimaryId
+                    }
+                }
+            }
+            assertEquals(ROUTES_UPDATE_REASON_REFRESH, refreshUpdate.reason)
+            assertTrue(
+                "refresh did not produce an ONLINE primary",
+                refreshUpdate.navigationRoutes.first().origin == RouterOrigin.ONLINE,
+            )
+
+            // 6. State observer must have seen both STARTED and FINISHED_SUCCESS for the
+            //    refresh round that produced the update above. (Earlier STARTED/FAILED
+            //    events from the offline window may also be present; we only care that at
+            //    least one successful pair exists by the time the refresh update lands.)
+            assertTrue(
+                "refresh STARTED state never observed (saw $refreshStates)",
+                refreshStates.contains(RouteRefreshExtra.REFRESH_STATE_STARTED),
+            )
+            assertTrue(
+                "refresh FINISHED_SUCCESS state never observed (saw $refreshStates)",
+                refreshStates.contains(RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS),
+            )
         }
     }
 
@@ -2028,6 +2200,28 @@ class CoreRerouteTest(
         nativeRerouteControllerNoRetryConfig
     } else {
         ""
+    }
+
+    /**
+     * Custom config that forces NN's hybrid router to fall back to onboard within ~1s while
+     * offline (so a reroute during a short offline window lands as OFFLINE), and preserves
+     * the parameterized native-vs-platform reroute toggle from [getTestCustomConfig].
+     */
+    private fun getTestCustomConfigWithFastHybridFallback(): String {
+        val featuresBlock = if (runOptions.nativeReroute) {
+            """"features": { "useInternalReroute": true },"""
+        } else {
+            ""
+        }
+        return """{
+            $featuresBlock
+            "router": {
+                "hybridRouterConfig": {
+                    "fallbackDelaySeconds": 0,
+                    "timeoutToFallbackSeconds": 1
+                }
+            }
+        }"""
     }
 
     private data class RerouteTestData(
