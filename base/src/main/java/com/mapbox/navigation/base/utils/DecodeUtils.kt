@@ -1,6 +1,7 @@
 package com.mapbox.navigation.base.utils
 
-import android.util.LruCache
+import androidx.annotation.VisibleForTesting
+import androidx.collection.LruCache
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.DirectionsRouteFBWrapper
@@ -16,16 +17,31 @@ import com.mapbox.navigation.utils.internal.logD
 
 private const val LOG_TAG = "DecodeUtils"
 
+// Memory limits expressed in number of decoded Points (each Point ≈ 56 B on heap).
+// Using point-count bounds prevents unbounded growth for very long routes where a single
+// geometry may contain tens of thousands of points.
+internal const val COMPLETE_GEOMETRY_CACHE_MAX_POINTS = 75_000 // ~4 MB
+internal const val STEPS_GEOMETRY_CACHE_MAX_POINTS = 150_000 // ~8 MB
+
 /**
  * Provides utilities to decode geometries of [DirectionsRoute]s and [LegStep]s.
- * Results are cached for geometries of up to 3 [DirectionsRoute]s.
+ * Results are cached up to [COMPLETE_GEOMETRY_CACHE_MAX_POINTS] /
+ * [STEPS_GEOMETRY_CACHE_MAX_POINTS] decoded [Point]s respectively.
  */
 object DecodeUtils {
 
-    private val completeGeometryDecodeCache = LruCache<Pair<String, Int>, List<Point>>(3)
+    private val completeGeometryDecodeCache =
+        object : LruCache<Pair<String, Int>, List<Point>>(COMPLETE_GEOMETRY_CACHE_MAX_POINTS) {
+            override fun sizeOf(key: Pair<String, Int>, value: List<Point>): Int =
+                value.size.coerceAtLeast(1)
+        }
 
-    private val stepsGeometryDecodeCache = LruCache<Pair<String, Int>, List<Point>>(1)
-    private val cachedRoutes = arrayListOf<CachedRouteInfo>()
+    private val stepsGeometryDecodeCache =
+        object : LruCache<Pair<String, Int>, List<Point>>(STEPS_GEOMETRY_CACHE_MAX_POINTS) {
+            override fun sizeOf(key: Pair<String, Int>, value: List<Point>): Int =
+                value.size.coerceAtLeast(1)
+        }
+    private val cachedRoutes = RouteList(maxSize = 3)
 
     /**
      * Decodes geometry of a [DirectionsRoute] to a [LineString] and caches the result.
@@ -157,7 +173,6 @@ object DecodeUtils {
         synchronized(stepsGeometryDecodeCache) {
             cachedRoutes.clear()
             stepsGeometryDecodeCache.evictAll()
-            stepsGeometryDecodeCache.resize(1)
         }
         completeGeometryDecodeCache.evictAll()
     }
@@ -166,6 +181,14 @@ object DecodeUtils {
     internal fun clearCacheInternalExceptFor(routes: List<DirectionsRoute>) {
         removeAllRoutesExcept(routes)
     }
+
+    @VisibleForTesting
+    internal fun completeGeometryCacheTotalPoints(): Int =
+        completeGeometryDecodeCache.snapshot().values.sumOf { it.size }
+
+    @VisibleForTesting
+    internal fun stepsGeometryCacheTotalPoints(): Int =
+        stepsGeometryDecodeCache.snapshot().values.sumOf { it.size }
 
     /**
      * todo Remove inline references to RouteOptions in favor of taking geometry type as an argument or expose the extensions on top of NavigationRoute instead.
@@ -193,18 +216,19 @@ object DecodeUtils {
 
     private fun cacheRoute(route: DirectionsRoute, precision: Int) {
         PerformanceTracker.trackPerformanceSync("DecodeUtils.cacheRoute") {
-            val stepCount = route.countSteps()
             synchronized(stepsGeometryDecodeCache) {
-                cachedRoutes.removeAll {
-                    it.route.isSameRoute(route) && it.precision == precision
+                when (val result = cachedRoutes.add(route, precision)) {
+                    is RouteList.AddResult.Reordered -> return@trackPerformanceSync
+                    is RouteList.AddResult.Added -> result.evicted?.let { evicted ->
+                        evicted.route.legs()?.forEach { leg ->
+                            leg.steps()?.forEach { step ->
+                                step.geometry()?.let { geometry ->
+                                    stepsGeometryDecodeCache.remove(geometry to evicted.precision)
+                                }
+                            }
+                        }
+                    }
                 }
-                if (cachedRoutes.size > 2) {
-                    cachedRoutes.removeAt(0)
-                }
-                cachedRoutes.add(CachedRouteInfo(route, precision, stepCount))
-                stepsGeometryDecodeCache.resize(
-                    cachedRoutes.sumOf { it.stepCount }.coerceAtLeast(1),
-                )
             }
         }
     }
@@ -216,51 +240,72 @@ object DecodeUtils {
             synchronized(stepsGeometryDecodeCache) {
                 logD(LOG_TAG) {
                     "Looking for routes to remove among cached:" +
-                        " ${cachedRoutes.joinToString(",") { it.route.routeIdForLogs() }}, " +
+                        " ${cachedRoutes.joinToString { it.route.routeIdForLogs() }}, " +
                         "while ${routesToKeep.joinToString(",") { it.routeIdForLogs() }} " +
                         "should be kept"
                 }
-                val cachedRoutesToRemove = cachedRoutes.filter { cached ->
-                    routesToKeep.none {
-                        cached.route.isSameRoute(it)
-                    }
+                val toRemove = cachedRoutes.filter { cached ->
+                    routesToKeep.none { cached.route.isSameRoute(it) }
                 }
-                cachedRoutesToRemove.forEach { cachedRouteToRemove ->
+                toRemove.forEach { cachedRouteToRemove ->
                     logD(LOG_TAG) {
                         "Cleaning steps geometry caches for route:" +
                             " ${cachedRouteToRemove.route.routeIdForLogs()}"
                     }
-                    val routeToRemove = cachedRouteToRemove.route
-                    cachedRouteToRemove.route.legs()?.forEach {
-                        it.steps()?.forEach { step ->
-                            val stepGeometry = step.geometry()
-                            if (stepGeometry != null) {
+                    cachedRouteToRemove.route.legs()?.forEach { leg ->
+                        leg.steps()?.forEach { step ->
+                            step.geometry()?.let { geometry ->
                                 stepsGeometryDecodeCache.remove(
-                                    stepGeometry to routeToRemove.precision(),
+                                    geometry to cachedRouteToRemove.precision,
                                 )
                             }
                         }
                     }
                     cachedRoutes.remove(cachedRouteToRemove)
                 }
-                stepsGeometryDecodeCache.resize(
-                    cachedRoutes.sumOf { it.stepCount }.coerceAtLeast(1),
-                )
             }
         }
 
-    private fun DirectionsRoute.countSteps(): Int {
-        if (this is DirectionsRouteFBWrapper) {
-            return this.stepsCountWithGeometry
-        }
-        return legs()?.sumOf { leg ->
-            leg.steps()?.count { it.geometry() != null } ?: 0
-        } ?: 0
-    }
-
-    private class CachedRouteInfo(
+    private data class CachedRouteInfo(
         val route: DirectionsRoute,
         val precision: Int,
-        val stepCount: Int,
     )
+
+    private class RouteList(private val maxSize: Int) {
+        private val items = arrayListOf<CachedRouteInfo>()
+
+        val size get() = items.size
+
+        sealed class AddResult {
+            object Reordered : AddResult()
+            data class Added(val evicted: CachedRouteInfo?) : AddResult()
+        }
+
+        /**
+         * Adds [route] to the list. If already present, moves it to the end (MRU) and returns
+         * [AddResult.Reordered]. If new, adds it and returns [AddResult.Added] with the evicted
+         * entry if the list exceeded [maxSize].
+         */
+        fun add(route: DirectionsRoute, precision: Int): AddResult {
+            val existingIndex = items.indexOfFirst {
+                it.route.isSameRoute(route) && it.precision == precision
+            }
+            if (existingIndex >= 0) {
+                if (existingIndex != items.lastIndex) {
+                    items.add(items.removeAt(existingIndex))
+                }
+                return AddResult.Reordered
+            }
+            items.add(CachedRouteInfo(route, precision))
+            val evicted = if (items.size > maxSize) items.removeAt(0) else null
+            return AddResult.Added(evicted)
+        }
+
+        fun remove(info: CachedRouteInfo) = items.remove(info)
+        fun filter(predicate: (CachedRouteInfo) -> Boolean) = items.filter(predicate)
+        fun joinToString(transform: (CachedRouteInfo) -> String) =
+            items.joinToString(transform = transform, separator = ",")
+
+        fun clear() = items.clear()
+    }
 }
