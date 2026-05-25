@@ -4,6 +4,7 @@ package com.mapbox.navigation.instrumentation_tests.core
 
 import android.content.Context
 import android.location.Location
+import android.util.Log
 import androidx.annotation.IntegerRes
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.Closure
@@ -38,9 +39,11 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForAlternativesUpdate
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForUpdate
+import com.mapbox.navigation.testing.ui.utils.coroutines.stopRecording
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigation.testing.utils.assertNoDiffs
 import com.mapbox.navigation.testing.utils.assertions.compareIdWithIncidentId
+import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.http.FailByRequestMockRequestHandler
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRefreshHandler
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
@@ -51,11 +54,13 @@ import com.mapbox.navigation.testing.utils.nro.assumeNotNROBecauseOfClientSideUp
 import com.mapbox.navigation.testing.utils.readRawFileText
 import com.mapbox.navigation.testing.utils.routes.MockRoute
 import com.mapbox.navigation.testing.utils.routes.requestMockRoutes
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -69,6 +74,9 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.absoluteValue
 
 class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
+
+    @get:Rule
+    val historyTestRule = MapboxHistoryTestRule()
 
     @get:Rule
     val mapboxNavigationRule = MapboxNavigationRule()
@@ -131,6 +139,9 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                     .navigatorPredictionMillis(0L)
                     .build(),
             )
+            historyTestRule.historyRecorder = mapboxNavigation.historyRecorder.apply {
+                startRecording()
+            }
         }
     }
 
@@ -138,6 +149,10 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
     fun tearDown() {
         if (this::failByRequestRouteRefreshResponse.isInitialized) {
             failByRequestRouteRefreshResponse.failResponse = false
+        }
+        runBlocking(Dispatchers.Main.immediate) {
+            val path = mapboxNavigation.historyRecorder.stopRecording()
+            Log.i("RouteRefreshTest", "history file recorder: $path")
         }
     }
 

@@ -31,6 +31,7 @@ import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -59,6 +60,7 @@ class PlannedRouteRefreshControllerTest {
     private val routeRefreshUtils by lazy { RouteRefreshUtils() }
     private var currentPrimaryRouteId: String? = null
     private val currentPrimaryRouteIdProvider: () -> String? = { currentPrimaryRouteId }
+    private val historyRecorder = FakeRouteRefreshHistoryRecorder()
     private lateinit var sut: PlannedRouteRefreshController
 
     @Before
@@ -78,6 +80,7 @@ class PlannedRouteRefreshControllerTest {
             retryStrategy,
             routeRefreshUtils,
             currentPrimaryRouteIdProvider,
+            historyRecorder,
         )
     }
 
@@ -241,8 +244,8 @@ class PlannedRouteRefreshControllerTest {
 
     @Test
     fun startRoutesRefreshing_allRoutesAreValid() = coroutineRule.runBlockingTest {
-        val route1 = mockk<NavigationRoute>(relaxed = true)
-        val route2 = mockk<NavigationRoute>(relaxed = true)
+        val route1 = mockk<NavigationRoute>(relaxed = true) { every { id } returns "id#0" }
+        val route2 = mockk<NavigationRoute>(relaxed = true) { every { id } returns "id#1" }
         val routes = listOf(route1, route2)
         every {
             RouteRefreshValidator.validateRoute(any())
@@ -262,6 +265,22 @@ class PlannedRouteRefreshControllerTest {
             delayer.resumeDelay()
         }
         assertEquals(routes, sut.routesToRefresh)
+
+        val updatedEvent = historyRecorder
+            .eventsOf<RouteRefreshHistoryEvent.PeriodicRouteRefresh.RoutesToRefreshUpdated>()
+        assertEquals(1, updatedEvent.size)
+        assertEquals(listOf("id#0", "id#1"), updatedEvent.first().ids)
+
+        assertTrue(
+            historyRecorder
+                .eventsOf<RouteRefreshHistoryEvent.PeriodicRouteRefresh.Started>()
+                .isNotEmpty(),
+        )
+
+        val scheduledEvent = historyRecorder
+            .eventsOf<RouteRefreshHistoryEvent.PeriodicRouteRefresh.RefreshAttemptScheduled>()
+        assertEquals(1, scheduledEvent.size)
+        assertEquals(false, scheduledEvent.first().resumeDelay)
     }
 
     @Test
@@ -634,6 +653,11 @@ class PlannedRouteRefreshControllerTest {
         sut.pause()
 
         verify(exactly = 1) { stateHolder.onCancel() }
+        assertTrue(
+            historyRecorder
+                .eventsOf<RouteRefreshHistoryEvent.PeriodicRouteRefresh.Paused>()
+                .isNotEmpty(),
+        )
     }
 
     @Test

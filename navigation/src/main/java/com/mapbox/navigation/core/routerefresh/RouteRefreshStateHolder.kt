@@ -4,7 +4,9 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import java.util.concurrent.CopyOnWriteArraySet
 
 @ExperimentalPreviewMapboxNavigationAPI
-internal class RouteRefreshStateHolder : RouteRefreshProgressObserver {
+internal class RouteRefreshStateHolder(
+    private val historyRecorder: RouteRefreshHistoryRecorder,
+) : RouteRefreshProgressObserver {
 
     private val observers = CopyOnWriteArraySet<RouteRefreshStatesObserver>()
 
@@ -61,6 +63,9 @@ internal class RouteRefreshStateHolder : RouteRefreshProgressObserver {
             val newState = state?.let { RouteRefreshStateResult(it, message) }
             this.state = newState
             if (newState != null) {
+                historyRecorder.recordRouteRefreshEvent(
+                    RouteRefreshHistoryEvent.RouteRefreshStateUpdated(state),
+                )
                 observers.forEach { it.onNewState(newState) }
             }
         }

@@ -106,6 +106,7 @@ import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesControllerProvider
 import com.mapbox.navigation.core.routealternatives.UpdateRouteSuggestion
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
+import com.mapbox.navigation.core.routerefresh.MapboxHistoryRecorderWrapper
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
 import com.mapbox.navigation.core.telemetry.ApplicationLifecycleMonitor
@@ -690,6 +691,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             routesProgressDataProvider,
             evDynamicDataHolder,
             Time.SystemClockImpl,
+            MapboxHistoryRecorderWrapper(compositeRecorder),
         )
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         routeRefreshController.registerRouteRefreshObserver {
