@@ -4,6 +4,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import io.mockk.clearAllMocks
 import io.mockk.mockk
 import io.mockk.verify
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 
@@ -11,7 +12,8 @@ import org.junit.Test
 class RouteRefreshStateHolderTest {
 
     private val observer = mockk<RouteRefreshStatesObserver>(relaxed = true)
-    private val sut = RouteRefreshStateHolder()
+    private val historyRecorder = FakeRouteRefreshHistoryRecorder()
+    private val sut = RouteRefreshStateHolder(historyRecorder)
 
     @Before
     fun setUp() {
@@ -27,6 +29,10 @@ class RouteRefreshStateHolderTest {
                 RouteRefreshStateResult(RouteRefreshExtra.REFRESH_STATE_STARTED, null),
             )
         }
+        val stateEvents = historyRecorder
+            .eventsOf<RouteRefreshHistoryEvent.RouteRefreshStateUpdated>()
+        assertEquals(1, stateEvents.size)
+        assertEquals(RouteRefreshExtra.REFRESH_STATE_STARTED, stateEvents.first().state)
     }
 
     @Test

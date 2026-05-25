@@ -13,6 +13,7 @@ import io.mockk.slot
 import io.mockk.verify
 import io.mockk.verifyOrder
 import kotlinx.coroutines.Job
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -32,6 +33,7 @@ class RouteRefreshControllerTest {
     private val refreshObserversManager = mockk<RefreshObserversManager>(relaxed = true)
     private val resultProcessor = mockk<RouteRefresherResultProcessor>(relaxed = true)
     private val job = mockk<Job>(relaxed = true)
+    private val historyRecorder = FakeRouteRefreshHistoryRecorder()
     private val sut = RouteRefreshController(
         job,
         plannedRouteRefreshController,
@@ -39,6 +41,7 @@ class RouteRefreshControllerTest {
         stateHolder,
         refreshObserversManager,
         resultProcessor,
+        historyRecorder,
     )
 
     @Test
@@ -104,6 +107,10 @@ class RouteRefreshControllerTest {
             stateHolder.unregisterAllRouteRefreshStateObservers()
             job.cancel()
         }
+        assertEquals(
+            1,
+            historyRecorder.eventsOf<RouteRefreshHistoryEvent.Destroyed>().size,
+        )
     }
 
     @Test
@@ -168,6 +175,12 @@ class RouteRefreshControllerTest {
             immediateRouteRefreshController.requestRoutesRefresh(routes, any())
         }
         verify(exactly = 0) { resultProcessor.reset() }
+        assertEquals(
+            1,
+            historyRecorder
+                .eventsOf<RouteRefreshHistoryEvent.ImmediateRouteRefresh.Requested>()
+                .size,
+        )
     }
 
     @Test

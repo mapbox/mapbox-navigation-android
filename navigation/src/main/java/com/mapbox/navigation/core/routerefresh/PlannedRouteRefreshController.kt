@@ -26,6 +26,7 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
     private val retryStrategy: RetryRouteRefreshStrategy,
     private val routeRefreshUtils: RouteRefreshUtils,
     private val currentPrimaryRouteIdProvider: () -> String?,
+    private val historyRecorder: RouteRefreshHistoryRecorder,
 ) {
 
     constructor(
@@ -38,6 +39,7 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
         timeProvider: Time,
         routeRefreshUtils: RouteRefreshUtils,
         currentPrimaryRouteIdProvider: () -> String?,
+        historyRecorder: RouteRefreshHistoryRecorder = NoOpRouteRefreshHistoryRecorder,
     ) : this(
         routeRefresherExecutor,
         Delayer(routeRefreshOptions.intervalMillis, timeProvider),
@@ -48,6 +50,7 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
         RetryRouteRefreshStrategy(maxAttemptsCount = MAX_RETRY_COUNT),
         routeRefreshUtils,
         currentPrimaryRouteIdProvider,
+        historyRecorder,
     )
 
     // null if refreshes are paused
@@ -73,6 +76,14 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
                 routes.any { route2 -> route1.id == route2.id }
             } == true
             routesToRefresh = routes
+            historyRecorder.recordRouteRefreshEvent(
+                RouteRefreshHistoryEvent.PeriodicRouteRefresh.RoutesToRefreshUpdated(
+                    routes.map { it.id },
+                ),
+            )
+            historyRecorder.recordRouteRefreshEvent(
+                RouteRefreshHistoryEvent.PeriodicRouteRefresh.Started(),
+            )
             scheduleNewUpdate(routes, hasSameRoutes)
         } else {
             routesToRefresh = null
@@ -92,7 +103,12 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
 
     fun pause() {
         logI("Pausing refreshes", RouteRefreshLog.LOG_CATEGORY)
-        plannedRefreshScope?.cancel()
+        plannedRefreshScope?.also {
+            it.cancel()
+            historyRecorder.recordRouteRefreshEvent(
+                RouteRefreshHistoryEvent.PeriodicRouteRefresh.Paused(),
+            )
+        }
         plannedRefreshScope = null
     }
 
@@ -131,6 +147,9 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
     }
 
     private fun postAttempt(shouldResume: Boolean, attemptBlock: suspend () -> Unit) {
+        historyRecorder.recordRouteRefreshEvent(
+            RouteRefreshHistoryEvent.PeriodicRouteRefresh.RefreshAttemptScheduled(shouldResume),
+        )
         plannedRefreshScope?.launch {
             try {
                 if (shouldResume) {

@@ -21,6 +21,7 @@ class RouteRefreshController internal constructor(
     private val stateHolder: RouteRefreshStateHolder,
     private val refreshObserversManager: RefreshObserversManager,
     private val routeRefresherResultProcessor: RouteRefresherResultProcessor,
+    private val historyRecorder: RouteRefreshHistoryRecorder,
 ) {
 
     /**
@@ -60,6 +61,9 @@ class RouteRefreshController internal constructor(
     fun requestImmediateRouteRefresh(
         callback: ImmediateRouteRefreshCallback = ImmediateRouteRefreshCallback {},
     ) {
+        historyRecorder.recordRouteRefreshEvent(
+            RouteRefreshHistoryEvent.ImmediateRouteRefresh.Requested(),
+        )
         val routes = plannedRouteRefreshController.routesToRefresh
         if (routes.isNullOrEmpty()) {
             logI("No routes to refresh", RouteRefreshLog.LOG_CATEGORY)
@@ -126,6 +130,7 @@ class RouteRefreshController internal constructor(
         stateHolder.unregisterAllRouteRefreshStateObservers()
         // first unregister observers, then cancel scope - otherwise we dispatch CANCELLED state from onDestroy
         routeRefreshParentJob.cancel()
+        historyRecorder.recordRouteRefreshEvent(RouteRefreshHistoryEvent.Destroyed())
     }
 
     internal fun onRoutesRefreshedManually(routes: List<NavigationRoute>) {

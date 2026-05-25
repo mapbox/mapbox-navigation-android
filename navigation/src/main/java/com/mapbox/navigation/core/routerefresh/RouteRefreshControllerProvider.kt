@@ -25,6 +25,7 @@ internal object RouteRefreshControllerProvider {
         routesProgressDataProvider: RoutesProgressDataProvider,
         evDynamicDataHolder: EVDynamicDataHolder,
         timeProvider: Time,
+        historyRecorder: RouteRefreshHistoryRecorder,
     ): RouteRefreshController {
         val routeRefresher = RouteRefresher(
             RoutesRefreshDataProvider(routesProgressDataProvider),
@@ -38,7 +39,7 @@ internal object RouteRefreshControllerProvider {
             routeRefreshOptions.intervalMillis,
             CoroutineUtils.createScope(routeRefreshParentJob, dispatcher),
         )
-        val stateHolder = RouteRefreshStateHolder()
+        val stateHolder = RouteRefreshStateHolder(historyRecorder)
         val refreshObserversManager = RefreshObserversManager()
         val routeRefresherResultProcessor = RouteRefresherResultProcessor(
             stateHolder,
@@ -63,6 +64,7 @@ internal object RouteRefreshControllerProvider {
             timeProvider,
             routeRefreshUtils,
             currentPrimaryRouteIdProvider,
+            historyRecorder,
         )
         val immediateRouteRefreshController = ImmediateRouteRefreshController(
             routeRefresherExecutor,
@@ -80,6 +82,7 @@ internal object RouteRefreshControllerProvider {
             stateHolder,
             refreshObserversManager,
             routeRefresherResultProcessor,
+            historyRecorder,
         )
     }
 }
