@@ -1,4 +1,21 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
+## Navigation SDK Core Framework 3.24.3 - 27 May, 2026
+#### Features
+- Update `MapboxRouteCalloutsApi` to include an extra guard condition to prevent creating `Callouts` if no **Alternative metadata** are sent for alternative routes provided. [#13870](https://github.com/mapbox/mapbox-sdk/pull/13870)
+- Improve view port calculation for a very small route. [#13970](https://github.com/mapbox/mapbox-sdk/pull/13970)
+
+
+#### Bug fixes and improvements
+- Fixed race condition where an in-flight route refresh could overwrite a reroute result when both completed at the same time. [#13925](https://github.com/mapbox/mapbox-sdk/pull/13925)
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.24.3` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.24.3))
+- Mapbox Navigation Native `v324.24.3`
+- Mapbox Core Common `v24.24.3`
+- Mapbox Java `v7.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.0))
+
 ## Navigation SDK Core Framework 3.24.2 - 20 May, 2026
 #### Features
 
