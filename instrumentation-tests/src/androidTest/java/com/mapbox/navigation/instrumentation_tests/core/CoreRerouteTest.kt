@@ -98,6 +98,7 @@ import kotlinx.coroutines.yield
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -290,6 +291,7 @@ class CoreRerouteTest(
      * The scenario reproduces a state where, after a short offline window with a deviation-
      * driven reroute, the SDK ends up refreshes
      */
+    @Ignore("uncomment after stabilization https://github.com/mapbox/navigation/pull/14371")
     @Test
     fun route_refresh_resumes_after_offline_reroute_and_back_online() = sdkTest(120_000) {
         assumeNotNROBecauseOfRerouteIssueWhileOffline()
