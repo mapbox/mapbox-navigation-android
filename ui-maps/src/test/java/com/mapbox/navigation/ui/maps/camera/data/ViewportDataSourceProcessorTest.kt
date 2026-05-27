@@ -168,6 +168,26 @@ class ViewportDataSourceProcessorTest {
     }
 
     @Test
+    fun `test simplifyCompleteRoutePoints - enabled, total geometry smaller than minimum size`() {
+        val stepPoints = listOf(
+            Point.fromLngLat(10.0, 10.0),
+            Point.fromLngLat(20.0, 20.0),
+            Point.fromLngLat(30.0, 30.0),
+            Point.fromLngLat(40.0, 40.0),
+        )
+        val completeRoutePoints = listOf(listOf(stepPoints))
+        val expected = completeRoutePoints
+
+        val actual = simplifyCompleteRoutePoints(
+            enabled = true,
+            simplificationFactor = 2,
+            completeRoutePoints = completeRoutePoints,
+        )
+
+        assertArrays3(expected, actual, pointAdapter)
+    }
+
+    @Test
     fun `test simplifyCompleteRoutePoints - enabled, factor zero`() {
         val expected: List<List<List<Point>>> = completeRoutePoints
 
