@@ -25,6 +25,13 @@ internal object ViewportDataSourceProcessor {
     private const val LOG_CATEGORY = "ViewportDataSourceProcessor"
 
     /**
+     * Avoid simplifying a very short route. When a very small route is simplified,
+     * the camera BBOX could lose small details of the route and end up with a weird framing.
+     * 100 geometry points equates to around 2 km of driving.
+     * */
+    private const val MIN_GEOMETRY_SIZE_TO_SIMPLIFY = 100
+
+    /**
      * Returns complete route points in nested arrays of points for all steps in all legs arranged as \[legs]\[steps]\[points].
      */
     fun processRoutePoints(route: DirectionsRoute): List<List<List<Point>>> {
@@ -159,6 +166,10 @@ internal object ViewportDataSourceProcessor {
                 "overview simplification factor should be a positive integer",
                 LOG_CATEGORY,
             )
+            return completeRoutePoints
+        }
+
+        if (!hasEnoughGeometryPointsToSimplify(completeRoutePoints)) {
             return completeRoutePoints
         }
 
@@ -366,6 +377,22 @@ internal object ViewportDataSourceProcessor {
     private fun wrap(angle: Double, min: Double, max: Double): Double {
         val d = max - min
         return ((((angle - min) % d) + d) % d) + min
+    }
+
+    private fun hasEnoughGeometryPointsToSimplify(
+        completeRoutePoints: List<List<List<Point>>>,
+        threshold: Int = MIN_GEOMETRY_SIZE_TO_SIMPLIFY,
+    ): Boolean {
+        var totalGeometrySize = 0
+        for (legs in completeRoutePoints) {
+            for (stepPoints in legs) {
+                totalGeometrySize += stepPoints.size
+                if (totalGeometrySize >= threshold) {
+                    return true
+                }
+            }
+        }
+        return false
     }
 }
 
