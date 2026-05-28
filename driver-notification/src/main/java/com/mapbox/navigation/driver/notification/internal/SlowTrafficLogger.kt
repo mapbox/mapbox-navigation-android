@@ -15,6 +15,8 @@ object SlowTrafficLogger {
     private var maxEvents: Int? = null
     private var segmentsLogged = 0
     private var eventsLogged = 0
+    private var lastRouteUuid: String? = null
+    private var noEventsLoggedThisInterval = false
 
     fun setInterval(interval: Duration) {
         this.interval = interval
@@ -35,7 +37,14 @@ object SlowTrafficLogger {
         nextLogAt = now + interval.inWholeMilliseconds
         segmentsLogged = 0
         eventsLogged = 0
+        noEventsLoggedThisInterval = false
         return true
+    }
+
+    internal fun logRouteChanged(routeUuid: String?) {
+        if (routeUuid == lastRouteUuid) return
+        lastRouteUuid = routeUuid
+        logD(TAG) { "Route changed: uuid=${routeUuid ?: "n/a"}" }
     }
 
     internal fun logSegment(
@@ -61,7 +70,14 @@ object SlowTrafficLogger {
         }
     }
 
-    internal fun logSummary(index: Int, summary: SlowTrafficSegmentsSummary) {
+    internal fun logSummary(
+        index: Int,
+        summary: SlowTrafficSegmentsSummary,
+        nullFreeFlowSegments: Int,
+        coveredSegments: Int,
+        minFreeFlowSpeed: Int?,
+        maxFreeFlowSpeed: Int?,
+    ) {
         val max = maxEvents
         if (max != null && eventsLogged >= max) return
         eventsLogged++
@@ -76,12 +92,29 @@ object SlowTrafficLogger {
                 }
             val totalDuration = durationSec.seconds
             val totalFreeFlowDuration = freeFlowSec.seconds
+            val totalSegments = coveredSegments + nullFreeFlowSegments
+            val freeFlowRange = when {
+                minFreeFlowSpeed == null || maxFreeFlowSpeed == null -> "null"
+                minFreeFlowSpeed == maxFreeFlowSpeed -> "$minFreeFlowSpeed km/h"
+                else -> "$minFreeFlowSpeed..$maxFreeFlowSpeed km/h"
+            }
             "  => Event#$index finalized: " +
                 "impact=${totalDuration - totalFreeFlowDuration}, " +
                 "duration=$totalDuration, " +
                 "freeFlowDuration=$totalFreeFlowDuration, " +
                 "distanceFromRouteStart=${summary.distanceFromRouteStartMeters.toInt()}m, " +
-                "length=${totalLength.toInt()}m"
+                "length=${totalLength.toInt()}m, " +
+                "nullFreeFlowSegments=$nullFreeFlowSegments/$totalSegments, " +
+                "freeFlowSpeed=$freeFlowRange"
+        }
+    }
+
+    internal fun logNoEvents(routeUuid: String?, targetCongestionsRanges: List<IntRange>) {
+        if (noEventsLoggedThisInterval) return
+        noEventsLoggedThisInterval = true
+        logD(TAG) {
+            "  => no events matched ranges=$targetCongestionsRanges " +
+                "(route=${routeUuid ?: "n/a"})"
         }
     }
 

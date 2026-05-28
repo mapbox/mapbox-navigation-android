@@ -136,28 +136,41 @@ class SlowTrafficSegmentsFinder(
         geometryIndex: Int,
     ): SlowTrafficSegment {
         val legFreeFlowSpeed = geometry.freeFlowSpeed(geometryIndex)
-        val freeFlowDurationSec = when {
-            legFreeFlowSpeed != null && legFreeFlowSpeed > 0 -> {
-                // Speed is km/h, but distance is in the meters.
-                // Applying conversion of the speed from km/h -> m/s
-                geometry.distance(geometryIndex) * KM_PER_H_TO_M_PER_SEC_RATE / legFreeFlowSpeed
-            }
 
-            0.0 < this.lengthMeters -> {
-                // Adding average duration based on the previous geometry
-                val avgTimePerMeter =
-                    this.freeFlowDuration.inWholeSeconds.toDouble() / this.lengthMeters
-                geometry.distance(geometryIndex) * avgTimePerMeter
-            }
-
-            else -> 0.0
+        // Fallback for missing/invalid freeflow_speed: assume freeflow == current effective
+        // speed for the segment, so the impact contribution is zero while the segment still
+        // counts toward `duration` and `lengthMeters`.
+        val distance = geometry.distance(geometryIndex)
+        val currentDuration = geometry.duration(geometryIndex)
+        val freeFlowDurationSec = if (legFreeFlowSpeed != null && legFreeFlowSpeed > 0) {
+            // Speed is km/h, distance is in meters. Convert speed km/h -> m/s.
+            distance * KM_PER_H_TO_M_PER_SEC_RATE / legFreeFlowSpeed
+        } else {
+            currentDuration.inWholeMilliseconds / 1000.0
         }
+
+        // Debug stats: count null-freeflow geometry points and track the freeflow range
+        // observed across the segment. Surfaced via SlowTrafficLogger; does not affect
+        // impact computation.
+        val updatedNullCount = nullFreeFlowSegments +
+            if (legFreeFlowSpeed == null || legFreeFlowSpeed <= 0) 1 else 0
+        val updatedMinFreeFlow = legFreeFlowSpeed
+            ?.takeIf { it > 0 }
+            ?.let { minOf(minFreeFlowSpeed ?: it, it) }
+            ?: minFreeFlowSpeed
+        val updatedMaxFreeFlow = legFreeFlowSpeed
+            ?.takeIf { it > 0 }
+            ?.let { maxOf(maxFreeFlowSpeed ?: it, it) }
+            ?: maxFreeFlowSpeed
 
         return this.copy(
             freeFlowDuration = this.freeFlowDuration + freeFlowDurationSec.seconds,
-            duration = this.duration + geometry.duration(geometryIndex),
-            lengthMeters = this.lengthMeters + geometry.distance(geometryIndex),
+            duration = this.duration + currentDuration,
+            lengthMeters = this.lengthMeters + distance,
             geometryRange = geometryRange.first..geometryIndex,
+            nullFreeFlowSegments = updatedNullCount,
+            minFreeFlowSpeed = updatedMinFreeFlow,
+            maxFreeFlowSpeed = updatedMaxFreeFlow,
         ).apply {
             // Each geometry consists of 2 points
             if (_points.isEmpty()) {
