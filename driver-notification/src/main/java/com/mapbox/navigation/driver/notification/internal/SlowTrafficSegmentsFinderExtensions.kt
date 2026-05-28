@@ -35,6 +35,8 @@ suspend fun SlowTrafficSegmentsFinder.findAndSummarizeSlowTrafficSegments(
     route: DirectionsRoute,
     targetCongestionsRanges: List<IntRange>,
 ): List<SlowTrafficSegmentsSummary> = withContext(Dispatchers.Default) {
+    val routeUuid = route.requestUuid()
+    SlowTrafficLogger.logRouteChanged(routeUuid)
     val shouldLog = SlowTrafficLogger.shouldLogNow()
     val segments = findSlowTrafficSegments(
         route = route,
@@ -42,12 +44,17 @@ suspend fun SlowTrafficSegmentsFinder.findAndSummarizeSlowTrafficSegments(
     )
 
     val summaries = mutableListOf<SlowTrafficSegmentsSummary>()
+    val perSummaryStats = mutableListOf<EventStats>()
     var currentSummary: SlowTrafficSegmentsSummary? = null
     var traitsMap: MutableMap<IntRange, SlowTrafficTraits>? = null
     var currentPoints: MutableList<Point>? = null
     var eventIndex = 0
     var longestSegmentDistance = 0.0
     var dominantCongestionRange: IntRange = IntRange.EMPTY
+    var summarySkipped = 0
+    var summaryCovered = 0
+    var summaryMinFreeFlow: Int? = null
+    var summaryMaxFreeFlow: Int? = null
 
     for ((segmentIndex, segment) in segments.withIndex()) {
         val segmentTraits = segment.toTraits()
@@ -63,6 +70,20 @@ suspend fun SlowTrafficSegmentsFinder.findAndSummarizeSlowTrafficSegments(
                     currentPoints.orEmpty(),
                     dominantCongestionRange,
                 )
+                if (shouldLog) {
+                    perSummaryStats.add(
+                        EventStats(
+                            skipped = summarySkipped,
+                            covered = summaryCovered,
+                            minFreeFlow = summaryMinFreeFlow,
+                            maxFreeFlow = summaryMaxFreeFlow,
+                        ),
+                    )
+                    summarySkipped = 0
+                    summaryCovered = 0
+                    summaryMinFreeFlow = null
+                    summaryMaxFreeFlow = null
+                }
                 eventIndex++
                 traitsMap = null
                 currentPoints = null
@@ -82,7 +103,18 @@ suspend fun SlowTrafficSegmentsFinder.findAndSummarizeSlowTrafficSegments(
             longestSegmentDistance = segment.lengthMeters
             dominantCongestionRange = segment.congestionRange
         }
-        if (shouldLog) logSegment(segmentIndex, segment, isNew = currentPoints == null, eventIndex)
+        // Stat aggregation only matters when this interval's logging will fire; skipped otherwise
+        // to keep the per-segment hot path cheap when logging is disabled.
+        if (shouldLog) {
+            summarySkipped += segment.nullFreeFlowSegments
+            summaryCovered += (segment.geometryRange.last - segment.geometryRange.first + 1) -
+                segment.nullFreeFlowSegments
+            summaryMinFreeFlow =
+                listOfNotNull(summaryMinFreeFlow, segment.minFreeFlowSpeed).minOrNull()
+            summaryMaxFreeFlow =
+                listOfNotNull(summaryMaxFreeFlow, segment.maxFreeFlowSpeed).maxOrNull()
+            logSegment(segmentIndex, segment, isNew = currentPoints == null, eventIndex)
+        }
         traitsMap = traitsMap ?: mutableMapOf()
 
         // Skip the first point of subsequent segments to avoid duplicating the boundary
@@ -101,11 +133,44 @@ suspend fun SlowTrafficSegmentsFinder.findAndSummarizeSlowTrafficSegments(
 
     currentSummary?.let {
         summaries.add(it, traitsMap.orEmpty(), currentPoints.orEmpty(), dominantCongestionRange)
+        if (shouldLog) {
+            perSummaryStats.add(
+                EventStats(
+                    skipped = summarySkipped,
+                    covered = summaryCovered,
+                    minFreeFlow = summaryMinFreeFlow,
+                    maxFreeFlow = summaryMaxFreeFlow,
+                ),
+            )
+        }
     }
 
-    if (shouldLog) summaries.forEachIndexed { index, summary -> logSummary(index, summary) }
+    if (shouldLog) {
+        if (summaries.isEmpty()) {
+            SlowTrafficLogger.logNoEvents(routeUuid, targetCongestionsRanges)
+        } else {
+            summaries.forEachIndexed { index, summary ->
+                val stats = perSummaryStats[index]
+                logSummary(
+                    index = index,
+                    summary = summary,
+                    nullFreeFlowSegments = stats.skipped,
+                    coveredSegments = stats.covered,
+                    minFreeFlowSpeed = stats.minFreeFlow,
+                    maxFreeFlowSpeed = stats.maxFreeFlow,
+                )
+            }
+        }
+    }
     summaries
 }
+
+private data class EventStats(
+    val skipped: Int,
+    val covered: Int,
+    val minFreeFlow: Int?,
+    val maxFreeFlow: Int?,
+)
 
 private fun SlowTrafficSegment.toTraits(): SlowTrafficTraits {
     return SlowTrafficTraits(

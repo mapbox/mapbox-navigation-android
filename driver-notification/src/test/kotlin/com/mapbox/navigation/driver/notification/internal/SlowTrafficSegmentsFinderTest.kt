@@ -369,6 +369,48 @@ class SlowTrafficSegmentsFinderTest {
     }
 
     @Test
+    fun `null freeflow segments fall back to current speed (zero impact contribution)`() =
+        runBlocking {
+            // Three severe-congestion segments. Middle one has null freeflow_speed.
+            // Expected (current-speed fallback): the null-freeflow segment STILL contributes to
+            // duration and lengthMeters, and contributes its own duration to freeFlowDuration —
+            // so its impact contribution is zero, but the segment's spatial / temporal extent
+            // is preserved. See NAVPOR-8849.
+            //   seg1 (idx=1): dist=100, dur=10, ff=36   → ff sec = 100*3.6/36 = 10s; impact = 0s
+            //   seg2 (idx=2): dist=80,  dur=20, ff=null → ff sec = 20s (=dur);       impact = 0s
+            //   seg3 (idx=3): dist=120, dur=30, ff=24   → ff sec = 120*3.6/24 = 18s; impact = 12s
+            // → length = 100 + 80 + 120 = 300m
+            //   duration = 10 + 20 + 30 = 60s
+            //   freeFlowDuration = 10 + 20 + 18 = 48s
+            //   impact = 60 - 48 = 12s
+            val annotation = mockk<LegAnnotation> {
+                every { congestionNumeric() } returns listOf(
+                    lowCongestion,
+                    severeCongestion,
+                    severeCongestion,
+                    severeCongestion,
+                    lowCongestion,
+                )
+                every { distance() } returns listOf(50.0, 100.0, 80.0, 120.0, 30.0)
+                every { duration() } returns listOf(5.0, 10.0, 20.0, 30.0, 3.0)
+                every { freeflowSpeed() } returns listOf(36, 36, null, 24, 36)
+            }
+            val route = prepareRouteFrom(annotation)
+
+            val segments = finder.findSlowTrafficSegments(
+                route = route,
+                targetCongestionsRanges = listOf(SEVERE_CONGESTION_RANGE),
+            )
+
+            Assert.assertEquals(1, segments.size)
+            val segment = segments.first()
+            Assert.assertEquals(1..3, segment.geometryRange)
+            Assert.assertEquals(300.0, segment.lengthMeters, 0.01)
+            Assert.assertEquals(60, segment.duration.inWholeSeconds)
+            Assert.assertEquals(48, segment.freeFlowDuration.inWholeSeconds)
+        }
+
+    @Test
     fun `geometry point does not throw when index equals points array size`() = runBlocking {
         // Geometry.point(geometryIndex + 1) is called for every slow annotation.
         // Check if no exception when annotation index is higher than points count for some reason
@@ -455,7 +497,10 @@ class SlowTrafficSegmentsFinderTest {
 
     private fun prepareRouteFrom(vararg annotation: LegAnnotation): DirectionsRoute {
         val legs = annotation.map { ann -> mockk<RouteLeg> { every { annotation() } returns ann } }
-        return mockk<DirectionsRoute> { every { legs() } returns legs }
+        return mockk<DirectionsRoute> {
+            every { legs() } returns legs
+            every { requestUuid() } returns null
+        }
     }
 }
 
