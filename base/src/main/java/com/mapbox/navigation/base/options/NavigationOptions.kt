@@ -53,7 +53,16 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1000L
  *   [DirectionsJsonObject].
  * - Route refresh is not supported.
  * - A route parsed using the native route object may not fully match the same route
- *   parsed with [nativeRouteObject] set to `false`.
+ *   parsed with [nativeRouteObject] set to `false`. In particular, coordinates
+ *   returned by polyline-decoding APIs (such as
+ *   [com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints]) can
+ *   differ in the trailing digits due to small algorithmic differences between the
+ *   C++ and Java polyline decoders. The two values describe the same point on the
+ *   road to well under a millimeter, but are not guaranteed to be bit-identical;
+ *   use an epsilon-based comparison rather than exact `Double` equality.
+ *
+ * See the [NRO compatibility guide](https://docs.mapbox.com/android/navigation/guides/advanced/nro)
+ * for the full list of considerations before enabling this option.
  */
 class NavigationOptions
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -372,7 +381,16 @@ private constructor(
          *   [DirectionsJsonObject].
          * - Route refresh is not supported.
          * - A route parsed using the native route object may not fully match the same route
-         *   parsed with [nativeRouteObject] set to `false`.
+         *   parsed with [nativeRouteObject] set to `false`. In particular, coordinates
+         *   returned by polyline-decoding APIs (such as
+         *   [com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints]) can
+         *   differ in the trailing digits due to small algorithmic differences between the
+         *   C++ and Java polyline decoders. The two values describe the same point on the
+         *   road to well under a millimeter, but are not guaranteed to be bit-identical;
+         *   use an epsilon-based comparison rather than exact `Double` equality.
+         *
+         * See the [NRO compatibility guide](https://docs.mapbox.com/android/navigation/guides/advanced/nro)
+         * for the full list of considerations before enabling this option.
          */
         @ExperimentalPreviewMapboxNavigationAPI
         fun nativeRouteObject(value: Boolean): Builder =
