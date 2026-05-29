@@ -6,6 +6,7 @@ import com.mapbox.navigation.core.utils.routeRefresh.RouteRefreshUtils
 import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
@@ -25,11 +26,12 @@ internal class ImmediateRouteRefreshController(
     fun requestRoutesRefresh(
         routes: List<NavigationRoute>,
         callback: (RoutesRefresherExecutorResult) -> Unit,
-    ) {
+        onCancellation: () -> Unit = {},
+    ): Job {
         if (routes.isEmpty()) {
             throw IllegalArgumentException("Routes to refresh should not be empty")
         }
-        scope.launch {
+        return scope.launch {
             val result = try {
                 routeRefresherExecutor.executeRoutesRefresh(
                     routes,
@@ -37,6 +39,7 @@ internal class ImmediateRouteRefreshController(
                 )
             } catch (ex: CancellationException) {
                 stateHolder.onCancel()
+                onCancellation()
                 throw ex
             }
 

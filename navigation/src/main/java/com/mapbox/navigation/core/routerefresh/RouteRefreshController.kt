@@ -73,21 +73,33 @@ class RouteRefreshController internal constructor(
             return
         }
         plannedRouteRefreshController.pause()
-        immediateRouteRefreshController.requestRoutesRefresh(routes) { result ->
-            val callbackResult = when (result) {
-                is RoutesRefresherExecutorResult.Finished -> {
-                    plannedRouteRefreshController.resume()
-                    if (result.value.anySuccess()) {
-                        ImmediateRouteRefreshResult.Success()
-                    } else {
-                        ImmediateRouteRefreshResult.Failure()
+        val refreshJob = immediateRouteRefreshController.requestRoutesRefresh(
+            routes,
+            callback = { result ->
+                val callbackResult = when (result) {
+                    is RoutesRefresherExecutorResult.Finished -> {
+                        plannedRouteRefreshController.resume()
+                        if (result.value.anySuccess()) {
+                            ImmediateRouteRefreshResult.Success()
+                        } else {
+                            ImmediateRouteRefreshResult.Failure()
+                        }
+                    }
+                    is RoutesRefresherExecutorResult.ReplacedByNewer -> {
+                        ImmediateRouteRefreshResult.Cancelled()
                     }
                 }
-                is RoutesRefresherExecutorResult.ReplacedByNewer -> {
-                    ImmediateRouteRefreshResult.Cancelled()
-                }
+                callback.onRefreshFinished(callbackResult)
+            },
+            onCancellation = {
+                plannedRouteRefreshController.resume()
+                callback.onRefreshFinished(ImmediateRouteRefreshResult.Cancelled())
+            },
+        )
+        refreshJob.invokeOnCompletion { cause ->
+            if (cause != null) {
+                plannedRouteRefreshController.resume()
             }
-            callback.onRefreshFinished(callbackResult)
         }
     }
 

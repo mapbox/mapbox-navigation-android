@@ -14,6 +14,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.routerefresh.ImmediateRouteRefreshResult
 import com.mapbox.navigation.core.routerefresh.RouteRefreshExtra
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.activity.EmptyTestActivity
@@ -25,7 +26,9 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForUpdate
+import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
 import com.mapbox.navigation.testing.utils.DynamicResponseModifier
+import com.mapbox.navigation.testing.utils.assertions.assertIs
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRefreshHandler
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.testing.utils.http.MockRoutingTileEndpointErrorRequestHandler
@@ -37,7 +40,9 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -171,6 +176,44 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
             ),
             observer.getStatesSnapshot(),
         )
+    }
+
+    @Test
+    fun route_refresh_on_demand_is_cancelled() = sdkTest {
+        baseRefreshHandler.jsonResponseModifier = DynamicResponseModifier()
+        setupMockRequestHandlers(baseRefreshHandler)
+        val testRouteRefreshIntervalMs = 3_000L
+        createMapboxNavigation(
+            createRouteRefreshOptionsWithInvalidInterval(
+                testRouteRefreshIntervalMs,
+            ),
+        )
+        mapboxNavigation.startTripSession()
+        val routeOptions = generateRouteOptions(twoCoordinates)
+        val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
+            .getSuccessfulResultOrThrowException()
+            .routes
+        mapboxNavigation.setNavigationRoutesAsync(requestedRoutes)
+
+        var immediateRefreshResult: ImmediateRouteRefreshResult? = null
+        mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh { result ->
+            immediateRefreshResult = result
+        }
+        // routes set should cancel ongoing immediate route refresh
+        mapboxNavigation.setNavigationRoutesAsync(requestedRoutes)
+
+        val refreshTimeout = testRouteRefreshIntervalMs * 2
+        val plannedRefreshResult = withTimeoutOrNull(refreshTimeout) {
+            mapboxNavigation.routesUpdates()
+                .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
+                .first()
+        }
+        assertNotNull(
+            "No route refresh happened in $refreshTimeout " +
+                "while refresh interval is $testRouteRefreshIntervalMs",
+            plannedRefreshResult,
+        )
+        assertIs<ImmediateRouteRefreshResult.Cancelled>(immediateRefreshResult)
     }
 
     private fun createMapboxNavigation(routeRefreshOptions: RouteRefreshOptions) {
