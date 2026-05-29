@@ -3,11 +3,13 @@ package com.mapbox.navigation.core.routerefresh
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.testing.assertIs
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
 internal class RouteRefreshOnDemandIntegrationTest : RouteRefreshIntegrationTest() {
 
     @Test
@@ -191,6 +193,74 @@ internal class RouteRefreshOnDemandIntegrationTest : RouteRefreshIntegrationTest
             routesAfterReroute[1].id,
             refreshObserver.refreshes.first().alternativesRouteRefresherResults.first().route.id,
         )
+        assertEquals(
+            listOf(
+                RouteRefreshExtra.REFRESH_STATE_STARTED,
+                RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS,
+            ),
+            stateObserver.getStatesSnapshot(),
+        )
+    }
+
+    @Test
+    fun plannedRouteRefreshHappensAfterImmediateRouteRefreshCancellation() {
+        val routes = setUpRoutes("route_response_single_route_refresh.json", responseDelay = 60_000)
+        routeRefreshController = createRefreshController(30_000)
+        routeRefreshController.registerRouteRefreshObserver(refreshObserver)
+        routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
+
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW),
+        )
+
+        var immediateRefreshResult: ImmediateRouteRefreshResult? = null
+        routeRefreshController.requestImmediateRouteRefresh { result ->
+            immediateRefreshResult = result
+        }
+
+        setUpRouteRefresh("route_response_single_route_refresh.json", responseDelay = 0)
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW),
+        )
+
+        testDispatcher.advanceTimeBy(30_000)
+
+        assertIs<ImmediateRouteRefreshResult.Cancelled>(immediateRefreshResult)
+        assertEquals(1, refreshObserver.refreshes.size)
+        assertEquals(
+            listOf(
+                RouteRefreshExtra.REFRESH_STATE_STARTED,
+                RouteRefreshExtra.REFRESH_STATE_CANCELED,
+                RouteRefreshExtra.REFRESH_STATE_STARTED,
+                RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS,
+            ),
+            stateObserver.getStatesSnapshot(),
+        )
+    }
+
+    @Test
+    fun plannedRouteRefreshHappensAfterImmediateRouteRefreshCancelledImmediately() {
+        val routes = setUpRoutes("route_response_single_route_refresh.json")
+        routeRefreshController = createRefreshController(30_000)
+        routeRefreshController.registerRouteRefreshObserver(refreshObserver)
+        routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
+
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW),
+        )
+
+        // Pause the dispatcher so the immediate-refresh launch is queued but its body
+        // does not start before the new routes are set, mirroring how Dispatchers.Main
+        // queues a launch and the next Main-thread message cancels it before it runs.
+        testDispatcher.pauseDispatcher()
+        routeRefreshController.requestImmediateRouteRefresh()
+        routeRefreshController.onRoutesChanged(
+            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW),
+        )
+
+        testDispatcher.advanceTimeBy(30_000)
+
+        assertEquals(1, refreshObserver.refreshes.size)
         assertEquals(
             listOf(
                 RouteRefreshExtra.REFRESH_STATE_STARTED,
