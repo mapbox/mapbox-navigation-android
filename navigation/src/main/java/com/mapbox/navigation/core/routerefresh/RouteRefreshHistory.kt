@@ -13,46 +13,51 @@ internal object NoOpRouteRefreshHistoryRecorder : RouteRefreshHistoryRecorder {
     override fun recordRouteRefreshEvent(event: RouteRefreshHistoryEvent) = Unit
 }
 
-internal sealed class RouteRefreshHistoryEvent {
-    class ImmediateRouteRefresh : RouteRefreshHistoryEvent() {
-        override fun toEventJson() = """{"type":"ImmediateRouteRefresh"}"""
+internal sealed interface RouteRefreshHistoryEvent {
+    fun toEventJson(): String
 
-        class Requested : PeriodicRouteRefresh() {
+    sealed interface ImmediateRouteRefresh : RouteRefreshHistoryEvent {
+        class Requested : ImmediateRouteRefresh {
             override fun toEventJson() = """{"type":"ImmediateRouteRefresh.Requested"}"""
         }
     }
-    sealed class PeriodicRouteRefresh : RouteRefreshHistoryEvent() {
-        class Started : PeriodicRouteRefresh() {
-            override fun toEventJson() = """{"type":"PeriodicRouteRefresh.Started"}"""
+    sealed interface PeriodicRouteRefresh : RouteRefreshHistoryEvent {
+        class Resumed : PeriodicRouteRefresh {
+            override fun toEventJson() = """{"type":"PeriodicRouteRefresh.Resumed"}"""
         }
-        class Paused : PeriodicRouteRefresh() {
+        class Paused : PeriodicRouteRefresh {
             override fun toEventJson() = """{"type":"PeriodicRouteRefresh.Paused"}"""
         }
-        class RoutesToRefreshUpdated(val ids: List<String>) : PeriodicRouteRefresh() {
+        class RoutesToRefreshUpdated(val ids: List<String>) : PeriodicRouteRefresh {
             override fun toEventJson(): String {
                 val idsJson = ids.joinToString(",") { "\"$it\"" }
                 return """{"type":"PeriodicRouteRefresh.RoutesToRefreshUpdated","ids":[$idsJson]}"""
             }
         }
-        class RefreshAttemptScheduled(val resumeDelay: Boolean) : PeriodicRouteRefresh() {
+        class RefreshAttemptPosted(
+            val resumePreviousAttemptDelay: Boolean,
+            val isPaused: Boolean,
+        ) : PeriodicRouteRefresh {
             override fun toEventJson(): String {
-                return """{"type":"PeriodicRouteRefresh.RefreshAttemptScheduled",""" +
-                    """"resumeDelay":$resumeDelay}"""
+                return """{
+                    "type":"PeriodicRouteRefresh.RefreshAttemptPosted",
+                    "resumePreviousAttemptDelay":$resumePreviousAttemptDelay,
+                    "isPaused": $isPaused
+                    }
+                """.trimIndent()
             }
         }
     }
     class RouteRefreshStateUpdated(
         @RouteRefreshExtra.RouteRefreshState val state: String,
-    ) : RouteRefreshHistoryEvent() {
+    ) : RouteRefreshHistoryEvent {
         override fun toEventJson() =
             """{"type":"RouteRefreshStateUpdated","state":"$state"}"""
     }
 
-    class Destroyed : RouteRefreshHistoryEvent() {
+    class Destroyed : RouteRefreshHistoryEvent {
         override fun toEventJson() = """{"type":"Destroyed"}"""
     }
-
-    abstract fun toEventJson(): String
 }
 
 internal class MapboxHistoryRecorderWrapper(

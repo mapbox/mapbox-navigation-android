@@ -271,16 +271,11 @@ class PlannedRouteRefreshControllerTest {
         assertEquals(1, updatedEvent.size)
         assertEquals(listOf("id#0", "id#1"), updatedEvent.first().ids)
 
-        assertTrue(
-            historyRecorder
-                .eventsOf<RouteRefreshHistoryEvent.PeriodicRouteRefresh.Started>()
-                .isNotEmpty(),
-        )
-
         val scheduledEvent = historyRecorder
-            .eventsOf<RouteRefreshHistoryEvent.PeriodicRouteRefresh.RefreshAttemptScheduled>()
+            .eventsOf<RouteRefreshHistoryEvent.PeriodicRouteRefresh.RefreshAttemptPosted>()
         assertEquals(1, scheduledEvent.size)
-        assertEquals(false, scheduledEvent.first().resumeDelay)
+        assertEquals(false, scheduledEvent.first().resumePreviousAttemptDelay)
+        assertEquals(false, scheduledEvent.first().isPaused)
     }
 
     @Test
@@ -676,6 +671,27 @@ class PlannedRouteRefreshControllerTest {
     }
 
     @Test
+    fun startRouteRefreshingForPaused() = coroutineRule.runBlockingTest {
+        sut.pause()
+        every {
+            RouteRefreshValidator.validateRoute(any())
+        } returns RouteRefreshValidator.RouteValidationResult.Valid
+
+        sut.startRoutesRefreshing(listOf(mockk(relaxed = true)))
+
+        assertEquals(
+            1,
+            historyRecorder
+                .eventsOf<RouteRefreshHistoryEvent.PeriodicRouteRefresh.RoutesToRefreshUpdated>()
+                .size,
+        )
+        val refreshAttempt = historyRecorder
+            .eventsOf<RouteRefreshHistoryEvent.PeriodicRouteRefresh.RefreshAttemptPosted>()
+            .single()
+        assertTrue(refreshAttempt.isPaused)
+    }
+
+    @Test
     fun pauseResumed() = coroutineRule.runBlockingTest {
         every {
             RouteRefreshValidator.validateRoute(any())
@@ -705,6 +721,11 @@ class PlannedRouteRefreshControllerTest {
         coVerify(exactly = 0) {
             executor.executeRoutesRefresh(any(), any())
         }
+        assertTrue(
+            historyRecorder
+                .eventsOf<RouteRefreshHistoryEvent.PeriodicRouteRefresh.Resumed>()
+                .isNotEmpty(),
+        )
     }
 
     @Test

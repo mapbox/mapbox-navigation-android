@@ -81,9 +81,6 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
                     routes.map { it.id },
                 ),
             )
-            historyRecorder.recordRouteRefreshEvent(
-                RouteRefreshHistoryEvent.PeriodicRouteRefresh.Started(),
-            )
             scheduleNewUpdate(routes, hasSameRoutes)
         } else {
             routesToRefresh = null
@@ -116,6 +113,9 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
         logI("Resuming refreshes", RouteRefreshLog.LOG_CATEGORY)
         if (plannedRefreshScope == null) {
             plannedRefreshScope = parentScope.newChildScope()
+            historyRecorder.recordRouteRefreshEvent(
+                RouteRefreshHistoryEvent.PeriodicRouteRefresh.Resumed(),
+            )
             routesToRefresh?.let {
                 if (retryStrategy.shouldRetry()) {
                     scheduleUpdateRetry(
@@ -148,7 +148,10 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
 
     private fun postAttempt(shouldResume: Boolean, attemptBlock: suspend () -> Unit) {
         historyRecorder.recordRouteRefreshEvent(
-            RouteRefreshHistoryEvent.PeriodicRouteRefresh.RefreshAttemptScheduled(shouldResume),
+            RouteRefreshHistoryEvent.PeriodicRouteRefresh.RefreshAttemptPosted(
+                resumePreviousAttemptDelay = shouldResume,
+                isPaused = plannedRefreshScope == null,
+            ),
         )
         plannedRefreshScope?.launch {
             try {
