@@ -1,6 +1,7 @@
 package com.mapbox.navigation.base.options
 
 import com.mapbox.bindgen.Value
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 
 /**
  * Predictive cache Maps related options.
@@ -9,22 +10,26 @@ import com.mapbox.bindgen.Value
  * @param minZoom Minimum zoom level for the tile package. See **com.mapbox.maps.TilesetDescriptorOptions#getMinZoom**
  * @param maxZoom Maximum zoom level for the tile package. See **com.mapbox.maps.TilesetDescriptorOptions#getMaxZoom**
  * @param extraOptions Extra tileset descriptor options. See **com.mapbox.maps.TilesetDescriptorOptions#getExtraOptions**
+ * @param tilesets The tilesets associated with the tileset descriptor. See **com.mapbox.maps.TilesetDescriptorOptions#getTilesets**
  */
 class PredictiveCacheMapsOptions private constructor(
     val predictiveCacheLocationOptions: PredictiveCacheLocationOptions,
     val minZoom: Byte,
     val maxZoom: Byte,
     val extraOptions: Value?,
+    val tilesets: List<String>?,
 ) {
 
     /**
      * Get a builder to customize a subset of current options.
      */
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     fun toBuilder(): Builder = Builder().apply {
         predictiveCacheLocationOptions(predictiveCacheLocationOptions)
         minZoom(minZoom)
         maxZoom(maxZoom)
         extraOptions(extraOptions)
+        tilesets(tilesets)
     }
 
     /**
@@ -39,7 +44,8 @@ class PredictiveCacheMapsOptions private constructor(
         if (predictiveCacheLocationOptions != other.predictiveCacheLocationOptions) return false
         if (minZoom != other.minZoom) return false
         if (maxZoom != other.maxZoom) return false
-        return extraOptions == other.extraOptions
+        if (extraOptions != other.extraOptions) return false
+        return tilesets == other.tilesets
     }
 
     /**
@@ -50,6 +56,7 @@ class PredictiveCacheMapsOptions private constructor(
         result = 31 * result + minZoom
         result = 31 * result + maxZoom
         result = 31 * result + (extraOptions?.hashCode() ?: 0)
+        result = 31 * result + (tilesets?.hashCode() ?: 0)
         return result
     }
 
@@ -61,7 +68,8 @@ class PredictiveCacheMapsOptions private constructor(
             "predictiveCacheLocationOptions=$predictiveCacheLocationOptions, " +
             "minZoom=$minZoom, " +
             "maxZoom=$maxZoom, " +
-            "extraOptions=$extraOptions" +
+            "extraOptions=$extraOptions, " +
+            "tilesets=$tilesets" +
             ")"
     }
 
@@ -73,6 +81,7 @@ class PredictiveCacheMapsOptions private constructor(
         private var minZoom = 15.toByte()
         private var maxZoom = 16.toByte()
         private var extraOptions: Value? = null
+        private var tilesets: List<String>? = null
 
         /**
          * Location configuration for visual map predictive caching
@@ -85,7 +94,7 @@ class PredictiveCacheMapsOptions private constructor(
          * Minimum zoom level for the tile package.
          * See **com.mapbox.maps.TilesetDescriptorOptions#getMinZoom**
          *
-         * Defaults to 0
+         * Defaults to 15
          */
         fun minZoom(minZoom: Byte): Builder = apply {
             this.minZoom = minZoom
@@ -112,6 +121,17 @@ class PredictiveCacheMapsOptions private constructor(
         }
 
         /**
+         * The tilesets associated with the tileset descriptor.
+         * See **com.mapbox.maps.TilesetDescriptorOptions#getTilesets**
+         *
+         * Defaults to null.
+         */
+        @ExperimentalPreviewMapboxNavigationAPI
+        fun tilesets(tilesets: List<String>?): Builder = apply {
+            this.tilesets = tilesets
+        }
+
+        /**
          * Build [PredictiveCacheMapsOptions].
          */
         fun build(): PredictiveCacheMapsOptions = PredictiveCacheMapsOptions(
@@ -119,6 +139,7 @@ class PredictiveCacheMapsOptions private constructor(
             minZoom,
             maxZoom,
             extraOptions,
+            tilesets,
         )
     }
 }
