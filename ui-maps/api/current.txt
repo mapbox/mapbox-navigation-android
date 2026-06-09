@@ -61,6 +61,7 @@ package com.mapbox.navigation.ui.maps {
     method public void createStyleMapControllers(com.mapbox.maps.MapboxMap map, boolean cacheCurrentMapStyle = true, java.util.List<java.lang.String> styles = emptyList());
     method public void createStyleMapControllers(com.mapbox.maps.MapboxMap map, boolean cacheCurrentMapStyle = true);
     method public void createStyleMapControllers(com.mapbox.maps.MapboxMap map);
+    method public void createTilesetsMapController(com.mapbox.maps.MapboxMap map, java.util.List<com.mapbox.navigation.base.options.PredictiveCacheMapsOptions>? predictiveCacheMapOptions = null);
     method public com.mapbox.navigation.ui.maps.PredictiveCacheControllerErrorHandler? getPredictiveCacheControllerErrorHandler();
     method public void onDestroy();
     method public void removeMapControllers(com.mapbox.maps.MapboxMap map);
