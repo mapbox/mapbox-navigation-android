@@ -11,6 +11,7 @@ import com.mapbox.maps.MapboxMapsOptions
 import com.mapbox.maps.StyleLoadedCallback
 import com.mapbox.maps.TilesetDescriptorOptions
 import com.mapbox.maps.mapsOptions
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.PredictiveCacheMapsOptions
 import com.mapbox.navigation.base.options.PredictiveCacheOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
@@ -154,7 +155,7 @@ class PredictiveCacheController @VisibleForTesting internal constructor(
         }
 
         styles.forEach { styleURI ->
-            createMapsController(styleURI, map, tileStore)
+            createStyleMapsController(styleURI, map, tileStore)
         }
 
         if (!cacheCurrentMapStyle) {
@@ -163,20 +164,45 @@ class PredictiveCacheController @VisibleForTesting internal constructor(
 
         map.style?.styleURI?.let { styleURI ->
             if (!styles.contains(styleURI)) {
-                createMapsController(styleURI, map, tileStore, null)
+                createStyleMapsController(styleURI, map, tileStore, null)
             }
         }
 
         val styleLoadedCallback = StyleLoadedCallback {
             map.style?.styleURI?.let { styleURI ->
                 if (!styles.contains(styleURI)) {
-                    createMapsController(styleURI, map, tileStore, null)
+                    createStyleMapsController(styleURI, map, tileStore, null)
                 }
             }
         }
 
         val subscription = map.subscribeStyleLoaded(styleLoadedCallback)
         mapSubscriptions[map] = subscription
+    }
+
+    /**
+     * Creates map cache controller for a map instance based on a list of tilesets.
+     * This method is useful for caching specific data sources (like traffic or terrain)
+     * that are not tied to a single map style.
+     *
+     * @param map an instance of [MapboxMap]
+     * @param predictiveCacheMapOptions a list of [PredictiveCacheMapsOptions] defining the
+     *                                  tilesets to cache and their zoom ranges.
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun createTilesetsMapController(
+        map: MapboxMap,
+        predictiveCacheMapOptions: List<PredictiveCacheMapsOptions>? = null,
+    ) {
+        logD(LOG_CATEGORY) {
+            "createTilesetsMapController($map, ${predictiveCacheMapOptions?.joinToString()})"
+        }
+        val tileStore = MapboxOptions.mapsOptions.tileStore
+        if (tileStore == null) {
+            handleError("TileStore instance not configured for the Map.")
+            return
+        }
+        createMapsController("", map, tileStore, predictiveCacheMapOptions)
     }
 
     internal fun createStyleMapControllers(
@@ -191,7 +217,7 @@ class PredictiveCacheController @VisibleForTesting internal constructor(
         }
 
         styles.forEach { styleUri ->
-            createMapsController(styleUri, map, tileStore, predictiveCacheMapOptions)
+            createStyleMapsController(styleUri, map, tileStore, predictiveCacheMapOptions)
         }
     }
 
@@ -225,7 +251,7 @@ class PredictiveCacheController @VisibleForTesting internal constructor(
         predictiveCacheControllerErrorHandler?.onError(error)
     }
 
-    private fun createMapsController(
+    private fun createStyleMapsController(
         styleURI: String,
         map: MapboxMap,
         tileStore: TileStore,
@@ -240,7 +266,15 @@ class PredictiveCacheController @VisibleForTesting internal constructor(
             handleError(message)
             return
         }
+        createMapsController(styleURI, map, tileStore, predictiveCacheMapOptions)
+    }
 
+    private fun createMapsController(
+        styleURI: String,
+        map: MapboxMap,
+        tileStore: TileStore,
+        predictiveCacheMapOptions: List<PredictiveCacheMapsOptions>? = null,
+    ) {
         val offlineManager = OfflineManagerProvider.provideOfflineManager()
         val predictiveCacheControllerKeys =
             (predictiveCacheMapOptions ?: predictiveCacheOptions.predictiveCacheMapsOptionsList)
@@ -250,6 +284,7 @@ class PredictiveCacheController @VisibleForTesting internal constructor(
                         .minZoom(options.minZoom)
                         .maxZoom(options.maxZoom)
                         .extraOptions(options.extraOptions)
+                        .tilesets(options.tilesets)
                         .build()
 
                     val tilesetDescriptor =

@@ -825,11 +825,13 @@ package com.mapbox.navigation.base.options {
     method public byte getMaxZoom();
     method public byte getMinZoom();
     method public com.mapbox.navigation.base.options.PredictiveCacheLocationOptions getPredictiveCacheLocationOptions();
+    method public java.util.List<java.lang.String>? getTilesets();
     method public com.mapbox.navigation.base.options.PredictiveCacheMapsOptions.Builder toBuilder();
     property public final com.mapbox.bindgen.Value? extraOptions;
     property public final byte maxZoom;
     property public final byte minZoom;
     property public final com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions;
+    property public final java.util.List<java.lang.String>? tilesets;
   }
 
   public static final class PredictiveCacheMapsOptions.Builder {
@@ -839,6 +841,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.PredictiveCacheMapsOptions.Builder maxZoom(byte maxZoom);
     method public com.mapbox.navigation.base.options.PredictiveCacheMapsOptions.Builder minZoom(byte minZoom);
     method public com.mapbox.navigation.base.options.PredictiveCacheMapsOptions.Builder predictiveCacheLocationOptions(com.mapbox.navigation.base.options.PredictiveCacheLocationOptions predictiveCacheLocationOptions);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.base.options.PredictiveCacheMapsOptions.Builder tilesets(java.util.List<java.lang.String>? tilesets);
   }
 
   public final class PredictiveCacheNavigationOptions {

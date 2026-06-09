@@ -1,5 +1,6 @@
 package com.mapbox.navigation.base.options
 
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.testing.BuilderTest
 import io.mockk.mockk
 import org.junit.Test
@@ -11,6 +12,7 @@ class PredictiveCacheMapsOptionsTest :
     override fun getImplementationClass(): KClass<PredictiveCacheMapsOptions> =
         PredictiveCacheMapsOptions::class
 
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun getFilledUpBuilder(): PredictiveCacheMapsOptions.Builder =
         PredictiveCacheMapsOptions.Builder().apply {
             predictiveCacheLocationOptions(
@@ -22,6 +24,7 @@ class PredictiveCacheMapsOptionsTest :
             )
             minZoom(20)
             maxZoom(30)
+            tilesets(listOf("mapbox://mapbox.streets"))
             extraOptions(mockk(relaxed = true))
         }
 
