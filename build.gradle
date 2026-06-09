@@ -2,6 +2,7 @@ buildscript {
   apply from: "${rootDir}/gradle/dependencies.gradle"
   repositories {
     google()
+    mavenLocal()
     mavenCentral()
     maven {
       url 'https://api.mapbox.com/downloads/v2/releases/maven'
@@ -47,6 +48,7 @@ task testReport(type: TestReport, group: 'Build') {
 allprojects {
   repositories {
     google()
+    mavenLocal()
     mavenCentral()
     maven {
       url 'https://api.mapbox.com/downloads/v2/releases/maven'
