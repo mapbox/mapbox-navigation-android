@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mapbox_voice_feedback__share_your_feedback">分享你的意見</string>
+    <string name="mapbox_voice_feedback__listening">正在聆聽…</string>
+    <string name="mapbox_voice_feedback__processing">處理中…</string>
+    <string name="mapbox_voice_feedback__success_title">多謝分享</string>
+    <string name="mapbox_voice_feedback__success_description">您的意見有助我們改進</string>
+    <string name="mapbox_voice_feedback__error_title">哎呀！出現了一些問題</string>
+    <string name="mapbox_voice_feedback__error_description">請再試一次</string>
+    <string name="mapbox_voice_feedback__speech_not_recognized_title">哎呀！我聽唔清楚你講咩</string>
+</resources>

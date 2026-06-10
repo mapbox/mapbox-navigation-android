@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    tools:background="@drawable/mapbox_bg_button"
+    tools:layout_margin="20dp"
+    tools:parentTag="android.widget.FrameLayout">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/iconImage"
+        android:layout_width="@dimen/mapbox_voice_feedback_button_icon_size"
+        android:layout_height="@dimen/mapbox_voice_feedback_button_icon_size"
+        android:padding="@dimen/mapbox_voice_feedback_button_padding"
+        android:layout_gravity="center"
+        android:src="@drawable/mapbox_ic_voice_feedback" />
+
+</merge>

@@ -33,6 +33,7 @@ import com.mapbox.navigation.examples.core.databinding.LayoutActivityMainBinding
 import com.mapbox.navigation.examples.util.LocationPermissionsHelper
 import com.mapbox.navigation.examples.util.LocationPermissionsHelper.Companion.areLocationPermissionsGranted
 import com.mapbox.navigation.examples.util.RouteDrawingActivity
+import com.mapbox.navigation.examples.voicefeedback.MapboxVoiceFeedbackActivity
 
 class MainActivity : AppCompatActivity(), PermissionsListener {
 
@@ -148,6 +149,11 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
                 getString(R.string.title_adasis),
                 getString(R.string.description_adasis),
                 AdasisActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_voice_feedback),
+                getString(R.string.description_voice_feedback),
+                MapboxVoiceFeedbackActivity::class.java
             )
         )
     }

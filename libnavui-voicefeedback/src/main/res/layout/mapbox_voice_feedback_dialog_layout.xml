@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:minWidth="@dimen/mapbox_voice_feedback_card_width"
+    android:background="@drawable/mapbox_bg_voice_feedback_dialog"
+    android:elevation="@dimen/mapbox_voice_feedback_card_elevation"
+    android:padding="@dimen/mapbox_voice_feedback_content_padding">
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/contentBlock"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="closeButton,contentHeader,contentDescription,contentIconImage" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/infoBlock"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="infoIcon,infoDescription,infoHeader" />
+
+    <ImageButton
+        android:id="@+id/closeButton"
+        android:layout_width="@dimen/mapbox_voice_feedback_close_button_size"
+        android:layout_height="@dimen/mapbox_voice_feedback_close_button_size"
+        android:background="@drawable/mapbox_bg_close_button_circle"
+        android:src="@drawable/mapbox_ic_cancel"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/contentHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="start"
+        android:textAppearance="@style/MapboxVoiceFeedbackHeaderText"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/closeButton"
+        app:layout_constraintHorizontal_bias="0"
+        tools:text="@string/mapbox_voice_feedback__share_your_feedback" />
+
+    <TextView
+        android:id="@+id/contentDescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/mapbox_voice_feedback_description_top_margin"
+        android:textAppearance="@style/MapboxVoiceFeedbackDescriptionText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/contentHeader"
+        tools:text="@string/mapbox_voice_feedback__listening" />
+
+    <ImageView
+        android:id="@+id/contentIconImage"
+        android:layout_width="@dimen/mapbox_voice_feedback_icon_size"
+        android:layout_height="@dimen/mapbox_voice_feedback_icon_size"
+        android:layout_marginTop="@dimen/mapbox_voice_feedback_description_top_margin"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/contentDescription"
+        tools:src="@drawable/mapbox_ic_mic_pulsing"/>
+
+    <ImageView
+        android:id="@+id/infoIcon"
+        android:layout_width="@dimen/mapbox_voice_feedback_icon_size"
+        android:layout_height="@dimen/mapbox_voice_feedback_icon_size"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/infoHeader"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:src="@drawable/mapbox_ic_ok_sign" />
+
+    <TextView
+        android:id="@+id/infoHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/mapbox_voice_feedback_info_header_top_margin"
+        android:gravity="center"
+        android:textAppearance="@style/MapboxVoiceFeedbackHeaderText"
+        app:layout_constraintTop_toBottomOf="@id/infoIcon"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/infoDescription"
+        tools:text="@string/mapbox_voice_feedback__success_title" />
+
+    <TextView
+        android:id="@+id/infoDescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/mapbox_voice_feedback_info_description_top_margin"
+        android:layout_marginBottom="@dimen/mapbox_voice_feedback_info_description_bottom_margin"
+        android:gravity="center"
+        android:textAppearance="@style/MapboxVoiceFeedbackDescriptionText"
+        app:layout_constraintTop_toBottomOf="@id/infoHeader"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:text="@string/mapbox_voice_feedback__success_description" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

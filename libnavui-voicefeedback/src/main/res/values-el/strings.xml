@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mapbox_voice_feedback__share_your_feedback">Μοιραστείτε τα σχόλιά σας</string>
+    <string name="mapbox_voice_feedback__listening">Ακρόαση…</string>
+    <string name="mapbox_voice_feedback__processing">Γίνεται επεξεργασία…</string>
+    <string name="mapbox_voice_feedback__success_title">Ευχαριστώ που το μοιράστηκες</string>
+    <string name="mapbox_voice_feedback__success_description">Τα σχόλιά σας μας βοηθούν να βελτιωνόμαστε</string>
+    <string name="mapbox_voice_feedback__error_title">Ουπς! Κάτι πήγε στραβά</string>
+    <string name="mapbox_voice_feedback__error_description">Παρακαλώ δοκιμάστε ξανά</string>
+    <string name="mapbox_voice_feedback__speech_not_recognized_title">Ουπς! Δεν το κατάλαβα αυτό</string>
+</resources>

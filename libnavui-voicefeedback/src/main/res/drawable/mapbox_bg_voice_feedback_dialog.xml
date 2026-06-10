@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/mapbox_voice_feedback_background" />
+    <corners android:radius="@dimen/mapbox_voice_feedback_card_corner_radius" />
+</shape>

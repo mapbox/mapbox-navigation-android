@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mapbox_voice_feedback__share_your_feedback">שתפו את המשוב שלכם</string>
+    <string name="mapbox_voice_feedback__listening">מקשיב…</string>
+    <string name="mapbox_voice_feedback__processing">מעבד…</string>
+    <string name="mapbox_voice_feedback__success_title">תודה ששיתפת</string>
+    <string name="mapbox_voice_feedback__success_description">המשוב שלך עוזר לנו להשתפר</string>
+    <string name="mapbox_voice_feedback__error_title">אופס! משהו השתבש</string>
+    <string name="mapbox_voice_feedback__error_description">אנא נסה שוב</string>
+    <string name="mapbox_voice_feedback__speech_not_recognized_title">אופס! לא קלטתי את זה</string>
+</resources>

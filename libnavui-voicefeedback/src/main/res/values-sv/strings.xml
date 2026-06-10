@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mapbox_voice_feedback__share_your_feedback">Dela din feedback</string>
+    <string name="mapbox_voice_feedback__listening">Lyssnar…</string>
+    <string name="mapbox_voice_feedback__processing">Bearbetar…</string>
+    <string name="mapbox_voice_feedback__success_title">Tack för att du delade med dig</string>
+    <string name="mapbox_voice_feedback__success_description">Din feedback hjälper oss att bli bättre</string>
+    <string name="mapbox_voice_feedback__error_title">Hoppsan! Något gick fel</string>
+    <string name="mapbox_voice_feedback__error_description">Var god försök igen</string>
+    <string name="mapbox_voice_feedback__speech_not_recognized_title">Hoppsan! Det uppfattade jag inte</string>
+</resources>
