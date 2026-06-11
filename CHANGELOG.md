@@ -1,3 +1,22 @@
+## Navigation SDK Core Framework 3.25.0 - 11 June, 2026
+#### Features
+- Update `MapboxRouteCalloutsApi` to include an extra guard condition to prevent creating `Callouts` if no **Alternative metadata** are sent for alternative routes provided. [#13870](https://github.com/mapbox/mapbox-sdk/pull/13870)
+- Improve view port calculation for a very small route. [#13970](https://github.com/mapbox/mapbox-sdk/pull/13970)
+
+
+#### Bug fixes and improvements
+- Fixed race condition that caused an inconsistency between the tracked active primary route and the actual primary route. This is done by ensuring that the `RouteRefresh` operation taking place, is still relevant and not stale with an old `PrimaryRouteId`. [#13238](https://github.com/mapbox/mapbox-sdk/pull/13238)
+- Fixed unbounded memory growth in route geometry cache for long routes. [#13861](https://github.com/mapbox/mapbox-sdk/pull/13861)
+- Fixed race condition where an in-flight route refresh could overwrite a reroute result when both completed at the same time. [#13925](https://github.com/mapbox/mapbox-sdk/pull/13925)
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.25.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.25.0))
+- Mapbox Navigation Native `v324.25.0`
+- Mapbox Core Common `v24.25.0`
+- Mapbox Java `v7.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.0))
+
 ## Navigation SDK Core Framework 3.25.0-rc.2 - 04 June, 2026
 #### Features
 
