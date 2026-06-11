@@ -32,17 +32,20 @@ object TimeFormatter {
      * @param routeDuration duration in seconds
      * @param type [TimeFormat.Type]
      * @param isDeviceTwentyFourHourFormat *true* if 24-hour format, *false* otherwise
+     * @param locale locale for digit and AM/PM formatting; defaults to [Locale.getDefault]
      * @return String
      */
     @JvmStatic
+    @JvmOverloads
     fun formatTime(
         time: Calendar,
         routeDuration: Double,
         @TimeFormat.Type type: Int,
         isDeviceTwentyFourHourFormat: Boolean,
+        locale: Locale = Locale.getDefault(),
     ): String {
         time.add(Calendar.SECOND, routeDuration.toInt())
-        return formatTime(time, type, isDeviceTwentyFourHourFormat)
+        return formatTime(time, type, isDeviceTwentyFourHourFormat, locale)
     }
 
     /**
@@ -51,16 +54,19 @@ object TimeFormatter {
      * @param time Calendar
      * @param type [TimeFormat.Type]
      * @param isDeviceTwentyFourHourFormat *true* if 24-hour format, *false* otherwise
+     * @param locale locale for digit and AM/PM formatting; defaults to [Locale.getDefault]
      * @return String
      */
     @JvmStatic
+    @JvmOverloads
     fun formatTime(
         time: Calendar,
         @TimeFormat.Type type: Int,
         isDeviceTwentyFourHourFormat: Boolean,
+        locale: Locale = Locale.getDefault(),
     ): String {
         val chain = TimeFormattingChain()
-        return chain.setup(isDeviceTwentyFourHourFormat).obtainTimeFormatted(type, time)
+        return chain.setup(isDeviceTwentyFourHourFormat, locale).obtainTimeFormatted(type, time)
     }
 
     /**

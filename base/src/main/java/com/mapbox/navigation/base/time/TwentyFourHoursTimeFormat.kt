@@ -5,6 +5,7 @@ import java.util.Locale
 
 internal class TwentyFourHoursTimeFormat(
     private val chain: TimeFormatResolver,
+    private val locale: Locale = Locale.getDefault(),
 ) : TimeFormatResolver {
 
     companion object {
@@ -14,7 +15,7 @@ internal class TwentyFourHoursTimeFormat(
 
     override fun obtainTimeFormatted(type: Int, time: Calendar): String {
         return if (type == TWENTY_FOUR_HOURS_TYPE) {
-            String.format(Locale.getDefault(), TWENTY_FOUR_HOURS_FORMAT, time, time)
+            String.format(locale, TWENTY_FOUR_HOURS_FORMAT, time, time)
         } else {
             chain.obtainTimeFormatted(type, time)
         }
