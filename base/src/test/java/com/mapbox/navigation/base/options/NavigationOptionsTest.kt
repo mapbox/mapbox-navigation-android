@@ -1,15 +1,21 @@
 package com.mapbox.navigation.base.options
 
 import android.content.Context
+import android.text.format.DateFormat
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED
 import com.mapbox.navigation.base.TimeFormat.TWELVE_HOURS
 import com.mapbox.navigation.base.TimeFormat.TWENTY_FOUR_HOURS
+import com.mapbox.navigation.base.formatter.MapboxTimeFormatter
+import com.mapbox.navigation.base.internal.time.TimeFormatter
 import com.mapbox.navigation.testing.BuilderTest
+import com.mapbox.navigation.testing.assertIs
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.verify
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,6 +28,14 @@ import kotlin.reflect.KClass
 class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.Builder>() {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
+
+    // timeFormatType is deprecated and only used to configure timeFormatter during build();
+    // it is not stored directly in equals/hashCode.
+    // timeFormatter is compared by reference; there are separate tests covering it.
+    override val fieldsToExcludeFromEqualsHashCodeTest: Set<String> = setOf(
+        "timeFormatType",
+        "timeFormatter",
+    )
 
     override fun getImplementationClass(): KClass<NavigationOptions> = NavigationOptions::class
 
@@ -38,7 +52,7 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
             .locationOptions(mockk())
             .navigatorPredictionMillis(1)
             .routingTilesOptions(mockk())
-            .timeFormatType(1)
+            .timeFormatter(mockk())
             .eHorizonOptions(mockk())
             .routeRefreshOptions(mockk())
             .rerouteOptions(mockk())
@@ -75,10 +89,27 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
     }
 
     @Test
+    fun defaultTimeFormatterWithCustomTimeFormatTypeIsUsed() {
+        val options = NavigationOptions.Builder(context)
+            .timeFormatType(TWELVE_HOURS)
+            .build()
+
+        assertIs<MapboxTimeFormatter>(options.timeFormatter)
+        mockkStatic(TimeFormatter::class) {
+            mockkStatic(DateFormat::is24HourFormat) {
+                every { DateFormat.is24HourFormat(any()) } returns true
+                every { TimeFormatter.formatTime(any(), any(), any()) } returns ""
+                (options.timeFormatter as MapboxTimeFormatter).formatTime(mockk(relaxed = true))
+                verify { TimeFormatter.formatTime(any(), TWELVE_HOURS, any()) }
+            }
+        }
+    }
+
+    @Test
     fun whenBuilderBuildWithNoValuesCalledThenDefaultValuesUsed() {
         val options = NavigationOptions.Builder(context).build()
 
-        assertEquals(options.timeFormatType, NONE_SPECIFIED)
+        assertIs<MapboxTimeFormatter>(options.timeFormatter)
         assertEquals(options.navigatorPredictionMillis, DEFAULT_NAVIGATOR_PREDICTION_MILLIS)
         assertEquals(LocationOptions.Builder().build(), options.locationOptions)
         assertNotNull(options.routingTilesOptions)
@@ -122,19 +153,55 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
 
     @Test
     fun whenSeparateBuildersBuildSameOptions() {
-        val timeFormat = TWELVE_HOURS
+        val timeFormatter = mockk<com.mapbox.navigation.base.formatter.TimeFormatter>()
         val navigatorPredictionMillis = 1020L
 
         val options = NavigationOptions.Builder(context)
-            .timeFormatType(timeFormat)
+            .timeFormatter(timeFormatter)
             .navigatorPredictionMillis(navigatorPredictionMillis)
             .build()
 
         val otherOptions = NavigationOptions.Builder(context)
-            .timeFormatType(timeFormat)
+            .timeFormatter(timeFormatter)
             .navigatorPredictionMillis(navigatorPredictionMillis)
             .build()
 
         assertEquals(options, otherOptions)
+    }
+
+    @Test
+    fun equalsWithTheSameTimeFormatter() {
+        val timeFormatter = mockk<com.mapbox.navigation.base.formatter.TimeFormatter>()
+
+        val options1 = NavigationOptions.Builder(context).timeFormatter(timeFormatter).build()
+        val options2 = NavigationOptions.Builder(context).timeFormatter(timeFormatter).build()
+
+        assertEquals(options2, options1)
+    }
+
+    @Test
+    fun equalsWithDifferentTimeFormatter() {
+        val options1 = NavigationOptions.Builder(context).timeFormatter(mockk()).build()
+        val options2 = NavigationOptions.Builder(context).timeFormatter(mockk()).build()
+
+        assertNotEquals(options2, options1)
+    }
+
+    @Test
+    fun hashCodeWithTheSameTimeFormatter() {
+        val timeFormatter = mockk<com.mapbox.navigation.base.formatter.TimeFormatter>()
+
+        val options1 = NavigationOptions.Builder(context).timeFormatter(timeFormatter).build()
+        val options2 = NavigationOptions.Builder(context).timeFormatter(timeFormatter).build()
+
+        assertEquals(options2.hashCode(), options1.hashCode())
+    }
+
+    @Test
+    fun hashCodeWithDifferentTimeFormatter() {
+        val options1 = NavigationOptions.Builder(context).timeFormatter(mockk()).build()
+        val options2 = NavigationOptions.Builder(context).timeFormatter(mockk()).build()
+
+        assertNotEquals(options2.hashCode(), options1.hashCode())
     }
 }

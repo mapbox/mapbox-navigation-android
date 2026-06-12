@@ -4,8 +4,8 @@ import androidx.car.app.CarContext
 import androidx.car.app.model.CarColor
 import androidx.car.app.notification.CarAppExtender
 import androidx.core.app.NotificationCompat
-import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.formatter.DistanceFormatter
+import com.mapbox.navigation.base.formatter.TimeFormatter
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
@@ -49,7 +49,7 @@ class MapboxCarNotification internal constructor(
             val formatterOptions = mapboxNavigation.navigationOptions.distanceFormatterOptions
             val extenderBuilder = getExtenderBuilder(
                 MapboxDistanceFormatter(formatterOptions),
-                mapboxNavigation.navigationOptions.timeFormatType,
+                mapboxNavigation.navigationOptions.timeFormatter,
                 CarColor.createCustom(color, color),
             )
             notificationBuilder
@@ -67,7 +67,7 @@ class MapboxCarNotification internal constructor(
 
     private fun getExtenderBuilder(
         distanceFormatter: DistanceFormatter,
-        @TimeFormat.Type timeFormatType: Int,
+        timeFormatter: TimeFormatter,
         color: CarColor,
     ): CarAppExtender.Builder {
         val extenderBuilder = CarAppExtender.Builder()
@@ -90,7 +90,7 @@ class MapboxCarNotification internal constructor(
                         extenderBuilder,
                         routeProgress,
                         distanceFormatter,
-                        timeFormatType,
+                        timeFormatter,
                     )
                 } else {
                     setIdleMode(extenderBuilder)

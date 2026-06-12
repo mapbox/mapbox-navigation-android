@@ -93,6 +93,12 @@ package com.mapbox.navigation.base.formatter {
     method public com.mapbox.navigation.base.formatter.DistanceFormatterOptions.Builder unitType(com.mapbox.navigation.base.formatter.UnitType? unitType);
   }
 
+  public final class MapboxTimeFormatter implements com.mapbox.navigation.base.formatter.TimeFormatter {
+    ctor public MapboxTimeFormatter(android.content.Context applicationContext, @com.mapbox.navigation.base.TimeFormat.Type int timeFormatType = -1);
+    ctor public MapboxTimeFormatter(android.content.Context applicationContext);
+    method public String formatTime(java.util.Calendar time);
+  }
+
   public final class Rounding {
     field public static final int INCREMENT_DISTANCE_DEPENDENT = -1; // 0xffffffff
     field public static final int INCREMENT_FIFTY = 50; // 0x32
@@ -104,6 +110,10 @@ package com.mapbox.navigation.base.formatter {
   }
 
   @IntDef({com.mapbox.navigation.base.formatter.Rounding.INCREMENT_DISTANCE_DEPENDENT, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_FIVE, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_TEN, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_TWENTY_FIVE, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_FIFTY, com.mapbox.navigation.base.formatter.Rounding.INCREMENT_ONE_HUNDRED}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface Rounding.Increment {
+  }
+
+  public fun interface TimeFormatter {
+    method public String formatTime(java.util.Calendar time);
   }
 
   public enum UnitType {
@@ -733,7 +743,8 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.route.RouteAlternativesOptions getRouteAlternativesOptions();
     method public com.mapbox.navigation.base.route.RouteRefreshOptions getRouteRefreshOptions();
     method public com.mapbox.navigation.base.options.RoutingTilesOptions getRoutingTilesOptions();
-    method public int getTimeFormatType();
+    method @Deprecated public int getTimeFormatType();
+    method public com.mapbox.navigation.base.formatter.TimeFormatter getTimeFormatter();
     method public com.mapbox.navigation.base.options.TrafficOverrideOptions getTrafficOverrideOptions();
     method public boolean isDebugLoggingEnabled();
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder toBuilder();
@@ -755,7 +766,8 @@ package com.mapbox.navigation.base.options {
     property public final com.mapbox.navigation.base.route.RouteAlternativesOptions routeAlternativesOptions;
     property public final com.mapbox.navigation.base.route.RouteRefreshOptions routeRefreshOptions;
     property public final com.mapbox.navigation.base.options.RoutingTilesOptions routingTilesOptions;
-    property public final int timeFormatType;
+    property @Deprecated public final int timeFormatType;
+    property public final com.mapbox.navigation.base.formatter.TimeFormatter timeFormatter;
     property public final com.mapbox.navigation.base.options.TrafficOverrideOptions trafficOverrideOptions;
   }
 
@@ -779,7 +791,8 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder routeAlternativesOptions(com.mapbox.navigation.base.route.RouteAlternativesOptions routeAlternativesOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder routeRefreshOptions(com.mapbox.navigation.base.route.RouteRefreshOptions routeRefreshOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder routingTilesOptions(com.mapbox.navigation.base.options.RoutingTilesOptions routingTilesOptions);
-    method public com.mapbox.navigation.base.options.NavigationOptions.Builder timeFormatType(int type);
+    method @Deprecated public com.mapbox.navigation.base.options.NavigationOptions.Builder timeFormatType(int type);
+    method public com.mapbox.navigation.base.options.NavigationOptions.Builder timeFormatter(com.mapbox.navigation.base.formatter.TimeFormatter formatter);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.base.options.NavigationOptions.Builder trafficOverrideOptions(com.mapbox.navigation.base.options.TrafficOverrideOptions trafficOverrideOptions);
   }
 
