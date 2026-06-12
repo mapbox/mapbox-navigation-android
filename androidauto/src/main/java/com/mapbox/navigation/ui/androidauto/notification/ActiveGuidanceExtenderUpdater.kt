@@ -8,20 +8,19 @@ import android.graphics.drawable.Drawable
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.TextUtils
-import android.text.format.DateFormat
 import androidx.car.app.notification.CarAppExtender
 import androidx.core.content.ContextCompat
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver
-import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.formatter.DistanceFormatter
+import com.mapbox.navigation.base.formatter.TimeFormatter
 import com.mapbox.navigation.base.internal.maneuver.TurnIconHelper
-import com.mapbox.navigation.base.internal.time.TimeFormatter
 import com.mapbox.navigation.base.internal.trip.notification.NotificationTurnIconResources
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.ui.androidauto.R
 import java.util.Calendar
+import kotlin.math.roundToInt
 
 internal class ActiveGuidanceExtenderUpdater(private val context: Context) {
 
@@ -40,7 +39,7 @@ internal class ActiveGuidanceExtenderUpdater(private val context: Context) {
         extenderBuilder: CarAppExtender.Builder,
         routeProgress: RouteProgress,
         distanceFormatter: DistanceFormatter,
-        @TimeFormat.Type timeFormatType: Int,
+        timeFormatter: TimeFormatter,
     ) {
         val bannerInstructions = routeProgress.bannerInstructions
         val currentLegProgress = routeProgress.currentLegProgress
@@ -51,7 +50,7 @@ internal class ActiveGuidanceExtenderUpdater(private val context: Context) {
             currentLegProgress?.currentStepProgress?.distanceRemaining?.toDouble(),
             distanceFormatter,
         )
-        updateViewsWithArrival(durationRemaining, timeFormatType)
+        updateViewsWithArrival(durationRemaining, timeFormatter)
         val titleBuilder = SpannableStringBuilder()
         currentFormattedDistance?.let { titleBuilder.append(it) }
         titleBuilder.append(" • ")
@@ -80,9 +79,9 @@ internal class ActiveGuidanceExtenderUpdater(private val context: Context) {
 
     private fun updateViewsWithArrival(
         durationRemaining: Double?,
-        @TimeFormat.Type timeFormatType: Int,
+        timeFormatter: TimeFormatter,
     ) {
-        generateArrivalTime(durationRemaining, timeFormatType)?.let { currentFormattedTime = it }
+        generateArrivalTime(durationRemaining, timeFormatter)?.let { currentFormattedTime = it }
     }
 
     private fun updateInstructionText(
@@ -122,16 +121,12 @@ internal class ActiveGuidanceExtenderUpdater(private val context: Context) {
 
     private fun generateArrivalTime(
         durationRemaining: Double?,
-        @TimeFormat.Type timeFormatType: Int,
+        timeFormatter: TimeFormatter,
     ): String? {
         val time = Calendar.getInstance()
         return durationRemaining?.let {
-            val arrivalTime = TimeFormatter.formatTime(
-                time,
-                durationRemaining,
-                timeFormatType,
-                DateFormat.is24HourFormat(context),
-            )
+            time.add(Calendar.SECOND, it.roundToInt())
+            val arrivalTime = timeFormatter.formatTime(time)
             context.getString(R.string.mapbox_eta_format, arrivalTime)
         }
     }

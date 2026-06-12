@@ -6,6 +6,8 @@ import com.mapbox.navigation.base.BuildConfig
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
+import com.mapbox.navigation.base.formatter.MapboxTimeFormatter
+import com.mapbox.navigation.base.formatter.TimeFormatter
 import com.mapbox.navigation.base.route.RouteAlternativesOptions
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 
@@ -25,7 +27,8 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1000L
  *
  * @param applicationContext the Context of the Android Application
  * @param locationOptions [LocationOptions] that specify where to take locations from
- * @param timeFormatType defines time format for calculation remaining trip time
+ * @param timeFormatType defines time format for calculation remaining trip time. Deprecated: timeFormatter is used instead.
+ * @param timeFormatter [TimeFormatter] used to format time.
  * @param navigatorPredictionMillis defines approximate navigator prediction in milliseconds
  * @param distanceFormatterOptions [DistanceFormatterOptions] options to format distances showing in notification during navigation
  * @param routingTilesOptions [RoutingTilesOptions] defines routing tiles endpoint and storage configuration.
@@ -68,7 +71,8 @@ class NavigationOptions
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 private constructor(
     val applicationContext: Context,
-    @TimeFormat.Type val timeFormatType: Int,
+    @Deprecated("timeFormatter is used instead") @TimeFormat.Type val timeFormatType: Int,
+    val timeFormatter: TimeFormatter,
     val navigatorPredictionMillis: Long,
     val distanceFormatterOptions: DistanceFormatterOptions,
     val routingTilesOptions: RoutingTilesOptions,
@@ -100,6 +104,7 @@ private constructor(
     fun toBuilder(): Builder = Builder(applicationContext).apply {
         locationOptions(locationOptions)
         timeFormatType(timeFormatType)
+        timeFormatter(timeFormatter)
         navigatorPredictionMillis(navigatorPredictionMillis)
         distanceFormatterOptions(distanceFormatterOptions)
         routingTilesOptions(routingTilesOptions)
@@ -131,7 +136,7 @@ private constructor(
 
         if (applicationContext != other.applicationContext) return false
         if (locationOptions != other.locationOptions) return false
-        if (timeFormatType != other.timeFormatType) return false
+        if (timeFormatter != other.timeFormatter) return false
         if (navigatorPredictionMillis != other.navigatorPredictionMillis) return false
         if (distanceFormatterOptions != other.distanceFormatterOptions) return false
         if (routingTilesOptions != other.routingTilesOptions) return false
@@ -160,7 +165,7 @@ private constructor(
     override fun hashCode(): Int {
         var result = applicationContext.hashCode()
         result = 31 * result + locationOptions.hashCode()
-        result = 31 * result + timeFormatType
+        result = 31 * result + timeFormatter.hashCode()
         result = 31 * result + navigatorPredictionMillis.hashCode()
         result = 31 * result + distanceFormatterOptions.hashCode()
         result = 31 * result + routingTilesOptions.hashCode()
@@ -189,7 +194,7 @@ private constructor(
         return "NavigationOptions(" +
             "applicationContext=$applicationContext, " +
             "locationOptions=$locationOptions, " +
-            "timeFormatType=$timeFormatType, " +
+            "timeFormatter=$timeFormatter, " +
             "navigatorPredictionMillis=$navigatorPredictionMillis, " +
             "distanceFormatterOptions=$distanceFormatterOptions, " +
             "routingTilesOptions=$routingTilesOptions, " +
@@ -217,6 +222,7 @@ private constructor(
 
         private val applicationContext = applicationContext.applicationContext
         private var timeFormatType: Int = TimeFormat.NONE_SPECIFIED
+        private var timeFormatter: TimeFormatter? = null
         private var navigatorPredictionMillis: Long = DEFAULT_NAVIGATOR_PREDICTION_MILLIS
         private var distanceFormatterOptions: DistanceFormatterOptions =
             DistanceFormatterOptions.Builder(applicationContext).build()
@@ -268,8 +274,14 @@ private constructor(
         /**
          * Defines time format for calculation remaining trip time
          */
+        @Deprecated("Use timeFormatter method instead with default MapboxTimeFormatter")
         fun timeFormatType(type: Int): Builder =
             apply { this.timeFormatType = type }
+
+        /**
+         * Defines time formatter. See [TimeFormatter] for details. By default, [MapboxTimeFormatter] is used.
+         */
+        fun timeFormatter(formatter: TimeFormatter) = apply { this.timeFormatter = formatter }
 
         /**
          * Defines approximate navigator prediction in milliseconds
@@ -402,9 +414,14 @@ private constructor(
          */
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         fun build(): NavigationOptions {
+            val resolvedTimeFormatter = timeFormatter ?: MapboxTimeFormatter(
+                applicationContext,
+                timeFormatType,
+            )
             return NavigationOptions(
                 applicationContext = applicationContext,
                 timeFormatType = timeFormatType,
+                timeFormatter = resolvedTimeFormatter,
                 navigatorPredictionMillis = navigatorPredictionMillis,
                 distanceFormatterOptions = distanceFormatterOptions,
                 routingTilesOptions = routingTilesOptions,

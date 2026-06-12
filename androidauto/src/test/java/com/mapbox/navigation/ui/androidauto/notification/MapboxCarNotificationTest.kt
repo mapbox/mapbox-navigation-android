@@ -9,8 +9,8 @@ import androidx.car.app.notification.CarAppExtender
 import androidx.car.app.validation.HostValidator
 import androidx.core.app.NotificationCompat
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
+import com.mapbox.navigation.base.formatter.TimeFormatter
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.notification.TripNotificationInterceptor
 import com.mapbox.navigation.core.MapboxNavigation
@@ -51,6 +51,8 @@ class MapboxCarNotificationTest {
     private val freeDriveExtenderUpdater = mockk<FreeDriveExtenderUpdater>(relaxUnitFun = true)
     private val activeGuidanceExtenderUpdater =
         mockk<ActiveGuidanceExtenderUpdater>(relaxUnitFun = true)
+
+    private val timeFormatter = mockk<TimeFormatter>(relaxed = true)
     private val mapboxCarNotification = MapboxCarNotification(
         options,
         carContext,
@@ -62,7 +64,7 @@ class MapboxCarNotificationTest {
     private val mapboxNavigation = mockk<MapboxNavigation>(relaxUnitFun = true) {
         every { navigationOptions } returns mockk {
             every { distanceFormatterOptions } returns formatterOptions
-            every { timeFormatType } returns TimeFormat.TWENTY_FOUR_HOURS
+            every { timeFormatter } returns this@MapboxCarNotificationTest.timeFormatter
         }
     }
     private val navigationSessionStateObserverSlot = slot<NavigationSessionStateObserver>()
@@ -215,7 +217,7 @@ class MapboxCarNotificationTest {
                 match { checkExtender(it) },
                 routeProgress,
                 match { it is MapboxDistanceFormatter && it.options == formatterOptions },
-                TimeFormat.TWENTY_FOUR_HOURS,
+                timeFormatter,
             )
         }
         verify(exactly = 0) {
