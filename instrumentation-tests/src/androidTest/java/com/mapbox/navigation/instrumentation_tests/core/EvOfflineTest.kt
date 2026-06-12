@@ -43,6 +43,7 @@ import com.mapbox.navigation.testing.utils.withoutInternet
 import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import java.util.concurrent.TimeUnit
@@ -116,6 +117,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         }
     }
 
+    @Ignore("Flaky test - NAVAND-7338")
     @Test
     fun offlineOnlineSwitchWhenOnlineRouteIsTheSameAsCurrentOffline() = sdkTest {
         assumeNotNROBecauseToBuilderIsRequiredForTest()

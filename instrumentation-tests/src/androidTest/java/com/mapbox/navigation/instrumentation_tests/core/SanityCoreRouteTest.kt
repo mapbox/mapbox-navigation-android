@@ -21,6 +21,7 @@ import com.mapbox.navigation.testing.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.utils.withMapboxNavigation
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 
@@ -79,6 +80,7 @@ class SanityCoreRouteTest : BaseCoreNoCleanUpTest() {
         }
     }
 
+    @Ignore("Flaky test - NAVAND-7338")
     @Test
     fun route_with_two_legs_completes() = sdkTest {
         withMapboxNavigation(

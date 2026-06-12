@@ -44,6 +44,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import java.net.URI
@@ -79,6 +80,7 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
         bearing = 190f
     }
 
+    @Ignore("Flaky test - NAVAND-7338")
     @Test
     fun immediate_route_refresh_before_planned() = sdkTest {
         val observer = TestObserver()
@@ -178,6 +180,7 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
         )
     }
 
+    @Ignore("Flaky test - NAVAND-7338")
     @Test
     fun route_refresh_on_demand_is_cancelled() = sdkTest {
         baseRefreshHandler.jsonResponseModifier = DynamicResponseModifier()

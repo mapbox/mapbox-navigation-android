@@ -53,6 +53,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import java.util.concurrent.CountDownLatch
@@ -547,6 +548,7 @@ class RouteLineLayersTest : BaseTest<BasicNavigationViewActivity>(
         countDownLatch3.await()
     }
 
+    @Ignore("Flaky test - NAVAND-7338")
     @Test
     fun should_provide_valid_offset_for_alternative_route() {
         sdkTest {

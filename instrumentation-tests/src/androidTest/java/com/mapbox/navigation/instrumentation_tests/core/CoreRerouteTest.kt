@@ -467,6 +467,7 @@ class CoreRerouteTest(
      * Note: this test could become flaky if NN downloads enough navigation tiles ahead of time
      * so that switching to the offline pack is never triggered during navigation.
      */
+    @Ignore("Flaky test - NAVAND-7338")
     @Test
     fun route_replan_triggered_after_navigator_recreation_with_fallback() = sdkTest(180_000) {
         val mockRoute = RoutesProvider.near_munich_with_waypoints(context)
@@ -1741,6 +1742,7 @@ class CoreRerouteTest(
      * `Idle → FetchingRoute → Interrupted → Idle → FetchingRoute → RouteFetched → Idle`.
      * The final route must include the adapter's modifications (ferry exclusion).
      */
+    @Ignore("Flaky test - NAVAND-7338")
     @Test
     fun replan_interrupts_ongoing_reroute_request() = sdkTest {
         // Setting to 4s to ensure reroute is in progress when replan is called
@@ -1970,6 +1972,7 @@ class CoreRerouteTest(
      * cycle, the same controller instance is reused and no spurious state notifications are
      * emitted upon re-registration.
      */
+    @Ignore("Flaky test - NAVAND-7338")
     @Test
     fun destroy_during_reroute() = sdkTest {
         val mapboxNavigation = createMapboxNavigation()

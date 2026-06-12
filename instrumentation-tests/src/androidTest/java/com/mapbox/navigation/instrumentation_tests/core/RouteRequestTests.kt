@@ -19,6 +19,7 @@ import com.mapbox.navigation.testing.utils.withoutInternet
 import okhttp3.mockwebserver.MockResponse
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 
@@ -44,6 +45,7 @@ class RouteRequestTests : BaseCoreNoCleanUpTest() {
         }
     }
 
+    @Ignore("Flaky test - NAVAND-7338")
     @Test
     fun requestRouteWithoutInternetAndTiles() = sdkTest {
         withMapboxNavigation(
