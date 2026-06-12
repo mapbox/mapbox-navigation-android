@@ -16,7 +16,6 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 import android.text.SpannableString
 import android.text.TextUtils
-import android.text.format.DateFormat
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.core.app.NotificationCompat
@@ -29,7 +28,6 @@ import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver.StepManeuverType
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.internal.maneuver.TurnIconHelper
-import com.mapbox.navigation.base.internal.time.TimeFormatter.formatTime
 import com.mapbox.navigation.base.internal.trip.notification.NotificationTurnIconResources
 import com.mapbox.navigation.base.internal.trip.notification.TripNotificationInterceptorOwner
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -78,7 +76,7 @@ class MapboxTripNotification constructor(
     }
 
     private val applicationContext = navigationOptions.applicationContext
-    private val timeFormatType = navigationOptions.timeFormatType
+    private val timeFormatter = navigationOptions.timeFormatter
 
     @StepManeuverType
     var currentManeuverType: String? = null
@@ -379,13 +377,8 @@ class MapboxTripNotification constructor(
         time: Calendar = Calendar.getInstance(),
     ): String? {
         return durationRemaining?.let {
-            val timeFormatType = timeFormatType
-            val arrivalTime = formatTime(
-                time,
-                durationRemaining,
-                timeFormatType,
-                DateFormat.is24HourFormat(applicationContext),
-            )
+            time.add(Calendar.SECOND, it.toInt())
+            val arrivalTime = timeFormatter.formatTime(time)
             String.format(etaFormat, arrivalTime)
         }
     }

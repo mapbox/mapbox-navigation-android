@@ -106,6 +106,12 @@ import kotlin.reflect.jvm.isAccessible
  */
 abstract class BuilderTest<Implementation : Any, Builder> {
 
+    /**
+     * Names of builder fields to exclude from equals/hashCode tests.
+     * Override when a builder field intentionally does not directly affect equals/hashCode.
+     */
+    open val fieldsToExcludeFromEqualsHashCodeTest: Set<String> = emptySet()
+
     private val implClass: KClass<*> by lazy { getImplementationClass() }
 
     /**
@@ -270,7 +276,7 @@ abstract class BuilderTest<Implementation : Any, Builder> {
             )
         }
 
-        optionalFieldValues.forEach { exclude ->
+        optionalFieldValues.filter { it.first.name !in fieldsToExcludeFromEqualsHashCodeTest }.forEach { exclude ->
             val field = exclude.first
             val value = exclude.second
             val builderConstructor = builderClass.constructors.first()

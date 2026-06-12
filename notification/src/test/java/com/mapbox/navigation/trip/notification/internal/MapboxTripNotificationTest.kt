@@ -19,8 +19,8 @@ import androidx.core.content.ContextCompat
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerText
 import com.mapbox.navigation.base.formatter.DistanceFormatter
+import com.mapbox.navigation.base.formatter.TimeFormatter
 import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory.buildTripNotificationState
-import com.mapbox.navigation.base.internal.time.TimeFormatter
 import com.mapbox.navigation.base.internal.trip.notification.TripNotificationInterceptorOwner
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.TripNotificationState
@@ -52,6 +52,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.Calendar
 import java.util.Locale
 
 internal const val STOP_SESSION = "Stop session"
@@ -71,6 +72,7 @@ class MapboxTripNotificationTest {
     private val collapsedViews get() = collapsedViewsList.last()
     private val expandedViews get() = expandedViewsList.last()
     private val navigationOptions: NavigationOptions = mockk(relaxed = true)
+    private val timeFormatter: TimeFormatter = mockk(relaxed = true)
     private val interceptorOwner: TripNotificationInterceptorOwner = mockk(relaxed = true)
     private val distanceSpannable: SpannableString = mockk()
     private val distanceFormatter: DistanceFormatter
@@ -85,13 +87,13 @@ class MapboxTripNotificationTest {
     fun setUp() {
         mockkStatic(DateFormat::class)
         mockkStatic(PendingIntent::class)
-        mockkStatic(TimeFormatter::class)
         mockkStatic(ContextCompat::class)
         every { ContextCompat.getColor(any(), any()) } returns 0
         every { ContextCompat.getDrawable(any(), any()) } returns null
         mockedContext = createContext()
         every { mockedContext.applicationContext } returns mockedContext
         every { navigationOptions.applicationContext } returns mockedContext
+        every { navigationOptions.timeFormatter } returns timeFormatter
         mockRemoteViews()
         notification = MapboxTripNotification(
             navigationOptions,
@@ -393,7 +395,7 @@ class MapboxTripNotificationTest {
         mockUpdateNotificationAndroidInteractions()
         val suffix = "this is nice formatting"
         mockTimeFormatter(suffix)
-        val result = String.format(FORMAT_STRING, suffix + duration.toString())
+        val result = String.format(FORMAT_STRING, suffix)
         val state = buildTripNotificationState(
             null,
             distance,
@@ -406,6 +408,29 @@ class MapboxTripNotificationTest {
 
         verify(exactly = 1) { collapsedViews.setTextViewText(any(), result) }
         verify(exactly = 1) { expandedViews.setTextViewText(any(), result) }
+    }
+
+    @Test
+    fun whenUpdateNotificationCalledThenArrivalTimeCalendarIsAdvancedByDuration() {
+        val duration = 112.4
+        val beforeCallMs = System.currentTimeMillis()
+        mockUpdateNotificationAndroidInteractions()
+        val calendarSlot = slot<Calendar>()
+        var capturedTimeMs = 0L
+        every { timeFormatter.formatTime(capture(calendarSlot)) } answers {
+            capturedTimeMs = calendarSlot.captured.timeInMillis
+            "formatted"
+        }
+        val state = buildTripNotificationState(null, 0.0, duration, null)
+        notification.onTripSessionStarted()
+
+        notification.updateNotification(state)
+
+        val afterCallMs = System.currentTimeMillis()
+        val expectedOffsetMs = duration.toInt() * 1000L
+        val actualOffsetMs = capturedTimeMs - beforeCallMs
+        assertTrue(actualOffsetMs >= expectedOffsetMs)
+        assertTrue(actualOffsetMs <= expectedOffsetMs + (afterCallMs - beforeCallMs))
     }
 
     @Test
@@ -706,11 +731,7 @@ class MapboxTripNotificationTest {
     }
 
     private fun mockTimeFormatter(@Suppress("SameParameterValue") suffix: String) {
-        mockkStatic(TimeFormatter::class)
-        val durationSlot = slot<Double>()
-        every {
-            TimeFormatter.formatTime(any(), capture(durationSlot), any(), any())
-        } answers { "$suffix${durationSlot.captured}" }
+        every { timeFormatter.formatTime(any()) } returns suffix
     }
 
     private fun mockNotificationBuilder(): NotificationCompat.Builder {
