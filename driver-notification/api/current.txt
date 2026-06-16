@@ -32,6 +32,56 @@ package com.mapbox.navigation.driver.notification {
 
 }
 
+package com.mapbox.navigation.driver.notification.closure {
+
+  public final class RouteClosureAlternativeNotification extends com.mapbox.navigation.driver.notification.DriverNotification {
+    method public com.mapbox.navigation.base.route.NavigationRoute getAlternativeRoute();
+    method public double getDistanceMeters();
+    method public String getIncidentId();
+    property public final com.mapbox.navigation.base.route.NavigationRoute alternativeRoute;
+    property public final double distanceMeters;
+    property public final String incidentId;
+  }
+
+  public final class RouteClosureMonitoringNotification extends com.mapbox.navigation.driver.notification.DriverNotification {
+    method public double getDistanceMeters();
+    method public String getIncidentId();
+    property public final double distanceMeters;
+    property public final String incidentId;
+  }
+
+  public final class RouteClosureNotificationOptions {
+    method public double getAlternativeTriggerThresholdMeters();
+    method public com.mapbox.navigation.driver.notification.closure.RouteClosureNotificationOptions.Builder toBuilder();
+    property public final double alternativeTriggerThresholdMeters;
+    field public static final com.mapbox.navigation.driver.notification.closure.RouteClosureNotificationOptions.Companion Companion;
+    field public static final double DEFAULT_ALTERNATIVE_TRIGGER_THRESHOLD_METERS = 250000.0;
+  }
+
+  public static final class RouteClosureNotificationOptions.Builder {
+    ctor public RouteClosureNotificationOptions.Builder();
+    method public com.mapbox.navigation.driver.notification.closure.RouteClosureNotificationOptions.Builder alternativeTriggerThresholdMeters(double value);
+    method public com.mapbox.navigation.driver.notification.closure.RouteClosureNotificationOptions build();
+  }
+
+  public static final class RouteClosureNotificationOptions.Companion {
+  }
+
+  public final class RouteClosureNotificationProvider extends com.mapbox.navigation.driver.notification.DriverNotificationProvider {
+    ctor public RouteClosureNotificationProvider(com.mapbox.navigation.driver.notification.closure.RouteClosureNotificationOptions options = RouteClosureNotificationOptions.<init>().build());
+    method public com.mapbox.navigation.driver.notification.closure.RouteClosureNotificationOptions getOptions();
+    method public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
+    method public void setOptions(com.mapbox.navigation.driver.notification.closure.RouteClosureNotificationOptions);
+    method public kotlinx.coroutines.flow.Flow<com.mapbox.navigation.driver.notification.DriverNotification> trackNotifications();
+    property public final com.mapbox.navigation.driver.notification.closure.RouteClosureNotificationOptions options;
+  }
+
+  public final class RouteClosureResolvedNotification extends com.mapbox.navigation.driver.notification.DriverNotification {
+  }
+
+}
+
 package com.mapbox.navigation.driver.notification.traffic {
 
   public final class SlowTrafficNotification extends com.mapbox.navigation.driver.notification.DriverNotification {
