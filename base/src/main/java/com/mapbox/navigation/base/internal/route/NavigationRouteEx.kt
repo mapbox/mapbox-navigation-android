@@ -22,9 +22,11 @@ import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouterOrigin
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import java.net.URL
 
 private const val ROUTE_REFRESH_LOG_CATEGORY = "RouteRefresh"
+private const val NATIVE_ROUTE_REQUEST_REASON_CLOSURE = "closure"
 
 val NavigationRoute.routerOrigin: RouterOrigin get() = nativeRoute.routerOrigin
 
@@ -32,6 +34,22 @@ val NavigationRoute.routerOrigin: RouterOrigin get() = nativeRoute.routerOrigin
  * Internal handle for the route's native peer.
  */
 fun NavigationRoute.nativeRoute(): RouteInterface = this.nativeRoute
+
+/**
+ * Returns the value of the `reason` query parameter from the route's native request URI,
+ * or null if the parameter is absent or the URI cannot be parsed.
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+fun NavigationRoute.requestReason(): String? =
+    nativeRoute.requestUri.toHttpUrlOrNull()?.queryParameter("reason")
+
+/**
+ * True when this route was generated because of a road closure ahead, i.e. its native request
+ * carries `reason=closure`.
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+fun NavigationRoute.isClosureAlternative(): Boolean =
+    requestReason() == NATIVE_ROUTE_REQUEST_REASON_CLOSURE
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 @WorkerThread
