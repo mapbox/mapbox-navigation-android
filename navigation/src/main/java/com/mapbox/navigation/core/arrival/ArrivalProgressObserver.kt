@@ -93,10 +93,11 @@ internal class ArrivalProgressObserver(
         if (routeLegArrived != routeLegProgress.routeLeg) {
             routeLegArrived = routeLegProgress.routeLeg
             arrivalObservers.forEach { it.onWaypointArrival(routeProgress) }
-        }
-        val moveToNextLeg = arrivalController.navigateNextRouteLeg(routeLegProgress)
-        if (moveToNextLeg) {
-            navigateNextRouteLeg(callback = null)
+
+            val moveToNextLeg = arrivalController.navigateNextRouteLeg(routeLegProgress)
+            if (moveToNextLeg) {
+                navigateNextRouteLeg(callback = null)
+            }
         }
     }
 

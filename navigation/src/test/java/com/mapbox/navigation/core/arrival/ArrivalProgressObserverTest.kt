@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.arrival
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -8,7 +9,9 @@ import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.trip.session.LegIndexUpdatedCallback
 import com.mapbox.navigation.core.trip.session.TripSession
 import io.mockk.Called
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
@@ -486,6 +489,57 @@ class ArrivalProgressObserverTest {
 
         assertTrue(onNavigateNextRouteLegCalls.isCaptured)
         assertFalse(onFinalDestinationArrivalCalls.isCaptured)
+    }
+
+    @Test
+    fun `should advance to next leg only once when COMPLETE non-stale is received twice for the same leg`() {
+        // GIVEN
+        val routeLeg = mockk<RouteLeg>()
+        val legProgress: RouteLegProgress = mockk {
+            every { this@mockk.routeLeg } returns routeLeg
+            every { legIndex } returns 0
+        }
+        val routeProgress: RouteProgress = mockk {
+            every { stale } returns false
+            every { currentState } returns RouteProgressState.COMPLETE
+            every { navigationRoute } returns mockk {
+                every { directionsRoute } returns mockk {
+                    mockMultipleLegs()
+                }
+            }
+            every { currentLegProgress } returns legProgress
+        }
+
+        val updatedProgress: RouteProgress = mockk {
+            every { navigationRoute } returns mockk {
+                every { directionsRoute } returns mockk {
+                    mockMultipleLegs()
+                }
+            }
+            every { currentLegProgress } returns mockk {
+                every { legIndex } returns 1
+            }
+        }
+        var sessionProgress: RouteProgress? = routeProgress
+        every { tripSession.getRouteProgress() } answers { sessionProgress }
+        val callbackSlot = slot<LegIndexUpdatedCallback>()
+        every { tripSession.updateLegIndex(1, capture(callbackSlot)) } answers {
+            sessionProgress = updatedProgress
+            callbackSlot.captured.onLegIndexUpdatedCallback(true)
+        }
+        every { tripSession.updateLegIndex(2, any()) } just Runs
+        val customArrivalController: ArrivalController = mockk {
+            every { navigateNextRouteLeg(any()) } returns true
+        }
+
+        // WHEN onRouteProgressChanged called twice with COMPLETE for the same routeLeg
+        arrivalProgressObserver.attach(customArrivalController)
+        arrivalProgressObserver.onRouteProgressChanged(routeProgress)
+        arrivalProgressObserver.onRouteProgressChanged(routeProgress)
+
+        // THEN leg index should be increased only once
+        verify(exactly = 1) { tripSession.updateLegIndex(1, any()) }
+        verify(exactly = 0) { tripSession.updateLegIndex(2, any()) }
     }
 
     private fun DirectionsRoute.mockMultipleLegs() {
