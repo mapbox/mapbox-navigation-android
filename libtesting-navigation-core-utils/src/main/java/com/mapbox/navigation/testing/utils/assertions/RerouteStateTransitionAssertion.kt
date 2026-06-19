@@ -129,3 +129,32 @@ fun assertSuccessfulRouteReplanRerouteStateTransition(rerouteStates: List<Rerout
     assertIs<RerouteStateV2.Idle>(rerouteStates[3])
 }
 
+fun interruptedReplanRerouteStateTransitionAssertion(
+    rerouteController: RerouteController,
+) = RerouteStateTransitionAssertion(rerouteController) {
+    requiredState(RerouteState.Idle)
+    requiredState(RerouteState.FetchingRoute)
+    requiredState(RerouteState.Interrupted)
+    requiredState(RerouteState.Idle)
+    requiredState(RerouteState.FetchingRoute)
+    requiredState(RerouteState.RouteFetched(RouterOrigin.ONLINE))
+    requiredState(RerouteState.Idle)
+}
+
+@OptIn(ExperimentalMapboxNavigationAPI::class)
+fun assertInterruptedReplanRerouteStateTransitionV2(rerouteStates: List<RerouteStateV2>) {
+    Assert.assertEquals(
+        "reroute states are: $rerouteStates",
+        7,
+        rerouteStates.size,
+    )
+    assertIs<RerouteStateV2.Idle>(rerouteStates[0])
+    assertIs<RerouteStateV2.FetchingRoute>(rerouteStates[1])
+    assertIs<RerouteStateV2.Interrupted>(rerouteStates[2])
+    assertIs<RerouteStateV2.Idle>(rerouteStates[3])
+    assertIs<RerouteStateV2.FetchingRoute>(rerouteStates[4])
+    assertIs<RerouteStateV2.RouteFetched>(rerouteStates[5])
+    assertEquals(RouterOrigin.ONLINE, (rerouteStates[5] as RerouteStateV2.RouteFetched).routerOrigin)
+    assertIs<RerouteStateV2.Idle>(rerouteStates[6])
+}
+

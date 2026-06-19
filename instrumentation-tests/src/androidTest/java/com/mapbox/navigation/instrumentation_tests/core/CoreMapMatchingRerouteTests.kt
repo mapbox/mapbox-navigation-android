@@ -6,8 +6,6 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
-import com.mapbox.navigation.base.internal.route.deserializeNavigationRouteFrom
-import com.mapbox.navigation.base.internal.route.serialize
 import com.mapbox.navigation.base.options.NavigateToFinalDestination
 import com.mapbox.navigation.base.options.RerouteDisabled
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -43,14 +41,10 @@ import com.mapbox.navigation.testing.utils.nativeRerouteControllerNoRetryConfig
 import com.mapbox.navigation.testing.utils.readRawFileText
 import com.mapbox.navigation.testing.utils.withMapboxNavigation
 import com.mapbox.turf.TurfMeasurement
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
-import org.junit.Assume.assumeFalse
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -387,102 +381,6 @@ class CoreMapMatchingRerouteTests(
                     it is RerouteStateV2.Idle
                 }
 
-                yield()
-
-                assertRerouteFailedTransition(rerouteStates)
-                assertRerouteFailedTransitionV2(rerouteStatesV2)
-            }
-        }
-    }
-
-    /**
-     * Test: Off-route behavior with serialized/deserialized map-matched route
-     *
-     * Use Case: Apps often save routes to disk for offline use or session recovery. This validates
-     * that serialization/deserialization preserves route metadata and off-route behavior works
-     * identically to non-deserialized routes.
-     *
-     * Flow:
-     * 1. Request map-matched route
-     * 2. Serialize the route to JSON/bytes
-     * 3. Deserialize back to NavigationRoute object
-     * 4. Verify deserialization succeeded (no errors)
-     * 5. Set deserialized route as active
-     * 6. Simulate going off-route
-     * 7. Monitor reroute failure (same as non-deserialized)
-     *
-     * Validates:
-     * - Serialization/deserialization preserves route properties
-     * - Deserialized map-matched routes maintain their "map-matched" identity
-     * - Off-route detection works identically with deserialized routes
-     * - Reroute fails appropriately (no fallback strategy)
-     * - Both observer versions report failed transition
-     *
-     * Example: Route persistence across app restarts
-     * - Session 1: Get route, serialize, save to disk
-     * - Session 2: Load, deserialize, navigate → same behavior as original
-     */
-    @Test
-    fun offRouteOnDeserializedMapMatchedRoute() = sdkTest {
-        assumeFalse(
-            "this test didn't work great with native reroute, so we disable it because" +
-                "deserialization maybe going to be removed " +
-                "https://mapbox.atlassian.net/browse/NAVAND-6775 anyway",
-            runOptions.nativeReroute,
-        )
-        withMapboxNavigation(
-            historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestCustomConfig(),
-        ) { navigation ->
-            val rerouteStates = mutableListOf<RerouteState>()
-            val rerouteStatesV2 = mutableListOf<RerouteStateV2>()
-            navigation.getRerouteController()!!.registerRerouteStateObserver {
-                rerouteStates.add(it)
-            }
-            navigation.getRerouteController()!!.registerRerouteStateV2Observer {
-                rerouteStatesV2.add(it)
-            }
-            val options = setupTestMapMatchingRoute()
-            val result = navigation.requestMapMatching(options).getSuccessfulOrThrowException()
-
-            val deserializationResult = withContext(Dispatchers.Default) {
-                deserializeNavigationRouteFrom(
-                    result.matches.first().navigationRoute.serialize(),
-                )
-            }
-            assertNull(
-                deserializationResult.error,
-            )
-            val deserializedRoute = deserializationResult.value!!
-
-            navigation.setNavigationRoutes(listOf(deserializedRoute))
-
-            navigation.startTripSession()
-            navigation.moveAlongTheRouteUntilTracking(
-                result.matches.first().navigationRoute,
-                mockLocationReplayerRule,
-            )
-
-            stayOnPosition(
-                latitude = 32.712997,
-                longitude = -117.172881,
-                bearing = 178.0f,
-                frequencyHz = 5,
-            ) {
-                navigation.getRerouteController()?.rerouteStates()?.first {
-                    it is RerouteState.FetchingRoute
-                }
-                navigation.getRerouteController()?.rerouteStatesV2()?.first {
-                    it is RerouteStateV2.FetchingRoute
-                }
-                navigation.getRerouteController()?.rerouteStates()?.first {
-                    it is RerouteState.Idle
-                }
-                navigation.getRerouteController()?.rerouteStatesV2()?.first {
-                    it is RerouteStateV2.Idle
-                }
-
-                // let the rerouteStatesV2Observer be notified
                 yield()
 
                 assertRerouteFailedTransition(rerouteStates)

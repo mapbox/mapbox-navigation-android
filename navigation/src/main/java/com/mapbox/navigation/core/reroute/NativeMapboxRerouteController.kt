@@ -11,6 +11,8 @@ import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.ResponseOriginAPI
 import com.mapbox.navigation.core.internal.router.mapToSdkRouterFailureType
+import com.mapbox.navigation.core.reroute.internal.NativeRerouteControllerState
+import com.mapbox.navigation.core.utils.ThreadUtils
 import com.mapbox.navigation.navigator.internal.MapboxNativeRerouteInterface
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
@@ -20,12 +22,17 @@ import com.mapbox.navigator.RerouteControllerInterface
 import com.mapbox.navigator.RerouteDetectorInterface
 import com.mapbox.navigator.RerouteError
 import com.mapbox.navigator.RerouteErrorType
+import com.mapbox.navigator.RerouteInfo
 import com.mapbox.navigator.RerouteObserver
 import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouteOptionsAdapter
 import com.mapbox.navigator.RouterErrorType
 import com.mapbox.navigator.RouterOrigin
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.net.MalformedURLException
 import java.net.URL
@@ -40,8 +47,10 @@ internal class NativeMapboxRerouteController(
     private val updateRoutes: UpdateRoutes,
     private val scope: CoroutineScope,
     private val routeParser: NavigationRoutesParser,
+    private val mainThreadAssertion: () -> Unit = ThreadUtils::assertCurrentLooperIsMain,
 ) : InternalRerouteController() {
 
+    private var activeParsingJob: Job? = null
     private var rerouteOptionsAdapter: RerouteOptionsAdapter? = null
     private var rerouteController = rerouteInterface.getRerouteController()
     private var rerouteDetector = rerouteInterface.getRerouteDetector()
@@ -63,7 +72,7 @@ internal class NativeMapboxRerouteController(
 
     /**
      * There's a private backing field for [state] so that it can become val
-     * so that we don't accidentally update it instead of stateV2.
+     * so that we don't accidentally update it instead of nativeState.
      */
     private var deprecatedState: RerouteState = RerouteState.Idle
         set(value) {
@@ -76,28 +85,43 @@ internal class NativeMapboxRerouteController(
         }
 
     /*
-     Backed by `deprecatedState`. Should not be updated directly - all the internal logic should switch to `stateV2`.
+     Backed by `deprecatedState`. Should not be updated directly - all the internal logic should switch to `nativeState`.
     */
     override val state: RerouteState
         get() = deprecatedState
 
-    override var stateV2: RerouteStateV2 = RerouteStateV2.Idle()
-        private set(value) {
-            if (field == value) {
+    private val _nativeControllerStateFlow =
+        MutableStateFlow<NativeRerouteControllerState>(NativeRerouteControllerState.Idle())
+
+    val nativeControllerStateFlow: StateFlow<NativeRerouteControllerState> =
+        _nativeControllerStateFlow.asStateFlow()
+
+    private var nativeState: NativeRerouteControllerState
+        get() = _nativeControllerStateFlow.value
+        set(value) {
+            if (_nativeControllerStateFlow.value == value) {
                 return
             }
-            logD(TAG) { "RerouteState: $value" }
-            field = value
-            value.toRerouteState()?.let {
+            val prevV2 = _nativeControllerStateFlow.value.toRerouteStateV2()
+            logD(TAG) { "NativeRerouteControllerState: $value" }
+            _nativeControllerStateFlow.value = value
+            val v2 = value.toRerouteStateV2()
+            v2.toRerouteState()?.let {
                 deprecatedState = it
             }
-            observersV2.forEach { it.onRerouteStateChanged(value) }
+            if (prevV2 != v2) {
+                observersV2.forEach { it.onRerouteStateChanged(v2) }
+            }
         }
+
+    override val stateV2: RerouteStateV2
+        get() = nativeState.toRerouteStateV2()
 
     private val nativeRerouteObserver = object : RerouteObserver {
         override fun onRerouteDetected(routeRequest: String): Boolean {
+            mainThreadAssertion()
             logD(TAG) { "onRerouteDetected: $routeRequest" }
-            stateV2 = RerouteStateV2.FetchingRoute()
+            nativeState = NativeRerouteControllerState.WaitingForResponse()
             return true
         }
 
@@ -106,64 +130,70 @@ internal class NativeMapboxRerouteController(
             routeRequest: String,
             origin: RouterOrigin,
         ) {
+            mainThreadAssertion()
             logD(TAG) { "onRerouteReceived: request: $routeRequest" }
-            scope.launch {
+            interruptParsingIfAny()
+            activeParsingJob = scope.launch {
                 logD(TAG) { "Parsing reroute response $routeRequest" }
+                nativeState = NativeRerouteControllerState.RouteObjectsParsing()
                 when (val result = handleRerouteResponse(routeResponse, routeRequest, origin)) {
                     is RerouteResponseParsingResult.Error -> {
-                        stateV2 = RerouteStateV2.Failed(
+                        nativeState = NativeRerouteControllerState.Failed(
                             "Error parsing route",
                             result.throwable,
                         )
-                        stateV2 = RerouteStateV2.Idle()
+                        nativeState = NativeRerouteControllerState.Idle()
                     }
                     is RerouteResponseParsingResult.RoutesAvailable -> {
-                        stateV2 = RerouteStateV2.RouteFetched(
+                        nativeState = NativeRerouteControllerState.RouteFetched(
                             result.newRoutes.firstOrNull()?.origin.orEmpty(),
                         )
                         val routeAccepted = updateRoutes(
                             result.newRoutes,
                             result.primaryRouteLegIndex,
                         )
-                        stateV2 = if (routeAccepted) {
-                            RerouteStateV2.Deviation.ApplyingRoute()
+                        nativeState = if (routeAccepted) {
+                            NativeRerouteControllerState.Deviation.ApplyingRoute()
                         } else {
-                            RerouteStateV2.Deviation.RouteIgnored()
+                            NativeRerouteControllerState.Deviation.RouteIgnored()
                         }
-                        stateV2 = RerouteStateV2.Idle()
+                        nativeState = NativeRerouteControllerState.Idle()
                     }
                 }
             }
         }
 
         override fun onRerouteCancelled() {
+            mainThreadAssertion()
             logD(TAG) { "onRerouteCancelled" }
-            stateV2 = RerouteStateV2.Interrupted()
-            stateV2 = RerouteStateV2.Idle()
+            nativeState = NativeRerouteControllerState.Interrupted()
+            nativeState = NativeRerouteControllerState.Idle()
         }
 
         override fun onRerouteFailed(error: RerouteError) {
-            stateV2 = RerouteStateV2.FetchingRoute()
+            mainThreadAssertion()
+            nativeState = NativeRerouteControllerState.WaitingForResponse()
             setRerouteFailureState("onRerouteFailed", error)
-            stateV2 = RerouteStateV2.Idle()
+            nativeState = NativeRerouteControllerState.Idle()
         }
 
         override fun onSwitchToAlternative(route: RouteInterface, legIndex: Int) {
+            mainThreadAssertion()
             logD(TAG) { "onSwitchToAlternative: ${route.routeId}" }
             val origin = route.routerOrigin.mapToSdkRouteOrigin()
             val routes = getCurrentRoutes().toMutableList()
             val routeToSwitchTo = routes.firstOrNull { it.id == route.routeId } ?: return
-            stateV2 = RerouteStateV2.FetchingRoute()
+            nativeState = NativeRerouteControllerState.WaitingForResponse()
             routes.remove(routeToSwitchTo)
             routes.add(0, routeToSwitchTo)
-            stateV2 = RerouteStateV2.RouteFetched(origin)
+            nativeState = NativeRerouteControllerState.RouteFetched(origin)
             val routeAccepted = updateRoutes(routes, legIndex)
-            stateV2 = if (routeAccepted) {
-                RerouteStateV2.Deviation.ApplyingRoute()
+            nativeState = if (routeAccepted) {
+                NativeRerouteControllerState.Deviation.ApplyingRoute()
             } else {
-                RerouteStateV2.Deviation.RouteIgnored()
+                NativeRerouteControllerState.Deviation.RouteIgnored()
             }
-            stateV2 = RerouteStateV2.Idle()
+            nativeState = NativeRerouteControllerState.Idle()
         }
     }
 
@@ -189,6 +219,7 @@ internal class NativeMapboxRerouteController(
      * Native reroute controller is disabled when there is no observers
      */
     override fun setEnabled(enabled: Boolean) {
+        mainThreadAssertion()
         val rerouteController = requireNativeRerouteController()
         logD(TAG) { "Set reroute controller enabled = $enabled" }
         if (enabled) {
@@ -211,54 +242,22 @@ internal class NativeMapboxRerouteController(
     override fun rerouteOnDeviation(callback: DeviationRoutesCallback) {
     }
 
-    // test how route replan stops ongoing request
     override fun rerouteOnParametersChange(callback: RouteReplanRoutesCallback) {
-        val rerouteDetector = requireNativeRerouteDetector()
+        mainThreadAssertion()
         logI(TAG) { "Forcing reroute because of parameters change" }
-        stateV2 = RerouteStateV2.FetchingRoute()
-        rerouteDetector.forceReroute(ForceRerouteReason.PARAMETERS_CHANGE) {
-            logD(TAG) {
-                "Received force reroute on parameters change callback with ${it.value}, ${it.error}"
-            }
-            it.onValue { value ->
-                scope.launch {
-                    val parsingResult = handleRerouteResponse(
-                        value.routeResponse,
-                        value.routeRequest,
-                        value.origin,
-                    )
-                    when (parsingResult) {
-                        is RerouteResponseParsingResult.Error -> {
-                            stateV2 = RerouteStateV2.Failed(
-                                "Error parsing route",
-                                parsingResult.throwable,
-                            )
-                            stateV2 = RerouteStateV2.Idle()
-                        }
-
-                        is RerouteResponseParsingResult.RoutesAvailable -> {
-                            stateV2 = RerouteStateV2.RouteFetched(
-                                parsingResult.newRoutes.firstOrNull()?.origin.orEmpty(),
-                            )
-                            stateV2 = RerouteStateV2.Idle()
-                            callback.onNewRoutes(
-                                RerouteResult(
-                                    parsingResult.newRoutes,
-                                    parsingResult.primaryRouteLegIndex,
-                                    value.origin.mapToSdkRouteOrigin(),
-                                ),
-                            )
-                        }
-                    }
-                }
-            }.onError { rerouteError ->
-                setRerouteFailureState("User triggered force reroute", rerouteError)
-                stateV2 = RerouteStateV2.Idle()
-            }
+        forceRerouteAndParse(ForceRerouteReason.PARAMETERS_CHANGE) { value, parsingResult ->
+            callback.onNewRoutes(
+                RerouteResult(
+                    parsingResult.newRoutes,
+                    parsingResult.primaryRouteLegIndex,
+                    value.origin.mapToSdkRouteOrigin(),
+                ),
+            )
         }
     }
 
     override fun setRerouteOptionsAdapter(rerouteOptionsAdapter: RerouteOptionsAdapter?) {
+        mainThreadAssertion()
         val rerouteController = requireNativeRerouteController()
         this.rerouteOptionsAdapter = rerouteOptionsAdapter
         rerouteController.setOptionsAdapter(
@@ -271,13 +270,28 @@ internal class NativeMapboxRerouteController(
     }
 
     override fun reroute(callback: RerouteController.RoutesCallback) {
-        val rerouteDetector = requireNativeRerouteDetector()
+        mainThreadAssertion()
         logI(TAG) { "Forcing reroute because of user request" }
-        stateV2 = RerouteStateV2.FetchingRoute()
-        rerouteDetector.forceReroute(ForceRerouteReason.USER_TRIGGERED) {
-            logD(TAG) { "Received force reroute callback with ${it.value}, ${it.error}" }
+        forceRerouteAndParse(ForceRerouteReason.USER_TRIGGERED) { _, parsingResult ->
+            callback.onNewRoutes(
+                parsingResult.newRoutes,
+                parsingResult.newRoutes.first().origin,
+            )
+        }
+    }
+
+    private fun forceRerouteAndParse(
+        reason: ForceRerouteReason,
+        onRoutesAvailable: (RerouteInfo, RerouteResponseParsingResult.RoutesAvailable) -> Unit,
+    ) {
+        val rerouteDetector = requireNativeRerouteDetector()
+        interruptParsingIfAny()
+        nativeState = NativeRerouteControllerState.WaitingForResponse()
+        rerouteDetector.forceReroute(reason) {
+            logD(TAG) { "Received force reroute ($reason) callback with ${it.value}, ${it.error}" }
             it.onValue { value ->
-                scope.launch {
+                activeParsingJob = scope.launch {
+                    nativeState = NativeRerouteControllerState.RouteObjectsParsing()
                     val parsingResult = handleRerouteResponse(
                         value.routeResponse,
                         value.routeRequest,
@@ -285,29 +299,39 @@ internal class NativeMapboxRerouteController(
                     )
                     when (parsingResult) {
                         is RerouteResponseParsingResult.Error -> {
-                            stateV2 = RerouteStateV2.Failed(
+                            nativeState = NativeRerouteControllerState.Failed(
                                 "Error parsing route",
                                 parsingResult.throwable,
                             )
-                            stateV2 = RerouteStateV2.Idle()
+                            nativeState = NativeRerouteControllerState.Idle()
                         }
 
                         is RerouteResponseParsingResult.RoutesAvailable -> {
-                            stateV2 = RerouteStateV2.RouteFetched(
+                            nativeState = NativeRerouteControllerState.RouteFetched(
                                 parsingResult.newRoutes.firstOrNull()?.origin.orEmpty(),
                             )
-                            stateV2 = RerouteStateV2.Idle()
-                            callback.onNewRoutes(
-                                parsingResult.newRoutes,
-                                parsingResult.newRoutes.first().origin,
-                            )
+                            nativeState = NativeRerouteControllerState.Idle()
+                            onRoutesAvailable(value, parsingResult)
                         }
                     }
                 }
             }.onError { rerouteError ->
-                setRerouteFailureState("User triggered force reroute", rerouteError)
-                stateV2 = RerouteStateV2.Idle()
+                setRerouteFailureState("Force reroute ($reason)", rerouteError)
+                nativeState = NativeRerouteControllerState.Idle()
             }
+        }
+    }
+
+    private fun interruptParsingIfAny() {
+        val previousJob = activeParsingJob
+        activeParsingJob = null
+        if (previousJob != null && previousJob.isActive) {
+            logI(TAG) {
+                "interrupting currently running route response parsing job"
+            }
+            previousJob.cancel()
+            nativeState = NativeRerouteControllerState.Interrupted()
+            nativeState = NativeRerouteControllerState.Idle()
         }
     }
 
@@ -318,10 +342,10 @@ internal class NativeMapboxRerouteController(
                 "message: ${rerouteError.message}; " +
                 "router errors: ${rerouteError.routerErrors}"
         }
-        stateV2 = if (rerouteError.type == RerouteErrorType.CANCELLED) {
-            RerouteStateV2.Interrupted()
+        nativeState = if (rerouteError.type == RerouteErrorType.CANCELLED) {
+            NativeRerouteControllerState.Interrupted()
         } else {
-            RerouteStateV2.Failed(
+            NativeRerouteControllerState.Failed(
                 message = rerouteError.message,
                 throwable = null,
                 reasons = rerouteError.routerErrors

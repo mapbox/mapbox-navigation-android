@@ -3,6 +3,9 @@ package com.mapbox.navigation.core.reroute
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.route.nativeRoute
+import com.mapbox.navigation.base.internal.route.parsing.ResponseToParse
+import com.mapbox.navigation.base.internal.route.parsing.models.directions.NavigationRouteParsingSuccessfulResult
+import com.mapbox.navigation.base.internal.route.parsing.models.directions.NavigationRoutesParser
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.internal.router.util.TestRouteFixtures
 import com.mapbox.navigation.navigator.internal.MapboxNativeRerouteInterface
@@ -35,6 +38,7 @@ import io.mockk.verify
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
@@ -242,6 +246,680 @@ class NativeMapboxRerouteControllerTest {
             statesV2,
         )
         verify(exactly = 0) { updateRoutes.invoke(any(), any()) }
+    }
+
+    @Test
+    fun `only latest replan applied when a few requested in parallel`() {
+        // When forceReroute is called with a callback, native does NOT trigger onRerouteDetected/
+        // onRerouteReceived on observers (notifyObservers = !callback = false in native).
+        // Results arrive exclusively via ForceRerouteCallback.
+        val nativeRerouteInterface = MapboxNativeRerouteInterfaceImpl()
+        val rerouteDetector = nativeRerouteInterface.getRerouteDetector() as TestRerouteDetector
+        val pausingParser = PausingNavigationRoutesParser(
+            createTestNavigationRoutesParsing(UnconfinedTestDispatcher()),
+        )
+        val controller = createNativeMapboxRerouteController(
+            nativeRerouteInterface = nativeRerouteInterface,
+            routeParser = pausingParser,
+        )
+
+        val statesV2 = controller.recordRerouteStateV2()
+        val firstReplanCallback = mockk<InternalRerouteController.RouteReplanRoutesCallback>(
+            relaxed = true,
+        )
+        val secondReplanCallback = mockk<InternalRerouteController.RouteReplanRoutesCallback>(
+            relaxed = true,
+        )
+
+        // First replan: forceReroute is called; save callback before it is overwritten by second call
+        controller.rerouteOnParametersChange(firstReplanCallback)
+        val firstForceRerouteCallback = rerouteDetector.latestCallback!!
+
+        // Native responds to first forceReroute - parsing starts but is suspended by PausingNavigationRoutesParser
+        firstForceRerouteCallback.run(
+            ExpectedFactory.createValue(
+                RerouteInfo(
+                    testRouteFixtures.loadTwoLegRoute().toDataRef(),
+                    TEST_REROUTE_URL,
+                    RouterOrigin.ONBOARD,
+                ),
+            ),
+        )
+
+        // Second replan starts before first parsing completes - first job is cancelled
+        controller.rerouteOnParametersChange(secondReplanCallback)
+
+        // Native responds to second forceReroute - second parsing also suspended
+        rerouteDetector.latestCallback!!.run(
+            ExpectedFactory.createValue(
+                RerouteInfo(
+                    testRouteFixtures.loadTwoLegRoute().toDataRef(),
+                    TEST_REROUTE_URL,
+                    RouterOrigin.ONLINE,
+                ),
+            ),
+        )
+
+        // Release both parsing operations to complete
+        pausingParser.releaseAll()
+
+        // Only the second (latest) result should deliver routes
+        verify(exactly = 0) { firstReplanCallback.onNewRoutes(any()) }
+        verify(exactly = 1) { secondReplanCallback.onNewRoutes(any()) }
+
+        // First replan is interrupted by second; second completes successfully
+        assertEquals(
+            listOf(
+                RerouteStateV2.Idle(),
+                RerouteStateV2.FetchingRoute(),
+                RerouteStateV2.Interrupted(),
+                RerouteStateV2.Idle(),
+                RerouteStateV2.FetchingRoute(),
+                RerouteStateV2.RouteFetched(com.mapbox.navigation.base.route.RouterOrigin.ONLINE),
+                RerouteStateV2.Idle(),
+            ),
+            statesV2,
+        )
+    }
+
+    @Test
+    fun `second deviation after completed deviation`() {
+        val updateRoutes = mockk<UpdateRoutes> {
+            every { this@mockk.invoke(any(), any()) } returns true
+        }
+        val observerRegistration = MapboxNativeRerouteInterfaceImpl()
+        val controller = createNativeMapboxRerouteController(
+            nativeRerouteInterface = observerRegistration,
+            updateRoutes = updateRoutes,
+        )
+        val statesV2 = controller.recordRerouteStateV2()
+
+        // First deviation completes fully; activeParsingJob is done but still referenced.
+        observerRegistration.observer.apply {
+            onRerouteDetected(TEST_REROUTE_URL)
+            onRerouteReceived(
+                testRouteFixtures.loadTwoLegRoute().toDataRef(),
+                TEST_REROUTE_URL,
+                RouterOrigin.ONBOARD,
+            )
+        }
+
+        // Second deviation: interruptParsingIfAny() must NOT emit Interrupted because the job is already done.
+        observerRegistration.observer.apply {
+            onRerouteDetected(TEST_REROUTE_URL)
+            onRerouteReceived(
+                testRouteFixtures.loadTwoLegRoute().toDataRef(),
+                TEST_REROUTE_URL,
+                RouterOrigin.ONLINE,
+            )
+        }
+
+        assertEquals(
+            listOf(
+                RerouteStateV2.Idle(),
+                RerouteStateV2.FetchingRoute(),
+                RerouteStateV2.RouteFetched(com.mapbox.navigation.base.route.RouterOrigin.OFFLINE),
+                RerouteStateV2.Deviation.ApplyingRoute(),
+                RerouteStateV2.Idle(),
+                RerouteStateV2.FetchingRoute(),
+                RerouteStateV2.RouteFetched(com.mapbox.navigation.base.route.RouterOrigin.ONLINE),
+                RerouteStateV2.Deviation.ApplyingRoute(),
+                RerouteStateV2.Idle(),
+            ),
+            statesV2,
+        )
+    }
+
+    @Test
+    fun `second replan after completed replan`() {
+        val nativeRerouteInterface = MapboxNativeRerouteInterfaceImpl()
+        val rerouteDetector = nativeRerouteInterface.getRerouteDetector() as TestRerouteDetector
+        val controller = createNativeMapboxRerouteController(
+            nativeRerouteInterface = nativeRerouteInterface,
+        )
+        val statesV2 = controller.recordRerouteStateV2()
+        val firstCallback = mockk<InternalRerouteController.RouteReplanRoutesCallback>(
+            relaxed = true,
+        )
+        val secondCallback = mockk<InternalRerouteController.RouteReplanRoutesCallback>(
+            relaxed = true,
+        )
+
+        // First replan completes fully; activeParsingJob is done but still referenced.
+        controller.rerouteOnParametersChange(firstCallback)
+        rerouteDetector.latestCallback!!.run(
+            ExpectedFactory.createValue(
+                RerouteInfo(
+                    testRouteFixtures.loadTwoLegRoute().toDataRef(),
+                    TEST_REROUTE_URL,
+                    RouterOrigin.ONLINE,
+                ),
+            ),
+        )
+
+        // Second replan: interruptParsingIfAny() must NOT emit Interrupted because the job is already done.
+        controller.rerouteOnParametersChange(secondCallback)
+        rerouteDetector.latestCallback!!.run(
+            ExpectedFactory.createValue(
+                RerouteInfo(
+                    testRouteFixtures.loadTwoLegRoute().toDataRef(),
+                    TEST_REROUTE_URL,
+                    RouterOrigin.ONLINE,
+                ),
+            ),
+        )
+
+        assertEquals(
+            listOf(
+                RerouteStateV2.Idle(),
+                RerouteStateV2.FetchingRoute(),
+                RerouteStateV2.RouteFetched(com.mapbox.navigation.base.route.RouterOrigin.ONLINE),
+                RerouteStateV2.Idle(),
+                RerouteStateV2.FetchingRoute(),
+                RerouteStateV2.RouteFetched(com.mapbox.navigation.base.route.RouterOrigin.ONLINE),
+                RerouteStateV2.Idle(),
+            ),
+            statesV2,
+        )
+        verify(exactly = 1) { firstCallback.onNewRoutes(any()) }
+        verify(exactly = 1) { secondCallback.onNewRoutes(any()) }
+    }
+
+    @Test
+    fun `replan after completed deviation`() {
+        val updateRoutes = mockk<UpdateRoutes> {
+            every { this@mockk.invoke(any(), any()) } returns true
+        }
+        val nativeRerouteInterface = MapboxNativeRerouteInterfaceImpl()
+        val rerouteDetector = nativeRerouteInterface.getRerouteDetector() as TestRerouteDetector
+        val controller = createNativeMapboxRerouteController(
+            nativeRerouteInterface = nativeRerouteInterface,
+            updateRoutes = updateRoutes,
+        )
+        val statesV2 = controller.recordRerouteStateV2()
+        val replanCallback = mockk<InternalRerouteController.RouteReplanRoutesCallback>(
+            relaxed = true,
+        )
+
+        // Deviation completes fully; activeParsingJob is done but still referenced.
+        nativeRerouteInterface.observer.apply {
+            onRerouteDetected(TEST_REROUTE_URL)
+            onRerouteReceived(
+                testRouteFixtures.loadTwoLegRoute().toDataRef(),
+                TEST_REROUTE_URL,
+                RouterOrigin.ONBOARD,
+            )
+        }
+
+        // Replan after completed deviation: interruptParsingIfAny() must NOT emit Interrupted.
+        controller.rerouteOnParametersChange(replanCallback)
+        rerouteDetector.latestCallback!!.run(
+            ExpectedFactory.createValue(
+                RerouteInfo(
+                    testRouteFixtures.loadTwoLegRoute().toDataRef(),
+                    TEST_REROUTE_URL,
+                    RouterOrigin.ONLINE,
+                ),
+            ),
+        )
+
+        assertEquals(
+            listOf(
+                RerouteStateV2.Idle(),
+                RerouteStateV2.FetchingRoute(),
+                RerouteStateV2.RouteFetched(com.mapbox.navigation.base.route.RouterOrigin.OFFLINE),
+                RerouteStateV2.Deviation.ApplyingRoute(),
+                RerouteStateV2.Idle(),
+                RerouteStateV2.FetchingRoute(),
+                RerouteStateV2.RouteFetched(com.mapbox.navigation.base.route.RouterOrigin.ONLINE),
+                RerouteStateV2.Idle(),
+            ),
+            statesV2,
+        )
+        verify(exactly = 1) { replanCallback.onNewRoutes(any()) }
+    }
+
+    @Test
+    fun `deviation after completed replan`() {
+        val updateRoutes = mockk<UpdateRoutes> {
+            every { this@mockk.invoke(any(), any()) } returns true
+        }
+        val nativeRerouteInterface = MapboxNativeRerouteInterfaceImpl()
+        val rerouteDetector = nativeRerouteInterface.getRerouteDetector() as TestRerouteDetector
+        val controller = createNativeMapboxRerouteController(
+            nativeRerouteInterface = nativeRerouteInterface,
+            updateRoutes = updateRoutes,
+        )
+        val statesV2 = controller.recordRerouteStateV2()
+        val replanCallback = mockk<InternalRerouteController.RouteReplanRoutesCallback>(
+            relaxed = true,
+        )
+
+        // Replan completes fully; activeParsingJob is done but still referenced.
+        controller.rerouteOnParametersChange(replanCallback)
+        rerouteDetector.latestCallback!!.run(
+            ExpectedFactory.createValue(
+                RerouteInfo(
+                    testRouteFixtures.loadTwoLegRoute().toDataRef(),
+                    TEST_REROUTE_URL,
+                    RouterOrigin.ONLINE,
+                ),
+            ),
+        )
+
+        // Deviation after completed replan: onRerouteReceived calls interruptParsingIfAny()
+        // which must NOT emit Interrupted because the job is already done.
+        nativeRerouteInterface.observer.apply {
+            onRerouteDetected(TEST_REROUTE_URL)
+            onRerouteReceived(
+                testRouteFixtures.loadTwoLegRoute().toDataRef(),
+                TEST_REROUTE_URL,
+                RouterOrigin.ONLINE,
+            )
+        }
+
+        assertEquals(
+            listOf(
+                RerouteStateV2.Idle(),
+                RerouteStateV2.FetchingRoute(),
+                RerouteStateV2.RouteFetched(com.mapbox.navigation.base.route.RouterOrigin.ONLINE),
+                RerouteStateV2.Idle(),
+                RerouteStateV2.FetchingRoute(),
+                RerouteStateV2.RouteFetched(com.mapbox.navigation.base.route.RouterOrigin.ONLINE),
+                RerouteStateV2.Deviation.ApplyingRoute(),
+                RerouteStateV2.Idle(),
+            ),
+            statesV2,
+        )
+        verify(exactly = 1) { replanCallback.onNewRoutes(any()) }
+    }
+
+    @Test
+    fun `deviation cancels in-flight replan parsing`() {
+        // Scenario: replan response already received (Kotlin parsing in progress),
+        // then auto-deviation fires. Deviation should win; replan callback must not fire.
+        val nativeRerouteInterface = MapboxNativeRerouteInterfaceImpl()
+        val rerouteDetector = nativeRerouteInterface.getRerouteDetector() as TestRerouteDetector
+        val pausingParser = PausingNavigationRoutesParser(
+            createTestNavigationRoutesParsing(UnconfinedTestDispatcher()),
+        )
+        val updateRoutes = mockk<UpdateRoutes> {
+            every { this@mockk.invoke(any(), any()) } returns true
+        }
+        val controller = createNativeMapboxRerouteController(
+            nativeRerouteInterface = nativeRerouteInterface,
+            routeParser = pausingParser,
+            updateRoutes = updateRoutes,
+        )
+
+        val statesV2 = controller.recordRerouteStateV2()
+        val replanCallback = mockk<InternalRerouteController.RouteReplanRoutesCallback>(
+            relaxed = true,
+        )
+
+        // Replan kicks off; native responds immediately — parsing starts, suspended
+        controller.rerouteOnParametersChange(replanCallback)
+        rerouteDetector.latestCallback!!.run(
+            ExpectedFactory.createValue(
+                RerouteInfo(
+                    testRouteFixtures.loadTwoLegRoute().toDataRef(),
+                    TEST_REROUTE_URL,
+                    RouterOrigin.ONBOARD,
+                ),
+            ),
+        )
+
+        // Auto-deviation fires (native rerouteInProgress_ is false now — replan already responded)
+        nativeRerouteInterface.observer.onRerouteDetected(TEST_REROUTE_URL)
+        nativeRerouteInterface.observer.onRerouteReceived(
+            testRouteFixtures.loadTwoLegRoute().toDataRef(),
+            TEST_REROUTE_URL,
+            RouterOrigin.ONLINE,
+        )
+
+        // Both parsings are released
+        pausingParser.releaseAll()
+
+        // Deviation wins; replan callback must not fire
+        verify(exactly = 0) { replanCallback.onNewRoutes(any()) }
+        verify(exactly = 1) { updateRoutes(any(), any()) }
+
+        assertEquals(
+            listOf(
+                RerouteStateV2.Idle(),
+                RerouteStateV2.FetchingRoute(),
+                RerouteStateV2.Interrupted(),
+                RerouteStateV2.Idle(),
+                RerouteStateV2.FetchingRoute(),
+                RerouteStateV2.RouteFetched(com.mapbox.navigation.base.route.RouterOrigin.ONLINE),
+                RerouteStateV2.Deviation.ApplyingRoute(),
+                RerouteStateV2.Idle(),
+            ),
+            statesV2,
+        )
+    }
+
+    @Test
+    fun `replan cancels in-flight deviation parsing`() {
+        // Scenario: deviation response already received (Kotlin parsing in progress),
+        // then rerouteOnParametersChange fires. Replan should win; deviation must not apply routes.
+        val nativeRerouteInterface = MapboxNativeRerouteInterfaceImpl()
+        val rerouteDetector = nativeRerouteInterface.getRerouteDetector() as TestRerouteDetector
+        val pausingParser = PausingNavigationRoutesParser(
+            createTestNavigationRoutesParsing(UnconfinedTestDispatcher()),
+        )
+        val updateRoutes = mockk<UpdateRoutes> {
+            every { this@mockk.invoke(any(), any()) } returns true
+        }
+        val controller = createNativeMapboxRerouteController(
+            nativeRerouteInterface = nativeRerouteInterface,
+            routeParser = pausingParser,
+            updateRoutes = updateRoutes,
+        )
+
+        val statesV2 = controller.recordRerouteStateV2()
+        val replanCallback = mockk<InternalRerouteController.RouteReplanRoutesCallback>(
+            relaxed = true,
+        )
+
+        // Auto-deviation fires; native responds — parsing starts, suspended
+        nativeRerouteInterface.observer.onRerouteDetected(TEST_REROUTE_URL)
+        nativeRerouteInterface.observer.onRerouteReceived(
+            testRouteFixtures.loadTwoLegRoute().toDataRef(),
+            TEST_REROUTE_URL,
+            RouterOrigin.ONBOARD,
+        )
+
+        // Replan is requested before deviation parsing completes
+        controller.rerouteOnParametersChange(replanCallback)
+        rerouteDetector.latestCallback!!.run(
+            ExpectedFactory.createValue(
+                RerouteInfo(
+                    testRouteFixtures.loadTwoLegRoute().toDataRef(),
+                    TEST_REROUTE_URL,
+                    RouterOrigin.ONLINE,
+                ),
+            ),
+        )
+
+        // Both parsings are released
+        pausingParser.releaseAll()
+
+        // Replan wins; deviation must not apply routes
+        verify(exactly = 0) { updateRoutes(any(), any()) }
+        verify(exactly = 1) { replanCallback.onNewRoutes(any()) }
+
+        assertEquals(
+            listOf(
+                RerouteStateV2.Idle(),
+                RerouteStateV2.FetchingRoute(),
+                RerouteStateV2.Interrupted(),
+                RerouteStateV2.Idle(),
+                RerouteStateV2.FetchingRoute(),
+                RerouteStateV2.RouteFetched(com.mapbox.navigation.base.route.RouterOrigin.ONLINE),
+                RerouteStateV2.Idle(),
+            ),
+            statesV2,
+        )
+    }
+
+    @Test
+    fun `replan cancels in-flight user-triggered reroute parsing`() {
+        // Scenario: user-triggered reroute response already received (parsing in progress),
+        // then rerouteOnParametersChange fires. Replan should win; user reroute callback must not fire.
+        val nativeRerouteInterface = MapboxNativeRerouteInterfaceImpl()
+        val rerouteDetector = nativeRerouteInterface.getRerouteDetector() as TestRerouteDetector
+        val pausingParser = PausingNavigationRoutesParser(
+            createTestNavigationRoutesParsing(UnconfinedTestDispatcher()),
+        )
+        val updateRoutes = mockk<UpdateRoutes> {
+            every { this@mockk.invoke(any(), any()) } returns true
+        }
+        val controller = createNativeMapboxRerouteController(
+            nativeRerouteInterface = nativeRerouteInterface,
+            routeParser = pausingParser,
+            updateRoutes = updateRoutes,
+        )
+
+        val statesV2 = controller.recordRerouteStateV2()
+        val rerouteCallback = mockk<RerouteController.RoutesCallback>(relaxed = true)
+        val replanCallback = mockk<InternalRerouteController.RouteReplanRoutesCallback>(
+            relaxed = true,
+        )
+
+        // User triggers reroute; native responds — parsing starts, suspended
+        controller.reroute(rerouteCallback)
+        rerouteDetector.latestCallback!!.run(
+            ExpectedFactory.createValue(
+                RerouteInfo(
+                    testRouteFixtures.loadTwoLegRoute().toDataRef(),
+                    TEST_REROUTE_URL,
+                    RouterOrigin.ONBOARD,
+                ),
+            ),
+        )
+
+        // Replan is requested before user-reroute parsing completes
+        controller.rerouteOnParametersChange(replanCallback)
+        rerouteDetector.latestCallback!!.run(
+            ExpectedFactory.createValue(
+                RerouteInfo(
+                    testRouteFixtures.loadTwoLegRoute().toDataRef(),
+                    TEST_REROUTE_URL,
+                    RouterOrigin.ONLINE,
+                ),
+            ),
+        )
+
+        // Both parsings are released
+        pausingParser.releaseAll()
+
+        // Replan wins; user reroute callback must not fire
+        verify(exactly = 0) { rerouteCallback.onNewRoutes(any(), any()) }
+        verify(exactly = 1) { replanCallback.onNewRoutes(any()) }
+
+        assertEquals(
+            listOf(
+                RerouteStateV2.Idle(),
+                RerouteStateV2.FetchingRoute(),
+                RerouteStateV2.Interrupted(),
+                RerouteStateV2.Idle(),
+                RerouteStateV2.FetchingRoute(),
+                RerouteStateV2.RouteFetched(com.mapbox.navigation.base.route.RouterOrigin.ONLINE),
+                RerouteStateV2.Idle(),
+            ),
+            statesV2,
+        )
+    }
+
+    @Test
+    fun `deviation cancels in-flight user-triggered reroute parsing`() {
+        // Scenario: user-triggered reroute response already received (parsing in progress),
+        // then auto-deviation fires. Deviation should win; user reroute callback must not fire.
+        val nativeRerouteInterface = MapboxNativeRerouteInterfaceImpl()
+        val rerouteDetector = nativeRerouteInterface.getRerouteDetector() as TestRerouteDetector
+        val pausingParser = PausingNavigationRoutesParser(
+            createTestNavigationRoutesParsing(UnconfinedTestDispatcher()),
+        )
+        val updateRoutes = mockk<UpdateRoutes> {
+            every { this@mockk.invoke(any(), any()) } returns true
+        }
+        val controller = createNativeMapboxRerouteController(
+            nativeRerouteInterface = nativeRerouteInterface,
+            routeParser = pausingParser,
+            updateRoutes = updateRoutes,
+        )
+
+        val statesV2 = controller.recordRerouteStateV2()
+        val rerouteCallback = mockk<RerouteController.RoutesCallback>(relaxed = true)
+
+        // User triggers reroute; native responds — parsing starts, suspended
+        controller.reroute(rerouteCallback)
+        rerouteDetector.latestCallback!!.run(
+            ExpectedFactory.createValue(
+                RerouteInfo(
+                    testRouteFixtures.loadTwoLegRoute().toDataRef(),
+                    TEST_REROUTE_URL,
+                    RouterOrigin.ONBOARD,
+                ),
+            ),
+        )
+
+        // Auto-deviation fires before user-reroute parsing completes
+        nativeRerouteInterface.observer.onRerouteDetected(TEST_REROUTE_URL)
+        nativeRerouteInterface.observer.onRerouteReceived(
+            testRouteFixtures.loadTwoLegRoute().toDataRef(),
+            TEST_REROUTE_URL,
+            RouterOrigin.ONLINE,
+        )
+
+        // Both parsings are released
+        pausingParser.releaseAll()
+
+        // Deviation wins; user reroute callback must not fire
+        verify(exactly = 0) { rerouteCallback.onNewRoutes(any(), any()) }
+        verify(exactly = 1) { updateRoutes(any(), any()) }
+
+        assertEquals(
+            listOf(
+                RerouteStateV2.Idle(),
+                RerouteStateV2.FetchingRoute(),
+                RerouteStateV2.Interrupted(),
+                RerouteStateV2.Idle(),
+                RerouteStateV2.FetchingRoute(),
+                RerouteStateV2.RouteFetched(com.mapbox.navigation.base.route.RouterOrigin.ONLINE),
+                RerouteStateV2.Deviation.ApplyingRoute(),
+                RerouteStateV2.Idle(),
+            ),
+            statesV2,
+        )
+    }
+
+    @Test
+    fun `user reroute cancels in-flight replan parsing`() {
+        // Scenario: replan response already received (parsing in progress),
+        // then user triggers reroute. User reroute should win; replan callback must not fire.
+        val nativeRerouteInterface = MapboxNativeRerouteInterfaceImpl()
+        val rerouteDetector = nativeRerouteInterface.getRerouteDetector() as TestRerouteDetector
+        val pausingParser = PausingNavigationRoutesParser(
+            createTestNavigationRoutesParsing(UnconfinedTestDispatcher()),
+        )
+        val controller = createNativeMapboxRerouteController(
+            nativeRerouteInterface = nativeRerouteInterface,
+            routeParser = pausingParser,
+        )
+
+        val statesV2 = controller.recordRerouteStateV2()
+        val replanCallback = mockk<InternalRerouteController.RouteReplanRoutesCallback>(
+            relaxed = true,
+        )
+        val rerouteCallback = mockk<RerouteController.RoutesCallback>(relaxed = true)
+
+        // Replan kicks off; native responds — parsing starts, suspended
+        controller.rerouteOnParametersChange(replanCallback)
+        rerouteDetector.latestCallback!!.run(
+            ExpectedFactory.createValue(
+                RerouteInfo(
+                    testRouteFixtures.loadTwoLegRoute().toDataRef(),
+                    TEST_REROUTE_URL,
+                    RouterOrigin.ONBOARD,
+                ),
+            ),
+        )
+
+        // User triggers reroute before replan parsing completes
+        controller.reroute(rerouteCallback)
+        rerouteDetector.latestCallback!!.run(
+            ExpectedFactory.createValue(
+                RerouteInfo(
+                    testRouteFixtures.loadTwoLegRoute().toDataRef(),
+                    TEST_REROUTE_URL,
+                    RouterOrigin.ONLINE,
+                ),
+            ),
+        )
+
+        // Both parsings are released
+        pausingParser.releaseAll()
+
+        // User reroute wins; replan callback must not fire
+        verify(exactly = 0) { replanCallback.onNewRoutes(any()) }
+        verify(exactly = 1) { rerouteCallback.onNewRoutes(any(), any()) }
+
+        assertEquals(
+            listOf(
+                RerouteStateV2.Idle(),
+                RerouteStateV2.FetchingRoute(),
+                RerouteStateV2.Interrupted(),
+                RerouteStateV2.Idle(),
+                RerouteStateV2.FetchingRoute(),
+                RerouteStateV2.RouteFetched(com.mapbox.navigation.base.route.RouterOrigin.ONLINE),
+                RerouteStateV2.Idle(),
+            ),
+            statesV2,
+        )
+    }
+
+    @Test
+    fun `user reroute cancels in-flight deviation parsing`() {
+        // Scenario: deviation response already received (parsing in progress),
+        // then user triggers reroute. User reroute should win; deviation must not apply routes.
+        val nativeRerouteInterface = MapboxNativeRerouteInterfaceImpl()
+        val rerouteDetector = nativeRerouteInterface.getRerouteDetector() as TestRerouteDetector
+        val pausingParser = PausingNavigationRoutesParser(
+            createTestNavigationRoutesParsing(UnconfinedTestDispatcher()),
+        )
+        val updateRoutes = mockk<UpdateRoutes> {
+            every { this@mockk.invoke(any(), any()) } returns true
+        }
+        val controller = createNativeMapboxRerouteController(
+            nativeRerouteInterface = nativeRerouteInterface,
+            routeParser = pausingParser,
+            updateRoutes = updateRoutes,
+        )
+
+        val statesV2 = controller.recordRerouteStateV2()
+        val rerouteCallback = mockk<RerouteController.RoutesCallback>(relaxed = true)
+
+        // Auto-deviation fires; native responds — parsing starts, suspended
+        nativeRerouteInterface.observer.onRerouteDetected(TEST_REROUTE_URL)
+        nativeRerouteInterface.observer.onRerouteReceived(
+            testRouteFixtures.loadTwoLegRoute().toDataRef(),
+            TEST_REROUTE_URL,
+            RouterOrigin.ONBOARD,
+        )
+
+        // User triggers reroute before deviation parsing completes
+        controller.reroute(rerouteCallback)
+        rerouteDetector.latestCallback!!.run(
+            ExpectedFactory.createValue(
+                RerouteInfo(
+                    testRouteFixtures.loadTwoLegRoute().toDataRef(),
+                    TEST_REROUTE_URL,
+                    RouterOrigin.ONLINE,
+                ),
+            ),
+        )
+
+        // Both parsings are released
+        pausingParser.releaseAll()
+
+        // User reroute wins; deviation must not apply routes
+        verify(exactly = 0) { updateRoutes(any(), any()) }
+        verify(exactly = 1) { rerouteCallback.onNewRoutes(any(), any()) }
+
+        assertEquals(
+            listOf(
+                RerouteStateV2.Idle(),
+                RerouteStateV2.FetchingRoute(),
+                RerouteStateV2.Interrupted(),
+                RerouteStateV2.Idle(),
+                RerouteStateV2.FetchingRoute(),
+                RerouteStateV2.RouteFetched(com.mapbox.navigation.base.route.RouterOrigin.ONLINE),
+                RerouteStateV2.Idle(),
+            ),
+            statesV2,
+        )
     }
 
     @Test
@@ -633,6 +1311,38 @@ class NativeMapboxRerouteControllerTest {
         verify(exactly = 0) { updateRoutes(any(), any()) }
     }
 
+    @Test(expected = IllegalStateException::class)
+    fun `setEnabled throws when mainThreadAssertion fails`() {
+        val controller = createNativeMapboxRerouteController(
+            mainThreadAssertion = { throw IllegalStateException("not on main thread") },
+        )
+        controller.setEnabled(true)
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun `rerouteOnParametersChange throws when mainThreadAssertion fails`() {
+        val controller = createNativeMapboxRerouteController(
+            mainThreadAssertion = { throw IllegalStateException("not on main thread") },
+        )
+        controller.rerouteOnParametersChange(mockk(relaxed = true))
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun `reroute throws when mainThreadAssertion fails`() {
+        val controller = createNativeMapboxRerouteController(
+            mainThreadAssertion = { throw IllegalStateException("not on main thread") },
+        )
+        controller.reroute(mockk(relaxed = true))
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun `setRerouteOptionsAdapter throws when mainThreadAssertion fails`() {
+        val controller = createNativeMapboxRerouteController(
+            mainThreadAssertion = { throw IllegalStateException("not on main thread") },
+        )
+        controller.setRerouteOptionsAdapter(null)
+    }
+
     @Test
     fun `user requests reroute but it's cancelled`() {
         val updateRoutes = mockk<UpdateRoutes>()
@@ -695,12 +1405,15 @@ private fun createNativeMapboxRerouteController(
     parsingDispatcher: CoroutineDispatcher = UnconfinedTestDispatcher(),
     getCurrentRoutes: () -> List<NavigationRoute> = { emptyList() },
     updateRoutes: UpdateRoutes = { _, _ -> true },
+    routeParser: NavigationRoutesParser = createTestNavigationRoutesParsing(parsingDispatcher),
+    mainThreadAssertion: () -> Unit = {},
 ) = NativeMapboxRerouteController(
     nativeRerouteInterface,
     getCurrentRoutes,
     updateRoutes,
     scope,
-    createTestNavigationRoutesParsing(parsingDispatcher),
+    routeParser,
+    mainThreadAssertion,
 )
 
 private class MapboxNativeRerouteInterfaceImpl : MapboxNativeRerouteInterface {
@@ -746,6 +1459,28 @@ private fun RerouteController.recordRerouteStateV2(): List<RerouteStateV2> {
         states.add(it)
     }
     return states
+}
+
+private class PausingNavigationRoutesParser(
+    private val delegate: NavigationRoutesParser,
+) : NavigationRoutesParser {
+
+    private val gates = mutableListOf<CompletableDeferred<Unit>>()
+
+    override suspend fun parseDirectionsResponse(
+        response: ResponseToParse,
+    ): Result<NavigationRouteParsingSuccessfulResult> {
+        val gate = CompletableDeferred<Unit>()
+        gates.add(gate)
+        gate.await()
+        return delegate.parseDirectionsResponse(response)
+    }
+
+    fun releaseAll() {
+        val toRelease = ArrayList(gates)
+        gates.clear()
+        toRelease.forEach { it.complete(Unit) }
+    }
 }
 
 class TestRerouteDetector : RerouteDetectorInterface {
