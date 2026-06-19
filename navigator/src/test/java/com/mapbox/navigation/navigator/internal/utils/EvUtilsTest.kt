@@ -27,7 +27,7 @@ class EvUtilsTest {
             null,
             null,
             emptyList(),
-            hashMapOf(),
+            null,
             null,
             null,
             null,
@@ -47,8 +47,7 @@ class EvUtilsTest {
             "auxiliary_consumption" to "5",
             "ev_pre_conditioning_time" to "7",
             "ev_unconditioned_charging_curve" to "5.0,6.0;7.0,8.0",
-            "ev_extra_param_1_key" to "extra_param_1_value",
-            "ev_extra_param_2_key" to "extra_param_2_value",
+            "ev_additional_parameters" to "key1:value1,key2:value2",
         )
         val expected = EvStateData(
             10,
@@ -58,10 +57,7 @@ class EvUtilsTest {
             5,
             7,
             listOf(CurveElement(5.0f, 6.0f), CurveElement(7.0f, 8.0f)),
-            hashMapOf(
-                "ev_extra_param_1_key" to "extra_param_1_value",
-                "ev_extra_param_2_key" to "extra_param_2_value",
-            ),
+            hashMapOf("key1" to "value1", "key2" to "value2"),
             null,
             null,
             null,
@@ -69,6 +65,32 @@ class EvUtilsTest {
         )
 
         assertEquals(expected, input.toEvStateData())
+    }
+
+    @Test
+    fun additionalParametersPreserveInsertionOrder() {
+        val input = mapOf(
+            "energy_consumption_curve" to "1.0,2.0;3.0,4.0",
+            "ev_additional_parameters" to "key1:value1,key2:value2,key3:value3",
+        )
+
+        assertEquals(
+            listOf("key1", "key2", "key3"),
+            input.toEvStateData().evAdditionalParameters!!.keys.toList(),
+        )
+    }
+
+    @Test
+    fun additionalParametersSkipEntriesWithoutColon() {
+        val input = mapOf(
+            "energy_consumption_curve" to "1.0,2.0;3.0,4.0",
+            "ev_additional_parameters" to "key1:value1,invalid,key2:value2",
+        )
+
+        assertEquals(
+            hashMapOf("key1" to "value1", "key2" to "value2"),
+            input.toEvStateData().evAdditionalParameters,
+        )
     }
 
     @Test
