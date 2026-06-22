@@ -108,6 +108,13 @@ class MapboxNativeNavigatorImpl(
 
     init {
         init(tilesConfig)
+
+        // Updated here rather than inside init() because init() is also called from recreate(),
+        // where the navigation session is restored only after init() returns. updateNavigatorHandle
+        // fires the navigatorInstanceChanged() signal, so it must run after the session is restored
+        // (see recreate()) - otherwise subscribers would observe a navigator without its session.
+        // On first construction there is no session to restore, so we update right away.
+        NavigatorLoader.updateNavigatorHandle(navigatorHandle, cache, navigator)
     }
 
     private fun init(tilesConfig: TilesConfig) {
@@ -161,10 +168,6 @@ class MapboxNativeNavigatorImpl(
         telemetry = PerformanceTracker.trackPerformanceSync("${sectionPrefix}telemetry") {
             navigator.getTelemetry(eventsMetadataProvider)
         }
-
-        // Push the freshly (re)created instances into the stable handle. On recreate() this swaps
-        // CacheHandle + Navigator inside the same handle and notifies native subscribers.
-        NavigatorLoader.updateNavigatorHandle(navigatorHandle, cache, navigator)
     }
 
     override fun recreate(tilesConfig: TilesConfig) {
@@ -176,6 +179,13 @@ class MapboxNativeNavigatorImpl(
         init(tilesConfig)
 
         navigator.restoreNavigationSession(storeNavSessionState)
+
+        // Update the handle only after the session is restored, so subscribers of the navigator
+        // instance change observe a navigator with its session already in place. If this ordering
+        // is changed, update the constructor's init {} block accordingly (it also calls
+        // updateNavigatorHandle).
+        NavigatorLoader.updateNavigatorHandle(navigatorHandle, cache, navigator)
+
         nativeNavigatorRecreationObservers.forEach {
             it.onNativeNavigatorRecreated()
         }
