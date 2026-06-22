@@ -28,6 +28,7 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
+import com.mapbox.navigator.NavigatorHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -69,6 +70,14 @@ fun MapboxNavigation.retrieveCopilotHistoryRecorder(): MapboxHistoryRecorder =
 
 fun MapboxNavigation.retrieveCompositeHistoryRecorder(): MapboxHistoryRecorder =
     compositeRecorder
+
+/**
+ * Opaque handle to the native Navigator instance for SDK components. The handle instance is
+ * stable across navigator recreation (offline fallback); its internal Navigator/CacheHandle are
+ * replaced in place.
+ */
+fun MapboxNavigation.retrieveNavigatorHandle(): NavigatorHandle =
+    navigator.navigatorHandle
 
 /**
  * TODO note that each of these creates a new subscription. A concern may be that we want to have

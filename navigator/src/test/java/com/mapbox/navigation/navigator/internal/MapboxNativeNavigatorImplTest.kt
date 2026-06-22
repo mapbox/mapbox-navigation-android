@@ -8,13 +8,16 @@ import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.EventsMetadataInterface
 import com.mapbox.navigator.InputsServiceHandle
+import com.mapbox.navigator.NavigatorHandle
 import com.mapbox.navigator.NavigatorInterface
 import com.mapbox.navigator.NavigatorObserver
 import com.mapbox.navigator.RoadObjectMatcherConfig
 import com.mapbox.navigator.RoadObjectsStoreInterface
 import com.mapbox.navigator.TilesConfig
+import io.mockk.Runs
 import io.mockk.clearMocks
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
@@ -65,6 +68,10 @@ class MapboxNativeNavigatorImplTest {
         every {
             NavigatorLoader.createNavigator(any(), any(), any(), any(), any(), any())
         } returns mockNavigator
+        every {
+            NavigatorLoader.createNavigatorHandle(any())
+        } returns mockk<NavigatorHandle>(relaxed = true)
+        every { NavigatorLoader.updateNavigatorHandle(any(), any(), any()) } just Runs
 
         navigatorImpl = MapboxNativeNavigatorImpl(
             tilesConfig = mockk<TilesConfig>(relaxed = true),

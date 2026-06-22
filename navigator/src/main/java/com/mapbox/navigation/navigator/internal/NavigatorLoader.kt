@@ -24,6 +24,8 @@ import com.mapbox.navigator.HistoryRecorderHandle
 import com.mapbox.navigator.InputsServiceHandle
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorConfig
+import com.mapbox.navigator.NavigatorHandle
+import com.mapbox.navigator.NavigatorHandleBuilder
 import com.mapbox.navigator.NavigatorInterface
 import com.mapbox.navigator.ProfileApplication
 import com.mapbox.navigator.ProfilePlatform
@@ -99,6 +101,35 @@ object NavigatorLoader {
         historyRecorder: HistoryRecorderHandle?,
     ): CacheHandle {
         return CacheFactory.build(tilesConfig, config, historyRecorder, BillingProductType.CF)
+    }
+
+    /**
+     * Builds an empty [NavigatorHandle] and sets the [historyRecorder] on it.
+     *
+     * [NavigatorHandleBuilder.setHistoryRecorder] must be called before the navigator is set,
+     * because setting the navigator emits the instance-changed signal and subscribers expect the
+     * recorder to be already set.
+     */
+    fun createNavigatorHandle(historyRecorder: HistoryRecorderHandle?): NavigatorHandle =
+        NavigatorHandleBuilder.build().also { handle ->
+            historyRecorder?.let { NavigatorHandleBuilder.setHistoryRecorder(handle, it) }
+        }
+
+    /**
+     * Replaces the [CacheHandle] and [Navigator] instances inside [handle]. Call on navigator
+     * (re)creation, e.g. on offline restart, keeping the same [handle] instance.
+     */
+    fun updateNavigatorHandle(
+        handle: NavigatorHandle,
+        cacheHandle: CacheHandle,
+        navigator: NavigatorInterface,
+    ) {
+        // TODO migrate to setTilesManagerHandleAndNavigator when Android adopts TilesManagerHandle.
+        NavigatorHandleBuilder.setCacheHandleAndNavigator(
+            handle,
+            cacheHandle,
+            navigator as Navigator,
+        )
     }
 
     fun createRoadObjectMatcherConfig(
