@@ -33,6 +33,8 @@ import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.core.reroute.RerouteOptionsAdapter
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.reroute.RerouteStateV2
+import com.mapbox.navigation.core.reroute.internal.NativeRerouteControllerState
+import com.mapbox.navigation.core.reroute.internal.nativeRerouteControllerStateFlow
 import com.mapbox.navigation.core.routerefresh.RouteRefreshExtra
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.instrumentation_tests.utils.PredictiveCacheMonitor
@@ -56,6 +58,7 @@ import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigation.testing.utils.DelayedResponseModifier
 import com.mapbox.navigation.testing.utils.assertNoDiffs
 import com.mapbox.navigation.testing.utils.assertions.RerouteStateTransitionAssertion
+import com.mapbox.navigation.testing.utils.assertions.assertInterruptedReplanRerouteStateTransitionV2
 import com.mapbox.navigation.testing.utils.assertions.assertIs
 import com.mapbox.navigation.testing.utils.assertions.assertRerouteFailedTransition
 import com.mapbox.navigation.testing.utils.assertions.assertRerouteFailedTransitionV2
@@ -63,6 +66,7 @@ import com.mapbox.navigation.testing.utils.assertions.assertSuccessfulRerouteSta
 import com.mapbox.navigation.testing.utils.assertions.assertSuccessfulRouteAppliedRerouteStateTransition
 import com.mapbox.navigation.testing.utils.assertions.assertSuccessfulRouteIgnoredRerouteStateTransition
 import com.mapbox.navigation.testing.utils.assertions.assertSuccessfulRouteReplanRerouteStateTransition
+import com.mapbox.navigation.testing.utils.assertions.interruptedReplanRerouteStateTransitionAssertion
 import com.mapbox.navigation.testing.utils.assertions.recordRerouteStates
 import com.mapbox.navigation.testing.utils.assertions.recordRerouteStatesV2
 import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
@@ -98,6 +102,7 @@ import kotlinx.coroutines.yield
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
+import org.junit.Assume.assumeTrue
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
@@ -1593,7 +1598,6 @@ class CoreRerouteTest(
                     val (state1, state2) = combine(
                         mapboxNavigation.getRerouteController()!!.rerouteStates(),
                         mapboxNavigation.getRerouteController()!!.rerouteStatesV2(),
-
                     ) { v1, v2 -> Pair(v1, v2) }.first { (v1, v2) ->
                         (v1 is RerouteState.Failed || v1 is RerouteState.RouteFetched) &&
                             (v2 is RerouteStateV2.Failed || v2 is RerouteStateV2.RouteFetched)
@@ -1749,6 +1753,9 @@ class CoreRerouteTest(
         val replanDelay = 1_000L
 
         val mapboxNavigation = createMapboxNavigation()
+        mapboxHistoryTestRule.historyRecorder = mapboxNavigation.historyRecorder.apply {
+            startRecording()
+        }
         val mockRoute = RoutesProvider.dc_short_with_alternative(context)
         val mockReroute = RoutesProvider.dc_short_with_alternative_reroute(context)
         val testData = prepareRouteAndRerouteWithAlternatives(
@@ -1785,20 +1792,9 @@ class CoreRerouteTest(
 
         // start recording reroute states after route is set and tracking,
         // to avoid capturing early NN-triggered state transitions
-        val rerouteStateTransitionAssertion = RerouteStateTransitionAssertion(
+        val rerouteStateTransitionAssertion = interruptedReplanRerouteStateTransitionAssertion(
             mapboxNavigation.getRerouteController()!!,
-        ) {
-            requiredState(RerouteState.Idle)
-            // First reroute starts (triggered by off-route)
-            requiredState(RerouteState.FetchingRoute)
-            // First reroute is interrupted by replan
-            requiredState(RerouteState.Interrupted)
-            requiredState(RerouteState.Idle)
-            // Second reroute starts (triggered by replan)
-            requiredState(RerouteState.FetchingRoute)
-            requiredState(RerouteState.RouteFetched(RouterOrigin.ONLINE))
-            requiredState(RerouteState.Idle)
-        }
+        )
         val rerouteStatesV2 = mapboxNavigation.recordRerouteStatesV2()
 
         // Go off-route to trigger first reroute
@@ -1831,24 +1827,155 @@ class CoreRerouteTest(
         )
 
         rerouteStateTransitionAssertion.assert()
+        assertInterruptedReplanRerouteStateTransitionV2(rerouteStatesV2)
+    }
 
-        // V2 state assertions - check for interrupted replan scenario
-        // Expected: Idle → FetchingRoute → Interrupted → Idle → FetchingRoute → RouteFetched → Idle
-        assertTrue(
-            "Expected 7 V2 states but got ${rerouteStatesV2.size}: $rerouteStatesV2",
-            rerouteStatesV2.size == 7,
+    @Test
+    fun replan_interrupts_ongoing_reroute_request_while_parsing() = sdkTest {
+        assumeTrue(
+            "test is relevant only for native reroute controller implementation",
+            runOptions.nativeReroute,
         )
-        assertIs<RerouteStateV2.Idle>(rerouteStatesV2[0])
-        assertIs<RerouteStateV2.FetchingRoute>(rerouteStatesV2[1])
-        assertIs<RerouteStateV2.Interrupted>(rerouteStatesV2[2])
-        assertIs<RerouteStateV2.Idle>(rerouteStatesV2[3])
-        assertIs<RerouteStateV2.FetchingRoute>(rerouteStatesV2[4])
-        assertIs<RerouteStateV2.RouteFetched>(rerouteStatesV2[5])
+        val mapboxNavigation = createMapboxNavigation()
+        mapboxHistoryTestRule.historyRecorder = mapboxNavigation.historyRecorder.apply {
+            startRecording()
+        }
+        val mockRoute = RoutesProvider.dc_short_with_alternative(context)
+        val mockReroute = RoutesProvider.dc_short_with_alternative_reroute(context)
+        val testData = prepareRouteAndRerouteWithAlternatives(
+            mockRoute = mockRoute,
+            mockReroute = mockReroute,
+        )
+        val nativeRerouteState = mapboxNavigation.getRerouteController()!!
+            .nativeRerouteControllerStateFlow()!!
+
+        mockLocationReplayerRule.loopUpdate(testData.originLocation, times = 120)
+
+        // Set up reroute options adapter to modify route options during replan
+        mapboxNavigation.setRerouteOptionsAdapter(
+            object : RerouteOptionsAdapter {
+                override fun onRouteOptions(routeOptions: RouteOptions): RouteOptions {
+                    return routeOptions.toBuilder()
+                        .exclude(DirectionsCriteria.EXCLUDE_FERRY)
+                        .build()
+                }
+            },
+        )
+
+        val originalRoutes = mapboxNavigation.requestRoutes(
+            testData.originRouteOptions,
+        ).getSuccessfulResultOrThrowException().routes
+
+        // Start session and set original route
+        mapboxNavigation.startTripSession()
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(listOf(originalRoutes.first()))
+
+        mapboxNavigation.moveAlongTheRouteUntilTracking(
+            originalRoutes.first(),
+            mockLocationReplayerRule,
+        )
+
+        // start recording reroute states after route is set and tracking,
+        // to avoid capturing early NN-triggered state transitions
+        val rerouteStateTransitionAssertion = interruptedReplanRerouteStateTransitionAssertion(
+            mapboxNavigation.getRerouteController()!!,
+        )
+        val rerouteStatesV2 = mapboxNavigation.recordRerouteStatesV2()
+
+        // Go off-route to trigger first reroute
+        mockLocationReplayerRule.stopAndClearEvents()
+        mockLocationReplayerRule.loopUpdate(testData.offRouteLocation, times = 120)
+        mapboxNavigation.offRouteUpdates().filter { it }.first()
+
+        // Wait for first reroute to be in FetchingRoute state
+        nativeRerouteState.first {
+            it is NativeRerouteControllerState.RouteObjectsParsing
+        }
+        mapboxNavigation.replanRoute()
+
+        // Wait for the replan reroute to complete
+        val rerouteUpdate = mapboxNavigation.routesUpdates().first {
+            it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
+        }
+
+        // Verify that the final route has the modified options from replan
         assertEquals(
-            RouterOrigin.ONLINE,
-            (rerouteStatesV2[5] as RerouteStateV2.RouteFetched).routerOrigin,
+            DirectionsCriteria.EXCLUDE_FERRY,
+            rerouteUpdate.navigationRoutes.first().routeOptions.exclude(),
         )
-        assertIs<RerouteStateV2.Idle>(rerouteStatesV2[6])
+        assertEquals(
+            mockReroute.routeWaypoints,
+            rerouteUpdate.navigationRoutes.first().waypoints!!.map { it.location() },
+        )
+
+        rerouteStateTransitionAssertion.assert()
+        assertInterruptedReplanRerouteStateTransitionV2(rerouteStatesV2)
+    }
+
+    @Test
+    fun replan_interrupts_ongoing_replan_while_parsing() = sdkTest {
+        assumeTrue(
+            "test is relevant only for native reroute controller implementation",
+            runOptions.nativeReroute,
+        )
+        val mapboxNavigation = createMapboxNavigation()
+        mapboxHistoryTestRule.historyRecorder = mapboxNavigation.historyRecorder.apply {
+            startRecording()
+        }
+        val mockRoute = RoutesProvider.dc_short_with_alternative(context)
+        mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
+        val nativeRerouteState = mapboxNavigation.getRerouteController()!!
+            .nativeRerouteControllerStateFlow()!!
+
+        stayOnPosition(mockRoute.routeWaypoints.first(), bearing = 0f) {
+            val originalRoutes = mapboxNavigation.requestRoutes(
+                RouteOptions.builder()
+                    .applyDefaultNavigationOptions()
+                    .applyLanguageAndVoiceUnitOptions(context)
+                    .baseUrl(mockWebServerRule.baseUrl)
+                    .coordinatesList(mockRoute.routeWaypoints)
+                    .alternatives(true)
+                    .build(),
+            ).getSuccessfulResultOrThrowException().routes
+
+            // Start session and set original route
+            mapboxNavigation.startTripSession()
+            mapboxNavigation.setNavigationRoutesAsync(originalRoutes)
+            mapboxNavigation.routeProgressUpdates().first {
+                it.currentState == RouteProgressState.TRACKING
+            }
+            // start recording reroute states after route is set and tracking,
+            // to avoid capturing early NN-triggered state transitions
+            val rerouteStateTransitionAssertion = interruptedReplanRerouteStateTransitionAssertion(
+                mapboxNavigation.getRerouteController()!!,
+            )
+            val rerouteStatesV2 = mapboxNavigation.recordRerouteStatesV2()
+
+            mapboxNavigation.replanRoute()
+            nativeRerouteState.first {
+                it is NativeRerouteControllerState.RouteObjectsParsing
+            }
+            mapboxNavigation.setRerouteOptionsAdapter(
+                object : RerouteOptionsAdapter {
+                    override fun onRouteOptions(routeOptions: RouteOptions): RouteOptions {
+                        return routeOptions.toBuilder()
+                            .exclude(DirectionsCriteria.EXCLUDE_FERRY)
+                            .build()
+                    }
+                },
+            )
+            mapboxNavigation.replanRoute()
+
+            val rerouteUpdate = mapboxNavigation.routesUpdates().first {
+                it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
+            }
+            assertEquals(
+                DirectionsCriteria.EXCLUDE_FERRY,
+                rerouteUpdate.navigationRoutes.first().routeOptions.exclude(),
+            )
+            rerouteStateTransitionAssertion.assert()
+            assertInterruptedReplanRerouteStateTransitionV2(rerouteStatesV2)
+        }
     }
 
     /**
