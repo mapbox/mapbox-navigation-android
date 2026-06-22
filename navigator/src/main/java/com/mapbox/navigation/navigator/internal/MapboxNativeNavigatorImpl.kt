@@ -35,6 +35,7 @@ import com.mapbox.navigator.GraphAccessor
 import com.mapbox.navigator.HistoryRecorderHandle
 import com.mapbox.navigator.InputsServiceHandle
 import com.mapbox.navigator.LaneSensorInfo
+import com.mapbox.navigator.NavigatorHandle
 import com.mapbox.navigator.NavigatorInterface
 import com.mapbox.navigator.NavigatorObserver
 import com.mapbox.navigator.PredictiveCacheControllerInterface
@@ -97,6 +98,11 @@ class MapboxNativeNavigatorImpl(
     override val inputsService: InputsServiceHandle =
         NavigatorLoader.createInputService(config, historyRecorderComposite)
 
+    // Built once and kept stable; its internal Navigator/CacheHandle are replaced on every
+    // (re)create in [init].
+    override val navigatorHandle: NavigatorHandle =
+        NavigatorLoader.createNavigatorHandle(historyRecorderComposite)
+
     private val nativeNavigatorRecreationObservers =
         CopyOnWriteArraySet<NativeNavigatorRecreationObserver>()
 
@@ -155,6 +161,10 @@ class MapboxNativeNavigatorImpl(
         telemetry = PerformanceTracker.trackPerformanceSync("${sectionPrefix}telemetry") {
             navigator.getTelemetry(eventsMetadataProvider)
         }
+
+        // Push the freshly (re)created instances into the stable handle. On recreate() this swaps
+        // CacheHandle + Navigator inside the same handle and notifies native subscribers.
+        NavigatorLoader.updateNavigatorHandle(navigatorHandle, cache, navigator)
     }
 
     override fun recreate(tilesConfig: TilesConfig) {

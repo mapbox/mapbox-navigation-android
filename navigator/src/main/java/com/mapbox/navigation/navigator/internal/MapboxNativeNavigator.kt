@@ -22,6 +22,7 @@ import com.mapbox.navigator.GraphAccessorInterface
 import com.mapbox.navigator.InputsServiceHandleInterface
 import com.mapbox.navigator.LaneSensorInfo
 import com.mapbox.navigator.NavigationStatus
+import com.mapbox.navigator.NavigatorHandle
 import com.mapbox.navigator.NavigatorInterface
 import com.mapbox.navigator.NavigatorObserver
 import com.mapbox.navigator.PredictiveCacheControllerInterface
@@ -250,6 +251,12 @@ interface MapboxNativeNavigator : MapboxNativeRerouteInterface {
     val eventsMetadataProvider: EventsMetadataInterface
 
     val navigator: NavigatorInterface
+
+    /**
+     * Opaque handle to the native Navigator instance. Stays the same across navigator
+     * recreation (e.g. offline fallback); its internal Navigator/CacheHandle are replaced.
+     */
+    val navigatorHandle: NavigatorHandle
 
     val routeAlternativesController: RouteAlternativesControllerInterface
 
