@@ -27,6 +27,7 @@ class CarLocationsOverviewCameraTest : MapboxRobolectricTestRunner() {
     fun loaded() {
         val mapboxNavigation = mockk<MapboxNavigation>(relaxUnitFun = true)
         val mapboxMap = mockk<MapboxMap>(relaxUnitFun = true)
+        every { mapboxMap.isValid() } returns true
         val cameraAnimationsPlugin = mockk<CameraAnimationsPlugin>()
         val aMapSurface = mockk<MapSurface> {
             every { getMapboxMap() } returns mapboxMap

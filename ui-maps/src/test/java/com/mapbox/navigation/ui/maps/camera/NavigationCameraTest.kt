@@ -23,6 +23,7 @@ import com.mapbox.navigation.ui.maps.camera.transition.SimplifiedFrameAnimatorsC
 import com.mapbox.navigation.ui.maps.camera.transition.TransitionEndListener
 import com.mapbox.navigation.ui.maps.camera.transition.UpdateFrameAnimatorsOptions
 import io.mockk.Runs
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -90,6 +91,7 @@ class NavigationCameraTest {
 
     @Before
     fun setup() {
+        every { mapboxMap.isValid() } returns true
         navigationCamera = NavigationCamera(
             mapboxMap,
             cameraPlugin,
@@ -445,6 +447,55 @@ class NavigationCameraTest {
         internalTransitionListenerSlot.captured.onAnimationStart(followingAnimatorSet)
         internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
 
+        val frameTransition = mockFrameTransitionForFollowing(
+            DEFAULT_FRAME_TRANSITION_OPT,
+        )
+        internalDataSourceObserverSlot.captured.viewportDataSourceUpdated(viewportData)
+
+        verifyTransitionExecuted(
+            AnimatorsCreator::updateFrameForFollowing,
+            frameTransition.frameCamera,
+            DEFAULT_FRAME_TRANSITION_OPT,
+            frameTransition.frameAnimatorSet,
+        )
+    }
+
+    @Test
+    fun `when map is invalid, viewport update does not apply a frame`() {
+        navigationCamera.requestNavigationCameraToFollowing()
+        internalTransitionListenerSlot.captured.onAnimationStart(followingAnimatorSet)
+        internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
+
+        every { mapboxMap.isValid() } returns false
+        clearMocks(animatorsCreator, answers = false, recordedCalls = true)
+        internalDataSourceObserverSlot.captured.viewportDataSourceUpdated(viewportData)
+
+        verify(exactly = 0) { animatorsCreator.updateFrameForFollowing(any(), any()) }
+    }
+
+    @Test
+    fun `when map is invalid, cameraState is not read on viewport update`() {
+        navigationCamera.requestNavigationCameraToFollowing()
+        internalTransitionListenerSlot.captured.onAnimationStart(followingAnimatorSet)
+        internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
+
+        every { mapboxMap.isValid() } returns false
+        clearMocks(mapboxMap, answers = false, recordedCalls = true)
+        internalDataSourceObserverSlot.captured.viewportDataSourceUpdated(viewportData)
+
+        verify(exactly = 0) { mapboxMap.cameraState }
+    }
+
+    @Test
+    fun `when map becomes valid again, viewport update applies a frame`() {
+        navigationCamera.requestNavigationCameraToFollowing()
+        internalTransitionListenerSlot.captured.onAnimationStart(followingAnimatorSet)
+        internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
+
+        every { mapboxMap.isValid() } returns false
+        internalDataSourceObserverSlot.captured.viewportDataSourceUpdated(viewportData)
+
+        every { mapboxMap.isValid() } returns true
         val frameTransition = mockFrameTransitionForFollowing(
             DEFAULT_FRAME_TRANSITION_OPT,
         )
