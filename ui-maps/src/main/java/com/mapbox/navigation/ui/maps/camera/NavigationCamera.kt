@@ -45,6 +45,7 @@ import com.mapbox.navigation.ui.maps.internal.camera.OverviewMode
 import com.mapbox.navigation.ui.maps.internal.camera.OverviewViewportDataSource
 import com.mapbox.navigation.ui.maps.internal.camera.SimplifiedUpdateFrameTransitionProvider
 import com.mapbox.navigation.utils.internal.logI
+import com.mapbox.navigation.utils.internal.logW
 import java.util.concurrent.CopyOnWriteArraySet
 
 /**
@@ -199,6 +200,7 @@ internal constructor(
         private const val LOG_CATEGORY = "NavigationCamera"
         private const val LOG_CAMERA_STATE_SAMPLING_PERIOD_MILLIS = 1000L
         private const val APPLY_MAP_HINT_WHILE_IN_OVERVIEW_SAMPLING_PERIOD_MILLIS = 1000L
+        private const val LOG_INVALID_MAP_SAMPLING_PERIOD_MILLIS = 1000L
 
         /**
          * Constant used to recognize the owner of transitions initiated by the [NavigationCamera].
@@ -277,8 +279,10 @@ internal constructor(
         }
 
     private var lastCameraStateLogTime = 0L
+    private var lastInvalidMapLogTime = 0L
     private val sourceUpdateObserver =
         ViewportDataSourceUpdateObserver { viewportData ->
+            if (!isMapValid()) return@ViewportDataSourceUpdateObserver
             val currentTime = SystemClock.elapsedRealtime()
             if (currentTime - lastCameraStateLogTime >= LOG_CAMERA_STATE_SAMPLING_PERIOD_MILLIS) {
                 logI(
@@ -496,6 +500,7 @@ internal constructor(
     }
 
     private fun updateFrame(viewportData: ViewportData, instant: Boolean) {
+        if (!isMapValid()) return
         when (state) {
             FOLLOWING -> {
                 startAnimation(
@@ -641,6 +646,24 @@ internal constructor(
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private fun updateDebugger() {
         debugger?.cameraState = state
+    }
+
+    /**
+     * Returns whether the attached [mapboxMap] is still valid. This guard skips those calls and
+     * logs a single throttled warning.
+     */
+    private fun isMapValid(): Boolean {
+        if (mapboxMap.isValid()) return true
+        val currentTime = SystemClock.elapsedRealtime()
+        if (currentTime - lastInvalidMapLogTime >= LOG_INVALID_MAP_SAMPLING_PERIOD_MILLIS) {
+            logW(
+                "MapboxMap is invalid, skipping camera update. The attached MapView is likely " +
+                    "destroyed; detach the NavigationCamera or stop feeding it viewport updates.",
+                LOG_CATEGORY,
+            )
+            lastInvalidMapLogTime = currentTime
+        }
+        return false
     }
 
     /**
