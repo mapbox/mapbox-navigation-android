@@ -162,18 +162,20 @@ class NavigationLocationProvider : LocationProvider {
             keyPoints.map { it.bearing }
         } else {
             listOf(location.bearing)
-        }.filterNotNull().toDoubleArray()
+        }.filterNotNull().filter { it.isFinite() }.toDoubleArray()
 
         val puckAnimationEvaluatorInterpolator = PuckAnimationEvaluatorInterpolator(latLngUpdates)
-        this.onLocationUpdated(
-            location = latLngUpdates,
-            options = {
-                this.duration = puckAnimationDuration
-                this.interpolator = puckAnimationEvaluatorInterpolator
-                this.setEvaluator(puckAnimationEvaluatorInterpolator)
-                latLngTransitionOptions?.also { this.apply(it) }
-            },
-        )
+        if (latLngUpdates.isNotEmpty()) {
+            this.onLocationUpdated(
+                location = latLngUpdates,
+                options = {
+                    this.duration = puckAnimationDuration
+                    this.interpolator = puckAnimationEvaluatorInterpolator
+                    this.setEvaluator(puckAnimationEvaluatorInterpolator)
+                    latLngTransitionOptions?.also { this.apply(it) }
+                },
+            )
+        }
         if (bearingUpdates.isNotEmpty()) {
             this.onBearingUpdated(
                 bearing = bearingUpdates,

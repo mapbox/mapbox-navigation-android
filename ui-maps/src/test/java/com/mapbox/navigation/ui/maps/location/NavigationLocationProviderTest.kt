@@ -107,6 +107,58 @@ class NavigationLocationProviderTest {
     }
 
     @Test
+    fun `non-finite bearing is dropped, without key points`() {
+        val location: Location = mockk {
+            every { latitude } returns 10.0
+            every { longitude } returns 20.0
+            every { bearing } returns Double.NaN
+        }
+        val keyPoints: List<Location> = emptyList()
+        val latLngOptions: (ValueAnimator.() -> Unit) = mockk()
+        val bearingOptions: (ValueAnimator.() -> Unit) = mockk()
+        val consumer: LocationConsumer = mockk(relaxUnitFun = true)
+
+        navigationLocationProvider.registerLocationConsumer(consumer)
+        navigationLocationProvider.changePosition(
+            location,
+            keyPoints,
+            latLngOptions,
+            bearingOptions,
+        )
+
+        val expectedPoints =
+            arrayOf(Point.fromLngLat(location.longitude, location.latitude))
+        verify(exactly = 1) { consumer.onLocationUpdated(*expectedPoints, options = any()) }
+        verify(exactly = 0) {
+            consumer.onBearingUpdated(any(), any())
+        }
+    }
+
+    @Test
+    fun `non-finite bearings are filtered out of key points`() {
+        val location: Location = mockk {
+            every { latitude } returns 10.0
+            every { longitude } returns 20.0
+            every { bearing } returns 123.0
+        }
+        val keyPoint: Location = mockk {
+            every { latitude } returns 30.0
+            every { longitude } returns 40.0
+            every { bearing } returns Double.NaN
+        }
+        val keyPoints: List<Location> = listOf(keyPoint, location)
+        val consumer: LocationConsumer = mockk(relaxUnitFun = true)
+
+        navigationLocationProvider.registerLocationConsumer(consumer)
+        navigationLocationProvider.changePosition(location, keyPoints, mockk(), mockk())
+
+        val expectedBearings = doubleArrayOf(location.bearing!!)
+        verify(exactly = 1) {
+            consumer.onBearingUpdated(*expectedBearings, options = any())
+        }
+    }
+
+    @Test
     fun `location consumers are notified on update, with key points`() {
         val location: Location = mockk {
             every { latitude } returns 10.0
