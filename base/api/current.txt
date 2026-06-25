@@ -729,6 +729,7 @@ package com.mapbox.navigation.base.options {
     method public android.content.Context getApplicationContext();
     method public com.mapbox.navigation.base.options.CopilotOptions getCopilotOptions();
     method public com.mapbox.navigation.base.options.DeviceProfile getDeviceProfile();
+    method public com.mapbox.navigation.base.formatter.DistanceFormatter? getDistanceFormatter();
     method public com.mapbox.navigation.base.formatter.DistanceFormatterOptions getDistanceFormatterOptions();
     method public com.mapbox.navigation.base.options.EHorizonOptions getEHorizonOptions();
     method public boolean getEnableSensors();
@@ -751,6 +752,7 @@ package com.mapbox.navigation.base.options {
     property public final android.content.Context applicationContext;
     property public final com.mapbox.navigation.base.options.CopilotOptions copilotOptions;
     property public final com.mapbox.navigation.base.options.DeviceProfile deviceProfile;
+    property public final com.mapbox.navigation.base.formatter.DistanceFormatter? distanceFormatter;
     property public final com.mapbox.navigation.base.formatter.DistanceFormatterOptions distanceFormatterOptions;
     property public final com.mapbox.navigation.base.options.EHorizonOptions eHorizonOptions;
     property public final boolean enableSensors;
@@ -776,6 +778,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.NavigationOptions build();
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.base.options.NavigationOptions.Builder copilotOptions(com.mapbox.navigation.base.options.CopilotOptions copilotOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder deviceProfile(com.mapbox.navigation.base.options.DeviceProfile deviceProfile);
+    method public com.mapbox.navigation.base.options.NavigationOptions.Builder distanceFormatter(com.mapbox.navigation.base.formatter.DistanceFormatter? distanceFormatter);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder distanceFormatterOptions(com.mapbox.navigation.base.formatter.DistanceFormatterOptions distanceFormatterOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder eHorizonOptions(com.mapbox.navigation.base.options.EHorizonOptions eHorizonOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder enableSensors(boolean value);
