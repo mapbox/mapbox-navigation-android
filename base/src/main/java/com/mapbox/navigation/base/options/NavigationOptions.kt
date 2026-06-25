@@ -5,6 +5,7 @@ import com.mapbox.api.directions.v5.models.DirectionsJsonObject
 import com.mapbox.navigation.base.BuildConfig
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.TimeFormat
+import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.formatter.MapboxTimeFormatter
 import com.mapbox.navigation.base.formatter.TimeFormatter
@@ -31,6 +32,7 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1000L
  * @param timeFormatter [TimeFormatter] used to format time.
  * @param navigatorPredictionMillis defines approximate navigator prediction in milliseconds
  * @param distanceFormatterOptions [DistanceFormatterOptions] options to format distances showing in notification during navigation
+ * @param distanceFormatter custom [DistanceFormatter] used to format distance. If null, default distance formatter is used
  * @param routingTilesOptions [RoutingTilesOptions] defines routing tiles endpoint and storage configuration.
  * @param isDebugLoggingEnabled Boolean
  * @param deviceProfile [DeviceProfile] defines how navigation data should be interpreted
@@ -75,6 +77,7 @@ private constructor(
     val timeFormatter: TimeFormatter,
     val navigatorPredictionMillis: Long,
     val distanceFormatterOptions: DistanceFormatterOptions,
+    val distanceFormatter: DistanceFormatter?,
     val routingTilesOptions: RoutingTilesOptions,
     val isDebugLoggingEnabled: Boolean,
     val deviceProfile: DeviceProfile,
@@ -107,6 +110,7 @@ private constructor(
         timeFormatter(timeFormatter)
         navigatorPredictionMillis(navigatorPredictionMillis)
         distanceFormatterOptions(distanceFormatterOptions)
+        distanceFormatter(distanceFormatter)
         routingTilesOptions(routingTilesOptions)
         isDebugLoggingEnabled(isDebugLoggingEnabled)
         deviceProfile(deviceProfile)
@@ -139,6 +143,7 @@ private constructor(
         if (timeFormatter != other.timeFormatter) return false
         if (navigatorPredictionMillis != other.navigatorPredictionMillis) return false
         if (distanceFormatterOptions != other.distanceFormatterOptions) return false
+        if (distanceFormatter != other.distanceFormatter) return false
         if (routingTilesOptions != other.routingTilesOptions) return false
         if (isDebugLoggingEnabled != other.isDebugLoggingEnabled) return false
         if (deviceProfile != other.deviceProfile) return false
@@ -168,6 +173,7 @@ private constructor(
         result = 31 * result + timeFormatter.hashCode()
         result = 31 * result + navigatorPredictionMillis.hashCode()
         result = 31 * result + distanceFormatterOptions.hashCode()
+        result = 31 * result + distanceFormatter.hashCode()
         result = 31 * result + routingTilesOptions.hashCode()
         result = 31 * result + isDebugLoggingEnabled.hashCode()
         result = 31 * result + deviceProfile.hashCode()
@@ -197,6 +203,7 @@ private constructor(
             "timeFormatter=$timeFormatter, " +
             "navigatorPredictionMillis=$navigatorPredictionMillis, " +
             "distanceFormatterOptions=$distanceFormatterOptions, " +
+            "distanceFormatter=$distanceFormatter, " +
             "routingTilesOptions=$routingTilesOptions, " +
             "isDebugLoggingEnabled=$isDebugLoggingEnabled, " +
             "deviceProfile=$deviceProfile, " +
@@ -226,6 +233,7 @@ private constructor(
         private var navigatorPredictionMillis: Long = DEFAULT_NAVIGATOR_PREDICTION_MILLIS
         private var distanceFormatterOptions: DistanceFormatterOptions =
             DistanceFormatterOptions.Builder(applicationContext).build()
+        private var distanceFormatter: DistanceFormatter? = null
         private var routingTilesOptions: RoutingTilesOptions =
             RoutingTilesOptions.Builder().build()
         private var isDebugLoggingEnabled: Boolean = false
@@ -294,6 +302,16 @@ private constructor(
          */
         fun distanceFormatterOptions(distanceFormatterOptions: DistanceFormatterOptions): Builder =
             apply { this.distanceFormatterOptions = distanceFormatterOptions }
+
+        /**
+         * Defines distance formatter. See [DistanceFormatter] for details. By default, [MapboxDistanceFormatter] is used.
+         * Note that custom formatter passed here overrides distanceFormatterOptions in all cases except Android Auto
+         * (in Android Auto distanceFormatterOptions are used to determine unit types not only related to distance: speed limit, etc.).
+         * If null, default distance formatter is used.
+         */
+        fun distanceFormatter(distanceFormatter: DistanceFormatter?): Builder = apply {
+            this.distanceFormatter = distanceFormatter
+        }
 
         /**
          * Defines configuration for the default on-board router
@@ -424,6 +442,7 @@ private constructor(
                 timeFormatter = resolvedTimeFormatter,
                 navigatorPredictionMillis = navigatorPredictionMillis,
                 distanceFormatterOptions = distanceFormatterOptions,
+                distanceFormatter = distanceFormatter,
                 routingTilesOptions = routingTilesOptions,
                 isDebugLoggingEnabled = isDebugLoggingEnabled,
                 deviceProfile = deviceProfile,
