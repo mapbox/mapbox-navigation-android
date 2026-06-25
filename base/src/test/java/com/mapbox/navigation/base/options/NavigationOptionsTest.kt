@@ -17,6 +17,7 @@ import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -53,6 +54,7 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
             .navigatorPredictionMillis(1)
             .routingTilesOptions(mockk())
             .timeFormatter(mockk())
+            .distanceFormatter(mockk())
             .eHorizonOptions(mockk())
             .routeRefreshOptions(mockk())
             .rerouteOptions(mockk())
@@ -110,6 +112,7 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
         val options = NavigationOptions.Builder(context).build()
 
         assertIs<MapboxTimeFormatter>(options.timeFormatter)
+        assertNull(options.distanceFormatter)
         assertEquals(options.navigatorPredictionMillis, DEFAULT_NAVIGATOR_PREDICTION_MILLIS)
         assertEquals(LocationOptions.Builder().build(), options.locationOptions)
         assertNotNull(options.routingTilesOptions)

@@ -64,6 +64,7 @@ import com.mapbox.navigation.core.directions.session.SetNavigationRoutesStartedO
 import com.mapbox.navigation.core.directions.session.Utils
 import com.mapbox.navigation.core.directions.session.findRoute
 import com.mapbox.navigation.core.directions.session.routesPlusIgnored
+import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.history.MapboxHistoryReader
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.history.TestingContext
@@ -593,6 +594,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         val notification: TripNotification = PerformanceTracker.trackPerformanceSync(
             "${initSectionName}notification",
         ) {
+            val distanceFormatter = navigationOptions.distanceFormatter
+                ?: MapboxDistanceFormatter(navigationOptions.distanceFormatterOptions)
             MapboxModuleProvider
                 .createModule(
                     MapboxModuleType.NavigationTripNotification,
@@ -601,7 +604,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                         ModuleParams.NavigationTripNotification(
                             navigationOptions,
                             tripNotificationInterceptorOwner,
-                            navigationOptions.distanceFormatterOptions,
+                            distanceFormatter,
                         ),
                     )
                 }
