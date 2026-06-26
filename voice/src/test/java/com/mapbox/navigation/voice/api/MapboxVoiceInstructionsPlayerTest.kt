@@ -80,7 +80,6 @@ class MapboxVoiceInstructionsPlayerTest {
         val mockedTextPlayer: VoiceInstructionsTextPlayer = mockk(relaxed = true)
         every {
             retrieveVoiceInstructionsFilePlayer(
-                aMockedContext,
                 mockedPlayerAttributes,
             )
         } returns mockedFilePlayer
@@ -120,7 +119,6 @@ class MapboxVoiceInstructionsPlayerTest {
         }
         every {
             retrieveVoiceInstructionsFilePlayer(
-                aMockedContext,
                 mockedPlayerAttributes,
             )
         } returns mockedFilePlayer
@@ -189,7 +187,6 @@ class MapboxVoiceInstructionsPlayerTest {
         }
         every {
             retrieveVoiceInstructionsFilePlayer(
-                aMockedContext,
                 mockedPlayerAttributes,
             )
         } returns mockedFilePlayer
@@ -258,7 +255,6 @@ class MapboxVoiceInstructionsPlayerTest {
         }
         every {
             retrieveVoiceInstructionsFilePlayer(
-                aMockedContext,
                 mockedPlayerAttributes,
             )
         } returns mockedFilePlayer
@@ -333,7 +329,6 @@ class MapboxVoiceInstructionsPlayerTest {
         }
         every {
             retrieveVoiceInstructionsFilePlayer(
-                aMockedContext,
                 mockedPlayerAttributes,
             )
         } returns mockedFilePlayer
@@ -389,7 +384,6 @@ class MapboxVoiceInstructionsPlayerTest {
         every { mockedTextPlayer.volume(any()) } just Runs
         every {
             retrieveVoiceInstructionsFilePlayer(
-                aMockedContext,
                 mockedPlayerAttributes,
             )
         } returns mockedFilePlayer
@@ -428,7 +422,6 @@ class MapboxVoiceInstructionsPlayerTest {
         every { mockedTextPlayer.volume(any()) } just Runs
         every {
             retrieveVoiceInstructionsFilePlayer(
-                aMockedContext,
                 mockedPlayerAttributes,
             )
         } returns mockedFilePlayer
@@ -460,7 +453,6 @@ class MapboxVoiceInstructionsPlayerTest {
         every { mockedTextPlayer.volume(any()) } just Runs
         every {
             retrieveVoiceInstructionsFilePlayer(
-                aMockedContext,
                 mockedPlayerAttributes,
             )
         } returns mockedFilePlayer
@@ -492,7 +484,6 @@ class MapboxVoiceInstructionsPlayerTest {
         every { mockedTextPlayer.clear() } just Runs
         every {
             retrieveVoiceInstructionsFilePlayer(
-                aMockedContext,
                 mockedPlayerAttributes,
             )
         } returns mockedFilePlayer
@@ -530,7 +521,6 @@ class MapboxVoiceInstructionsPlayerTest {
         val mockedTextPlayer: VoiceInstructionsTextPlayer = mockk(relaxed = true)
         every {
             retrieveVoiceInstructionsFilePlayer(
-                aMockedContext,
                 mockedPlayerAttributes,
             )
         } returns mockedFilePlayer
@@ -584,6 +574,16 @@ class MapboxVoiceInstructionsPlayerTest {
     fun `request audio focus when play and abandon focus when done`() {
         val anyLanguage = Locale.US.language
         val mockedAnnouncement: SpeechAnnouncement = mockk(relaxed = true)
+        val mockedFilePlayer: VoiceInstructionsFilePlayer = mockk()
+        val filePlayerCallbackSlot = slot<VoiceInstructionsPlayerCallback>()
+        every {
+            mockedFilePlayer.play(any(), capture(filePlayerCallbackSlot))
+        } answers {
+            filePlayerCallbackSlot.captured.onDone(mockedAnnouncement)
+        }
+        every {
+            retrieveVoiceInstructionsFilePlayer(mockedPlayerAttributes)
+        } returns mockedFilePlayer
         val mapboxVoiceInstructionsPlayer =
             MapboxVoiceInstructionsPlayer(
                 aMockedContext,
@@ -692,7 +692,7 @@ class MapboxVoiceInstructionsPlayerTest {
 
         val filePlayerCallback = slot<VoiceInstructionsPlayerCallback>()
         val textPlayerCallback = slot<VoiceInstructionsPlayerCallback>()
-        every { retrieveVoiceInstructionsFilePlayer(any(), any()) } returns mockk {
+        every { retrieveVoiceInstructionsFilePlayer(any()) } returns mockk {
             every { play(any(), capture(filePlayerCallback)) } answers {
                 filePlayerCallbackAnswer(filePlayerCallback.captured)
             }

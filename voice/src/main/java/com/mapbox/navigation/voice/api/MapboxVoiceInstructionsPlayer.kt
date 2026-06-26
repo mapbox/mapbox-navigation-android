@@ -55,7 +55,6 @@ class MapboxVoiceInstructionsPlayer @JvmOverloads constructor(
     private val playCallbackQueue: Queue<PlayCallback> = ConcurrentLinkedQueue()
     private val filePlayer: VoiceInstructionsFilePlayer =
         VoiceInstructionsFilePlayerProvider.retrieveVoiceInstructionsFilePlayer(
-            context,
             attributes,
         )
     private val textPlayer: VoiceInstructionsTextPlayer =

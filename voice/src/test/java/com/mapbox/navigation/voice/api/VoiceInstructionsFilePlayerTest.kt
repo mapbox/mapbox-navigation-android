@@ -1,8 +1,9 @@
 package com.mapbox.navigation.voice.api
 
-import android.content.Context
 import android.media.MediaPlayer
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
+import com.mapbox.navigation.utils.internal.InternalJobControlFactory
+import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.voice.model.SpeechVolume
 import io.mockk.every
@@ -10,15 +11,23 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.job
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import java.io.File
 import java.io.FileDescriptor
 import java.io.FileInputStream
+import java.io.FileNotFoundException
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class VoiceInstructionsFilePlayerTest {
 
     @get:Rule
@@ -35,20 +44,23 @@ class VoiceInstructionsFilePlayerTest {
         every {
             FileInputStreamProvider.retrieveFileInputStream(any())
         } returns mockedFileInputStream
+        mockkObject(InternalJobControlFactory)
+        val defaultJob = SupervisorJob()
+        every { InternalJobControlFactory.createMainScopeJobControl() } answers {
+            JobControl(defaultJob, CoroutineScope(defaultJob + UnconfinedTestDispatcher()))
+        }
     }
 
     @After
     fun tearDown() {
         unmockkObject(MediaPlayerProvider)
         unmockkObject(FileInputStreamProvider)
+        unmockkObject(InternalJobControlFactory)
     }
 
     @Test(expected = IllegalStateException::class)
-    fun `only one announcement can be played at a time`() {
-        val anyContext = mockk<Context>()
-        val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>()
-        val filePlayer =
-            VoiceInstructionsFilePlayer(anyContext, anyPlayerAttributes)
+    fun `only one announcement can be played at a time`() = runTest {
+        val filePlayer = initFilePlayer()
         val anyAnnouncement = mockk<SpeechAnnouncement>(relaxed = true)
         val anyVoiceInstructionsPlayerCallback =
             mockk<VoiceInstructionsPlayerCallback>(relaxUnitFun = true)
@@ -59,11 +71,8 @@ class VoiceInstructionsFilePlayerTest {
     }
 
     @Test
-    fun `announcement file from state can't be null media player is released`() {
-        val anyContext = mockk<Context>()
-        val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>()
-        val filePlayer =
-            VoiceInstructionsFilePlayer(anyContext, anyPlayerAttributes)
+    fun `announcement file from state can't be null media player is released`() = runTest {
+        val filePlayer = initFilePlayer()
         val announcementWithNullFile = mockk<SpeechAnnouncement>(relaxed = true)
         every { announcementWithNullFile.file } returns null
         val anyVoiceInstructionsPlayerCallback =
@@ -72,17 +81,12 @@ class VoiceInstructionsFilePlayerTest {
 
         filePlayer.play(announcementWithNullFile, anyVoiceInstructionsPlayerCallback)
 
-        verify {
-            mockedMediaPlayer.release()
-        }
+        verify { mockedMediaPlayer.release() }
     }
 
     @Test
-    fun `announcement file from state can't be null media player is null`() {
-        val anyContext = mockk<Context>()
-        val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>()
-        val filePlayer =
-            VoiceInstructionsFilePlayer(anyContext, anyPlayerAttributes)
+    fun `announcement file from state can't be null media player is null`() = runTest {
+        val filePlayer = initFilePlayer()
         val announcementWithNullFile = mockk<SpeechAnnouncement>(relaxed = true)
         every { announcementWithNullFile.file } returns null
         val anyVoiceInstructionsPlayerCallback =
@@ -94,11 +98,8 @@ class VoiceInstructionsFilePlayerTest {
     }
 
     @Test
-    fun `announcement file from state can't be null current play is null`() {
-        val anyContext = mockk<Context>()
-        val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>()
-        val filePlayer =
-            VoiceInstructionsFilePlayer(anyContext, anyPlayerAttributes)
+    fun `announcement file from state can't be null current play is null`() = runTest {
+        val filePlayer = initFilePlayer()
         val announcementWithNullFile = mockk<SpeechAnnouncement>(relaxed = true)
         every { announcementWithNullFile.file } returns null
         val anyVoiceInstructionsPlayerCallback =
@@ -110,11 +111,8 @@ class VoiceInstructionsFilePlayerTest {
     }
 
     @Test
-    fun `announcement file from state can't be null onDone is called`() {
-        val anyContext = mockk<Context>()
-        val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>()
-        val filePlayer =
-            VoiceInstructionsFilePlayer(anyContext, anyPlayerAttributes)
+    fun `announcement file from state can't be null onDone is called`() = runTest {
+        val filePlayer = initFilePlayer()
         val announcementWithNullFile = mockk<SpeechAnnouncement>(relaxed = true)
         every { announcementWithNullFile.file } returns null
         val anyVoiceInstructionsPlayerCallback =
@@ -122,226 +120,168 @@ class VoiceInstructionsFilePlayerTest {
 
         filePlayer.play(announcementWithNullFile, anyVoiceInstructionsPlayerCallback)
 
-        verify {
-            anyVoiceInstructionsPlayerCallback.onDone(announcementWithNullFile)
-        }
+        verify { anyVoiceInstructionsPlayerCallback.onDone(announcementWithNullFile) }
     }
 
     @Test
-    fun `announcement file from state needs to be accessible media player is released`() {
-        val anyContext = mockk<Context>()
-        val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>()
-        val filePlayer =
-            VoiceInstructionsFilePlayer(anyContext, anyPlayerAttributes)
-        val announcementWithNullFile = mockk<SpeechAnnouncement>(relaxed = true)
-        val mockedFile = mockk<File>()
-        every { mockedFile.canRead() } returns false
-        every { announcementWithNullFile.file } returns mockedFile
+    fun `announcement file not accessible media player is released`() = runTest {
+        val filePlayer = initFilePlayer()
+        val announcement = mockk<SpeechAnnouncement>(relaxed = true)
+        every { announcement.file } returns mockk()
+        every {
+            FileInputStreamProvider.retrieveFileInputStream(any())
+        } throws FileNotFoundException()
         val anyVoiceInstructionsPlayerCallback =
             mockk<VoiceInstructionsPlayerCallback>(relaxUnitFun = true)
         filePlayer.mediaPlayer = mockedMediaPlayer
 
-        filePlayer.play(announcementWithNullFile, anyVoiceInstructionsPlayerCallback)
+        filePlayer.play(announcement, anyVoiceInstructionsPlayerCallback)
 
-        verify {
-            mockedMediaPlayer.release()
-        }
+        verify { mockedMediaPlayer.release() }
     }
 
     @Test
-    fun `announcement file from state needs to be accessible media player is null`() {
-        val anyContext = mockk<Context>()
-        val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>()
-        val filePlayer =
-            VoiceInstructionsFilePlayer(anyContext, anyPlayerAttributes)
-        val announcementWithNullFile = mockk<SpeechAnnouncement>(relaxed = true)
-        val mockedFile = mockk<File>()
-        every { mockedFile.canRead() } returns false
-        every { announcementWithNullFile.file } returns mockedFile
+    fun `announcement file not accessible media player is null`() = runTest {
+        val filePlayer = initFilePlayer()
+        val announcement = mockk<SpeechAnnouncement>(relaxed = true)
+        every { announcement.file } returns mockk()
+        every {
+            FileInputStreamProvider.retrieveFileInputStream(any())
+        } throws FileNotFoundException()
         val anyVoiceInstructionsPlayerCallback =
             mockk<VoiceInstructionsPlayerCallback>(relaxUnitFun = true)
 
-        filePlayer.play(announcementWithNullFile, anyVoiceInstructionsPlayerCallback)
+        filePlayer.play(announcement, anyVoiceInstructionsPlayerCallback)
 
         assertEquals(null, filePlayer.mediaPlayer)
     }
 
     @Test
-    fun `announcement file from state needs to be accessible current play is null`() {
-        val anyContext = mockk<Context>()
-        val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>()
-        val filePlayer =
-            VoiceInstructionsFilePlayer(anyContext, anyPlayerAttributes)
-        val announcementWithNullFile = mockk<SpeechAnnouncement>(relaxed = true)
-        val mockedFile = mockk<File>()
-        every { mockedFile.canRead() } returns false
-        every { announcementWithNullFile.file } returns mockedFile
+    fun `announcement file not accessible current play is null`() = runTest {
+        val filePlayer = initFilePlayer()
+        val announcement = mockk<SpeechAnnouncement>(relaxed = true)
+        every { announcement.file } returns mockk()
+        every {
+            FileInputStreamProvider.retrieveFileInputStream(any())
+        } throws FileNotFoundException()
         val anyVoiceInstructionsPlayerCallback =
             mockk<VoiceInstructionsPlayerCallback>(relaxUnitFun = true)
 
-        filePlayer.play(announcementWithNullFile, anyVoiceInstructionsPlayerCallback)
+        filePlayer.play(announcement, anyVoiceInstructionsPlayerCallback)
 
         assertEquals(null, filePlayer.currentPlay)
     }
 
     @Test
-    fun `announcement file from state needs to be accessible onDone is called`() {
-        val anyContext = mockk<Context>()
-        val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>()
-        val filePlayer =
-            VoiceInstructionsFilePlayer(anyContext, anyPlayerAttributes)
-        val announcementWithNullFile = mockk<SpeechAnnouncement>(relaxed = true)
-        val mockedFile = mockk<File>()
-        every { mockedFile.canRead() } returns false
-        every { announcementWithNullFile.file } returns mockedFile
+    fun `announcement file not accessible onDone is called`() = runTest {
+        val filePlayer = initFilePlayer()
+        val announcement = mockk<SpeechAnnouncement>(relaxed = true)
+        every { announcement.file } returns mockk()
+        every {
+            FileInputStreamProvider.retrieveFileInputStream(any())
+        } throws FileNotFoundException()
         val anyVoiceInstructionsPlayerCallback =
             mockk<VoiceInstructionsPlayerCallback>(relaxUnitFun = true)
 
-        filePlayer.play(announcementWithNullFile, anyVoiceInstructionsPlayerCallback)
+        filePlayer.play(announcement, anyVoiceInstructionsPlayerCallback)
 
-        verify {
-            anyVoiceInstructionsPlayerCallback.onDone(announcementWithNullFile)
-        }
+        verify { anyVoiceInstructionsPlayerCallback.onDone(announcement) }
     }
 
     @Test
-    fun `player attributes applyOn media player is called when play`() {
-        val anyContext = mockk<Context>()
-        val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>(relaxUnitFun = true)
-        val filePlayer =
-            VoiceInstructionsFilePlayer(anyContext, anyPlayerAttributes)
-        val announcementWithNullFile = mockk<SpeechAnnouncement>(relaxed = true)
-        val mockedFile = mockk<File>(relaxed = true)
-        every { mockedFile.canRead() } returns true
-        every { announcementWithNullFile.file } returns mockedFile
+    fun `player attributes applyOn media player is called when play`() = runTest {
+        val playerAttributes = mockk<VoiceInstructionsPlayerAttributes>(relaxUnitFun = true)
+        val filePlayer = initFilePlayer(playerAttributes)
+        val announcement = mockk<SpeechAnnouncement>(relaxed = true)
+        every { announcement.file } returns mockk()
         val anyVoiceInstructionsPlayerCallback =
             mockk<VoiceInstructionsPlayerCallback>(relaxUnitFun = true)
         val mockedFileDescriptor = mockk<FileDescriptor>()
         every { mockedFileInputStream.fd } returns mockedFileDescriptor
 
-        filePlayer.play(announcementWithNullFile, anyVoiceInstructionsPlayerCallback)
+        filePlayer.play(announcement, anyVoiceInstructionsPlayerCallback)
 
-        verify {
-            anyPlayerAttributes.applyOn(filePlayer.mediaPlayer!!)
-        }
+        verify { playerAttributes.applyOn(filePlayer.mediaPlayer!!) }
     }
 
     @Test
-    fun `media player prepareAsync is called when play`() {
-        val anyContext = mockk<Context>()
-        val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>(relaxUnitFun = true)
-        val filePlayer =
-            VoiceInstructionsFilePlayer(anyContext, anyPlayerAttributes)
-        val announcementWithNullFile = mockk<SpeechAnnouncement>(relaxed = true)
-        val mockedFile = mockk<File>(relaxed = true)
-        every { mockedFile.canRead() } returns true
-        every { announcementWithNullFile.file } returns mockedFile
+    fun `media player prepareAsync is called when play`() = runTest {
+        val filePlayer = initFilePlayer()
+        val announcement = mockk<SpeechAnnouncement>(relaxed = true)
+        every { announcement.file } returns mockk()
         val anyVoiceInstructionsPlayerCallback =
             mockk<VoiceInstructionsPlayerCallback>(relaxUnitFun = true)
         val mockedFileDescriptor = mockk<FileDescriptor>()
         every { mockedFileInputStream.fd } returns mockedFileDescriptor
 
-        filePlayer.play(announcementWithNullFile, anyVoiceInstructionsPlayerCallback)
+        filePlayer.play(announcement, anyVoiceInstructionsPlayerCallback)
 
-        verify {
-            filePlayer.mediaPlayer!!.prepareAsync()
-        }
+        verify { filePlayer.mediaPlayer!!.prepareAsync() }
     }
 
     @Test
-    fun `media player setVolume with default level is called when play`() {
-        val anyContext = mockk<Context>()
-        val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>(relaxUnitFun = true)
-        val filePlayer =
-            VoiceInstructionsFilePlayer(anyContext, anyPlayerAttributes)
-        val announcementWithNullFile = mockk<SpeechAnnouncement>(relaxed = true)
-        val mockedFile = mockk<File>(relaxed = true)
-        every { mockedFile.canRead() } returns true
-        every { announcementWithNullFile.file } returns mockedFile
+    fun `media player setVolume with default level is called when play`() = runTest {
+        val filePlayer = initFilePlayer()
+        val announcement = mockk<SpeechAnnouncement>(relaxed = true)
+        every { announcement.file } returns mockk()
         val anyVoiceInstructionsPlayerCallback =
             mockk<VoiceInstructionsPlayerCallback>(relaxUnitFun = true)
         val mockedFileDescriptor = mockk<FileDescriptor>()
         every { mockedFileInputStream.fd } returns mockedFileDescriptor
 
-        filePlayer.play(announcementWithNullFile, anyVoiceInstructionsPlayerCallback)
+        filePlayer.play(announcement, anyVoiceInstructionsPlayerCallback)
 
-        verify {
-            filePlayer.mediaPlayer!!.setVolume(1.0f, 1.0f)
-        }
+        verify { filePlayer.mediaPlayer!!.setVolume(1.0f, 1.0f) }
     }
 
     @Test
-    fun `media player setOnErrorListener is added when play`() {
-        val anyContext = mockk<Context>()
-        val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>(relaxUnitFun = true)
-        val filePlayer =
-            VoiceInstructionsFilePlayer(anyContext, anyPlayerAttributes)
-        val announcementWithNullFile = mockk<SpeechAnnouncement>(relaxed = true)
-        val mockedFile = mockk<File>(relaxed = true)
-        every { mockedFile.canRead() } returns true
-        every { announcementWithNullFile.file } returns mockedFile
+    fun `media player setOnErrorListener is added when play`() = runTest {
+        val filePlayer = initFilePlayer()
+        val announcement = mockk<SpeechAnnouncement>(relaxed = true)
+        every { announcement.file } returns mockk()
         val anyVoiceInstructionsPlayerCallback =
             mockk<VoiceInstructionsPlayerCallback>(relaxUnitFun = true)
         val mockedFileDescriptor = mockk<FileDescriptor>()
         every { mockedFileInputStream.fd } returns mockedFileDescriptor
 
-        filePlayer.play(announcementWithNullFile, anyVoiceInstructionsPlayerCallback)
+        filePlayer.play(announcement, anyVoiceInstructionsPlayerCallback)
 
-        verify {
-            filePlayer.mediaPlayer!!.setOnErrorListener(any())
-        }
+        verify { filePlayer.mediaPlayer!!.setOnErrorListener(any()) }
     }
 
     @Test
-    fun `media player setOnPreparedListener is added when play`() {
-        val anyContext = mockk<Context>()
-        val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>(relaxUnitFun = true)
-        val filePlayer =
-            VoiceInstructionsFilePlayer(anyContext, anyPlayerAttributes)
-        val announcementWithNullFile = mockk<SpeechAnnouncement>(relaxed = true)
-        val mockedFile = mockk<File>(relaxed = true)
-        every { mockedFile.canRead() } returns true
-        every { announcementWithNullFile.file } returns mockedFile
+    fun `media player setOnPreparedListener is added when play`() = runTest {
+        val filePlayer = initFilePlayer()
+        val announcement = mockk<SpeechAnnouncement>(relaxed = true)
+        every { announcement.file } returns mockk()
         val anyVoiceInstructionsPlayerCallback =
             mockk<VoiceInstructionsPlayerCallback>(relaxUnitFun = true)
         val mockedFileDescriptor = mockk<FileDescriptor>()
         every { mockedFileInputStream.fd } returns mockedFileDescriptor
 
-        filePlayer.play(announcementWithNullFile, anyVoiceInstructionsPlayerCallback)
+        filePlayer.play(announcement, anyVoiceInstructionsPlayerCallback)
 
-        verify {
-            filePlayer.mediaPlayer!!.setOnPreparedListener(any())
-        }
+        verify { filePlayer.mediaPlayer!!.setOnPreparedListener(any()) }
     }
 
     @Test
-    fun `media player setOnCompletionListener is added when play`() {
-        val anyContext = mockk<Context>()
-        val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>(relaxUnitFun = true)
-        val filePlayer =
-            VoiceInstructionsFilePlayer(anyContext, anyPlayerAttributes)
-        val announcementWithAnyFile = mockk<SpeechAnnouncement>(relaxed = true)
-        val mockedFile = mockk<File>(relaxed = true)
-        every { mockedFile.canRead() } returns true
-        every { announcementWithAnyFile.file } returns mockedFile
+    fun `media player setOnCompletionListener is added when play`() = runTest {
+        val filePlayer = initFilePlayer()
+        val announcement = mockk<SpeechAnnouncement>(relaxed = true)
+        every { announcement.file } returns mockk()
         val anyVoiceInstructionsPlayerCallback =
             mockk<VoiceInstructionsPlayerCallback>(relaxUnitFun = true)
         val mockedFileDescriptor = mockk<FileDescriptor>()
         every { mockedFileInputStream.fd } returns mockedFileDescriptor
 
-        filePlayer.play(announcementWithAnyFile, anyVoiceInstructionsPlayerCallback)
+        filePlayer.play(announcement, anyVoiceInstructionsPlayerCallback)
 
-        verify {
-            filePlayer.mediaPlayer!!.setOnCompletionListener(any())
-        }
+        verify { filePlayer.mediaPlayer!!.setOnCompletionListener(any()) }
     }
 
     @Test
     fun `volume level is updated when volume`() {
-        val anyContext = mockk<Context>()
-        val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>(relaxUnitFun = true)
-        val filePlayer =
-            VoiceInstructionsFilePlayer(anyContext, anyPlayerAttributes)
+        val filePlayer = VoiceInstructionsFilePlayer(mockk(relaxUnitFun = true))
         val aSpeechVolume = SpeechVolume(0.5f)
 
         filePlayer.volume(aSpeechVolume)
@@ -351,41 +291,28 @@ class VoiceInstructionsFilePlayerTest {
 
     @Test
     fun `media player setVolume is called when volume`() {
-        val anyContext = mockk<Context>()
-        val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>(relaxUnitFun = true)
-        val filePlayer =
-            VoiceInstructionsFilePlayer(anyContext, anyPlayerAttributes)
+        val filePlayer = VoiceInstructionsFilePlayer(mockk(relaxUnitFun = true))
         val aSpeechVolume = SpeechVolume(0.5f)
         filePlayer.mediaPlayer = mockedMediaPlayer
 
         filePlayer.volume(aSpeechVolume)
 
-        verify {
-            mockedMediaPlayer.setVolume(0.5f, 0.5f)
-        }
+        verify { mockedMediaPlayer.setVolume(0.5f, 0.5f) }
     }
 
     @Test
     fun `media player release is called when clear`() {
-        val anyContext = mockk<Context>()
-        val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>(relaxUnitFun = true)
-        val filePlayer =
-            VoiceInstructionsFilePlayer(anyContext, anyPlayerAttributes)
+        val filePlayer = VoiceInstructionsFilePlayer(mockk(relaxUnitFun = true))
         filePlayer.mediaPlayer = mockedMediaPlayer
 
         filePlayer.clear()
 
-        verify {
-            mockedMediaPlayer.release()
-        }
+        verify { mockedMediaPlayer.release() }
     }
 
     @Test
     fun `media player is null after clear`() {
-        val anyContext = mockk<Context>()
-        val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>(relaxUnitFun = true)
-        val filePlayer =
-            VoiceInstructionsFilePlayer(anyContext, anyPlayerAttributes)
+        val filePlayer = VoiceInstructionsFilePlayer(mockk(relaxUnitFun = true))
 
         filePlayer.clear()
 
@@ -394,10 +321,7 @@ class VoiceInstructionsFilePlayerTest {
 
     @Test
     fun `current play is null after clear`() {
-        val anyContext = mockk<Context>()
-        val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>(relaxUnitFun = true)
-        val filePlayer =
-            VoiceInstructionsFilePlayer(anyContext, anyPlayerAttributes)
+        val filePlayer = VoiceInstructionsFilePlayer(mockk(relaxUnitFun = true))
 
         filePlayer.clear()
 
@@ -406,25 +330,17 @@ class VoiceInstructionsFilePlayerTest {
 
     @Test
     fun `media player release is called when shutdown`() {
-        val anyContext = mockk<Context>()
-        val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>(relaxUnitFun = true)
-        val filePlayer =
-            VoiceInstructionsFilePlayer(anyContext, anyPlayerAttributes)
+        val filePlayer = VoiceInstructionsFilePlayer(mockk(relaxUnitFun = true))
         filePlayer.mediaPlayer = mockedMediaPlayer
 
         filePlayer.shutdown()
 
-        verify {
-            mockedMediaPlayer.release()
-        }
+        verify { mockedMediaPlayer.release() }
     }
 
     @Test
     fun `media player is null after shutdown`() {
-        val anyContext = mockk<Context>()
-        val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>(relaxUnitFun = true)
-        val filePlayer =
-            VoiceInstructionsFilePlayer(anyContext, anyPlayerAttributes)
+        val filePlayer = VoiceInstructionsFilePlayer(mockk(relaxUnitFun = true))
 
         filePlayer.shutdown()
 
@@ -433,10 +349,7 @@ class VoiceInstructionsFilePlayerTest {
 
     @Test
     fun `current play is null after shutdown`() {
-        val anyContext = mockk<Context>()
-        val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>(relaxUnitFun = true)
-        val filePlayer =
-            VoiceInstructionsFilePlayer(anyContext, anyPlayerAttributes)
+        val filePlayer = VoiceInstructionsFilePlayer(mockk(relaxUnitFun = true))
 
         filePlayer.shutdown()
 
@@ -445,14 +358,26 @@ class VoiceInstructionsFilePlayerTest {
 
     @Test
     fun `volume level is reset to default after shutdown`() {
-        val anyContext = mockk<Context>()
-        val anyPlayerAttributes = mockk<VoiceInstructionsPlayerAttributes>(relaxUnitFun = true)
-        val filePlayer =
-            VoiceInstructionsFilePlayer(anyContext, anyPlayerAttributes)
+        val filePlayer = VoiceInstructionsFilePlayer(mockk(relaxUnitFun = true))
         filePlayer.volumeLevel = 0.5f
 
         filePlayer.shutdown()
 
         assertEquals(1.0f, filePlayer.volumeLevel)
+    }
+
+    private fun TestScope.initFilePlayer(
+        playerAttributes: VoiceInstructionsPlayerAttributes = mockk(relaxUnitFun = true),
+    ): VoiceInstructionsFilePlayer {
+        val jobScope = CoroutineScope(coroutineContext + UnconfinedTestDispatcher())
+        every {
+            InternalJobControlFactory.createMainScopeJobControl()
+        } answers {
+            JobControl(jobScope.coroutineContext.job, jobScope)
+        }
+        return VoiceInstructionsFilePlayer(
+            playerAttributes,
+            ioDispatcher = UnconfinedTestDispatcher(),
+        )
     }
 }
