@@ -1,11 +1,15 @@
 package com.mapbox.navigation.voice.api
 
-import android.content.Context
 import android.media.MediaPlayer
 import androidx.annotation.VisibleForTesting
+import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.voice.model.SpeechVolume
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -13,13 +17,14 @@ import java.io.IOException
 /**
  * Online implementation of [VoiceInstructionsPlayer].
  * Will retrieve synthesized speech mp3s from Mapbox's API Voice.
- * @property context Context
  * @property playerAttributes [VoiceInstructionsPlayerAttributes]
  */
 internal class VoiceInstructionsFilePlayer(
-    private val context: Context,
     private val playerAttributes: VoiceInstructionsPlayerAttributes,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : VoiceInstructionsPlayer {
+
+    private val jobControl by lazy { InternalJobControlFactory.createMainScopeJobControl() }
 
     @VisibleForTesting
     internal var mediaPlayer: MediaPlayer? = null
@@ -49,7 +54,7 @@ internal class VoiceInstructionsFilePlayer(
         }
         currentPlay = announcement
         val file = announcement.file
-        if (file != null && file.canRead()) {
+        if (file != null) {
             play(file)
         } else {
             logE(
@@ -73,6 +78,7 @@ internal class VoiceInstructionsFilePlayer(
      * Clears any announcements queued.
      */
     override fun clear() {
+        jobControl.job.children.forEach { it.cancel() }
         resetMediaPlayer(mediaPlayer)
         currentPlay = null
     }
@@ -88,24 +94,28 @@ internal class VoiceInstructionsFilePlayer(
     }
 
     private fun play(instruction: File) {
-        try {
-            val currentFileInputStream = FileInputStreamProvider.retrieveFileInputStream(
-                instruction,
-            )
-            currentFileInputStream.use { fis ->
-                val currentMediaPlayer = MediaPlayerProvider.retrieveMediaPlayer()
-                mediaPlayer = currentMediaPlayer!!.apply {
-                    setDataSource(fis!!.fd)
-                    playerAttributes.applyOn(this)
-                    prepareAsync()
+        jobControl.scope.launch {
+            try {
+                val fis = withContext(ioDispatcher) {
+                    FileInputStreamProvider.retrieveFileInputStream(instruction)
                 }
-                setVolume(volumeLevel)
-                addListeners()
+                fis.use { stream ->
+                    val currentMediaPlayer = MediaPlayerProvider.retrieveMediaPlayer()
+                    mediaPlayer = currentMediaPlayer.apply {
+                        setDataSource(stream.fd)
+                        playerAttributes.applyOn(this)
+                        prepareAsync()
+                    }
+                    setVolume(volumeLevel)
+                    addListeners()
+                }
+            } catch (ex: FileNotFoundException) {
+                logE("Announcement file is not accessible: ${ex.message}", LOG_CATEGORY)
+                donePlaying(mediaPlayer)
+            } catch (ex: IOException) {
+                logE("Announcement file reading error: ${ex.message}", LOG_CATEGORY)
+                donePlaying(mediaPlayer)
             }
-        } catch (ex: FileNotFoundException) {
-            donePlaying(mediaPlayer)
-        } catch (ex: IOException) {
-            donePlaying(mediaPlayer)
         }
     }
 
