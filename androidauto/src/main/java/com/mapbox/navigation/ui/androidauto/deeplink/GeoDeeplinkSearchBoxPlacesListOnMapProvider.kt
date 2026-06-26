@@ -10,26 +10,32 @@ import com.mapbox.navigation.ui.androidauto.search.PlaceRecord
 import com.mapbox.navigation.ui.androidauto.search.PlaceRecordMapper
 import com.mapbox.navigation.utils.internal.toPoint
 
-internal class GeoDeeplinkPlacesListOnMapProvider(
-    private val geoDeeplinkGeocoding: GeoDeeplinkGeocoding,
+internal class GeoDeeplinkSearchBoxPlacesListOnMapProvider(
+    private val geoDeeplinkSearchBox: GeoDeeplinkSearchBox,
     private val geoDeeplink: GeoDeeplink,
 ) : PlacesListOnMapProvider {
 
     override suspend fun getPlaces(): Expected<GetPlacesError, List<PlaceRecord>> {
         val origin = CarLocationProvider.getRegisteredInstance().waitForLocationOrNull()?.toPoint()
 
-        // Request places from the origin to the deeplink place
-        val result = geoDeeplinkGeocoding.requestPlaces(geoDeeplink, origin)
+        val results = geoDeeplinkSearchBox.requestPlaces(geoDeeplink, origin)
             ?: return ExpectedFactory.createError(
                 GetPlacesError("Error getting geo deeplink places.", null),
             )
+
+        if (results.isEmpty()) {
+            return ExpectedFactory.createError(
+                GetPlacesError("No places found for geo deeplink.", null),
+            )
+        }
+
         return ExpectedFactory.createValue(
-            result.features().map(PlaceRecordMapper::fromCarmenFeature),
+            results.map(PlaceRecordMapper::fromSearchResult),
         )
     }
 
     @Deprecated("Use coroutine scope cancellation instead.")
     override fun cancel() {
-        geoDeeplinkGeocoding.cancel()
+        geoDeeplinkSearchBox.cancel()
     }
 }

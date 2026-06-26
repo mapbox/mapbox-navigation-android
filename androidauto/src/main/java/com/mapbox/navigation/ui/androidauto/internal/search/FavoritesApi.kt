@@ -30,6 +30,7 @@ class FavoritesApi(
         }
     }
 
+    @Deprecated("Use coroutine scope cancellation instead.")
     override fun cancel() {
         cancelRequests()
     }

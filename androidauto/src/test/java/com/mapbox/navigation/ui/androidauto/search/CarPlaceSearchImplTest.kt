@@ -6,6 +6,7 @@ import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.androidauto.MapboxCarOptions
 import com.mapbox.navigation.ui.androidauto.internal.search.CarPlaceSearchImpl
 import com.mapbox.navigation.ui.androidauto.internal.search.CarSearchLocationProvider
+import com.mapbox.search.ApiType
 import com.mapbox.search.SearchEngine
 import com.mapbox.search.SearchSelectionCallback
 import com.mapbox.search.SearchSuggestionsCallback
@@ -18,6 +19,7 @@ import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -149,5 +151,39 @@ class CarPlaceSearchImplTest {
         val result = asyncResult.await()
 
         assertTrue(result.isFailure)
+    }
+
+    @Test
+    fun `onAttached creates search engine with SBS api type for legacy mode`() {
+        val apiTypeSlot = slot<ApiType>()
+        every {
+            SearchEngine.createSearchEngineWithBuiltInDataProviders(
+                capture(apiTypeSlot),
+                any(),
+                any(),
+                any(),
+            )
+        } returns searchEngine
+
+        CarPlaceSearchImpl(options, locationProvider, CarSearchMode.Legacy).onAttached(mockk())
+
+        assertEquals(ApiType.SBS, apiTypeSlot.captured)
+    }
+
+    @Test
+    fun `onAttached creates search engine with SEARCH_BOX api type for search box mode`() {
+        val apiTypeSlot = slot<ApiType>()
+        every {
+            SearchEngine.createSearchEngineWithBuiltInDataProviders(
+                capture(apiTypeSlot),
+                any(),
+                any(),
+                any(),
+            )
+        } returns searchEngine
+
+        CarPlaceSearchImpl(options, locationProvider, CarSearchMode.SearchBox).onAttached(mockk())
+
+        assertEquals(ApiType.SEARCH_BOX, apiTypeSlot.captured)
     }
 }

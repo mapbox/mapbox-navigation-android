@@ -4,7 +4,8 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.androidauto.MapboxCarOptions
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAuto
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAutoFailure
-import com.mapbox.search.ApiType
+import com.mapbox.navigation.ui.androidauto.search.CarSearchMode
+import com.mapbox.search.NewQueryType
 import com.mapbox.search.ResponseInfo
 import com.mapbox.search.SearchEngine
 import com.mapbox.search.SearchEngineSettings
@@ -22,6 +23,7 @@ import kotlin.coroutines.resume
 class CarPlaceSearchImpl(
     private val options: MapboxCarOptions,
     private val locationProvider: CarSearchLocationProvider,
+    private val searchMode: CarSearchMode = CarSearchMode.DEFAULT,
 ) : CarPlaceSearch {
 
     private var searchEngine: SearchEngine? = null
@@ -29,7 +31,7 @@ class CarPlaceSearchImpl(
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         locationProvider.onAttached(mapboxNavigation)
         searchEngine = SearchEngine.createSearchEngineWithBuiltInDataProviders(
-            apiType = ApiType.SBS,
+            apiType = searchMode.apiType,
             settings = SearchEngineSettings(
                 locationProvider,
             ),
@@ -42,12 +44,13 @@ class CarPlaceSearchImpl(
     }
 
     override suspend fun search(query: String): Result<List<SearchSuggestion>> {
-        val searchEngine = searchEngine
-            ?: return searchEngineNotAvailable("search")
+        val searchEngine = searchEngine ?: return searchEngineNotAvailable("search")
 
         val optionsBuilder = SearchOptions.Builder()
             .requestDebounce(SEARCH_DEBOUNCE_MILLIS)
             .limit(SEARCH_RESULT_LIMIT)
+            .newTypes(SEARCH_QUERY_TYPES)
+
         locationProvider.point?.let { origin ->
             optionsBuilder
                 .origin(origin)
@@ -109,14 +112,10 @@ class CarPlaceSearchImpl(
                     suggestions: List<SearchSuggestion>,
                     responseInfo: ResponseInfo,
                 ) {
-                    logAndroidAutoFailure(
-                        """
-                        Why are there search suggestions coming from a selection
-                        suggestions: $suggestions
-                        responseInfo: $responseInfo
-                        """.trimIndent(),
+                    logAndroidAutoFailure("Recursive suggestions are not supported")
+                    continuation.resume(
+                        Result.failure(Exception("Recursive suggestions are not supported")),
                     )
-                    error("Why are there search suggestions coming from a selection")
                 }
             }
             val task = searchEngine.select(selection, selectionCallback)
@@ -135,5 +134,19 @@ class CarPlaceSearchImpl(
     private companion object {
         private const val SEARCH_DEBOUNCE_MILLIS = 100
         private const val SEARCH_RESULT_LIMIT = 5
+
+        // All query types except for CATEGORY and BRAND because they are not supported now
+        val SEARCH_QUERY_TYPES = listOf(
+            NewQueryType.COUNTRY,
+            NewQueryType.REGION,
+            NewQueryType.POSTCODE,
+            NewQueryType.DISTRICT,
+            NewQueryType.PLACE,
+            NewQueryType.LOCALITY,
+            NewQueryType.NEIGHBORHOOD,
+            NewQueryType.STREET,
+            NewQueryType.ADDRESS,
+            NewQueryType.POI,
+        )
     }
 }

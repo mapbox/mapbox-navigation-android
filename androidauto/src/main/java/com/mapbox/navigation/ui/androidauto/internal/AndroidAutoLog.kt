@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.androidauto.internal
 
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
+import com.mapbox.navigation.utils.internal.logW
 
 internal object AndroidAutoLog {
 
@@ -9,6 +10,13 @@ internal object AndroidAutoLog {
 
     fun logAndroidAuto(message: String) {
         logI(
+            msg = "${Thread.currentThread().id}: $message",
+            LOG_CATEGORY,
+        )
+    }
+
+    fun logAndroidAutoWarning(message: String) {
+        logW(
             msg = "${Thread.currentThread().id}: $message",
             LOG_CATEGORY,
         )

@@ -67,7 +67,7 @@ class GeoDeeplinkPlacesListOnMapProviderTest {
             every { features() } returns listOf(carmenFeature1, carmenFeature2)
         }
         val carLocationProvider = mockk<CarLocationProvider> {
-            coEvery { validLocation() } returns location
+            coEvery { waitForLocationOrNull(any()) } returns location
         }
         every { CarLocationProvider.getRegisteredInstance() } returns carLocationProvider
         val originSlot = slot<Point>()
