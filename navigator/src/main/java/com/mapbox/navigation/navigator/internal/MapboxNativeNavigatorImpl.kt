@@ -38,6 +38,7 @@ import com.mapbox.navigator.LaneSensorInfo
 import com.mapbox.navigator.NavigatorHandle
 import com.mapbox.navigator.NavigatorInterface
 import com.mapbox.navigator.NavigatorObserver
+import com.mapbox.navigator.NavigatorOperationsDelegate
 import com.mapbox.navigator.PredictiveCacheControllerInterface
 import com.mapbox.navigator.PredictiveCacheControllerOptions
 import com.mapbox.navigator.RefreshRouteResult
@@ -435,6 +436,10 @@ class MapboxNativeNavigatorImpl(
     override fun setFallbackVersionsObserver(fallbackVersionsObserver: FallbackVersionsObserver?) {
         if (warnIfShutdown("setFallbackVersionsObserver")) return
         navigator.setFallbackVersionsObserver(fallbackVersionsObserver)
+    }
+
+    override fun setOperationsDelegate(delegate: NavigatorOperationsDelegate) {
+        NavigatorLoader.setOperationsDelegate(navigatorHandle, delegate)
     }
 
     override fun addNativeNavigatorRecreationObserver(
