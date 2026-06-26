@@ -27,6 +27,7 @@ import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.NavigatorHandle
 import com.mapbox.navigator.NavigatorHandleBuilder
 import com.mapbox.navigator.NavigatorInterface
+import com.mapbox.navigator.NavigatorOperationsDelegate
 import com.mapbox.navigator.ProfileApplication
 import com.mapbox.navigator.ProfilePlatform
 import com.mapbox.navigator.RoadObjectMatcher
@@ -130,6 +131,13 @@ object NavigatorLoader {
             cacheHandle,
             navigator as Navigator,
         )
+    }
+
+    /**
+     * Sets the [NavigatorOperationsDelegate] on [handle].
+     */
+    fun setOperationsDelegate(handle: NavigatorHandle, delegate: NavigatorOperationsDelegate) {
+        NavigatorHandleBuilder.setOperationsDelegate(handle, delegate)
     }
 
     fun createRoadObjectMatcherConfig(

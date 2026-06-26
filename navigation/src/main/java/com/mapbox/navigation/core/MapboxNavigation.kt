@@ -780,6 +780,13 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         )
 
         lowMemoryManager.addObserver(lowMemoryObserver)
+
+        // Route route-mutating operations from SDK components (e.g. C++ presenters) back through this
+        // MapboxNavigation instead of letting them mutate the shared native Navigator directly, which
+        // would leave this instance's route state stale.
+        navigator.setOperationsDelegate(
+            MapboxNavigatorOperationsDelegate(this, parsing, mainJobController.scope),
+        )
     }
 
     internal val locationInputHandlerThread: HandlerThread

@@ -25,6 +25,7 @@ import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigatorHandle
 import com.mapbox.navigator.NavigatorInterface
 import com.mapbox.navigator.NavigatorObserver
+import com.mapbox.navigator.NavigatorOperationsDelegate
 import com.mapbox.navigator.PredictiveCacheControllerInterface
 import com.mapbox.navigator.RerouteControllerInterface
 import com.mapbox.navigator.RerouteDetectorInterface
@@ -146,6 +147,12 @@ interface MapboxNativeNavigator : MapboxNativeRerouteInterface {
     fun removeRoadObjectsStoreObserver(roadObjectsStoreObserver: RoadObjectsStoreObserver)
 
     fun setFallbackVersionsObserver(fallbackVersionsObserver: FallbackVersionsObserver?)
+
+    /**
+     * Sets the [NavigatorOperationsDelegate] on the [navigatorHandle] so that route-mutating
+     * operations from SDK components are routed back through the route-state owner.
+     */
+    fun setOperationsDelegate(delegate: NavigatorOperationsDelegate)
 
     override fun addNativeNavigatorRecreationObserver(
         nativeNavigatorRecreationObserver: NativeNavigatorRecreationObserver,
