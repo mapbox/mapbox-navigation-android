@@ -31,6 +31,7 @@ package com.mapbox.navigation.ui.androidauto {
     method public com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackPollProvider getFeedbackPollProvider();
     method public com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotificationOptions getNotificationOptions();
     method public com.mapbox.navigation.ui.androidauto.preview.CarRouteOptionsInterceptor getRouteOptionsInterceptor();
+    method public com.mapbox.navigation.ui.androidauto.search.CarSearchMode getSearchMode();
     method public kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.androidauto.navigation.speedlimit.SpeedLimitOptions> getSpeedLimitOptions();
     property public final com.mapbox.navigation.ui.androidauto.action.MapboxScreenActionStripProvider actionStripProvider;
     property public final com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackOptions carFeedbackOptions;
@@ -38,6 +39,7 @@ package com.mapbox.navigation.ui.androidauto {
     property public final com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackPollProvider feedbackPollProvider;
     property public final com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotificationOptions notificationOptions;
     property public final com.mapbox.navigation.ui.androidauto.preview.CarRouteOptionsInterceptor routeOptionsInterceptor;
+    property public final com.mapbox.navigation.ui.androidauto.search.CarSearchMode searchMode;
     property public final kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.androidauto.navigation.speedlimit.SpeedLimitOptions> speedLimitOptions;
   }
 
@@ -49,6 +51,7 @@ package com.mapbox.navigation.ui.androidauto {
     method public com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotificationOptions? getNotificationOptions();
     method public com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions? getPlaceSearchOptions();
     method public com.mapbox.navigation.ui.androidauto.preview.CarRouteOptionsInterceptor? getRouteOptionsInterceptor();
+    method public com.mapbox.navigation.ui.androidauto.search.CarSearchMode? getSearchMode();
     method public com.mapbox.navigation.ui.androidauto.navigation.speedlimit.SpeedLimitOptions? getSpeedLimitOptions();
     method public void setActionsStripProvider(com.mapbox.navigation.ui.androidauto.action.MapboxScreenActionStripProvider?);
     method public void setCarFeedbackOptions(com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackOptions?);
@@ -56,6 +59,7 @@ package com.mapbox.navigation.ui.androidauto {
     method public void setNotificationOptions(com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotificationOptions?);
     method public void setPlaceSearchOptions(com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions?);
     method public void setRouteOptionsInterceptor(com.mapbox.navigation.ui.androidauto.preview.CarRouteOptionsInterceptor?);
+    method public void setSearchMode(com.mapbox.navigation.ui.androidauto.search.CarSearchMode?);
     method public void setSpeedLimitOptions(com.mapbox.navigation.ui.androidauto.navigation.speedlimit.SpeedLimitOptions?);
     property public final com.mapbox.navigation.ui.androidauto.action.MapboxScreenActionStripProvider? actionsStripProvider;
     property public final com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackOptions? carFeedbackOptions;
@@ -63,6 +67,7 @@ package com.mapbox.navigation.ui.androidauto {
     property public final com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotificationOptions? notificationOptions;
     property public final com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions? placeSearchOptions;
     property public final com.mapbox.navigation.ui.androidauto.preview.CarRouteOptionsInterceptor? routeOptionsInterceptor;
+    property public final com.mapbox.navigation.ui.androidauto.search.CarSearchMode? searchMode;
     property public final com.mapbox.navigation.ui.androidauto.navigation.speedlimit.SpeedLimitOptions? speedLimitOptions;
   }
 
@@ -95,7 +100,7 @@ package com.mapbox.navigation.ui.androidauto.deeplink {
     ctor public GeoDeeplinkGeocoding();
     method public void cancel();
     method public com.mapbox.api.geocoding.v5.MapboxGeocoding? getCurrentMapboxGeocoding();
-    method public suspend Object? requestPlaces(com.mapbox.navigation.core.geodeeplink.GeoDeeplink geoDeeplink, com.mapbox.geojson.Point origin, kotlin.coroutines.Continuation<? super com.mapbox.api.geocoding.v5.models.GeocodingResponse>);
+    method public suspend Object? requestPlaces(com.mapbox.navigation.core.geodeeplink.GeoDeeplink geoDeeplink, com.mapbox.geojson.Point? origin, kotlin.coroutines.Continuation<? super com.mapbox.api.geocoding.v5.models.GeocodingResponse>);
     method public void setCurrentMapboxGeocoding(com.mapbox.api.geocoding.v5.MapboxGeocoding?);
     property public final com.mapbox.api.geocoding.v5.MapboxGeocoding? currentMapboxGeocoding;
   }
@@ -601,7 +606,7 @@ package com.mapbox.navigation.ui.androidauto.placeslistonmap {
   }
 
   public interface PlacesListOnMapProvider {
-    method public void cancel();
+    method @Deprecated public void cancel();
     method public suspend Object? getPlaces(kotlin.coroutines.Continuation<? super com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.androidauto.search.GetPlacesError,java.util.List<? extends com.mapbox.navigation.ui.androidauto.search.PlaceRecord>>>);
   }
 
@@ -853,6 +858,17 @@ package com.mapbox.navigation.ui.androidauto.search {
     ctor public CarPlaceSearchOptions.Builder();
     method @Deprecated public com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions.Builder accessToken(String? accessToken);
     method public com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions build();
+  }
+
+  public abstract class CarSearchMode {
+  }
+
+  @Deprecated public static final class CarSearchMode.Legacy extends com.mapbox.navigation.ui.androidauto.search.CarSearchMode {
+    field @Deprecated public static final com.mapbox.navigation.ui.androidauto.search.CarSearchMode.Legacy INSTANCE;
+  }
+
+  public static final class CarSearchMode.SearchBox extends com.mapbox.navigation.ui.androidauto.search.CarSearchMode {
+    field public static final com.mapbox.navigation.ui.androidauto.search.CarSearchMode.SearchBox INSTANCE;
   }
 
   public final class GetPlacesError {

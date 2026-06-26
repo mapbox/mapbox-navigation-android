@@ -13,6 +13,8 @@ import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeoutOrNull
+import java.util.concurrent.TimeUnit
 
 /**
  * Automatically attaches and detaches from [MapboxNavigationApp] to provide map matched locations.
@@ -65,6 +67,15 @@ class CarLocationProvider private constructor() : MapboxNavigationObserver, Loca
      * Wait until a non-null location is received. Improves results when the app is starting.
      */
     suspend fun validLocation(): Location = mutableLocation.first()
+
+    @JvmSynthetic
+    internal suspend fun waitForLocationOrNull(
+        timeoutMillis: Long = TimeUnit.SECONDS.toMillis(3),
+    ): Location? {
+        return withTimeoutOrNull(timeoutMillis) {
+            validLocation()
+        } ?: lastLocation()
+    }
 
     companion object {
         /**

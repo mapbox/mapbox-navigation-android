@@ -6,7 +6,6 @@ import androidx.car.app.Session
 import androidx.car.app.navigation.NavigationManager
 import androidx.lifecycle.Lifecycle
 import com.mapbox.maps.extension.androidauto.MapboxCarMap
-import com.mapbox.navigation.ui.androidauto.deeplink.GeoDeeplinkPlacesListOnMapProvider
 import com.mapbox.navigation.ui.androidauto.internal.context.MapboxCarContextOwner
 import com.mapbox.navigation.ui.androidauto.internal.context.mapboxCarNavigationService
 import com.mapbox.navigation.ui.androidauto.internal.context.mapboxCarService
@@ -16,6 +15,7 @@ import com.mapbox.navigation.ui.androidauto.notification.FreeDriveExtenderUpdate
 import com.mapbox.navigation.ui.androidauto.notification.IdleExtenderUpdater
 import com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotification
 import com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotificationOptions
+import com.mapbox.navigation.ui.androidauto.placeslistonmap.PlacesListOnMapProvider
 import com.mapbox.navigation.ui.androidauto.preview.CarRoutePreviewRequest
 import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenManager
 import com.mapbox.navigation.ui.androidauto.settings.MapboxCarStorage
@@ -100,7 +100,7 @@ class MapboxCarContext(
     val routePreviewRequest = CarRoutePreviewRequest(options)
 
     // This is internal because it surfaces search objects which will likely change.
-    internal var geoDeeplinkPlacesProvider: GeoDeeplinkPlacesListOnMapProvider? = null
+    internal var geoDeeplinkPlacesProvider: PlacesListOnMapProvider? = null
 
     /**
      * Allows you to define values used by the Mapbox Android Auto Navigation SDK.

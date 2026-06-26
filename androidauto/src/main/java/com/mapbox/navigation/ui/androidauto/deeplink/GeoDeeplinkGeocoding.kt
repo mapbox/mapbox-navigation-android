@@ -6,6 +6,7 @@ import com.mapbox.api.geocoding.v5.models.GeocodingResponse
 import com.mapbox.common.MapboxOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.core.geodeeplink.GeoDeeplink
+import com.mapbox.navigation.ui.androidauto.internal.logAndroidAuto
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -16,6 +17,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
+// TODO make this type internal in the next major Nav SDK release
 class GeoDeeplinkGeocoding private constructor(
     private val accessTokenWrapper: AccessTokenWrapper,
 ) {
@@ -29,8 +31,10 @@ class GeoDeeplinkGeocoding private constructor(
 
     suspend fun requestPlaces(
         geoDeeplink: GeoDeeplink,
-        origin: Point,
+        origin: Point?,
     ): GeocodingResponse? {
+        logAndroidAuto("GeoDeeplinkGeocoding.requestPlaces($geoDeeplink)")
+
         currentMapboxGeocoding?.cancelCall()
         val point = geoDeeplink.point
         val placeQuery = geoDeeplink.placeQuery
@@ -39,15 +43,23 @@ class GeoDeeplinkGeocoding private constructor(
                 MapboxGeocoding.builder()
                     .accessToken(accessTokenWrapper.getLatestToken())
                     .query(point)
-                    .proximity(origin)
                     .geocodingTypes(GeocodingCriteria.TYPE_ADDRESS)
+                    .also { builder ->
+                        origin?.let {
+                            builder.proximity(it)
+                        }
+                    }
                     .build()
             }
             placeQuery != null -> {
                 MapboxGeocoding.builder()
                     .accessToken(accessTokenWrapper.getLatestToken())
                     .query(placeQuery)
-                    .proximity(origin)
+                    .also { builder ->
+                        origin?.let {
+                            builder.proximity(it)
+                        }
+                    }
                     .build()
             }
             else -> {

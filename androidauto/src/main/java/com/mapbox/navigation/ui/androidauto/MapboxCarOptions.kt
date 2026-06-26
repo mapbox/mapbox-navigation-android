@@ -11,6 +11,7 @@ import com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotification
 import com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotificationOptions
 import com.mapbox.navigation.ui.androidauto.preview.CarRouteOptionsInterceptor
 import com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions
+import com.mapbox.navigation.ui.androidauto.search.CarSearchMode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -46,6 +47,13 @@ class MapboxCarOptions {
         private set
 
     /**
+     * @see CarSearchMode
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    var searchMode: CarSearchMode = CarSearchMode.DEFAULT
+        private set
+
+    /**
      * @see CarFeedbackOptions
      */
     var carFeedbackOptions: CarFeedbackOptions = CarFeedbackOptions.Builder().build()
@@ -76,6 +84,7 @@ class MapboxCarOptions {
         customization.carFeedbackOptions?.also { this.carFeedbackOptions = it }
         customization.feedbackPollProvider?.also { this.feedbackPollProvider = it }
         customization.actionsStripProvider?.also { this.actionStripProvider = it }
+        customization.searchMode?.also { this.searchMode = it }
     }
 
     /**
@@ -118,5 +127,11 @@ class MapboxCarOptions {
          */
         @ExperimentalPreviewMapboxNavigationAPI
         var actionsStripProvider: MapboxScreenActionStripProvider? = null
+
+        /**
+         * Modify the search engine mode used for place search and geo deeplinks.
+         */
+        @ExperimentalPreviewMapboxNavigationAPI
+        var searchMode: CarSearchMode? = null
     }
 }
