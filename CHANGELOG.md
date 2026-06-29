@@ -1,3 +1,27 @@
+## Navigation SDK Core Framework 3.26.0-rc.1 - 29 June, 2026
+#### Features
+- Added `RouteClosureNotificationProvider` that detects road closures on the active route and emits notifications via DriverNotificationManager. [#14755](https://github.com/mapbox/mapbox-sdk/pull/14755)
+- Android Auto: added `CarSearchMode` to enable switching between the legacy SBS/Geocoding V5 backend and the recommended Search Box backend. Opt in via `MapboxCarContext.customize { searchMode = CarSearchMode.SearchBox }`. [#15105](https://github.com/mapbox/mapbox-sdk/pull/15105)
+
+#### Bug fixes and improvements
+- Fix when ASZ message replaced with regular speed camera message after adding waypoint inside ASZ [#14768](https://github.com/mapbox/mapbox-sdk/pull/14768)
+- Fixed file I/O on main thread when playing voice instructions via `VoiceInstructionsFilePlayer`. [#15105](https://github.com/mapbox/mapbox-sdk/pull/15105)
+- Adding additional bearing value guard inside `NavigationLocationProvider` to prevent passing NaN values. [#15232](https://github.com/mapbox/mapbox-sdk/pull/15232)
+- Fixed an issue where ampersands (`&`) in spoken text or SSML caused malformed voice synthesis requests to the `voice/v1/speak` API. [#15234](https://github.com/mapbox/mapbox-sdk/pull/15234)
+- Fixed `NavigationCamera` continuing to operate on an invalidated `MapboxMap` after its `MapView` (or surface) is destroyed. [#15289](https://github.com/mapbox/mapbox-sdk/pull/15289)
+
+#### Known issues
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.26.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.26.0-rc.1))
+- Mapbox Navigation Native `v324.26.0-rc.1`
+- Mapbox Core Common `v24.26.0-rc.1`
+- Mapbox Java `v7.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.0))
+
 ## Navigation SDK Core Framework 3.25.0 - 11 June, 2026
 #### Features
 - Update `MapboxRouteCalloutsApi` to include an extra guard condition to prevent creating `Callouts` if no **Alternative metadata** are sent for alternative routes provided. [#13870](https://github.com/mapbox/mapbox-sdk/pull/13870)
