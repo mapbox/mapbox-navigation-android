@@ -18,7 +18,10 @@ internal object UrlUtils {
 
     private val HEX_DIGITS =
         charArrayOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F')
-    private const val PATH_SEGMENT_ENCODE_SET = " \"<>^`{}|/\\?#"
+    // '&' is technically valid in a path segment per RFC 3986, but leaving it unencoded risks
+    // misparse by servers or proxies that don't fully respect the path/query boundary, and breaks
+    // XML entities in SSML (e.g. &amp; must arrive at the server as %26amp; then decode to &amp;).
+    private const val PATH_SEGMENT_ENCODE_SET = " \"<>^`{}|/\\?#&"
     private const val FORM_ENCODE_SET = " !\"#$&'()+,/:;<=>?@[\\]^`{|}~"
 
     fun encodePathSegment(pathSegment: String): String =
