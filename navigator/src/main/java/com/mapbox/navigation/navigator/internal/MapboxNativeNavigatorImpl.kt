@@ -461,7 +461,9 @@ class MapboxNativeNavigatorImpl(
         observer: VoiceInstructionsAvailabilityObserver,
     ) {
         if (warnIfShutdown("addVoiceInstructionsAvailabilityObserver")) return
-        navigator.voiceInstructionsRetriever.subscribe(observer)
+        navigator.getVoiceInstructionsRetriever { retriever ->
+            retriever.subscribe(observer)
+        }
     }
 
     @OptIn(MapboxExperimental::class)
@@ -469,13 +471,17 @@ class MapboxNativeNavigatorImpl(
         observer: VoiceInstructionsAvailabilityObserver,
     ) {
         if (warnIfShutdown("removeVoiceInstructionsAvailabilityObserver")) return
-        navigator.voiceInstructionsRetriever.unsubscribe(observer)
+        navigator.getVoiceInstructionsRetriever { retriever ->
+            retriever.unsubscribe(observer)
+        }
     }
 
     @OptIn(MapboxExperimental::class)
     override fun getRelevantVoiceInstructions(observer: VoiceInstructionsCallback) {
         if (warnIfShutdown("getRelevantVoiceInstructions")) return
-        navigator.voiceInstructionsRetriever.getRelevantVoiceInstructions(observer)
+        navigator.getVoiceInstructionsRetriever { retriever ->
+            retriever.getRelevantVoiceInstructions(observer)
+        }
     }
 
     private fun unregisterAllNativeNavigatorObservers() {
