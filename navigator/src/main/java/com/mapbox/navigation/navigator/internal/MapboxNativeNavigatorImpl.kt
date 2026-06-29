@@ -187,6 +187,7 @@ class MapboxNativeNavigatorImpl(
         // updateNavigatorHandle).
         NavigatorLoader.updateNavigatorHandle(navigatorHandle, cache, navigator)
 
+        // Observers need updated NavigatorHandle, so do it after NavigatorLoader.updateNavigatorHandle().
         nativeNavigatorRecreationObservers.forEach {
             it.onNativeNavigatorRecreated()
         }
