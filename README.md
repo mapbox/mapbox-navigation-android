@@ -4,9 +4,13 @@
 Refer to the [full documentation pages](https://docs.mapbox.com/android/navigation/) for 
 [installation](https://docs.mapbox.com/android/navigation/guides/installation/) and usage instructions.
 
+Check out the example repo at https://github.com/mapbox/mapbox-navigation-android-examples for a collection of examples with complete source code.
+
 For the latest version and changelog visit [CHANGELOG](./CHANGELOG.md).
 
 Along with the full documentation, [this migration guide](https://docs.mapbox.com/android/navigation/guides/migration-from-v2/) can help you transition your project from version `v2` of the Navigation SDK to `v3` or higher.
+
+
 
 ## Getting Help
 
