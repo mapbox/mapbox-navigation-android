@@ -1,9 +1,7 @@
 package com.mapbox.api.directions.v5.models
 
 import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
-import com.mapbox.api.directions.v5.models.utils.throwNotComparableRouteObjects
 import com.mapbox.api.directions.v5.models.utils.toDoubleArrayOrEmpty
-import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.api.directions.v5.models.utils.toPoint
 import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.geojson.Point
@@ -42,15 +40,15 @@ internal class DirectionsWaypointFBWrapper private constructor(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other == null) return false
-        if (other is DirectionsWaypoint && other !is DirectionsWaypointFBWrapper) {
-            throwNotComparableRouteObjects()
-        }
-        if (other !is DirectionsWaypointFBWrapper) return false
-        return fb.contentEquals(other.fb)
+        if (other is DirectionsWaypointFBWrapper && other.fb === fb) return true
+        if (other is DirectionsWaypointFBWrapper && efficientEquals(fb, other.fb)) return true
+
+        return false
     }
 
-    override fun hashCode() = fb.contentHash().toHashCode()
+    override fun hashCode(): Int {
+        return efficientHashCode(fb)
+    }
 
     override fun toString(): String {
         return "DirectionsWaypoint(" +

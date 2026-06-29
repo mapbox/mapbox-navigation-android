@@ -10,7 +10,6 @@ import com.mapbox.navigation.core.replay.history.ReplayEventLocation
 import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
 import com.mapbox.navigation.core.replay.history.ReplayEventsObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
-import com.mapbox.navigation.core.replay.route.ReplayRouteOptions
 import com.mapbox.navigation.testing.ui.MockLocationUpdatesRule
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
@@ -35,17 +34,7 @@ class MockLocationReplayerRule(mockLocationUpdatesRule: MockLocationUpdatesRule)
             }
         }
     }
-    private fun mapper(
-        maxSpeedMps: Double? = null,
-    ) = ReplayRouteMapper(
-        ReplayRouteOptions.Builder()
-            .apply {
-                if (maxSpeedMps != null) {
-                    this.maxSpeedMps(maxSpeedMps)
-                }
-            }
-            .build()
-    )
+    private val mapper = ReplayRouteMapper()
     private var mapboxReplayer: MapboxReplayer? = null
 
     override fun starting(description: Description?) {
@@ -61,12 +50,9 @@ class MockLocationReplayerRule(mockLocationUpdatesRule: MockLocationUpdatesRule)
 
     fun playRoute(
         directionsRoute: DirectionsRoute,
-        eventsToDrop: Int = 0,
-        maxSpeedMps: Double? = null,
+        eventsToDrop: Int = 0
     ) {
-        val replayEvents = mapper(
-            maxSpeedMps = maxSpeedMps,
-        ).mapDirectionsRouteGeometry(directionsRoute)
+        val replayEvents = mapper.mapDirectionsRouteGeometry(directionsRoute)
             .drop(eventsToDrop)
         mapboxReplayer?.clearEvents()
         mapboxReplayer?.pushEvents(replayEvents)
@@ -77,7 +63,7 @@ class MockLocationReplayerRule(mockLocationUpdatesRule: MockLocationUpdatesRule)
     fun playGeometry(
         polyLine6Geometry: String,
     ) {
-        val replayEvents = mapper().mapGeometry(polyLine6Geometry)
+        val replayEvents = mapper.mapGeometry(polyLine6Geometry)
         mapboxReplayer?.clearEvents()
         mapboxReplayer?.pushEvents(replayEvents)
         mapboxReplayer?.seekTo(replayEvents.first())

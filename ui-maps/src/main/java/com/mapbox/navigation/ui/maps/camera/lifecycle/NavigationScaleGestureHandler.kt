@@ -30,8 +30,7 @@ import com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
-import com.mapbox.navigation.ui.maps.internal.camera.NavigationCameraStateChangedObserverInternal
-import com.mapbox.navigation.ui.maps.internal.camera.NavigationCameraStateInternal.FOLLOWING
+import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraStateChangedObserver
 import com.mapbox.navigation.ui.maps.internal.camera.lifecycle.CameraStateManager
 import com.mapbox.navigation.ui.maps.internal.camera.lifecycle.UserLocationIndicatorPositionObserver
 import com.mapbox.navigation.ui.maps.internal.camera.lifecycle.UserLocationIndicatorPositionProvider
@@ -221,7 +220,17 @@ class NavigationScaleGestureHandler internal constructor(
         )
     }
 
-    private val thresholdsOwner = Any()
+    // reused when camera is not in following state
+    private val notFollowingRotationAngleThreshold =
+        initialGesturesManager.rotateGestureDetector.angleThreshold
+    private val notFollowingMoveThreshold =
+        initialGesturesManager.moveGestureDetector.moveThreshold
+    private val notFollowingMultiFingerMoveThreshold =
+        initialGesturesManager.moveGestureDetector.multiFingerMoveThreshold
+    private val notFollowingMoveThresholdRect =
+        initialGesturesManager.moveGestureDetector.moveThresholdRect
+    private val notFollowingShovePixelDeltaThreshold =
+        initialGesturesManager.shoveGestureDetector.pixelDeltaThreshold
 
     private var puckScreenPosition: Point? = null
 
@@ -229,7 +238,7 @@ class NavigationScaleGestureHandler internal constructor(
         private var interrupt: Boolean = false
 
         override fun onMoveBegin(detector: MoveGestureDetector) {
-            if (cameraStateManager.getCurrentState() == FOLLOWING) {
+            if (cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING) {
                 if (detector.pointersCount > 1) {
                     applyMultiFingerThresholdArea(detector)
                     applyMultiFingerMoveThreshold(detector)
@@ -277,7 +286,7 @@ class NavigationScaleGestureHandler internal constructor(
                 detector.interrupt()
                 return true
             }
-            if (cameraStateManager.getCurrentState() == FOLLOWING) {
+            if (cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING) {
                 cameraStateManager.disable()
                 detector.interrupt() // todo is this needed?
             }
@@ -286,7 +295,7 @@ class NavigationScaleGestureHandler internal constructor(
 
         override fun onMoveEnd(detector: MoveGestureDetector) {
             if (!interrupt &&
-                cameraStateManager.getCurrentState() == FOLLOWING
+                cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING
             ) {
                 detector.moveThreshold = options.followingInitialMoveThreshold
                 detector.multiFingerMoveThreshold = options.followingMultiFingerMoveThreshold
@@ -300,7 +309,7 @@ class NavigationScaleGestureHandler internal constructor(
         private var interrupt: Boolean = false
 
         override fun onShoveBegin(detector: ShoveGestureDetector) {
-            if (cameraStateManager.getCurrentState() == FOLLOWING) {
+            if (cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING) {
                 if (detector.pixelDeltaThreshold != options.followingMultiFingerMoveThreshold) {
                     detector.pixelDeltaThreshold = options.followingMultiFingerMoveThreshold
                     interrupt = true
@@ -316,7 +325,7 @@ class NavigationScaleGestureHandler internal constructor(
                 return
             }
 
-            if (cameraStateManager.getCurrentState() == FOLLOWING) {
+            if (cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING) {
                 cameraStateManager.disable()
                 detector.interrupt()
             }
@@ -324,7 +333,7 @@ class NavigationScaleGestureHandler internal constructor(
 
         override fun onShoveEnd(detector: ShoveGestureDetector) {
             if (!interrupt &&
-                cameraStateManager.getCurrentState() == FOLLOWING
+                cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING
             ) {
                 detector.pixelDeltaThreshold = options.followingMultiFingerMoveThreshold
             }
@@ -334,7 +343,7 @@ class NavigationScaleGestureHandler internal constructor(
 
     private val onScaleListener: OnScaleListener = object : OnScaleListener {
         override fun onScaleBegin(detector: StandardScaleGestureDetector) {
-            if (cameraStateManager.getCurrentState() == FOLLOWING) {
+            if (cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING) {
                 // do nothing, let the gesture happen
             } else {
                 cameraStateManager.disable()
@@ -349,7 +358,7 @@ class NavigationScaleGestureHandler internal constructor(
         private var interrupt: Boolean = false
 
         override fun onRotateBegin(detector: RotateGestureDetector) {
-            if (cameraStateManager.getCurrentState() == FOLLOWING) {
+            if (cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING) {
                 if (detector.angleThreshold != options.followingRotationAngleThreshold) {
                     detector.angleThreshold = options.followingRotationAngleThreshold
                     interrupt = true
@@ -365,7 +374,7 @@ class NavigationScaleGestureHandler internal constructor(
                 return
             }
 
-            if (cameraStateManager.getCurrentState() == FOLLOWING) {
+            if (cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING) {
                 cameraStateManager.disable()
                 detector.interrupt()
             }
@@ -373,7 +382,7 @@ class NavigationScaleGestureHandler internal constructor(
 
         override fun onRotateEnd(detector: RotateGestureDetector) {
             if (!interrupt &&
-                cameraStateManager.getCurrentState() == FOLLOWING
+                cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING
             ) {
                 detector.angleThreshold = options.followingRotationAngleThreshold
             }
@@ -392,52 +401,42 @@ class NavigationScaleGestureHandler internal constructor(
     }
     private var cameraChangedSubscription: Cancelable? = null
 
-    private val navigationCameraStateChangedObserver =
-        NavigationCameraStateChangedObserverInternal {
-            adjustGesturesThresholds(
-                initialGesturesManager.moveGestureDetector,
-                initialGesturesManager.rotateGestureDetector,
-                initialGesturesManager.shoveGestureDetector,
-            )
-        }
+    private val navigationCameraStateChangedObserver = NavigationCameraStateChangedObserver {
+        adjustGesturesThresholds(
+            initialGesturesManager.moveGestureDetector,
+            initialGesturesManager.rotateGestureDetector,
+            initialGesturesManager.shoveGestureDetector,
+        )
+    }
 
     private fun adjustGesturesThresholds(
         moveGestureDetector: MoveGestureDetector,
         rotateGestureDetector: RotateGestureDetector,
         shoveGestureDetector: ShoveGestureDetector,
     ) {
-        if (cameraStateManager.getCurrentState() == FOLLOWING && isActive.value) {
-            // When in FOLLOWING state, apply the thresholds
-            GestureThresholdsController.applyFollowing(initialGesturesManager, thresholdsOwner) {
-                moveGestureDetector.moveThreshold = options.followingInitialMoveThreshold
-                moveGestureDetector.multiFingerMoveThreshold =
-                    options.followingMultiFingerMoveThreshold
-                moveGestureDetector.moveThresholdRect =
-                    options.followingMultiFingerProtectedMoveArea
-                rotateGestureDetector.angleThreshold = options.followingRotationAngleThreshold
-                shoveGestureDetector.pixelDeltaThreshold = options.followingMultiFingerMoveThreshold
-                updateFlingGesture(isFollowing = true)
-            }
-        } else {
-            // When not in FOLLOWING state, restore the baseline thresholds if allowed
-            GestureThresholdsController.restoreBaseline(
-                initialGesturesManager,
-                thresholdsOwner,
-                isActive.value,
-            ) { thresholds ->
-                moveGestureDetector.moveThreshold = thresholds.moveThreshold
-                moveGestureDetector.moveThresholdRect = thresholds.moveThresholdRect
-                moveGestureDetector.multiFingerMoveThreshold =
-                    thresholds.multiFingerMoveThreshold
-                rotateGestureDetector.angleThreshold = thresholds.rotationAngleThreshold
-                shoveGestureDetector.pixelDeltaThreshold = thresholds.shovePixelDeltaThreshold
-                updateFlingGesture(isFollowing = false)
-            }
+        if (!isActive.value) {
+            return
         }
+
+        if (cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING) {
+            moveGestureDetector.moveThreshold = options.followingInitialMoveThreshold
+            moveGestureDetector.multiFingerMoveThreshold = options.followingMultiFingerMoveThreshold
+            moveGestureDetector.moveThresholdRect = options.followingMultiFingerProtectedMoveArea
+            rotateGestureDetector.angleThreshold = options.followingRotationAngleThreshold
+            shoveGestureDetector.pixelDeltaThreshold = options.followingMultiFingerMoveThreshold
+        } else {
+            moveGestureDetector.moveThreshold = notFollowingMoveThreshold
+            moveGestureDetector.moveThresholdRect = notFollowingMoveThresholdRect
+            moveGestureDetector.multiFingerMoveThreshold = notFollowingMultiFingerMoveThreshold
+            rotateGestureDetector.angleThreshold = notFollowingRotationAngleThreshold
+            shoveGestureDetector.pixelDeltaThreshold = notFollowingShovePixelDeltaThreshold
+        }
+
+        updateFlingGesture()
     }
 
     private fun adjustFocalPoint(puckPosition: Point) {
-        if (cameraStateManager.getCurrentState() == FOLLOWING) {
+        if (cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING) {
             val focalPoint = mapboxMap.pixelForCoordinate(puckPosition)
             gesturesPlugin.updateSettings { this.focalPoint = focalPoint }
         } else {
@@ -451,9 +450,10 @@ class NavigationScaleGestureHandler internal constructor(
      *
      * In non-following camera states, re-enables scroll deceleration, so fling works as usual.
      */
-    private fun updateFlingGesture(isFollowing: Boolean) {
+    private fun updateFlingGesture() {
         gesturesPlugin.updateSettings {
-            scrollDecelerationEnabled = !isFollowing
+            scrollDecelerationEnabled =
+                cameraStateManager.getCurrentState() != NavigationCameraState.FOLLOWING
         }
     }
 
@@ -508,21 +508,6 @@ class NavigationScaleGestureHandler internal constructor(
 
         cameraStateManager.unregisterStateChangeObserver(navigationCameraStateChangedObserver)
 
-        GestureThresholdsController.restoreBaseline(
-            initialGesturesManager,
-            thresholdsOwner,
-            isActive = false,
-        ) { thresholds ->
-            val moveGestureDetector = initialGesturesManager.moveGestureDetector
-            moveGestureDetector.moveThreshold = thresholds.moveThreshold
-            moveGestureDetector.moveThresholdRect = thresholds.moveThresholdRect
-            moveGestureDetector.multiFingerMoveThreshold = thresholds.multiFingerMoveThreshold
-            initialGesturesManager.rotateGestureDetector.angleThreshold =
-                thresholds.rotationAngleThreshold
-            initialGesturesManager.shoveGestureDetector.pixelDeltaThreshold =
-                thresholds.shovePixelDeltaThreshold
-            updateFlingGesture(isFollowing = false)
-        }
         isInitialized = false
     }
 }

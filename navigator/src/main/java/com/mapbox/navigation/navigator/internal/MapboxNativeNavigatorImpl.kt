@@ -62,7 +62,6 @@ import com.mapbox.navigator.TilesConfig
 import com.mapbox.navigator.VehicleType
 import com.mapbox.navigator.VoiceInstructionsAvailabilityObserver
 import com.mapbox.navigator.VoiceInstructionsCallback
-import com.mapbox.navigator.VoiceInstructionsRetriever
 import com.mapbox.navigator.WeatherData
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -94,7 +93,6 @@ class MapboxNativeNavigatorImpl(
     override lateinit var telemetry: Telemetry
 
     private lateinit var adasisFacade: AdasisFacadeHandleInterface
-    private var voiceInstructionsRetriever: VoiceInstructionsRetriever? = null
 
     private var isShutdown = false
 
@@ -171,7 +169,6 @@ class MapboxNativeNavigatorImpl(
         telemetry = PerformanceTracker.trackPerformanceSync("${sectionPrefix}telemetry") {
             navigator.getTelemetry(eventsMetadataProvider)
         }
-        prepareVoiceInstructionsRetriever()
     }
 
     override fun recreate(tilesConfig: TilesConfig) {
@@ -190,7 +187,6 @@ class MapboxNativeNavigatorImpl(
         // updateNavigatorHandle).
         NavigatorLoader.updateNavigatorHandle(navigatorHandle, cache, navigator)
 
-        // Observers need updated NavigatorHandle, so do it after NavigatorLoader.updateNavigatorHandle().
         nativeNavigatorRecreationObservers.forEach {
             it.onNativeNavigatorRecreated()
         }
@@ -464,7 +460,7 @@ class MapboxNativeNavigatorImpl(
         observer: VoiceInstructionsAvailabilityObserver,
     ) {
         if (warnIfShutdown("addVoiceInstructionsAvailabilityObserver")) return
-        executeActionOnVoiceInstructionsRetriever { retriever -> retriever.subscribe(observer) }
+        navigator.voiceInstructionsRetriever.subscribe(observer)
     }
 
     @OptIn(MapboxExperimental::class)
@@ -472,17 +468,13 @@ class MapboxNativeNavigatorImpl(
         observer: VoiceInstructionsAvailabilityObserver,
     ) {
         if (warnIfShutdown("removeVoiceInstructionsAvailabilityObserver")) return
-        executeActionOnVoiceInstructionsRetriever { retriever -> retriever.unsubscribe(observer) }
+        navigator.voiceInstructionsRetriever.unsubscribe(observer)
     }
 
     @OptIn(MapboxExperimental::class)
     override fun getRelevantVoiceInstructions(observer: VoiceInstructionsCallback) {
         if (warnIfShutdown("getRelevantVoiceInstructions")) return
-        executeActionOnVoiceInstructionsRetriever { retriever ->
-            retriever.getRelevantVoiceInstructions(
-                observer,
-            )
-        }
+        navigator.voiceInstructionsRetriever.getRelevantVoiceInstructions(observer)
     }
 
     private fun unregisterAllNativeNavigatorObservers() {
@@ -513,7 +505,6 @@ class MapboxNativeNavigatorImpl(
         roadObjectsStore.removeAllCustomRoadObjects()
         nativeNavigatorRecreationObservers.clear()
         resetAdasisMessageCallback()
-        voiceInstructionsRetriever = null
 
         isShutdown = true
         navigator.shutdown()
@@ -705,27 +696,6 @@ class MapboxNativeNavigatorImpl(
         }
     }
 
-    private fun executeActionOnVoiceInstructionsRetriever(
-        action: (VoiceInstructionsRetriever) -> Unit,
-    ) {
-        voiceInstructionsRetriever?.let {
-            action(it)
-        } ?: run {
-            navigator.getVoiceInstructionsRetriever { retriever ->
-                voiceInstructionsRetriever = retriever
-                action(retriever)
-            }
-        }
-    }
-
-    /**
-     * We reset the [voiceInstructionsRetriever] instance at the start, then do initialize it for
-     * later use. We need to initialize it to prevent empty initial emission by consumers.
-     */
-    private fun prepareVoiceInstructionsRetriever() {
-        voiceInstructionsRetriever = null
-        executeActionOnVoiceInstructionsRetriever { }
-    }
     private companion object {
 
         private const val PERF_TRACKER_SECTION_NAME = "MapboxNativeNavigatorImpl"

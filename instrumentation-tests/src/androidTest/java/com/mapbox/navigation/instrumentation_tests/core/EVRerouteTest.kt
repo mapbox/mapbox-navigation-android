@@ -26,14 +26,13 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForUpdate
-import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
 import com.mapbox.navigation.testing.ui.utils.coroutines.stopRecording
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
-import com.mapbox.navigation.testing.utils.getTestRerouteCustomConfig
 import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracking
+import com.mapbox.navigation.testing.utils.nativeRerouteControllerNoRetryConfig
 import com.mapbox.navigation.testing.utils.readRawFileText
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
@@ -147,7 +146,7 @@ class EVRerouteTest(
                     .navigatorPredictionMillis(0L)
                     .deviceProfile(
                         DeviceProfile.Builder().customConfig(
-                            getTestRerouteCustomConfig(runOptions.nativeReroute),
+                            getTestCustomConfig(),
                         ).build(),
                     )
                     .build(),
@@ -171,6 +170,12 @@ class EVRerouteTest(
             val path = mapboxNavigation.historyRecorder.stopRecording()
             Log.i("Test history file", "history file recorder: $path")
         }
+    }
+
+    private fun getTestCustomConfig(): String = if (runOptions.nativeReroute) {
+        nativeRerouteControllerNoRetryConfig
+    } else {
+        ""
     }
 
     /**
@@ -198,7 +203,6 @@ class EVRerouteTest(
         )
         stayOnPosition(offRouteLocationUpdate.latitude, offRouteLocationUpdate.longitude)
         waitForReroute()
-        mapboxNavigation.setNavigationRoutesAsync(emptyList())
 
         val url1 = routeHandler.handledRequests.last().requestUrl!!
         checkHasParameters(
@@ -229,7 +233,6 @@ class EVRerouteTest(
         )
         stayOnPosition(offRouteLocationUpdate.latitude, offRouteLocationUpdate.longitude)
         waitForReroute()
-        mapboxNavigation.setNavigationRoutesAsync(emptyList())
 
         val url2 = routeHandler.handledRequests.last().requestUrl!!
         checkHasParameters(

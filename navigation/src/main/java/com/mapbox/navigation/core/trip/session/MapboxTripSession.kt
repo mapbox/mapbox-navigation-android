@@ -163,74 +163,63 @@ internal class MapboxTripSession(
                 )
             }
 
-            is SetRoutes.SwitchToOnlineAlternative -> {
-                setRouteToNativeNavigator(
-                    routes,
-                    setRoutes.initialLegIndex(),
-                    SetRoutesReason.NEW_ROUTE,
-                )
-            }
-
             is SetRoutes.RefreshRoutes -> {
-                updateRouteTransaction {
-                    if (routes.isNotEmpty()) {
-                        val refreshControllerRefresh = setRoutes
-                            as? SetRoutes.RefreshRoutes.RefreshControllerRefresh
-                        val primaryRoute = routes.first()
-                        var refreshRouteResult: Expected<String, List<RouteAlternative>> =
-                            ExpectedFactory.createError("None of the routes were refreshed")
-                        var lastSavedResultValue: Expected<String, List<RouteAlternative>>? = null
-                        // primary route must be refreshed at the very end,
-                        // because after it is refreshed,
-                        // statuses that correspond to the refreshed route will start coming
-                        for (route in routes.drop(1) + primaryRoute) {
-                            val refreshMetadata = refreshControllerRefresh?.routeRefreshResult
-                                ?.find(route.id)
-                            if (refreshMetadata?.wasRouteUpdated == false) {
-                                // skip refresh in NN if route was not updated
-                                continue
-                            }
-                            refreshRouteResult = navigator.refreshRoute(
-                                route,
-                                (refreshMetadata?.status as? RouteRefresherStatus.Success)
-                                    ?.refreshResponse,
-                                refreshMetadata?.routeProgressData?.routeGeometryIndex,
-                            )
+                if (routes.isNotEmpty()) {
+                    val refreshControllerRefresh = setRoutes
+                        as? SetRoutes.RefreshRoutes.RefreshControllerRefresh
+                    val primaryRoute = routes.first()
+                    var refreshRouteResult: Expected<String, List<RouteAlternative>> =
+                        ExpectedFactory.createError("None of the routes were refreshed")
+                    var lastSavedResultValue: Expected<String, List<RouteAlternative>>? = null
+                    // primary route must be refreshed at the very end,
+                    // because after it is refreshed,
+                    // statuses that correspond to the refreshed route will start coming
+                    for (route in routes.drop(1) + primaryRoute) {
+                        val refreshMetadata = refreshControllerRefresh?.routeRefreshResult
+                            ?.find(route.id)
+                        if (refreshMetadata?.wasRouteUpdated == false) {
+                            // skip refresh in NN if route was not updated
+                            continue
+                        }
+                        refreshRouteResult = navigator.refreshRoute(
+                            route,
+                            (refreshMetadata?.status as? RouteRefresherStatus.Success)
+                                ?.refreshResponse,
+                            refreshMetadata?.routeProgressData?.routeGeometryIndex,
+                        )
 
-                            if (refreshRouteResult.isValue) {
-                                lastSavedResultValue = refreshRouteResult
-                            }
+                        if (refreshRouteResult.isValue) {
+                            lastSavedResultValue = refreshRouteResult
                         }
-                        // The latest result contains the most actual cumulated data.
-                        // TODO API change request NN-110
-                        (lastSavedResultValue ?: refreshRouteResult).fold(
-                            { NativeSetRouteError(it) },
-                            { value ->
-                                val refreshedPrimaryRoute = primaryRoute.refreshNativePeer()
-                                this@MapboxTripSession.primaryRoute = refreshedPrimaryRoute
-                                roadObjects = refreshedPrimaryRoute.upcomingRoadObjects
-                                val refreshedRoutes = routes
-                                    .drop(1)
-                                    .toMutableList().apply {
-                                        add(0, refreshedPrimaryRoute)
-                                    }
-                                NativeSetRouteValue(
-                                    routes = refreshedRoutes,
-                                    nativeAlternatives = value,
-                                )
-                            },
-                        ).also {
-                            logD(
-                                "routes update (route IDs: ${routes.map { it.id }})" +
-                                    " - refresh finished",
-                                LOG_CATEGORY,
+                    }
+                    // The latest result contains the most actual cumulated data.
+                    // TODO API change request NN-110
+                    (lastSavedResultValue ?: refreshRouteResult).fold(
+                        { NativeSetRouteError(it) },
+                        { value ->
+                            val refreshedPrimaryRoute = primaryRoute.refreshNativePeer()
+                            this@MapboxTripSession.primaryRoute = refreshedPrimaryRoute
+                            roadObjects = refreshedPrimaryRoute.upcomingRoadObjects
+                            val refreshedRoutes = routes
+                                .drop(1)
+                                .toMutableList().apply {
+                                    add(0, refreshedPrimaryRoute)
+                                }
+                            NativeSetRouteValue(
+                                routes = refreshedRoutes,
+                                nativeAlternatives = value,
                             )
-                        }
-                    } else {
-                        with("Cannot refresh route. Route can't be null") {
-                            logW(this, LOG_CATEGORY)
-                            NativeSetRouteError(this)
-                        }
+                        },
+                    ).also {
+                        logD(
+                            "routes update (route IDs: ${routes.map { it.id }}) - refresh finished",
+                            LOG_CATEGORY,
+                        )
+                    }
+                } else {
+                    with("Cannot refresh route. Route can't be null") {
+                        logW(this, LOG_CATEGORY)
+                        NativeSetRouteError(this)
                     }
                 }
             }
@@ -474,12 +463,6 @@ internal class MapboxTripSession(
             }
             if (state == TripSessionState.STARTED) {
                 navigator.addNavigatorObserver(navigatorObserver)
-            }
-            @OptIn(MapboxExperimental::class)
-            if (voiceInstructionsAvailableObserver.isNotEmpty()) {
-                navigator.addVoiceInstructionsAvailabilityObserver(
-                    voiceInstructionsAvailabilityObserver,
-                )
             }
         }
     }
@@ -1120,7 +1103,7 @@ internal class MapboxTripSession(
      * This ensures that during the execution of the provided function, any incoming
      * route progress updates are ignored, preventing potential race conditions
      */
-    private suspend inline fun <T> updateRouteTransaction(func: suspend () -> T): T {
+    private inline fun <T> updateRouteTransaction(func: () -> T): T {
         isUpdatingRoute.set(true)
         return try {
             func()

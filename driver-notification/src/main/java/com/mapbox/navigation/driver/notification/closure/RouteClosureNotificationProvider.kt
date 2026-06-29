@@ -42,7 +42,7 @@ import kotlinx.coroutines.flow.merge
 class RouteClosureNotificationProvider(
     var options: RouteClosureNotificationOptions = RouteClosureNotificationOptions.Builder()
         .build(),
-) : DriverNotificationProvider("route-closure") {
+) : DriverNotificationProvider() {
 
     private val alternativeTriggerThresholdMeters get() = options.alternativeTriggerThresholdMeters
 

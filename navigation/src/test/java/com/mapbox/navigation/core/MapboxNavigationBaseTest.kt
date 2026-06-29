@@ -362,7 +362,6 @@ internal open class MapboxNavigationBaseTest {
         coEvery { navigator.setRoutes(any(), any(), any(), any()) } answers {
             createSetRouteResult()
         }
-        coEvery { navigator.updateLocation(any()) } returns false
         every { navigator.cache } returns cache
         every { navigator.telemetry } returns telemetry
         every { navigator.getRerouteDetector() } returns null
@@ -417,7 +416,6 @@ internal open class MapboxNavigationBaseTest {
             RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP,
         )
         every { directionsSession.routes } returns emptyList()
-        every { directionsSession.ignoredRoutes } returns emptyList()
     }
 
     private fun mockNavigationSession() {

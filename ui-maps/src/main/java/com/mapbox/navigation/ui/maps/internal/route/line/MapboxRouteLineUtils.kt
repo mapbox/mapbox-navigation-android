@@ -1451,12 +1451,11 @@ internal object MapboxRouteLineUtils {
                 RouteLayerConstants.LAYER_GROUP_3_MAIN,
                 RouteLayerConstants.LAYER_GROUP_3_SOURCE_ID,
             )
-                .lineCap(options.lineLayersConfigs.lineConfig.lineCap)
-                .lineJoin(options.lineLayersConfigs.lineConfig.lineJoin)
+                .lineCap(LineCap.ROUND)
+                .lineJoin(LineJoin.ROUND)
                 .lineWidth(options.scaleExpressions.routeLineScaleExpression)
                 .lineEmissiveStrength(1.0)
                 .apply { opacityExpression?.let { lineOpacity(it) } }
-                .lineDasharray(options.lineLayersConfigs.lineConfig.toDashArray())
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
                     style.layerLineDepthOcclusionFactor(
@@ -1617,12 +1616,11 @@ internal object MapboxRouteLineUtils {
                 RouteLayerConstants.LAYER_GROUP_2_MAIN,
                 RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID,
             )
-                .lineCap(options.lineLayersConfigs.lineConfig.lineCap)
-                .lineJoin(options.lineLayersConfigs.lineConfig.lineJoin)
+                .lineCap(LineCap.ROUND)
+                .lineJoin(LineJoin.ROUND)
                 .lineWidth(options.scaleExpressions.routeLineScaleExpression)
                 .lineEmissiveStrength(1.0)
                 .apply { opacityExpression?.let { lineOpacity(it) } }
-                .lineDasharray(options.lineLayersConfigs.lineConfig.toDashArray())
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
                     style.layerLineDepthOcclusionFactor(
@@ -1785,12 +1783,11 @@ internal object MapboxRouteLineUtils {
                 RouteLayerConstants.LAYER_GROUP_1_MAIN,
                 RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID,
             )
-                .lineCap(options.lineLayersConfigs.lineConfig.lineCap)
-                .lineJoin(options.lineLayersConfigs.lineConfig.lineJoin)
+                .lineCap(LineCap.ROUND)
+                .lineJoin(LineJoin.ROUND)
                 .lineWidth(options.scaleExpressions.routeLineScaleExpression)
                 .lineEmissiveStrength(1.0)
                 .apply { opacityExpression?.let { lineOpacity(it) } }
-                .lineDasharray(options.lineLayersConfigs.lineConfig.toDashArray())
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
                     style.layerLineDepthOcclusionFactor(
@@ -1927,12 +1924,11 @@ internal object MapboxRouteLineUtils {
                 RouteLayerConstants.MASKING_LAYER_MAIN,
                 RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID,
             )
-                .lineCap(options.lineLayersConfigs.lineConfig.lineCap)
-                .lineJoin(options.lineLayersConfigs.lineConfig.lineJoin)
+                .lineCap(LineCap.ROUND)
+                .lineJoin(LineJoin.ROUND)
                 .lineWidth(options.scaleExpressions.routeLineScaleExpression)
                 .lineEmissiveStrength(1.0)
                 .apply { opacityExpression?.let { lineOpacity(it) } }
-                .lineDasharray(options.lineLayersConfigs.lineConfig.toDashArray())
                 .lineColor(Color.GRAY).apply {
                     style.addPersistentLayer(this, LayerPosition(null, belowLayerIdToUse, null))
                     style.layerLineDepthOcclusionFactor(
@@ -2079,7 +2075,7 @@ internal object MapboxRouteLineUtils {
 
     // for a set of dynamic values, see MapboxRouteLineViewDynamicOptionsBuilder
     // scale expressions and restricted layer colors will be changed when routes are re-rendered.
-    @OptIn(MapboxExperimental::class, ExperimentalPreviewMapboxNavigationAPI::class)
+    @OptIn(MapboxExperimental::class)
     internal fun updateLayersStyling(style: Style, viewOptions: MapboxRouteLineViewOptions) {
         val opacityExpression = viewOptions.opacityExpression()
         val restrictedRoadsOpacityExpression = viewOptions.restrictedRoadsOpacityExpression()
@@ -2116,14 +2112,7 @@ internal object MapboxRouteLineUtils {
                 it.slot(viewOptions.slotName)
             }
             style.layerLineDepthOcclusionFactor(it.layerId, viewOptions.lineDepthOcclusionFactor)
-            it.apply {
-                opacityExpression?.let { expr -> lineOpacity(expr) }
-                with(viewOptions.lineLayersConfigs) {
-                    lineCap(lineConfig.lineCap)
-                    lineJoin(lineConfig.lineJoin)
-                    lineDasharray(lineConfig.toDashArray())
-                }
-            }
+            opacityExpression?.let { expr -> it.lineOpacity(expr) }
         }
         (style.getLayer(RouteLayerConstants.LAYER_GROUP_3_TRAFFIC) as? LineLayer)?.let {
             if (styleContainsSlotName) {
@@ -2168,14 +2157,7 @@ internal object MapboxRouteLineUtils {
                 it.slot(viewOptions.slotName)
             }
             style.layerLineDepthOcclusionFactor(it.layerId, viewOptions.lineDepthOcclusionFactor)
-            it.apply {
-                opacityExpression?.let { expr -> lineOpacity(expr) }
-                with(viewOptions.lineLayersConfigs) {
-                    lineCap(lineConfig.lineCap)
-                    lineJoin(lineConfig.lineJoin)
-                    lineDasharray(lineConfig.toDashArray())
-                }
-            }
+            opacityExpression?.let { expr -> it.lineOpacity(expr) }
         }
         (style.getLayer(RouteLayerConstants.LAYER_GROUP_2_TRAFFIC) as? LineLayer)?.let {
             if (styleContainsSlotName) {
@@ -2220,14 +2202,7 @@ internal object MapboxRouteLineUtils {
                 it.slot(viewOptions.slotName)
             }
             style.layerLineDepthOcclusionFactor(it.layerId, viewOptions.lineDepthOcclusionFactor)
-            it.apply {
-                opacityExpression?.let { expr -> lineOpacity(expr) }
-                with(viewOptions.lineLayersConfigs) {
-                    lineCap(lineConfig.lineCap)
-                    lineJoin(lineConfig.lineJoin)
-                    lineDasharray(lineConfig.toDashArray())
-                }
-            }
+            opacityExpression?.let { expr -> it.lineOpacity(expr) }
         }
         (style.getLayer(RouteLayerConstants.LAYER_GROUP_1_TRAFFIC) as? LineLayer)?.let {
             if (styleContainsSlotName) {
@@ -2272,14 +2247,7 @@ internal object MapboxRouteLineUtils {
                 it.slot(viewOptions.slotName)
             }
             style.layerLineDepthOcclusionFactor(it.layerId, viewOptions.lineDepthOcclusionFactor)
-            it.apply {
-                opacityExpression?.let { expr -> lineOpacity(expr) }
-                with(viewOptions.lineLayersConfigs) {
-                    lineCap(lineConfig.lineCap)
-                    lineJoin(lineConfig.lineJoin)
-                    lineDasharray(lineConfig.toDashArray())
-                }
-            }
+            opacityExpression?.let { expr -> it.lineOpacity(expr) }
         }
         (style.getLayer(RouteLayerConstants.MASKING_LAYER_TRAFFIC) as? LineLayer)?.let {
             if (styleContainsSlotName) {

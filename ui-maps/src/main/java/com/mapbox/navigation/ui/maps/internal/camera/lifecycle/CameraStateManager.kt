@@ -1,17 +1,17 @@
 package com.mapbox.navigation.ui.maps.internal.camera.lifecycle
 
 import androidx.annotation.RestrictTo
-import com.mapbox.navigation.ui.maps.internal.camera.NavigationCameraStateChangedObserverInternal
-import com.mapbox.navigation.ui.maps.internal.camera.NavigationCameraStateInternal
+import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
+import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraStateChangedObserver
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 interface CameraStateManager {
 
-    fun registerStateChangeObserver(observer: NavigationCameraStateChangedObserverInternal)
+    fun registerStateChangeObserver(observer: NavigationCameraStateChangedObserver)
 
-    fun unregisterStateChangeObserver(observer: NavigationCameraStateChangedObserverInternal)
+    fun unregisterStateChangeObserver(observer: NavigationCameraStateChangedObserver)
 
-    fun getCurrentState(): NavigationCameraStateInternal
+    fun getCurrentState(): NavigationCameraState
 
     fun disable()
 }

@@ -8,12 +8,12 @@ jobs:
     permissions:
       pull-requests: write
       contents: write
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-20.04
     env:
       PR_NUMBER: ${{ github.event.pull_request.number }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v6
         with:
           ref: ${{github.head_ref}}
 

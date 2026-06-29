@@ -14,7 +14,6 @@ import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.MapboxMapException
 import com.mapbox.maps.ScreenBox
-import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.toCameraOptions
 import com.mapbox.maps.util.isEmpty
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -35,11 +34,9 @@ import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.pro
 import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger
 import com.mapbox.navigation.ui.maps.internal.camera.FollowingFramingMode
 import com.mapbox.navigation.ui.maps.internal.camera.FollowingFramingModeHolder
-import com.mapbox.navigation.ui.maps.internal.camera.InternalFollowingOverviewOptions
-import com.mapbox.navigation.ui.maps.internal.camera.InternalRouteOverviewOptions
+import com.mapbox.navigation.ui.maps.internal.camera.InternalViewportDataSourceOptions
 import com.mapbox.navigation.ui.maps.internal.camera.OverviewMode
-import com.mapbox.navigation.ui.maps.internal.camera.PointsOverviewViewportDataSource
-import com.mapbox.navigation.ui.maps.internal.camera.RouteOverviewViewportDataSource
+import com.mapbox.navigation.ui.maps.internal.camera.OverviewViewportDataSource
 import com.mapbox.navigation.ui.maps.util.MapSizeInitializedCallbackHelper
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
@@ -54,17 +51,17 @@ import kotlin.math.min
  * Default implementation of [ViewportDataSource] to use with the [NavigationCamera].
  *
  * Use:
- * - [onRouteChanged] to produce route overview geometries that need to be framed
+ * - [onRouteChanged] to produce overview geometries that need to be framed
  * - [onRouteProgressChanged] (requires also [onRouteChanged]) to produce following geometries of the current step
- * and route overview geometries of the remaining points on the route that need to be framed.
+ * and overview geometries of the remaining points on the route that need to be framed.
  * This will make the frame in following mode change zoom level depending on the proximity to
- * the upcoming maneuver and resize the frame in route overview mode to fit only the remaining portion of the route.
+ * the upcoming maneuver and resize the frame in overview mode to fit only the remaining portion of the route.
  * - [onLocationChanged] to pass a point to be framed and used as a source of bearing for the
  * following camera frame
  * - [additionalPointsToFrameForFollowing] - points that also need to be visible in
  * the following camera frame
  * - [additionalPointsToFrameForOverview] - points that also need to be visible in
- * the route overview camera frame
+ * the overview camera frame
  *
  * Whenever a set of these arguments is provided or refreshed, you need to call [evaluate]
  * to process the data and compute an opinionated [ViewportData] update that [NavigationCamera]
@@ -89,13 +86,13 @@ import kotlin.math.min
  *
  * ## Padding and framing behavior
  * This data source initializes at the `null island` (0.0, 0.0). Make sure to first provide at least
- * [onLocationChanged] for following mode framing and [onRouteChanged] for route overview mode framing
+ * [onLocationChanged] for following mode framing and [onRouteChanged] for overview mode framing
  * (or the [additionalPointsToFrameForOverview] and [additionalPointsToFrameForFollowing]).
  *
- * ### Route overview
+ * ### Overview
  * [overviewPadding] is used to generate the correct zoom level while positioning the contents on screen
  * and is also applied to the resulting default [ViewportData.cameraForOverview].
- * The default bearing for route overview framing is north (`0.0`).
+ * The default bearing for overview framing is north (`0.0`).
  *
  * ### Following
  * [followingPadding] is used to generate the correct zoom level while positioning the contents on screen
@@ -214,10 +211,7 @@ class MapboxNavigationViewportDataSource private constructor(
     private val followingFramingModeHolder: FollowingFramingModeHolder?,
     options: MapboxNavigationViewportDataSourceOptions,
     @get:VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    internal val routeOverviewViewportDataSource: RouteOverviewViewportDataSource,
-    @get:VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    internal val pointsOverviewViewportDataSource: PointsOverviewViewportDataSource,
-    private val followingInternalOptions: InternalFollowingOverviewOptions,
+    internal val overviewViewportDataSource: OverviewViewportDataSource,
 ) : ViewportDataSource {
 
     internal companion object {
@@ -232,33 +226,26 @@ class MapboxNavigationViewportDataSource private constructor(
     constructor(mapboxMap: MapboxMap) : this(
         mapboxMap,
         null,
-        RouteOverviewViewportDataSource(
+        OverviewViewportDataSource(
             mapboxMap,
-            InternalRouteOverviewOptions(
+            InternalViewportDataSourceOptions(
+                ignoreMinZoomWhenFramingManeuver = false,
                 overviewMode = OverviewMode.ACTIVE_LEG,
                 overviewAlternatives = false,
             ),
         ),
-        PointsOverviewViewportDataSource(mapboxMap),
     )
 
+    // options and internalOptions must be the same instance in OverviewViewportDataSource and MapboxNavigationViewportDataSource
     internal constructor(
         mapboxMap: MapboxMap,
         followingFramingModeHolder: FollowingFramingModeHolder?,
-        routeOverviewViewportDataSource: RouteOverviewViewportDataSource,
-        pointsOverviewViewportDataSource: PointsOverviewViewportDataSource =
-            PointsOverviewViewportDataSource(mapboxMap),
-        followingInternalOptions: InternalFollowingOverviewOptions =
-            InternalFollowingOverviewOptions(ignoreMinZoomWhenFramingManeuver = false),
+        overviewViewportDataSource: OverviewViewportDataSource,
     ) : this(
         mapboxMap,
         followingFramingModeHolder,
-        MapboxNavigationViewportDataSourceOptions().also {
-            it.overviewFrameOptions = routeOverviewViewportDataSource.options
-        },
-        routeOverviewViewportDataSource,
-        pointsOverviewViewportDataSource,
-        followingInternalOptions,
+        overviewViewportDataSource.options,
+        overviewViewportDataSource,
     )
 
     /**
@@ -268,6 +255,12 @@ class MapboxNavigationViewportDataSource private constructor(
      */
     val options = options
 
+    internal var internalOptions
+        get() = overviewViewportDataSource.internalOptions
+        set(value) {
+            overviewViewportDataSource.internalOptions = value
+        }
+
     /**
      * Set a [MapboxNavigationViewportDataSourceDebugger].
      */
@@ -275,8 +268,7 @@ class MapboxNavigationViewportDataSource private constructor(
     var debugger: MapboxNavigationViewportDataSourceDebugger? = null
         set(value) {
             field = value
-            routeOverviewViewportDataSource.debugger = value
-            pointsOverviewViewportDataSource.debugger = value
+            overviewViewportDataSource.debugger = value
         }
 
     private var navigationRoutes: List<NavigationRoute> = emptyList()
@@ -322,16 +314,15 @@ class MapboxNavigationViewportDataSource private constructor(
     private var appliedFollowingPadding: EdgeInsets? = followingPadding
 
     /**
-     * Holds a padding (in pixels, in reference to the [MapView]'s size) used for generating
-     * a route overview frame.
+     * Holds a padding (in pixels, in reference to the [MapView]'s size) used for generating an overview frame.
      *
      * The frame will contain the entirety of the route provided via [onRouteChanged]
      * or its remainder if [onRouteProgressChanged] is also available, and the [additionalPointsToFrameForOverview].
      */
     var overviewPadding: EdgeInsets
-        get() = routeOverviewViewportDataSource.padding
+        get() = overviewViewportDataSource.padding
         set(value) {
-            routeOverviewViewportDataSource.padding = value
+            overviewViewportDataSource.padding = value
         }
 
     private var additionalPointsToFrameForFollowing: List<Point> = emptyList()
@@ -344,8 +335,7 @@ class MapboxNavigationViewportDataSource private constructor(
             .pitch(followingPitchProperty.get())
             .padding(appliedFollowingPadding)
             .build(),
-        cameraForOverview = routeOverviewViewportDataSource.cameraOptions,
-        cameraForPointsOverview = pointsOverviewViewportDataSource.cameraOptions,
+        cameraForOverview = overviewViewportDataSource.viewportData,
     )
         set(value) {
             if (!value.isStandstill(field)) {
@@ -360,7 +350,6 @@ class MapboxNavigationViewportDataSource private constructor(
 
     private val mapSizeReadyCallbackHelper = MapSizeInitializedCallbackHelper(mapboxMap)
     private var mapsSizeReadyCancellable: Cancelable? = null
-    private var isMapSizeReadyCallbackPending = false
 
     override fun getViewportData(): ViewportData = viewportData
 
@@ -385,28 +374,20 @@ class MapboxNavigationViewportDataSource private constructor(
      * @see [getViewportData]
      */
     fun evaluate() {
-        if (isMapSizeReadyCallbackPending) {
-            return
-        }
-
-        isMapSizeReadyCallbackPending = true
-        val cancellable = mapSizeReadyCallbackHelper.onMapSizeInitialized {
-            isMapSizeReadyCallbackPending = false
-            mapsSizeReadyCancellable = null
+        mapsSizeReadyCancellable?.cancel()
+        mapsSizeReadyCancellable = mapSizeReadyCallbackHelper.onMapSizeInitialized {
             PerformanceTracker.trackPerformanceSync(
                 "MapboxNavigationViewportDataSource#evaluateImpl",
             ) {
                 evaluateImpl()
             }
         }
-        mapsSizeReadyCancellable = if (isMapSizeReadyCallbackPending) cancellable else null
     }
 
     private fun evaluateImpl() {
         val cameraState = mapboxMap.cameraState
         updateFollowingData(cameraState)
-        routeOverviewViewportDataSource.evaluate()
-        pointsOverviewViewportDataSource.evaluate()
+        overviewViewportDataSource.evaluate()
 
         val followingCameraOptions = options.followingFrameOptions.run {
             CameraOptions.Builder().apply {
@@ -430,14 +411,13 @@ class MapboxNavigationViewportDataSource private constructor(
 
         viewportData = ViewportData(
             cameraForFollowing = followingCameraOptions,
-            cameraForOverview = routeOverviewViewportDataSource.cameraOptions,
-            cameraForPointsOverview = pointsOverviewViewportDataSource.cameraOptions,
+            cameraForOverview = overviewViewportDataSource.viewportData,
         )
     }
 
     /**
      * Call whenever the primary route changes.
-     * This produces and stores geometries that need to be framed for route overview.
+     * This produces and stores geometries that need to be framed for overview.
      *
      * @see [MapboxNavigation.registerRoutesObserver]
      * @see [clearRouteData]
@@ -467,9 +447,9 @@ class MapboxNavigationViewportDataSource private constructor(
 
     /**
      * Call whenever [RouteProgress] changes to produce following geometries of the current step
-     * and route overview geometries of the remaining points on the route that need to be framed.
+     * and overview geometries of the remaining points on the route that need to be framed.
      * This will make the following frame change zoom level and pitch depending on the proximity to
-     * the upcoming maneuver and resize the route overview to fit only remaining portion of the route.
+     * the upcoming maneuver and resize overview to fit only remaining portion of the route.
      *
      * [onRouteChanged] has to be called before providing progress to compute any updates based
      * on the current primary route's geometry.
@@ -494,7 +474,7 @@ class MapboxNavigationViewportDataSource private constructor(
      */
     fun onLocationChanged(location: Location) {
         targetLocation = location
-        routeOverviewViewportDataSource.onLocationChanged(location)
+        overviewViewportDataSource.onLocationChanged(location)
     }
 
     /**
@@ -508,18 +488,17 @@ class MapboxNavigationViewportDataSource private constructor(
     fun clearRouteData() {
         mapsSizeReadyCancellable?.cancel()
         mapsSizeReadyCancellable = null
-        isMapSizeReadyCallbackPending = false
 
         navigationRoutes = emptyList()
         postManeuverFramingPoints = emptyList()
         averageIntersectionDistancesOnRoute = emptyList()
-        routeOverviewViewportDataSource.clearRouteData()
+        overviewViewportDataSource.clearRouteData()
         clearProgressData()
     }
 
     // non-empty routes
     private fun calculateRouteData(routes: List<NavigationRoute>) {
-        routeOverviewViewportDataSource.onRoutesChanged(routes)
+        overviewViewportDataSource.onRoutesChanged(routes)
 
         val route = routes.firstOrNull() ?: return
         val completeRoutePoints = processRoutePoints(route.directionsRoute)
@@ -603,7 +582,7 @@ class MapboxNavigationViewportDataSource private constructor(
                     postManeuverFramingPoints,
                 )
 
-            routeOverviewViewportDataSource.onRouteProgressChanged(routeProgress)
+            overviewViewportDataSource.onRouteProgressChanged(routeProgress)
         } ?: run {
             logE(
                 "You're calling #onRouteProgressChanged with empty leg or step progress.",
@@ -619,7 +598,7 @@ class MapboxNavigationViewportDataSource private constructor(
         pointsToFrameOnCurrentStep = emptyList()
         pointsToFrameAfterCurrentStep = emptyList()
         this.routeProgress = null
-        routeOverviewViewportDataSource.clearProgressData()
+        overviewViewportDataSource.clearProgressData()
     }
 
     /**
@@ -630,10 +609,10 @@ class MapboxNavigationViewportDataSource private constructor(
     }
 
     /**
-     * Provide additional points that should be fitted into the route overview frame update.
+     * Provide additional points that should be fitted into the overview frame update.
      */
     fun additionalPointsToFrameForOverview(points: List<Point>) {
-        routeOverviewViewportDataSource.additionalPointsToFrame(points)
+        overviewViewportDataSource.additionalPointsToFrame(points)
     }
 
     /**
@@ -709,12 +688,12 @@ class MapboxNavigationViewportDataSource private constructor(
      * with opinionated values for all camera properties.
      *
      * Use this method to override the Center Camera Property. As long as the override is present,
-     * it will be used for all [ViewportData] route overview updates instead of the opinionated value.
+     * it will be used for all [ViewportData] overview updates instead of the opinionated value.
      *
      * @see [evaluate]
      */
     fun overviewCenterPropertyOverride(value: Point?) {
-        routeOverviewViewportDataSource.centerPropertyOverride(value)
+        overviewViewportDataSource.centerPropertyOverride(value)
     }
 
     /**
@@ -722,12 +701,12 @@ class MapboxNavigationViewportDataSource private constructor(
      * with opinionated values for all camera properties.
      *
      * Use this method to override the Zoom Camera Property. As long as the override is present,
-     * it will be used for all [ViewportData] route overview updates instead of the opinionated value.
+     * it will be used for all [ViewportData] overview updates instead of the opinionated value.
      *
      * @see [evaluate]
      */
     fun overviewZoomPropertyOverride(value: Double?) {
-        routeOverviewViewportDataSource.zoomPropertyOverride(value)
+        overviewViewportDataSource.zoomPropertyOverride(value)
     }
 
     /**
@@ -735,12 +714,12 @@ class MapboxNavigationViewportDataSource private constructor(
      * with opinionated values for all camera properties.
      *
      * Use this method to override the Bearing Camera Property. As long as the override is present,
-     * it will be used for all [ViewportData] route overview updates instead of the opinionated value.
+     * it will be used for all [ViewportData] overview updates instead of the opinionated value.
      *
      * @see [evaluate]
      */
     fun overviewBearingPropertyOverride(value: Double?) {
-        routeOverviewViewportDataSource.bearingPropertyOverride(value)
+        overviewViewportDataSource.bearingPropertyOverride(value)
     }
 
     /**
@@ -748,12 +727,12 @@ class MapboxNavigationViewportDataSource private constructor(
      * with opinionated values for all camera properties.
      *
      * Use this method to override the Pitch Camera Property. As long as the override is present,
-     * it will be used for all [ViewportData] route overview updates instead of the opinionated value.
+     * it will be used for all [ViewportData] overview updates instead of the opinionated value.
      *
      * @see [evaluate]
      */
     fun overviewPitchPropertyOverride(value: Double?) {
-        routeOverviewViewportDataSource.pitchPropertyOverride(value)
+        overviewViewportDataSource.pitchPropertyOverride(value)
     }
 
     /**
@@ -767,10 +746,10 @@ class MapboxNavigationViewportDataSource private constructor(
     }
 
     /**
-     * Helper method that clears all user-set overrides for camera properties when in route overview.
+     * Helper method that clears all user-set overrides for camera properties when in overview.
      */
     fun clearOverviewOverrides() {
-        routeOverviewViewportDataSource.clearOverrides()
+        overviewViewportDataSource.clearOverrides()
     }
 
     private fun updateFollowingData(cameraState: CameraState) {
@@ -838,13 +817,12 @@ class MapboxNavigationViewportDataSource private constructor(
                 )
             } else {
                 val mapSize = mapboxMap.getSize()
+                val screenBox = getScreenBoxForFraming(mapSize, followingPadding)
                 val padding = getMapAnchoredPaddingFromUserPadding(
                     mapSize,
                     followingPadding,
                     options.followingFrameOptions.focalPoint,
                 )
-                val screenBox = getScreenBoxForFraming(mapSize, followingPadding)
-                    .withPrincipalPointInside(padding.top)
                 followingFramingModeHolder?.mode = FollowingFramingMode.LOCATION_INDICATOR
                 val fallbackCameraOptions = CameraOptions.Builder()
                     .center(
@@ -875,9 +853,8 @@ class MapboxNavigationViewportDataSource private constructor(
 
         options.followingFrameOptions.run {
             val isFramingManeuver = isFramingManeuverProperty.get()
-            val ignoreMinZoom = followingInternalOptions.ignoreMinZoomWhenFramingManeuver
             followingZoomProperty.fallback =
-                if (isFramingManeuver && ignoreMinZoom) {
+                if (isFramingManeuver && internalOptions.ignoreMinZoomWhenFramingManeuver) {
                     min(cameraFrame.zoom!!, maxZoom)
                 } else {
                     max(min(cameraFrame.zoom!!, maxZoom), minZoom)
@@ -894,21 +871,6 @@ class MapboxNavigationViewportDataSource private constructor(
         debugger?.followingPoints = pointsForFollowing
         debugger?.followingUserPadding = followingPadding
     }
-
-    /**
-     * Returns a [ScreenBox] guaranteed to strictly contain the camera's principal point along the
-     * vertical axis. The following camera places the principal point (puck vanishing point) on the
-     * box's bottom edge when [FollowingFrameOptions.FocalPoint.y] is `1.0`; in that case
-     * [cameraForCoordinates] fails and returns the seed camera. Extending the bottom edge below the
-     * principal point avoids that. It's safe because geometry below the vanishing point is never
-     * framed, so the extra space is unused for zoom calculation.
-     */
-    private fun ScreenBox.withPrincipalPointInside(principalY: Double): ScreenBox =
-        if (principalY < max.y) {
-            this
-        } else {
-            ScreenBox(min, ScreenCoordinate(max.x, principalY + 1.0))
-        }
 
     private fun MapboxMap.safeCameraForCoordinates(
         coordinates: List<Point>,
