@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.androidauto.navigation.speedlimit
 
 import android.graphics.Bitmap
+import android.os.Build
 import com.mapbox.navigation.base.speed.model.SpeedLimitSign
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotSame
@@ -8,8 +9,10 @@ import org.junit.Assert.assertSame
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
+@Config(sdk = [Build.VERSION_CODES.O])
 class SpeedLimitBitmapRendererTest {
 
     private val sut = SpeedLimitBitmapRenderer()

@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.components.voice.view
 
 import android.content.Context
+import android.os.Build
 import android.view.View
 import android.widget.ImageView
 import androidx.appcompat.widget.AppCompatTextView
@@ -15,6 +16,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import org.robolectric.annotation.LooperMode
 import org.robolectric.shadows.ShadowLooper
 
@@ -22,6 +24,7 @@ private const val customText = "custom text"
 
 @LooperMode(LooperMode.Mode.PAUSED)
 @RunWith(RobolectricTestRunner::class)
+@Config(sdk = [Build.VERSION_CODES.P])
 class MapboxSoundButtonTest {
 
     private lateinit var ctx: Context

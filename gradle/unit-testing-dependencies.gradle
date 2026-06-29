@@ -8,14 +8,3 @@ dependencies {
     testImplementation dependenciesList.kotlinReflect
     testImplementation dependenciesList.mockwebserver
 }
-
-def robolectricRepoUrl = System.getenv('ROBOLECTRIC_MAVEN_REPO_URL')
-def robolectricRepoUsername = System.getenv('ROBOLECTRIC_MAVEN_REPO_USERNAME')
-def robolectricRepoPassword = System.getenv('ROBOLECTRIC_MAVEN_REPO_PASSWORD')
-if (robolectricRepoUrl && robolectricRepoUsername && robolectricRepoPassword) {
-    tasks.withType(Test).configureEach {
-        systemProperty 'robolectric.dependency.repo.url', robolectricRepoUrl
-        systemProperty 'robolectric.dependency.repo.username', robolectricRepoUsername
-        systemProperty 'robolectric.dependency.repo.password', robolectricRepoPassword
-    }
-}

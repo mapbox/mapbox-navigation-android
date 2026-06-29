@@ -2,8 +2,6 @@ package com.mapbox.api.directions.v5.models
 
 import com.google.flatbuffers.FlexBuffers
 import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
-import com.mapbox.api.directions.v5.models.utils.throwNotComparableRouteObjects
-import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.directions.generated.MergingAreaType
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
@@ -32,15 +30,15 @@ internal class MergingAreaFBWrapper private constructor(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other == null) return false
-        if (other is MergingArea && other !is MergingAreaFBWrapper) {
-            throwNotComparableRouteObjects()
-        }
-        if (other !is MergingAreaFBWrapper) return false
-        return fb.contentEquals(other.fb)
+        if (other is MergingAreaFBWrapper && other.fb === fb) return true
+        if (other is MergingAreaFBWrapper && efficientEquals(fb, other.fb)) return true
+
+        return false
     }
 
-    override fun hashCode() = fb.contentHash().toHashCode()
+    override fun hashCode(): Int {
+        return efficientHashCode(fb)
+    }
 
     override fun toString(): String {
         return "MergingArea(type=${type()})"

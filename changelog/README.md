@@ -6,12 +6,13 @@ To avoid merge conflicts in the CHANGELOG.md file we accepted the multi-file run
 
 To follow this strategy you should create a `.md` file for every PR. Choose a directory:
 
-- `changelog/features` for **Features** changes
-- `changelog/bugfixes` for **Bug fixes and improvements** changes
-- `changelog/issues` for **Known issues :warning:** changes
-- `changelog/other` for other changes
+- `changelog/unreleased/features` for **Features** changes
+- `changelog/unreleased/bugfixes` for **Bug fixes and improvements** changes
+- `changelog/unreleased/issues` for **Known issues :warning:** changes
+- `changelog/unreleased/other` for other changes
 
-Create the file directly in the appropriate directory. Do not use `scripts/changelog/add_changelog.py`: it writes to the legacy `changelog/unreleased` location, which is not read by the CD release job.
+Or you can use the helper script to do it. Just call `python3 scripts/changelog/add_changelog.py -f "I have added something special"` to create a changelog file.
+Call `python3 scripts/changelog/add_changelog.py -h` to get more info.
 
 You can use anything that allow .md format in changelog files.
 
@@ -23,7 +24,7 @@ If you have implemented several features or bugfixes you should describe all of 
 ```
 
 You can choose any name for your changelog files because the GitHub action will rename files in
-`changelog/features` and `changelog/bugfixes` directories to `${PR_NUMBER}.md` when you open a PR.
+`changelog/unreleased/features` and `changelog/unreleased/bugfixes` directories to `${PR_NUMBER}.md` when you open a PR.
 
 For every PR the script will generate and update a comment with a changelog for the current branch in the following format:
 

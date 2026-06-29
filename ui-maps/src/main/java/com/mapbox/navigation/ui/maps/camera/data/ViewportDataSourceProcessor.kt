@@ -49,9 +49,7 @@ internal object ViewportDataSourceProcessor {
         distanceToFrameAfterManeuver: Double,
         route: DirectionsRoute,
         completeRoutePoints: List<List<List<Point>>>,
-    ): List<List<List<Point>>> = PerformanceTracker.trackPerformanceSync(
-        "ViewportDataSourceProcessor#processRouteForPostManeuverFramingGeometry",
-    ) {
+    ): List<List<List<Point>>> {
         if (!enabled) {
             return emptyList()
         }
@@ -265,7 +263,7 @@ internal object ViewportDataSourceProcessor {
             }
         val remainingPointsAfterCurrentStep = remainingStepsAfterCurrentStep.flatten()
         val remainingPointsAfterCurrentLeg = when (overviewMode) {
-            OverviewMode.ACTIVE_LEG -> emptyList()
+            OverviewMode.ACTIVE_LEG, OverviewMode.POINTS -> emptyList()
             OverviewMode.ENTIRE_ROUTE -> simplifiedCompleteRoutePoints.subList(
                 legIndex + 1,
                 simplifiedCompleteRoutePoints.size,

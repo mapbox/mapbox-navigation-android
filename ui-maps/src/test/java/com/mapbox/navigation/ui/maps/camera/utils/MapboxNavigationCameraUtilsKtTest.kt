@@ -134,10 +134,7 @@ class MapboxNavigationCameraUtilsKtTest {
 
     @Test
     fun `test createAnimatorSet`() {
-        // Real animators rather than mockk<Animator>(): from API 34 on, Animator has a
-        // package-private nested AnimatorCaller that a ByteBuddy subclass in another
-        // classloader cannot access, so mocking Animator itself throws IllegalAccessError.
-        val animators = listOf<Animator>(ValueAnimator.ofFloat(), ValueAnimator.ofFloat())
+        val animators = listOf<Animator>(mockk(), mockk())
         val expected = AnimatorSet().apply {
             playTogether(*(animators.toTypedArray()))
         }.childAnimations

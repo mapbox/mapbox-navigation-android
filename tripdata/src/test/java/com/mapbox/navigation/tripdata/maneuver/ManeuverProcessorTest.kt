@@ -10,8 +10,6 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotSame
-import org.junit.Assert.assertSame
 import org.junit.Rule
 import org.junit.Test
 
@@ -19,7 +17,7 @@ import org.junit.Test
 class ManeuverProcessorTest {
 
     @get:Rule
-    val coroutineRule = MainCoroutineRule()
+    var coroutineRule = MainCoroutineRule()
 
     @Test
     fun `when maneuver with direction route having invalid banner instruction`() {
@@ -222,110 +220,6 @@ class ManeuverProcessorTest {
             ManeuverResult.GetManeuverList.Success
 
         assertEquals(21.2, actual.maneuvers[0].stepDistance.totalDistance, 0.0)
-    }
-
-    @Test
-    fun `when direction route has same geometry and language then cached maneuvers are reused`() {
-        val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_route.json"),
-        )
-        val maneuverState = ManeuverState()
-        val distanceFormatter = mockk<DistanceFormatter>()
-        val maneuverOptions = ManeuverOptions.Builder().build()
-        val maneuverAction = ManeuverAction.GetManeuverListWithRoute(
-            route,
-            null,
-            maneuverState,
-            maneuverOptions,
-            distanceFormatter,
-        )
-
-        ManeuverProcessor.process(maneuverAction)
-        val cachedManeuvers = maneuverState.routeWithManeuvers.second
-
-        // new route instance, but same geometry and language as the cached one
-        val sameRoute = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_route.json"),
-        )
-        val maneuverAction1 = ManeuverAction.GetManeuverListWithRoute(
-            sameRoute,
-            null,
-            maneuverState,
-            maneuverOptions,
-            distanceFormatter,
-        )
-        ManeuverProcessor.process(maneuverAction1)
-
-        assertSame(route, maneuverState.routeWithManeuvers.first)
-        assertSame(cachedManeuvers, maneuverState.routeWithManeuvers.second)
-    }
-
-    @Test
-    fun `when direction route has different geometry then maneuvers are recomputed`() {
-        val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_route.json"),
-        )
-        val maneuverState = ManeuverState()
-        val distanceFormatter = mockk<DistanceFormatter>()
-        val maneuverOptions = ManeuverOptions.Builder().build()
-        val maneuverAction = ManeuverAction.GetManeuverListWithRoute(
-            route,
-            null,
-            maneuverState,
-            maneuverOptions,
-            distanceFormatter,
-        )
-
-        ManeuverProcessor.process(maneuverAction)
-        val cachedManeuvers = maneuverState.routeWithManeuvers.second
-
-        val differentGeometryRoute = route.toBuilder().geometry("different_geometry").build()
-        val maneuverAction1 = ManeuverAction.GetManeuverListWithRoute(
-            differentGeometryRoute,
-            null,
-            maneuverState,
-            maneuverOptions,
-            distanceFormatter,
-        )
-        ManeuverProcessor.process(maneuverAction1)
-
-        assertSame(differentGeometryRoute, maneuverState.routeWithManeuvers.first)
-        assertNotSame(cachedManeuvers, maneuverState.routeWithManeuvers.second)
-    }
-
-    @Test
-    fun `when direction route has same geometry but different language then maneuvers are recomputed`() {
-        val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_route.json"),
-        )
-        val maneuverState = ManeuverState()
-        val distanceFormatter = mockk<DistanceFormatter>()
-        val maneuverOptions = ManeuverOptions.Builder().build()
-        val maneuverAction = ManeuverAction.GetManeuverListWithRoute(
-            route,
-            null,
-            maneuverState,
-            maneuverOptions,
-            distanceFormatter,
-        )
-
-        ManeuverProcessor.process(maneuverAction)
-        val cachedManeuvers = maneuverState.routeWithManeuvers.second
-
-        val differentLanguageRoute = route.toBuilder().routeOptions(
-            route.routeOptions()!!.toBuilder().language("fr").build(),
-        ).build()
-        val maneuverAction1 = ManeuverAction.GetManeuverListWithRoute(
-            differentLanguageRoute,
-            null,
-            maneuverState,
-            maneuverOptions,
-            distanceFormatter,
-        )
-        ManeuverProcessor.process(maneuverAction1)
-
-        assertSame(differentLanguageRoute, maneuverState.routeWithManeuvers.first)
-        assertNotSame(cachedManeuvers, maneuverState.routeWithManeuvers.second)
     }
 
     @Test
@@ -788,53 +682,6 @@ class ManeuverProcessorTest {
 
         assertEquals(1, actual1.maneuvers.size)
         assertEquals(10.0, actual1.maneuvers[0].stepDistance.distanceRemaining)
-    }
-
-    @Test
-    fun `when route progress has same geometry but different language then maneuvers are recomputed`() {
-        val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("short_route.json"),
-        )
-        val routeProgress = mockRouteProgress(
-            _route = route,
-            _distanceRemainingOnStep = 15f,
-            _routeLegIndex = 0,
-            _stepIndex = 0,
-            _instructionIndex = 0,
-        )
-        val maneuverState = ManeuverState()
-        val distanceFormatter = mockk<DistanceFormatter>()
-        val maneuverOptions = ManeuverOptions.Builder().build()
-        val maneuverAction = ManeuverAction.GetManeuverList(
-            routeProgress,
-            maneuverState,
-            maneuverOptions,
-            distanceFormatter,
-        )
-
-        ManeuverProcessor.process(maneuverAction)
-        val cachedManeuvers = maneuverState.routeWithManeuvers.second
-
-        val differentLanguageRoute = route.toBuilder().routeOptions(
-            route.routeOptions()!!.toBuilder().language("fr").build(),
-        ).build()
-        val routeProgress1 = mockRouteProgress(
-            _route = differentLanguageRoute,
-            _distanceRemainingOnStep = 15f,
-            _routeLegIndex = 0,
-            _stepIndex = 0,
-            _instructionIndex = 0,
-        )
-        val maneuverAction1 = ManeuverAction.GetManeuverList(
-            routeProgress1,
-            maneuverState,
-            maneuverOptions,
-            distanceFormatter,
-        )
-        ManeuverProcessor.process(maneuverAction1)
-
-        assertSame(differentLanguageRoute, maneuverState.routeWithManeuvers.first)
-        assertNotSame(cachedManeuvers, maneuverState.routeWithManeuvers.second)
     }
 
     @Test

@@ -2,5 +2,5 @@ package com.mapbox.navigation.tripdata.maneuver.model
 
 internal data class StepIndexToManeuvers(
     val stepIndex: Int,
-    val maneuverList: List<Maneuver>,
+    val maneuverList: MutableList<Maneuver>,
 )

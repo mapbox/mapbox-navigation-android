@@ -14,11 +14,8 @@ import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraChangedCoalescedCallback
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapView
-import com.mapbox.maps.Style
-import com.mapbox.maps.extension.style.layers.Layer
 import com.mapbox.maps.extension.style.layers.addLayer
 import com.mapbox.maps.extension.style.layers.addLayerAbove
-import com.mapbox.maps.extension.style.layers.generated.CircleLayer
 import com.mapbox.maps.extension.style.layers.generated.LineLayer
 import com.mapbox.maps.extension.style.sources.addSource
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
@@ -28,7 +25,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.maps.R
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
-import com.mapbox.navigation.ui.maps.internal.camera.NavigationCameraStateInternal
+import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 
 /**
  * **This feature is currently experimental an subject to change.**
@@ -38,9 +35,7 @@ import com.mapbox.navigation.ui.maps.internal.camera.NavigationCameraStateIntern
  * - Green Box, which is the padding applied by the developer for framing purposes.
  * - Black Box, which is the padding applied to the Map instance.
  * - Red Box, which is the Map's camera center.
- * - Light Blue Line, which shows the framed geometries (following and route overview).
- * - Light Blue Dots, which show the individual framed points in the points overview. Those points
- * are not a geometry, so they are not connected with a line.
+ * - Light Blue Line, which shows the framed geometries.
  *
  * ### Example
  * Make sure to also provide the same debugger instance to [NavigationCamera.debugger] and
@@ -75,8 +70,6 @@ class MapboxNavigationViewportDataSourceDebugger @JvmOverloads constructor(
 ) {
     private val pointsSourceId = "mbx_viewport_data_source_points_source"
     private val pointsLayerId = "mbx_viewport_data_source_points_layer"
-    private val pointsOnlySourceId = "mbx_viewport_data_source_points_only_source"
-    private val pointsOnlyLayerId = "mbx_viewport_data_source_points_only_layer"
 
     private val mapboxMap = mapView.getMapboxMap()
 
@@ -101,7 +94,8 @@ class MapboxNavigationViewportDataSourceDebugger @JvmOverloads constructor(
                 mapView.removeView(mapPaddingBorder)
                 mapView.removeView(mapWidthLabel)
                 cameraChangedSubscription?.cancel()
-                removePointsLayers()
+                mapboxMap.getStyle()?.removeStyleLayer(pointsLayerId)
+                mapboxMap.getStyle()?.removeStyleSource(pointsSourceId)
             }
             val initialCameraState = mapboxMap.cameraState
             updateMapCameraCenter(initialCameraState.center)
@@ -126,30 +120,15 @@ class MapboxNavigationViewportDataSourceDebugger @JvmOverloads constructor(
             field = value
             updatePoints()
         }
-
-    /**
-     * Route geometry framed by the route overview camera. Rendered as the light blue line.
-     */
-    internal var routePointsForOverview = listOf<Point>()
+    internal var overviewPoints = listOf<Point>()
         set(value) {
             field = value
             updatePoints()
         }
-
-    /**
-     * Standalone points framed by the points overview camera. These are not a geometry, so they are
-     * rendered as individual markers rather than the light blue line.
-     */
-    internal var pointsOnlyForOverview = listOf<Point>()
-        set(value) {
-            field = value
-            updatePoints()
-        }
-    internal var cameraState = NavigationCameraStateInternal.IDLE
+    internal var cameraState = NavigationCameraState.IDLE
         set(value) {
             field = value
             updateUserPadding()
-            updatePoints()
         }
 
     private val mapPaddingBorder = View(context).apply {
@@ -219,20 +198,18 @@ class MapboxNavigationViewportDataSourceDebugger @JvmOverloads constructor(
         }
 
         val padding = when (cameraState) {
-            NavigationCameraStateInternal.IDLE -> {
+            NavigationCameraState.IDLE -> {
                 userPaddingBorder.visibility = View.GONE
                 return
             }
-            NavigationCameraStateInternal.TRANSITION_TO_FOLLOWING,
-            NavigationCameraStateInternal.FOLLOWING,
+            NavigationCameraState.TRANSITION_TO_FOLLOWING,
+            NavigationCameraState.FOLLOWING,
             -> {
                 userPaddingBorder.visibility = View.VISIBLE
                 followingUserPadding
             }
-            NavigationCameraStateInternal.TRANSITION_TO_ROUTE_OVERVIEW,
-            NavigationCameraStateInternal.ROUTE_OVERVIEW,
-            NavigationCameraStateInternal.TRANSITION_TO_POINTS_OVERVIEW,
-            NavigationCameraStateInternal.POINTS_OVERVIEW,
+            NavigationCameraState.TRANSITION_TO_OVERVIEW,
+            NavigationCameraState.OVERVIEW,
             -> {
                 userPaddingBorder.visibility = View.VISIBLE
                 overviewUserPadding
@@ -259,92 +236,51 @@ class MapboxNavigationViewportDataSourceDebugger @JvmOverloads constructor(
             return
         }
 
-        // Geometries (route/following) are drawn as a line, standalone points overview points are
-        // drawn as individual markers - connecting unrelated points with a line would be misleading.
-        val geometryPoints: List<Point>
-        val standalonePoints: List<Point>
-        when (cameraState) {
-            NavigationCameraStateInternal.IDLE -> {
-                removePointsLayers()
+        val points = when (cameraState) {
+            NavigationCameraState.IDLE -> {
+                mapboxMap.getStyle()?.removeStyleLayer(pointsLayerId)
+                mapboxMap.getStyle()?.removeStyleSource(pointsSourceId)
                 return
             }
-            NavigationCameraStateInternal.TRANSITION_TO_FOLLOWING,
-            NavigationCameraStateInternal.FOLLOWING,
+            NavigationCameraState.TRANSITION_TO_FOLLOWING,
+            NavigationCameraState.FOLLOWING,
             -> {
-                geometryPoints = followingPoints
-                standalonePoints = emptyList()
+                followingPoints
             }
-            NavigationCameraStateInternal.TRANSITION_TO_ROUTE_OVERVIEW,
-            NavigationCameraStateInternal.ROUTE_OVERVIEW,
+            NavigationCameraState.TRANSITION_TO_OVERVIEW,
+            NavigationCameraState.OVERVIEW,
             -> {
-                geometryPoints = routePointsForOverview
-                standalonePoints = emptyList()
-            }
-            NavigationCameraStateInternal.TRANSITION_TO_POINTS_OVERVIEW,
-            NavigationCameraStateInternal.POINTS_OVERVIEW,
-            -> {
-                geometryPoints = emptyList()
-                standalonePoints = pointsOnlyForOverview
+                overviewPoints
             }
         }
 
-        val style = mapboxMap.getStyle() ?: return
-
-        val lineFeatures = if (geometryPoints.size > 1) {
-            FeatureCollection.fromFeature(
-                Feature.fromGeometry(LineString.fromLngLats(geometryPoints)),
-            )
+        val featureCollection = if (points.size > 1) {
+            FeatureCollection.fromFeature(Feature.fromGeometry(LineString.fromLngLats(points)))
         } else {
             FeatureCollection.fromFeatures(emptyList())
         }
-        updateSource(style, pointsSourceId, lineFeatures) {
-            LineLayer(pointsLayerId, pointsSourceId).apply {
-                lineColor(Color.CYAN)
-                lineWidth(5.0)
+
+        val style = mapboxMap.getStyle()
+        if (enabled && style != null) {
+            if (!style.styleSourceExists(pointsSourceId)) {
+                val source = geoJsonSource(pointsSourceId) {}.featureCollection(featureCollection)
+                style.addSource(source)
             }
-        }
 
-        val circleFeatures = FeatureCollection.fromFeatures(
-            standalonePoints.map { Feature.fromGeometry(it) },
-        )
-        updateSource(style, pointsOnlySourceId, circleFeatures) {
-            CircleLayer(pointsOnlyLayerId, pointsOnlySourceId).apply {
-                circleColor(Color.CYAN)
-                circleRadius(6.0)
-                circleStrokeColor(Color.BLACK)
-                circleStrokeWidth(1.0)
+            if (!style.styleLayerExists(pointsLayerId)) {
+                val layer = LineLayer(pointsLayerId, pointsSourceId).apply {
+                    lineColor(Color.CYAN)
+                    lineWidth(5.0)
+                }
+                if (layerAbove != null && style.styleLayerExists(layerAbove)) {
+                    style.addLayerAbove(layer, layerAbove)
+                } else {
+                    style.addLayer(layer)
+                }
             }
-        }
-    }
 
-    private fun updateSource(
-        style: Style,
-        sourceId: String,
-        featureCollection: FeatureCollection,
-        layerProvider: () -> Layer,
-    ) {
-        if (!style.styleSourceExists(sourceId)) {
-            style.addSource(geoJsonSource(sourceId) {}.featureCollection(featureCollection))
-        }
-
-        val layer = layerProvider()
-        if (!style.styleLayerExists(layer.layerId)) {
-            if (layerAbove != null && style.styleLayerExists(layerAbove)) {
-                style.addLayerAbove(layer, layerAbove)
-            } else {
-                style.addLayer(layer)
-            }
-        }
-
-        (style.getSource(sourceId) as GeoJsonSource).featureCollection(featureCollection)
-    }
-
-    private fun removePointsLayers() {
-        mapboxMap.getStyle()?.apply {
-            removeStyleLayer(pointsLayerId)
-            removeStyleSource(pointsSourceId)
-            removeStyleLayer(pointsOnlyLayerId)
-            removeStyleSource(pointsOnlySourceId)
+            val source = style.getSource(pointsSourceId) as GeoJsonSource
+            source.featureCollection(featureCollection)
         }
     }
 }

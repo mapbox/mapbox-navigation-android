@@ -129,7 +129,7 @@ class DriverNotificationManagerTest {
 
     private class TestProvider(
         private val notifications: Flow<DriverNotification> = emptyFlow(),
-    ) : DriverNotificationProvider("test") {
+    ) : DriverNotificationProvider() {
 
         var attached = false
         var detached = false

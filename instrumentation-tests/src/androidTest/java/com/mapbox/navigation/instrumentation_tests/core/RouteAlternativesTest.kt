@@ -33,7 +33,6 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
 import com.mapbox.navigation.testing.ui.utils.coroutines.switchToAlternativeAsync
-import com.mapbox.navigation.testing.utils.assertNoDiffs
 import com.mapbox.navigation.testing.utils.assertions.assertIs
 import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
@@ -219,7 +218,8 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
                 DirectionsResponse.fromJson(it)
             }
             newAlternatives.forEach {
-                assertNoDiffs(
+                assertEquals(
+                    "some info was lost during NN -> Nav SDK transition",
                     it.directionsRoute.toBuilder().routeOptions(null).build(),
                     mockedAlternativesResponse.routes()[it.routeIndex].toBuilder()
                         .legs(
@@ -232,8 +232,6 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
                                 },
                         )
                         .build(),
-                    emptyList(),
-                    true,
                 )
             }
         }
@@ -579,9 +577,6 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
 
                 mockLocationReplayerRule.playRoute(
                     routes[0].directionsRoute,
-                    // low speed to trigger arrival at the intermediate waypoint
-                    // higher speed may cause reroute instead of arrival
-                    maxSpeedMps = 7.0,
                 )
                 mapboxNavigation.startTripSession()
                 mapboxNavigation.setNavigationRoutes(routes)

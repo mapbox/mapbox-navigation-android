@@ -1,8 +1,6 @@
 package com.mapbox.api.directions.v5.models
 
 import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
-import com.mapbox.api.directions.v5.models.utils.throwNotComparableRouteObjects
-import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
@@ -41,15 +39,15 @@ internal class MaxSpeedFBWrapper private constructor(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other == null) return false
-        if (other is MaxSpeed && other !is MaxSpeedFBWrapper) {
-            throwNotComparableRouteObjects()
-        }
-        if (other !is MaxSpeedFBWrapper) return false
-        return fb.contentEquals(other.fb)
+        if (other is MaxSpeedFBWrapper && other.fb === fb) return true
+        if (other is MaxSpeedFBWrapper && efficientEquals(fb, other.fb)) return true
+
+        return false
     }
 
-    override fun hashCode() = fb.contentHash().toHashCode()
+    override fun hashCode(): Int {
+        return efficientHashCode(fb)
+    }
 
     override fun toString(): String {
         return "MaxSpeed(" +

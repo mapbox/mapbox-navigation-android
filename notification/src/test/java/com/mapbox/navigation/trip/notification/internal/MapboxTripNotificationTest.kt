@@ -198,7 +198,6 @@ class MapboxTripNotificationTest {
             mockedContext.registerReceiver(
                 capture(receivers),
                 capture(filters),
-                Context.RECEIVER_NOT_EXPORTED,
             )
         }
 
@@ -756,7 +755,6 @@ class MapboxTripNotificationTest {
             mockedContext.registerReceiver(
                 capture(receivers),
                 capture(filters),
-                Context.RECEIVER_NOT_EXPORTED,
             )
         }
         return receivers[filters.indexOfFirst { it.hasAction(DISMISS_NOTIFICATION_ACTION) }]

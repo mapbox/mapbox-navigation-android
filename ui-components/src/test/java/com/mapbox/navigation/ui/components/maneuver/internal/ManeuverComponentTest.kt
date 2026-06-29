@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.components.maneuver.internal
 
+import android.os.Build
 import android.view.View
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.bindgen.Expected
@@ -41,8 +42,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
+@Config(sdk = [Build.VERSION_CODES.N])
 @ExperimentalCoroutinesApi
 class ManeuverComponentTest {
 

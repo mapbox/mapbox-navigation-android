@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.components.speedlimit.view
 
 import android.content.Context
+import android.os.Build
 import androidx.core.view.isVisible
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -18,7 +19,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
+import org.robolectric.annotation.Config
 
+@Config(sdk = [Build.VERSION_CODES.O_MR1])
 @RunWith(RobolectricTestRunner::class)
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class MapboxSpeedInfoViewTest {

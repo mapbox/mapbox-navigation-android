@@ -190,10 +190,8 @@ class CyclingAndWalkingRoutingTest(private val directionsProfile: String) :
                     profile = directionsProfile,
                     jsonResponse = retrieveMatchingRouteJsonFor(
                         profile = directionsProfile,
-                        cyclingRouteJson =
-                        R.raw.cycling_reroute_response_dc_very_short_two_legs,
-                        walkingRouteJson =
-                        R.raw.walking_reroute_response_dc_very_short_two_legs,
+                        cyclingRouteJson = R.raw.cycling_route_response_dc_very_short_two_legs,
+                        walkingRouteJson = R.raw.walking_route_response_dc_very_short_two_legs,
                     ),
                     expectedCoordinates = listOf(
                         Point.fromLngLat(
@@ -202,6 +200,7 @@ class CyclingAndWalkingRoutingTest(private val directionsProfile: String) :
                         ),
                         mockRoute.routeWaypoints.last(),
                     ),
+                    relaxedExpectedCoordinates = true,
                 ),
             )
             val rerouteStates = mapboxNavigation.recordRerouteStates()

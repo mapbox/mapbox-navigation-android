@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.androidauto.navigation
 
+import android.os.Build
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.tripdata.progress.api.MapboxTripProgressApi
 import com.mapbox.navigation.tripdata.progress.model.TripProgressUpdateValue
@@ -13,8 +14,10 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
+@Config(sdk = [Build.VERSION_CODES.O])
 class CarNavigationEtaMapperTest {
 
     @Before

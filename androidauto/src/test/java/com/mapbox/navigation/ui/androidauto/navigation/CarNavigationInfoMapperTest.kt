@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.androidauto.navigation
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.os.Build
 import androidx.car.app.model.CarIcon
 import androidx.car.app.model.CarText
 import androidx.car.app.model.Distance
@@ -41,9 +42,11 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @OptIn(ExperimentalMapboxNavigationAPI::class)
 @RunWith(RobolectricTestRunner::class)
+@Config(sdk = [Build.VERSION_CODES.O])
 class CarNavigationInfoMapperTest {
 
     private lateinit var instructionRenderer: CarManeuverInstructionRenderer

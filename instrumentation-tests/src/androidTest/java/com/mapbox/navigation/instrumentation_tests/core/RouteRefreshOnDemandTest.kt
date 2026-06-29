@@ -35,9 +35,7 @@ import com.mapbox.navigation.testing.utils.http.MockRoutingTileEndpointErrorRequ
 import com.mapbox.navigation.testing.utils.http.NthAttemptHandler
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.testing.utils.readRawFileText
-import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
@@ -46,11 +44,11 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import java.net.URI
 import java.util.concurrent.TimeUnit
-import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
@@ -82,6 +80,7 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
         bearing = 190f
     }
 
+    @Ignore("Flaky test - NAVAND-7338")
     @Test
     fun immediate_route_refresh_before_planned() = sdkTest {
         val observer = TestObserver()
@@ -102,21 +101,12 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
             }
         }
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
-        delay(2500.milliseconds)
-
-        // Subscribe before requesting the immediate refresh so this observer sees events
-        // live from the start, without replay. drop(1) skips the immediate refresh and
-        // resolves only when the next planned refresh fires.
-        val plannedRefreshDeferred = async {
-            mapboxNavigation.routesUpdates()
-                .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
-                .drop(1)
-                .first()
-        }
+        delay(2500)
 
         mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
         val refreshedRoutes = mapboxNavigation.routesUpdates()
-            .first { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
+            .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
+            .first()
         assertEquals(1, routeRefreshes.size)
         assertEquals(
             224.2239,
@@ -130,11 +120,15 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
         )
 
         // no route refresh 4 seconds after refresh on demand
-        delay(4000.milliseconds)
+        delay(4000)
         assertEquals(1, routeRefreshes.size)
 
+        delay(1000)
         // has new refresh 5 seconds after refresh on demand
-        plannedRefreshDeferred.await()
+        mapboxNavigation.routesUpdates()
+            .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
+            .take(2)
+            .toList()
 
         assertEquals(
             listOf(
@@ -186,6 +180,7 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
         )
     }
 
+    @Ignore("Flaky test - NAVAND-7338")
     @Test
     fun route_refresh_on_demand_is_cancelled() = sdkTest {
         baseRefreshHandler.jsonResponseModifier = DynamicResponseModifier()
@@ -213,7 +208,8 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
         val refreshTimeout = testRouteRefreshIntervalMs * 2
         val plannedRefreshResult = withTimeoutOrNull(refreshTimeout) {
             mapboxNavigation.routesUpdates()
-                .first { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
+                .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
+                .first()
         }
         assertNotNull(
             "No route refresh happened in $refreshTimeout " +

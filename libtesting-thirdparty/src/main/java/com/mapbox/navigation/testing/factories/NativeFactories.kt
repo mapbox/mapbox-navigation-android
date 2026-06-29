@@ -248,7 +248,6 @@ fun createRouteInterface(
     override fun getLastRefreshTimestamp(): Date? = lastRefreshTimestamp
 
     override fun getRouteGeometry() = routeGeometry
-    override fun toJson() = TODO("Not yet implemented")
 }
 
 fun String.toDataRef(): DataRef {
