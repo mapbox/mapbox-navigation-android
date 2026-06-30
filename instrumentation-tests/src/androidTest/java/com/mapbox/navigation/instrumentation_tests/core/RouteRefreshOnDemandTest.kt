@@ -35,7 +35,9 @@ import com.mapbox.navigation.testing.utils.http.MockRoutingTileEndpointErrorRequ
 import com.mapbox.navigation.testing.utils.http.NthAttemptHandler
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.testing.utils.readRawFileText
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
@@ -48,6 +50,7 @@ import org.junit.Rule
 import org.junit.Test
 import java.net.URI
 import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
@@ -99,7 +102,17 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
             }
         }
         mapboxNavigation.setNavigationRoutesAndWaitForUpdate(requestedRoutes)
-        delay(2500)
+        delay(2500.milliseconds)
+
+        // Subscribe before requesting the immediate refresh so this observer sees events
+        // live from the start, without replay. drop(1) skips the immediate refresh and
+        // resolves only when the next planned refresh fires.
+        val plannedRefreshDeferred = async {
+            mapboxNavigation.routesUpdates()
+                .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
+                .drop(1)
+                .first()
+        }
 
         mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
         val refreshedRoutes = mapboxNavigation.routesUpdates()
@@ -118,15 +131,11 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
         )
 
         // no route refresh 4 seconds after refresh on demand
-        delay(4000)
+        delay(4000.milliseconds)
         assertEquals(1, routeRefreshes.size)
 
-        delay(1000)
         // has new refresh 5 seconds after refresh on demand
-        mapboxNavigation.routesUpdates()
-            .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
-            .take(2)
-            .toList()
+        plannedRefreshDeferred.await()
 
         assertEquals(
             listOf(
