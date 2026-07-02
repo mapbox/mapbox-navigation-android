@@ -20,12 +20,12 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
 import com.mapbox.navigation.testing.utils.DelayedResponseModifier
+import com.mapbox.navigation.testing.utils.bufferFromRawFile
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracking
 import com.mapbox.navigation.testing.utils.location.stayOnPosition
 import com.mapbox.navigation.testing.utils.nro.assumeNotNROBecauseOfAlternativesDropDuringSerialization
-import com.mapbox.navigation.testing.utils.readRawFileText
 import com.mapbox.navigation.testing.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.utils.withMapboxNavigation
 import kotlinx.coroutines.flow.filterNotNull
@@ -56,9 +56,10 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
         val routeOptions = longRouteOptions()
         val handler = MockDirectionsRequestHandler(
             profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
-            lazyJsonResponse = { readRawFileText(context, R.raw.long_route_7k) },
+            lazyJsonResponse = { "" },
             expectedCoordinates = routeOptions.coordinatesList(),
         ).apply {
+            lazyBufferResponse = { bufferFromRawFile(context, R.raw.long_route_7k) }
             // It takes time for Direction API to calculate a long route
             jsonResponseModifier = DelayedResponseModifier(12_000)
         }
@@ -176,9 +177,11 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
         val routeOptions = longRouteOptions()
         val handler = MockDirectionsRequestHandler(
             profile = routeOptions.profile(),
-            lazyJsonResponse = { readRawFileText(context, R.raw.long_route_7k) },
+            lazyJsonResponse = { "" },
             expectedCoordinates = routeOptions.coordinatesList(),
-        )
+        ).apply {
+            lazyBufferResponse = { bufferFromRawFile(context, R.raw.long_route_7k) }
+        }
         mockWebServerRule.requestHandlers.add(handler)
         return routeOptions
     }
@@ -205,9 +208,11 @@ class LongRoutesSanityTest : BaseCoreNoCleanUpTest() {
         val routeOptions = longRouteRerouteOptions()
         val handler = MockDirectionsRequestHandler(
             profile = routeOptions.profile(),
-            lazyJsonResponse = { readRawFileText(context, R.raw.long_route_7k_reroute) },
+            lazyJsonResponse = { "" },
             expectedCoordinates = routeOptions.coordinatesList(),
-        )
+        ).apply {
+            lazyBufferResponse = { bufferFromRawFile(context, R.raw.long_route_7k_reroute) }
+        }
         mockWebServerRule.requestHandlers.add(handler)
         return routeOptions
     }
