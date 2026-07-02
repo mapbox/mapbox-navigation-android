@@ -416,6 +416,7 @@ internal open class MapboxNavigationBaseTest {
             RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP,
         )
         every { directionsSession.routes } returns emptyList()
+        every { directionsSession.ignoredRoutes } returns emptyList()
     }
 
     private fun mockNavigationSession() {
