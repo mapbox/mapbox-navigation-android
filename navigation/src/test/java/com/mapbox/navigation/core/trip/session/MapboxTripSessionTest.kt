@@ -873,6 +873,29 @@ class MapboxTripSessionTest {
         }
 
     @Test
+    fun `isUpdatingRoute is cleared after failed refresh via updateRouteTransaction finally (NAVAND-7393)`() =
+        coroutineRule.runBlockingTest {
+            val route = mockk<NavigationRoute>(relaxed = true) { every { id } returns "id0" }
+            tripSession.isUpdatingRoute.set(true)
+
+            tripSession.setRoutes(
+                listOf(route),
+                RefreshControllerRefresh(
+                    RoutesRefresherResult(
+                        RouteRefresherResult(
+                            route,
+                            RouteProgressData(3, 8, 1),
+                            RouteRefresherStatus.Failure,
+                        ),
+                        emptyList(),
+                    ),
+                ),
+            )
+
+            assertFalse(tripSession.isUpdatingRoute.get())
+        }
+
+    @Test
     fun `verify only alternatives are updated when reason is ROUTES_UPDATE_REASON_ALTERNATIVE`() =
         coroutineRule.runBlockingTest {
             tripSession.start(true)
@@ -1607,8 +1630,13 @@ class MapboxTripSessionTest {
         }
 
     @Test
-    fun `routeProgress updates are not ignored while primary route is being refreshed`() =
+    fun `routeProgress updates are blocked while primary route is being refreshed`() =
         coroutineRule.runBlockingTest {
+            val startObserver = slot<SetNavigationRoutesStartedObserver>()
+            every {
+                directionsSession.registerSetNavigationRoutesStartedObserver(capture(startObserver))
+            } just Runs
+
             val primary = mockNavigationRoute()
             val alternative = mockNavigationRoute()
             coEvery { navigator.refreshRoute(primary, any(), any()) } coAnswers {
@@ -1624,6 +1652,8 @@ class MapboxTripSessionTest {
 
             pauseDispatcher {
                 val setRoutesInfo = mockSuccessfulSetRouteRefresh(listOf(primary, alternative))
+                // mirrors MapboxNavigation: setNavigationRoutesStarted fires before coroutine launch
+                startObserver.captured.onRoutesSetStarted(mockk())
                 launch { tripSession.setRoutes(listOf(primary, alternative), setRoutesInfo) }
                 runCurrent()
                 advanceTimeBy(delayTimeMillis = 50)
@@ -1632,7 +1662,7 @@ class MapboxTripSessionTest {
                     navigationStatus,
                 )
                 runCurrent()
-                verify(exactly = 1) { observer.onRouteProgressChanged(any()) }
+                verify(exactly = 0) { observer.onRouteProgressChanged(any()) }
             }
         }
 
