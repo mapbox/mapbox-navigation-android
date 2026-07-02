@@ -1,5 +1,20 @@
 # Changelog for the Mapbox Navigation SDK Core Framework for Android
 
+## Navigation SDK Core Framework 3.21.11 - 02 July, 2026
+#### Features
+
+
+#### Bug fixes and improvements
+- Fixed race condition where an in-flight route refresh could overwrite a reroute result when both completed at the same time.
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.21.9` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.21.9))
+- Mapbox Navigation Native `v324.21.9`
+- Mapbox Core Common `v24.21.9`
+- Mapbox Java `v7.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.0))
+
+
 ## Navigation SDK Core Framework 3.21.10 - 29 June, 2026
 #### Features
 
