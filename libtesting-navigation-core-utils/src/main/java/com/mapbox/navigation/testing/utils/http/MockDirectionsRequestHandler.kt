@@ -8,6 +8,7 @@ import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.RecordedRequest
+import okio.Buffer
 
 private const val TAG = "MockDirectionsRequestHandler"
 
@@ -45,6 +46,14 @@ data class MockDirectionsRequestHandler constructor(
     )
 
     var jsonResponseModifier: ((String) -> String) = { it }
+
+    /**
+     * When set, the response body is streamed from this Buffer producer instead of being
+     * materialized as a String. Avoids large contiguous heap allocations for big JSON files.
+     * Note: [jsonResponseModifier] is still invoked (with a minimal valid JSON document) so
+     * side effects such as artificial delays continue to work, but its return value is ignored.
+     */
+    var lazyBufferResponse: (() -> Buffer)? = null
 
     override fun handleInternal(request: RecordedRequest): MockResponse? {
         val routeOptions = try {
@@ -84,7 +93,13 @@ data class MockDirectionsRequestHandler constructor(
 
     private fun provideMockResponse(): MockResponse {
         Log.d(TAG, "mock response is provided")
-        return MockResponse().setBody(jsonResponseModifier(lazyJsonResponse()))
+        val buffer = lazyBufferResponse
+        return if (buffer != null) {
+            jsonResponseModifier("{}") // trigger side effects (e.g. delays); return value ignored
+            MockResponse().setBody(buffer())
+        } else {
+            MockResponse().setBody(jsonResponseModifier(lazyJsonResponse()))
+        }
     }
 
     private fun coordinatesWithinRadius(
