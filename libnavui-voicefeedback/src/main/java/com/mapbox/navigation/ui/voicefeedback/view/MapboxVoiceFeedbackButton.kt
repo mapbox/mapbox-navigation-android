@@ -76,7 +76,9 @@ class MapboxVoiceFeedbackButton : FrameLayout {
                 iconImage.imageTintList = it
             }
         background =
-            typedArray.getDrawable(R.styleable.MapboxVoiceFeedbackButton_voiceFeedbackButtonBackground)
+            typedArray.getDrawable(
+                R.styleable.MapboxVoiceFeedbackButton_voiceFeedbackButtonBackground,
+            )
                 ?: ContextCompat.getDrawable(context, R.drawable.mapbox_voice_feedback_bg_button)
     }
 }

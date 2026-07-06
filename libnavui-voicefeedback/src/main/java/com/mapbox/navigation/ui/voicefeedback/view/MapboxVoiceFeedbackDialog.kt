@@ -13,6 +13,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND
 import android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.Lifecycle
@@ -23,10 +24,9 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.voicefeedback.R
 import com.mapbox.navigation.ui.voicefeedback.databinding.MapboxVoiceFeedbackDialogLayoutBinding
 import com.mapbox.navigation.voicefeedback.ASRState
-import kotlinx.coroutines.launch
-import androidx.core.graphics.drawable.toDrawable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @ExperimentalPreviewMapboxNavigationAPI
 class MapboxVoiceFeedbackDialog : DialogFragment() {

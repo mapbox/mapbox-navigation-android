@@ -16,4 +16,3 @@ import com.mapbox.navigation.ui.voicefeedback.view.MapboxVoiceFeedbackButton
 fun ComponentInstaller.voiceFeedbackButton(button: MapboxVoiceFeedbackButton): Installation {
     return component(VoiceFeedbackComponent(button))
 }
-

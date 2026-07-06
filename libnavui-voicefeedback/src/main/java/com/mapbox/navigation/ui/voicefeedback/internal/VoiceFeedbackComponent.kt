@@ -111,7 +111,7 @@ class VoiceFeedbackComponent(
             feedbackSubType = result.feedbackType,
             description = result.text,
             screenshot = screenshot,
-            userFeedbackCallback = UserFeedbackCallback {/*no-op*/},
+            userFeedbackCallback = UserFeedbackCallback { /* no-op */ },
         )
     }
 
