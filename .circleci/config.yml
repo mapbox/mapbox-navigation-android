@@ -982,7 +982,7 @@ jobs:
 
   publish-documentation:
     executor: ndk-r22-latest-executor
-    resource_class: medium+
+    resource_class: xlarge
     steps:
       - checkout
       - prepare-mbx-ci
