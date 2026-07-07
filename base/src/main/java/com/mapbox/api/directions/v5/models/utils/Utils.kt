@@ -11,6 +11,20 @@ import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.directions.generated.ManeuverType
 import com.mapbox.geojson.Point
 
+/**
+ * Folds a 64-bit hash into a 32-bit [Int] hash code by xor-ing the high and low words.
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+internal inline fun Long.toHashCode(): Int = (this xor (this ushr 32)).toInt()
+
+/**
+ * Thrown when native route object components are compared against an incompatible type.
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+internal fun throwNotComparableRouteObjects(): Nothing {
+    throw IllegalArgumentException("Only native route object components are comparable")
+}
+
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 internal fun FBCoordinate.toDoubleArray(): DoubleArray? {
     return doubleArrayOf(longitude, latitude)
