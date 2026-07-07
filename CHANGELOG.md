@@ -6,6 +6,25 @@ Mapbox welcomes participation and contributions from everyone.
 #### Features
 #### Bug fixes and improvements
 
+## Mapbox Navigation SDK 2.22.2 - 07 July, 2026
+### Changelog
+[Changes between v2.22.1 and v2.22.2](https://github.com/mapbox/mapbox-navigation-android/compare/v2.22.1...v2.22.2)
+
+#### Features
+
+
+#### Bug fixes and improvements
+- Adding additional bearing value guard inside `NavigationLocationProvider` to prevent passing NaN values.
+- Fixed an issue where ampersands (`&`) in spoken text or SSML caused malformed voice synthesis requests to the `voice/v1/speak` API.
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v10.19.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v10.19.0))
+- Mapbox Navigation Native `v207.0.0`
+- Mapbox Core Common `v23.12.0`
+- Mapbox Java `v7.1.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.1.0))
+
+
 ## Mapbox Navigation SDK 2.22.1 - 06 May, 2026
 ### Changelog
 [Changes between v2.22.0 and v2.22.1](https://github.com/mapbox/mapbox-navigation-android/compare/v2.22.0...v2.22.1)
