@@ -9,6 +9,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRouteFBWrapper
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.LegAnnotationFBWrapper
 import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
+import com.mapbox.bindgen.DataRef
 import java.nio.ByteBuffer
 
 fun DirectionsRoute.directionsRouteContextOrNull(): ByteBuffer? {
@@ -17,6 +18,16 @@ fun DirectionsRoute.directionsRouteContextOrNull(): ByteBuffer? {
     } else {
         null
     }
+}
+
+/**
+ * The [DataRef] backing this route's native DirectionsRouteContext flatbuffer, or null for
+ * non-native (Java) routes. Pass it to DirectionsRouteContext-buffer APIs such as
+ * DirectionsRouteGeometryUtils / DirectionsRouteHashUtils.
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+fun DirectionsRoute.directionsRouteContextDataRefOrNull(): DataRef? {
+    return (this as? DirectionsRouteFBWrapper)?.context?.getData()
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
