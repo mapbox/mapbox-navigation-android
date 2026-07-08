@@ -8,7 +8,7 @@ jobs:
     permissions:
       pull-requests: write
       contents: write
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     env:
       BRANCH_NAME: ${{ github.head_ref }}
       CIRCLE_CI_TOKEN: ${{ secrets.CIRCLE_CI_TOKEN }}
