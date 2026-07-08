@@ -18,11 +18,11 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
 import com.mapbox.navigation.testing.utils.createTileStore
+import com.mapbox.navigation.testing.utils.getTestRerouteCustomConfig
 import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracking
 import com.mapbox.navigation.testing.utils.location.stayOnPosition
-import com.mapbox.navigation.testing.utils.nativeRerouteControllerNoRetryConfig
 import com.mapbox.navigation.testing.utils.offline.Tileset
 import com.mapbox.navigation.testing.utils.offline.unpackTiles
 import com.mapbox.navigation.testing.utils.routes.EvRoutesProvider
@@ -74,12 +74,6 @@ class EvOfflineRerouteTest(
             longitude = 13.361378213031003
             latitude = 52.49813341962201
         }
-    }
-
-    private fun getTestCustomConfig(): String = if (runOptions.nativeReroute) {
-        nativeRerouteControllerNoRetryConfig
-    } else {
-        ""
     }
 
     /**
@@ -161,7 +155,7 @@ class EvOfflineRerouteTest(
             tilesVersion = tilesVersion,
             deviceType = DeviceType.HANDHELD,
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestCustomConfig(),
+            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
             routeRefreshOptions = routeRefreshOptions,
             block = block,
         )

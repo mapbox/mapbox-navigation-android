@@ -69,6 +69,7 @@ import com.mapbox.navigation.testing.utils.assertions.assertSuccessfulRouteRepla
 import com.mapbox.navigation.testing.utils.assertions.interruptedReplanRerouteStateTransitionAssertion
 import com.mapbox.navigation.testing.utils.assertions.recordRerouteStates
 import com.mapbox.navigation.testing.utils.assertions.recordRerouteStatesV2
+import com.mapbox.navigation.testing.utils.getTestRerouteCustomConfig
 import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRefreshHandler
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
@@ -76,7 +77,6 @@ import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.testing.utils.location.moveAlongTheCurrentRouteUntilLocation
 import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracking
 import com.mapbox.navigation.testing.utils.location.stayOnPosition
-import com.mapbox.navigation.testing.utils.nativeRerouteControllerNoRetryConfig
 import com.mapbox.navigation.testing.utils.nro.assumeNotNROBecauseOfRerouteIssueWhileOffline
 import com.mapbox.navigation.testing.utils.offline.Tileset
 import com.mapbox.navigation.testing.utils.offline.unpackTiles
@@ -84,7 +84,6 @@ import com.mapbox.navigation.testing.utils.readRawFileText
 import com.mapbox.navigation.testing.utils.routes.MockRoute
 import com.mapbox.navigation.testing.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.utils.setTestRouteRefreshInterval
-import com.mapbox.navigation.testing.utils.stableNativeSimulationConfig
 import com.mapbox.navigation.testing.utils.withMapboxNavigation
 import com.mapbox.navigation.testing.utils.withoutInternet
 import com.mapbox.navigation.utils.internal.toPoint
@@ -207,7 +206,7 @@ class CoreRerouteTest(
 
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestCustomConfig(),
+            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
         ) { navigation ->
             val rerouteStates = navigation.recordRerouteStates()
             val rerouteStatesV2 = navigation.recordRerouteStatesV2()
@@ -255,7 +254,7 @@ class CoreRerouteTest(
         withMapboxNavigation(
             useRealTiles = true,
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestCustomConfig(),
+            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
             tileStore = TileStore.create(),
         ) { navigation ->
             val routes = stayOnPosition(originLocation, bearing = 0.0f) {
@@ -315,7 +314,7 @@ class CoreRerouteTest(
         withMapboxNavigation(
             useRealTiles = true,
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestCustomConfigWithFastHybridFallback(),
+            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
             tileStore = tileStore,
             routeRefreshOptions = refreshOptions,
         ) { navigation ->
@@ -484,7 +483,7 @@ class CoreRerouteTest(
         withMapboxNavigation(
             useRealTiles = true,
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestCustomConfig(),
+            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
             tileStore = TileStore.create(),
         ) { navigation ->
             // 1. Request the initial online route from the mock web server and start tracking
@@ -863,7 +862,6 @@ class CoreRerouteTest(
             customConfig = """
             {
                 "features": {
-                    "useInternalReroute": true,
                     "routeLatencyImprovement": {
                         "doNotRequestAlternativesOnNewRoute": false
                     }
@@ -1022,7 +1020,7 @@ class CoreRerouteTest(
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestCustomConfig(),
+            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
         ) { navigation ->
             val routeOptions = RouteOptions.builder()
                 .coordinatesList(
@@ -1091,7 +1089,7 @@ class CoreRerouteTest(
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestCustomConfig(),
+            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
         ) { navigation ->
             val routeOptions = RouteOptions.builder()
                 .coordinatesList(
@@ -1214,7 +1212,7 @@ class CoreRerouteTest(
     fun reroute_on_multieg_route_without_alternatives() = sdkTest {
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestCustomConfig(),
+            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
         ) { mapboxNavigation ->
             val mockRoute = RoutesProvider.dc_very_short_two_legs(context)
             val originalLocation = mockLocationUpdatesRule.generateLocationUpdate {
@@ -1392,7 +1390,7 @@ class CoreRerouteTest(
     fun reroute_on_single_leg_route_with_alternatives() = sdkTest {
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestCustomConfig(),
+            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
         ) { mapboxNavigation ->
             val rerouteState = mapboxNavigation.recordRerouteStates()
             val rerouteStateV2 = mapboxNavigation.recordRerouteStatesV2()
@@ -1440,7 +1438,7 @@ class CoreRerouteTest(
     fun reroute_on_multileg_route_first_leg_with_alternatives() = sdkTest {
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestCustomConfig(),
+            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
         ) { mapboxNavigation ->
             val rerouteStates = mapboxNavigation.recordRerouteStates()
             val rerouteStatesV2 = mapboxNavigation.recordRerouteStatesV2()
@@ -1485,7 +1483,7 @@ class CoreRerouteTest(
     fun reroute_from_single_leg_primary_to_multileg_alternative() = sdkTest {
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestCustomConfig(),
+            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
         ) { mapboxNavigation ->
             val mockSingleLegPrimaryRoute = RoutesProvider
                 .dc_short_alternative_after_parssing_waypoint(context)
@@ -1573,7 +1571,7 @@ class CoreRerouteTest(
         )
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestCustomConfig(),
+            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
         ) { mapboxNavigation ->
 
             val rerouteStates = mapboxNavigation.recordRerouteStates()
@@ -2294,7 +2292,7 @@ class CoreRerouteTest(
                         .build(),
                 ).deviceProfile(
                     DeviceProfile.Builder().customConfig(
-                        customConfig ?: getTestCustomConfig(),
+                        customConfig ?: getTestRerouteCustomConfig(runOptions.nativeReroute),
                     ).build(),
                 )
                 .routingTilesOptions(
@@ -2328,34 +2326,6 @@ class CoreRerouteTest(
             mapboxNavigation = create()
         }
         return mapboxNavigation!!
-    }
-
-    private fun getTestCustomConfig(): String = if (runOptions.nativeReroute) {
-        nativeRerouteControllerNoRetryConfig
-    } else {
-        stableNativeSimulationConfig
-    }
-
-    /**
-     * Custom config that forces NN's hybrid router to fall back to onboard within ~1s while
-     * offline (so a reroute during a short offline window lands as OFFLINE), and preserves
-     * the parameterized native-vs-platform reroute toggle from [getTestCustomConfig].
-     */
-    private fun getTestCustomConfigWithFastHybridFallback(): String {
-        val featuresBlock = if (runOptions.nativeReroute) {
-            """"features": { "useInternalReroute": true },"""
-        } else {
-            ""
-        }
-        return """{
-            $featuresBlock
-            "router": {
-                "hybridRouterConfig": {
-                    "fallbackDelaySeconds": 0,
-                    "timeoutToFallbackSeconds": 1
-                }
-            }
-        }"""
     }
 
     private data class RerouteTestData(
