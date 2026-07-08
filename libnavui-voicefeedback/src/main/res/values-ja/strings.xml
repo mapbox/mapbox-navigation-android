@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mapbox_voice_feedback__share_your_feedback">ご意見をお聞かせください</string>
+    <string name="mapbox_voice_feedback__listening">聞き取り中…</string>
+    <string name="mapbox_voice_feedback__processing">処理中…</string>
+    <string name="mapbox_voice_feedback__success_title">共有してくれてありがとうございます</string>
+    <string name="mapbox_voice_feedback__success_description">あなたのフィードバックは、私たちの改善に役立ちます。</string>
+    <string name="mapbox_voice_feedback__error_title">おっと！何か問題が発生しました</string>
+    <string name="mapbox_voice_feedback__error_description">もう一度お試しください</string>
+    <string name="mapbox_voice_feedback__speech_not_recognized_title">おっと！聞き取れませんでした</string>
+    <string name="mapbox_voice_feedback__connecting">接続なし</string>
+</resources>

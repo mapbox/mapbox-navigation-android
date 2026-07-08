@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="mapbox_voice_feedback_background_primary">#FFFFFF</color>
+    <color name="mapbox_voice_feedback_background_secondary">#F2F4F7</color>
+    <color name="mapbox_voice_feedback_text_primary">#05070A</color>
+    <color name="mapbox_voice_feedback_text_secondary">#536275</color>
+    <color name="mapbox_voice_feedback_icon_primary">#23262D</color>
+    <color name="mapbox_voice_feedback_icon_accent">#3072F5</color>
+    <color name="mapbox_voice_feedback_icon_green">#09AA74</color>
+    <color name="mapbox_voice_feedback_icon_red">#EB252A</color>
+</resources>

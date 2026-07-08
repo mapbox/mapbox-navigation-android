@@ -185,7 +185,9 @@ internal class AudioRecordMicrophone : Microphone {
         logD(TAG) { "After startRecording: ${AudioInfoRetriever.stateString(audioRecord)}" }
         cont.invokeOnCancellation {
             logD(TAG) { "stream cancelled, calling audioRecord.stop()" }
-            audioRecord.stop()
+            if (audioRecord.recordingState == AudioRecord.RECORDSTATE_RECORDING) {
+                audioRecord.stop()
+            }
         }
         while (
             cont.isActive &&
