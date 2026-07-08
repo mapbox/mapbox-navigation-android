@@ -155,7 +155,7 @@ class NavigationLocationProvider : LocationProvider {
             keyPoints.map { it.bearing.toDouble() }.toDoubleArray()
         } else {
             doubleArrayOf(location.bearing.toDouble())
-        }
+        }.filter { it.isFinite() }.toDoubleArray()
 
         this.onLocationUpdated(
             location = latLngUpdates,
