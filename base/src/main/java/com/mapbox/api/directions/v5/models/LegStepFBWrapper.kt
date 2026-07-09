@@ -2,6 +2,8 @@ package com.mapbox.api.directions.v5.models
 
 import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
 import com.mapbox.api.directions.v5.models.utils.FlatbuffersListWrapper
+import com.mapbox.api.directions.v5.models.utils.throwNotComparableRouteObjects
+import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
@@ -119,15 +121,15 @@ internal class LegStepFBWrapper private constructor(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other is LegStepFBWrapper && other.fb === fb) return true
-        if (other is LegStepFBWrapper && efficientEquals(fb, other.fb)) return true
-
-        return false
+        if (other == null) return false
+        if (other is LegStep && other !is LegStepFBWrapper) {
+            throwNotComparableRouteObjects()
+        }
+        if (other !is LegStepFBWrapper) return false
+        return fb.contentEquals(other.fb)
     }
 
-    override fun hashCode(): Int {
-        return efficientHashCode(fb)
-    }
+    override fun hashCode() = fb.contentHash().toHashCode()
 
     override fun toString(): String {
         return "LegStep(" +

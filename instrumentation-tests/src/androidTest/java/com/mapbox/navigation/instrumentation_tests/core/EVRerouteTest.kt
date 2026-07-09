@@ -26,6 +26,7 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForUpdate
+import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
 import com.mapbox.navigation.testing.ui.utils.coroutines.stopRecording
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
@@ -203,6 +204,7 @@ class EVRerouteTest(
         )
         stayOnPosition(offRouteLocationUpdate.latitude, offRouteLocationUpdate.longitude)
         waitForReroute()
+        mapboxNavigation.setNavigationRoutesAsync(emptyList())
 
         val url1 = routeHandler.handledRequests.last().requestUrl!!
         checkHasParameters(
@@ -233,6 +235,7 @@ class EVRerouteTest(
         )
         stayOnPosition(offRouteLocationUpdate.latitude, offRouteLocationUpdate.longitude)
         waitForReroute()
+        mapboxNavigation.setNavigationRoutesAsync(emptyList())
 
         val url2 = routeHandler.handledRequests.last().requestUrl!!
         checkHasParameters(

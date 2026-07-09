@@ -1,6 +1,8 @@
 package com.mapbox.api.directions.v5.models
 
 import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
+import com.mapbox.api.directions.v5.models.utils.throwNotComparableRouteObjects
+import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
@@ -29,25 +31,15 @@ internal class ClosureFBWrapper private constructor(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other is ClosureFBWrapper && other.fb === fb) return true
-        if (other is ClosureFBWrapper && efficientEquals(fb, other.fb)) return true
-
-        if (other is Closure) {
-            if (geometryIndexStart() != other.geometryIndexStart()) return false
-            if (geometryIndexEnd() != other.geometryIndexEnd()) return false
-            if (unrecognized() != other.unrecognized()) return false
-            return true
+        if (other == null) return false
+        if (other is Closure && other !is ClosureFBWrapper) {
+            throwNotComparableRouteObjects()
         }
-
-        return false
+        if (other !is ClosureFBWrapper) return false
+        return fb.contentEquals(other.fb)
     }
 
-    override fun hashCode(): Int {
-        var result = geometryIndexStart()
-        result = 31 * result + geometryIndexEnd()
-        result = 31 * result + unrecognized().hashCode()
-        return result
-    }
+    override fun hashCode() = fb.contentHash().toHashCode()
 
     override fun toString(): String {
         return "Closure(" +
