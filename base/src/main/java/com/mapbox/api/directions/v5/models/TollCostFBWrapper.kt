@@ -1,6 +1,8 @@
 package com.mapbox.api.directions.v5.models
 
 import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
+import com.mapbox.api.directions.v5.models.utils.throwNotComparableRouteObjects
+import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
@@ -31,15 +33,15 @@ internal class TollCostFBWrapper private constructor(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other is TollCostFBWrapper && other.fb === fb) return true
-        if (other is TollCostFBWrapper && efficientEquals(fb, other.fb)) return true
-
-        return false
+        if (other == null) return false
+        if (other is TollCost && other !is TollCostFBWrapper) {
+            throwNotComparableRouteObjects()
+        }
+        if (other !is TollCostFBWrapper) return false
+        return fb.contentEquals(other.fb)
     }
 
-    override fun hashCode(): Int {
-        return efficientHashCode(fb)
-    }
+    override fun hashCode() = fb.contentHash().toHashCode()
 
     override fun toString(): String {
         return "TollCost(" +
