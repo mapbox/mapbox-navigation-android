@@ -1,0 +1,1 @@
+- Changed `equals` and `hashCode` of native route objects (routes and their nested models) to compare by content, fixing the previous implementation which had undefined and unstable behavior. Comparing a native route object with a plain Java route object of the same type now throws `IllegalArgumentException`, while comparing with `null` or an unrelated type returns `false`.
