@@ -1,8 +1,6 @@
 package com.mapbox.api.directions.v5.models.utils
 
 import com.google.flatbuffers.FlexBuffers
-import com.google.flatbuffers.Table
-import com.google.flatbuffers.offset
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
@@ -65,14 +63,6 @@ internal interface BaseFBWrapper {
             result.isNullOrEmpty() -> platformAdded
             else -> result + platformAdded
         }
-    }
-
-    fun efficientEquals(a: Table, b: Table): Boolean {
-        return a.byteBuffer === b.byteBuffer && a.offset == b.offset
-    }
-
-    fun efficientHashCode(table: Table): Int {
-        return System.identityHashCode(table.byteBuffer) * 31 + table.offset.hashCode()
     }
 
     private fun mapReference(value: FlexBuffers.Reference): Any? {

@@ -4,6 +4,8 @@ import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
 import com.mapbox.api.directions.v5.models.utils.FlatbuffersListWrapper
 import com.mapbox.api.directions.v5.models.utils.fbToManeuverModifierType
 import com.mapbox.api.directions.v5.models.utils.fbToStepManeuverType
+import com.mapbox.api.directions.v5.models.utils.throwNotComparableRouteObjects
+import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.auto.value.gson.SerializableJsonElement
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
@@ -43,15 +45,15 @@ internal class BannerViewFBWrapper private constructor(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other is BannerViewFBWrapper && other.fb === fb) return true
-        if (other is BannerViewFBWrapper && efficientEquals(fb, other.fb)) return true
-
-        return false
+        if (other == null) return false
+        if (other is BannerView && other !is BannerViewFBWrapper) {
+            throwNotComparableRouteObjects()
+        }
+        if (other !is BannerViewFBWrapper) return false
+        return fb.contentEquals(other.fb)
     }
 
-    override fun hashCode(): Int {
-        return efficientHashCode(fb)
-    }
+    override fun hashCode() = fb.contentHash().toHashCode()
 
     override fun toString(): String {
         return "BannerView(" +
