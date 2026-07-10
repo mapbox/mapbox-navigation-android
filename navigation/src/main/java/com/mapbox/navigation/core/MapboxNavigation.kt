@@ -2413,9 +2413,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         }
     }
 
-    private fun createInternalRoutesObserver() = RoutesObserver { _ ->
+    private fun createInternalRoutesObserver() = RoutesObserver { result ->
         latestLegIndex = null
-        routesProgressDataProvider.onNewRoutes()
+        routesProgressDataProvider.onNewRoutes(result.navigationRoutes)
     }
 
     private fun createInternalOffRouteObserver() = OffRouteObserver { offRoute ->
