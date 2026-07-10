@@ -1,7 +1,11 @@
 package com.mapbox.navigation.core
 
+import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.LegAnnotation
+import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.navigation.base.internal.extensions.internalAlternativeRouteIndices
 import com.mapbox.navigation.base.internal.factory.RouteIndicesFactory
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.internal.RouteProgressData
@@ -260,4 +264,75 @@ class RoutesProgressDataProviderTest {
 
         assertEquals(expected, provider.getRouteRefreshRequestDataOrWait())
     }
+
+    @Test
+    fun `clamps geometry indices in COMPLETE state for both primary and alternative routes`() =
+        runBlocking {
+            val legAnnotationsCount = 40
+            val primaryOvershotLegGeometryIndex = legAnnotationsCount + 2
+            val altOvershotLegGeometryIndex = legAnnotationsCount + 5
+            val primaryRouteGeometryIndex = 100
+            val altRouteGeometryIndex = 90
+
+            val mockedRouteLeg = mockk<RouteLeg> {
+                every { annotation() } returns mockk<LegAnnotation> {
+                    every { duration() } returns List(legAnnotationsCount) { 1.0 }
+                    every { speed() } returns null
+                    every { distance() } returns null
+                    every { congestion() } returns null
+                    every { congestionNumeric() } returns null
+                    every { maxspeed() } returns null
+                    every { freeflowSpeed() } returns null
+                    every { currentSpeed() } returns null
+                    every { trafficTendency() } returns null
+                }
+                every { unrecognizedJsonProperties } returns null
+            }
+            val alternativeNavigationRoute = mockk<NavigationRoute> {
+                every { id } returns altId1
+                every { directionsRoute } returns mockk<DirectionsRoute> {
+                    every { legs() } returns listOf(mockedRouteLeg)
+                }
+            }
+
+            val routeProgress = mockk<RouteProgress> {
+                every { currentRouteGeometryIndex } returns primaryRouteGeometryIndex
+                every { currentLegProgress } returns mockk {
+                    every { legIndex } returns 0
+                    every { geometryIndex } returns primaryOvershotLegGeometryIndex
+                    every { routeLeg } returns mockedRouteLeg
+                }
+                every { internalAlternativeRouteIndices() } returns mapOf(
+                    altId1 to RouteIndicesFactory.buildRouteIndices(
+                        0,
+                        0,
+                        altRouteGeometryIndex,
+                        altOvershotLegGeometryIndex,
+                        1,
+                        false,
+                    ),
+                )
+                every { currentState } returns RouteProgressState.COMPLETE
+            }
+
+            provider.onNewRoutes(listOf(alternativeNavigationRoute))
+            provider.onRouteProgressChanged(routeProgress)
+
+            val result = provider.getRouteRefreshRequestDataOrWait()
+
+            assertEquals(legAnnotationsCount - 1, result.primary.legGeometryIndex)
+            assertEquals(
+                primaryRouteGeometryIndex -
+                    (primaryOvershotLegGeometryIndex - (legAnnotationsCount - 1)),
+                result.primary.routeGeometryIndex,
+            )
+            assertEquals(
+                legAnnotationsCount - 1,
+                result.alternatives.getValue(altId1).legGeometryIndex,
+            )
+            assertEquals(
+                altRouteGeometryIndex - (altOvershotLegGeometryIndex - (legAnnotationsCount - 1)),
+                result.alternatives.getValue(altId1).routeGeometryIndex,
+            )
+        }
 }

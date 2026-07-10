@@ -226,8 +226,8 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             directionsSession.registerSetNavigationRoutesFinishedObserver(capture(observers))
         }
 
-        observers[1].onRoutesChanged(mockk())
-        verify { routeProgressDataProvider.onNewRoutes() }
+        observers[1].onRoutesChanged(mockk(relaxed = true))
+        verify { routeProgressDataProvider.onNewRoutes(any()) }
 
         val testChange: RoutesUpdatedResult = mockk()
         observers[2].onRoutesChanged(testChange)
@@ -669,7 +669,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         }
 
         coVerify(exactly = 1) {
-            routeProgressDataProvider.onNewRoutes()
+            routeProgressDataProvider.onNewRoutes(routes)
         }
     }
 
@@ -692,7 +692,7 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         }
 
         coVerify(exactly = 1) {
-            routeProgressDataProvider.onNewRoutes()
+            routeProgressDataProvider.onNewRoutes(routes)
         }
     }
 
