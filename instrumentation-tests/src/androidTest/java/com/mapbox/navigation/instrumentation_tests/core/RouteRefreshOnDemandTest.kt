@@ -105,8 +105,7 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
 
         mapboxNavigation.routeRefreshController.requestImmediateRouteRefresh()
         val refreshedRoutes = mapboxNavigation.routesUpdates()
-            .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
-            .first()
+            .first { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
         assertEquals(1, routeRefreshes.size)
         assertEquals(
             224.2239,
@@ -208,8 +207,7 @@ class RouteRefreshOnDemandTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::
         val refreshTimeout = testRouteRefreshIntervalMs * 2
         val plannedRefreshResult = withTimeoutOrNull(refreshTimeout) {
             mapboxNavigation.routesUpdates()
-                .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
-                .first()
+                .first { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
         }
         assertNotNull(
             "No route refresh happened in $refreshTimeout " +

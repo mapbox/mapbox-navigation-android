@@ -4,6 +4,7 @@ import androidx.annotation.MainThread
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.extensions.internalAlternativeRouteIndices
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.internal.RouteProgressData
@@ -24,6 +25,9 @@ internal class RoutesProgressDataProvider : RouteProgressObserver {
     private var routesProgressData: RoutesProgressData? = null
     private var continuation: CancellableContinuation<RoutesProgressData>? = null
 
+    // route id to per-leg annotations count, extracted eagerly to avoid holding full routes
+    private var altAnnotationsCountsById = emptyMap<String, List<Int?>>()
+
     /**
      * Returns either last saved value (if has one) or waits for the next update.
      */
@@ -31,23 +35,29 @@ internal class RoutesProgressDataProvider : RouteProgressObserver {
         return (routesProgressData ?: suspendCancellableCoroutine { continuation = it })
     }
 
-    fun onNewRoutes() {
+    fun onNewRoutes(routes: List<NavigationRoute> = emptyList()) {
         routesProgressData = null
+        altAnnotationsCountsById = routes.associate { route ->
+            route.id to route.directionsRoute.legs().orEmpty().map { it.annotationsCount() }
+        }
     }
 
     override fun onRouteProgressChanged(routeProgress: RouteProgress) {
+        val isComplete = routeProgress.currentState == RouteProgressState.COMPLETE
         val legProgress = routeProgress.currentLegProgress
         val primary = RouteProgressData(
             legIndex = legProgress?.legIndex ?: defaultRouteProgressData.legIndex,
             routeGeometryIndex = routeProgress.currentRouteGeometryIndex,
             legGeometryIndex = legProgress?.geometryIndex,
-        ).clampGeometryIndices(routeProgress)
+        ).clampGeometryIndices(isComplete) { legProgress?.routeLeg?.annotationsCount() }
         val alternatives = routeProgress.internalAlternativeRouteIndices().entries.associate {
             it.key to RouteProgressData(
                 it.value.legIndex,
                 it.value.routeGeometryIndex,
                 it.value.legGeometryIndex,
-            )
+            ).clampGeometryIndices(isComplete) {
+                altAnnotationsCountsById[it.key]?.getOrNull(it.value.legIndex)
+            }
         }
         routesProgressData = RoutesProgressData(primary, alternatives).also {
             continuation?.resume(it)
@@ -60,17 +70,17 @@ internal class RoutesProgressDataProvider : RouteProgressObserver {
      * in COMPLETE state while still on the same leg — clamp it back.
      */
     private fun RouteProgressData.clampGeometryIndices(
-        routeProgress: RouteProgress,
+        isComplete: Boolean,
+        legAnnotationsCount: () -> Int?,
     ): RouteProgressData {
-        if (routeProgress.currentState != RouteProgressState.COMPLETE) return this
+        if (!isComplete) return this
         val legGeometryIndex = legGeometryIndex ?: return this
-        val legAnnotationsCount =
-            routeProgress.currentLegProgress?.routeLeg?.annotationsCount() ?: return this
-        if (legGeometryIndex < legAnnotationsCount) return this
+        val annotationsCount = legAnnotationsCount() ?: return this
+        if (annotationsCount !in 1..legGeometryIndex) return this
 
-        val overshot = legGeometryIndex - (legAnnotationsCount - 1)
+        val overshot = legGeometryIndex - (annotationsCount - 1)
         return copy(
-            legGeometryIndex = legAnnotationsCount - 1,
+            legGeometryIndex = annotationsCount - 1,
             routeGeometryIndex = routeGeometryIndex - overshot,
         )
     }
