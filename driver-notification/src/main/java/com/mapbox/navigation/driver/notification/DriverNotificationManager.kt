@@ -130,9 +130,9 @@ class DriverNotificationManager(
 
     private fun addProvider(provider: DriverNotificationProvider) {
         providerJobs.keys.forEach {
-            if (it.javaClass == provider.javaClass) {
+            if (it.type == provider.type) {
                 throw IllegalArgumentException(
-                    "${provider.javaClass} type already exists, please detach it first",
+                    "provider type '${provider.type}' already exists, please detach it first",
                 )
             }
         }
