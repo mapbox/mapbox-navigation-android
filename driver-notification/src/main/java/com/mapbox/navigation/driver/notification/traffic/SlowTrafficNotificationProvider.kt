@@ -43,7 +43,7 @@ import kotlinx.coroutines.flow.mapNotNull
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class SlowTrafficNotificationProvider(
     var options: SlowTrafficNotificationOptions = SlowTrafficNotificationOptions.Builder().build(),
-) : DriverNotificationProvider() {
+) : DriverNotificationProvider("slow-traffic") {
 
     @VisibleForTesting
     internal var slowTrafficSegmentsFinder: SlowTrafficSegmentsFinder = SlowTrafficSegmentsFinder()
