@@ -2143,6 +2143,23 @@ class MapboxNavigationViewportDataSourceTest {
     }
 
     @Test
+    fun `evaluate registers one callback while map size is not ready`() {
+        val actionSlot = slot<() -> Unit>()
+        every {
+            mapboxMap.whenSizeReady(
+                capture(actionSlot),
+            )
+        } returns Unit
+
+        viewportDataSource.evaluate()
+        viewportDataSource.evaluate()
+
+        verify(exactly = 1) {
+            mapboxMap.whenSizeReady(actionSlot.captured)
+        }
+    }
+
+    @Test
     fun `viewport data does not change while map size is not ready`() {
         every {
             mapboxMap.whenSizeReady(any())

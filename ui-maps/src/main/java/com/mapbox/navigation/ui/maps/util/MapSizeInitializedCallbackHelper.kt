@@ -20,20 +20,21 @@ internal class MapSizeInitializedCallbackHelper(
      * Invokes [action] when [MapboxMap]'s size is ready.
      */
     fun onMapSizeInitialized(action: () -> Unit): Cancelable {
-        // Use cancellable wrapper to avoid memory leaks.
+        // Use cancellable wrapper to avoid executing stale callbacks and retaining their actions.
         return mapboxMap.cancellableWhenSizeReady(action)
     }
 
     private fun MapboxMap.cancellableWhenSizeReady(
         action: () -> Unit,
     ): Cancelable {
-        val cancelable = CancellableImpl()
+        val cancelable = CancellableImpl(action)
 
         val callback: () -> Unit = {
-            cancelable.runIfNotComplete {
-                action()
+            try {
+                cancelable.runIfNotComplete()
+            } finally {
+                cancelable.complete()
             }
-            cancelable.complete()
         }
 
         whenSizeReady(callback)
@@ -41,9 +42,9 @@ internal class MapSizeInitializedCallbackHelper(
         return cancelable
     }
 
-    private class CancellableImpl : Cancelable {
-
-        var completionAction: (() -> Unit)? = null
+    private class CancellableImpl(
+        private var action: (() -> Unit)?,
+    ) : Cancelable {
 
         private val isComplete = AtomicBoolean(false)
 
@@ -52,14 +53,14 @@ internal class MapSizeInitializedCallbackHelper(
         }
 
         fun complete() {
-            isComplete.set(true)
-            completionAction?.invoke()
-            completionAction = null
+            if (isComplete.compareAndSet(false, true)) {
+                action = null
+            }
         }
 
-        inline fun runIfNotComplete(block: () -> Unit) {
+        fun runIfNotComplete() {
             if (!isComplete.get()) {
-                block()
+                action?.invoke()
             }
         }
     }
