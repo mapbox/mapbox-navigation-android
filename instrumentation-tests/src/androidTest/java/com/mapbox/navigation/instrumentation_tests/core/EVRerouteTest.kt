@@ -29,11 +29,11 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndW
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
 import com.mapbox.navigation.testing.ui.utils.coroutines.stopRecording
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
+import com.mapbox.navigation.testing.utils.getTestRerouteCustomConfig
 import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracking
-import com.mapbox.navigation.testing.utils.nativeRerouteControllerNoRetryConfig
 import com.mapbox.navigation.testing.utils.readRawFileText
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
@@ -147,7 +147,7 @@ class EVRerouteTest(
                     .navigatorPredictionMillis(0L)
                     .deviceProfile(
                         DeviceProfile.Builder().customConfig(
-                            getTestCustomConfig(),
+                            getTestRerouteCustomConfig(runOptions.nativeReroute),
                         ).build(),
                     )
                     .build(),
@@ -171,12 +171,6 @@ class EVRerouteTest(
             val path = mapboxNavigation.historyRecorder.stopRecording()
             Log.i("Test history file", "history file recorder: $path")
         }
-    }
-
-    private fun getTestCustomConfig(): String = if (runOptions.nativeReroute) {
-        nativeRerouteControllerNoRetryConfig
-    } else {
-        ""
     }
 
     /**
