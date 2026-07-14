@@ -29,6 +29,7 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsyn
 import com.mapbox.navigation.testing.utils.assertions.assertRerouteFailedTransition
 import com.mapbox.navigation.testing.utils.assertions.assertRerouteFailedTransitionV2
 import com.mapbox.navigation.testing.utils.assertions.assertSuccessfulRouteAppliedRerouteStateTransition
+import com.mapbox.navigation.testing.utils.getTestRerouteCustomConfig
 import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRefreshHandler
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
@@ -37,7 +38,6 @@ import com.mapbox.navigation.testing.utils.http.NotAuthorizedRequestHandler
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracking
 import com.mapbox.navigation.testing.utils.location.stayOnPosition
-import com.mapbox.navigation.testing.utils.nativeRerouteControllerNoRetryConfig
 import com.mapbox.navigation.testing.utils.readRawFileText
 import com.mapbox.navigation.testing.utils.withMapboxNavigation
 import com.mapbox.turf.TurfMeasurement
@@ -93,12 +93,6 @@ class CoreMapMatchingRerouteTests(
     @get:Rule
     val mapboxHistoryTestRule = MapboxHistoryTestRule()
 
-    private fun getTestCustomConfig(): String = if (runOptions.nativeReroute) {
-        nativeRerouteControllerNoRetryConfig
-    } else {
-        ""
-    }
-
     @get:Rule
     val mockLocationReplayerRule = MockLocationReplayerRule(mockLocationUpdatesRule)
 
@@ -142,7 +136,7 @@ class CoreMapMatchingRerouteTests(
     fun deviateToRegularRouteAlternative() = sdkTest {
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestCustomConfig(),
+            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
         ) { navigation ->
             val rerouteStates = mutableListOf<RerouteState>()
             navigation.getRerouteController()!!.registerRerouteStateObserver {
@@ -204,7 +198,7 @@ class CoreMapMatchingRerouteTests(
     fun deviateFromRegularToMapMatchedAlternativeRoute() = sdkTest {
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestCustomConfig(),
+            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
         ) { navigation ->
             val rerouteStates = mutableListOf<RerouteState>()
             val rerouteStatesV2 = mutableListOf<RerouteStateV2>()
@@ -273,7 +267,7 @@ class CoreMapMatchingRerouteTests(
     fun deviateToMapMatchedAlternativeRoute() = sdkTest {
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestCustomConfig(),
+            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
         ) { navigation ->
             val rerouteStates = mutableListOf<RerouteState>()
             val rerouteStatesV2 = mutableListOf<RerouteStateV2>()
@@ -343,7 +337,7 @@ class CoreMapMatchingRerouteTests(
     fun offRouteOnMapMatchedRoute() = sdkTest {
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestCustomConfig(),
+            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
         ) { navigation ->
             val rerouteStates = mutableListOf<RerouteState>()
             val rerouteStatesV2 = mutableListOf<RerouteStateV2>()
@@ -420,7 +414,7 @@ class CoreMapMatchingRerouteTests(
     fun offRouteOnCustomMapMatchedRouteFallbackToDirectionsApiAndFinalDestination() = sdkTest {
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestCustomConfig(),
+            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
             rerouteStrategyForMapMatchedRoutes = NavigateToFinalDestination,
         ) { navigation ->
             val geometryToDeviate = setupMockRouteAfterDeviation()
@@ -513,7 +507,7 @@ class CoreMapMatchingRerouteTests(
     fun offRouteOnMapMatchedRouteFallbackToDirectionsApiAndFinalDestinationMultiLeg() = sdkTest {
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestCustomConfig(),
+            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
             rerouteStrategyForMapMatchedRoutes = NavigateToFinalDestination,
         ) { navigation ->
             val geometryToDeviate = setupMockRouteAfterDeviation()
@@ -614,7 +608,7 @@ class CoreMapMatchingRerouteTests(
     fun offRouteOnCustomMapMatchedRouteFailsOnRerouteDisabledStrategy() = sdkTest {
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestCustomConfig(),
+            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
             rerouteStrategyForMapMatchedRoutes = RerouteDisabled,
         ) { navigation ->
             val rerouteStates = mutableListOf<RerouteState>()
