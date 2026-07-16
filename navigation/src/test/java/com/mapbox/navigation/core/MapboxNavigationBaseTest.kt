@@ -362,6 +362,7 @@ internal open class MapboxNavigationBaseTest {
         coEvery { navigator.setRoutes(any(), any(), any(), any()) } answers {
             createSetRouteResult()
         }
+        coEvery { navigator.updateLocation(any()) } returns false
         every { navigator.cache } returns cache
         every { navigator.telemetry } returns telemetry
         every { navigator.getRerouteDetector() } returns null
