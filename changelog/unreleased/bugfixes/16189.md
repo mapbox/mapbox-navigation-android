@@ -1,0 +1,1 @@
+- Started re-using last raw location update in case of online-offline switch in case no new raw locations are present.
