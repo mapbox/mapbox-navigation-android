@@ -184,5 +184,19 @@ class MapboxRouteLineViewDynamicOptionsBuilder internal constructor(
         builder.routeLineBlurOpacity(opacity)
     }
 
+    /**
+     * The lines configurations applied to the  [LineLayer].
+     * See [LineLayersConfigs] for details.
+     *
+     * @param config lines configurations, null for default values.
+     * @return the builder
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun lineLayersConfigs(
+        config: LineLayersConfigs?,
+    ): MapboxRouteLineViewDynamicOptionsBuilder = apply {
+        builder.lineLayersConfigs(config)
+    }
+
     internal fun build(): MapboxRouteLineViewOptions = builder.build()
 }

@@ -19,6 +19,7 @@ import kotlin.jvm.Throws
  * @param context context
  * @param routeLineColorResources an instance of [RouteLineColorResources] containing color information
  * @param scaleExpressions an instance of [RouteLineScaleExpressions] containing custom scaling expressions
+ * @param lineLayersConfigs the route lines configurations applied to the [LineLayer].
  * @param restrictedRoadDashArray the dash array for the [LineLayer] used for displaying restricted roads
  * @param restrictedRoadOpacity the opacity of the restricted road [LineLayer]
  * @param restrictedRoadLineWidth the width of the restricted road [LineLayer]
@@ -52,12 +53,14 @@ import kotlin.jvm.Throws
  * @param fadeOnHighZoomsConfig configuration for fading out of the route line. See [FadingConfig] for details. If not set, the route line will be fully opaque at all zoom levels.
  * NOTE: this property guards fading out the route line on transition from a lower to a higher zoom level,
  * meaning that [FadingConfig.startFadingZoom] must be less than or equal to [FadingConfig.finishFadingZoom].
+
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class MapboxRouteLineViewOptions private constructor(
     private val context: Context,
     val routeLineColorResources: RouteLineColorResources,
     val scaleExpressions: RouteLineScaleExpressions,
+    val lineLayersConfigs: LineLayersConfigs,
     val restrictedRoadDashArray: List<Double>,
     val restrictedRoadOpacity: Double,
     val restrictedRoadLineWidth: Double,
@@ -93,6 +96,7 @@ class MapboxRouteLineViewOptions private constructor(
         return Builder(context)
             .routeLineColorResources(routeLineColorResources)
             .scaleExpressions(scaleExpressions)
+            .lineLayersConfigs(lineLayersConfigs)
             .restrictedRoadDashArray(restrictedRoadDashArray)
             .restrictedRoadOpacity(restrictedRoadOpacity)
             .restrictedRoadLineWidth(restrictedRoadLineWidth)
@@ -128,6 +132,7 @@ class MapboxRouteLineViewOptions private constructor(
         if (context != other.context) return false
         if (routeLineColorResources != other.routeLineColorResources) return false
         if (scaleExpressions != other.scaleExpressions) return false
+        if (lineLayersConfigs != other.lineLayersConfigs) return false
         if (restrictedRoadDashArray != other.restrictedRoadDashArray) return false
         if (restrictedRoadOpacity != other.restrictedRoadOpacity) return false
         if (restrictedRoadLineWidth != other.restrictedRoadLineWidth) return false
@@ -164,6 +169,7 @@ class MapboxRouteLineViewOptions private constructor(
         var result = context.hashCode()
         result = 31 * result + routeLineColorResources.hashCode()
         result = 31 * result + scaleExpressions.hashCode()
+        result = 31 * result + lineLayersConfigs.hashCode()
         result = 31 * result + restrictedRoadDashArray.hashCode()
         result = 31 * result + restrictedRoadOpacity.hashCode()
         result = 31 * result + restrictedRoadLineWidth.hashCode()
@@ -199,6 +205,7 @@ class MapboxRouteLineViewOptions private constructor(
             "context=$context, " +
             "routeLineColorResources=$routeLineColorResources, " +
             "scaleExpressions=$scaleExpressions, " +
+            "lineLayersConfigs=$lineLayersConfigs, " +
             "restrictedRoadDashArray=$restrictedRoadDashArray, " +
             "restrictedRoadOpacity=$restrictedRoadOpacity, " +
             "restrictedRoadLineWidth=$restrictedRoadLineWidth, " +
@@ -218,11 +225,10 @@ class MapboxRouteLineViewOptions private constructor(
             "lineDepthOcclusionFactor=$lineDepthOcclusionFactor, " +
             "slotName=$slotName, " +
             "fadingConfig=$fadeOnHighZoomsConfig, " +
-            "lineDepthOcclusionFactor=$lineDepthOcclusionFactor, " +
             "routeLineBlurWidth=$routeLineBlurWidth, " +
             "routeLineBlurEnabled=$routeLineBlurEnabled, " +
             "applyTrafficColorsToRouteLineBlur=$applyTrafficColorsToRouteLineBlur," +
-            "routeLineBlurOpacity=$routeLineBlurOpacity" +
+            "routeLineBlurOpacity=$routeLineBlurOpacity, " +
             ")"
     }
 
@@ -267,6 +273,8 @@ class MapboxRouteLineViewOptions private constructor(
         private var routeLineBlurEnabled: Boolean = false
         private var applyTrafficColorsToRouteLineBlur: Boolean = false
         private var routeLineBlurOpacity: Double = .4
+
+        private var lineLayersConfigs: LineLayersConfigs = LineLayersConfigs.Builder().build()
 
         /**
          * An instance of [RouteLineColorResources].
@@ -535,6 +543,17 @@ class MapboxRouteLineViewOptions private constructor(
         }
 
         /**
+         * The lines configurations applied to the [LineLayer].
+         * See [LineLayersConfigs] for details.
+         *
+         * @param configs route line configurations
+         * @return the builder
+         */
+        fun lineLayersConfigs(configs: LineLayersConfigs?): Builder = apply {
+            this.lineLayersConfigs = configs ?: LineLayersConfigs.Builder().build()
+        }
+
+        /**
          * Creates an instance of [MapboxRouteLineViewOptions].
          *
          * @return an instance of [MapboxRouteLineViewOptions].
@@ -569,6 +588,7 @@ class MapboxRouteLineViewOptions private constructor(
                 context,
                 routeLineColorResources,
                 scaleExpressions,
+                lineLayersConfigs,
                 restrictedRoadDashArray,
                 restrictedRoadOpacity,
                 restrictedRoadLineWidth,

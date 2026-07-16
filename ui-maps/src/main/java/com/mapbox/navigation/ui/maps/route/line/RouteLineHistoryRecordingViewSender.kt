@@ -5,6 +5,7 @@ import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineViewCancelValu
 import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineViewDataError
 import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineViewEvent
 import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineViewHideAlternativeRoutesValue
+import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineViewHideCasingValue
 import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineViewHideOriginAndDestinationValue
 import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineViewHidePrimaryRouteValue
 import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineViewHideTrafficValue
@@ -16,6 +17,7 @@ import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineViewRenderRout
 import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineViewRenderRouteLineClearValue
 import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineViewRenderRouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineViewShowAlternativeRoutesValue
+import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineViewShowCasingValue
 import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineViewShowOriginAndDestinationValue
 import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineViewShowPrimaryRouteValue
 import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineViewShowTrafficValue
@@ -159,6 +161,18 @@ internal class RouteLineHistoryRecordingViewSender : RouteLineHistoryRecordingIn
     fun sendShowTrafficEvent(styleId: String?) {
         RouteLineHistoryRecordingPusherProvider.instance.pushEventIfEnabled {
             RouteLineViewEvent(instanceId, RouteLineViewShowTrafficValue(styleId))
+        }
+    }
+
+    fun sendHideCasingEvent(styleId: String?) {
+        RouteLineHistoryRecordingPusherProvider.instance.pushEventIfEnabled {
+            RouteLineViewEvent(instanceId, RouteLineViewHideCasingValue(styleId))
+        }
+    }
+
+    fun sendShowCasingEvent(styleId: String?) {
+        RouteLineHistoryRecordingPusherProvider.instance.pushEventIfEnabled {
+            RouteLineViewEvent(instanceId, RouteLineViewShowCasingValue(styleId))
         }
     }
 

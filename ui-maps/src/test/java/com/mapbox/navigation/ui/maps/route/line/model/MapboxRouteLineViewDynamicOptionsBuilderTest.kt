@@ -2,6 +2,8 @@ package com.mapbox.navigation.ui.maps.route.line.model
 
 import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment
+import com.mapbox.maps.extension.style.layers.properties.generated.LineCap
+import com.mapbox.maps.extension.style.layers.properties.generated.LineJoin
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.maps.route.model.FadingConfig
 import io.mockk.every
@@ -35,6 +37,12 @@ internal class MapboxRouteLineViewDynamicOptionsBuilderTest {
         val newScaleExpressions = mockk<RouteLineScaleExpressions>()
         val oldFadingConfig = FadingConfig.Builder(16.0, 17.5).build()
         val newFadingConfig = FadingConfig.Builder(15.0, 16.5).build()
+        val oldLineLayersConfigs = LineLayersConfigs.Builder()
+            .lineConfig(LineConfig.Builder().lineCap(LineCap.SQUARE).build())
+            .build()
+        val newLineLayersConfigs = LineLayersConfigs.Builder()
+            .lineConfig(LineConfig.Builder().lineJoin(LineJoin.BEVEL).build())
+            .build()
         val originalOptions = MapboxRouteLineViewOptions.Builder(mockk(relaxed = true))
             .routeLineBelowLayerId("some-layer-id")
             .originWaypointIcon(23)
@@ -56,6 +64,7 @@ internal class MapboxRouteLineViewDynamicOptionsBuilderTest {
             .routeLineBlurWidth(77.77)
             .slotName("foobar")
             .fadeOnHighZoomsConfig(oldFadingConfig)
+            .lineLayersConfigs(oldLineLayersConfigs)
             .build()
 
         val newOptions = MapboxRouteLineViewDynamicOptionsBuilder(originalOptions.toBuilder())
@@ -70,6 +79,7 @@ internal class MapboxRouteLineViewDynamicOptionsBuilderTest {
             .routeLineBlurWidth(33.3)
             .slotName("new-foobar")
             .fadingConfig(newFadingConfig)
+            .lineLayersConfigs(newLineLayersConfigs)
             .build()
 
         val tolerance = 0.0000001
@@ -93,5 +103,25 @@ internal class MapboxRouteLineViewDynamicOptionsBuilderTest {
         assertEquals(false, newOptions.routeLineBlurEnabled)
         assertEquals(false, newOptions.applyTrafficColorsToRouteLineBlur)
         assertEquals(33.3, newOptions.routeLineBlurWidth, tolerance)
+        assertEquals(newLineLayersConfigs, newOptions.lineLayersConfigs)
+    }
+
+    @Test
+    fun lineLayersConfigsNullResetsToDefault() {
+        // GIVEN
+        val customLineLayersConfigs = LineLayersConfigs.Builder()
+            .lineConfig(LineConfig.Builder().lineCap(LineCap.SQUARE).build())
+            .build()
+        val originalOptions = MapboxRouteLineViewOptions.Builder(mockk(relaxed = true))
+            .lineLayersConfigs(customLineLayersConfigs)
+            .build()
+
+        // WHEN
+        val newOptions = MapboxRouteLineViewDynamicOptionsBuilder(originalOptions.toBuilder())
+            .lineLayersConfigs(null)
+            .build()
+
+        // THEN
+        assertEquals(LineLayersConfigs.Builder().build(), newOptions.lineLayersConfigs)
     }
 }

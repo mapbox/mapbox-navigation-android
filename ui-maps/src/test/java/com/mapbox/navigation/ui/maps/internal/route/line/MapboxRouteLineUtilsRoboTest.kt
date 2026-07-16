@@ -26,6 +26,8 @@ import com.mapbox.maps.extension.style.layers.generated.SymbolLayer
 import com.mapbox.maps.extension.style.layers.getLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment
+import com.mapbox.maps.extension.style.layers.properties.generated.LineCap
+import com.mapbox.maps.extension.style.layers.properties.generated.LineJoin
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.route.testing.createNavigationRouteForTest
@@ -77,6 +79,9 @@ import com.mapbox.navigation.ui.maps.route.line.api.DoubleChecker
 import com.mapbox.navigation.ui.maps.route.line.api.StringChecker
 import com.mapbox.navigation.ui.maps.route.line.api.checkExpression
 import com.mapbox.navigation.ui.maps.route.line.api.toExpression
+import com.mapbox.navigation.ui.maps.route.line.model.LineConfig
+import com.mapbox.navigation.ui.maps.route.line.model.LineDashConfig
+import com.mapbox.navigation.ui.maps.route.line.model.LineLayersConfigs
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
@@ -1836,6 +1841,18 @@ class MapboxRouteLineUtilsRoboTest {
             }
         }
         val fadingConfig = FadingConfig.Builder(15.0, 15.3).build()
+        val mainLineDashArray = listOf(1.0, 2.0)
+        val lineLayersConfigs = LineLayersConfigs.Builder()
+            .lineConfig(
+                LineConfig.Builder()
+                    .lineCap(LineCap.SQUARE)
+                    .lineJoin(LineJoin.BEVEL)
+                    .lineDashConfig(
+                        LineDashConfig.Builder().dashLength(1.0).dashGap(2.0).build(),
+                    )
+                    .build(),
+            )
+            .build()
         val options = MapboxRouteLineViewOptions.Builder(context)
             .lineDepthOcclusionFactor(occlusionFactor)
             .restrictedRoadDashArray(dashArray)
@@ -1848,6 +1865,7 @@ class MapboxRouteLineUtilsRoboTest {
             .iconPitchAlignment(IconPitchAlignment.AUTO)
             .slotName("slotName")
             .fadeOnHighZoomsConfig(fadingConfig)
+            .lineLayersConfigs(lineLayersConfigs)
             .build()
         MapboxRouteLineUtils.updateLayersStyling(style, options)
 
@@ -1997,6 +2015,18 @@ class MapboxRouteLineUtilsRoboTest {
         }
 
         verify {
+            mainLayer1.lineCap(LineCap.SQUARE)
+            mainLayer1.lineJoin(LineJoin.BEVEL)
+            mainLayer1.lineDasharray(mainLineDashArray)
+            mainLayer2.lineCap(LineCap.SQUARE)
+            mainLayer2.lineJoin(LineJoin.BEVEL)
+            mainLayer2.lineDasharray(mainLineDashArray)
+            mainLayer3.lineCap(LineCap.SQUARE)
+            mainLayer3.lineJoin(LineJoin.BEVEL)
+            mainLayer3.lineDasharray(mainLineDashArray)
+        }
+
+        verify {
             trailCasingLayer3.lineOpacity(lineOpacityExpression)
             trailCasingLayer2.lineOpacity(lineOpacityExpression)
             trailCasingLayer1.lineOpacity(lineOpacityExpression)
@@ -2038,6 +2068,53 @@ class MapboxRouteLineUtilsRoboTest {
         unmockkStatic(AppCompatResources::class)
         unmockkStatic("com.mapbox.navigation.ui.utils.internal.extensions.DrawableExKt")
         unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
+    }
+
+    @Test
+    fun updateLayersStylingUsesDefaultLineLayersConfigsWhenNotSet() {
+        mockkStatic(
+            "com.mapbox.maps.extension.style.layers.LayerUtils",
+            "com.mapbox.navigation.ui.utils.internal.extensions.DrawableExKt",
+        ) {
+            mockkStatic(AppCompatResources::class) {
+                every {
+                    AppCompatResources.getDrawable(any(), any())
+                } returns mockk<Drawable>(relaxed = true) {
+                    every { getBitmap() } returns mockk(relaxed = true)
+                }
+
+                val mainLayer1 = mockk<LineLayer>(relaxed = true) {
+                    every { layerId } returns LAYER_GROUP_1_MAIN
+                }
+                val mainLayer2 = mockk<LineLayer>(relaxed = true) {
+                    every { layerId } returns LAYER_GROUP_2_MAIN
+                }
+                val mainLayer3 = mockk<LineLayer>(relaxed = true) {
+                    every { layerId } returns LAYER_GROUP_3_MAIN
+                }
+                val style = mockk<Style>(relaxed = true) {
+                    every { getLayer(LAYER_GROUP_1_MAIN) } returns mainLayer1
+                    every { getLayer(LAYER_GROUP_2_MAIN) } returns mainLayer2
+                    every { getLayer(LAYER_GROUP_3_MAIN) } returns mainLayer3
+                }
+
+                val options = MapboxRouteLineViewOptions.Builder(mockk()).build()
+
+                MapboxRouteLineUtils.updateLayersStyling(style, options)
+
+                verify {
+                    mainLayer1.lineCap(LineCap.ROUND)
+                    mainLayer1.lineJoin(LineJoin.ROUND)
+                    mainLayer1.lineDasharray(emptyList())
+                    mainLayer2.lineCap(LineCap.ROUND)
+                    mainLayer2.lineJoin(LineJoin.ROUND)
+                    mainLayer2.lineDasharray(emptyList())
+                    mainLayer3.lineCap(LineCap.ROUND)
+                    mainLayer3.lineJoin(LineJoin.ROUND)
+                    mainLayer3.lineDasharray(emptyList())
+                }
+            }
+        }
     }
 
     @Test

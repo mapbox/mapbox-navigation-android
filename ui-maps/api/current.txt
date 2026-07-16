@@ -1149,6 +1149,7 @@ package com.mapbox.navigation.ui.maps.route.line.api {
     method public com.mapbox.maps.extension.style.layers.properties.generated.Visibility? getPrimaryRouteVisibility(com.mapbox.maps.Style style);
     method public com.mapbox.maps.extension.style.layers.properties.generated.Visibility? getTrafficVisibility(com.mapbox.maps.Style style);
     method public void hideAlternativeRoutes(com.mapbox.maps.Style style);
+    method public void hideCasing(com.mapbox.maps.Style style);
     method public void hideOriginAndDestinationPoints(com.mapbox.maps.Style style);
     method public void hidePrimaryRoute(com.mapbox.maps.Style style);
     method public void hideTraffic(com.mapbox.maps.Style style);
@@ -1160,6 +1161,7 @@ package com.mapbox.navigation.ui.maps.route.line.api {
     method public void renderRouteLineUpdate(com.mapbox.maps.Style style, com.mapbox.bindgen.Expected<com.mapbox.navigation.ui.maps.route.line.model.RouteLineError,com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue> update);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void setCalloutAdapter(com.mapbox.maps.viewannotation.ViewAnnotationManager viewAnnotationManager, com.mapbox.navigation.ui.maps.route.callout.api.MapboxRouteCalloutAdapter adapter);
     method public void showAlternativeRoutes(com.mapbox.maps.Style style);
+    method public void showCasing(com.mapbox.maps.Style style);
     method public void showOriginAndDestinationPoints(com.mapbox.maps.Style style);
     method public void showPrimaryRoute(com.mapbox.maps.Style style);
     method public void showTraffic(com.mapbox.maps.Style style);
@@ -1191,6 +1193,48 @@ package com.mapbox.navigation.ui.maps.route.line.model {
   public final class ClosestRouteValue {
     method public com.mapbox.navigation.base.route.NavigationRoute getNavigationRoute();
     property public final com.mapbox.navigation.base.route.NavigationRoute navigationRoute;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class LineConfig {
+    method public com.mapbox.maps.extension.style.layers.properties.generated.LineCap getLineCap();
+    method public com.mapbox.navigation.ui.maps.route.line.model.LineDashConfig? getLineDashConfig();
+    method public com.mapbox.maps.extension.style.layers.properties.generated.LineJoin getLineJoin();
+    property public final com.mapbox.maps.extension.style.layers.properties.generated.LineCap lineCap;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.LineDashConfig? lineDashConfig;
+    property public final com.mapbox.maps.extension.style.layers.properties.generated.LineJoin lineJoin;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static final class LineConfig.Builder {
+    ctor public LineConfig.Builder();
+    method public com.mapbox.navigation.ui.maps.route.line.model.LineConfig build();
+    method public com.mapbox.navigation.ui.maps.route.line.model.LineConfig.Builder lineCap(com.mapbox.maps.extension.style.layers.properties.generated.LineCap lineCap);
+    method public com.mapbox.navigation.ui.maps.route.line.model.LineConfig.Builder lineDashConfig(com.mapbox.navigation.ui.maps.route.line.model.LineDashConfig? lineDashConfig);
+    method public com.mapbox.navigation.ui.maps.route.line.model.LineConfig.Builder lineJoin(com.mapbox.maps.extension.style.layers.properties.generated.LineJoin lineJoin);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class LineDashConfig {
+    method public double getDashGap();
+    method public double getDashLength();
+    property public final double dashGap;
+    property public final double dashLength;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static final class LineDashConfig.Builder {
+    ctor public LineDashConfig.Builder();
+    method public com.mapbox.navigation.ui.maps.route.line.model.LineDashConfig build();
+    method public com.mapbox.navigation.ui.maps.route.line.model.LineDashConfig.Builder dashGap(double gap);
+    method public com.mapbox.navigation.ui.maps.route.line.model.LineDashConfig.Builder dashLength(double length);
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class LineLayersConfigs {
+    method public com.mapbox.navigation.ui.maps.route.line.model.LineConfig getLineConfig();
+    property public final com.mapbox.navigation.ui.maps.route.line.model.LineConfig lineConfig;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static final class LineLayersConfigs.Builder {
+    ctor public LineLayersConfigs.Builder();
+    method public com.mapbox.navigation.ui.maps.route.line.model.LineLayersConfigs build();
+    method public com.mapbox.navigation.ui.maps.route.line.model.LineLayersConfigs.Builder lineConfig(com.mapbox.navigation.ui.maps.route.line.model.LineConfig config);
   }
 
   @Keep public final class MapboxRouteLineApiOptions {
@@ -1237,6 +1281,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewDynamicOptionsBuilder displaySoftGradientForTraffic(boolean displaySoftGradientForTraffic);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewDynamicOptionsBuilder fadingConfig(com.mapbox.navigation.ui.maps.route.model.FadingConfig? fadingConfig);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewDynamicOptionsBuilder lineDepthOcclusionFactor(@FloatRange(from=0.0, to=1.0) double lineDepthOcclusionFactor);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewDynamicOptionsBuilder lineLayersConfigs(com.mapbox.navigation.ui.maps.route.line.model.LineLayersConfigs? config);
     method @Deprecated public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewDynamicOptionsBuilder routeLineBelowLayerId(String? layerId);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewDynamicOptionsBuilder routeLineBlurEnabled(boolean enableLineBlur);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewDynamicOptionsBuilder routeLineBlurOpacity(double opacity);
@@ -1258,6 +1303,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.model.FadingConfig? getFadeOnHighZoomsConfig();
     method public com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment getIconPitchAlignment();
     method public double getLineDepthOcclusionFactor();
+    method public com.mapbox.navigation.ui.maps.route.line.model.LineLayersConfigs getLineLayersConfigs();
     method public android.graphics.drawable.Drawable getOriginWaypointIcon();
     method public java.util.List<java.lang.Double> getRestrictedRoadDashArray();
     method public double getRestrictedRoadLineWidth();
@@ -1282,6 +1328,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     property public final com.mapbox.navigation.ui.maps.route.model.FadingConfig? fadeOnHighZoomsConfig;
     property public final com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment iconPitchAlignment;
     property public final double lineDepthOcclusionFactor;
+    property public final com.mapbox.navigation.ui.maps.route.line.model.LineLayersConfigs lineLayersConfigs;
     property public final android.graphics.drawable.Drawable originWaypointIcon;
     property public final java.util.List<java.lang.Double> restrictedRoadDashArray;
     property public final double restrictedRoadLineWidth;
@@ -1310,6 +1357,7 @@ package com.mapbox.navigation.ui.maps.route.line.model {
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions.Builder fadeOnHighZoomsConfig(com.mapbox.navigation.ui.maps.route.model.FadingConfig? config);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions.Builder iconPitchAlignment(com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment iconPitchAlignment);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions.Builder lineDepthOcclusionFactor(@FloatRange(from=0.0, to=1.0) double lineDepthOcclusionFactor);
+    method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions.Builder lineLayersConfigs(com.mapbox.navigation.ui.maps.route.line.model.LineLayersConfigs? configs);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions.Builder originWaypointIcon(@DrawableRes int originWaypointIcon);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions.Builder restrictedRoadDashArray(java.util.List<java.lang.Double> restrictedRoadDashArray);
     method public com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions.Builder restrictedRoadLineWidth(double restrictedRoadLineWidth);

@@ -54,6 +54,7 @@ internal fun MapboxRouteLineViewOptions.toData(): RouteLineViewOptionsData {
     return RouteLineViewOptionsData(
         routeLineColorResources,
         scaleExpressions,
+        lineLayersConfigs,
         restrictedRoadDashArray,
         restrictedRoadOpacity,
         restrictedRoadLineWidth,
