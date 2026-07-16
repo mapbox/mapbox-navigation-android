@@ -988,6 +988,40 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
     }
 
     /**
+     * Hides the layers used for the route line casing(s).
+     *
+     * @param style an instance of the [Style]
+     */
+    fun hideCasing(style: Style) {
+        sender.sendHideCasingEvent(style.getStyleId())
+        layerGroup1SourceLayerIds
+            .union(layerGroup2SourceLayerIds)
+            .union(layerGroup3SourceLayerIds)
+            .union(maskingLayerIds)
+            .filter { it in casingLayerIds }
+            .forEach { layerId ->
+                adjustLayerVisibility(style, layerId, Visibility.NONE)
+            }
+    }
+
+    /**
+     * Shows the layers used for the route line casing(s).
+     *
+     * @param style an instance of the [Style]
+     */
+    fun showCasing(style: Style) {
+        sender.sendShowCasingEvent(style.getStyleId())
+        layerGroup1SourceLayerIds
+            .union(layerGroup2SourceLayerIds)
+            .union(layerGroup3SourceLayerIds)
+            .union(maskingLayerIds)
+            .filter { it in casingLayerIds }
+            .forEach { layerId ->
+                adjustLayerVisibility(style, layerId, Visibility.VISIBLE)
+            }
+    }
+
+    /**
      * Returns the visibility of the primary route map traffic layer.
      *
      * @param style an instance of the Style

@@ -11,12 +11,17 @@ import com.mapbox.maps.StylePropertyValueKind
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment
+import com.mapbox.maps.extension.style.layers.properties.generated.LineCap
+import com.mapbox.maps.extension.style.layers.properties.generated.LineJoin
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.maps.internal.route.callout.model.RouteCalloutData
 import com.mapbox.navigation.ui.maps.route.line.api.LineGradientCommandApplier
 import com.mapbox.navigation.ui.maps.route.line.api.LineTrimCommandApplier
 import com.mapbox.navigation.ui.maps.route.line.api.RouteLineValueCommandHolder
 import com.mapbox.navigation.ui.maps.route.line.api.unsupportedRouteLineCommandHolder
+import com.mapbox.navigation.ui.maps.route.line.model.LineConfig
+import com.mapbox.navigation.ui.maps.route.line.model.LineDashConfig
+import com.mapbox.navigation.ui.maps.route.line.model.LineLayersConfigs
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineClearValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
@@ -653,9 +658,21 @@ internal class RouteLineDataConverterTest {
             val colorResources = mockk<RouteLineColorResources>()
             val scaleExpressions = mockk<RouteLineScaleExpressions>()
             val fadingConfig = FadingConfig.Builder(15.0, 16.0).build()
+            val lineLayersConfigs = LineLayersConfigs.Builder()
+                .lineConfig(
+                    LineConfig.Builder()
+                        .lineCap(LineCap.SQUARE)
+                        .lineJoin(LineJoin.BEVEL)
+                        .lineDashConfig(
+                            LineDashConfig.Builder().dashLength(1.0).dashGap(2.0).build(),
+                        )
+                        .build(),
+                )
+                .build()
             val viewOptions = MapboxRouteLineViewOptions.Builder(ctx)
                 .routeLineColorResources(colorResources)
                 .scaleExpressions(scaleExpressions)
+                .lineLayersConfigs(lineLayersConfigs)
                 .routeLineBelowLayerId("someLayerId")
                 .tolerance(.111)
                 .displayRestrictedRoadSections(true)
@@ -681,6 +698,7 @@ internal class RouteLineDataConverterTest {
             val expected = RouteLineViewOptionsData(
                 colorResources,
                 scaleExpressions,
+                lineLayersConfigs,
                 listOf(0.2, 0.8),
                 0.7,
                 1.2,

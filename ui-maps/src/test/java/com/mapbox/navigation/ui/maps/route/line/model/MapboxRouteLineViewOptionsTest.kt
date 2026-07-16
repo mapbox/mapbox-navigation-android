@@ -5,6 +5,8 @@ import android.graphics.Color
 import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment
+import com.mapbox.maps.extension.style.layers.properties.generated.LineCap
+import com.mapbox.maps.extension.style.layers.properties.generated.LineJoin
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.testing.BuilderTest
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
@@ -112,6 +114,16 @@ class MapboxRouteLineViewOptionsTest :
                                 RouteLineScaleValue(22f, 18f, 1.5f),
                             ),
                         ),
+                    )
+                    .build(),
+            )
+            .lineLayersConfigs(
+                LineLayersConfigs.Builder()
+                    .lineConfig(
+                        LineConfig.Builder()
+                            .lineCap(LineCap.SQUARE)
+                            .lineJoin(LineJoin.BEVEL)
+                            .build(),
                     )
                     .build(),
             )

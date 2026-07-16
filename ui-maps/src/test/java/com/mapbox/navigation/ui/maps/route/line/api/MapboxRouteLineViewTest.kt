@@ -4309,6 +4309,120 @@ class MapboxRouteLineViewTest {
     }
 
     @Test
+    fun hideCasing() {
+        mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
+        val options = MapboxRouteLineViewOptions.Builder(ctx).build()
+        val route1TrailCasing = mockk<LineLayer>(relaxed = true)
+        val route1Trail = mockk<LineLayer>(relaxed = true)
+        val route1Casing = mockk<LineLayer>(relaxed = true)
+        val route1Main = mockk<LineLayer>(relaxed = true)
+        val route1Traffic = mockk<LineLayer>(relaxed = true)
+        val route1Restricted = mockk<LineLayer>(relaxed = true)
+        val route2Casing = mockk<LineLayer>(relaxed = true)
+        val route3Casing = mockk<LineLayer>(relaxed = true)
+        val maskingTrailCasing = mockk<LineLayer>(relaxed = true)
+        val maskingCasing = mockk<LineLayer>(relaxed = true)
+        val maskingMain = mockk<LineLayer>(relaxed = true)
+        val style = getMockedStyle().apply {
+            every { getLayer(LAYER_GROUP_1_TRAIL_CASING) } returns route1TrailCasing
+            every { getLayer(LAYER_GROUP_1_TRAIL) } returns route1Trail
+            every { getLayer(LAYER_GROUP_1_CASING) } returns route1Casing
+            every { getLayer(LAYER_GROUP_1_MAIN) } returns route1Main
+            every { getLayer(LAYER_GROUP_1_TRAFFIC) } returns route1Traffic
+            every { getLayer(LAYER_GROUP_1_RESTRICTED) } returns route1Restricted
+            every { getLayer(LAYER_GROUP_2_CASING) } returns route2Casing
+            every { getLayer(LAYER_GROUP_3_CASING) } returns route3Casing
+            every { getLayer(MASKING_LAYER_TRAIL_CASING) } returns maskingTrailCasing
+            every { getLayer(MASKING_LAYER_CASING) } returns maskingCasing
+            every { getLayer(MASKING_LAYER_MAIN) } returns maskingMain
+            every { styleLayerExists(LAYER_GROUP_1_TRAIL_CASING) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_TRAIL) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_CASING) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_MAIN) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_TRAFFIC) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_RESTRICTED) } returns true
+            every { styleLayerExists(LAYER_GROUP_2_CASING) } returns true
+            every { styleLayerExists(LAYER_GROUP_3_CASING) } returns true
+            every { styleLayerExists(MASKING_LAYER_TRAIL_CASING) } returns true
+            every { styleLayerExists(MASKING_LAYER_CASING) } returns true
+            every { styleLayerExists(MASKING_LAYER_MAIN) } returns true
+        }
+
+        MapboxRouteLineView(options).hideCasing(style)
+
+        verify(exactly = 1) { route1Casing.visibility(Visibility.NONE) }
+        verify(exactly = 1) { route2Casing.visibility(Visibility.NONE) }
+        verify(exactly = 1) { route3Casing.visibility(Visibility.NONE) }
+        verify(exactly = 1) { maskingCasing.visibility(Visibility.NONE) }
+        verify(exactly = 0) { route1TrailCasing.visibility(any<Visibility>()) }
+        verify(exactly = 0) { route1Trail.visibility(any<Visibility>()) }
+        verify(exactly = 0) { route1Main.visibility(any<Visibility>()) }
+        verify(exactly = 0) { route1Traffic.visibility(any<Visibility>()) }
+        verify(exactly = 0) { route1Restricted.visibility(any<Visibility>()) }
+        verify(exactly = 0) { maskingTrailCasing.visibility(any<Visibility>()) }
+        verify(exactly = 0) { maskingMain.visibility(any<Visibility>()) }
+
+        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
+    }
+
+    @Test
+    fun showCasing() {
+        mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
+        val options = MapboxRouteLineViewOptions.Builder(ctx).build()
+        val route1TrailCasing = mockk<LineLayer>(relaxed = true)
+        val route1Trail = mockk<LineLayer>(relaxed = true)
+        val route1Casing = mockk<LineLayer>(relaxed = true)
+        val route1Main = mockk<LineLayer>(relaxed = true)
+        val route1Traffic = mockk<LineLayer>(relaxed = true)
+        val route1Restricted = mockk<LineLayer>(relaxed = true)
+        val route2Casing = mockk<LineLayer>(relaxed = true)
+        val route3Casing = mockk<LineLayer>(relaxed = true)
+        val maskingTrailCasing = mockk<LineLayer>(relaxed = true)
+        val maskingCasing = mockk<LineLayer>(relaxed = true)
+        val maskingMain = mockk<LineLayer>(relaxed = true)
+        val style = getMockedStyle().apply {
+            every { getLayer(LAYER_GROUP_1_TRAIL_CASING) } returns route1TrailCasing
+            every { getLayer(LAYER_GROUP_1_TRAIL) } returns route1Trail
+            every { getLayer(LAYER_GROUP_1_CASING) } returns route1Casing
+            every { getLayer(LAYER_GROUP_1_MAIN) } returns route1Main
+            every { getLayer(LAYER_GROUP_1_TRAFFIC) } returns route1Traffic
+            every { getLayer(LAYER_GROUP_1_RESTRICTED) } returns route1Restricted
+            every { getLayer(LAYER_GROUP_2_CASING) } returns route2Casing
+            every { getLayer(LAYER_GROUP_3_CASING) } returns route3Casing
+            every { getLayer(MASKING_LAYER_TRAIL_CASING) } returns maskingTrailCasing
+            every { getLayer(MASKING_LAYER_CASING) } returns maskingCasing
+            every { getLayer(MASKING_LAYER_MAIN) } returns maskingMain
+            every { styleLayerExists(LAYER_GROUP_1_TRAIL_CASING) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_TRAIL) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_CASING) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_MAIN) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_TRAFFIC) } returns true
+            every { styleLayerExists(LAYER_GROUP_1_RESTRICTED) } returns true
+            every { styleLayerExists(LAYER_GROUP_2_CASING) } returns true
+            every { styleLayerExists(LAYER_GROUP_3_CASING) } returns true
+            every { styleLayerExists(MASKING_LAYER_TRAIL_CASING) } returns true
+            every { styleLayerExists(MASKING_LAYER_CASING) } returns true
+            every { styleLayerExists(MASKING_LAYER_MAIN) } returns true
+        }
+
+        MapboxRouteLineView(options).showCasing(style)
+
+        verify(exactly = 1) { route1Casing.visibility(Visibility.VISIBLE) }
+        verify(exactly = 1) { route2Casing.visibility(Visibility.VISIBLE) }
+        verify(exactly = 1) { route3Casing.visibility(Visibility.VISIBLE) }
+        verify(exactly = 1) { maskingCasing.visibility(Visibility.VISIBLE) }
+        verify(exactly = 0) { route1TrailCasing.visibility(any<Visibility>()) }
+        verify(exactly = 0) { route1Trail.visibility(any<Visibility>()) }
+        verify(exactly = 0) { route1Main.visibility(any<Visibility>()) }
+        verify(exactly = 0) { route1Traffic.visibility(any<Visibility>()) }
+        verify(exactly = 0) { route1Restricted.visibility(any<Visibility>()) }
+        verify(exactly = 0) { maskingTrailCasing.visibility(any<Visibility>()) }
+        verify(exactly = 0) { maskingMain.visibility(any<Visibility>()) }
+
+        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
+    }
+
+    @Test
     fun getTrafficVisibility() {
         mockkObject(MapboxRouteLineUtils)
         val layerGroup1SourceLayerIds = setOf(
@@ -5074,6 +5188,24 @@ class MapboxRouteLineViewTest {
 
         view.hideTraffic(style)
         verify { sender.sendHideTrafficEvent(styleId) }
+    }
+
+    @Test
+    fun showCasingSendsEvent() = coroutineRule.runBlockingTest {
+        val options = MapboxRouteLineViewOptions.Builder(ctx).build()
+        val view = MapboxRouteLineView(options, routesExpector, dataIdHolder, sender)
+
+        view.showCasing(style)
+        verify { sender.sendShowCasingEvent(styleId) }
+    }
+
+    @Test
+    fun hideCasingSendsEvent() = coroutineRule.runBlockingTest {
+        val options = MapboxRouteLineViewOptions.Builder(ctx).build()
+        val view = MapboxRouteLineView(options, routesExpector, dataIdHolder, sender)
+
+        view.hideCasing(style)
+        verify { sender.sendHideCasingEvent(styleId) }
     }
 
     @Test

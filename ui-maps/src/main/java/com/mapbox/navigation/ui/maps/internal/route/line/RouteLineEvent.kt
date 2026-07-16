@@ -12,6 +12,7 @@ import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.extension.style.layers.properties.generated.IconPitchAlignment
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.trip.model.RouteProgressState
+import com.mapbox.navigation.ui.maps.route.line.model.LineLayersConfigs
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineScaleExpressions
@@ -137,6 +138,7 @@ class RouteLineViewPushUpdateDynamicOptionsValue(
 data class RouteLineViewOptionsData(
     val routeLineColorResources: RouteLineColorResources,
     val scaleExpressions: RouteLineScaleExpressions,
+    val lineLayersConfigs: LineLayersConfigs,
     val restrictedRoadDashArray: List<Double>,
     val restrictedRoadOpacity: Double,
     val restrictedRoadLineWidth: Double,
@@ -212,6 +214,16 @@ class RouteLineViewShowTrafficValue(
 class RouteLineViewHideTrafficValue(
     styleId: String?,
 ) : RouteLineViewWithStyleIdValue(Keys.ACTION_HIDE_TRAFFIC, styleId)
+
+@Keep
+class RouteLineViewShowCasingValue(
+    styleId: String?,
+) : RouteLineViewWithStyleIdValue(Keys.ACTION_SHOW_CASING, styleId)
+
+@Keep
+class RouteLineViewHideCasingValue(
+    styleId: String?,
+) : RouteLineViewWithStyleIdValue(Keys.ACTION_HIDE_CASING, styleId)
 
 @Keep
 class RouteLineViewShowOriginAndDestinationValue(
@@ -328,6 +340,8 @@ object Keys {
     const val ACTION_HIDE_ALTERNATIVE_ROUTES = "hide_alternative_routes"
     const val ACTION_SHOW_TRAFFIC = "show_traffic"
     const val ACTION_HIDE_TRAFFIC = "hide_traffic"
+    const val ACTION_SHOW_CASING = "show_casing"
+    const val ACTION_HIDE_CASING = "hide_casing"
     const val ACTION_SHOW_ORIGIN_AND_DESTINATION = "show_origin_and_destination"
     const val ACTION_HIDE_ORIGIN_AND_DESTINATION = "hide_origin_and_destination"
 
