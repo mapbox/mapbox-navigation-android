@@ -90,6 +90,7 @@ import com.mapbox.navigation.core.mapmatching.MapMatchingSuccessfulResult
 import com.mapbox.navigation.core.navigator.CacheHandleWrapper
 import com.mapbox.navigation.core.navigator.TilesetDescriptorFactory
 import com.mapbox.navigation.core.navigator.offline.TilesetVersionManager
+import com.mapbox.navigation.core.navigator.toFixLocation
 import com.mapbox.navigation.core.preview.RoutesPreview
 import com.mapbox.navigation.core.preview.RoutesPreviewObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
@@ -2483,6 +2484,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                         false -> SetRoutesReason.RESTORE_TO_ONLINE
                     },
                 )
+            }
+            tripSession.getRawLocation()?.let { lastRawLocation ->
+                logI(LOG_CATEGORY) { "Re-pushing last raw location $lastRawLocation" }
+                navigator.updateLocation(lastRawLocation.toFixLocation())
             }
         }
     }

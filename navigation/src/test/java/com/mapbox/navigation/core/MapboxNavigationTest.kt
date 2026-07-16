@@ -5,6 +5,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.MapboxOptions
 import com.mapbox.common.TileDataDomain
+import com.mapbox.common.location.Location
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.DomainTilesOptions
@@ -37,6 +38,7 @@ import com.mapbox.navigation.core.internal.telemetry.postAndroidAutoEvent
 import com.mapbox.navigation.core.internal.telemetry.registerUserFeedbackObserver
 import com.mapbox.navigation.core.internal.telemetry.unregisterUserFeedbackObserver
 import com.mapbox.navigation.core.navigator.CacheHandleWrapper
+import com.mapbox.navigation.core.navigator.toFixLocation
 import com.mapbox.navigation.core.preview.RoutesPreview
 import com.mapbox.navigation.core.reroute.InternalRerouteController
 import com.mapbox.navigation.core.reroute.InternalRerouteController.RouteReplanRoutesCallback
@@ -66,6 +68,7 @@ import com.mapbox.navigation.navigator.internal.NavigatorLoader
 import com.mapbox.navigation.testing.factories.createNavigationRoute
 import com.mapbox.navigation.testing.factories.createNavigationStatus
 import com.mapbox.navigator.FallbackVersionsObserver
+import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.RoadObjectMatcherConfig
 import com.mapbox.navigator.RouteAlternative
@@ -86,7 +89,9 @@ import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.mockk.slot
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import io.mockk.verifyOrder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -1276,6 +1281,54 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                 SetRoutesReason.FALLBACK_TO_OFFLINE,
             )
         }
+    }
+
+    @Test
+    fun `recreateNavigator re-pushes last raw location to navigator`() = runBlocking {
+        mockkStatic("com.mapbox.navigation.core.navigator.LocationEx")
+        try {
+            threadController.cancelAllUICoroutines()
+
+            val fallbackObserverSlot = slot<FallbackVersionsObserver>()
+            every {
+                tripSession.registerFallbackVersionsObserver(capture(fallbackObserverSlot))
+            } just Runs
+
+            val lastRawLocation = mockk<Location>()
+            val fixLocation = mockk<FixLocation>()
+            every { lastRawLocation.toFixLocation() } returns fixLocation
+            every { tripSession.getRawLocation() } returns lastRawLocation
+
+            createMapboxNavigation()
+
+            every { navigator.recreate(any()) } returns Unit
+
+            fallbackObserverSlot.captured.onFallbackVersionsFound(listOf("version"))
+
+            coVerify(exactly = 1) { navigator.updateLocation(fixLocation) }
+        } finally {
+            unmockkStatic("com.mapbox.navigation.core.navigator.LocationEx")
+        }
+    }
+
+    @Test
+    fun `recreateNavigator does not push location when last raw location is null`() = runBlocking {
+        threadController.cancelAllUICoroutines()
+
+        val fallbackObserverSlot = slot<FallbackVersionsObserver>()
+        every {
+            tripSession.registerFallbackVersionsObserver(capture(fallbackObserverSlot))
+        } just Runs
+
+        every { tripSession.getRawLocation() } returns null
+
+        createMapboxNavigation()
+
+        every { navigator.recreate(any()) } returns Unit
+
+        fallbackObserverSlot.captured.onFallbackVersionsFound(listOf("version"))
+
+        coVerify(exactly = 0) { navigator.updateLocation(any()) }
     }
 
     @Test
