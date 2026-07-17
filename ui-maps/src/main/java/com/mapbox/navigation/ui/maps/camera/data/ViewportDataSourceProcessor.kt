@@ -49,7 +49,9 @@ internal object ViewportDataSourceProcessor {
         distanceToFrameAfterManeuver: Double,
         route: DirectionsRoute,
         completeRoutePoints: List<List<List<Point>>>,
-    ): List<List<List<Point>>> {
+    ): List<List<List<Point>>> = PerformanceTracker.trackPerformanceSync(
+        "ViewportDataSourceProcessor#processRouteForPostManeuverFramingGeometry",
+    ) {
         if (!enabled) {
             return emptyList()
         }
