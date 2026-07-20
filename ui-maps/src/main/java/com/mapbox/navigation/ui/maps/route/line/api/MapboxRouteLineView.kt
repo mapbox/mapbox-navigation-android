@@ -200,20 +200,6 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         LAYER_GROUP_2_BLUR,
         LAYER_GROUP_3_BLUR,
     )
-
-    // Every set here groups together the 3 layer group instances (plus the masking instance,
-    // when there is one) of a single visual role (e.g. all 3 "casing" layers). Preserving
-    // visibility across a redraw is done per role so that explicitly hiding/showing one role
-    // (traffic, casing, blur, etc.) never gets clobbered by another role's visibility state.
-    private val layerRoles: List<Set<String>> = listOf(
-        trailCasingLayerIds,
-        trailLayerIds,
-        casingLayerIds,
-        mainLayerIds,
-        trafficLayerIds,
-        restrictedLayerIds,
-        blurLayerIds,
-    )
     private val sourceToFeatureMap = mutableMapOf(
         MapboxRouteLineUtils.layerGroup1SourceKey to RouteLineFeatureId(featureId = null),
         MapboxRouteLineUtils.layerGroup2SourceKey to RouteLineFeatureId(featureId = null),
@@ -541,24 +527,15 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
             primaryRouteLineLayerGroup = getLayerIdsForPrimaryRoute(style, sourceLayerMap)
             updateLayerScaling(style, optionsHolder.options)
 
-            val allSlotLayerIds = layerGroup1SourceLayerIds
-                .union(layerGroup2SourceLayerIds)
-                .union(layerGroup3SourceLayerIds)
-
-            // Fetch layer visibility for primary route layer
-            val primaryVisibilityByRole = layerRoles.associateWith { role ->
-                role.intersect(originalPrimaryRouteLayers).firstOrNull()
-                    ?.let { getLayerVisibility(style, it) }
-            }
-
-            // Fetch layer visibility for alternatives route layer
-            val alternativeVisibilityByRole = layerRoles.associateWith { role ->
-                allSlotLayerIds.subtract(originalPrimaryRouteLayers).intersect(role).firstOrNull()
-                    ?.let { getLayerVisibility(style, it) }
-            }
+            val primaryRouteTrafficVisibility =
+                getTrafficVisibility(originalPrimaryRouteLayers, style)
+            val primaryRouteVisibility =
+                getPrimaryRouteVisibility(originalPrimaryRouteLayers, style)
+            val alternativeRouteVisibility =
+                getAlternativeRoutesVisibility(originalPrimaryRouteLayers, style)
 
             // Any layer group can host the primary route.  If a call was made to
-            // hide the primary or alternative routes, that state needs to be maintained
+            // hide the primary our alternative routes, that state needs to be maintained
             // until a call is made to show the line(s).  For example if there are 3
             // route lines showing on the map and a call is made to hide the primary route
             // it's expected only the alternative routes are displayed. If a user then
@@ -567,15 +544,18 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
             // should appear since the state is: primary route line = hidden / alternative
             // routes = showing. Only when an API call to show the primary route is made
             // should the primary route line become visible. The snippet below adjusts
-            // the layer visibility to maintain that state, per layer role, so that an
-            // explicit visibility change to one role (e.g. traffic, or casing) is never
-            // overwritten by another role's visibility state.
+            // the layer visibility to maintain that state.
             adjustLayerVisibility(
                 style,
-                primaryVisibilityByRole,
-                alternativeVisibilityByRole,
+                primaryRouteTrafficVisibility,
+                primaryRouteVisibility,
+                alternativeRouteVisibility,
             )
-            adjustMaskingLayersVisibility(style, primaryVisibilityByRole)
+            adjustMaskingLayersVisibility(
+                style,
+                primaryRouteTrafficVisibility,
+                primaryRouteVisibility,
+            )
 
             val updateMaskingLayerSourceCommands =
                 getSourceKeyForPrimaryRoute(style).getOrNull()?.run {
@@ -1426,30 +1406,44 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
     // the layer visibility to maintain that state.
     private fun adjustLayerVisibility(
         style: Style,
-        primaryVisibilityByRole: Map<Set<String>, Visibility?>,
-        alternativeVisibilityByRole: Map<Set<String>, Visibility?>,
+        primaryRouteTrafficVisibility: Visibility?,
+        primaryRouteVisibility: Visibility?,
+        alternativeRouteVisibility: Visibility?,
     ) {
-        sourceLayerMap.values.flatten().forEach { layerID ->
-            val role = layerRoles.firstOrNull { layerID in it } ?: return@forEach
-            val resolvedVisibility = if (primaryRouteLineLayerGroup.contains(layerID)) {
-                primaryVisibilityByRole[role]
-            } else {
-                alternativeVisibilityByRole[role]
+        sourceLayerMap.values.flatten().map { layerID ->
+            when (layerID in trafficLayerIds || layerID in blurLayerIds) {
+                true -> when (primaryRouteLineLayerGroup.contains(layerID)) {
+                    true -> Pair(layerID, primaryRouteTrafficVisibility)
+                    false -> Pair(layerID, alternativeRouteVisibility)
+                }
+
+                false -> when (primaryRouteLineLayerGroup.contains(layerID)) {
+                    true -> Pair(layerID, primaryRouteVisibility)
+                    false -> Pair(layerID, alternativeRouteVisibility)
+                }
             }
-            ifNonNull(resolvedVisibility) { visibility ->
-                adjustLayerVisibility(style, layerID, visibility)
+        }.forEach {
+            ifNonNull(it.second) { visibility ->
+                adjustLayerVisibility(style, it.first, visibility)
             }
         }
     }
 
     private fun adjustMaskingLayersVisibility(
         style: Style,
-        primaryVisibilityByRole: Map<Set<String>, Visibility?>,
+        primaryRouteTrafficVisibility: Visibility?,
+        primaryRouteVisibility: Visibility?,
     ) {
-        layerRoles.forEach { role ->
-            val maskingLayerId = role.firstOrNull { it in maskingLayerIds } ?: return@forEach
-            val visibility = primaryVisibilityByRole[role] ?: return@forEach
-            adjustLayerVisibility(style, maskingLayerId, visibility)
+        primaryRouteTrafficVisibility?.apply {
+            adjustLayerVisibility(style, MASKING_LAYER_TRAFFIC, this)
+        }
+        primaryRouteVisibility?.apply {
+            adjustLayerVisibility(style, MASKING_LAYER_RESTRICTED, this)
+            adjustLayerVisibility(style, MASKING_LAYER_MAIN, this)
+            adjustLayerVisibility(style, MASKING_LAYER_CASING, this)
+            adjustLayerVisibility(style, MASKING_LAYER_TRAIL, this)
+            adjustLayerVisibility(style, MASKING_LAYER_TRAIL, this)
+            adjustLayerVisibility(style, MASKING_LAYER_TRAIL_CASING, this)
         }
     }
 
