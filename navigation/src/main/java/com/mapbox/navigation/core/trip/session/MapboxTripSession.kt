@@ -464,6 +464,12 @@ internal class MapboxTripSession(
             if (state == TripSessionState.STARTED) {
                 navigator.addNavigatorObserver(navigatorObserver)
             }
+            @OptIn(MapboxExperimental::class)
+            if (voiceInstructionsAvailableObserver.isNotEmpty()) {
+                navigator.addVoiceInstructionsAvailabilityObserver(
+                    voiceInstructionsAvailabilityObserver,
+                )
+            }
         }
     }
 
