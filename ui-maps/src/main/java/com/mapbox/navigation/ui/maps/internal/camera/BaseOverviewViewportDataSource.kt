@@ -7,6 +7,7 @@ import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.util.isEmpty
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource.Companion.BEARING_NORTH
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource.Companion.EMPTY_EDGE_INSETS
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource.Companion.NULL_ISLAND_POINT
@@ -114,69 +115,71 @@ abstract class BaseOverviewViewportDataSource(
     fun evaluate() {
         val cameraState = mapboxMap.cameraState
         runIfActive {
-            val pointsForOverview = getPointsToFrame().toMutableList()
-            pointsForOverview.addAll(additionalPointsToFrame)
+            PerformanceTracker.trackPerformanceSync("BaseOverviewViewportDataSource#evaluate") {
+                val pointsForOverview = getPointsToFrame().toMutableList()
+                pointsForOverview.addAll(additionalPointsToFrame)
 
-            if (pointsForOverview.isEmpty()) {
-                // nothing to frame
-                options.run {
-                    bearingProperty.fallback = cameraState.bearing
-                    pitchProperty.fallback = cameraState.pitch
-                    centerProperty.fallback = cameraState.center
-                    zoomProperty.fallback = min(cameraState.zoom, maxZoom)
-                }
-            } else {
-                pitchProperty.fallback = ZERO_PITCH
-                bearingProperty.fallback = normalizeBearing(
-                    cameraState.bearing,
-                    BEARING_NORTH,
-                )
-
-                val cameraFrame = mapboxMap.cameraForCoordinates(
-                    pointsForOverview,
-                    CameraOptions.Builder()
-                        .padding(padding)
-                        .bearing(bearingProperty.get())
-                        .pitch(pitchProperty.get())
-                        .build(),
-                    null,
-                    null,
-                    null,
-                )
-
-                if (cameraFrame.isEmpty) {
-                    logW(LOG_CATEGORY) { "CameraOptions is empty" }
+                if (pointsForOverview.isEmpty()) {
+                    // nothing to frame
+                    options.run {
+                        bearingProperty.fallback = cameraState.bearing
+                        pitchProperty.fallback = cameraState.pitch
+                        centerProperty.fallback = cameraState.center
+                        zoomProperty.fallback = min(cameraState.zoom, maxZoom)
+                    }
                 } else {
-                    // TODO should be non-null (reproducible with Camera test)
-                    centerProperty.fallback = cameraFrame.center!!
-                    zoomProperty.fallback = min(
-                        cameraFrame.zoom!!,
-                        options.maxZoom,
+                    pitchProperty.fallback = ZERO_PITCH
+                    bearingProperty.fallback = normalizeBearing(
+                        cameraState.bearing,
+                        BEARING_NORTH,
                     )
+
+                    val cameraFrame = mapboxMap.cameraForCoordinates(
+                        pointsForOverview,
+                        CameraOptions.Builder()
+                            .padding(padding)
+                            .bearing(bearingProperty.get())
+                            .pitch(pitchProperty.get())
+                            .build(),
+                        null,
+                        null,
+                        null,
+                    )
+
+                    if (cameraFrame.isEmpty) {
+                        logW(LOG_CATEGORY) { "CameraOptions is empty" }
+                    } else {
+                        // TODO should be non-null (reproducible with Camera test)
+                        centerProperty.fallback = cameraFrame.center!!
+                        zoomProperty.fallback = min(
+                            cameraFrame.zoom!!,
+                            options.maxZoom,
+                        )
+                    }
                 }
-            }
 
-            updateDebugger(pointsForOverview)
+                updateDebugger(pointsForOverview)
 
-            options.run {
-                cameraOptions =
-                    CameraOptions.Builder().apply {
-                        if (centerUpdatesAllowed) {
-                            center(centerProperty.get())
-                        }
-                        if (zoomUpdatesAllowed) {
-                            zoom(zoomProperty.get())
-                        }
-                        if (bearingUpdatesAllowed) {
-                            bearing(bearingProperty.get())
-                        }
-                        if (pitchUpdatesAllowed) {
-                            pitch(pitchProperty.get())
-                        }
-                        if (paddingUpdatesAllowed) {
-                            padding(padding)
-                        }
-                    }.build()
+                options.run {
+                    cameraOptions =
+                        CameraOptions.Builder().apply {
+                            if (centerUpdatesAllowed) {
+                                center(centerProperty.get())
+                            }
+                            if (zoomUpdatesAllowed) {
+                                zoom(zoomProperty.get())
+                            }
+                            if (bearingUpdatesAllowed) {
+                                bearing(bearingProperty.get())
+                            }
+                            if (pitchUpdatesAllowed) {
+                                pitch(pitchProperty.get())
+                            }
+                            if (paddingUpdatesAllowed) {
+                                padding(padding)
+                            }
+                        }.build()
+                }
             }
         }
     }
