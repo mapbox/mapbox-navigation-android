@@ -3640,6 +3640,325 @@ class MapboxRouteLineViewTest {
     }
 
     @Test
+    fun `hidden layer stays hidden after a subsequent renderRouteDrawData`() {
+        // GIVEN
+        mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
+        mockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
+        mockkObject(MapboxRouteLineUtils)
+        val options = MapboxRouteLineViewOptions.Builder(ctx).build()
+        val route1TrailCasing = mockk<LineLayer>(relaxed = true)
+        val route1Trail = mockk<LineLayer>(relaxed = true)
+        val route1Casing = mockk<LineLayer>(relaxed = true)
+        val route1Main = mockk<LineLayer>(relaxed = true)
+        val route1Traffic = mockk<LineLayer>(relaxed = true)
+        val route1Restricted = mockk<LineLayer>(relaxed = true)
+        val route2TrailCasing = mockk<LineLayer>(relaxed = true)
+        val route2Trail = mockk<LineLayer>(relaxed = true)
+        val route2Casing = mockk<LineLayer>(relaxed = true)
+        val route2Main = mockk<LineLayer>(relaxed = true)
+        val route2Traffic = mockk<LineLayer>(relaxed = true)
+        val route2Restricted = mockk<LineLayer>(relaxed = true)
+        val route3TrailCasing = mockk<LineLayer>(relaxed = true)
+        val route3Trail = mockk<LineLayer>(relaxed = true)
+        val route3Casing = mockk<LineLayer>(relaxed = true)
+        val route3Main = mockk<LineLayer>(relaxed = true)
+        val route3Traffic = mockk<LineLayer>(relaxed = true)
+        val route3Restricted = mockk<LineLayer>(relaxed = true)
+        val maskingTrailCasing = mockk<LineLayer>(relaxed = true)
+        val maskingTrail = mockk<LineLayer>(relaxed = true)
+        val maskingCasing = mockk<LineLayer>(relaxed = true)
+        val maskingMain = mockk<LineLayer>(relaxed = true)
+        val maskingTraffic = mockk<LineLayer>(relaxed = true)
+        val bottomLevelLayer = mockk<BackgroundLayer>(relaxed = true)
+        val topLevelLayer = mockk<BackgroundLayer>(relaxed = true)
+        val primaryRouteSource = mockk<GeoJsonSource>(relaxed = true)
+        val altRoute1Source = mockk<GeoJsonSource>(relaxed = true)
+        val altRoute2Source = mockk<GeoJsonSource>(relaxed = true)
+        val wayPointSource = mockk<GeoJsonSource>(relaxed = true)
+
+        // The layers this test cares about start visible, as with a freshly drawn route, so
+        // that the `hideTraffic` call below is what puts traffic into the NONE state.
+        listOf(
+            route1TrailCasing,
+            route1Trail,
+            route1Main,
+            route1Traffic,
+            route1Restricted,
+            route2Traffic,
+            route3Traffic,
+        ).forEach { stubVisibilityState(it, Visibility.VISIBLE) }
+
+        val style = getMockedStyle(
+            route1TrailCasing,
+            route1Trail,
+            route1Casing,
+            route1Main,
+            route1Traffic,
+            route1Restricted,
+            route2TrailCasing,
+            route2Trail,
+            route2Casing,
+            route2Main,
+            route2Traffic,
+            route2Restricted,
+            route3TrailCasing,
+            route3Trail,
+            route3Casing,
+            route3Main,
+            route3Traffic,
+            route3Restricted,
+            maskingTrailCasing,
+            maskingTrail,
+            maskingCasing,
+            maskingMain,
+            maskingTraffic,
+            topLevelLayer,
+            bottomLevelLayer,
+            primaryRouteSource,
+            altRoute1Source,
+            altRoute2Source,
+            wayPointSource,
+        )
+        every { MapboxRouteLineUtils.initializeLayers(style, options) } just Runs
+        every {
+            style.setStyleLayerProperty(any(), any(), any())
+        } returns ExpectedFactory.createNone()
+        every {
+            style.getStyleLayerProperty(MASKING_LAYER_TRAFFIC, "source")
+        } returns mockk {
+            every { value } returns Value.valueOf("foobar")
+        }
+        every {
+            MapboxRouteLineUtils.getTopRouteLineRelatedLayerId(style)
+        } returns LAYER_GROUP_1_MAIN
+        every { dataIdHolder.incrementDataId(LAYER_GROUP_1_SOURCE_ID) } returns 1
+        every { dataIdHolder.incrementDataId(LAYER_GROUP_2_SOURCE_ID) } returns 2
+        every { dataIdHolder.incrementDataId(LAYER_GROUP_3_SOURCE_ID) } returns 3
+
+        val view = MapboxRouteLineView(options, routesExpector, dataIdHolder, sender)
+
+        // GIVEN traffic is explicitly hidden
+        view.hideTraffic(style)
+
+        // WHEN the next route draw
+        view.renderRouteDrawData(style, buildMinimalRouteSetValueState())
+
+        // THEN the hidden layer stays hidden
+        verify(exactly = 2) { route1Traffic.visibility(Visibility.NONE) }
+        verify(exactly = 2) { route2Traffic.visibility(Visibility.NONE) }
+        verify(exactly = 2) { route3Traffic.visibility(Visibility.NONE) }
+        verify(exactly = 2) { maskingTraffic.visibility(Visibility.NONE) }
+
+        // AND other roles are left untouched
+        verify(exactly = 1) { route1Main.visibility(Visibility.VISIBLE) }
+        verify(exactly = 1) { route1Trail.visibility(Visibility.VISIBLE) }
+        verify(exactly = 1) { route1TrailCasing.visibility(Visibility.VISIBLE) }
+        verify(exactly = 1) { route1Restricted.visibility(Visibility.VISIBLE) }
+        verify(exactly = 0) { route1Main.visibility(Visibility.NONE) }
+        verify(exactly = 0) { route1Trail.visibility(Visibility.NONE) }
+        verify(exactly = 0) { route1TrailCasing.visibility(Visibility.NONE) }
+        verify(exactly = 0) { route1Restricted.visibility(Visibility.NONE) }
+
+        unmockkObject(MapboxRouteLineUtils)
+        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
+        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
+    }
+
+    @Test
+    fun `hidden primary state carries over when an alternative is promoted to primary`() {
+        // GIVEN
+        mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
+        mockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
+        mockkObject(MapboxRouteLineUtils)
+        val options = MapboxRouteLineViewOptions.Builder(ctx).build()
+        val route1TrailCasing = mockk<LineLayer>(relaxed = true)
+        val route1Trail = mockk<LineLayer>(relaxed = true)
+        val route1Casing = mockk<LineLayer>(relaxed = true)
+        val route1Main = mockk<LineLayer>(relaxed = true)
+        val route1Traffic = mockk<LineLayer>(relaxed = true)
+        val route1Restricted = mockk<LineLayer>(relaxed = true)
+        val route2TrailCasing = mockk<LineLayer>(relaxed = true)
+        val route2Trail = mockk<LineLayer>(relaxed = true)
+        val route2Casing = mockk<LineLayer>(relaxed = true)
+        val route2Main = mockk<LineLayer>(relaxed = true)
+        val route2Traffic = mockk<LineLayer>(relaxed = true)
+        val route2Restricted = mockk<LineLayer>(relaxed = true)
+        val route3TrailCasing = mockk<LineLayer>(relaxed = true)
+        val route3Trail = mockk<LineLayer>(relaxed = true)
+        val route3Casing = mockk<LineLayer>(relaxed = true)
+        val route3Main = mockk<LineLayer>(relaxed = true)
+        val route3Traffic = mockk<LineLayer>(relaxed = true)
+        val route3Restricted = mockk<LineLayer>(relaxed = true)
+        val maskingTrailCasing = mockk<LineLayer>(relaxed = true)
+        val maskingTrail = mockk<LineLayer>(relaxed = true)
+        val maskingCasing = mockk<LineLayer>(relaxed = true)
+        val maskingMain = mockk<LineLayer>(relaxed = true)
+        val maskingTraffic = mockk<LineLayer>(relaxed = true)
+        val bottomLevelLayer = mockk<BackgroundLayer>(relaxed = true)
+        val topLevelLayer = mockk<BackgroundLayer>(relaxed = true)
+        val primaryRouteSource = mockk<GeoJsonSource>(relaxed = true)
+        val altRoute1Source = mockk<GeoJsonSource>(relaxed = true)
+        val altRoute2Source = mockk<GeoJsonSource>(relaxed = true)
+        val wayPointSource = mockk<GeoJsonSource>(relaxed = true)
+
+        val route1Layers = listOf(
+            route1TrailCasing,
+            route1Trail,
+            route1Casing,
+            route1Main,
+            route1Traffic,
+            route1Restricted,
+        )
+        val route2Layers = listOf(
+            route2TrailCasing,
+            route2Trail,
+            route2Casing,
+            route2Main,
+            route2Traffic,
+            route2Restricted,
+        )
+        val route3Layers = listOf(
+            route3TrailCasing,
+            route3Trail,
+            route3Casing,
+            route3Main,
+            route3Traffic,
+            route3Restricted,
+        )
+        val maskingLayers = listOf(
+            maskingTrailCasing,
+            maskingTrail,
+            maskingCasing,
+            maskingMain,
+            maskingTraffic,
+        )
+        // All 3 route lines start visible, as with a freshly drawn route.
+        (route1Layers + route2Layers + route3Layers).forEach {
+            stubVisibilityState(it, Visibility.VISIBLE)
+        }
+
+        val style = getMockedStyle(
+            route1TrailCasing,
+            route1Trail,
+            route1Casing,
+            route1Main,
+            route1Traffic,
+            route1Restricted,
+            route2TrailCasing,
+            route2Trail,
+            route2Casing,
+            route2Main,
+            route2Traffic,
+            route2Restricted,
+            route3TrailCasing,
+            route3Trail,
+            route3Casing,
+            route3Main,
+            route3Traffic,
+            route3Restricted,
+            maskingTrailCasing,
+            maskingTrail,
+            maskingCasing,
+            maskingMain,
+            maskingTraffic,
+            topLevelLayer,
+            bottomLevelLayer,
+            primaryRouteSource,
+            altRoute1Source,
+            altRoute2Source,
+            wayPointSource,
+        )
+        every { MapboxRouteLineUtils.initializeLayers(style, options) } just Runs
+        every {
+            style.setStyleLayerProperty(any(), any(), any())
+        } returns ExpectedFactory.createNone()
+        every {
+            style.getStyleLayerProperty(MASKING_LAYER_TRAFFIC, "source")
+        } returns mockk {
+            every { value } returns Value.valueOf("foobar")
+        }
+        every { dataIdHolder.incrementDataId(LAYER_GROUP_1_SOURCE_ID) } returns 1
+        every { dataIdHolder.incrementDataId(LAYER_GROUP_2_SOURCE_ID) } returns 2
+        every { dataIdHolder.incrementDataId(LAYER_GROUP_3_SOURCE_ID) } returns 3
+
+        val view = MapboxRouteLineView(options, routesExpector, dataIdHolder, sender)
+
+        // routeA is drawn as primary (layer group 1), routeB and routeC as alternatives
+        // (layer groups 2 and 3).
+        every {
+            MapboxRouteLineUtils.getTopRouteLineRelatedLayerId(style)
+        } returns LAYER_GROUP_1_MAIN
+        view.renderRouteDrawData(
+            style,
+            buildMinimalRouteSetValueState(
+                primaryFeatureId = "routeA",
+                alternative1FeatureId = "routeB",
+                alternative2FeatureId = "routeC",
+            ),
+        )
+
+        // WHEN 1. Primary route is hidden.
+        view.hidePrimaryRoute(style)
+
+        // 2. routeB, previously an alternative, is selected as the new primary; it keeps
+        // rendering out of layer group 2, which now moves to the top of the layer stack.
+        every {
+            MapboxRouteLineUtils.getTopRouteLineRelatedLayerId(style)
+        } returns LAYER_GROUP_2_MAIN
+        view.renderRouteDrawData(
+            style,
+            buildMinimalRouteSetValueState(
+                primaryFeatureId = "routeB",
+                alternative1FeatureId = "routeA",
+                alternative2FeatureId = "routeC",
+            ),
+        )
+
+        // THEN 3. The new primary route (routeB / layer group 2) should be hidden: it was visible
+        // before, but the redraw must apply the still-hidden primary role to it.
+        route2Layers.forEach { layer ->
+            verifyOrder {
+                layer.visibility(Visibility.VISIBLE)
+                layer.visibility(Visibility.NONE)
+            }
+        }
+        maskingLayers.forEach { layer ->
+            verifyOrder {
+                layer.visibility(Visibility.VISIBLE)
+                layer.visibility(Visibility.NONE)
+            }
+        }
+        // routeA, the old primary, is now just an alternative, so it reappears.
+        route1Layers.forEach { layer ->
+            verifyOrder {
+                layer.visibility(Visibility.NONE)
+                layer.visibility(Visibility.VISIBLE)
+            }
+        }
+
+        // WHEN 4. Primary route is shown.
+        view.showPrimaryRoute(style)
+
+        // THEN  5. routeB (the primary selected in point 2) should now be visible.
+        route2Layers.forEach { layer ->
+            verifyOrder {
+                layer.visibility(Visibility.NONE)
+                layer.visibility(Visibility.VISIBLE)
+            }
+        }
+        maskingLayers.forEach { layer ->
+            verifyOrder {
+                layer.visibility(Visibility.NONE)
+                layer.visibility(Visibility.VISIBLE)
+            }
+        }
+
+        unmockkObject(MapboxRouteLineUtils)
+        unmockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
+        unmockkStatic("com.mapbox.maps.extension.style.sources.SourceUtils")
+    }
+
+    @Test
     fun showPrimaryRoute() {
         mockkStatic("com.mapbox.maps.extension.style.layers.LayerUtils")
         mockkObject(MapboxRouteLineUtils)
@@ -6253,6 +6572,92 @@ class MapboxRouteLineViewTest {
         return Feature.fromJson(
             "{\"type\":\"Feature\",\"id\":\"${featureId}\"," +
                 "\"geometry\":{\"type\":\"LineString\",\"coordinates\":[]}}",
+        )
+    }
+
+    // Backs `layer.visibility` (the property read by `getLayerVisibility`) with the last value
+    // passed to `layer.visibility(...)` (the fluent setter used by `adjustLayerVisibility`), so a
+    // mocked layer behaves like a real one across a sequence of calls in a single test.
+    private fun stubVisibilityState(layer: LineLayer, initial: Visibility) {
+        var current: Visibility? = initial
+        every { layer.visibility } answers { current }
+        every { layer.visibility(any<Visibility>()) } answers {
+            current = firstArg()
+            layer
+        }
+    }
+
+    private fun buildMinimalRouteSetValueState(
+        primaryFeatureId: String = "primary",
+        alternative1FeatureId: String = "alternative1",
+        alternative2FeatureId: String = "alternative2",
+    ): Expected<RouteLineError, RouteSetValue> {
+        val expression = mockk<Expression>()
+        fun dynamicData() = RouteLineDynamicData(
+            baseExpressionCommandHolder = RouteLineValueCommandHolder(
+                LightRouteLineValueProvider {
+                    StylePropertyValue(expression, StylePropertyValueKind.EXPRESSION)
+                },
+                LineGradientCommandApplier(),
+            ),
+            casingExpressionCommandHolder = RouteLineValueCommandHolder(
+                LightRouteLineValueProvider {
+                    StylePropertyValue(expression, StylePropertyValueKind.EXPRESSION)
+                },
+                LineGradientCommandApplier(),
+            ),
+            trafficExpressionCommandHolder = RouteLineValueCommandHolder(
+                LightRouteLineValueProvider {
+                    StylePropertyValue(expression, StylePropertyValueKind.EXPRESSION)
+                },
+                LineGradientCommandApplier(),
+            ),
+            restrictedSectionExpressionCommandHolder = RouteLineValueCommandHolder(
+                LightRouteLineValueProvider {
+                    StylePropertyValue(expression, StylePropertyValueKind.EXPRESSION)
+                },
+                LineGradientCommandApplier(),
+            ),
+            trimOffset = RouteLineTrimOffset(0.0),
+            trailExpressionCommandHolder = RouteLineValueCommandHolder(
+                LightRouteLineValueProvider {
+                    StylePropertyValue(expression, StylePropertyValueKind.EXPRESSION)
+                },
+                LineGradientCommandApplier(),
+            ),
+            trailCasingExpressionCommandHolder = RouteLineValueCommandHolder(
+                LightRouteLineValueProvider {
+                    StylePropertyValue(expression, StylePropertyValueKind.EXPRESSION)
+                },
+                LineGradientCommandApplier(),
+            ),
+        )
+        return ExpectedFactory.createValue(
+            RouteSetValue(
+                primaryRouteLineData = RouteLineData(
+                    FeatureCollection.fromFeatures(listOf(getEmptyFeature(primaryFeatureId))),
+                    dynamicData(),
+                ),
+                alternativeRouteLinesData = listOf(
+                    RouteLineData(
+                        FeatureCollection.fromFeatures(
+                            listOf(getEmptyFeature(alternative1FeatureId)),
+                        ),
+                        dynamicData(),
+                    ),
+                    RouteLineData(
+                        FeatureCollection.fromFeatures(
+                            listOf(getEmptyFeature(alternative2FeatureId)),
+                        ),
+                        dynamicData(),
+                    ),
+                ),
+                waypointsSource = FeatureCollection.fromFeatures(
+                    listOf(getEmptyFeature("waypoints")),
+                ),
+                callouts = RouteCalloutData(emptyList()),
+                routeLineMaskingLayerDynamicData = dynamicData(),
+            ),
         )
     }
 
