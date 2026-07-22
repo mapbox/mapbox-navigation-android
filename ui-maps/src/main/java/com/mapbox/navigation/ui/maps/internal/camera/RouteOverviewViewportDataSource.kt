@@ -7,6 +7,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxMap
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.extensions.internalAlternativeRouteIndices
+import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.utils.areSameRoutes
 import com.mapbox.navigation.base.internal.utils.isSameRoute
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -84,30 +85,34 @@ class RouteOverviewViewportDataSource @VisibleForTesting internal constructor(
             if (routes.isEmpty()) {
                 clearRouteData()
             } else {
-                val completeRoutesPoints = routes
-                    .mapIndexedNotNull { index, route ->
-                        if (index == 0 || internalOptions.overviewAlternatives) {
-                            processRoutePoints(route.directionsRoute)
-                        } else {
-                            null
+                PerformanceTracker.trackPerformanceSync(
+                    "RouteOverviewViewportDataSource#calculateRouteData",
+                ) {
+                    val completeRoutesPoints = routes
+                        .mapIndexedNotNull { index, route ->
+                            if (index == 0 || internalOptions.overviewAlternatives) {
+                                processRoutePoints(route.directionsRoute)
+                            } else {
+                                null
+                            }
                         }
-                    }
-                indicesConverter.onRoutesChanged(
-                    if (internalOptions.overviewAlternatives) {
-                        routes
-                    } else {
-                        routes.take(1)
-                    },
-                )
-                simplifiedCompleteRoutesPoints = completeRoutesPoints.map {
-                    simplifyCompleteRoutePoints(
-                        options.geometrySimplification.enabled,
-                        options.geometrySimplification.simplificationFactor,
-                        it,
+                    indicesConverter.onRoutesChanged(
+                        if (internalOptions.overviewAlternatives) {
+                            routes
+                        } else {
+                            routes.take(1)
+                        },
                     )
+                    simplifiedCompleteRoutesPoints = completeRoutesPoints.map {
+                        simplifyCompleteRoutePoints(
+                            options.geometrySimplification.enabled,
+                            options.geometrySimplification.simplificationFactor,
+                            it,
+                        )
+                    }
+                    simplifiedRemainingPointsOnRoutes =
+                        simplifiedCompleteRoutesPoints.flatten().flatten().flatten()
                 }
-                simplifiedRemainingPointsOnRoutes =
-                    simplifiedCompleteRoutesPoints.flatten().flatten().flatten()
             }
         }
     }
@@ -151,52 +156,56 @@ class RouteOverviewViewportDataSource @VisibleForTesting internal constructor(
                 routeProgress.currentLegProgress,
                 routeProgress.currentLegProgress?.currentStepProgress,
             ) { currentLegProgress, currentStepProgress ->
-                simplifiedRemainingPointsOnRoutes =
-                    navigationRoutes.mapIndexedNotNull { index, route ->
-                        if (index > 0 && !internalOptions.overviewAlternatives) {
-                            null
-                        } else {
-                            val indices = if (index == 0) {
-                                RouteIndices(
-                                    currentLegProgress.legIndex,
-                                    currentStepProgress.stepIndex,
-                                    currentLegProgress.geometryIndex,
-                                )
-                            } else {
-                                routeProgress.internalAlternativeRouteIndices()[route.id]?.let {
-                                    RouteIndices(it.legIndex, it.stepIndex, it.legGeometryIndex)
-                                }
-                            }
-                            if (indices == null) {
+                PerformanceTracker.trackPerformanceSync(
+                    "RouteOverviewViewportDataSource#onRouteProgressChanged",
+                ) {
+                    simplifiedRemainingPointsOnRoutes =
+                        navigationRoutes.mapIndexedNotNull { index, route ->
+                            if (index > 0 && !internalOptions.overviewAlternatives) {
                                 null
                             } else {
-                                if (indices != cachedRemainingPoints[route.id]?.indices) {
-                                    val stepGeometryIndex = indicesConverter.convert(
-                                        route.id,
-                                        indices.legIndex,
-                                        indices.stepIndex,
-                                        indices.legGeometryIndex,
+                                val indices = if (index == 0) {
+                                    RouteIndices(
+                                        currentLegProgress.legIndex,
+                                        currentStepProgress.stepIndex,
+                                        currentLegProgress.geometryIndex,
                                     )
-                                    if (stepGeometryIndex != null) {
-                                        cachedRemainingPoints[route.id] =
-                                            getCachedRemainingPoints(
-                                                route,
-                                                indices,
-                                                stepGeometryIndex,
-                                            )
+                                } else {
+                                    routeProgress.internalAlternativeRouteIndices()[route.id]?.let {
+                                        RouteIndices(it.legIndex, it.stepIndex, it.legGeometryIndex)
                                     }
                                 }
-                                getRemainingPointsOnRoute(
-                                    simplifiedCompleteRoutesPoints[index],
-                                    cachedRemainingPoints[route.id]?.remainingPointsOnCurrentStep
-                                        .orEmpty(),
-                                    internalOptions.overviewMode,
-                                    indices.legIndex,
-                                    indices.stepIndex,
-                                )
+                                if (indices == null) {
+                                    null
+                                } else {
+                                    if (indices != cachedRemainingPoints[route.id]?.indices) {
+                                        val stepGeometryIndex = indicesConverter.convert(
+                                            route.id,
+                                            indices.legIndex,
+                                            indices.stepIndex,
+                                            indices.legGeometryIndex,
+                                        )
+                                        if (stepGeometryIndex != null) {
+                                            cachedRemainingPoints[route.id] =
+                                                getCachedRemainingPoints(
+                                                    route,
+                                                    indices,
+                                                    stepGeometryIndex,
+                                                )
+                                        }
+                                    }
+                                    getRemainingPointsOnRoute(
+                                        simplifiedCompleteRoutesPoints[index],
+                                        cachedRemainingPoints[route.id]
+                                            ?.remainingPointsOnCurrentStep.orEmpty(),
+                                        internalOptions.overviewMode,
+                                        indices.legIndex,
+                                        indices.stepIndex,
+                                    )
+                                }
                             }
-                        }
-                    }.flatten()
+                        }.flatten()
+                }
             }
         }
     }
