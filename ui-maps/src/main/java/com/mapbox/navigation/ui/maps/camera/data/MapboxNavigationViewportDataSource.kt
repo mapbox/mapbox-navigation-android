@@ -14,6 +14,7 @@ import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.MapboxMapException
 import com.mapbox.maps.ScreenBox
+import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.maps.toCameraOptions
 import com.mapbox.maps.util.isEmpty
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -826,12 +827,13 @@ class MapboxNavigationViewportDataSource private constructor(
                 )
             } else {
                 val mapSize = mapboxMap.getSize()
-                val screenBox = getScreenBoxForFraming(mapSize, followingPadding)
                 val padding = getMapAnchoredPaddingFromUserPadding(
                     mapSize,
                     followingPadding,
                     options.followingFrameOptions.focalPoint,
                 )
+                val screenBox = getScreenBoxForFraming(mapSize, followingPadding)
+                    .withPrincipalPointInside(padding.top)
                 followingFramingModeHolder?.mode = FollowingFramingMode.LOCATION_INDICATOR
                 val fallbackCameraOptions = CameraOptions.Builder()
                     .center(
@@ -880,6 +882,21 @@ class MapboxNavigationViewportDataSource private constructor(
         debugger?.followingPoints = pointsForFollowing
         debugger?.followingUserPadding = followingPadding
     }
+
+    /**
+     * Returns a [ScreenBox] guaranteed to strictly contain the camera's principal point along the
+     * vertical axis. The following camera places the principal point (puck vanishing point) on the
+     * box's bottom edge when [FollowingFrameOptions.FocalPoint.y] is `1.0`; in that case
+     * [cameraForCoordinates] fails and returns the seed camera. Extending the bottom edge below the
+     * principal point avoids that. It's safe because geometry below the vanishing point is never
+     * framed, so the extra space is unused for zoom calculation.
+     */
+    private fun ScreenBox.withPrincipalPointInside(principalY: Double): ScreenBox =
+        if (principalY < max.y) {
+            this
+        } else {
+            ScreenBox(min, ScreenCoordinate(max.x, principalY + 1.0))
+        }
 
     private fun MapboxMap.safeCameraForCoordinates(
         coordinates: List<Point>,
