@@ -1,0 +1,1 @@
+- Requesting transition to following/overview in NavigationCamera before current transition finished, now will restart the transition with the new parameters
