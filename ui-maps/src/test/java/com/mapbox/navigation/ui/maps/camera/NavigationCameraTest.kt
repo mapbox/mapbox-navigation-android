@@ -187,9 +187,10 @@ class NavigationCameraTest {
     }
 
     @Test
-    fun `when following requested twice, transition executed once`() {
+    fun `when following requested second time after first completed, transition executed once`() {
         navigationCamera.requestNavigationCameraToFollowing()
         internalTransitionListenerSlot.captured.onAnimationStart(followingAnimatorSet)
+        internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
         navigationCamera.requestNavigationCameraToFollowing()
 
         verifyTransitionExecuted(
@@ -202,7 +203,38 @@ class NavigationCameraTest {
     }
 
     @Test
-    fun `when overview requested twice, transition executed once`() {
+    fun `when following requested second time before first completed, transition restarts`() {
+        navigationCamera.requestNavigationCameraToFollowing()
+        internalTransitionListenerSlot.captured.onAnimationStart(followingAnimatorSet)
+        navigationCamera.requestNavigationCameraToFollowing()
+
+        verifyTransitionExecuted(
+            AnimatorsCreator::transitionToFollowing,
+            followingCameraOptions,
+            DEFAULT_STATE_TRANSITION_OPT,
+            followingAnimatorSet,
+            times = 2,
+        )
+    }
+
+    @Test
+    fun `when overview requested second time after first completed, transition executed once`() {
+        navigationCamera.requestNavigationCameraToOverview()
+        internalTransitionListenerSlot.captured.onAnimationStart(overviewAnimatorSet)
+        internalTransitionListenerSlot.captured.onAnimationEnd(overviewAnimatorSet)
+        navigationCamera.requestNavigationCameraToOverview()
+
+        verifyTransitionExecuted(
+            AnimatorsCreator::transitionToRouteOverview,
+            overviewCameraOptions,
+            DEFAULT_STATE_TRANSITION_OPT,
+            overviewAnimatorSet,
+            times = 1,
+        )
+    }
+
+    @Test
+    fun `when overview requested second time after first completed, transition restarts`() {
         navigationCamera.requestNavigationCameraToOverview()
         internalTransitionListenerSlot.captured.onAnimationStart(overviewAnimatorSet)
         navigationCamera.requestNavigationCameraToOverview()
@@ -212,7 +244,7 @@ class NavigationCameraTest {
             overviewCameraOptions,
             DEFAULT_STATE_TRANSITION_OPT,
             overviewAnimatorSet,
-            times = 1,
+            times = 2,
         )
     }
 
