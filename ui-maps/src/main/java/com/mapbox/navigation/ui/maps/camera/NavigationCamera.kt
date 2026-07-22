@@ -345,17 +345,11 @@ internal constructor(
         transitionEndListener: TransitionEndListener? = null,
     ) {
         when (state) {
-            TRANSITION_TO_FOLLOWING -> {
-                if (transitionEndListener != null) {
-                    transitionEndListeners.add(transitionEndListener)
-                }
-            }
-
             FOLLOWING -> {
                 transitionEndListener?.onTransitionEnd(isCanceled = false)
             }
 
-            IDLE, TRANSITION_TO_OVERVIEW, OVERVIEW -> {
+            IDLE, TRANSITION_TO_OVERVIEW, OVERVIEW, TRANSITION_TO_FOLLOWING -> {
                 val data = viewportDataSource.getViewportData()
                 startAnimation(
                     animatorsCreator.transitionToFollowing(
@@ -425,17 +419,11 @@ internal constructor(
         transitionEndListener: TransitionEndListener? = null,
     ) {
         when (state) {
-            TRANSITION_TO_OVERVIEW -> {
-                if (transitionEndListener != null) {
-                    transitionEndListeners.add(transitionEndListener)
-                }
-            }
-
             OVERVIEW -> {
                 transitionEndListener?.onTransitionEnd(isCanceled = false)
             }
 
-            IDLE, TRANSITION_TO_FOLLOWING, FOLLOWING -> {
+            IDLE, TRANSITION_TO_FOLLOWING, FOLLOWING, TRANSITION_TO_OVERVIEW -> {
                 startAnimation(
                     getOverviewTransition(
                         stateTransitionOptions,
