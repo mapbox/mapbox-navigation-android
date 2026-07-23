@@ -11,18 +11,9 @@ private const val EV_KEY_PRE_CONDITIONING_TIME = "ev_pre_conditioning_time"
 private const val EV_KEY_UNCONDITIONED_CHARGING_CURVE = "ev_unconditioned_charging_curve"
 private const val EV_FREEFLOW_CONSUMPTION_CURVE = "ev_freeflow_consumption_curve"
 private const val EV_CURVE_BLENDING_RATIO = "ev_curve_blending_ratio"
+private const val EV_ADDITIONAL_PARAMETERS = "ev_additional_parameters"
 
 fun Map<String, String>.toEvStateData(): EvStateData {
-    val additionalParameters = HashMap(this).apply {
-        remove(EV_KEY_INITIAL_CHARGE)
-        remove(EV_KEY_ENERGY_CONSUMPTION_CURVE)
-        remove(EV_KEY_AUX_CONSUMPTION)
-        remove(EV_KEY_PRE_CONDITIONING_TIME)
-        remove(EV_KEY_UNCONDITIONED_CHARGING_CURVE)
-        remove(EV_FREEFLOW_CONSUMPTION_CURVE)
-        remove(EV_CURVE_BLENDING_RATIO)
-    }
-
     return EvStateData(
         this[EV_KEY_INITIAL_CHARGE]?.toIntOrNull() ?: 0,
         this[EV_KEY_ENERGY_CONSUMPTION_CURVE]?.toCurveElements() ?: emptyList(),
@@ -31,13 +22,24 @@ fun Map<String, String>.toEvStateData(): EvStateData {
         this[EV_KEY_AUX_CONSUMPTION]?.toIntOrNull(),
         this[EV_KEY_PRE_CONDITIONING_TIME]?.toIntOrNull(),
         this[EV_KEY_UNCONDITIONED_CHARGING_CURVE]?.toCurveElements() ?: emptyList(),
-        additionalParameters,
+        this[EV_ADDITIONAL_PARAMETERS]?.toAdditionalParameters(),
         // TODO: https://mapbox.atlassian.net/browse/NAVAND-7151
         /* evBatteryTemp */ null,
         /* evBatteryChargePowerAtTemp */ null,
         /* evBatteryChargePowerOptimalTemp */ null,
         /* evBatteryHeating */ null,
     )
+}
+
+private fun String.toAdditionalParameters() = LinkedHashMap<String, String>().apply {
+    split(",").forEach { entry ->
+        if (!entry.contains(":")) return@forEach
+        val key = entry.substringBefore(":")
+        val value = entry.substringAfter(":", "")
+        if (key.isNotEmpty()) {
+            this[key] = value
+        }
+    }
 }
 
 private fun String.toCurveElements(): List<CurveElement> {
