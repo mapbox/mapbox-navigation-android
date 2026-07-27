@@ -42,7 +42,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 
-class OverviewViewportDataSourceTest {
+class RouteOverviewViewportDataSourceTest {
 
     private val mapboxMap: MapboxMap = mockk(relaxed = true)
     private val routeProgress: RouteProgress = mockk(relaxed = true)
@@ -136,20 +136,18 @@ class OverviewViewportDataSourceTest {
         Point.fromLngLat(57.0, 53.0),
     )
 
-    private val viewportDataSource = OverviewViewportDataSource(
+    private val viewportDataSource = RouteOverviewViewportDataSource(
         mapboxMap,
-        InternalViewportDataSourceOptions(
-            ignoreMinZoomWhenFramingManeuver = false,
+        InternalRouteOverviewOptions(
             overviewMode = OverviewMode.ACTIVE_LEG,
             overviewAlternatives = false,
         ),
         indicesConverter,
     )
 
-    private val viewportDataSourceWithAlternatives = OverviewViewportDataSource(
+    private val viewportDataSourceWithAlternatives = RouteOverviewViewportDataSource(
         mapboxMap,
-        InternalViewportDataSourceOptions(
-            ignoreMinZoomWhenFramingManeuver = false,
+        InternalRouteOverviewOptions(
             overviewMode = OverviewMode.ACTIVE_LEG,
             overviewAlternatives = true,
         ),
@@ -295,14 +293,14 @@ class OverviewViewportDataSourceTest {
 
     @Test
     fun `empty source initializes at null island`() {
-        val data = viewportDataSource.viewportData
+        val data = viewportDataSource.cameraOptions
 
         assertEquals(
             createCameraOptions {
                 center(NULL_ISLAND_POINT)
                 bearing(BEARING_NORTH)
                 pitch(ZERO_PITCH)
-                zoom(viewportDataSource.options.overviewFrameOptions.maxZoom)
+                zoom(viewportDataSource.options.maxZoom)
                 padding(EMPTY_EDGE_INSETS)
             },
             data,
@@ -337,7 +335,7 @@ class OverviewViewportDataSourceTest {
         // run
         viewportDataSource.onLocationChanged(location)
         viewportDataSource.evaluate()
-        val data = viewportDataSource.viewportData
+        val data = viewportDataSource.cameraOptions
 
         assertEquals(
             overviewCameraOptions,
@@ -351,7 +349,7 @@ class OverviewViewportDataSourceTest {
         val expectedPoints = listOf(additionalPoint)
 
         // overview mocks
-        val overviewZoom = viewportDataSource.options.overviewFrameOptions.maxZoom
+        val overviewZoom = viewportDataSource.options.maxZoom
         val overviewCameraOptions = createCameraOptions {
             center(additionalPoint)
             bearing(BEARING_NORTH)
@@ -375,7 +373,7 @@ class OverviewViewportDataSourceTest {
         // run
         viewportDataSource.additionalPointsToFrame(listOf(additionalPoint))
         viewportDataSource.evaluate()
-        val data = viewportDataSource.viewportData
+        val data = viewportDataSource.cameraOptions
 
         assertEquals(
             overviewCameraOptions,
@@ -387,7 +385,7 @@ class OverviewViewportDataSourceTest {
     fun `verify frame - just routeProgress`() {
         viewportDataSource.onRouteProgressChanged(routeProgress)
         viewportDataSource.evaluate()
-        val data = viewportDataSource.viewportData
+        val data = viewportDataSource.cameraOptions
 
         assertEquals(
             createCameraOptions {
@@ -429,7 +427,7 @@ class OverviewViewportDataSourceTest {
 
         viewportDataSource.onRoutesChanged(listOf(navigationRoute))
         viewportDataSource.evaluate()
-        val data = viewportDataSource.viewportData
+        val data = viewportDataSource.cameraOptions
 
         assertEquals(
             overviewCameraOptions,
@@ -470,7 +468,7 @@ class OverviewViewportDataSourceTest {
         viewportDataSource.onLocationChanged(location)
         viewportDataSource.additionalPointsToFrame(listOf(additionalPoint))
         viewportDataSource.evaluate()
-        val data = viewportDataSource.viewportData
+        val data = viewportDataSource.cameraOptions
 
         // verify
         assertEquals(
@@ -513,7 +511,7 @@ class OverviewViewportDataSourceTest {
         viewportDataSource.onRoutesChanged(listOf(navigationRoute))
         viewportDataSource.onRouteProgressChanged(routeProgress)
         viewportDataSource.evaluate()
-        val data = viewportDataSource.viewportData
+        val data = viewportDataSource.cameraOptions
 
         // verify
         assertEquals(
@@ -582,7 +580,7 @@ class OverviewViewportDataSourceTest {
         viewportDataSource.onRoutesChanged(listOf(navigationRoute))
         viewportDataSource.onRouteProgressChanged(routeProgress)
         viewportDataSource.evaluate()
-        val data = viewportDataSource.viewportData
+        val data = viewportDataSource.cameraOptions
 
         // verify
         assertEquals(
@@ -645,7 +643,7 @@ class OverviewViewportDataSourceTest {
         viewportDataSource.evaluate()
         viewportDataSource.clearRouteData()
         viewportDataSource.evaluate()
-        val data = viewportDataSource.viewportData
+        val data = viewportDataSource.cameraOptions
 
         // verify
         assertEquals(
@@ -691,7 +689,7 @@ class OverviewViewportDataSourceTest {
         viewportDataSource.onRoutesChanged(listOf(navigationRoute))
         viewportDataSource.onRouteProgressChanged(routeProgress)
         viewportDataSource.evaluate()
-        val data = viewportDataSource.viewportData
+        val data = viewportDataSource.cameraOptions
 
         // verify
         assertEquals(
@@ -747,7 +745,7 @@ class OverviewViewportDataSourceTest {
         viewportDataSource.onRoutesChanged(listOf(navigationRoute))
         unmockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
         viewportDataSource.evaluate()
-        val data = viewportDataSource.viewportData
+        val data = viewportDataSource.cameraOptions
 
         // verify
         assertEquals(
@@ -805,7 +803,7 @@ class OverviewViewportDataSourceTest {
         unmockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
 
         viewportDataSource.evaluate()
-        val data = viewportDataSource.viewportData
+        val data = viewportDataSource.cameraOptions
 
         // verify
         assertEquals(
@@ -851,7 +849,7 @@ class OverviewViewportDataSourceTest {
         viewportDataSource.bearingPropertyOverride(overviewBearing)
         viewportDataSource.pitchPropertyOverride(overviewPitch)
         viewportDataSource.evaluate()
-        val data = viewportDataSource.viewportData
+        val data = viewportDataSource.cameraOptions
 
         // verify
         assertEquals(
@@ -945,7 +943,7 @@ class OverviewViewportDataSourceTest {
             )
         }
 
-        assertEquals(expected, viewportDataSource.viewportData)
+        assertEquals(expected, viewportDataSource.cameraOptions)
     }
 
     @Test
@@ -1085,7 +1083,7 @@ class OverviewViewportDataSourceTest {
         viewportDataSource.clearRouteData()
         viewportDataSource.evaluate()
 
-        val options = viewportDataSource.viewportData
+        val options = viewportDataSource.cameraOptions
         assertEquals(currentCameraState.center, options.center)
     }
 
@@ -1108,7 +1106,7 @@ class OverviewViewportDataSourceTest {
         viewportDataSource.onRoutesChanged(emptyList())
         viewportDataSource.evaluate()
 
-        val options = viewportDataSource.viewportData
+        val options = viewportDataSource.cameraOptions
         assertEquals(currentCameraState.toCameraOptions().center, options.center)
     }
 
@@ -1171,7 +1169,7 @@ class OverviewViewportDataSourceTest {
             )
         }
 
-        val options = viewportDataSourceWithAlternatives.viewportData
+        val options = viewportDataSourceWithAlternatives.cameraOptions
         assertEquals(cameraOptions.center, options.center)
     }
 
@@ -1230,7 +1228,7 @@ class OverviewViewportDataSourceTest {
             )
         }
 
-        val options = viewportDataSourceWithAlternatives.viewportData
+        val options = viewportDataSourceWithAlternatives.cameraOptions
         assertEquals(cameraOptions.center, options.center)
     }
 
@@ -1277,7 +1275,7 @@ class OverviewViewportDataSourceTest {
             )
         }
 
-        val options = viewportDataSource.viewportData
+        val options = viewportDataSource.cameraOptions
         assertEquals(cameraOptions.center, options.center)
     }
 
@@ -1312,13 +1310,13 @@ class OverviewViewportDataSourceTest {
         viewportDataSource.onRoutesChanged(listOf(navigationRoute, navigationRoute2))
         viewportDataSource.onRouteProgressChanged(routeProgress)
         viewportDataSource.evaluate()
-        val options = viewportDataSource.viewportData
+        val options = viewportDataSource.cameraOptions
         assertEquals(oldCameraOptions.center, options.center)
 
         viewportDataSource.internalOptions = viewportDataSource.internalOptions
             .copy(overviewAlternatives = true)
 
-        val newOptions = viewportDataSource.viewportData
+        val newOptions = viewportDataSource.cameraOptions
         assertEquals(newCameraOptions.center, newOptions.center)
     }
 
@@ -1405,7 +1403,7 @@ class OverviewViewportDataSourceTest {
                 }
                 every { geometryIndex } returns primaryLegGeometryIndex
             }
-            every { route } returns this@OverviewViewportDataSourceTest.route
+            every { route } returns this@RouteOverviewViewportDataSourceTest.route
         }
 
         viewportDataSource.onRouteProgressChanged(routeProgress2)
@@ -1420,7 +1418,7 @@ class OverviewViewportDataSourceTest {
             )
         }
 
-        assertEquals(expected, viewportDataSource.viewportData)
+        assertEquals(expected, viewportDataSource.cameraOptions)
     }
 
     @Test
@@ -1474,7 +1472,7 @@ class OverviewViewportDataSourceTest {
             )
         }
 
-        assertEquals(expected, viewportDataSource.viewportData)
+        assertEquals(expected, viewportDataSource.cameraOptions)
     }
 
     private fun createCameraOptions(block: CameraOptions.Builder.() -> Unit): CameraOptions {
