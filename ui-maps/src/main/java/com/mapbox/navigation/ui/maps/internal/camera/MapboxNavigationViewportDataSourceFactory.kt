@@ -10,12 +10,17 @@ object MapboxNavigationViewportDataSourceFactory {
     fun create(
         map: MapboxMap,
         followingFramingModeHolder: FollowingFramingModeHolder,
-        overviewViewportDataSource: OverviewViewportDataSource,
+        routeOverviewViewportDataSource: RouteOverviewViewportDataSource,
+        pointsOverviewViewportDataSource: PointsOverviewViewportDataSource,
+        followingInternalOptions: InternalFollowingOverviewOptions =
+            InternalFollowingOverviewOptions(ignoreMinZoomWhenFramingManeuver = false),
     ): MapboxNavigationViewportDataSource {
         return MapboxNavigationViewportDataSource(
             map,
             followingFramingModeHolder,
-            overviewViewportDataSource,
+            routeOverviewViewportDataSource,
+            pointsOverviewViewportDataSource,
+            followingInternalOptions,
         )
     }
 }

@@ -21,11 +21,6 @@ import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewpo
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationBasicGesturesHandler
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationScaleGestureHandler
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
-import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState.FOLLOWING
-import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState.IDLE
-import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState.OVERVIEW
-import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState.TRANSITION_TO_FOLLOWING
-import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState.TRANSITION_TO_OVERVIEW
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraStateChangedObserver
 import com.mapbox.navigation.ui.maps.camera.transition.AnimatorsCreator
 import com.mapbox.navigation.ui.maps.camera.transition.DefaultSimplifiedUpdateFrameTransitionProvider
@@ -41,8 +36,15 @@ import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitio
 import com.mapbox.navigation.ui.maps.camera.transition.SimplifiedFrameAnimatorsCreator
 import com.mapbox.navigation.ui.maps.camera.transition.TransitionEndListener
 import com.mapbox.navigation.ui.maps.camera.transition.UpdateFrameAnimatorsOptions
-import com.mapbox.navigation.ui.maps.internal.camera.OverviewMode
-import com.mapbox.navigation.ui.maps.internal.camera.OverviewViewportDataSource
+import com.mapbox.navigation.ui.maps.internal.camera.NavigationCameraStateChangedObserverInternal
+import com.mapbox.navigation.ui.maps.internal.camera.NavigationCameraStateInternal
+import com.mapbox.navigation.ui.maps.internal.camera.NavigationCameraStateInternal.FOLLOWING
+import com.mapbox.navigation.ui.maps.internal.camera.NavigationCameraStateInternal.IDLE
+import com.mapbox.navigation.ui.maps.internal.camera.NavigationCameraStateInternal.POINTS_OVERVIEW
+import com.mapbox.navigation.ui.maps.internal.camera.NavigationCameraStateInternal.ROUTE_OVERVIEW
+import com.mapbox.navigation.ui.maps.internal.camera.NavigationCameraStateInternal.TRANSITION_TO_FOLLOWING
+import com.mapbox.navigation.ui.maps.internal.camera.NavigationCameraStateInternal.TRANSITION_TO_POINTS_OVERVIEW
+import com.mapbox.navigation.ui.maps.internal.camera.NavigationCameraStateInternal.TRANSITION_TO_ROUTE_OVERVIEW
 import com.mapbox.navigation.ui.maps.internal.camera.SimplifiedUpdateFrameTransitionProvider
 import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.logW
@@ -58,19 +60,19 @@ import java.util.concurrent.CopyOnWriteArraySet
  *
  * ## States
  * The `NavigationCamera` is an entity that offers to maintain 3 distinct [NavigationCameraState]s:
- * [IDLE], [FOLLOWING], and [OVERVIEW]. States can be requested at any point in runtime.
+ * [NavigationCameraState.IDLE], [NavigationCameraState.FOLLOWING], and [NavigationCameraState.OVERVIEW]. States can be requested at any point in runtime.
  *
  * When the camera is transitioning between states, it reports that status with
- * [TRANSITION_TO_FOLLOWING] and [TRANSITION_TO_OVERVIEW] helper states.
+ * [NavigationCameraState.TRANSITION_TO_FOLLOWING] and [NavigationCameraState.TRANSITION_TO_OVERVIEW] helper states.
  * These helper transition states cannot be directly requested.
  *
- * Change to [IDLE] state is always instantaneous.
+ * Change to [NavigationCameraState.IDLE] state is always instantaneous.
  *
  * ## Data
  * In order to be able to perform state transitions or later frame updates,
  * the `NavigationCamera` needs data. This is provided by the [ViewportDataSource] argument.
  * The source is an observable interface that produces `CameraOptions` that frame the camera
- * for both [FOLLOWING] and [OVERVIEW] states.
+ * for both [NavigationCameraState.FOLLOWING] and [NavigationCameraState.OVERVIEW] states.
  *
  * On creation, `NavigationCamera` subscribes to the data source and listens for updates.
  *
@@ -87,7 +89,7 @@ import java.util.concurrent.CopyOnWriteArraySet
  * to create the [NavigationCameraStateTransition.transitionToFollowing]
  * or [NavigationCameraStateTransition.transitionToOverview] transitions.
  *
- * When `NavigationCamera` already is in one of the [FOLLOWING] or [OVERVIEW] states,
+ * When `NavigationCamera` already is in one of the [NavigationCameraState.FOLLOWING] or [NavigationCameraState.OVERVIEW] states,
  * data source updates trigger creation of [NavigationCameraStateTransition.updateFrameForFollowing]
  * or [NavigationCameraStateTransition.updateFrameForOverview] transitions.
  *
@@ -249,20 +251,42 @@ internal constructor(
     private val navigationCameraStateChangedObservers =
         CopyOnWriteArraySet<NavigationCameraStateChangedObserver>()
 
+    private val navigationCameraStateChangedObserversInternal =
+        CopyOnWriteArraySet<NavigationCameraStateChangedObserverInternal>()
+
     private var currentStateTransitionListener: NavigationCameraTransitionListener? = null
-    private var overviewViewportDataSource: OverviewViewportDataSource? =
-        (viewportDataSource as? MapboxNavigationViewportDataSource)?.overviewViewportDataSource
 
     /**
      * Returns current [NavigationCameraState].
+     *
+     * This is a projection of [stateInternal] used purely for public notifications: the internal
+     * points-overview states collapse onto [NavigationCameraState.OVERVIEW] / [NavigationCameraState.TRANSITION_TO_OVERVIEW]. Core logic must
+     * drive [stateInternal] and never assign this directly.
      * @see registerNavigationCameraStateChangeObserver
      */
-    var state: NavigationCameraState = IDLE
+    var state: NavigationCameraState = NavigationCameraState.IDLE
         private set(value) {
             if (value != field) {
                 field = value
-                updateDebugger()
                 navigationCameraStateChangedObservers.forEach {
+                    it.onNavigationCameraStateChanged(value)
+                }
+            }
+        }
+
+    /**
+     * The state that drives the camera state machine. Public [state] is derived from it; assigning
+     * a value here updates [state] (de-duplicated) whenever the projected public state changes.
+     */
+    internal var stateInternal: NavigationCameraStateInternal = IDLE
+        private set(value) {
+            if (value != field) {
+                field = value
+                // the debugger distinguishes route and points overview, so it follows the internal
+                // state which doesn't collapse them onto a single overview state
+                updateDebugger()
+                state = value.toNavigationCameraState()
+                navigationCameraStateChangedObserversInternal.forEach {
                     it.onNavigationCameraStateChanged(value)
                 }
             }
@@ -300,15 +324,15 @@ internal constructor(
     }
 
     /**
-     * Executes a transition to [FOLLOWING] state. When started, goes to [TRANSITION_TO_FOLLOWING]
-     * and to the final [FOLLOWING] when ended.
+     * Executes a transition to [NavigationCameraState.FOLLOWING] state. When started, goes to [NavigationCameraState.TRANSITION_TO_FOLLOWING]
+     * and to the final [NavigationCameraState.FOLLOWING] when ended.
      *
      * The target camera position is obtained with [ViewportDataSource.getViewportData].
      *
      * @param stateTransitionOptionsBlock options that impact the transition animation from the current state to the requested state.
      * Defaults to [NavigationCameraTransitionOptions.maxDuration] equal to 3500 millis.
      * @param frameTransitionOptionsBlock options that impact the transition animations between viewport frames in the selected state.
-     * This refers to camera transition on each [ViewportDataSource] update when [FOLLOWING] is engaged.
+     * This refers to camera transition on each [ViewportDataSource] update when [NavigationCameraState.FOLLOWING] is engaged.
      * Defaults to [NavigationCameraTransitionOptions.maxDuration] equal to 1000 millis.
      * @param transitionEndListener invoked when transition ends.
      */
@@ -326,15 +350,15 @@ internal constructor(
     }
 
     /**
-     * Executes a transition to [FOLLOWING] state. When started, goes to [TRANSITION_TO_FOLLOWING]
-     * and to the final [FOLLOWING] when ended.
+     * Executes a transition to [NavigationCameraState.FOLLOWING] state. When started, goes to [NavigationCameraState.TRANSITION_TO_FOLLOWING]
+     * and to the final [NavigationCameraState.FOLLOWING] when ended.
      *
      * The target camera position is obtained with [ViewportDataSource.getViewportData].
      *
      * @param stateTransitionOptions options that impact the transition animation from the current state to the requested state.
      * Defaults to [NavigationCameraTransitionOptions.maxDuration] equal to 3500 millis.
      * @param frameTransitionOptions options that impact the transition animations between viewport frames in the selected state.
-     * This refers to camera transition on each [ViewportDataSource] update when [FOLLOWING] is engaged.
+     * This refers to camera transition on each [ViewportDataSource] update when [NavigationCameraState.FOLLOWING] is engaged.
      * Defaults to [NavigationCameraTransitionOptions.maxDuration] equal to 1000 millis.
      * @param transitionEndListener invoked when transition ends.
      */
@@ -344,28 +368,23 @@ internal constructor(
         frameTransitionOptions: NavigationCameraTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT,
         transitionEndListener: TransitionEndListener? = null,
     ) {
-        when (state) {
+        when (stateInternal) {
             FOLLOWING -> {
                 transitionEndListener?.onTransitionEnd(isCanceled = false)
             }
 
-            IDLE, TRANSITION_TO_OVERVIEW, OVERVIEW, TRANSITION_TO_FOLLOWING -> {
-                val data = viewportDataSource.getViewportData()
+            IDLE,
+            TRANSITION_TO_ROUTE_OVERVIEW,
+            ROUTE_OVERVIEW,
+            TRANSITION_TO_POINTS_OVERVIEW,
+            POINTS_OVERVIEW,
+            TRANSITION_TO_FOLLOWING,
+            -> {
                 startAnimation(
-                    animatorsCreator.transitionToFollowing(
-                        data.cameraForFollowing,
+                    getFollowingTransition(
                         stateTransitionOptions,
-                    ).apply {
-                        addListener(
-                            createTransitionListener(
-                                TRANSITION_TO_FOLLOWING,
-                                FOLLOWING,
-                                frameTransitionOptions,
-                            ).also {
-                                this@NavigationCamera.currentStateTransitionListener = it
-                            },
-                        )
-                    },
+                        frameTransitionOptions,
+                    ),
                     instant = false,
                     transitionEndListener,
                 )
@@ -373,16 +392,37 @@ internal constructor(
         }
     }
 
+    private fun getFollowingTransition(
+        stateTransitionOptions: NavigationCameraTransitionOptions,
+        frameTransitionOptions: NavigationCameraTransitionOptions,
+    ): FullAnimatorSet {
+        val cameraForFollowing = viewportDataSource.getViewportData().cameraForFollowing
+        return animatorsCreator.transitionToFollowing(
+            cameraForFollowing,
+            stateTransitionOptions,
+        ).apply {
+            addListener(
+                createTransitionListener(
+                    TRANSITION_TO_FOLLOWING,
+                    FOLLOWING,
+                    frameTransitionOptions,
+                ).also {
+                    this@NavigationCamera.currentStateTransitionListener = it
+                },
+            )
+        }
+    }
+
     /**
-     * Executes a transition to [OVERVIEW] state. When started, goes to [TRANSITION_TO_OVERVIEW]
-     * and to the final [OVERVIEW] when ended.
+     * Executes a transition to [NavigationCameraState.OVERVIEW] state. When started, goes to [NavigationCameraState.TRANSITION_TO_OVERVIEW]
+     * and to the final [NavigationCameraState.OVERVIEW] when ended.
      *
      * The target camera position is obtained with [ViewportDataSource.getViewportData].
      *
      * @param stateTransitionOptionsBlock options that impact the transition animation from the current state to the requested state.
      * Defaults to [NavigationCameraTransitionOptions.maxDuration] equal to 3500 millis.
      * @param frameTransitionOptionsBlock options that impact the transition animations between viewport frames in the selected state.
-     * This refers to camera transition on each [ViewportDataSource] update when [OVERVIEW] is engaged.
+     * This refers to camera transition on each [ViewportDataSource] update when [NavigationCameraState.OVERVIEW] is engaged.
      * Defaults to [NavigationCameraTransitionOptions.maxDuration] equal to 1000 millis.
      * @param transitionEndListener invoked when transition ends.
      */
@@ -400,15 +440,15 @@ internal constructor(
     }
 
     /**
-     * Executes a transition to [OVERVIEW] state. When started, goes to [TRANSITION_TO_OVERVIEW]
-     * and to the final [OVERVIEW] when ended.
+     * Executes a transition to [NavigationCameraState.OVERVIEW] state. When started, goes to [NavigationCameraState.TRANSITION_TO_OVERVIEW]
+     * and to the final [NavigationCameraState.OVERVIEW] when ended.
      *
      * The target camera position is obtained with [ViewportDataSource.getViewportData].
      *
      * @param stateTransitionOptions options that impact the transition animation from the current state to the requested state.
      * Defaults to [NavigationCameraTransitionOptions.maxDuration] equal to 3500 millis.
      * @param frameTransitionOptions options that impact the transition animations between viewport frames in the selected state.
-     * This refers to camera transition on each [ViewportDataSource] update when [OVERVIEW] is engaged.
+     * This refers to camera transition on each [ViewportDataSource] update when [NavigationCameraState.OVERVIEW] is engaged.
      * Defaults to [NavigationCameraTransitionOptions.maxDuration] equal to 1000 millis.
      * @param transitionEndListener invoked when transition ends.
      */
@@ -418,12 +458,18 @@ internal constructor(
         frameTransitionOptions: NavigationCameraTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT,
         transitionEndListener: TransitionEndListener? = null,
     ) {
-        when (state) {
-            OVERVIEW -> {
+        when (stateInternal) {
+            ROUTE_OVERVIEW -> {
                 transitionEndListener?.onTransitionEnd(isCanceled = false)
             }
 
-            IDLE, TRANSITION_TO_FOLLOWING, FOLLOWING, TRANSITION_TO_OVERVIEW -> {
+            IDLE,
+            TRANSITION_TO_FOLLOWING,
+            FOLLOWING,
+            TRANSITION_TO_POINTS_OVERVIEW,
+            POINTS_OVERVIEW,
+            TRANSITION_TO_ROUTE_OVERVIEW,
+            -> {
                 startAnimation(
                     getOverviewTransition(
                         stateTransitionOptions,
@@ -441,21 +487,14 @@ internal constructor(
         frameTransitionOptions: NavigationCameraTransitionOptions,
     ): FullAnimatorSet {
         val cameraForOverview = viewportDataSource.getViewportData().cameraForOverview
-        return if (overviewViewportDataSource?.isPointsOverview() == true) {
-            animatorsCreator.transitionToPointsOverview(
-                cameraForOverview,
-                stateTransitionOptions,
-            )
-        } else {
-            animatorsCreator.transitionToRouteOverview(
-                cameraForOverview,
-                stateTransitionOptions,
-            )
-        }.apply {
+        return animatorsCreator.transitionToRouteOverview(
+            cameraForOverview,
+            stateTransitionOptions,
+        ).apply {
             addListener(
                 createTransitionListener(
-                    TRANSITION_TO_OVERVIEW,
-                    OVERVIEW,
+                    TRANSITION_TO_ROUTE_OVERVIEW,
+                    ROUTE_OVERVIEW,
                     frameTransitionOptions,
                 ).also {
                     this@NavigationCamera.currentStateTransitionListener = it
@@ -464,21 +503,82 @@ internal constructor(
         }
     }
 
-    private fun OverviewViewportDataSource.isPointsOverview() =
-        this.internalOptions.overviewMode == OverviewMode.POINTS
+    /**
+     * Executes a transition to the points overview, framing an arbitrary set of points
+     * (see [MapboxNavigationViewportDataSource]) rather than the route geometry.
+     *
+     * Publicly this is reported as [NavigationCameraState.OVERVIEW] via [state] and the state observers.
+     *
+     * The target camera position is obtained with [ViewportDataSource.getViewportData].
+     *
+     * @param stateTransitionOptions options that impact the transition animation from the current state to the requested state.
+     * @param frameTransitionOptions options that impact the transition animations between viewport frames in the selected state.
+     * @param transitionEndListener invoked when transition ends.
+     */
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    internal fun requestNavigationCameraToPointsOverview(
+        stateTransitionOptions: NavigationCameraTransitionOptions = DEFAULT_STATE_TRANSITION_OPT,
+        frameTransitionOptions: NavigationCameraTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT,
+        transitionEndListener: TransitionEndListener? = null,
+    ) {
+        when (stateInternal) {
+            POINTS_OVERVIEW -> {
+                transitionEndListener?.onTransitionEnd(isCanceled = false)
+            }
+
+            IDLE,
+            TRANSITION_TO_FOLLOWING,
+            FOLLOWING,
+            TRANSITION_TO_ROUTE_OVERVIEW,
+            ROUTE_OVERVIEW,
+            TRANSITION_TO_POINTS_OVERVIEW,
+            -> {
+                startAnimation(
+                    getPointsOverviewTransition(
+                        stateTransitionOptions,
+                        frameTransitionOptions,
+                    ),
+                    instant = false,
+                    transitionEndListener,
+                )
+            }
+        }
+    }
+
+    private fun getPointsOverviewTransition(
+        stateTransitionOptions: NavigationCameraTransitionOptions,
+        frameTransitionOptions: NavigationCameraTransitionOptions,
+    ): FullAnimatorSet {
+        val cameraForPointsOverview =
+            viewportDataSource.getViewportData().cameraForPointsOverview
+        return animatorsCreator.transitionToPointsOverview(
+            cameraForPointsOverview,
+            stateTransitionOptions,
+        ).apply {
+            addListener(
+                createTransitionListener(
+                    TRANSITION_TO_POINTS_OVERVIEW,
+                    POINTS_OVERVIEW,
+                    frameTransitionOptions,
+                ).also {
+                    this@NavigationCamera.currentStateTransitionListener = it
+                },
+            )
+        }
+    }
 
     /**
-     * Immediately goes to [IDLE] state canceling all ongoing transitions.
+     * Immediately goes to [NavigationCameraState.IDLE] state canceling all ongoing transitions.
      */
     fun requestNavigationCameraToIdle() {
-        if (state != IDLE) {
+        if (stateInternal != IDLE) {
             cancelAnimation()
             setIdleProperties()
         }
     }
 
     /**
-     * If the [state] is [FOLLOWING] or [OVERVIEW],
+     * If the [state] is [NavigationCameraState.FOLLOWING] or [NavigationCameraState.OVERVIEW],
      * performs an immediate camera transition (a jump, with animation duration equal to `0`)
      * based on the latest data obtained with [ViewportDataSource.getViewportData].
      */
@@ -489,7 +589,7 @@ internal constructor(
 
     private fun updateFrame(viewportData: ViewportData, instant: Boolean) {
         if (!isMapValid()) return
-        when (state) {
+        when (stateInternal) {
             FOLLOWING -> {
                 startAnimation(
                     animatorsCreator.updateFrameForFollowing(
@@ -502,7 +602,7 @@ internal constructor(
                 )
             }
 
-            OVERVIEW -> {
+            ROUTE_OVERVIEW -> {
                 setCameraAnimationHintWhileInOverview(viewportData.cameraForFollowing)
                 startAnimation(
                     animatorsCreator.updateFrameForOverview(
@@ -515,7 +615,24 @@ internal constructor(
                 )
             }
 
-            IDLE, TRANSITION_TO_FOLLOWING, TRANSITION_TO_OVERVIEW -> {
+            POINTS_OVERVIEW -> {
+                setCameraAnimationHintWhileInOverview(viewportData.cameraForFollowing)
+                startAnimation(
+                    animatorsCreator.updateFrameForOverview(
+                        viewportData.cameraForPointsOverview,
+                        frameTransitionOptions,
+                    ).apply {
+                        addAnimationEndListener(createFrameListener())
+                    },
+                    instant,
+                )
+            }
+
+            IDLE,
+            TRANSITION_TO_FOLLOWING,
+            TRANSITION_TO_ROUTE_OVERVIEW,
+            TRANSITION_TO_POINTS_OVERVIEW,
+            -> {
                 // no impl
             }
         }
@@ -570,9 +687,29 @@ internal constructor(
         navigationCameraStateChangedObservers.remove(navigationCameraStateChangedObserver)
     }
 
+    /**
+     * Registers [NavigationCameraStateChangedObserverInternal] that is notified with the
+     * fine-grained [stateInternal] (keeping the points-overview distinction).
+     */
+    internal fun registerNavigationCameraStateChangeObserverInternal(
+        observer: NavigationCameraStateChangedObserverInternal,
+    ) {
+        navigationCameraStateChangedObserversInternal.add(observer)
+        observer.onNavigationCameraStateChanged(stateInternal)
+    }
+
+    /**
+     * Unregisters [NavigationCameraStateChangedObserverInternal].
+     */
+    internal fun unregisterNavigationCameraStateChangeObserverInternal(
+        observer: NavigationCameraStateChangedObserverInternal,
+    ) {
+        navigationCameraStateChangedObserversInternal.remove(observer)
+    }
+
     private fun setIdleProperties() {
         this@NavigationCamera.frameTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT
-        state = IDLE
+        stateInternal = IDLE
     }
 
     private fun cancelAnimation() {
@@ -607,8 +744,8 @@ internal constructor(
     }
 
     private fun createTransitionListener(
-        progressState: NavigationCameraState,
-        finalState: NavigationCameraState,
+        progressState: NavigationCameraStateInternal,
+        finalState: NavigationCameraStateInternal,
         frameTransitionOptions: NavigationCameraTransitionOptions,
     ) = NavigationCameraTransitionListener(
         progressState,
@@ -633,7 +770,7 @@ internal constructor(
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private fun updateDebugger() {
-        debugger?.cameraState = state
+        debugger?.cameraState = stateInternal
     }
 
     /**
@@ -661,7 +798,7 @@ internal constructor(
     internal fun updateFollowingFrameTransitionOptions(
         frameTransitionOptions: NavigationCameraTransitionOptions,
     ) {
-        when (state) {
+        when (stateInternal) {
             FOLLOWING -> {
                 this.frameTransitionOptions = frameTransitionOptions
             }
@@ -683,12 +820,10 @@ internal constructor(
     internal fun updateOverviewFrameTransitionOptions(
         frameTransitionOptions: NavigationCameraTransitionOptions,
     ) {
-        when (state) {
-            OVERVIEW -> {
-                this.frameTransitionOptions = frameTransitionOptions
-            }
+        when (stateInternal) {
+            ROUTE_OVERVIEW -> this.frameTransitionOptions = frameTransitionOptions
 
-            TRANSITION_TO_OVERVIEW -> {
+            TRANSITION_TO_ROUTE_OVERVIEW -> {
                 currentStateTransitionListener?.frameTransitionOptions = frameTransitionOptions
             }
 
@@ -699,21 +834,21 @@ internal constructor(
     }
 
     private inner class NavigationCameraTransitionListener(
-        private val progressState: NavigationCameraState,
-        private val finalState: NavigationCameraState,
+        private val progressState: NavigationCameraStateInternal,
+        private val finalState: NavigationCameraStateInternal,
         var frameTransitionOptions: NavigationCameraTransitionOptions,
     ) : MapboxAnimatorSetListener {
         private var isCanceled = false
 
         override fun onAnimationStart(animation: MapboxAnimatorSet) {
             this@NavigationCamera.frameTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT
-            state = progressState
+            stateInternal = progressState
         }
 
         override fun onAnimationEnd(animation: MapboxAnimatorSet) {
             if (!isCanceled) {
                 this@NavigationCamera.frameTransitionOptions = frameTransitionOptions
-                state = finalState
+                stateInternal = finalState
             }
 
             this@NavigationCamera.currentStateTransitionListener = null
