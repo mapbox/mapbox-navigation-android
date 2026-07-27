@@ -14,6 +14,7 @@ import com.mapbox.navigation.core.replay.history.ReplayEventsObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.replay.route.ReplayRouteOptions
 import java.util.Collections.singletonList
+import java.util.concurrent.CopyOnWriteArraySet
 
 /**
  * This class is similar to a music player. It will include controls like play, pause, seek.
@@ -24,7 +25,7 @@ class MapboxReplayer {
     private val replayEvents = ReplayEvents(mutableListOf())
     private val replayEventSimulator = ReplayEventSimulator(replayEvents)
 
-    private val replayEventsObservers: MutableSet<ReplayEventsObserver> = mutableSetOf()
+    private val replayEventsObservers = CopyOnWriteArraySet<ReplayEventsObserver>()
 
     /**
      * Appends events to be replayed. Notice the basis of your [ReplayEventBase.eventTimestamp].
