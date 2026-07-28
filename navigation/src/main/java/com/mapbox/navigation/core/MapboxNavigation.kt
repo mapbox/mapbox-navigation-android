@@ -33,15 +33,18 @@ import com.mapbox.navigation.base.internal.extensions.internalAlternativeRouteIn
 import com.mapbox.navigation.base.internal.nativeRerouteStrategyForMatchRoute
 import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.reroute.getRepeatRerouteAfterOffRouteDelaySeconds
+import com.mapbox.navigation.base.internal.route.Waypoint
 import com.mapbox.navigation.base.internal.route.parsing.setupParsing
 import com.mapbox.navigation.base.internal.tilestore.NavigationTileStoreOwner
 import com.mapbox.navigation.base.internal.trip.notification.TripNotificationInterceptorOwner
+import com.mapbox.navigation.base.internal.utils.internalWaypoints
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.MapMatchingMatch
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.eh.EHorizonEdge
 import com.mapbox.navigation.base.trip.model.eh.EHorizonEdgeMetadata
@@ -106,7 +109,10 @@ import com.mapbox.navigation.core.reroute.RerouteStateV2
 import com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesControllerProvider
+import com.mapbox.navigation.core.routealternatives.SuggestionType
 import com.mapbox.navigation.core.routealternatives.UpdateRouteSuggestion
+import com.mapbox.navigation.core.routealternatives.matchesByLocationAndType
+import com.mapbox.navigation.core.routealternatives.upcomingWaypoints
 import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.routerefresh.MapboxHistoryRecorderWrapper
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
@@ -722,6 +728,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                             tripSession.resetOffRouteDeviationFlag()
                             true
                         }
+
                         else -> false
                     }
                 },
@@ -1366,6 +1373,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
             is SetRoutes.RefreshRoutes,
             is SetRoutes.Alternatives,
+            is SetRoutes.SwitchToOnlineAlternative,
             -> {
                 // do not interrupt reroute when primary route has not changed
             }
@@ -1418,6 +1426,27 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                                     "Refresh routes ${routes.map { it.id }} are outdated. " +
                                         "Primary route has changed from ${routes.first().id} " +
                                         "to ${directionsSession.routes.firstOrNull()?.id}",
+                                ),
+                            )
+                            // Even though we are not setting new routes here, we need to inform
+                            // that the operation (setNavigationRoutesStarted) is finished
+                            directionsSession.setNavigationRoutesFinished(
+                                DirectionsSessionRoutes(
+                                    acceptedRoutes = directionsSession.routes,
+                                    ignoredRoutes = directionsSession.ignoredRoutes,
+                                    setRoutesInfo = setRoutesInfo,
+                                ),
+                            )
+                        } else if (
+                            setRoutesInfo is SetRoutes.SwitchToOnlineAlternative &&
+                            !isSwitchToOnlineAlternativeStillValid(routes)
+                        ) {
+                            routesSetResult = ExpectedFactory.createError(
+                                RoutesSetError(
+                                    "Online alternative switch to ${routes.map { it.id }} is " +
+                                        "outdated: the current primary route's upcoming " +
+                                        "waypoints no longer match. Current primary route is " +
+                                        "${directionsSession.routes.firstOrNull()?.id}",
                                 ),
                             )
                             // Even though we are not setting new routes here, we need to inform
@@ -2613,7 +2642,47 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     private fun updateRoutes(suggestion: UpdateRouteSuggestion) {
-        setNavigationRoutes(suggestion.newRoutes)
+        when (suggestion.type) {
+            SuggestionType.SwitchToOnlineAlternative -> {
+                // Invoking separately, because alternative is not accepted yet,
+                // and decision should be done under the routeUpdateMutex,
+                // and general pipeline doesn't correctly handle the case
+                internalSetNavigationRoutes(
+                    suggestion.newRoutes,
+                    SetRoutes.SwitchToOnlineAlternative(legIndex = 0),
+                )
+            }
+
+            SuggestionType.AlternativesUpdated -> setNavigationRoutes(suggestion.newRoutes)
+        }
+    }
+
+    /**
+     * A [SetRoutes.SwitchToOnlineAlternative] suggestion is computed against a
+     * [com.mapbox.navigation.base.trip.model.RouteProgress] snapshot that may be stale by the
+     * time this runs (it can be evaluated concurrently with an app-driven [setNavigationRoutes]
+     * call). Since this check runs inside [routeUpdateMutex], any app-driven route update that
+     * was queued earlier is guaranteed to have already been applied to [directionsSession], so
+     * comparing against it here is safe from that particular race.
+     */
+    private fun isSwitchToOnlineAlternativeStillValid(
+        candidateRoutes: List<NavigationRoute>,
+    ): Boolean {
+        val candidatePrimary = candidateRoutes.firstOrNull() ?: return false
+        val currentPrimary = directionsSession.routes.firstOrNull() ?: return false
+        if (currentPrimary.origin != RouterOrigin.OFFLINE) {
+            return false
+        }
+
+        val routeProgress = tripSession.getRouteProgress() ?: return false
+        if (routeProgress.navigationRoute.id != currentPrimary.id) return false
+
+        val currentPrimaryUpcomingWaypoints = currentPrimary.internalWaypoints()
+            .takeLast(routeProgress.remainingWaypoints)
+            .filter { it.type == Waypoint.REGULAR || it.type == Waypoint.SILENT }
+
+        return candidatePrimary.upcomingWaypoints()
+            .matchesByLocationAndType(currentPrimaryUpcomingWaypoints)
     }
 
     private fun handleReplanResult(result: RerouteResult, callback: ReplanRoutesCallback?) {

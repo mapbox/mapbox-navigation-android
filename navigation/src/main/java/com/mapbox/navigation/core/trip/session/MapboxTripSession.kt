@@ -163,6 +163,14 @@ internal class MapboxTripSession(
                 )
             }
 
+            is SetRoutes.SwitchToOnlineAlternative -> {
+                setRouteToNativeNavigator(
+                    routes,
+                    setRoutes.initialLegIndex(),
+                    SetRoutesReason.NEW_ROUTE,
+                )
+            }
+
             is SetRoutes.RefreshRoutes -> {
                 updateRouteTransaction {
                     if (routes.isNotEmpty()) {
