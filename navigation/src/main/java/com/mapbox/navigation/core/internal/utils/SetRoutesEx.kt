@@ -11,6 +11,7 @@ internal fun SetRoutes.mapToReason(): String =
         SetRoutes.CleanUp -> RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
         is SetRoutes.NewRoutes,
         is SetRoutes.Reorder,
+        is SetRoutes.SwitchToOnlineAlternative,
         -> RoutesExtra.ROUTES_UPDATE_REASON_NEW
         is SetRoutes.RefreshRoutes -> RoutesExtra.ROUTES_UPDATE_REASON_REFRESH
         is SetRoutes.Reroute -> RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
@@ -26,4 +27,5 @@ internal fun SetRoutes.initialLegIndex(): Int =
         is SetRoutes.RefreshRoutes.RefreshControllerRefresh ->
             routeRefreshResult.primaryRouteRefresherResult.routeProgressData.legIndex
         is SetRoutes.Reroute -> legIndex
+        is SetRoutes.SwitchToOnlineAlternative -> legIndex
     }
