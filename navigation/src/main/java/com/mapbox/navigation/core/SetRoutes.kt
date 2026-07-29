@@ -44,6 +44,19 @@ internal sealed class SetRoutes {
     internal data class Reorder(val legIndex: Int) : SetRoutes()
 
     /**
+     * Triggered when [com.mapbox.navigation.core.routealternatives.RouteAlternativesController]
+     * suggests switching the primary route to an online alternative (e.g. after connectivity is
+     * restored while driving on an offline route).
+     *
+     * Unlike [NewRoutes], this suggestion may have been computed against a primary route that
+     * has since changed by the time it's applied, so it's re-validated against the live primary
+     * route at apply time, inside the route update mutex.
+     */
+    internal data class SwitchToOnlineAlternative(
+        val legIndex: Int,
+    ) : SetRoutes()
+
+    /**
      * Triggered when the **routes do not change but are refreshed**.
      *
      * Currently this can only be trigger internally by a response to [RouteRefreshController.refresh]
