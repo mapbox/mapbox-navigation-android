@@ -225,12 +225,7 @@ internal class RouteAlternativesController(
             .takeLast(routeProgress.remainingWaypoints)
             .filter { it.type == Waypoint.REGULAR || it.type == Waypoint.SILENT }
         return filter { alternative ->
-            // Continuous alternatives are generated from the current position,
-            // so every waypoint after the origin (index 0) is upcoming.
-            val alternativeUpcomingWaypoints = alternative.internalWaypoints()
-                .drop(1)
-                .filter { it.type == Waypoint.REGULAR || it.type == Waypoint.SILENT }
-            val matches = alternativeUpcomingWaypoints
+            val matches = alternative.upcomingWaypoints()
                 .matchesByLocationAndType(primaryUpcomingWaypoints)
             if (!matches) {
                 logI(LOG_CATEGORY) {
@@ -327,7 +322,16 @@ internal fun RouteAlternative.mapToMetadata(
     )
 }
 
-private fun List<Waypoint>.matchesByLocationAndType(other: List<Waypoint>): Boolean {
+/**
+ * Continuous alternatives are generated from the current position, so every waypoint after
+ * the origin (index 0) is upcoming.
+ */
+internal fun NavigationRoute.upcomingWaypoints(): List<Waypoint> =
+    internalWaypoints()
+        .drop(1)
+        .filter { it.type == Waypoint.REGULAR || it.type == Waypoint.SILENT }
+
+internal fun List<Waypoint>.matchesByLocationAndType(other: List<Waypoint>): Boolean {
     if (size != other.size) return false
     return withIndex().all { (index, waypoint) ->
         val otherWaypoint = other[index]
