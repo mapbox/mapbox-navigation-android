@@ -577,6 +577,9 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
 
                 mockLocationReplayerRule.playRoute(
                     routes[0].directionsRoute,
+                    // low speed to trigger arrival at the intermediate waypoint
+                    // higher speed may cause reroute instead of arrival
+                    maxSpeedMps = 7.0,
                 )
                 mapboxNavigation.startTripSession()
                 mapboxNavigation.setNavigationRoutes(routes)
