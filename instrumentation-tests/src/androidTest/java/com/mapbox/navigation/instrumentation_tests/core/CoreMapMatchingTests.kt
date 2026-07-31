@@ -21,6 +21,7 @@ import com.mapbox.navigation.core.routerefresh.RouteRefreshExtra
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.http.MockRequestHandler
+import com.mapbox.navigation.testing.ui.utils.clearInternalStorage
 import com.mapbox.navigation.testing.ui.utils.coroutines.MapMatchingRequestResult
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestMapMatching
@@ -29,6 +30,7 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAsync
+import com.mapbox.navigation.testing.utils.assertions.assertIs
 import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRefreshHandler
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
@@ -449,13 +451,14 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
      */
     @Test
     fun noInternet() = sdkTest {
-        withMapboxNavigation(
-            historyRecorderRule = mapboxHistoryTestRule,
-        ) { navigation ->
-            val options = setupTestMapMatchingRoute()
-            withoutInternet {
-                navigation.requestMapMatching(options)
-                    as MapMatchingRequestResult.Failure
+        withoutInternet {
+            clearInternalStorage()
+            withMapboxNavigation(
+                historyRecorderRule = mapboxHistoryTestRule,
+            ) { navigation ->
+                val options = setupTestMapMatchingRoute()
+                val result = navigation.requestMapMatching(options)
+                assertIs<MapMatchingRequestResult.Failure>(result)
             }
         }
     }
