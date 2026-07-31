@@ -760,10 +760,46 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
      * Note that corresponding [MapboxRouteLineApiOptions.isRouteCalloutsEnabled] should be
      * set to true
      */
+    @Deprecated(
+        "Use setCalloutAdapter(map, viewAnnotationManager, adapter). " +
+            "Without a MapboxMap the callouts may stay invisible in some cases.",
+        ReplaceWith("setCalloutAdapter(map, viewAnnotationManager, adapter)"),
+    )
     @ExperimentalPreviewMapboxNavigationAPI
     fun setCalloutAdapter(
         viewAnnotationManager: ViewAnnotationManager,
         adapter: MapboxRouteCalloutAdapter,
+    ) {
+        logW(TAG) {
+            "Call setCalloutAdapter(map, viewAnnotationManager, adapter). " +
+                "Otherwise the callouts may stay invisible in some cases"
+        }
+        setCalloutAdapter(viewAnnotationManager, adapter, map = null)
+    }
+
+    /**
+     * Set a new [adapter] and associated [viewAnnotationManager] to provide route callout views on
+     * demand. [DefaultRouteCalloutAdapter] can be used as a default implementation.
+     *
+     * You need to set your adapter again after calling [cancel]
+     *
+     * Note that corresponding [MapboxRouteLineApiOptions.isRouteCalloutsEnabled] should be
+     * set to true
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun setCalloutAdapter(
+        map: MapboxMap,
+        viewAnnotationManager: ViewAnnotationManager,
+        adapter: MapboxRouteCalloutAdapter,
+    ) {
+        setCalloutAdapter(viewAnnotationManager, adapter, map)
+    }
+
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    private fun setCalloutAdapter(
+        viewAnnotationManager: ViewAnnotationManager,
+        adapter: MapboxRouteCalloutAdapter,
+        map: MapboxMap?,
     ) {
         if (routeCalloutView != null) {
             routeCalloutView?.release()
@@ -772,6 +808,7 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         routeCalloutView = MapboxRouteCalloutsView(
             viewAnnotationManager,
             adapter,
+            map,
         )
 
         lastRouteCalloutData?.let { data -> routeCalloutView?.renderCallouts(data) }
@@ -809,7 +846,9 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
                         routeSourceKey
                     },
                     { error ->
-                        logE(TAG, error.message)
+                        logE(TAG) {
+                            "getSourceKeyForPrimaryRoute failed: ${error.message}"
+                        }
                         null
                     },
                 )?.also { primaryRouteLineSourceKey ->
