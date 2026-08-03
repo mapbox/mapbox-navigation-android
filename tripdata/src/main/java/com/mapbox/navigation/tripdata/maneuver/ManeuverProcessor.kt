@@ -60,7 +60,7 @@ internal object ManeuverProcessor {
         distanceFormatter: DistanceFormatter,
     ): ManeuverResult.GetManeuverList {
         val (previousRoute, previousManeuvers) = maneuverState.routeWithManeuvers
-        val allManeuvers = if (route.isSameRoute(previousRoute)) {
+        val allManeuvers = if (route.isSameGeometryAndLanguage(previousRoute)) {
             previousManeuvers
         } else {
             try {
@@ -147,7 +147,7 @@ internal object ManeuverProcessor {
 
                 else -> {
                     val (previousRoute, previousManeuvers) = maneuverState.routeWithManeuvers
-                    val allManeuvers = if (route.isSameRoute(previousRoute)) {
+                    val allManeuvers = if (route.isSameGeometryAndLanguage(previousRoute)) {
                         previousManeuvers
                     } else {
                         createAllManeuversForRoute(route, distanceFormatter)
@@ -443,5 +443,10 @@ internal object ManeuverProcessor {
                 else -> null
             }
         }
+    }
+
+    private fun DirectionsRoute.isSameGeometryAndLanguage(compare: DirectionsRoute?): Boolean {
+        return isSameRoute(compare) &&
+            routeOptions()?.language() == compare?.routeOptions()?.language()
     }
 }
