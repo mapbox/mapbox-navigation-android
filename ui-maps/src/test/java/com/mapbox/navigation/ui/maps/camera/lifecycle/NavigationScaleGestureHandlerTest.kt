@@ -26,6 +26,7 @@ import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListen
 import com.mapbox.navigation.ui.maps.R
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.NAVIGATION_CAMERA_OWNER
+import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import com.mapbox.navigation.ui.maps.internal.camera.NavigationCameraStateChangedObserverInternal
 import com.mapbox.navigation.ui.maps.internal.camera.NavigationCameraStateInternal
 import com.mapbox.navigation.utils.internal.LoggerProvider
@@ -247,6 +248,73 @@ class NavigationScaleGestureHandlerTest {
     }
 
     @Test
+    fun `thresholds restore to non-following baseline when handler becomes inactive mid-gesture`() {
+        val isActive = MutableStateFlow(true)
+        controller = NavigationScaleGestureHandler(
+            context,
+            navigationCamera,
+            mapboxMap,
+            gesturesPlugin,
+            locationPlugin,
+            scaleActionListener,
+            options,
+            isActive,
+        )
+        controller.initialize()
+
+        every { navigationCamera.stateInternal } returns NavigationCameraStateInternal.FOLLOWING
+        navigationCameraStateChangedObserverSlot.captured
+            .onNavigationCameraStateChanged(NavigationCameraStateInternal.FOLLOWING)
+
+        clearMocks(initialMoveGestureDetector, initialRotateGestureDetector, answers = false)
+        clearMocks(initialShoveGestureDetector, answers = false)
+        every { initialShoveGestureDetector.pixelDeltaThreshold } returns initialShoveDeltaThreshold
+
+        // Camera deactivates (gesture-driven disable) and this handler's presenter becomes
+        // inactive in the same moment - this is the racy sequence from the customer logs.
+        isActive.value = false
+        every { navigationCamera.stateInternal } returns NavigationCameraStateInternal.IDLE
+        navigationCameraStateChangedObserverSlot.captured
+            .onNavigationCameraStateChanged(NavigationCameraStateInternal.IDLE)
+
+        verify(exactly = 1) {
+            initialMoveGestureDetector.moveThreshold = initialMoveThreshold
+            initialMoveGestureDetector.moveThresholdRect = initialMoveThresdholdRect
+            initialMoveGestureDetector.multiFingerMoveThreshold = initialMultiFingerMoveThreshold
+            initialRotateGestureDetector.angleThreshold = 3.0f
+            initialShoveGestureDetector.pixelDeltaThreshold = initialShoveDeltaThreshold
+        }
+    }
+
+    @Test
+    fun `following thresholds are not re-applied by an inactive handler after it deactivates`() {
+        val isActive = MutableStateFlow(true)
+        controller = NavigationScaleGestureHandler(
+            context,
+            navigationCamera,
+            mapboxMap,
+            gesturesPlugin,
+            locationPlugin,
+            scaleActionListener,
+            options,
+            isActive,
+        )
+        controller.initialize()
+
+        isActive.value = false
+        every { navigationCamera.state } returns NavigationCameraState.FOLLOWING
+        navigationCameraStateChangedObserverSlot.captured
+            .onNavigationCameraStateChanged(NavigationCameraStateInternal.FOLLOWING)
+
+        verify(exactly = 0) {
+            initialMoveGestureDetector.moveThreshold = options.followingInitialMoveThreshold
+            initialRotateGestureDetector.angleThreshold = options.followingRotationAngleThreshold
+            initialShoveGestureDetector.pixelDeltaThreshold =
+                options.followingMultiFingerMoveThreshold
+        }
+    }
+
+    @Test
     fun `when two handlers exist only active handler adjusts thresholds`() {
         val activeNavigationCamera: NavigationCamera = mockk(relaxUnitFun = true)
         val inactiveNavigationCamera: NavigationCamera = mockk(relaxUnitFun = true)
@@ -343,6 +411,135 @@ class NavigationScaleGestureHandlerTest {
         verify(exactly = 1) { initialMoveDetector.moveThresholdRect = any() }
         verify(exactly = 1) { initialRotateDetector.angleThreshold = any() }
         verify(exactly = 1) { initialShoveDetector.pixelDeltaThreshold = any() }
+    }
+
+    @Test
+    fun `inactive handler does not override following thresholds after active handler switches`() {
+        // Both handlers share one gestures manager. Handler 1 starts active in route overview,
+        // then Handler 2 becomes active in following mode. If Handler 1's delayed non-following
+        // state callback runs last, it must not restore its baseline thresholds over Handler 2's
+        // following thresholds.
+        val firstNavigationCamera: NavigationCamera = mockk(relaxUnitFun = true)
+        val secondNavigationCamera: NavigationCamera = mockk(relaxUnitFun = true)
+        var firstCameraState = NavigationCameraStateInternal.ROUTE_OVERVIEW
+        every { firstNavigationCamera.stateInternal } answers { firstCameraState }
+        every { secondNavigationCamera.stateInternal } returns
+            NavigationCameraStateInternal.FOLLOWING
+
+        val sharedGesturesPlugin: GesturesPlugin = mockk(relaxUnitFun = true)
+        val initialManager: AndroidGesturesManager = mockk(relaxUnitFun = true)
+        val initialMoveDetector: MoveGestureDetector = mockk(relaxUnitFun = true)
+        val initialRotateDetector: RotateGestureDetector = mockk(relaxUnitFun = true)
+        val initialShoveDetector: ShoveGestureDetector = mockk(relaxUnitFun = true)
+        every { initialManager.moveGestureDetector } returns initialMoveDetector
+        every { initialManager.rotateGestureDetector } returns initialRotateDetector
+        every { initialManager.shoveGestureDetector } returns initialShoveDetector
+        every { initialMoveDetector.moveThreshold } returns initialMoveThreshold
+        every { initialMoveDetector.multiFingerMoveThreshold } returns
+            initialMultiFingerMoveThreshold
+        every { initialMoveDetector.moveThresholdRect } returns initialMoveThresdholdRect
+        every { initialRotateDetector.angleThreshold } returns 3.0f
+        every { initialShoveDetector.pixelDeltaThreshold } returns initialShoveDeltaThreshold
+        every { sharedGesturesPlugin.getGesturesManager() } returns initialManager
+        every {
+            NavigationCameraLifecycleProvider.getCustomOnUpDetector(context, initialManager, any())
+        } returns mockk(relaxUnitFun = true)
+        every { initialManager.getDetectors() } returns mutableListOf()
+
+        val firstObserverSlot = slot<NavigationCameraStateChangedObserverInternal>()
+        val secondObserverSlot = slot<NavigationCameraStateChangedObserverInternal>()
+        every {
+            firstNavigationCamera.registerNavigationCameraStateChangeObserverInternal(
+                capture(firstObserverSlot),
+            )
+        } just Runs
+        every {
+            secondNavigationCamera.registerNavigationCameraStateChangeObserverInternal(
+                capture(secondObserverSlot),
+            )
+        } just Runs
+        every { mapboxMap.subscribeCameraChangedCoalesced(any()) } returns mockk(relaxed = true)
+
+        val firstHandlerIsActive = MutableStateFlow(true)
+        val secondHandlerIsActive = MutableStateFlow(false)
+        val firstHandler = NavigationScaleGestureHandler(
+            context,
+            firstNavigationCamera,
+            mapboxMap,
+            sharedGesturesPlugin,
+            mockk(relaxUnitFun = true),
+            scaleActionListener,
+            options,
+            firstHandlerIsActive,
+        )
+        val secondHandler = NavigationScaleGestureHandler(
+            context,
+            secondNavigationCamera,
+            mapboxMap,
+            sharedGesturesPlugin,
+            mockk(relaxUnitFun = true),
+            scaleActionListener,
+            options,
+            secondHandlerIsActive,
+        )
+        firstHandler.initialize()
+        secondHandler.initialize()
+
+        firstObserverSlot.captured.onNavigationCameraStateChanged(
+            NavigationCameraStateInternal.ROUTE_OVERVIEW,
+        )
+
+        verify(exactly = 1) {
+            initialMoveDetector.moveThreshold = initialMoveThreshold
+            initialMoveDetector.moveThresholdRect = initialMoveThresdholdRect
+            initialMoveDetector.multiFingerMoveThreshold = initialMultiFingerMoveThreshold
+            initialRotateDetector.angleThreshold = 3.0f
+            initialShoveDetector.pixelDeltaThreshold = initialShoveDeltaThreshold
+        }
+
+        clearMocks(
+            initialMoveDetector,
+            initialRotateDetector,
+            initialShoveDetector,
+            answers = false,
+        )
+
+        secondHandlerIsActive.value = true
+        firstHandlerIsActive.value = false
+        secondObserverSlot.captured.onNavigationCameraStateChanged(
+            NavigationCameraStateInternal.FOLLOWING,
+        )
+
+        verify(exactly = 1) {
+            initialMoveDetector.moveThreshold = options.followingInitialMoveThreshold
+            initialMoveDetector.moveThresholdRect = options.followingMultiFingerProtectedMoveArea
+            initialMoveDetector.multiFingerMoveThreshold = options.followingMultiFingerMoveThreshold
+            initialRotateDetector.angleThreshold = options.followingRotationAngleThreshold
+            initialShoveDetector.pixelDeltaThreshold = options.followingMultiFingerMoveThreshold
+        }
+
+        clearMocks(
+            initialMoveDetector,
+            initialRotateDetector,
+            initialShoveDetector,
+            answers = false,
+        )
+        clearMocks(sharedGesturesPlugin, answers = false)
+        firstCameraState = NavigationCameraStateInternal.IDLE
+
+        // Handler 1's state callback can arrive after Handler 2 already owns the shared detectors.
+        firstObserverSlot.captured.onNavigationCameraStateChanged(
+            NavigationCameraStateInternal.IDLE,
+        )
+
+        verify(exactly = 0) {
+            initialMoveDetector.moveThreshold = initialMoveThreshold
+            initialMoveDetector.moveThresholdRect = initialMoveThresdholdRect
+            initialMoveDetector.multiFingerMoveThreshold = initialMultiFingerMoveThreshold
+            initialRotateDetector.angleThreshold = 3.0f
+            initialShoveDetector.pixelDeltaThreshold = initialShoveDeltaThreshold
+        }
+        verify(exactly = 0) { sharedGesturesPlugin.updateSettings(any()) }
     }
 
     @Test
@@ -742,6 +939,32 @@ class NavigationScaleGestureHandlerTest {
 
         assertTrue(gesturesSettings.scrollDecelerationEnabled)
         verify(exactly = 1) { gesturesPlugin.updateSettings(any()) }
+    }
+
+    @Test
+    fun `cleanup restores baseline thresholds when handler owns following thresholds`() {
+        val gesturesSettings = GesturesSettings.Builder().setScrollDecelerationEnabled(true)
+        every { gesturesPlugin.updateSettings(captureLambda()) } answers {
+            lambda<GesturesSettings.Builder.() -> Unit>().invoke(gesturesSettings)
+        }
+        controller.initialize()
+        every { navigationCamera.stateInternal } returns NavigationCameraStateInternal.FOLLOWING
+        navigationCameraStateChangedObserverSlot.captured
+            .onNavigationCameraStateChanged(NavigationCameraStateInternal.FOLLOWING)
+        assertFalse(gesturesSettings.scrollDecelerationEnabled)
+
+        clearMocks(initialMoveGestureDetector, initialRotateGestureDetector, answers = false)
+        clearMocks(initialShoveGestureDetector, answers = false)
+        controller.cleanup(shouldResetGestureManager = true)
+
+        verify(exactly = 1) {
+            initialMoveGestureDetector.moveThreshold = initialMoveThreshold
+            initialMoveGestureDetector.moveThresholdRect = initialMoveThresdholdRect
+            initialMoveGestureDetector.multiFingerMoveThreshold = initialMultiFingerMoveThreshold
+            initialRotateGestureDetector.angleThreshold = 3.0f
+            initialShoveGestureDetector.pixelDeltaThreshold = initialShoveDeltaThreshold
+        }
+        assertTrue(gesturesSettings.scrollDecelerationEnabled)
     }
 
     @Test
