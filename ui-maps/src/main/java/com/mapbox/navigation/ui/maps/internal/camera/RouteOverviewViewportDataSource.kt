@@ -18,6 +18,7 @@ import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.pro
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.simplifyCompleteRoutePoints
 import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger
 import com.mapbox.navigation.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.toPoint
 
 private data class RouteIndices(
@@ -56,6 +57,7 @@ class RouteOverviewViewportDataSource @VisibleForTesting internal constructor(
         set(value) {
             if (field != value) {
                 field = value
+                routeDataUpToDate = false
                 reevaluate()
             }
         }
@@ -67,8 +69,23 @@ class RouteOverviewViewportDataSource @VisibleForTesting internal constructor(
     private var targetLocation: Location? = null
     private var cachedRemainingPoints: MutableMap<String, CachedRemainingPoints> = hashMapOf()
 
+    // Tracks whether simplifiedCompleteRoutesPoints is current. Avoids re-decoding all step
+    // geometries on every setActive(true) when routes and simplification settings have not changed.
+    private var routeDataUpToDate = false
+
+    // Initial values are never read - hasSimplificationChanged() is only called
+    // when routeDataUpToDate = true, which is set only after calculateRouteData()
+    // has already updated these fields.
+    private var lastSimplificationEnabled = true
+    private var lastSimplificationFactor = -1
+
     override fun reevaluate() {
-        calculateRouteData(navigationRoutes)
+        if (!routeDataUpToDate || hasSimplificationChanged()) {
+            logD(TAG) { "Route data outdated - re-calculating" }
+            calculateRouteData(navigationRoutes)
+        } else {
+            logD(TAG) { "Route data up-to-date - skipping calculation" }
+        }
         routeProgress?.let { onRouteProgressChanged(it) }
         super.reevaluate()
     }
@@ -76,6 +93,7 @@ class RouteOverviewViewportDataSource @VisibleForTesting internal constructor(
     fun onRoutesChanged(routes: List<NavigationRoute>) {
         if (!areSameRoutes(navigationRoutes, routes)) {
             navigationRoutes = routes
+            routeDataUpToDate = false
             calculateRouteData(routes)
         }
     }
@@ -112,12 +130,16 @@ class RouteOverviewViewportDataSource @VisibleForTesting internal constructor(
                     }
                     simplifiedRemainingPointsOnRoutes =
                         simplifiedCompleteRoutesPoints.flatten().flatten().flatten()
+                    routeDataUpToDate = true
+                    lastSimplificationEnabled = options.geometrySimplification.enabled
+                    lastSimplificationFactor = options.geometrySimplification.simplificationFactor
                 }
             }
         }
     }
 
     private fun clearRoutePointsData() {
+        routeDataUpToDate = false
         indicesConverter.onRoutesChanged(emptyList())
         runIfActive {
             simplifiedCompleteRoutesPoints = emptyList()
@@ -126,6 +148,7 @@ class RouteOverviewViewportDataSource @VisibleForTesting internal constructor(
     }
 
     fun clearRouteData() {
+        routeDataUpToDate = false
         this.navigationRoutes = emptyList()
         clearRoutePointsData()
     }
@@ -242,5 +265,15 @@ class RouteOverviewViewportDataSource @VisibleForTesting internal constructor(
         // Track the puck as part of the route overview frame.
         targetLocation?.let { points.add(0, it.toPoint()) }
         return points
+    }
+
+    private fun hasSimplificationChanged(): Boolean {
+        val simplification = options.geometrySimplification
+        return lastSimplificationEnabled != simplification.enabled ||
+            lastSimplificationFactor != simplification.simplificationFactor
+    }
+
+    private companion object {
+        private const val TAG = "RouteOverviewViewportDataSource"
     }
 }

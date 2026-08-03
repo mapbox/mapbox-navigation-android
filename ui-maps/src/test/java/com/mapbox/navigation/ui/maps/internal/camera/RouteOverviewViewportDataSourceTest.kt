@@ -27,6 +27,7 @@ import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.getRemainingPointsOnRoute
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRoutePoints
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.simplifyCompleteRoutePoints
+import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.toPoint
 import io.mockk.clearAllMocks
 import io.mockk.clearMocks
@@ -165,6 +166,7 @@ class RouteOverviewViewportDataSourceTest {
 
     @Before
     fun setUp() {
+        LoggerProvider.setLoggerFrontend(mockk(relaxed = true))
         mockkObject(ViewportDataSourceProcessor)
         mockkStatic(DecodeUtils::class)
         every {
@@ -997,6 +999,45 @@ class RouteOverviewViewportDataSourceTest {
         }
         verify {
             mapboxMap.cameraForCoordinates(any(), any(), any(), any(), any())
+        }
+    }
+
+    @Test
+    fun setActiveDoesNotRedecodeRouteGeometryWhenRoutesUnchanged() {
+        // GIVEN routes are loaded and overview is activated
+        viewportDataSource.onRoutesChanged(listOf(navigationRoute))
+        viewportDataSource.onRouteProgressChanged(routeProgress)
+        viewportDataSource.evaluate()
+
+        clearMocks(ViewportDataSourceProcessor, answers = false)
+
+        // WHEN the camera toggles between following and overview without a route change
+        viewportDataSource.setActive(false)
+        viewportDataSource.setActive(true)
+
+        // THEN route geometry is NOT re-decoded (processRoutePoints called 0 additional times)
+        verify(exactly = 0) {
+            processRoutePoints(any())
+        }
+    }
+
+    @Test
+    fun setActiveRedecodeRouteGeometryWhenSimplificationSettingsChanged() {
+        // GIVEN routes are loaded and overview is activated
+        viewportDataSource.onRoutesChanged(listOf(navigationRoute))
+        viewportDataSource.onRouteProgressChanged(routeProgress)
+        viewportDataSource.evaluate()
+
+        clearMocks(ViewportDataSourceProcessor, answers = false)
+
+        // WHEN simplification factor is mutated and overview is re-activated
+        viewportDataSource.options.geometrySimplification.simplificationFactor = 5
+        viewportDataSource.setActive(false)
+        viewportDataSource.setActive(true)
+
+        // THEN route geometry IS re-processed with the new settings
+        verify(exactly = 1) {
+            processRoutePoints(any())
         }
     }
 
