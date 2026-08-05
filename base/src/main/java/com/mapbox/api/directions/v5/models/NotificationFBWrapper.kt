@@ -142,7 +142,12 @@ internal class NotificationFBWrapper private constructor(
                     DirectionsCriteria.NOTIFICATION_SUBTYPE_EV_STATION_UNAVAILABLE
                 // battery_preconditioning_range is not stable yet.
                 // It is not currently available in the backend or in mapbox-java.
-                FBNotificationSubtype.BatteryPreconditioningRange -> "battery_preconditioning_range"
+                FBNotificationSubtype.BatteryPreconditioningRange ->
+                    "battery_preconditioning_range"
+                FBNotificationSubtype.UnnecessaryChargingAtNextUPCS ->
+                    "unnecessaryChargingAtNextUPCS"
+                FBNotificationSubtype.UnnecessaryChargingAtNextCPOI ->
+                    "unnecessaryChargingAtNextCPOI"
                 FBNotificationSubtype.Unknown -> unrecognized?.get(propertyName)?.asString()
             }
         }
