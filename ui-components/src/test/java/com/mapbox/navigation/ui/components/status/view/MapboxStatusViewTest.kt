@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.components.status.view
 
 import android.content.Context
-import android.os.Build
 import androidx.core.view.isVisible
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
@@ -13,12 +12,10 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowLooper
 import com.mapbox.navigation.ui.components.status.model.StatusFactory.buildStatus as status
 
 @OptIn(ExperimentalMapboxNavigationAPI::class)
-@Config(sdk = [Build.VERSION_CODES.O_MR1])
 @RunWith(RobolectricTestRunner::class)
 class MapboxStatusViewTest {
 
