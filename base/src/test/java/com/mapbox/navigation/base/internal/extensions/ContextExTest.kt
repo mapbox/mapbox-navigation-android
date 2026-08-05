@@ -14,7 +14,7 @@ import org.robolectric.util.ReflectionHelpers
 import java.util.Locale
 
 @RunWith(RobolectricTestRunner::class)
-@Config(manifest = Config.NONE, sdk = [Build.VERSION_CODES.N])
+@Config(manifest = Config.NONE)
 class ContextExTest {
 
     private lateinit var context: Context

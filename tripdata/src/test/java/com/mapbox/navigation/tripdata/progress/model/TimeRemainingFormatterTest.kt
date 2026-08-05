@@ -2,7 +2,6 @@ package com.mapbox.navigation.tripdata.progress.model
 
 import android.content.Context
 import android.graphics.Typeface
-import android.os.Build
 import android.text.Spannable
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
@@ -18,7 +17,6 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.util.Locale
 
-@Config(sdk = [Build.VERSION_CODES.O_MR1])
 @RunWith(RobolectricTestRunner::class)
 class TimeRemainingFormatterTest {
 
