@@ -133,6 +133,19 @@ interface MapboxNativeNavigator : MapboxNativeRerouteInterface {
 
     fun onEVDataUpdated(data: Map<String, String>)
 
+    /**
+     * Notifies the navigator that the user decided to keep (or release) the charging station, so
+     * that it is retained in the route alternatives and no reroute to another station is triggered.
+     *
+     * The decision is session-scoped: native clears it when a new route is set or the destination
+     * is reached, and ignores calls made against a route that is no longer the primary one.
+     *
+     * @param routeId id of the route the decision was made against
+     * @param stationId id of the charging station the user decided on
+     * @param retained true when the user keeps the station, false to release it
+     */
+    fun retainUserChargingStation(routeId: String, stationId: String, retained: Boolean)
+
     // EH
 
     /**
