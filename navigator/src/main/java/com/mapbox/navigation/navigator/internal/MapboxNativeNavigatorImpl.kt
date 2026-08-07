@@ -418,6 +418,11 @@ class MapboxNativeNavigatorImpl(
         navigator.onEvDataUpdated(data.toEvStateData())
     }
 
+    override fun retainUserChargingStation(routeId: String, stationId: String, retained: Boolean) {
+        if (warnIfShutdown("retainUserChargingStation")) return
+        navigator.retainUserChargingStation(routeId, stationId, retained)
+    }
+
     // EH
 
     override fun setElectronicHorizonObserver(eHorizonObserver: ElectronicHorizonObserver?) {
