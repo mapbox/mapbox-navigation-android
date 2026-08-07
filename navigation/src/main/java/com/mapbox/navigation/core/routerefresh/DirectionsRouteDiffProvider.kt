@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.routerefresh
 import com.google.gson.JsonElement
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.route.NavigationRoute
 import kotlin.math.min
 
@@ -12,7 +13,9 @@ internal class DirectionsRouteDiffProvider {
         oldRoute: NavigationRoute,
         newRoute: NavigationRoute,
         currentLegIndex: Int,
-    ): List<String> {
+    ): List<String> = PerformanceTracker.trackPerformanceSync(
+        "DirectionsRouteDiffProvider#buildRouteDiffs",
+    ) {
         val routeDiffs = arrayListOf<String>()
         val oldRouteLegs = oldRoute.directionsRoute.legs()
         val newRouteLegs = newRoute.directionsRoute.legs()
@@ -32,7 +35,7 @@ internal class DirectionsRouteDiffProvider {
         if (oldRoute.waypoints != newRoute.waypoints) {
             routeDiffs.add("Updated waypoints at route ${newRoute.id}")
         }
-        return routeDiffs
+        routeDiffs
     }
 
     private fun getUpdatedData(oldRouteLeg: RouteLeg, newRouteLeg: RouteLeg): List<String> {

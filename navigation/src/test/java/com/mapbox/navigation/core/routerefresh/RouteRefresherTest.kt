@@ -90,6 +90,7 @@ class RouteRefresherTest {
         routeDiffProvider,
         routeRefresh,
         globalScope = coroutineRule.createTestScope(),
+        computationDispatcher = coroutineRule.testDispatcher,
     )
 
     @Before
