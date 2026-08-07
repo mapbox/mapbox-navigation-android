@@ -6,6 +6,7 @@ import com.adevinta.android.barista.rule.cleardata.ClearFilesRule
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.DirectionsCriteria.EXCLUDE_MOTORWAY
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.bindgen.Value
 import com.mapbox.common.TileDataDomain
 import com.mapbox.common.TileStore
 import com.mapbox.geojson.Point
@@ -470,22 +471,34 @@ class CoreRerouteTest(
      *   1. the destination waypoint is preserved across the replan;
      *   2. the new route's options reflect the adapter's modification (motorway exclusion).
      *
-     * Note: this test could become flaky if NN downloads enough navigation tiles ahead of time
+     * Note: this test was flaky if NN downloads enough navigation tiles ahead of time
      * so that switching to the offline pack is never triggered during navigation.
      */
-    @Ignore("Flaky test - NAVAND-7338")
     @Test
     fun route_replan_triggered_after_navigator_recreation_with_fallback() = sdkTest(180_000) {
-        val mockRoute = RoutesProvider.near_munich_with_waypoints(context)
+        val mockRoute = RoutesProvider.near_munich_tile_boundary_crossing(context)
         val originLocation = mockRoute.routeWaypoints.first()
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
         val tilesVersion = context.unpackTiles(Tileset.NearMunich)[TileDataDomain.NAVIGATION]!!
+        // On CI, there is a chance that tiles won't be downloaded due to a couple of unlucky
+        // transient network errors while re-downloading the online tiles after `withoutInternet`
+        // Since retry is delayed exponentially, waiting for next retry can eat this test's
+        // whole timeout before a retry succeeds, even though the SDK is
+        // still retrying correctly in the background. Shrinking the backoff timer allows to
+        // do more retry attempts land inside the test timeout window.
+        val testTileStore = TileStore.create().apply {
+            setOption("backoff-timer-scale", Value(0.1))
+            setOption("backoff-timer-base", Value(1.5))
+        }
         withMapboxNavigation(
             useRealTiles = true,
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
-            tileStore = TileStore.create(),
+            customConfig = getTestRerouteCustomConfig(
+                runOptions.nativeReroute,
+            ),
+            tileStore = testTileStore,
         ) { navigation ->
+
             // 1. Request the initial online route from the mock web server and start tracking
             //    from the route's origin.
             val routes = stayOnPosition(originLocation, bearing = 0.0f) {
@@ -510,6 +523,8 @@ class CoreRerouteTest(
                 endReplay = false,
             )
 
+            mockLocationReplayerRule.pause()
+
             // 3. Register a RerouteOptionsAdapter that adds EXCLUDE_MOTORWAY to the route
             //    options when `avoidMotorway` flips to true. This is the modification that
             //    the final replan call is expected to apply.
@@ -528,17 +543,18 @@ class CoreRerouteTest(
                 },
             )
 
-            val mockReplanRoute = RoutesProvider.near_munich_for_replan(context)
+            val mockReplanRoute = RoutesProvider.near_munich_tile_boundary_crossing_replan(context)
             val originLocationReplanRoute = mockReplanRoute.routeWaypoints.first()
 
             // 4. Drop the network: NN exhausts online tiles and switches to the offline pack,
             //    which recreates the navigator with SetRoutesReason.FALLBACK_TO_OFFLINE.
             //    Wait for the fallback version switch, then drive the route to the location
             //    where the replan should originate.
-            withoutInternet {}
-
-            navigation.versionSwitchObserver().first { it == tilesVersion }
-            navigation.moveAlongTheCurrentRouteUntilLocation(originLocationReplanRoute)
+            withoutInternet {
+                mockLocationReplayerRule.resume()
+                navigation.versionSwitchObserver().first { it == tilesVersion }
+                navigation.moveAlongTheCurrentRouteUntilLocation(originLocationReplanRoute)
+            }
 
             // 5. Network is restored. Park the puck at the replan origin and wait for NN to
             //    switch back to the target version — this is the second recreation

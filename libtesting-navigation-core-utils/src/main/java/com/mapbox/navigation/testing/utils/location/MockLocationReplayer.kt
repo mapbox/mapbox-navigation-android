@@ -115,6 +115,23 @@ class MockLocationReplayerRule(mockLocationUpdatesRule: MockLocationUpdatesRule)
             clearEvents()
         }
     }
+
+    /**
+     * Freezes the puck at its current position without stopping or clearing the replay session,
+     * unlike [stopAndClearEvents]. Useful to pin the simulated location while the test performs
+     * setup work that must not let the vehicle keep advancing along the route in the meantime.
+     * Resume with [resume].
+     */
+    fun pause() {
+        mapboxReplayer?.playbackSpeed(0.0)
+    }
+
+    /**
+     * Resumes replay after [pause] at normal (1x) speed.
+     */
+    fun resume() {
+        mapboxReplayer?.playbackSpeed(1.0)
+    }
 }
 
 fun Location.setUpLocation(event: ReplayEventUpdateLocation) {

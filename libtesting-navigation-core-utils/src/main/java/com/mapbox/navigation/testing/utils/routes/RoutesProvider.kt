@@ -389,6 +389,62 @@ object RoutesProvider {
         )
     }
 
+    /**
+     * Crosses the `lat=48.25` Valhalla tile boundary (real tile grid edges sit at exact 0.25
+     * degree multiples) a few hundred meters into the route, within `Tileset.NearMunich`'s
+     * coverage (lat 48.218-48.483).
+     */
+    fun near_munich_tile_boundary_crossing(context: Context): MockRoute {
+        val jsonResponse = readRawFileText(
+            context,
+            R.raw.route_response_near_munich_tile_boundary_crossing,
+        )
+        val coordinates = listOf(
+            Point.fromLngLat(12.6863, 48.2540),
+            Point.fromLngLat(12.6816, 48.2445),
+        )
+        return MockRoute(
+            jsonResponse,
+            DirectionsResponse.fromJson(jsonResponse),
+            listOf(
+                MockDirectionsRequestHandler(
+                    profile = PROFILE_DRIVING_TRAFFIC,
+                    jsonResponse = jsonResponse,
+                    expectedCoordinates = coordinates,
+                ),
+            ),
+            coordinates,
+        )
+    }
+
+    /**
+     * Replan-leg counterpart to [near_munich_tile_boundary_crossing]: origin sits along that
+     * route (past where the fallback version-switch is expected to resolve), destination reuses
+     * [near_munich_for_replan]'s.
+     */
+    fun near_munich_tile_boundary_crossing_replan(context: Context): MockRoute {
+        val jsonResponse = readRawFileText(
+            context,
+            R.raw.route_response_near_munich_tile_boundary_crossing_replan,
+        )
+        val coordinates = listOf(
+            Point.fromLngLat(12.68369, 48.25186),
+            Point.fromLngLat(12.71200424574019, 48.309799792717286),
+        )
+        return MockRoute(
+            jsonResponse,
+            DirectionsResponse.fromJson(jsonResponse),
+            listOf(
+                MockDirectionsRequestHandler(
+                    profile = PROFILE_DRIVING_TRAFFIC,
+                    jsonResponse = jsonResponse,
+                    expectedCoordinates = coordinates,
+                ),
+            ),
+            coordinates,
+        )
+    }
+
     fun near_munich_with_waypoints_for_reroute(context: Context): DirectionsRoute {
         val jsonResponse = readRawFileText(
             context,
