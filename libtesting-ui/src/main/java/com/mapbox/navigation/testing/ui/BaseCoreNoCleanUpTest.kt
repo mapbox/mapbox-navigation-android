@@ -11,7 +11,22 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.RuleChain
 
-abstract class BaseCoreNoCleanUpTest {
+/**
+ * Base class for instrumentation tests that need location permissions, a [MockWebServerRule],
+ * and a [MockLocationUpdatesRule], wired together in the right order (permissions granted before
+ * location mocking starts).
+ *
+ * Every subclass must supply an initial location via [setupMockLocation], which is pushed through
+ * [mockLocationUpdatesRule] before each test method runs.
+ *
+ * @param useFakeDeviceLocationProvider forwarded to [MockLocationUpdatesRule] - when `true`,
+ * [mockLocationUpdatesRule] pushes locations synchronously through an in-process fake provider
+ * instead of the real platform providers, and `withMapboxNavigation` (see
+ * `MapboxNavigationCreator.kt`) wires that provider in automatically.
+ */
+abstract class BaseCoreNoCleanUpTest(
+    useFakeDeviceLocationProvider: Boolean = false,
+) {
 
     private val permissionsToGrant by lazy {
         listOf(
@@ -29,7 +44,7 @@ abstract class BaseCoreNoCleanUpTest {
         *permissionsToGrant.toTypedArray()
     )
 
-    val mockLocationUpdatesRule = MockLocationUpdatesRule()
+    val mockLocationUpdatesRule = MockLocationUpdatesRule(useFakeDeviceLocationProvider)
 
     // We should first grant permissions, then set up location
     @get:Rule
