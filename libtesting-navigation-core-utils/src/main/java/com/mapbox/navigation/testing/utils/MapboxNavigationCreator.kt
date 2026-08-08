@@ -10,6 +10,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.reroute.setRepeatRerouteAfterOffRouteDelaySeconds
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.DeviceType
+import com.mapbox.navigation.base.options.LocationOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RerouteDisabled
 import com.mapbox.navigation.base.options.RerouteOptions
@@ -33,12 +34,16 @@ suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigation(
     customConfig: String? = null,
     routeRefreshOptions: RouteRefreshOptions? = null,
     rerouteStrategyForMapMatchedRoutes: RerouteStrategyForMapMatchedRoutes = RerouteDisabled,
-    block: (navigation: MapboxNavigation) -> Unit
+    locationOptions: LocationOptions? = mockLocationUpdatesRule.locationOptions,
+    block: (navigation: MapboxNavigation) -> Unit,
 ) {
     val navigation = MapboxNavigationProvider.create(
         NavigationOptions.Builder(
             InstrumentationRegistry.getInstrumentation().targetContext
         ).apply {
+            if (locationOptions != null) {
+                locationOptions(locationOptions)
+            }
             val routingTilesOptions = RoutingTilesOptions.Builder()
                 .apply {
                     if (!useRealTiles) {

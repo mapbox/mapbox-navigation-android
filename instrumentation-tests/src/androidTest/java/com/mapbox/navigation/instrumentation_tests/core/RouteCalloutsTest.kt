@@ -30,7 +30,6 @@ import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import kotlin.math.abs
@@ -43,7 +42,7 @@ import kotlin.time.times
 import kotlin.time.toDuration
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalMapboxNavigationAPI::class)
-class RouteCalloutsTest : BaseCoreNoCleanUpTest() {
+class RouteCalloutsTest : BaseCoreNoCleanUpTest(useFakeDeviceLocationProvider = true) {
 
     @get:Rule
     val clearFilesRule = ClearFilesRule()
@@ -74,7 +73,6 @@ class RouteCalloutsTest : BaseCoreNoCleanUpTest() {
      * Confirms metadata from Nav SDK produces one callout per route with a single primary and
      * that passing empty metadata with alternatives present returns no callouts (guard behavior).
      */
-    @Ignore("Flaky test - NAVAND-7338")
     @Test
     fun callouts_at_start_of_route_with_initial_alternative() = sdkTest {
         setupMockRequestHandlers()
@@ -85,6 +83,7 @@ class RouteCalloutsTest : BaseCoreNoCleanUpTest() {
                 testRoutes.size > 1,
             )
             mapboxNavigation.startTripSession()
+
             mapboxNavigation.flowLocationMatcherResult().first()
             mapboxNavigation.setNavigationRoutes(testRoutes)
             mapboxNavigation.routeProgressUpdates().first()
