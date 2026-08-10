@@ -478,6 +478,24 @@ object RoutesProvider {
         )
     }
 
+    fun multiple_routes_with_two_alternatives(context: Context): MockRoute {
+        val routeResponseJson = readRawFileText(context, R.raw.multiple_routes_with_2_alternatives)
+        val routeResponseModel = DirectionsResponse.fromJson(routeResponseJson)
+        val waypoints = routeResponseModel.routes().first().routeOptions()!!.coordinatesList()
+        return MockRoute(
+            routeResponseJson,
+            routeResponseModel,
+            mockRequestHandlers = listOf(
+                MockDirectionsRequestHandler(
+                    PROFILE_DRIVING_TRAFFIC,
+                    jsonResponse = routeResponseJson,
+                    expectedCoordinates = waypoints,
+                ),
+            ),
+            waypoints,
+        )
+    }
+
     fun route_alternative_with_closure(context: Context): MockRoute {
         val responseJson = readRawFileText(context, R.raw.route_response_route_refresh)
         val model = DirectionsResponse.fromJson(responseJson)
