@@ -1,1 +1,0 @@
-- Fixed a better EV route not being offered when the alternative resolved a critical charge alert but arrived at a newly added charging stop slightly below the requested minimum. Alternatives are now compared by how much of the primary's charge shortfall they remove, instead of being rejected for carrying any charge violation at all.
