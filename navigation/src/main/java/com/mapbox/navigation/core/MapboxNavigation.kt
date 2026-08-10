@@ -2339,6 +2339,36 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     /**
+     * Retains or releases user-provided charging station ids. While they are in retained state,
+     * the navigator stops requesting alternatives that skip those stops.
+     * Note that by default they are not in retained state and you have to explicitly make them such.
+     *
+     * @param stationIds ids of the stations whose state is supposed to be changed
+     * @param retain pass true to retain stations, false - to release them
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun changeUserChargingStationsRetainState(stationIds: Collection<String>, retain: Boolean) {
+        val primaryRouteId = getNavigationRoutes().firstOrNull()?.id
+        val action = if (retain) "retain" else "release"
+        if (primaryRouteId == null) {
+            logW(LOG_CATEGORY) {
+                "Cannot $action charging stations $stationIds: there is no primary route"
+            }
+            return
+        }
+        logI(LOG_CATEGORY) {
+            "Going to $action charging stations $stationIds on route $primaryRouteId"
+        }
+        stationIds.forEach { stationId ->
+            navigator.retainUserChargingStation(
+                primaryRouteId,
+                stationId,
+                retain,
+            )
+        }
+    }
+
+    /**
      * Retrieves current road graph version information. The retrieval process waits for the
      * tiles config to resolve.
      *
