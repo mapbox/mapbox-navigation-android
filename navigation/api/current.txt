@@ -26,6 +26,7 @@ package com.mapbox.navigation.core {
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void cancelMapMatchingRequest(long requestId);
     method public void cancelRouteRequest(long requestId);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI @kotlin.jvm.Throws(exceptionClasses=IllegalArgumentException::class) public void changeRoutesPreviewPrimaryRoute(com.mapbox.navigation.base.route.NavigationRoute newPrimaryRoute) throws java.lang.IllegalArgumentException;
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void changeUserChargingStationsRetainState(java.util.Collection<java.lang.String> stationIds, boolean retain);
     method public int currentLegIndex();
     method public com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata? getAlternativeMetadataFor(com.mapbox.navigation.base.route.NavigationRoute navigationRoute);
     method public java.util.List<com.mapbox.navigation.core.routealternatives.AlternativeRouteMetadata> getAlternativeMetadataFor(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> navigationRoutes);

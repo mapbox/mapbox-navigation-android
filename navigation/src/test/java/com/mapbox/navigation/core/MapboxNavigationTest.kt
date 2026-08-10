@@ -2451,6 +2451,78 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         }
     }
 
+    @Test
+    fun `changeUserChargingStationsRetainState retains stations on primary route`() {
+        createMapboxNavigation()
+        val primary = mockk<NavigationRoute> {
+            every { id } returns "primary-route-id"
+        }
+        every { directionsSession.routes } returns listOf(primary, mockk(relaxed = true))
+
+        mapboxNavigation.changeUserChargingStationsRetainState(
+            listOf("station-1", "station-2"),
+            retain = true,
+        )
+
+        verify(exactly = 1) {
+            navigator.retainUserChargingStation("primary-route-id", "station-1", true)
+        }
+        verify(exactly = 1) {
+            navigator.retainUserChargingStation("primary-route-id", "station-2", true)
+        }
+    }
+
+    @Test
+    fun `changeUserChargingStationsRetainState releases stations on primary route`() {
+        createMapboxNavigation()
+        val primary = mockk<NavigationRoute> {
+            every { id } returns "primary-route-id"
+        }
+        every { directionsSession.routes } returns listOf(primary)
+
+        mapboxNavigation.changeUserChargingStationsRetainState(
+            listOf("station-1"),
+            retain = false,
+        )
+
+        verify(exactly = 1) {
+            navigator.retainUserChargingStation("primary-route-id", "station-1", false)
+        }
+    }
+
+    @Test
+    fun `changeUserChargingStationsRetainState does nothing when there are no routes`() {
+        createMapboxNavigation()
+        every { directionsSession.routes } returns emptyList()
+
+        mapboxNavigation.changeUserChargingStationsRetainState(
+            listOf("station-1", "station-2"),
+            retain = true,
+        )
+
+        verify(exactly = 0) {
+            navigator.retainUserChargingStation(any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `changeUserChargingStationsRetainState does nothing when station ids are empty`() {
+        createMapboxNavigation()
+        val primary = mockk<NavigationRoute> {
+            every { id } returns "primary-route-id"
+        }
+        every { directionsSession.routes } returns listOf(primary)
+
+        mapboxNavigation.changeUserChargingStationsRetainState(
+            emptyList(),
+            retain = true,
+        )
+
+        verify(exactly = 0) {
+            navigator.retainUserChargingStation(any(), any(), any())
+        }
+    }
+
     @Test(expected = IllegalArgumentException::class)
     fun moveRoutesFromPreviewToNavigatorNoPreviewedRoutes() {
         createMapboxNavigation()
