@@ -8,6 +8,7 @@ import com.mapbox.navigation.tripdata.shield.model.RouteShieldError
 import com.mapbox.navigation.tripdata.shield.model.RouteShieldOrigin
 import com.mapbox.navigation.tripdata.shield.model.RouteShieldResult
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
+import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -71,6 +72,7 @@ internal class RoadShieldContentManagerImpl(
 ) : RoadShieldContentManager {
     internal companion object {
         internal const val CANCELED_MESSAGE = "canceled"
+        private const val TAG = "RoadShieldContentManagerImpl"
     }
 
     private val resultMap =
@@ -85,7 +87,7 @@ internal class RoadShieldContentManagerImpl(
         val requests = prepareShields(shieldsToDownload)
         return try {
             waitForShields(requests)
-        } catch (ex: CancellationException) {
+        } catch (_: CancellationException) {
             val availableResults = requests.filter { resultMap.containsKey(it) }
             val missingResults = requests.filterNot { availableResults.contains(it) }
 
@@ -173,6 +175,7 @@ internal class RoadShieldContentManagerImpl(
                             )
                         }
                     }
+
                     is RouteShieldToDownload.MapboxLegacy -> {
                         resultMap[request] = shieldResultCache.getOrRequest(toDownload).fold(
                             { error ->
@@ -219,8 +222,16 @@ internal class RoadShieldContentManagerImpl(
     ): List<Expected<RouteShieldError, RouteShieldResult>> {
         return suspendCancellableCoroutine { continuation ->
             val callback = {
-                check(!continuation.isCancelled)
-                if (requests.all { request -> resultMap.containsKey(request) }) {
+                if (continuation.isCancelled) {
+                    // The caller is already gone. Drop our result slots and report the callback
+                    // as handled so that [invalidate] unregisters it.
+                    logW(TAG) {
+                        "The caller's scope is already canceled, removing slots" +
+                            " and returning."
+                    }
+                    requests.forEach { resultMap.remove(it) }
+                    true
+                } else if (requests.all { request -> resultMap.containsKey(request) }) {
                     val returnList = mutableListOf<Expected<RouteShieldError, RouteShieldResult>>()
                     requests.forEach {
                         returnList.add(resultMap.remove(it)!!)
