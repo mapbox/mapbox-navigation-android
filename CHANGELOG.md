@@ -1,3 +1,17 @@
+## Navigation SDK Core Framework 3.25.3 - 12 August, 2026
+#### Features
+
+
+#### Bug fixes and improvements
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.25.3` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.25.3))
+- Mapbox Navigation Native `v324.25.3`
+- Mapbox Core Common `v24.25.3`
+- Mapbox Java `v7.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.0))
+
 ## Navigation SDK Core Framework 3.25.2 - 13 July, 2026
 #### Features
 
