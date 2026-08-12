@@ -10,6 +10,8 @@ import com.mapbox.navigation.tripdata.shield.model.RouteShield
 import com.mapbox.navigation.tripdata.shield.model.RouteShieldError
 import com.mapbox.navigation.tripdata.shield.model.RouteShieldOrigin
 import com.mapbox.navigation.tripdata.shield.model.RouteShieldResult
+import com.mapbox.navigation.utils.internal.LoggerFrontend
+import com.mapbox.navigation.utils.internal.LoggerProvider
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -20,7 +22,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.pauseDispatcher
 import kotlinx.coroutines.test.runCurrent
+import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
@@ -29,6 +34,18 @@ class RoadShieldContentManagerImplTest {
 
     @get:Rule
     var coroutineRule = MainCoroutineRule()
+
+    private val originalLogger = LoggerProvider.getLoggerFrontend()
+
+    @Before
+    fun setup() {
+        LoggerProvider.setLoggerFrontend(mockk<LoggerFrontend>(relaxed = true))
+    }
+
+    @After
+    fun tearDown() {
+        LoggerProvider.setLoggerFrontend(originalLogger)
+    }
 
     @Test
     fun `request waits for all results to be available (success and manual cancellation), async`() =
@@ -170,6 +187,51 @@ class RoadShieldContentManagerImplTest {
             }
             assertEquals(expectedLegacyResult, result!![0].value)
             assertEquals(expectedDesignResult, result!![1].error)
+        }
+
+    @Test
+    fun `callback invoked after coroutine cancellation drops stale result instead of crashing`() =
+        coroutineRule.runBlockingTest {
+            val cache = mockk<ShieldResultCache>()
+            val contentManager = createContentManager(cache)
+
+            val designShieldUrl = "url"
+            val toDownloadDesign = mockk<RouteShieldToDownload.MapboxDesign> {
+                every { generateUrl(any()) } returns designShieldUrl
+                every { legacyFallback } returns null
+            }
+            coEvery {
+                cache.getOrRequest(toDownloadDesign)
+            } coAnswers {
+                delay(1000L)
+                ExpectedFactory.createError(ResourceCache.RequestError("error", designShieldUrl))
+            }
+
+            lateinit var staleCallback: () -> Boolean
+            pauseDispatcher {
+                val job = launch {
+                    contentManager.getShields(listOf(toDownloadDesign))
+                }
+                // let waitForShields register its callback and the download start
+                runCurrent()
+
+                // We grab the callback before cancellation removes it, and invoke it manually
+                // afterwards.
+                staleCallback = contentManager.awaitingCallbacksSnapshot().single()
+
+                job.cancel()
+                job.join()
+
+                // let the download coroutine - owned by `mainJob`, unaffected by canceling
+                // the caller's job - finish and leave its result behind in resultMap
+                advanceTimeBy(1000L)
+            }
+            assertTrue(contentManager.resultMapSnapshot().isNotEmpty())
+
+            val handled = staleCallback()
+
+            assertTrue(handled)
+            assertTrue(contentManager.resultMapSnapshot().isEmpty())
         }
 
     @Test
@@ -481,4 +543,18 @@ class RoadShieldContentManagerImplTest {
     private fun createContentManager(
         shieldResultCache: ShieldResultCache = mockk(),
     ): RoadShieldContentManagerImpl = RoadShieldContentManagerImpl(shieldResultCache)
+
+    @Suppress("UNCHECKED_CAST")
+    private fun RoadShieldContentManagerImpl.awaitingCallbacksSnapshot(): List<() -> Boolean> {
+        val field = RoadShieldContentManagerImpl::class.java.getDeclaredField("awaitingCallbacks")
+        field.isAccessible = true
+        return (field.get(this) as MutableList<() -> Boolean>).toList()
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun RoadShieldContentManagerImpl.resultMapSnapshot(): Map<Any, Any> {
+        val field = RoadShieldContentManagerImpl::class.java.getDeclaredField("resultMap")
+        field.isAccessible = true
+        return (field.get(this) as Map<Any, Any>).toMap()
+    }
 }
