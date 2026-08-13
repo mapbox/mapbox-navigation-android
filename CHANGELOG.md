@@ -58,6 +58,35 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Core Common `v24.29.0-rc.1`
 - Mapbox Java `v7.10.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.1))
 
+## Navigation SDK Core Framework 3.28.2 - 13 August, 2026
+#### Features
+
+
+#### Bug fixes and improvements
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.28.2` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.28.2))
+- Mapbox Navigation Native `v324.28.2`
+- Mapbox Core Common `v24.28.2`
+- Mapbox Java `v7.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.0))
+
+## Navigation SDK Core Framework 3.28.1 - 12 August, 2026
+#### Features
+
+
+#### Bug fixes and improvements
+- Fixed an issue where `RoadShieldContentManagerImpl` could crash if the coroutine was canceled while waiting for the road shields to return. [#17444](https://github.com/mapbox/mapbox-sdk/pull/17444)
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.28.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.28.1))
+- Mapbox Navigation Native `v324.28.1`
+- Mapbox Core Common `v24.28.1`
+- Mapbox Java `v7.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.0))
+
 ## Navigation SDK Core Framework 3.28.0 - 06 August, 2026
 #### Features
 - Extended PredictiveCacheMapsOptions with an optional tilesets property. [#14408](https://github.com/mapbox/mapbox-sdk/pull/14408)
