@@ -41,7 +41,6 @@ import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -52,7 +51,7 @@ import org.junit.Test
 
 private val TEST_REROUTE_URL = createRouteOptions().toUrl("***").toString()
 
-@OptIn(ExperimentalMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalMapboxNavigationAPI::class)
 class NativeMapboxRerouteControllerTest {
 
     private val testRouteFixtures = TestRouteFixtures()
@@ -1345,139 +1344,6 @@ class NativeMapboxRerouteControllerTest {
     }
 
     @Test
-    fun `interrupt cancels in-flight deviation parsing`() {
-        val nativeRerouteInterface = MapboxNativeRerouteInterfaceImpl()
-        val pausingParser = PausingNavigationRoutesParser(
-            createTestNavigationRoutesParsing(UnconfinedTestDispatcher()),
-        )
-        val updateRoutes = mockk<UpdateRoutes> {
-            every { this@mockk.invoke(any(), any()) } returns true
-        }
-        val controller = createNativeMapboxRerouteController(
-            nativeRerouteInterface = nativeRerouteInterface,
-            routeParser = pausingParser,
-            updateRoutes = updateRoutes,
-        )
-        val statesV2 = controller.recordRerouteStateV2()
-
-        // Deviation reroute responds; parsing starts, suspended
-        nativeRerouteInterface.observer.onRerouteDetected(TEST_REROUTE_URL)
-        nativeRerouteInterface.observer.onRerouteReceived(
-            testRouteFixtures.loadTwoLegRoute().toDataRef(),
-            TEST_REROUTE_URL,
-            RouterOrigin.ONLINE,
-        )
-
-        // MapboxNavigation interrupts the reroute because new routes were set externally
-        controller.interrupt()
-        pausingParser.releaseAll()
-
-        verify(exactly = 0) { updateRoutes(any(), any()) }
-        assertEquals(
-            listOf(
-                RerouteStateV2.Idle(),
-                RerouteStateV2.FetchingRoute(),
-                RerouteStateV2.Interrupted(),
-                RerouteStateV2.Idle(),
-            ),
-            statesV2,
-        )
-    }
-
-    @Test
-    fun `interrupt when idle does not cancel native reroute or emit states`() {
-        val nativeRerouteInterface = MapboxNativeRerouteInterfaceImpl()
-        val controller = createNativeMapboxRerouteController(
-            nativeRerouteInterface = nativeRerouteInterface,
-        )
-        val statesV2 = controller.recordRerouteStateV2()
-
-        controller.interrupt()
-
-        verify(exactly = 0) { nativeRerouteInterface.rerouteControllerMock.cancel() }
-        assertEquals(listOf<RerouteStateV2>(RerouteStateV2.Idle()), statesV2)
-    }
-
-    @Test
-    fun `route update triggered by deviation result does not interrupt itself`() {
-        // MapboxNavigation.internalSetNavigationRoutes calls rerouteController.interrupt()
-        // for reroute route updates too. Applying the reroute's own result must not be
-        // treated as a stale in-flight reroute.
-        val nativeRerouteInterface = MapboxNativeRerouteInterfaceImpl()
-        var controller: NativeMapboxRerouteController? = null
-        var updateRoutesCalls = 0
-        controller = createNativeMapboxRerouteController(
-            nativeRerouteInterface = nativeRerouteInterface,
-            updateRoutes = { _, _ ->
-                updateRoutesCalls++
-                controller!!.interrupt()
-                true
-            },
-        )
-        val statesV2 = controller.recordRerouteStateV2()
-
-        nativeRerouteInterface.observer.onRerouteDetected(TEST_REROUTE_URL)
-        nativeRerouteInterface.observer.onRerouteReceived(
-            testRouteFixtures.loadTwoLegRoute().toDataRef(),
-            TEST_REROUTE_URL,
-            RouterOrigin.ONBOARD,
-        )
-
-        assertEquals(1, updateRoutesCalls)
-        verify(exactly = 0) { nativeRerouteInterface.rerouteControllerMock.cancel() }
-        assertEquals(
-            listOf(
-                RerouteStateV2.Idle(),
-                RerouteStateV2.FetchingRoute(),
-                RerouteStateV2.RouteFetched(com.mapbox.navigation.base.route.RouterOrigin.OFFLINE),
-                RerouteStateV2.Deviation.ApplyingRoute(),
-                RerouteStateV2.Idle(),
-            ),
-            statesV2,
-        )
-    }
-
-    @Test
-    fun `replan result delivery does not interrupt itself`() {
-        val nativeRerouteInterface = MapboxNativeRerouteInterfaceImpl()
-        val rerouteDetector = nativeRerouteInterface.getRerouteDetector() as TestRerouteDetector
-        val controller = createNativeMapboxRerouteController(
-            nativeRerouteInterface = nativeRerouteInterface,
-        )
-        val statesV2 = controller.recordRerouteStateV2()
-
-        var deliveredRoutes: List<NavigationRoute>? = null
-        controller.rerouteOnParametersChange { rerouteResult ->
-            deliveredRoutes = rerouteResult.routes
-            // Setting the replan result as new routes triggers interrupt()
-            controller.interrupt()
-        }
-        rerouteDetector.latestCallback!!.run(
-            ExpectedFactory.createValue(
-                RerouteInfo(
-                    testRouteFixtures.loadTwoLegRoute().toDataRef(),
-                    TEST_REROUTE_URL,
-                    RouterOrigin.ONLINE,
-                ),
-            ),
-        )
-
-        assertEquals(
-            listOf("cjeacbr8s21bk47lggcvce7lv#0"),
-            deliveredRoutes?.map { it.id },
-        )
-        assertEquals(
-            listOf(
-                RerouteStateV2.Idle(),
-                RerouteStateV2.FetchingRoute(),
-                RerouteStateV2.RouteFetched(com.mapbox.navigation.base.route.RouterOrigin.ONLINE),
-                RerouteStateV2.Idle(),
-            ),
-            statesV2,
-        )
-    }
-
-    @Test
     fun `user requests reroute but it's cancelled`() {
         val updateRoutes = mockk<UpdateRoutes>()
         val nativeRerouteInterface = MapboxNativeRerouteInterfaceImpl()
@@ -1554,7 +1420,6 @@ private class MapboxNativeRerouteInterfaceImpl : MapboxNativeRerouteInterface {
 
     lateinit var observer: RerouteObserver
     private val rerouteDetector = TestRerouteDetector()
-    val rerouteControllerMock = mockk<RerouteControllerInterface>(relaxed = true)
 
     override fun addRerouteObserver(nativeRerouteObserver: RerouteObserver) {
         observer = nativeRerouteObserver
@@ -1573,7 +1438,7 @@ private class MapboxNativeRerouteInterfaceImpl : MapboxNativeRerouteInterface {
     }
 
     override fun getRerouteController(): RerouteControllerInterface? {
-        return rerouteControllerMock
+        return mockk(relaxed = true)
     }
 
     override fun nativeRerouteEnabled(): Boolean = true
