@@ -5,7 +5,9 @@ ext {
       minSdkVersion           : 21,
       targetSdkVersion        : 36,
       compileSdkVersion       : 36,
-      carMinSdkVersion        : 23
+      carMinSdkVersion        : 23,
+      // Vulkan-enabled builds resolve android-core-vulkan, whose minSdk is 31 (Android 12+).
+      carVulkanMinSdkVersion  : 31
   ]
 
   // mapboxSdkHdFullSparseCheckout in generate_api_docs_android.sh depends on mapboxSdkVersionSuffix
