@@ -144,6 +144,7 @@ internal class NativeMapboxRerouteController(
                         )
                         nativeState = NativeRerouteControllerState.Idle()
                     }
+
                     is RerouteResponseParsingResult.RoutesAvailable -> {
                         nativeState = NativeRerouteControllerState.RouteFetched(
                             result.newRoutes.firstOrNull()?.origin.orEmpty(),
@@ -234,8 +235,20 @@ internal class NativeMapboxRerouteController(
         isEnabled = enabled
     }
 
-    @Deprecated("native reroute controller interrupts reroute without external help")
     override fun interrupt() {
+        // Interrupt only while a reroute is actually in flight. Once a route has been
+        // fetched, the result is delivered synchronously and must not cancel the delivery
+        // (same guard as MapboxRerouteController#onRequestInterrupted).
+        when (nativeState) {
+            is NativeRerouteControllerState.WaitingForResponse,
+            is NativeRerouteControllerState.RouteObjectsParsing,
+            -> {
+                logD(TAG) { "interrupt: cancelling reroute request" }
+                interruptParsingIfAny()
+            }
+
+            else -> Unit
+        }
     }
 
     @Deprecated("native reroute controller identify reroute without external help")
