@@ -359,6 +359,7 @@ class MapboxNavigationViewportDataSource private constructor(
 
     private val mapSizeReadyCallbackHelper = MapSizeInitializedCallbackHelper(mapboxMap)
     private var mapsSizeReadyCancellable: Cancelable? = null
+    private var isMapSizeReadyCallbackPending = false
 
     override fun getViewportData(): ViewportData = viewportData
 
@@ -383,14 +384,21 @@ class MapboxNavigationViewportDataSource private constructor(
      * @see [getViewportData]
      */
     fun evaluate() {
-        mapsSizeReadyCancellable?.cancel()
-        mapsSizeReadyCancellable = mapSizeReadyCallbackHelper.onMapSizeInitialized {
+        if (isMapSizeReadyCallbackPending) {
+            return
+        }
+
+        isMapSizeReadyCallbackPending = true
+        val cancellable = mapSizeReadyCallbackHelper.onMapSizeInitialized {
+            isMapSizeReadyCallbackPending = false
+            mapsSizeReadyCancellable = null
             PerformanceTracker.trackPerformanceSync(
                 "MapboxNavigationViewportDataSource#evaluateImpl",
             ) {
                 evaluateImpl()
             }
         }
+        mapsSizeReadyCancellable = if (isMapSizeReadyCallbackPending) cancellable else null
     }
 
     private fun evaluateImpl() {
@@ -499,6 +507,7 @@ class MapboxNavigationViewportDataSource private constructor(
     fun clearRouteData() {
         mapsSizeReadyCancellable?.cancel()
         mapsSizeReadyCancellable = null
+        isMapSizeReadyCallbackPending = false
 
         navigationRoutes = emptyList()
         postManeuverFramingPoints = emptyList()
