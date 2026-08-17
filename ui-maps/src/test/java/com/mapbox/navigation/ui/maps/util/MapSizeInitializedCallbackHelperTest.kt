@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 
@@ -70,6 +71,24 @@ class MapSizeInitializedCallbackHelperTest {
         actionSlot.captured.invoke()
 
         verify(exactly = 0) {
+            action.invoke()
+        }
+    }
+
+    @Test
+    fun `notifies only once when action throws`() {
+        val actionSlot = mockWhenSizeReady()
+
+        val action = mockk<() -> Unit>()
+        every { action.invoke() } throws RuntimeException()
+        helper.onMapSizeInitialized(action)
+
+        assertThrows(RuntimeException::class.java) {
+            actionSlot.captured.invoke()
+        }
+        actionSlot.captured.invoke()
+
+        verify(exactly = 1) {
             action.invoke()
         }
     }
