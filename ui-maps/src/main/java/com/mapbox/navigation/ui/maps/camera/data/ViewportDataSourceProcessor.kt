@@ -325,14 +325,48 @@ internal object ViewportDataSourceProcessor {
         )
     }
 
-    fun getScreenBoxForFraming(mapSize: Size, padding: EdgeInsets): ScreenBox {
+    /**
+     * The following camera places the principal point (puck vanishing point) on the returned
+     * box's bottom edge when [FollowingFrameOptions.FocalPoint.y] is `1.0`; in that case
+     * [MapboxMap.cameraForCoordinates] fails if puck bottom coordinate even equal to bottom
+     * padding for high zoom levels, and making bbox bottom edge lower even for 1 pixel works. When
+     * [allowCameraFramingForHighZoom] is enabled and [focalPointY] is `1.0`, the bottom edge is
+     * extended by 1 pixel to avoid that.
+     *
+     * That's a real bug fix, but customers have already built around the unfixed behavior, so
+     * it's opt-in via [allowCameraFramingForHighZoom] rather than applied unconditionally. This
+     * flag exists purely for backward compatibility with those integrations; enabling the fix
+     * requires adoption/verification on their side.
+     *
+     * [focalPointY] should never exceed `1.0`, that's enforced when constructing
+     * [FollowingFrameOptions.FocalPoint]. If it somehow does, that's treated as an exceptional
+     * case: it's logged and the regular, non-extended padding is used instead.
+     */
+    fun getScreenBoxForFraming(
+        mapSize: Size,
+        padding: EdgeInsets,
+        allowCameraFramingForHighZoom: Boolean,
+        focalPointY: Double,
+    ): ScreenBox {
         val topLeft = ScreenCoordinate(
             padding.left,
             padding.top,
         )
+        val bottomEdge = mapSize.height - padding.bottom
         val bottomRight = ScreenCoordinate(
             mapSize.width - padding.right,
-            mapSize.height - padding.bottom,
+            when {
+                focalPointY > 1.0 -> {
+                    logE(
+                        "focalPointY must not exceed 1.0 but was $focalPointY, " +
+                            "falling back to the regular padding",
+                        LOG_CATEGORY,
+                    )
+                    bottomEdge
+                }
+                allowCameraFramingForHighZoom && focalPointY == 1.0 -> bottomEdge + 1.0
+                else -> bottomEdge
+            },
         )
         return ScreenBox(
             topLeft,
