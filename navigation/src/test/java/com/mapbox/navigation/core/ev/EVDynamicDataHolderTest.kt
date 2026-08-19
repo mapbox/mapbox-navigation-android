@@ -17,6 +17,7 @@ class EVDynamicDataHolderTest {
     private val auxConsumption = "70"
     private val preConditioningTime = "10"
     private val unconditionedChargingCurve = "0,30;50,100"
+    private val batteryTemperature = "25.0"
     private val initial = mapOf(
         "energy_consumption_curve" to JsonPrimitive(curve),
         "ev_freeflow_consumption_curve" to JsonPrimitive(freeflowCurve),
@@ -24,6 +25,7 @@ class EVDynamicDataHolderTest {
         "auxiliary_consumption" to JsonPrimitive(auxConsumption),
         "ev_pre_conditioning_time" to JsonPrimitive(preConditioningTime),
         "ev_unconditioned_charging_curve" to JsonPrimitive(unconditionedChargingCurve),
+        "ev_battery_temperature" to JsonPrimitive(batteryTemperature),
         "aaa" to JsonPrimitive("bbb"),
     )
 
@@ -41,6 +43,7 @@ class EVDynamicDataHolderTest {
             "auxiliary_consumption" to auxConsumption,
             "ev_pre_conditioning_time" to preConditioningTime,
             "ev_unconditioned_charging_curve" to unconditionedChargingCurve,
+            "ev_battery_temperature" to batteryTemperature,
         )
         assertEquals(expected, evDynamicDataHolder.currentData(initial))
         assertEquals(emptyMap<String, String>(), evDynamicDataHolder.updatedRawData().value)
@@ -68,6 +71,7 @@ class EVDynamicDataHolderTest {
             "auxiliary_consumption" to "80",
             "ev_pre_conditioning_time" to preConditioningTime,
             "ev_unconditioned_charging_curve" to unconditionedChargingCurve,
+            "ev_battery_temperature" to batteryTemperature,
         )
         evDynamicDataHolder.updateData(data)
 
@@ -108,6 +112,7 @@ class EVDynamicDataHolderTest {
             "auxiliary_consumption" to "80",
             "ev_pre_conditioning_time" to preConditioningTime,
             "ev_unconditioned_charging_curve" to unconditionedChargingCurve,
+            "ev_battery_temperature" to batteryTemperature,
         )
 
         evDynamicDataHolder.updateData(data1)
@@ -126,6 +131,7 @@ class EVDynamicDataHolderTest {
             "auxiliary_consumption" to JsonObject(),
             "ev_pre_conditioning_time" to JsonPrimitive(preConditioningTime),
             "ev_unconditioned_charging_curve" to JsonPrimitive(unconditionedChargingCurve),
+            "ev_battery_temperature" to JsonPrimitive(batteryTemperature),
             "aaa" to JsonPrimitive("bbb"),
         )
         val expected = mapOf(
@@ -134,9 +140,26 @@ class EVDynamicDataHolderTest {
             "ev_initial_charge" to charge,
             "ev_pre_conditioning_time" to preConditioningTime,
             "ev_unconditioned_charging_curve" to unconditionedChargingCurve,
+            "ev_battery_temperature" to batteryTemperature,
         )
 
         assertEquals(expected, evDynamicDataHolder.currentData(initial))
+    }
+
+    @Test
+    fun `currentData() drops directions-only battery conditioning keys from EV fallback`() {
+        val initialWithDirectionsOnlyKeys = initial + mapOf(
+            "ev_battery_charging_power_at_temperature" to JsonPrimitive("-5.0,10.0;0.0,100.0"),
+            "ev_battery_charging_power_optimal_temperature" to JsonPrimitive("10.0,-5.0;100.0,0.0"),
+            "ev_battery_heating_parameters" to JsonPrimitive("1.0,2.0,3.0"),
+        )
+
+        val result = evDynamicDataHolder.currentData(initialWithDirectionsOnlyKeys)
+
+        assertEquals(null, result["ev_battery_charging_power_at_temperature"])
+        assertEquals(null, result["ev_battery_charging_power_optimal_temperature"])
+        assertEquals(null, result["ev_battery_heating_parameters"])
+        assertEquals(batteryTemperature, result["ev_battery_temperature"])
     }
 
     @Test

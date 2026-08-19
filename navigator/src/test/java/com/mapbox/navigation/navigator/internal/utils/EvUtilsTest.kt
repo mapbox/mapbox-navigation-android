@@ -48,6 +48,10 @@ class EvUtilsTest {
             "ev_pre_conditioning_time" to "7",
             "ev_unconditioned_charging_curve" to "5.0,6.0;7.0,8.0",
             "ev_additional_parameters" to "key1:value1,key2:value2",
+            "ev_battery_temperature" to "25.0",
+            "ev_battery_charging_power_at_temperature" to "-5.0,10.0;0.0,100.0",
+            "ev_battery_charging_power_optimal_temperature" to "10.0,-5.0;100.0,0.0",
+            "ev_battery_heating_parameters" to "1.0,2.0,3.0",
         )
         val expected = EvStateData(
             10,
@@ -58,10 +62,10 @@ class EvUtilsTest {
             7,
             listOf(CurveElement(5.0f, 6.0f), CurveElement(7.0f, 8.0f)),
             hashMapOf("key1" to "value1", "key2" to "value2"),
-            null,
-            null,
-            null,
-            null,
+            25.0f,
+            listOf(CurveElement(-5.0f, 10.0f), CurveElement(0.0f, 100.0f)),
+            listOf(CurveElement(10.0f, -5.0f), CurveElement(100.0f, 0.0f)),
+            listOf(1.0f, 2.0f, 3.0f),
         )
 
         assertEquals(expected, input.toEvStateData())
@@ -166,5 +170,54 @@ class EvUtilsTest {
         )
 
         assertEquals(emptyList<CurveElement>(), input.toEvStateData().evFreeflowConsumptionCurve)
+    }
+
+    @Test
+    fun invalidBatteryTemperature() {
+        val input = mapOf(
+            "energy_consumption_curve" to "1.0,2.0;3.0,4.0",
+            "ev_battery_temperature" to "invalid",
+        )
+
+        assertNull(input.toEvStateData().evBatteryTemp)
+    }
+
+    @Test
+    fun invalidBatteryChargingPowerAtTemperature() {
+        val input = mapOf(
+            "energy_consumption_curve" to "1.0,2.0;3.0,4.0",
+            "ev_battery_charging_power_at_temperature" to "invalid",
+        )
+
+        assertEquals(
+            emptyList<CurveElement>(),
+            input.toEvStateData().evBatteryChargePowerAtTemp,
+        )
+    }
+
+    @Test
+    fun invalidBatteryChargingPowerOptimalTemperature() {
+        val input = mapOf(
+            "energy_consumption_curve" to "1.0,2.0;3.0,4.0",
+            "ev_battery_charging_power_optimal_temperature" to "invalid",
+        )
+
+        assertEquals(
+            emptyList<CurveElement>(),
+            input.toEvStateData().evBatteryChargePowerOptimalTemp,
+        )
+    }
+
+    @Test
+    fun invalidBatteryHeatingParameters() {
+        val input = mapOf(
+            "energy_consumption_curve" to "1.0,2.0;3.0,4.0",
+            "ev_battery_heating_parameters" to "1.0,invalid,3.0",
+        )
+
+        assertEquals(
+            emptyList<Float>(),
+            input.toEvStateData().evBatteryHeating,
+        )
     }
 }

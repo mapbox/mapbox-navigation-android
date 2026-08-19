@@ -2330,6 +2330,21 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      *     )
      * ```
      *
+     * Battery preconditioning model parameters are also supported:
+     * - `ev_battery_temperature`: current battery temperature, e.g. `"25.0"`. Valid on both
+     *   directions and EV route refresh requests.
+     * - `ev_battery_charging_power_at_temperature`: maximum charging power at a given battery
+     *   temperature, as semicolon-separated `temperature,power` pairs, e.g.
+     *   `"-5.0,10.0;0.0,100.0;5.0,350.0"`.
+     * - `ev_battery_charging_power_optimal_temperature`: minimal battery temperature for a given
+     *   charging power, as semicolon-separated `power,temperature` pairs.
+     * - `ev_battery_heating_parameters`: comma-separated triplet of
+     *   `passiveHeating,activeHeating,activeHeatingPower`.
+     *
+     * The last three are **directions-request-only** and are not compatible with an EV route
+     * refresh — per the note above, do not pass them via this method while relying on the route
+     * being refreshed, or the refresh request will fail.
+     *
      * @param data Map describing the changed EV data
      */
     @ExperimentalPreviewMapboxNavigationAPI
