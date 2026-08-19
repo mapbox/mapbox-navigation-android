@@ -37,7 +37,7 @@ internal class MapSizeInitializedCallbackHelper(
             }
         }
 
-        whenSizeReady(callback)
+        cancelable.registration = whenSizeReady(callback)
 
         return cancelable
     }
@@ -48,7 +48,13 @@ internal class MapSizeInitializedCallbackHelper(
 
         private val isComplete = AtomicBoolean(false)
 
+        // The real registration with the map's native size-ready callback list, wired in
+        // right after construction. Cancelling this actually removes the callback from that
+        // list, instead of only guarding against invoking a stale [action] locally.
+        var registration: Cancelable? = null
+
         override fun cancel() {
+            registration?.cancel()
             complete()
         }
 

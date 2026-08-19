@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maps.util
 
+import com.mapbox.common.Cancelable
 import com.mapbox.maps.MapboxMap
 import io.mockk.CapturingSlot
 import io.mockk.every
@@ -27,7 +28,7 @@ class MapSizeInitializedCallbackHelperTest {
             mapboxMap.whenSizeReady(
                 capture(callbackSlot),
             )
-        } returns Unit
+        } returns mockk(relaxed = true)
         return callbackSlot
     }
 
@@ -72,6 +73,25 @@ class MapSizeInitializedCallbackHelperTest {
 
         verify(exactly = 0) {
             action.invoke()
+        }
+    }
+
+    @Test
+    fun `cancel removes the registration from the map's size-ready registry`() {
+        val actionSlot = slot<() -> Unit>()
+        val registration = mockk<Cancelable>(relaxed = true)
+        every {
+            mapboxMap.whenSizeReady(
+                capture(actionSlot),
+            )
+        } returns registration
+
+        val action = mockk<() -> Unit>(relaxed = true)
+        val request = helper.onMapSizeInitialized(action)
+        request.cancel()
+
+        verify(exactly = 1) {
+            registration.cancel()
         }
     }
 
