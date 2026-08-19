@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maps.camera.data
 
 import com.mapbox.annotation.MapboxDelicateApi
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.common.Cancelable
 import com.mapbox.common.location.Location
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
@@ -159,6 +160,7 @@ class MapboxNavigationViewportDataSourceTest {
             )
         } answers {
             actionSlot.captured()
+            mockk<Cancelable>(relaxed = true)
         }
 
         viewportDataSource = MapboxNavigationViewportDataSource(mapboxMap)
@@ -2211,7 +2213,7 @@ class MapboxNavigationViewportDataSourceTest {
             mapboxMap.whenSizeReady(
                 capture(actionSlot),
             )
-        } returns Unit
+        } returns mockk<Cancelable>(relaxed = true)
 
         val initialViewportData = viewportDataSource.getViewportData()
 
@@ -2232,7 +2234,7 @@ class MapboxNavigationViewportDataSourceTest {
             mapboxMap.whenSizeReady(
                 capture(actionSlot),
             )
-        } returns Unit
+        } returns mockk<Cancelable>(relaxed = true)
 
         viewportDataSource.evaluate()
         viewportDataSource.evaluate()
@@ -2248,6 +2250,7 @@ class MapboxNavigationViewportDataSourceTest {
             mapboxMap.whenSizeReady(any())
         } answers {
             // do nothing, callback is not called
+            mockk<Cancelable>(relaxed = true)
         }
 
         val initialViewportData = viewportDataSource.getViewportData()
@@ -2265,7 +2268,7 @@ class MapboxNavigationViewportDataSourceTest {
             mapboxMap.whenSizeReady(
                 capture(actionSlot),
             )
-        } returns Unit
+        } returns mockk<Cancelable>(relaxed = true)
 
         val initialViewportData = viewportDataSource.getViewportData()
 
@@ -2275,6 +2278,29 @@ class MapboxNavigationViewportDataSourceTest {
 
         actionSlot.captured.invoke()
 
+        assertEquals(initialViewportData, viewportDataSource.getViewportData())
+    }
+
+    @Test
+    fun `viewport data does not change if map size is ready after onDestroy() called`() {
+        // GIVEN
+        val actionSlot = slot<() -> Unit>()
+        val registration = mockk<Cancelable>(relaxed = true)
+        every {
+            mapboxMap.whenSizeReady(
+                capture(actionSlot),
+            )
+        } returns registration
+        val initialViewportData = viewportDataSource.getViewportData()
+        viewportDataSource.additionalPointsToFrameForOverview(listOf(Point.fromLngLat(10.0, 20.0)))
+        viewportDataSource.evaluate()
+
+        // WHEN
+        viewportDataSource.onDestroy()
+        actionSlot.captured.invoke()
+
+        // THEN
+        verify(exactly = 1) { registration.cancel() }
         assertEquals(initialViewportData, viewportDataSource.getViewportData())
     }
 
