@@ -318,6 +318,7 @@ package com.mapbox.navigation.ui.maps.camera.data {
     method public com.mapbox.maps.EdgeInsets getOverviewPadding();
     method public com.mapbox.navigation.ui.maps.camera.data.ViewportData getViewportData();
     method @com.mapbox.annotation.MapboxDelicateApi @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void isFramingManeuverPropertyOverride(Boolean? value);
+    method public void onDestroy();
     method public void onLocationChanged(com.mapbox.common.location.Location location);
     method public void onRouteChanged(com.mapbox.navigation.base.route.NavigationRoute route);
     method public void onRouteProgressChanged(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
@@ -380,7 +381,7 @@ package com.mapbox.navigation.ui.maps.camera.data {
   }
 
   public final class ViewportData {
-    ctor @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public ViewportData(com.mapbox.maps.CameraOptions cameraForFollowing, com.mapbox.maps.CameraOptions cameraForOverview, com.mapbox.maps.CameraOptions cameraForPointsOverview);
+    ctor @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public ViewportData(com.mapbox.maps.CameraOptions cameraForFollowing, com.mapbox.maps.CameraOptions cameraForOverview, com.mapbox.maps.CameraOptions cameraForPointsOverview = cameraForOverview);
     ctor public ViewportData(com.mapbox.maps.CameraOptions cameraForFollowing, com.mapbox.maps.CameraOptions cameraForOverview);
     method public com.mapbox.maps.CameraOptions getCameraForFollowing();
     method public com.mapbox.maps.CameraOptions getCameraForOverview();

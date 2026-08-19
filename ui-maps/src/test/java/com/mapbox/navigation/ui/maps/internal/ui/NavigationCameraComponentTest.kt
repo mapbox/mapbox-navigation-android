@@ -12,6 +12,7 @@ import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSou
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.verify
 import io.mockk.verifyOrder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
@@ -67,6 +68,14 @@ class NavigationCameraComponentTest {
             dataSource.onLocationChanged(location)
             dataSource.evaluate()
         }
+    }
+
+    @Test
+    fun `should cancel pending map size callback on detach`() {
+        sut.onAttached(mapboxNavigation)
+        sut.onDetached(mapboxNavigation)
+
+        verify(exactly = 1) { dataSource.onDestroy() }
     }
 
     private fun given(
