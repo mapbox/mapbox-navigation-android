@@ -26,8 +26,8 @@ import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListen
 import com.mapbox.navigation.ui.maps.R
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.NAVIGATION_CAMERA_OWNER
-import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
-import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraStateChangedObserver
+import com.mapbox.navigation.ui.maps.internal.camera.NavigationCameraStateChangedObserverInternal
+import com.mapbox.navigation.ui.maps.internal.camera.NavigationCameraStateInternal
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import io.mockk.Runs
 import io.mockk.clearMocks
@@ -92,7 +92,7 @@ class NavigationScaleGestureHandlerTest {
     private val cameraChangedCallbackSlot = slot<CameraChangedCoalescedCallback>()
     private val cameraChangedTask = mockk<Cancelable>(relaxed = true)
     private val navigationCameraStateChangedObserverSlot =
-        slot<NavigationCameraStateChangedObserver>()
+        slot<NavigationCameraStateChangedObserverInternal>()
     private val initialMoveThreshold = 1.0f
     private val initialMultiFingerMoveThreshold = 1.5f
     private val initialMoveThresdholdRect = RectF(1.0f, 1.0f, 1.0f, 1.0f)
@@ -102,7 +102,7 @@ class NavigationScaleGestureHandlerTest {
     fun setup() {
         initialDetectors.clear()
         mockkObject(NavigationCameraLifecycleProvider)
-        every { navigationCamera.state } returns NavigationCameraState.IDLE
+        every { navigationCamera.stateInternal } returns NavigationCameraStateInternal.IDLE
         every {
             NavigationCameraLifecycleProvider.getCustomOnUpDetector(
                 context,
@@ -143,7 +143,7 @@ class NavigationScaleGestureHandlerTest {
             mapboxMap.subscribeCameraChangedCoalesced(capture(cameraChangedCallbackSlot))
         } returns cameraChangedTask
         every {
-            navigationCamera.registerNavigationCameraStateChangeObserver(
+            navigationCamera.registerNavigationCameraStateChangeObserverInternal(
                 capture(navigationCameraStateChangedObserverSlot),
             )
         } just Runs
@@ -213,10 +213,10 @@ class NavigationScaleGestureHandlerTest {
     @Test
     fun `when camera state changed to following state`() {
         controller.initialize()
-        every { navigationCamera.state } returns NavigationCameraState.FOLLOWING
+        every { navigationCamera.stateInternal } returns NavigationCameraStateInternal.FOLLOWING
 
         navigationCameraStateChangedObserverSlot.captured
-            .onNavigationCameraStateChanged(NavigationCameraState.FOLLOWING)
+            .onNavigationCameraStateChanged(NavigationCameraStateInternal.FOLLOWING)
 
         verify(exactly = 1) {
             initialMoveGestureDetector.moveThreshold = options.followingInitialMoveThreshold
@@ -231,10 +231,10 @@ class NavigationScaleGestureHandlerTest {
     @Test
     fun `when camera state changed NOT to following state`() {
         controller.initialize()
-        every { navigationCamera.state } returns NavigationCameraState.IDLE
+        every { navigationCamera.stateInternal } returns NavigationCameraStateInternal.IDLE
 
         navigationCameraStateChangedObserverSlot.captured
-            .onNavigationCameraStateChanged(NavigationCameraState.FOLLOWING)
+            .onNavigationCameraStateChanged(NavigationCameraStateInternal.FOLLOWING)
 
         verify(exactly = 1) {
             initialMoveGestureDetector.moveThreshold = initialMoveThreshold
@@ -250,8 +250,10 @@ class NavigationScaleGestureHandlerTest {
     fun `when two handlers exist only active handler adjusts thresholds`() {
         val activeNavigationCamera: NavigationCamera = mockk(relaxUnitFun = true)
         val inactiveNavigationCamera: NavigationCamera = mockk(relaxUnitFun = true)
-        every { activeNavigationCamera.state } returns NavigationCameraState.FOLLOWING
-        every { inactiveNavigationCamera.state } returns NavigationCameraState.FOLLOWING
+        every { activeNavigationCamera.stateInternal } returns
+            NavigationCameraStateInternal.FOLLOWING
+        every { inactiveNavigationCamera.stateInternal } returns
+            NavigationCameraStateInternal.FOLLOWING
 
         val sharedGesturesPlugin: GesturesPlugin = mockk(relaxUnitFun = true)
         val initialManager: AndroidGesturesManager = mockk(relaxUnitFun = true)
@@ -274,15 +276,15 @@ class NavigationScaleGestureHandlerTest {
         } returns mockk(relaxUnitFun = true)
         every { initialManager.getDetectors() } returns mutableListOf()
 
-        val activeObserverSlot = slot<NavigationCameraStateChangedObserver>()
-        val inactiveObserverSlot = slot<NavigationCameraStateChangedObserver>()
+        val activeObserverSlot = slot<NavigationCameraStateChangedObserverInternal>()
+        val inactiveObserverSlot = slot<NavigationCameraStateChangedObserverInternal>()
         every {
-            activeNavigationCamera.registerNavigationCameraStateChangeObserver(
+            activeNavigationCamera.registerNavigationCameraStateChangeObserverInternal(
                 capture(activeObserverSlot),
             )
         } just Runs
         every {
-            inactiveNavigationCamera.registerNavigationCameraStateChangeObserver(
+            inactiveNavigationCamera.registerNavigationCameraStateChangeObserverInternal(
                 capture(inactiveObserverSlot),
             )
         } just Runs
@@ -316,9 +318,11 @@ class NavigationScaleGestureHandlerTest {
 
         activeHandler.initialize()
         inactiveHandler.initialize()
-        activeObserverSlot.captured.onNavigationCameraStateChanged(NavigationCameraState.FOLLOWING)
+        activeObserverSlot.captured.onNavigationCameraStateChanged(
+            NavigationCameraStateInternal.FOLLOWING,
+        )
         inactiveObserverSlot.captured.onNavigationCameraStateChanged(
-            NavigationCameraState.FOLLOWING,
+            NavigationCameraStateInternal.FOLLOWING,
         )
 
         verify(exactly = 1) {
@@ -389,7 +393,7 @@ class NavigationScaleGestureHandlerTest {
 
     @Test
     fun `when up motion event and following, set gesture thresholds`() {
-        every { navigationCamera.state } returns NavigationCameraState.FOLLOWING
+        every { navigationCamera.stateInternal } returns NavigationCameraStateInternal.FOLLOWING
         controller.initialize()
         onUpEventCallbackSlot.captured.invoke(initialGesturesManager)
 
@@ -402,13 +406,13 @@ class NavigationScaleGestureHandlerTest {
     fun `when up motion event and not following, reset gesture thresholds`() {
         controller.initialize()
         val states =
-            NavigationCameraState
+            NavigationCameraStateInternal
                 .values()
                 .toMutableList()
-                .apply { remove(NavigationCameraState.FOLLOWING) }
+                .apply { remove(NavigationCameraStateInternal.FOLLOWING) }
         for (state in states) {
             clearMocks(initialMoveGestureDetector, answers = false)
-            every { navigationCamera.state } returns state
+            every { navigationCamera.stateInternal } returns state
             onUpEventCallbackSlot.captured.invoke(initialGesturesManager)
 
             verify(exactly = 1) { initialMoveGestureDetector.moveThreshold = initialMoveThreshold }
@@ -433,13 +437,13 @@ class NavigationScaleGestureHandlerTest {
     fun `when not following and move gestures executed, request idle`() {
         controller.initialize()
         val states =
-            NavigationCameraState
+            NavigationCameraStateInternal
                 .values()
                 .toMutableList()
-                .apply { remove(NavigationCameraState.FOLLOWING) }
+                .apply { remove(NavigationCameraStateInternal.FOLLOWING) }
         for (state in states) {
             clearMocks(navigationCamera, answers = false)
-            every { navigationCamera.state } returns state
+            every { navigationCamera.stateInternal } returns state
             onMoveListenerSlot.captured.onMoveBegin(customMoveGestureDetector)
 
             verify(exactly = 1) { navigationCamera.requestNavigationCameraToIdle() }
@@ -448,7 +452,7 @@ class NavigationScaleGestureHandlerTest {
 
     @Test
     fun `when following and single move gestures executed, set threshold`() {
-        every { navigationCamera.state } returns NavigationCameraState.FOLLOWING
+        every { navigationCamera.stateInternal } returns NavigationCameraStateInternal.FOLLOWING
         every { customMoveGestureDetector.pointersCount } returns 1
         every { customMoveGestureDetector.moveThreshold } returns 0f
 
@@ -462,7 +466,7 @@ class NavigationScaleGestureHandlerTest {
 
     @Test
     fun `when following and multi move gestures executed, set threshold`() {
-        every { navigationCamera.state } returns NavigationCameraState.FOLLOWING
+        every { navigationCamera.stateInternal } returns NavigationCameraStateInternal.FOLLOWING
         every { customMoveGestureDetector.pointersCount } returns 2
         every { customMoveGestureDetector.moveThreshold } returns 0f
         every { customMoveGestureDetector.multiFingerMoveThreshold } returns 0f
@@ -483,7 +487,7 @@ class NavigationScaleGestureHandlerTest {
 
     @Test
     fun `when following and single move gestures that adjusts thresholds, interrupt gesture`() {
-        every { navigationCamera.state } returns NavigationCameraState.FOLLOWING
+        every { navigationCamera.stateInternal } returns NavigationCameraStateInternal.FOLLOWING
         every { customMoveGestureDetector.pointersCount } returns 1
         every { customMoveGestureDetector.moveThreshold } returns 0f
 
@@ -497,7 +501,7 @@ class NavigationScaleGestureHandlerTest {
 
     @Test
     fun `when following and multi move gestures that adjusts thresholds, interrupt gesture`() {
-        every { navigationCamera.state } returns NavigationCameraState.FOLLOWING
+        every { navigationCamera.stateInternal } returns NavigationCameraStateInternal.FOLLOWING
         every { customMoveGestureDetector.pointersCount } returns 2
         every { customMoveGestureDetector.moveThreshold } returns 0f
         every { customMoveGestureDetector.multiFingerMoveThreshold } returns 0f
@@ -513,7 +517,7 @@ class NavigationScaleGestureHandlerTest {
 
     @Test
     fun `when following and single move gestures when thresholds adjusted, request idle`() {
-        every { navigationCamera.state } returns NavigationCameraState.FOLLOWING
+        every { navigationCamera.stateInternal } returns NavigationCameraStateInternal.FOLLOWING
         every { customMoveGestureDetector.pointersCount } returns 1
         every {
             customMoveGestureDetector.moveThreshold
@@ -528,7 +532,7 @@ class NavigationScaleGestureHandlerTest {
 
     @Test
     fun `when following and multi move gestures when thresholds adjusted, request idle`() {
-        every { navigationCamera.state } returns NavigationCameraState.FOLLOWING
+        every { navigationCamera.stateInternal } returns NavigationCameraStateInternal.FOLLOWING
         every { customMoveGestureDetector.pointersCount } returns 2
         every {
             customMoveGestureDetector.moveThreshold
@@ -549,7 +553,7 @@ class NavigationScaleGestureHandlerTest {
 
     @Test
     fun `when interrupted move gesture finishes, do nothing`() {
-        every { navigationCamera.state } returns NavigationCameraState.FOLLOWING
+        every { navigationCamera.stateInternal } returns NavigationCameraStateInternal.FOLLOWING
         every { customMoveGestureDetector.pointersCount } returns 1
         every { customMoveGestureDetector.moveThreshold } returns 0f
 
@@ -565,7 +569,7 @@ class NavigationScaleGestureHandlerTest {
 
     @Test
     fun `when move gesture finishes, readjust thresholds`() {
-        every { navigationCamera.state } returns NavigationCameraState.FOLLOWING
+        every { navigationCamera.stateInternal } returns NavigationCameraStateInternal.FOLLOWING
         every { customMoveGestureDetector.pointersCount } returns 1
         every {
             customMoveGestureDetector.moveThreshold
@@ -589,13 +593,13 @@ class NavigationScaleGestureHandlerTest {
     fun `when not following and shove gestures executed, request idle`() {
         controller.initialize()
         val states =
-            NavigationCameraState
+            NavigationCameraStateInternal
                 .values()
                 .toMutableList()
-                .apply { remove(NavigationCameraState.FOLLOWING) }
+                .apply { remove(NavigationCameraStateInternal.FOLLOWING) }
         for (state in states) {
             clearMocks(navigationCamera, answers = false)
-            every { navigationCamera.state } returns state
+            every { navigationCamera.stateInternal } returns state
             onShoveListenerSlot.captured.onShoveBegin(customShoveDetector)
 
             verify(exactly = 1) { navigationCamera.requestNavigationCameraToIdle() }
@@ -604,7 +608,7 @@ class NavigationScaleGestureHandlerTest {
 
     @Test
     fun `when following and shove gesture threshold is adjusted, interrupt gesture`() {
-        every { navigationCamera.state } returns NavigationCameraState.FOLLOWING
+        every { navigationCamera.stateInternal } returns NavigationCameraStateInternal.FOLLOWING
         every { customShoveDetector.pixelDeltaThreshold } returns 0f
 
         controller.initialize()
@@ -620,7 +624,7 @@ class NavigationScaleGestureHandlerTest {
 
     @Test
     fun `when following and shove gesture threshold is already adjusted, request idle`() {
-        every { navigationCamera.state } returns NavigationCameraState.FOLLOWING
+        every { navigationCamera.stateInternal } returns NavigationCameraStateInternal.FOLLOWING
         every {
             customShoveDetector.pixelDeltaThreshold
         } returns options.followingMultiFingerMoveThreshold
@@ -634,7 +638,7 @@ class NavigationScaleGestureHandlerTest {
 
     @Test
     fun `when interrupted shove gesture finishes, do nothing`() {
-        every { navigationCamera.state } returns NavigationCameraState.FOLLOWING
+        every { navigationCamera.stateInternal } returns NavigationCameraStateInternal.FOLLOWING
         every { customShoveDetector.pixelDeltaThreshold } returns 0f
 
         controller.initialize()
@@ -648,7 +652,7 @@ class NavigationScaleGestureHandlerTest {
 
     @Test
     fun `when shove gesture finishes, readjust threshold`() {
-        every { navigationCamera.state } returns NavigationCameraState.FOLLOWING
+        every { navigationCamera.stateInternal } returns NavigationCameraStateInternal.FOLLOWING
         every {
             customShoveDetector.pixelDeltaThreshold
         } returns options.followingMultiFingerMoveThreshold
@@ -665,7 +669,7 @@ class NavigationScaleGestureHandlerTest {
 
     @Test
     fun `when following and location indicator position changed, adjust focal point`() {
-        every { navigationCamera.state } returns NavigationCameraState.FOLLOWING
+        every { navigationCamera.stateInternal } returns NavigationCameraStateInternal.FOLLOWING
         val point = Point.fromLngLat(10.0, 20.0)
         val pixel = ScreenCoordinate(123.0, 456.0)
         every { mapboxMap.pixelForCoordinate(point) } returns pixel
@@ -684,13 +688,13 @@ class NavigationScaleGestureHandlerTest {
     fun `when not following and location indicator position changed, adjust focal point`() {
         controller.initialize()
         val states =
-            NavigationCameraState
+            NavigationCameraStateInternal
                 .values()
                 .toMutableList()
-                .apply { remove(NavigationCameraState.FOLLOWING) }
+                .apply { remove(NavigationCameraStateInternal.FOLLOWING) }
         for (state in states) {
             clearMocks(gesturesPlugin)
-            every { navigationCamera.state } returns state
+            every { navigationCamera.stateInternal } returns state
             val point = Point.fromLngLat(10.0, 20.0)
             val pixel = ScreenCoordinate(123.0, 456.0)
             every { mapboxMap.pixelForCoordinate(point) } returns pixel
@@ -714,10 +718,10 @@ class NavigationScaleGestureHandlerTest {
         }
 
         controller.initialize()
-        every { navigationCamera.state } returns NavigationCameraState.FOLLOWING
+        every { navigationCamera.stateInternal } returns NavigationCameraStateInternal.FOLLOWING
 
         navigationCameraStateChangedObserverSlot.captured
-            .onNavigationCameraStateChanged(NavigationCameraState.FOLLOWING)
+            .onNavigationCameraStateChanged(NavigationCameraStateInternal.FOLLOWING)
 
         assertFalse(gesturesSettings.scrollDecelerationEnabled)
         verify(exactly = 1) { gesturesPlugin.updateSettings(any()) }
@@ -731,10 +735,10 @@ class NavigationScaleGestureHandlerTest {
         }
 
         controller.initialize()
-        every { navigationCamera.state } returns NavigationCameraState.IDLE
+        every { navigationCamera.stateInternal } returns NavigationCameraStateInternal.IDLE
 
         navigationCameraStateChangedObserverSlot.captured
-            .onNavigationCameraStateChanged(NavigationCameraState.IDLE)
+            .onNavigationCameraStateChanged(NavigationCameraStateInternal.IDLE)
 
         assertTrue(gesturesSettings.scrollDecelerationEnabled)
         verify(exactly = 1) { gesturesPlugin.updateSettings(any()) }
@@ -765,7 +769,7 @@ class NavigationScaleGestureHandlerTest {
             cameraChangedTask.cancel()
         }
         verify(exactly = 1) {
-            navigationCamera.unregisterNavigationCameraStateChangeObserver(
+            navigationCamera.unregisterNavigationCameraStateChangeObserverInternal(
                 navigationCameraStateChangedObserverSlot.captured,
             )
         }

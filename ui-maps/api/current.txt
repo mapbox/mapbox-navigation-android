@@ -380,11 +380,14 @@ package com.mapbox.navigation.ui.maps.camera.data {
   }
 
   public final class ViewportData {
+    ctor @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public ViewportData(com.mapbox.maps.CameraOptions cameraForFollowing, com.mapbox.maps.CameraOptions cameraForOverview, com.mapbox.maps.CameraOptions cameraForPointsOverview);
     ctor public ViewportData(com.mapbox.maps.CameraOptions cameraForFollowing, com.mapbox.maps.CameraOptions cameraForOverview);
     method public com.mapbox.maps.CameraOptions getCameraForFollowing();
     method public com.mapbox.maps.CameraOptions getCameraForOverview();
+    method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public com.mapbox.maps.CameraOptions getCameraForPointsOverview();
     property public final com.mapbox.maps.CameraOptions cameraForFollowing;
     property public final com.mapbox.maps.CameraOptions cameraForOverview;
+    property @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public final com.mapbox.maps.CameraOptions cameraForPointsOverview;
   }
 
   public final class ViewportDataExKt {
