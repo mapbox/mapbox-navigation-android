@@ -248,7 +248,10 @@ class MapboxNavigationViewportDataSource private constructor(
         pointsOverviewViewportDataSource: PointsOverviewViewportDataSource =
             PointsOverviewViewportDataSource(mapboxMap),
         followingInternalOptions: InternalFollowingOverviewOptions =
-            InternalFollowingOverviewOptions(ignoreMinZoomWhenFramingManeuver = false),
+            InternalFollowingOverviewOptions(
+                ignoreMinZoomWhenFramingManeuver = false,
+                allowCameraFramingForHighZoom = false,
+            ),
     ) : this(
         mapboxMap,
         followingFramingModeHolder,
@@ -837,11 +840,18 @@ class MapboxNavigationViewportDataSource private constructor(
                 )
             } else {
                 val mapSize = mapboxMap.getSize()
-                val screenBox = getScreenBoxForFraming(mapSize, followingPadding)
                 val padding = getMapAnchoredPaddingFromUserPadding(
                     mapSize,
                     followingPadding,
                     options.followingFrameOptions.focalPoint,
+                )
+                val allowCameraFramingForHighZoom =
+                    followingInternalOptions.allowCameraFramingForHighZoom
+                val screenBox = getScreenBoxForFraming(
+                    mapSize,
+                    followingPadding,
+                    allowCameraFramingForHighZoom = allowCameraFramingForHighZoom,
+                    focalPointY = options.followingFrameOptions.focalPoint.y,
                 )
                 followingFramingModeHolder?.mode = FollowingFramingMode.LOCATION_INDICATOR
                 val fallbackCameraOptions = CameraOptions.Builder()
