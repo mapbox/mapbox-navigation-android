@@ -508,15 +508,32 @@ class MapboxNavigationViewportDataSource private constructor(
      * @see [evaluate]
      */
     fun clearRouteData() {
-        mapsSizeReadyCancellable?.cancel()
-        mapsSizeReadyCancellable = null
-        isMapSizeReadyCallbackPending = false
+        cancelPendingMapSizeCallback()
 
         navigationRoutes = emptyList()
         postManeuverFramingPoints = emptyList()
         averageIntersectionDistancesOnRoute = emptyList()
         routeOverviewViewportDataSource.clearRouteData()
         clearProgressData()
+    }
+
+    /**
+     * Releases resources held by this data source.
+     *
+     * In particular, [evaluate] may register a pending callback that only fires once the
+     * associated [MapboxMap]'s size becomes ready; if that never happens, the callback (and
+     * everything it references, including this data source) would otherwise never be released.
+     * Call this once this instance is no longer going to be used, typically alongside the
+     * owning [MapboxMap]/`MapView` being destroyed.
+     */
+    fun onDestroy() {
+        cancelPendingMapSizeCallback()
+    }
+
+    private fun cancelPendingMapSizeCallback() {
+        mapsSizeReadyCancellable?.cancel()
+        mapsSizeReadyCancellable = null
+        isMapSizeReadyCallbackPending = false
     }
 
     // non-empty routes
