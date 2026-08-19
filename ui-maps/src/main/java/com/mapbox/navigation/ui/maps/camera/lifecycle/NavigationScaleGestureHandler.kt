@@ -30,7 +30,8 @@ import com.mapbox.navigation.ui.maps.camera.data.FollowingFrameOptions
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
-import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraStateChangedObserver
+import com.mapbox.navigation.ui.maps.internal.camera.NavigationCameraStateChangedObserverInternal
+import com.mapbox.navigation.ui.maps.internal.camera.NavigationCameraStateInternal.FOLLOWING
 import com.mapbox.navigation.ui.maps.internal.camera.lifecycle.CameraStateManager
 import com.mapbox.navigation.ui.maps.internal.camera.lifecycle.UserLocationIndicatorPositionObserver
 import com.mapbox.navigation.ui.maps.internal.camera.lifecycle.UserLocationIndicatorPositionProvider
@@ -238,7 +239,7 @@ class NavigationScaleGestureHandler internal constructor(
         private var interrupt: Boolean = false
 
         override fun onMoveBegin(detector: MoveGestureDetector) {
-            if (cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING) {
+            if (cameraStateManager.getCurrentState() == FOLLOWING) {
                 if (detector.pointersCount > 1) {
                     applyMultiFingerThresholdArea(detector)
                     applyMultiFingerMoveThreshold(detector)
@@ -286,7 +287,7 @@ class NavigationScaleGestureHandler internal constructor(
                 detector.interrupt()
                 return true
             }
-            if (cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING) {
+            if (cameraStateManager.getCurrentState() == FOLLOWING) {
                 cameraStateManager.disable()
                 detector.interrupt() // todo is this needed?
             }
@@ -295,7 +296,7 @@ class NavigationScaleGestureHandler internal constructor(
 
         override fun onMoveEnd(detector: MoveGestureDetector) {
             if (!interrupt &&
-                cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING
+                cameraStateManager.getCurrentState() == FOLLOWING
             ) {
                 detector.moveThreshold = options.followingInitialMoveThreshold
                 detector.multiFingerMoveThreshold = options.followingMultiFingerMoveThreshold
@@ -309,7 +310,7 @@ class NavigationScaleGestureHandler internal constructor(
         private var interrupt: Boolean = false
 
         override fun onShoveBegin(detector: ShoveGestureDetector) {
-            if (cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING) {
+            if (cameraStateManager.getCurrentState() == FOLLOWING) {
                 if (detector.pixelDeltaThreshold != options.followingMultiFingerMoveThreshold) {
                     detector.pixelDeltaThreshold = options.followingMultiFingerMoveThreshold
                     interrupt = true
@@ -325,7 +326,7 @@ class NavigationScaleGestureHandler internal constructor(
                 return
             }
 
-            if (cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING) {
+            if (cameraStateManager.getCurrentState() == FOLLOWING) {
                 cameraStateManager.disable()
                 detector.interrupt()
             }
@@ -333,7 +334,7 @@ class NavigationScaleGestureHandler internal constructor(
 
         override fun onShoveEnd(detector: ShoveGestureDetector) {
             if (!interrupt &&
-                cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING
+                cameraStateManager.getCurrentState() == FOLLOWING
             ) {
                 detector.pixelDeltaThreshold = options.followingMultiFingerMoveThreshold
             }
@@ -343,7 +344,7 @@ class NavigationScaleGestureHandler internal constructor(
 
     private val onScaleListener: OnScaleListener = object : OnScaleListener {
         override fun onScaleBegin(detector: StandardScaleGestureDetector) {
-            if (cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING) {
+            if (cameraStateManager.getCurrentState() == FOLLOWING) {
                 // do nothing, let the gesture happen
             } else {
                 cameraStateManager.disable()
@@ -358,7 +359,7 @@ class NavigationScaleGestureHandler internal constructor(
         private var interrupt: Boolean = false
 
         override fun onRotateBegin(detector: RotateGestureDetector) {
-            if (cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING) {
+            if (cameraStateManager.getCurrentState() == FOLLOWING) {
                 if (detector.angleThreshold != options.followingRotationAngleThreshold) {
                     detector.angleThreshold = options.followingRotationAngleThreshold
                     interrupt = true
@@ -374,7 +375,7 @@ class NavigationScaleGestureHandler internal constructor(
                 return
             }
 
-            if (cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING) {
+            if (cameraStateManager.getCurrentState() == FOLLOWING) {
                 cameraStateManager.disable()
                 detector.interrupt()
             }
@@ -382,7 +383,7 @@ class NavigationScaleGestureHandler internal constructor(
 
         override fun onRotateEnd(detector: RotateGestureDetector) {
             if (!interrupt &&
-                cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING
+                cameraStateManager.getCurrentState() == FOLLOWING
             ) {
                 detector.angleThreshold = options.followingRotationAngleThreshold
             }
@@ -401,13 +402,14 @@ class NavigationScaleGestureHandler internal constructor(
     }
     private var cameraChangedSubscription: Cancelable? = null
 
-    private val navigationCameraStateChangedObserver = NavigationCameraStateChangedObserver {
-        adjustGesturesThresholds(
-            initialGesturesManager.moveGestureDetector,
-            initialGesturesManager.rotateGestureDetector,
-            initialGesturesManager.shoveGestureDetector,
-        )
-    }
+    private val navigationCameraStateChangedObserver =
+        NavigationCameraStateChangedObserverInternal {
+            adjustGesturesThresholds(
+                initialGesturesManager.moveGestureDetector,
+                initialGesturesManager.rotateGestureDetector,
+                initialGesturesManager.shoveGestureDetector,
+            )
+        }
 
     private fun adjustGesturesThresholds(
         moveGestureDetector: MoveGestureDetector,
@@ -418,7 +420,7 @@ class NavigationScaleGestureHandler internal constructor(
             return
         }
 
-        if (cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING) {
+        if (cameraStateManager.getCurrentState() == FOLLOWING) {
             moveGestureDetector.moveThreshold = options.followingInitialMoveThreshold
             moveGestureDetector.multiFingerMoveThreshold = options.followingMultiFingerMoveThreshold
             moveGestureDetector.moveThresholdRect = options.followingMultiFingerProtectedMoveArea
@@ -436,7 +438,7 @@ class NavigationScaleGestureHandler internal constructor(
     }
 
     private fun adjustFocalPoint(puckPosition: Point) {
-        if (cameraStateManager.getCurrentState() == NavigationCameraState.FOLLOWING) {
+        if (cameraStateManager.getCurrentState() == FOLLOWING) {
             val focalPoint = mapboxMap.pixelForCoordinate(puckPosition)
             gesturesPlugin.updateSettings { this.focalPoint = focalPoint }
         } else {
@@ -453,7 +455,7 @@ class NavigationScaleGestureHandler internal constructor(
     private fun updateFlingGesture() {
         gesturesPlugin.updateSettings {
             scrollDecelerationEnabled =
-                cameraStateManager.getCurrentState() != NavigationCameraState.FOLLOWING
+                cameraStateManager.getCurrentState() != FOLLOWING
         }
     }
 

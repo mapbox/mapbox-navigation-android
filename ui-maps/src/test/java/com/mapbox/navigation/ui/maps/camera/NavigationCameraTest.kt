@@ -22,6 +22,7 @@ import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitio
 import com.mapbox.navigation.ui.maps.camera.transition.SimplifiedFrameAnimatorsCreator
 import com.mapbox.navigation.ui.maps.camera.transition.TransitionEndListener
 import com.mapbox.navigation.ui.maps.camera.transition.UpdateFrameAnimatorsOptions
+import com.mapbox.navigation.ui.maps.internal.camera.NavigationCameraStateInternal
 import io.mockk.Runs
 import io.mockk.clearMocks
 import io.mockk.every
@@ -58,6 +59,10 @@ class NavigationCameraTest {
         relaxUnitFun = true,
         block = transitionBlock,
     )
+    private val pointsOverviewAnimatorSet: FullAnimatorSet = mockk(
+        relaxUnitFun = true,
+        block = transitionBlock,
+    )
     private val followingFrameAnimatorSet: MapboxAnimatorSet = mockk(
         relaxUnitFun = true,
         block = frameBlock,
@@ -69,6 +74,7 @@ class NavigationCameraTest {
     private val animatorsCreator: AnimatorsCreator = mockk(relaxUnitFun = true) {
         every { transitionToFollowing(any(), any()) } returns followingAnimatorSet
         every { transitionToRouteOverview(any(), any()) } returns overviewAnimatorSet
+        every { transitionToPointsOverview(any(), any()) } returns pointsOverviewAnimatorSet
         every { updateFrameForFollowing(any(), any()) } returns followingFrameAnimatorSet
         every { updateFrameForOverview(any(), any()) } returns overviewFrameAnimatorSet
     }
@@ -76,9 +82,11 @@ class NavigationCameraTest {
     private val internalDataSourceObserverSlot = slot<ViewportDataSourceUpdateObserver>()
     private val followingCameraOptions: CameraOptions = mockk()
     private val overviewCameraOptions: CameraOptions = mockk()
+    private val pointsOverviewCameraOptions: CameraOptions = mockk()
     private val viewportData: ViewportData = mockk {
         every { cameraForFollowing } returns followingCameraOptions
         every { cameraForOverview } returns overviewCameraOptions
+        every { cameraForPointsOverview } returns pointsOverviewCameraOptions
     }
     private val viewportDataSource: ViewportDataSource = mockk(relaxUnitFun = true) {
         every { getViewportData() } returns viewportData
@@ -163,6 +171,49 @@ class NavigationCameraTest {
             overviewCameraOptions,
             DEFAULT_STATE_TRANSITION_OPT,
             overviewAnimatorSet,
+        )
+    }
+
+    @Test
+    fun `when points overview requested, transition executed`() {
+        navigationCamera.requestNavigationCameraToPointsOverview()
+
+        verifyTransitionExecuted(
+            AnimatorsCreator::transitionToPointsOverview,
+            pointsOverviewCameraOptions,
+            DEFAULT_STATE_TRANSITION_OPT,
+            pointsOverviewAnimatorSet,
+        )
+    }
+
+    @Test
+    fun `when points overview requested, state changes`() {
+        navigationCamera.requestNavigationCameraToPointsOverview()
+
+        internalTransitionListenerSlot.captured.onAnimationStart(pointsOverviewAnimatorSet)
+        assertEquals(
+            NavigationCameraStateInternal.TRANSITION_TO_POINTS_OVERVIEW,
+            navigationCamera.stateInternal,
+        )
+        assertEquals(NavigationCameraState.TRANSITION_TO_OVERVIEW, navigationCamera.state)
+
+        internalTransitionListenerSlot.captured.onAnimationEnd(pointsOverviewAnimatorSet)
+        assertEquals(NavigationCameraStateInternal.POINTS_OVERVIEW, navigationCamera.stateInternal)
+        assertEquals(NavigationCameraState.OVERVIEW, navigationCamera.state)
+    }
+
+    @Test
+    fun `when points overview transition ends, do a frame animation`() {
+        navigationCamera.requestNavigationCameraToPointsOverview()
+
+        internalTransitionListenerSlot.captured.onAnimationStart(pointsOverviewAnimatorSet)
+        internalTransitionListenerSlot.captured.onAnimationEnd(pointsOverviewAnimatorSet)
+
+        verifyTransitionExecuted(
+            AnimatorsCreator::updateFrameForOverview,
+            pointsOverviewCameraOptions,
+            DEFAULT_FRAME_TRANSITION_OPT,
+            overviewFrameAnimatorSet,
         )
     }
 

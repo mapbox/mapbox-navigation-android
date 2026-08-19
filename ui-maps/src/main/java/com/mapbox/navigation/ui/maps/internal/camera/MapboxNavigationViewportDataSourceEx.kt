@@ -15,12 +15,9 @@ fun MapboxNavigationViewportDataSource.onRoutesChanged(routes: List<NavigationRo
     onRoutesChanged(routes)
 }
 
-var MapboxNavigationViewportDataSource.internalOptions
+val MapboxNavigationViewportDataSource.routeOverviewViewportDataSource
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-    get() = internalOptions
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-    set(value) { internalOptions = value }
+    get() = routeOverviewViewportDataSource
 
 @TestOnly
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
