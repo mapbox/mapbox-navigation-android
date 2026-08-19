@@ -508,12 +508,65 @@ class ViewportDataSourceProcessorTest {
     }
 
     @Test
-    fun `test getScreenBoxForFraming`() {
+    fun `test getScreenBoxForFraming - high zoom framing disabled`() {
         val mapSize = Size(1000f, 1000f)
         val padding = EdgeInsets(300.0, 150.0, 200.0, 100.0)
         val expected = ScreenBox(ScreenCoordinate(150.0, 300.0), ScreenCoordinate(900.0, 800.0))
 
-        val actual = getScreenBoxForFraming(mapSize, padding)
+        val actual = getScreenBoxForFraming(
+            mapSize,
+            padding,
+            allowCameraFramingForHighZoom = false,
+            focalPointY = 1.0,
+        )
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `test getScreenBoxForFraming - high zoom framing enabled extends box past principal point on edge`() {
+        val mapSize = Size(1000f, 1000f)
+        val padding = EdgeInsets(300.0, 150.0, 200.0, 100.0)
+        val expected = ScreenBox(ScreenCoordinate(150.0, 300.0), ScreenCoordinate(900.0, 801.0))
+
+        val actual = getScreenBoxForFraming(
+            mapSize,
+            padding,
+            allowCameraFramingForHighZoom = true,
+            focalPointY = 1.0,
+        )
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `test getScreenBoxForFraming - high zoom framing enabled but focal point not at bottom`() {
+        val mapSize = Size(1000f, 1000f)
+        val padding = EdgeInsets(300.0, 150.0, 200.0, 100.0)
+        val expected = ScreenBox(ScreenCoordinate(150.0, 300.0), ScreenCoordinate(900.0, 800.0))
+
+        val actual = getScreenBoxForFraming(
+            mapSize,
+            padding,
+            allowCameraFramingForHighZoom = true,
+            focalPointY = 0.5,
+        )
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `test getScreenBoxForFraming - focal point exceeds 1_0 falls back to regular padding`() {
+        val mapSize = Size(1000f, 1000f)
+        val padding = EdgeInsets(300.0, 150.0, 200.0, 100.0)
+        val expected = ScreenBox(ScreenCoordinate(150.0, 300.0), ScreenCoordinate(900.0, 800.0))
+
+        val actual = getScreenBoxForFraming(
+            mapSize,
+            padding,
+            allowCameraFramingForHighZoom = true,
+            focalPointY = 1.5,
+        )
 
         assertEquals(expected, actual)
     }

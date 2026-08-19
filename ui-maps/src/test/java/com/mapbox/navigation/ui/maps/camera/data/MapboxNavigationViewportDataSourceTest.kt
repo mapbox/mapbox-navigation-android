@@ -168,7 +168,9 @@ class MapboxNavigationViewportDataSourceTest {
         every {
             getMapAnchoredPaddingFromUserPadding(mapSize, any(), any())
         } returns singlePixelEdgeInsets
-        every { getScreenBoxForFraming(mapSize, any()) } returns followingScreenBox
+        every {
+            getScreenBoxForFraming(mapSize, any(), any(), any())
+        } returns followingScreenBox
         every {
             getSmootherBearingForMap(
                 viewportDataSource.options.followingFrameOptions.bearingSmoothing.enabled,
@@ -1975,7 +1977,14 @@ class MapboxNavigationViewportDataSourceTest {
             overviewCameraOptions,
             data.cameraForOverview,
         )
-        verify { getScreenBoxForFraming(mapSize, followingPadding) }
+        verify {
+            getScreenBoxForFraming(
+                mapSize,
+                followingPadding,
+                allowCameraFramingForHighZoom = false,
+                focalPointY = any(),
+            )
+        }
     }
 
     @Test

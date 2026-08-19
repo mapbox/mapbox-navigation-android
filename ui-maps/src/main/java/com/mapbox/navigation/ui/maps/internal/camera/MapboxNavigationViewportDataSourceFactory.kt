@@ -13,7 +13,10 @@ object MapboxNavigationViewportDataSourceFactory {
         routeOverviewViewportDataSource: RouteOverviewViewportDataSource,
         pointsOverviewViewportDataSource: PointsOverviewViewportDataSource,
         followingInternalOptions: InternalFollowingOverviewOptions =
-            InternalFollowingOverviewOptions(ignoreMinZoomWhenFramingManeuver = false),
+            InternalFollowingOverviewOptions(
+                ignoreMinZoomWhenFramingManeuver = false,
+                allowCameraFramingForHighZoom = false,
+            ),
     ): MapboxNavigationViewportDataSource {
         return MapboxNavigationViewportDataSource(
             map,
