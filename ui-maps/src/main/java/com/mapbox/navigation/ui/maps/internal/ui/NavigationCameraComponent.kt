@@ -28,4 +28,9 @@ class NavigationCameraComponent(
             viewportDataSource.evaluate()
         }
     }
+
+    override fun onDetached(mapboxNavigation: MapboxNavigation) {
+        super.onDetached(mapboxNavigation)
+        viewportDataSource.onDestroy()
+    }
 }
