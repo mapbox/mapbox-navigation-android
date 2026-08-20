@@ -4,7 +4,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.route.createRouteRefreshMetadata
-import com.mapbox.navigation.base.internal.route.update
+import com.mapbox.navigation.base.internal.route.updateOrNull
 import com.mapbox.navigation.base.internal.time.parseISO8601DateToLocalTimeOrNull
 import com.mapbox.navigation.base.route.NavigationRoute
 import java.util.Date
@@ -16,30 +16,39 @@ internal class ExpiringDataRemover(
     fun removeExpiringDataFromRoutesProgressData(
         routesRefresherResult: RoutesRefresherResult,
     ): RoutesRefresherResult {
+        val primaryResult = routesRefresherResult.primaryRouteRefresherResult
         val primaryRoute = removeExpiringDataFromRoute(
-            routesRefresherResult.primaryRouteRefresherResult.route,
-            routesRefresherResult.primaryRouteRefresherResult.routeProgressData.legIndex,
+            primaryResult.route,
+            primaryResult.routeProgressData.legIndex,
         )
         val alternativeRoutesData = routesRefresherResult.alternativesRouteRefresherResults.map {
+            val updatedRoute = removeExpiringDataFromRoute(
+                it.route,
+                it.routeProgressData?.legIndex ?: 0,
+            )
             it.copy(
-                route = removeExpiringDataFromRoute(it.route, it.routeProgressData?.legIndex ?: 0),
-                wasRouteUpdated = true,
+                route = updatedRoute ?: it.route,
+                wasRouteUpdated = updatedRoute != null,
             )
         }
         return RoutesRefresherResult(
-            routesRefresherResult.primaryRouteRefresherResult.copy(
-                route = primaryRoute,
-                wasRouteUpdated = true,
+            primaryResult.copy(
+                route = primaryRoute ?: primaryResult.route,
+                wasRouteUpdated = primaryRoute != null,
             ),
             alternativeRoutesData,
         )
     }
 
+    /**
+     * Returns the route without expired data, or `null` when the update can't be applied,
+     * for example for routes backed by a native route object.
+     */
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     private fun removeExpiringDataFromRoute(
         route: NavigationRoute,
         currentLegIndex: Int,
-    ): NavigationRoute {
+    ): NavigationRoute? {
         val routeLegs = route.directionsRoute.legs()
         val directionsRouteBlock: DirectionsRoute.() -> DirectionsRoute = {
             toBuilder().legs(
@@ -53,7 +62,7 @@ internal class ExpiringDataRemover(
                 },
             ).build()
         }
-        return route.update(
+        return route.updateOrNull(
             directionsRouteBlock = directionsRouteBlock,
             waypointsBlock = { this },
             routeRefreshMetadata = createRouteRefreshMetadata(isUpToDate = false),

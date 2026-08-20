@@ -4,22 +4,52 @@ package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.route.updateOrNull
 import com.mapbox.navigation.base.internal.time.parseISO8601DateToLocalTimeOrNull
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.internal.RouteProgressData
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createIncident
 import com.mapbox.navigation.testing.factories.createNavigationRoute
 import com.mapbox.navigation.testing.factories.createRouteLeg
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import org.junit.Assert.assertEquals
+import org.junit.Rule
 import org.junit.Test
 import java.util.Date
 
 class ExpiringDataRemoverTest {
 
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
+
     private val localDateProvider = mockk<() -> Date>(relaxed = true)
     private val sut = ExpiringDataRemover(localDateProvider)
+
+    @Test
+    fun `keeps routes untouched when client side update is not supported`() {
+        mockkStatic(NavigationRoute::updateOrNull) {
+            val route = createNavigationRoute(
+                directionsRoute = createDirectionsRoute(legs = null),
+            )
+            every { route.updateOrNull(any(), any(), any(), any()) } returns null
+            val input = RoutesRefresherResult(
+                RouteRefresherResult(
+                    route,
+                    RouteProgressData(0, 0, 0),
+                    RouteRefresherStatus.Failure,
+                ),
+                emptyList(),
+            )
+
+            val actual = sut.removeExpiringDataFromRoutesProgressData(input)
+
+            assertEquals(input, actual)
+        }
+    }
 
     @Test
     fun removeExpiringDataFromRoutes() {

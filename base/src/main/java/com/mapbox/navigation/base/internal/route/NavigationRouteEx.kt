@@ -90,6 +90,9 @@ fun NavigationRoute.toDirectionsRefreshResponseInternal() = this.toDirectionsRef
 /**
  * Updates only java representation of route.
  * The native route should later be updated through [Navigator.refreshRoute].
+ *
+ * Returns the original route when the update can't be applied. Callers that need to know
+ * whether anything actually changed must use [updateOrNull] instead.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 fun NavigationRoute.update(
@@ -97,17 +100,33 @@ fun NavigationRoute.update(
     waypointsBlock: List<DirectionsWaypoint>?.() -> List<DirectionsWaypoint>?,
     overriddenTraffic: CongestionNumericOverride? = this.overriddenTraffic,
     routeRefreshMetadata: RouteRefreshMetadata? = this.routeRefreshMetadata,
-): NavigationRoute = this.clientSideUpdate(
+): NavigationRoute = updateOrNull(
+    directionsRouteBlock,
+    waypointsBlock,
+    overriddenTraffic,
+    routeRefreshMetadata,
+) ?: this
+
+/**
+ * Same as [update], but returns `null` when the client side update can't be applied, for example
+ * when the route is backed by a native route object, which has no java representation to update.
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+fun NavigationRoute.updateOrNull(
+    directionsRouteBlock: DirectionsRoute.() -> DirectionsRoute,
+    waypointsBlock: List<DirectionsWaypoint>?.() -> List<DirectionsWaypoint>?,
+    overriddenTraffic: CongestionNumericOverride? = this.overriddenTraffic,
+    routeRefreshMetadata: RouteRefreshMetadata? = this.routeRefreshMetadata,
+): NavigationRoute? = this.clientSideUpdate(
     directionsRouteBlock,
     waypointsBlock,
     overriddenTraffic,
     routeRefreshMetadata,
 ).getOrElse {
     logE(ROUTE_REFRESH_LOG_CATEGORY) {
-        "Can't update ${nativeRoute.routeId} because of ${it.message}. " +
-            "Working with initial route instead."
+        "Can't update ${nativeRoute.routeId} because of ${it.message}."
     }
-    this
+    null
 }
 
 fun NavigationRoute.updateExpirationTime(newExpirationTimeElapsedSeconds: Long?): NavigationRoute {
