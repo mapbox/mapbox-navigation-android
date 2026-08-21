@@ -58,6 +58,21 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Core Common `v24.29.0-rc.1`
 - Mapbox Java `v7.10.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.1))
 
+## Navigation SDK Core Framework 3.28.4 - 20 August, 2026
+#### Features
+
+
+#### Bug fixes and improvements
+- Fixed a leak where `MapboxNavigationViewportDataSource` and the `MapboxMap`/`MapView` it references could remain permanently retained if a pending map-size-ready callback was never cancelled on teardown. Added `MapboxNavigationViewportDataSource#onDestroy` to cancel it explicitly; `NavigationCameraComponent` now calls it on detach.
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.28.4` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.28.4))
+- Mapbox Navigation Native `v324.28.4`
+- Mapbox Core Common `v24.28.4`
+- Mapbox Java `v7.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.0))
+
 ## Navigation SDK Core Framework 3.28.3 - 17 August, 2026
 #### Features
 
