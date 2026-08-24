@@ -338,17 +338,13 @@ class MapboxNavigationViewportDataSource private constructor(
 
     private var additionalPointsToFrameForFollowing: List<Point> = emptyList()
 
-    private var viewportData: ViewportData = ViewportData(
-        cameraForFollowing = CameraOptions.Builder()
-            .center(followingCenterProperty.get())
-            .zoom(followingZoomProperty.get())
-            .bearing(followingBearingProperty.get())
-            .pitch(followingPitchProperty.get())
-            .padding(appliedFollowingPadding)
-            .build(),
-        cameraForOverview = routeOverviewViewportDataSource.cameraOptions,
-        cameraForPointsOverview = pointsOverviewViewportDataSource.cameraOptions,
-    )
+    /**
+     * Whether [evaluateImpl] has run at least once. Until it has, [viewportData] holds only the
+     * seed built at construction time, so [getViewportData] recomputes instead.
+     */
+    private var hasEvaluated = false
+
+    private var viewportData: ViewportData = buildViewportData()
         set(value) {
             if (!value.isStandstill(field)) {
                 field = value
@@ -364,13 +360,24 @@ class MapboxNavigationViewportDataSource private constructor(
     private var mapsSizeReadyCancellable: Cancelable? = null
     private var isMapSizeReadyCallbackPending = false
 
-    override fun getViewportData(): ViewportData = viewportData
+    /**
+     * Recomputes the frame until the first [evaluate] has run, and returns the cached
+     * [viewportData] after that.
+     *
+     * The cached value starts as a seed built at construction time. Overrides and options set
+     * later reach it only through [evaluate], which waits for the map to report its size. For a
+     * freshly shown [MapView] that can take several frames. Without the recompute, a camera
+     * transitioning in that window gets a frame that ignores everything configured since
+     * construction.
+     */
+    override fun getViewportData(): ViewportData =
+        if (hasEvaluated) viewportData else buildViewportData()
 
     override fun registerUpdateObserver(
         viewportDataSourceUpdateObserver: ViewportDataSourceUpdateObserver,
     ) {
         viewportDataSourceUpdateObservers.add(viewportDataSourceUpdateObserver)
-        viewportDataSourceUpdateObserver.viewportDataSourceUpdated(viewportData)
+        viewportDataSourceUpdateObserver.viewportDataSourceUpdated(getViewportData())
     }
 
     override fun unregisterUpdateObserver(
@@ -410,6 +417,15 @@ class MapboxNavigationViewportDataSource private constructor(
         routeOverviewViewportDataSource.evaluate()
         pointsOverviewViewportDataSource.evaluate()
 
+        hasEvaluated = true
+        viewportData = buildViewportData()
+    }
+
+    /**
+     * Assembles [ViewportData] from the current property values. Reads only and mutates nothing,
+     * so it is safe to call outside an evaluation.
+     */
+    private fun buildViewportData(): ViewportData {
         val followingCameraOptions = options.followingFrameOptions.run {
             CameraOptions.Builder().apply {
                 if (centerUpdatesAllowed) {
@@ -430,7 +446,7 @@ class MapboxNavigationViewportDataSource private constructor(
             }.build()
         }
 
-        viewportData = ViewportData(
+        return ViewportData(
             cameraForFollowing = followingCameraOptions,
             cameraForOverview = routeOverviewViewportDataSource.cameraOptions,
             cameraForPointsOverview = pointsOverviewViewportDataSource.cameraOptions,
