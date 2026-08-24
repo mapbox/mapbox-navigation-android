@@ -9,10 +9,7 @@ import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenFactory
 
 /**
  * Default screen for [MapboxScreen.ACTIVE_GUIDANCE].
- *
- * @deprecated Use [MapboxNavigationScreenFactory] for [MapboxScreen.NAVIGATION] instead.
  */
-@Deprecated("Use MapboxNavigationScreenFactory for MapboxScreen.NAVIGATION instead.")
 class ActiveGuidanceScreenFactory(
     private val mapboxCarContext: MapboxCarContext,
 ) : MapboxScreenFactory {

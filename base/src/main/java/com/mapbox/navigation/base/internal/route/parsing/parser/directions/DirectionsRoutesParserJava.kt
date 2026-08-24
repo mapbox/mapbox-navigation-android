@@ -30,14 +30,13 @@ internal class DirectionsRoutesParserJava(
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     override fun parse(
         response: ResponseToParse,
-        routeIndexOverride: Int?,
     ): Result<DirectionsResponseParsingResult> {
         return Result.runCatching {
             logger.logD(LOG_CATEGORY) { "parsing directions response" }
             PerformanceTracker.trackPerformanceSync(
                 "JavaRouteModelsParser#parseDirectionsResponseJava",
             ) {
-                parseDirectionsResponseJava(response, routeIndexOverride)
+                parseDirectionsResponseJava(response)
             }
         }
     }
@@ -46,7 +45,6 @@ internal class DirectionsRoutesParserJava(
 @WorkerThread
 private fun parseDirectionsResponseJava(
     responseToParse: ResponseToParse,
-    routeIndexOverride: Int?,
 ): DirectionsResponseParsingResult {
     val routeOptions = RouteOptions.fromUrl(URL(responseToParse.routeRequest))
     val response = responseToParse.responseBody.toReader().use { reader ->
@@ -56,7 +54,6 @@ private fun parseDirectionsResponseJava(
         response,
         routeOptions,
         responseToParse.routerOrigin,
-        routeIndexOverride,
     )
 }
 
@@ -65,18 +62,16 @@ internal fun createResponseParsingResult(
     response: DirectionsResponse,
     routeOptions: RouteOptions,
     @RouterOrigin routerOrigin: String,
-    routeIndexOverride: Int? = null,
 ): DirectionsResponseParsingResult = DirectionsResponseParsingResult(
     response.routes().mapIndexed { index, route ->
-        val resultRouteIndex = routeIndexOverride ?: index
-        val route = response.getDirectionsRoute(index, routeOptions, resultRouteIndex)
+        val route = response.getDirectionsRoute(index, routeOptions)
         val waypoints = response.getDirectionsWaypoint(index)
         val routeData = DirectionsParsedRouteData(
             route,
             waypoints,
             response.uuid(),
             routeOptions,
-            routeIndex = resultRouteIndex,
+            routeIndex = index,
             routerOrigin = routerOrigin,
             responseOriginAPI = ResponseOriginAPI.DIRECTIONS_API,
         )

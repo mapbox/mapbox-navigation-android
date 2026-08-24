@@ -11,10 +11,7 @@ import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenFactory
 
 /**
  * Default screen for [MapboxScreen.ROUTE_PREVIEW].
- *
- * @deprecated Use [MapboxNavigationScreenFactory] for [MapboxScreen.NAVIGATION] instead.
  */
-@Deprecated("Use MapboxNavigationScreenFactory for MapboxScreen.NAVIGATION instead.")
 class RoutePreviewScreenFactory(
     private val mapboxCarContext: MapboxCarContext,
 ) : MapboxScreenFactory {

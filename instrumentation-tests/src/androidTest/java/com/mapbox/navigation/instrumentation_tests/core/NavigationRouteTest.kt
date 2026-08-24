@@ -1,7 +1,6 @@
 package com.mapbox.navigation.instrumentation_tests.core
 
 import android.location.Location
-import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.route.deserializeNavigationRouteFrom
 import com.mapbox.navigation.base.internal.route.serialize
@@ -12,6 +11,7 @@ import com.mapbox.navigation.testing.utils.nro.assumeNotNROBecauseOfSerializatio
 import com.mapbox.navigation.testing.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.utils.routes.requestMockRoutes
 import com.mapbox.navigation.testing.utils.withMapboxNavigation
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -64,7 +64,7 @@ class NavigationRouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class
                 mockRoute,
             )
             routes.forEach { route ->
-                val deserializationResult = withContext(SdkDispatchers.Default) {
+                val deserializationResult = withContext(Dispatchers.Default) {
                     val serialized = route.serialize()
                     deserializeNavigationRouteFrom(serialized)
                 }

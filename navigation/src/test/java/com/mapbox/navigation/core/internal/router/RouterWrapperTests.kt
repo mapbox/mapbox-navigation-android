@@ -8,7 +8,6 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.common.Cancelable
 import com.mapbox.common.MapboxServices
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
@@ -29,7 +28,6 @@ import com.mapbox.navigation.core.internal.router.util.TestRouteFixtures
 import com.mapbox.navigation.core.mapmatching.MapMatchingAPICallback
 import com.mapbox.navigation.core.mapmatching.MapMatchingOptions
 import com.mapbox.navigation.navigator.internal.mapToRoutingMode
-import com.mapbox.navigation.testing.FakeDirectionsRouteContextRefresherRule
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.NativeRouteParserRule
@@ -75,6 +73,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
 
 @InternalCoroutinesApi
@@ -88,9 +87,6 @@ class RouterWrapperTests {
 
     @get:Rule
     val routeParserRule = NativeRouteParserRule()
-
-    @get:Rule
-    val fakeDirectionsRouteContextRefresherRule = FakeDirectionsRouteContextRefresherRule()
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()
@@ -200,12 +196,9 @@ class RouterWrapperTests {
             MapboxOptionsUtil.getTokenForService(MapboxServices.DIRECTIONS)
         } returns accessToken
 
-        every { router.getRoute(any(), any(), any(), capture(getRouteSlot)) } returns
-            mockk(relaxed = true)
-        every { router.getRouteMapMatched(any(), any(), capture(mapMatchedRouteSlot)) } returns
-            mockk(relaxed = true)
-        every { router.getRouteRefresh(any(), capture(refreshRouteSlot)) } returns
-            mockk(relaxed = true)
+        every { router.getRoute(any(), any(), any(), capture(getRouteSlot)) } returns 0L
+        every { router.getRouteMapMatched(any(), any(), capture(mapMatchedRouteSlot)) } returns 0L
+        every { router.getRouteRefresh(any(), capture(refreshRouteSlot)) } returns 0L
 
         every { route.requestUuid() } returns UUID
         every { route.routeIndex() } returns "index"
@@ -647,25 +640,24 @@ class RouterWrapperTests {
 
     @Test
     fun `check callback called on cancel`() = coroutineRule.runBlockingTest {
-        val handle = mockk<Cancelable>(relaxed = true)
-        every { router.getRoute(any(), any(), any(), capture(getRouteSlot)) } returns handle
+        every { router.cancelRouteRequest(any()) } answers {
+            getRouteSlot.captured.run(routerResultCancelled, nativeOriginOnboard)
+        }
 
-        val requestId = routerWrapper.getRoute(routerOptions, signature, navigationRouterCallback)
-        routerWrapper.cancelRouteRequest(requestId)
+        routerWrapper.getRoute(routerOptions, signature, navigationRouterCallback)
+        routerWrapper.cancelRouteRequest(REQUEST_ID)
 
-        verify(exactly = 1) { handle.cancel() }
         verify { navigationRouterCallback.onCanceled(routerOptions, OFFLINE) }
     }
 
     @Test
     fun `check cancel and NN callback afterwards - invoke only cancel`() {
-        val handle = mockk<Cancelable>(relaxed = true)
-        every { router.getRoute(any(), any(), any(), capture(getRouteSlot)) } returns handle
+        every { router.getRoute(any(), any(), any(), capture(getRouteSlot)) } returns REQUEST_ID
+        every { router.cancelRouteRequest(any()) } answers {}
 
-        val requestId = routerWrapper.getRoute(routerOptions, signature, navigationRouterCallback)
-        routerWrapper.cancelRouteRequest(requestId)
+        routerWrapper.getRoute(routerOptions, signature, navigationRouterCallback)
+        routerWrapper.cancelRouteRequest(REQUEST_ID)
 
-        verify(exactly = 1) { handle.cancel() }
         verify(exactly = 1) { navigationRouterCallback.onCanceled(routerOptions, OFFLINE) }
 
         clearMocks(navigationRouterCallback, answers = false)
@@ -691,6 +683,7 @@ class RouterWrapperTests {
 
     @Test
     fun `check cancelAll and NN callback afterwards - invoke only cancel`() {
+        every { router.getRoute(any(), any(), any(), capture(getRouteSlot)) } returns REQUEST_ID
         every { router.cancelAll() } answers {}
 
         routerWrapper.getRoute(routerOptions, signature, navigationRouterCallback)
@@ -709,22 +702,22 @@ class RouterWrapperTests {
 
     @Test
     fun `cancel a specific route request when multiple are running`() {
-        val first = mockk<Cancelable>(relaxed = true)
-        val second = mockk<Cancelable>(relaxed = true)
-        every { router.getRoute(any(), any(), any(), capture(getRouteSlot)) } returnsMany
-            listOf(first, second)
+        val requestIdOne = 1L
+        val requestIdTwo = 2L
+        val refreshIdOne = 3L
+        val refreshIdTwo = 4L
 
-        val firstId = routerWrapper.getRoute(routerOptions, signature, navigationRouterCallback)
-        val secondId = routerWrapper.getRoute(routerOptions, signature, navigationRouterCallback)
+        verify(exactly = 0) { router.cancelRouteRequest(any()) }
 
-        routerWrapper.cancelRouteRequest(firstId)
+        routerWrapper.cancelRouteRequest(requestIdOne)
+        routerWrapper.cancelRouteRequest(requestIdTwo)
+        routerWrapper.cancelRouteRequest(refreshIdOne)
+        routerWrapper.cancelRouteRequest(refreshIdTwo)
 
-        verify(exactly = 1) { first.cancel() }
-        verify(exactly = 0) { second.cancel() }
-
-        routerWrapper.cancelRouteRequest(secondId)
-
-        verify(exactly = 1) { second.cancel() }
+        verify(exactly = 1) { router.cancelRouteRequest(requestIdOne) }
+        verify(exactly = 1) { router.cancelRouteRequest(requestIdTwo) }
+        verify(exactly = 1) { router.cancelRouteRequest(refreshIdOne) }
+        verify(exactly = 1) { router.cancelRouteRequest(refreshIdTwo) }
     }
 
     @Test
@@ -749,14 +742,12 @@ class RouterWrapperTests {
             ONLINE,
         ).first()
 
-        val handle = mockk<Cancelable>(relaxed = true)
-        every { router.getRouteRefresh(any(), capture(refreshRouteSlot)) } returns handle
+        every { router.getRouteRefresh(any(), capture(refreshRouteSlot)) } returns REQUEST_ID
+        every { router.cancelRouteRequest(any()) } answers {}
 
-        val requestId =
-            routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
-        routerWrapper.cancelRouteRefreshRequest(requestId)
+        routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
+        routerWrapper.cancelRouteRefreshRequest(REQUEST_ID)
 
-        verify(exactly = 1) { handle.cancel() }
         verify(exactly = 1) {
             routerRefreshCallback.onFailure(any())
         }
@@ -791,6 +782,7 @@ class RouterWrapperTests {
             ONLINE,
         ).first()
 
+        every { router.getRouteRefresh(any(), capture(refreshRouteSlot)) } returns REQUEST_ID
         every { router.cancelAll() } answers {}
 
         routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
@@ -828,18 +820,15 @@ class RouterWrapperTests {
             ONLINE,
         ).first()
 
-        val routeHandle = mockk<Cancelable>(relaxed = true)
-        val refreshHandle = mockk<Cancelable>(relaxed = true)
-        every { router.getRoute(any(), any(), any(), capture(getRouteSlot)) } returns routeHandle
-        every { router.getRouteRefresh(any(), capture(refreshRouteSlot)) } returns refreshHandle
+        every { router.getRoute(any(), any(), any(), capture(getRouteSlot)) } returns REQUEST_ID
+        every { router.getRouteRefresh(any(), capture(refreshRouteSlot)) } returns REQUEST_ID
+        every { router.cancelRouteRequest(any()) } answers {}
+        every { router.cancelRouteRefreshRequest(any()) } answers {}
 
-        val routeRequestId =
-            routerWrapper.getRoute(routerOptions, signature, navigationRouterCallback)
+        routerWrapper.getRoute(routerOptions, signature, navigationRouterCallback)
         routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
-        routerWrapper.cancelRouteRequest(routeRequestId)
+        routerWrapper.cancelRouteRequest(REQUEST_ID)
 
-        verify(exactly = 1) { routeHandle.cancel() }
-        verify(exactly = 0) { refreshHandle.cancel() }
         verify(exactly = 0) { routerRefreshCallback.onFailure(any()) }
         verify(exactly = 1) { navigationRouterCallback.onCanceled(routerOptions, OFFLINE) }
 
@@ -886,18 +875,15 @@ class RouterWrapperTests {
             ONLINE,
         ).first()
 
-        val routeHandle = mockk<Cancelable>(relaxed = true)
-        val refreshHandle = mockk<Cancelable>(relaxed = true)
-        every { router.getRoute(any(), any(), any(), capture(getRouteSlot)) } returns routeHandle
-        every { router.getRouteRefresh(any(), capture(refreshRouteSlot)) } returns refreshHandle
+        every { router.getRoute(any(), any(), any(), capture(getRouteSlot)) } returns REQUEST_ID
+        every { router.getRouteRefresh(any(), capture(refreshRouteSlot)) } returns REQUEST_ID
+        every { router.cancelRouteRequest(any()) } answers {}
+        every { router.cancelRouteRefreshRequest(any()) } answers {}
 
         routerWrapper.getRoute(routerOptions, signature, navigationRouterCallback)
-        val refreshRequestId =
-            routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
-        routerWrapper.cancelRouteRefreshRequest(refreshRequestId)
+        routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
+        routerWrapper.cancelRouteRefreshRequest(REQUEST_ID)
 
-        verify(exactly = 1) { refreshHandle.cancel() }
-        verify(exactly = 0) { routeHandle.cancel() }
         verify(exactly = 1) { routerRefreshCallback.onFailure(any()) }
         verify(exactly = 0) { navigationRouterCallback.onCanceled(any(), any()) }
 
@@ -954,13 +940,13 @@ class RouterWrapperTests {
                 any(),
                 capture(getRouteSlots),
             )
-        } answers { mockk<Cancelable>(relaxed = true) }
+        } answers { Random.nextLong() }
         every {
             router.getRouteRefresh(
                 any(),
                 capture(refreshRouteSlots),
             )
-        } answers { mockk<Cancelable>(relaxed = true) }
+        } answers { Random.nextLong() }
         every { router.cancelAll() } answers {}
 
         routerWrapper.getRoute(routerOptions, signature, navigationRouterCallback)
@@ -1502,20 +1488,13 @@ class RouterWrapperTests {
 
     @Test
     fun `check map matched callback called on cancel`() = coroutineRule.runBlockingTest {
-        val handle = mockk<Cancelable>(relaxed = true)
-        every {
-            router.getRouteMapMatched(
-                any(),
-                any(),
-                capture(mapMatchedRouteSlot),
-            )
-        } returns handle
+        every { router.cancelRouteRequest(any()) } answers {
+            mapMatchedRouteSlot.captured.run(routerResultCancelled, nativeOriginOnboard)
+        }
 
-        val requestId =
-            routerWrapper.getRouteMapMatched(mapMatchingOptions, signature, mapMatchingCallback)
-        routerWrapper.cancelMapMatchedRouteRequest(requestId)
+        routerWrapper.getRouteMapMatched(mapMatchingOptions, signature, mapMatchingCallback)
+        routerWrapper.cancelRouteRequest(REQUEST_ID)
 
-        verify(exactly = 1) { handle.cancel() }
         verify(exactly = 1) { mapMatchingCallback.onCancel() }
         verify(exactly = 0) { mapMatchingCallback.success(any()) }
         verify(exactly = 0) { mapMatchingCallback.failure(any()) }
@@ -1523,21 +1502,20 @@ class RouterWrapperTests {
 
     @Test
     fun `check map matched cancel and NN callback afterwards - invoke only cancel`() {
-        val handle = mockk<Cancelable>(relaxed = true)
         every {
             router.getRouteMapMatched(
                 any(),
                 any(),
                 capture(mapMatchedRouteSlot),
             )
-        } returns handle
+        } returns REQUEST_ID
+        every { router.cancelRouteMapMatchedRequest(any()) } answers {}
 
-        val requestId =
-            routerWrapper.getRouteMapMatched(mapMatchingOptions, signature, mapMatchingCallback)
-        routerWrapper.cancelMapMatchedRouteRequest(requestId)
+        routerWrapper.getRouteMapMatched(mapMatchingOptions, signature, mapMatchingCallback)
+        routerWrapper.cancelMapMatchedRouteRequest(REQUEST_ID)
 
-        verify(exactly = 1) { handle.cancel() }
         verify(exactly = 1) { mapMatchingCallback.onCancel() }
+        verify(exactly = 1) { router.cancelRouteMapMatchedRequest(any()) }
 
         clearMocks(mapMatchingCallback, answers = false)
 
@@ -1568,7 +1546,7 @@ class RouterWrapperTests {
                 any(),
                 capture(mapMatchedRouteSlot),
             )
-        } returns mockk(relaxed = true)
+        } returns REQUEST_ID
         every { router.cancelAll() } answers {}
 
         routerWrapper.getRouteMapMatched(mapMatchingOptions, signature, mapMatchingCallback)

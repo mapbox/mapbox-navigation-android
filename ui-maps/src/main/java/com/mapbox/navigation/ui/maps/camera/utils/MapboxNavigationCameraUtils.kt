@@ -10,7 +10,6 @@ import com.mapbox.maps.plugin.animation.animator.CameraAnimator
 import com.mapbox.maps.plugin.animation.getCameraAnimatorsFactory
 import kotlin.math.hypot
 import kotlin.math.ln
-import kotlin.math.pow
 
 internal fun normalizeProjection(projectedDistance: Double): Double {
     return ((ln((projectedDistance / 1000.0) + 0.24) + 2.1) * 1000.0)
@@ -30,12 +29,9 @@ internal fun projectedDistance(
     targetPoint: Point,
     targetZL: Double,
 ): Double {
-    val targetScale = 2.0.pow(targetZL)
-    val currentCoordinate = mapboxMap.project(currentPoint, targetScale)
-    val targetCoordinate = mapboxMap.project(targetPoint, targetScale)
     return hypot(
-        currentCoordinate.x - targetCoordinate.x,
-        currentCoordinate.y - targetCoordinate.y,
+        mapboxMap.project(currentPoint, targetZL).x - mapboxMap.project(targetPoint, targetZL).x,
+        mapboxMap.project(targetPoint, targetZL).y - mapboxMap.project(targetPoint, targetZL).y,
     )
 }
 

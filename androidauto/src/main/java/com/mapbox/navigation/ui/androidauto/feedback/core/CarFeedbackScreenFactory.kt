@@ -12,14 +12,10 @@ abstract class CarFeedbackScreenFactory(
     private val mapboxCarContext: MapboxCarContext,
 ) : MapboxScreenFactory {
     override fun create(carContext: CarContext): Screen {
-        val feedbackOptions = mapboxCarContext.options.carFeedbackOptions
-        val encodedSnapshot = if (feedbackOptions.attachScreenshot) {
-            val mapSurface = mapboxCarContext.mapboxCarMap.carMapSurface?.mapSurface
-            mapSurface?.snapshot()?.let { bitmap ->
-                FeedbackHelper.encodeScreenshot(bitmap, feedbackOptions.bitmapEncodeOptions)
-            }
-        } else {
-            null
+        val bitmapEncodeOptions = mapboxCarContext.options.carFeedbackOptions.bitmapEncodeOptions
+        val mapSurface = mapboxCarContext.mapboxCarMap.carMapSurface?.mapSurface
+        val encodedSnapshot = mapSurface?.snapshot()?.let { bitmap ->
+            FeedbackHelper.encodeScreenshot(bitmap, bitmapEncodeOptions)
         }
 
         return object : CarGridFeedbackScreen(

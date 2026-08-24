@@ -13,7 +13,6 @@ import androidx.lifecycle.lifecycleScope
 import com.mapbox.navigation.ui.androidauto.MapboxCarContext
 import com.mapbox.navigation.ui.androidauto.internal.context.MapboxCarContextOwner
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAuto
-import com.mapbox.navigation.ui.androidauto.internal.logAndroidAutoFailure
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -177,10 +176,6 @@ class MapboxScreenManager internal constructor(
         return screenFactoryMap.contains(key)
     }
 
-    internal fun isScreenBelowTop(key: String): Boolean {
-        return screenStack.elementAtOrNull(1)?.first == key
-    }
-
     /**
      * Provides access to the [MapboxScreenFactory] for the specified screen key. This will throw
      * an exception if it is accessed when it is not available.
@@ -227,34 +222,12 @@ class MapboxScreenManager internal constructor(
             logAndroidAuto("$TAG replaceTop exit, the top is already set to $key")
             return
         }
-        val factory = findScreenFactoryForEvent(key, MapboxScreenOperation.REPLACE_TOP) ?: return
+        val factory: MapboxScreenFactory = requireScreenFactory(key)
         val screen = factory.create(carContextOwner.carContext())
         screenStack.push(Pair(key, screen))
         val screenManager = requireScreenManager()
         logAndroidAuto("$TAG replaceTop $key remove ${screenManager.stackSize} screens")
         screenManager.replaceTop(screen)
-    }
-
-    /**
-     * This instance can receive an event it has no factory for: the key was never registered, or
-     * the event is shared by every [MapboxScreenManager] and replayed to new subscribers, for
-     * example one left over from a previous [Session] and replayed before this instance's
-     * factories are registered. Throwing here would crash the app from the event collector with
-     * no way for the caller to intervene, so the event is logged and ignored instead.
-     */
-    private fun findScreenFactoryForEvent(
-        key: String,
-        operation: String,
-    ): MapboxScreenFactory? {
-        val factory = screenFactoryMap[key]
-        if (factory == null) {
-            logAndroidAutoFailure(
-                "$TAG $operation ignored, there is no MapboxScreenFactory for $key. Make sure " +
-                    "the factory is registered; replayed events are handled when the Session " +
-                    "lifecycle is CREATED, so register factories before that.",
-            )
-        }
-        return factory
     }
 
     private fun ScreenManager.replaceTop(screen: Screen) {
@@ -273,7 +246,7 @@ class MapboxScreenManager internal constructor(
             logAndroidAuto("$TAG push exit, the top is already set to $key")
             return
         }
-        val factory = findScreenFactoryForEvent(key, MapboxScreenOperation.PUSH) ?: return
+        val factory: MapboxScreenFactory = requireScreenFactory(key)
         val screen = factory.create(carContextOwner.carContext())
         screenStack.push(Pair(key, screen))
         logAndroidAuto("$TAG Push $key on top of ${screenManager?.stackSize} screens")
@@ -300,24 +273,13 @@ class MapboxScreenManager internal constructor(
 
         /**
          * This gives you the ability to observe the MapboxCarScreen in use. If the [ScreenManager]
-         * is used directly this state will become inconsistent.
-         *
-         * The events are shared by every [MapboxScreenManager] instance and up to the last 4
-         * events are replayed to new observers, including the [MapboxScreenManager]
-         * of a newly created [Session]. A [MapboxScreenOperation.REPLACE_TOP] or
-         * [MapboxScreenOperation.PUSH] event for a key without a registered [MapboxScreenFactory]
-         * is ignored by the [MapboxScreenManager].
+         * is used directly this state will become inconsistent. Use [clear] in these cases.
          */
         @JvmStatic
         val screenEvent: SharedFlow<MapboxScreenEvent> by lazy { screenKeyMutable.asSharedFlow() }
 
         /**
          * Get the last [MapboxScreenEvent]. This will give you the top of the backstack.
-         *
-         * This is the last requested event, which may not be shown: a
-         * [MapboxScreenOperation.REPLACE_TOP] or [MapboxScreenOperation.PUSH] for a key without a
-         * registered [MapboxScreenFactory] is ignored by the [MapboxScreenManager] but is still
-         * returned here.
          */
         @JvmStatic
         fun current(): MapboxScreenEvent? = screenEvent.replayCache.lastOrNull()

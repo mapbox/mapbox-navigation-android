@@ -12,7 +12,6 @@ import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.factory.RoadFactory
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.getUpdatedObjectsAhead
 import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory.buildTripNotificationState
-import com.mapbox.navigation.base.internal.performance.PerformanceTraceNameProvider
 import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.route.refreshNativePeer
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -31,6 +30,8 @@ import com.mapbox.navigation.core.navigator.mapToDirectionsApi
 import com.mapbox.navigation.core.navigator.toFixLocation
 import com.mapbox.navigation.core.navigator.toLocation
 import com.mapbox.navigation.core.navigator.toLocations
+import com.mapbox.navigation.core.reroute.RerouteController
+import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.routerefresh.RouteRefresherStatus
 import com.mapbox.navigation.core.trip.RelevantVoiceInstructionsCallback
 import com.mapbox.navigation.core.trip.VoiceInstructionsAvailableObserver
@@ -52,8 +53,7 @@ import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigationStatusOrigin
 import com.mapbox.navigator.NavigatorObserver
-import com.mapbox.navigator.RefreshRouteResult
-import com.mapbox.navigator.RouteInterface
+import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteState
 import com.mapbox.navigator.RoutesChangeInfo
 import com.mapbox.navigator.SetRoutesReason
@@ -69,6 +69,9 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
+import kotlin.time.TimeSource
 
 /**
  * Default implementation of [TripSession]
@@ -78,6 +81,8 @@ import java.util.concurrent.atomic.AtomicBoolean
  * @param tripSessionLocationEngine the location engine
  * @param navigator Native navigator
  * @param threadController controller for main/io jobs
+ * @param repeatRerouteAfterOffRouteDelaySeconds max delay in seconds before repeating reroute after
+ * off-route event (when RerouteState.FetchingRoute is not invoked after off-route event)
  */
 @MainThread
 internal class MapboxTripSession(
@@ -87,6 +92,7 @@ internal class MapboxTripSession(
     private val navigator: MapboxNativeNavigator,
     private val threadController: ThreadController,
     private val eHorizonSubscriptionManager: EHorizonSubscriptionManager,
+    private val repeatRerouteAfterOffRouteDelaySeconds: Int = -1,
 ) : TripSession {
 
     private companion object {
@@ -171,12 +177,9 @@ internal class MapboxTripSession(
                         val refreshControllerRefresh = setRoutes
                             as? SetRoutes.RefreshRoutes.RefreshControllerRefresh
                         val primaryRoute = routes.first()
-                        var refreshRouteResult: Expected<String, RefreshRouteResult> =
+                        var refreshRouteResult: Expected<String, List<RouteAlternative>> =
                             ExpectedFactory.createError("None of the routes were refreshed")
-                        var lastSavedResultValue: Expected<String, RefreshRouteResult>? = null
-                        // up-to-date native peers of the routes that were actually refreshed,
-                        // keyed by route id
-                        val refreshedNativePeers = mutableMapOf<String, RouteInterface>()
+                        var lastSavedResultValue: Expected<String, List<RouteAlternative>>? = null
                         // primary route must be refreshed at the very end,
                         // because after it is refreshed,
                         // statuses that correspond to the refreshed route will start coming
@@ -187,18 +190,15 @@ internal class MapboxTripSession(
                                 // skip refresh in NN if route was not updated
                                 continue
                             }
-                            val refreshSuccess =
-                                refreshMetadata?.status as? RouteRefresherStatus.Success
                             refreshRouteResult = navigator.refreshRoute(
-                                route = route,
-                                refreshResponse = refreshSuccess?.refreshResponse,
-                                geometryIndex =
+                                route,
+                                (refreshMetadata?.status as? RouteRefresherStatus.Success)
+                                    ?.refreshResponse,
                                 refreshMetadata?.routeProgressData?.routeGeometryIndex,
                             )
 
-                            refreshRouteResult.value?.let {
+                            if (refreshRouteResult.isValue) {
                                 lastSavedResultValue = refreshRouteResult
-                                refreshedNativePeers[route.id] = it.route
                             }
                         }
                         // The latest result contains the most actual cumulated data.
@@ -206,19 +206,17 @@ internal class MapboxTripSession(
                         (lastSavedResultValue ?: refreshRouteResult).fold(
                             { NativeSetRouteError(it) },
                             { value ->
-                                // each route adopts its own native peer, the cumulated result
-                                // above can belong to any of the refreshed routes
-                                val refreshedRoutes = routes.map { route ->
-                                    refreshedNativePeers[route.id]
-                                        ?.let { route.refreshNativePeer(it) }
-                                        ?: route
-                                }
-                                val refreshedPrimaryRoute = refreshedRoutes.first()
+                                val refreshedPrimaryRoute = primaryRoute.refreshNativePeer()
                                 this@MapboxTripSession.primaryRoute = refreshedPrimaryRoute
                                 roadObjects = refreshedPrimaryRoute.upcomingRoadObjects
+                                val refreshedRoutes = routes
+                                    .drop(1)
+                                    .toMutableList().apply {
+                                        add(0, refreshedPrimaryRoute)
+                                    }
                                 NativeSetRouteValue(
                                     routes = refreshedRoutes,
-                                    nativeAlternatives = value.alternatives,
+                                    nativeAlternatives = value,
                                 )
                             },
                         ).also {
@@ -279,13 +277,8 @@ internal class MapboxTripSession(
     private val mainJobController: JobControl = threadController.getMainScopeAndRootJob()
     private val ioJobController: JobControl = threadController.getIOScopeAndRootJob()
 
-    // the String is this observer's performance trace name, resolved once at registration
-    // time (see locationObserverName) so it isn't recomputed on every dispatch
-    private val locationObservers = CopyOnWriteArraySet<Pair<LocationObserver, String>>()
-
-    // the String is this observer's performance trace name, resolved once at registration
-    // time (see routeProgressObserverName) so it isn't recomputed on every dispatch
-    private val routeProgressObservers = CopyOnWriteArraySet<Pair<RouteProgressObserver, String>>()
+    private val locationObservers = CopyOnWriteArraySet<LocationObserver>()
+    private val routeProgressObservers = CopyOnWriteArraySet<RouteProgressObserver>()
     private val offRouteObservers = CopyOnWriteArraySet<OffRouteObserver>()
     private val stateObservers = CopyOnWriteArraySet<TripSessionStateObserver>()
     private val bannerInstructionsObservers = CopyOnWriteArraySet<BannerInstructionsObserver>()
@@ -325,6 +318,8 @@ internal class MapboxTripSession(
 
     override var hadOffRouteDeviation: Boolean = false
 
+    private var offRouteObserverForReroute: OffRouteObserver? = null
+
     // MutableStateFlow is used to ensure that observers receive only the latest location
     // and location updates bursts (rapidly received large number of locations) are ignored
     private val rawLocationState = MutableStateFlow<Location?>(null)
@@ -342,6 +337,8 @@ internal class MapboxTripSession(
 
     override var locationMatcherResult: LocationMatcherResult? = null
         private set
+
+    private var rerouteInvocationHandler: RerouteInvocationHandler? = null
 
     private val nativeFallbackVersionsObserver =
         object : FallbackVersionsObserver {
@@ -369,7 +366,7 @@ internal class MapboxTripSession(
 
     private suspend fun publishRawLocation(rawLocation: Location) {
         val locationHash = rawLocation.hashCode()
-        locationObservers.forEach { (observer, _) -> observer.onNewRawLocation(rawLocation) }
+        locationObservers.forEach { it.onNewRawLocation(rawLocation) }
         val monotonicStart = System.nanoTime()
         navigator.updateLocation(rawLocation.toFixLocation())
         val diffMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - monotonicStart)
@@ -392,6 +389,83 @@ internal class MapboxTripSession(
 
     @OptIn(MapboxExperimental::class)
     private var voiceInstructionsObserver: VoiceInstructionsCallback? = null
+
+    /**
+     * Helper class that handles the reroute invocation logic based on the off-route state changes.
+     * It uses the [RerouteController] to monitor the reroute state and ensure that reroutes are
+     * triggered appropriately when the user goes off-route.
+     *
+     * Rely on the fact that all triggerRerouteIfRequired() should be called from the same thread.
+     * It allows to build state machine based on variables without additional locks.
+     */
+    private class RerouteInvocationHandler(
+        val tripSession: MapboxTripSession,
+        val rerouteController: RerouteController,
+        val repeatRerouteAfterOffRouteDelaySeconds: Int,
+    ) {
+
+        private companion object {
+            private const val LOG_CATEGORY = "RerouteInvocationHandler"
+        }
+
+        @OptIn(ExperimentalTime::class)
+        private var startTimeMark = TimeSource.Monotonic.markNow()
+
+        fun triggerRerouteIfRequired(tripStatus: TripStatus) {
+            if (repeatRerouteAfterOffRouteDelaySeconds == -1) {
+                if (tripSession.isOffRoute != tripStatus.isOffRoute) {
+                    tripSession.offRouteObserverForReroute?.onOffRouteStateChanged(
+                        tripStatus.isOffRoute,
+                    )
+                }
+            } else {
+                when {
+                    // Send signal via callback to MapboxNavigation for the reroute logic
+                    !tripSession.isOffRoute && tripStatus.isOffRoute -> {
+                        logI("Trigger off-route observer for re-route", LOG_CATEGORY)
+                        resetState()
+                        tripSession.offRouteObserverForReroute?.onOffRouteStateChanged(true)
+                    }
+
+                    // Checks if the reroute was invoked the last time the user was off route
+                    tripSession.isOffRoute && tripStatus.isOffRoute -> {
+                        val rerouteState = rerouteController.state
+                        if (rerouteState.isInProgress()) {
+                            logI(
+                                "Re-route is in progress [$rerouteState]",
+                                LOG_CATEGORY,
+                            )
+                            resetState()
+                        } else {
+                            if (exceedDelay()) {
+                                logI(
+                                    "Re-route not invoked [$rerouteState]. " +
+                                        "Repeating off-route observer call for re-route",
+                                    LOG_CATEGORY,
+                                )
+                                resetState()
+                                tripSession.offRouteObserverForReroute?.onOffRouteStateChanged(true)
+                            }
+                        }
+                    }
+
+                    // Resets the state
+                    !tripSession.isOffRoute -> {
+                        resetState()
+                    }
+                }
+            }
+        }
+
+        @OptIn(ExperimentalTime::class)
+        private fun exceedDelay() =
+            startTimeMark.elapsedNow() >= repeatRerouteAfterOffRouteDelaySeconds.seconds
+
+        @OptIn(ExperimentalTime::class)
+        private fun resetState() {
+            startTimeMark = TimeSource.Monotonic.markNow()
+        }
+    }
 
     init {
         navigator.addNativeNavigatorRecreationObserver {
@@ -509,9 +583,7 @@ internal class MapboxTripSession(
      * Register [LocationObserver] to receive location updates
      */
     override fun registerLocationObserver(locationObserver: LocationObserver) {
-        locationObservers.add(
-            locationObserver to locationObserverName(locationObserver),
-        )
+        locationObservers.add(locationObserver)
         rawLocationState.value?.let { locationObserver.onNewRawLocation(it) }
         locationMatcherResult?.let { locationObserver.onNewLocationMatcherResult(it) }
     }
@@ -520,18 +592,8 @@ internal class MapboxTripSession(
      * Unregister [LocationObserver]
      */
     override fun unregisterLocationObserver(locationObserver: LocationObserver) {
-        locationObservers.remove(
-            locationObserver to locationObserverName(locationObserver),
-        )
+        locationObservers.remove(locationObserver)
     }
-
-    /**
-     * Either get the name that we'll use for performance tracking or use the default name based on
-     * the class name of the observer.
-     */
-    private fun locationObserverName(locationObserver: LocationObserver): String =
-        (locationObserver as? PerformanceTraceNameProvider)?.performanceTraceName
-            ?: locationObserver.javaClass.name.takeLast(70)
 
     /**
      * Unregister all [LocationObserver]
@@ -549,9 +611,7 @@ internal class MapboxTripSession(
      * @see [RouteProgress]
      */
     override fun registerRouteProgressObserver(routeProgressObserver: RouteProgressObserver) {
-        routeProgressObservers.add(
-            routeProgressObserver to routeProgressObserverName(routeProgressObserver),
-        )
+        routeProgressObservers.add(routeProgressObserver)
         routeProgress?.let { routeProgressObserver.onRouteProgressChanged(it) }
     }
 
@@ -559,18 +619,8 @@ internal class MapboxTripSession(
      * Unregister [RouteProgressObserver]
      */
     override fun unregisterRouteProgressObserver(routeProgressObserver: RouteProgressObserver) {
-        routeProgressObservers.remove(
-            routeProgressObserver to routeProgressObserverName(routeProgressObserver),
-        )
+        routeProgressObservers.remove(routeProgressObserver)
     }
-
-    /**
-     * Either get the name that we'll use for performance tracking or use the default name based on
-     * the class name of the observer.
-     */
-    private fun routeProgressObserverName(routeProgressObserver: RouteProgressObserver): String =
-        (routeProgressObserver as? PerformanceTraceNameProvider)?.performanceTraceName
-            ?: routeProgressObserver.javaClass.name.takeLast(70)
 
     /**
      * Unregister all [RouteProgressObserver]
@@ -829,6 +879,23 @@ internal class MapboxTripSession(
         navigator.setFallbackVersionsObserver(null)
     }
 
+    override fun setOffRouteObserverForReroute(
+        offRouteObserver: OffRouteObserver,
+        rerouteController: RerouteController,
+    ) {
+        offRouteObserverForReroute = offRouteObserver
+        rerouteInvocationHandler = RerouteInvocationHandler(
+            this,
+            rerouteController,
+            repeatRerouteAfterOffRouteDelaySeconds,
+        )
+    }
+
+    override fun resetOffRouteObserverForReroute() {
+        offRouteObserverForReroute = null
+        rerouteInvocationHandler = null
+    }
+
     override fun resetOffRouteDeviationFlag() {
         hadOffRouteDeviation = false
     }
@@ -836,8 +903,9 @@ internal class MapboxTripSession(
     private fun updateLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
         PerformanceTracker.trackPerformanceSync("MapboxTripSession#updateLocationMatcherResult") {
             this.locationMatcherResult = locationMatcherResult
-            locationObservers.forEach { (observer, observerName) ->
+            locationObservers.forEach { observer ->
                 mainJobController.scope.launch {
+                    val observerName = observer.javaClass.name.takeLast(70)
                     PerformanceTracker.trackPerformanceSync(
                         "MapboxTripSession#locationObserver#$observerName",
                     ) {
@@ -926,7 +994,6 @@ internal class MapboxTripSession(
                         lastVoiceInstruction,
                         upcomingRoadObjects,
                         currentLegDestination,
-                        status.stateOfCharging,
                     ).also { routeProgress ->
                         if (routeProgress == null) {
                             logD(
@@ -941,6 +1008,7 @@ internal class MapboxTripSession(
             }
         updateRouteProgress(routeProgress, triggerObserver)
         triggerVoiceInstructionEvent(routeProgress, status)
+        rerouteInvocationHandler?.triggerRerouteIfRequired(tripStatus)
         isOffRoute = tripStatus.isOffRoute
     }
 
@@ -965,8 +1033,9 @@ internal class MapboxTripSession(
             PerformanceTracker.trackPerformanceSync(
                 "MapboxTripSession#updateRouteProgress-dispatch-route-progress-update",
             ) {
-                routeProgressObservers.forEach { (observer, observerName) ->
+                routeProgressObservers.forEach { observer ->
                     mainJobController.scope.launch {
+                        val observerName = observer.javaClass.name.takeLast(70)
                         PerformanceTracker.trackPerformanceSync(
                             "MapboxTripSession#routeProgressObserver#$observerName",
                         ) {
@@ -1081,3 +1150,5 @@ private val TripStatus.isOffRoute: Boolean
 
 private class NativeStatusProcessingError(cause: Throwable) :
     Throwable("Error processing native status update", cause)
+
+private fun RerouteState.isInProgress(): Boolean = this is RerouteState.FetchingRoute

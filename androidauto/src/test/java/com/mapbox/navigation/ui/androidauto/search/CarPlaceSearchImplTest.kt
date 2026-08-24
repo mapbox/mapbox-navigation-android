@@ -34,7 +34,11 @@ class CarPlaceSearchImplTest {
     @get:Rule
     val coroutineRule = MainCoroutineRule()
 
-    private val options: MapboxCarOptions = mockk()
+    private val options: MapboxCarOptions = mockk {
+        every { carPlaceSearchOptions } returns mockk {
+            every { accessToken } returns "pk.search-token"
+        }
+    }
     private val locationProvider: CarSearchLocationProvider = mockk(relaxed = true)
     private val searchEngine: SearchEngine = mockk()
     private val sut = CarPlaceSearchImpl(options, locationProvider)

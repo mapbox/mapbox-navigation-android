@@ -57,10 +57,6 @@ check-kotlin-lint:
 	$(call run-gradle-tasks,$(UI_MODULES),ktlint)
 	$(call run-gradle-tasks,$(APPLICATION_MODULES),ktlint)
 
-.PHONY: check-detekt
-check-detekt:
-	./gradlew detekt
-
 .PHONY: format-kotlin-lint
 format-kotlin-lint:
 	$(call run-gradle-tasks,$(CORE_MODULES),ktlintFormat)
@@ -143,7 +139,6 @@ core-dependency-graph:
 .PHONY: core-check-api
 core-check-api: assemble-core-release
 	./gradlew :base:checkApi -PhidePackage=com.mapbox.navigation.base.internal
-	./gradlew :dispatchers:checkApi
 	./gradlew :metrics:checkApi -PhidePackage=com.mapbox.navigation.metrics.internal
 	./gradlew :utils:checkApi -PhidePackage=com.mapbox.navigation.utils.internal
 	./gradlew :navigator:checkApi -PhidePackage=com.mapbox.navigation.navigator.internal
@@ -158,7 +153,6 @@ core-check-api: assemble-core-release
 .PHONY: core-update-api
 core-update-api: assemble-core-release
 	./gradlew :base:updateApi -PhidePackage=com.mapbox.navigation.base.internal
-	./gradlew :dispatchers:updateApi
 	./gradlew :metrics:updateApi -PhidePackage=com.mapbox.navigation.metrics.internal
 	./gradlew :utils:updateApi -PhidePackage=com.mapbox.navigation.utils.internal
 	./gradlew :navigator:updateApi -PhidePackage=com.mapbox.navigation.navigator.internal

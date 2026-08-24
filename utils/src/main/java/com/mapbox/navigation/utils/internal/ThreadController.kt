@@ -1,10 +1,9 @@
 package com.mapbox.navigation.utils.internal
 
-import com.mapbox.annotation.MapboxExperimental
-import com.mapbox.common.dispatchers.SdkDispatchers
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
@@ -46,14 +45,11 @@ fun Exception.ifChannelException(action: () -> Unit) {
 
 data class JobControl(val job: Job, val scope: CoroutineScope)
 
-@OptIn(MapboxExperimental::class)
 class ThreadController {
 
     companion object {
-        val IODispatcher: CoroutineDispatcher
-            get() = SdkDispatchers.IO
-        val DefaultDispatcher: CoroutineDispatcher
-            get() = SdkDispatchers.Default
+        val IODispatcher: CoroutineDispatcher = Dispatchers.IO
+        val DefaultDispatcher: CoroutineDispatcher = Dispatchers.Default
     }
 
     internal var ioRootJob = SupervisorJob()
@@ -104,6 +100,6 @@ class ThreadController {
      */
     fun getMainScopeAndRootJob(): JobControl {
         val parentJob = SupervisorJob(mainRootJob)
-        return JobControl(parentJob, CoroutineScope(parentJob + SdkDispatchers.Main))
+        return JobControl(parentJob, CoroutineScope(parentJob + Dispatchers.Main))
     }
 }

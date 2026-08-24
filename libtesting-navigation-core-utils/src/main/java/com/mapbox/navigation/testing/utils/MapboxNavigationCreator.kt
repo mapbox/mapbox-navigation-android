@@ -4,10 +4,10 @@ package com.mapbox.navigation.testing.utils
 
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
-import com.mapbox.bindgen.Value
 import com.mapbox.common.TileStore
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.reroute.setRepeatRerouteAfterOffRouteDelaySeconds
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.DeviceType
 import com.mapbox.navigation.base.options.LocationOptions
@@ -20,7 +20,6 @@ import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
-import com.mapbox.navigation.testing.utils.offline.clearTileStore
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.stopRecording
 import java.net.URI
@@ -38,9 +37,6 @@ suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigation(
     locationOptions: LocationOptions? = mockLocationUpdatesRule.locationOptions,
     block: (navigation: MapboxNavigation) -> Unit,
 ) {
-    if (!useRealTiles && tileStore == null && tilesVersion == null) {
-        context.clearTileStore()
-    }
     val navigation = MapboxNavigationProvider.create(
         NavigationOptions.Builder(
             InstrumentationRegistry.getInstrumentation().targetContext
@@ -71,6 +67,7 @@ suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigation(
             rerouteOptions(
                 RerouteOptions.Builder()
                     .rerouteStrategyForMapMatchedRoutes(rerouteStrategyForMapMatchedRoutes)
+                    .setRepeatRerouteAfterOffRouteDelaySeconds(-1)
                     .build()
             )
             if (routeRefreshOptions != null) {
@@ -92,21 +89,4 @@ suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigation(
 
 fun createTileStore(): TileStore {
     return TileStore.create()
-}
-
-/**
- * Creates a [TileStore] whose tile download retry backoff is shrunk, so that tests relying on
- * real navigation tiles don't time out while waiting for a retry.
- *
- * On CI there is a chance that tiles won't be downloaded because of a couple of unlucky
- * transient network errors, for example while re-downloading online tiles after an offline
- * window. Retries are delayed exponentially, so with the production backoff a single wait can
- * eat a whole test timeout even though the SDK is still retrying correctly in the background.
- * Shrinking the backoff timer lets more retry attempts land inside the test timeout window.
- */
-fun createTileStoreWithFastRetryBackoff(): TileStore {
-    return TileStore.create().apply {
-        setOption("backoff-timer-scale", Value(0.1))
-        setOption("backoff-timer-base", Value(1.5))
-    }
 }

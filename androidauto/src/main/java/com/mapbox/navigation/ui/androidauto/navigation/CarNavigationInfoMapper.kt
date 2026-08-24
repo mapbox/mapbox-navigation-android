@@ -53,13 +53,7 @@ class CarNavigationInfoMapper(
         val maneuver = expectedManeuvers.value?.firstOrNull()
         return maneuver?.primary?.let { primary ->
             val carManeuver =
-                CarManeuverMapper.from(
-                    primary.type,
-                    primary.modifier,
-                    primary.degrees,
-                    primary.drivingSide,
-                    CarManeuverMapper.roundaboutExitNumber(primary.componentList),
-                )
+                CarManeuverMapper.from(primary.type, primary.modifier, primary.degrees)
             carManeuverIconRenderer.renderManeuverIcon(primary)?.let { carManeuver.setIcon(it) }
             val primaryInstruction =
                 renderManeuver(
@@ -111,13 +105,7 @@ class CarNavigationInfoMapper(
     ) = apply {
         maneuver.sub?.let { subManeuver ->
             val nextCarManeuver =
-                CarManeuverMapper.from(
-                    subManeuver.type,
-                    subManeuver.modifier,
-                    subManeuver.degrees,
-                    subManeuver.drivingSide,
-                    CarManeuverMapper.roundaboutExitNumber(subManeuver.componentList),
-                )
+                CarManeuverMapper.from(subManeuver.type, subManeuver.modifier, subManeuver.degrees)
             carManeuverIconRenderer.renderManeuverIcon(subManeuver)
                 ?.let { nextCarManeuver.setIcon(it) }
             val instruction =

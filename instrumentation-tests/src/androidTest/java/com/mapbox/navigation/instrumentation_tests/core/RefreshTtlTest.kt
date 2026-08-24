@@ -3,7 +3,6 @@ package com.mapbox.navigation.instrumentation_tests.core
 import android.location.Location
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
@@ -39,6 +38,7 @@ import com.mapbox.navigation.testing.utils.location.stayOnPositionAndWaitForUpda
 import com.mapbox.navigation.testing.utils.nro.assumeNotNROBecauseEmptyRefreshTllBreaksExpirationTime
 import com.mapbox.navigation.testing.utils.nro.assumeNotNROBecauseOfSerialization
 import com.mapbox.navigation.testing.utils.readRawFileText
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
@@ -136,7 +136,7 @@ class RefreshTtlTest : BaseCoreNoCleanUpTest() {
             val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
                 .getSuccessfulResultOrThrowException()
                 .routes
-            val deserializedRoutes = withContext(SdkDispatchers.Default) {
+            val deserializedRoutes = withContext(Dispatchers.Default) {
                 requestedRoutes.map { initialRoute ->
                     deserializeNavigationRouteFrom(initialRoute.serialize()).onError {
                         fail("Can't deserialize: ${it.message}")

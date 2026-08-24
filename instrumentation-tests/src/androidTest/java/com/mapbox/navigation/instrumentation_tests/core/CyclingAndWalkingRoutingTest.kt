@@ -29,7 +29,6 @@ import com.mapbox.navigation.testing.utils.assertions.recordRerouteStatesV2
 import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
-import com.mapbox.navigation.testing.utils.location.moveAlongTheCurrentRouteUntilLocation
 import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracking
 import com.mapbox.navigation.testing.utils.location.stayOnPosition
 import com.mapbox.navigation.testing.utils.readRawFileText
@@ -222,36 +221,29 @@ class CyclingAndWalkingRoutingTest(private val directionsProfile: String) :
                 routes[0],
                 mockLocationReplayerRule,
             )
-            stayOnPosition(originalLocation) {
+            mockLocationReplayerRule.loopUpdateUntil(originalLocation) {
                 mapboxNavigation.routeProgressUpdates().first()
             }
-            // Reach the waypoint separating the two legs before advancing the leg, and wait for
-            // the matched position to actually get there rather than for any progress update.
-            stayOnPosition(secondLegLocation) {
-                mapboxNavigation.moveAlongTheCurrentRouteUntilLocation(
-                    mockRoute.routeWaypoints[1],
-                )
-            }
+            mapboxNavigation.routeProgressUpdates().first()
             mapboxNavigation.navigateNextRouteLeg()
-            stayOnPosition(secondLegLocation) {
+            mockLocationReplayerRule.loopUpdateUntil(secondLegLocation) {
                 mapboxNavigation.routeProgressUpdates()
                     .filter { it.currentLegProgress?.legIndex == 1 }
                     .first()
             }
-            stayOnPosition(offRouteLocationUpdate) {
+            mockLocationReplayerRule.loopUpdateUntil(offRouteLocationUpdate) {
                 mapboxNavigation.routeProgressUpdates()
                     .filter { it.currentState == RouteProgressState.OFF_ROUTE }
                     .first()
-
-                mapboxNavigation.routesUpdates().filter {
-                    (it.reason == ROUTES_UPDATE_REASON_REROUTE).also { didUpdate ->
-                        if (didUpdate) {
-                            assertEquals(0, mapboxNavigation.currentLegIndex())
-                        }
-                    }
-                }.first()
             }
 
+            mapboxNavigation.routesUpdates().filter {
+                (it.reason == ROUTES_UPDATE_REASON_REROUTE).also { didUpdate ->
+                    if (didUpdate) {
+                        assertEquals(0, mapboxNavigation.currentLegIndex())
+                    }
+                }
+            }.first()
             assertSuccessfulRerouteStateTransition(rerouteStates)
             assertSuccessfulRouteAppliedRerouteStateTransition(rerouteStatesV2)
         }

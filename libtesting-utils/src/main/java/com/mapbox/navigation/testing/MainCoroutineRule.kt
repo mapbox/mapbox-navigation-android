@@ -1,14 +1,18 @@
 package com.mapbox.navigation.testing
 
-import com.mapbox.common.dispatchers.SdkDispatchers
-import com.mapbox.common.dispatchers.resetTestMain
-import com.mapbox.common.dispatchers.setTestMain
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.TestCoroutineScope
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.createTestCoroutineScope
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
@@ -29,14 +33,15 @@ class MainCoroutineRule : TestRule {
     override fun apply(base: Statement, description: Description?) = object : Statement() {
         @Throws(Throwable::class)
         override fun evaluate() {
-            SdkDispatchers.setTestMain(testDispatcher)
+            Dispatchers.setMain(testDispatcher)
 
             try {
                 base.evaluate()
             } finally {
-                SdkDispatchers.resetTestMain()
+                Dispatchers.resetMain() // Restore original main dispatcher
                 createdScopes.forEach { it.cleanupTestCoroutines() }
             }
+
         }
     }
 

@@ -2,11 +2,14 @@ package com.mapbox.navigation.core.reroute
 
 import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.bindgen.DataRef
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.RouterFailureFactory
-import com.mapbox.navigation.base.internal.route.parsing.models.nn.RouteInterfacesParser
+import com.mapbox.navigation.base.internal.route.parsing.ResponseToParse
+import com.mapbox.navigation.base.internal.route.parsing.models.directions.NavigationRoutesParser
 import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.route.ResponseOriginAPI
 import com.mapbox.navigation.core.internal.router.mapToSdkRouterFailureType
 import com.mapbox.navigation.core.reroute.internal.NativeRerouteControllerState
 import com.mapbox.navigation.core.utils.ThreadUtils
@@ -43,7 +46,7 @@ internal class NativeMapboxRerouteController(
     private val getCurrentRoutes: () -> List<NavigationRoute>,
     private val updateRoutes: UpdateRoutes,
     private val scope: CoroutineScope,
-    private val routeInterfacesParser: RouteInterfacesParser,
+    private val routeParser: NavigationRoutesParser,
     private val mainThreadAssertion: () -> Unit = ThreadUtils::assertCurrentLooperIsMain,
 ) : InternalRerouteController() {
 
@@ -123,16 +126,17 @@ internal class NativeMapboxRerouteController(
         }
 
         override fun onRerouteReceived(
-            routes: List<RouteInterface>,
+            routeResponse: DataRef,
+            routeRequest: String,
             origin: RouterOrigin,
         ) {
             mainThreadAssertion()
-            logD(TAG) { "onRerouteReceived: ${routes.size} route(s)" }
+            logD(TAG) { "onRerouteReceived: request: $routeRequest" }
             interruptParsingIfAny()
             activeParsingJob = scope.launch {
-                logD(TAG) { "Building reroute routes from ${routes.size} native route(s)" }
+                logD(TAG) { "Parsing reroute response $routeRequest" }
                 nativeState = NativeRerouteControllerState.RouteObjectsParsing()
-                when (val result = handleRerouteRoutes(routes)) {
+                when (val result = handleRerouteResponse(routeResponse, routeRequest, origin)) {
                     is RerouteResponseParsingResult.Error -> {
                         nativeState = NativeRerouteControllerState.Failed(
                             "Error parsing route",
@@ -231,15 +235,10 @@ internal class NativeMapboxRerouteController(
         isEnabled = enabled
     }
 
-    override fun shutdown() {
-        isEnabled = false
-        rerouteController?.cancel()
-        rerouteInterface.removeRerouteObserver(nativeRerouteObserver)
-    }
-
     override fun interrupt() {
         // Interrupt only while a reroute is actually in flight. Once a route has been
-        // fetched, the result is delivered synchronously and must not cancel the delivery.
+        // fetched, the result is delivered synchronously and must not cancel the delivery
+        // (same guard as MapboxRerouteController#onRequestInterrupted).
         when (nativeState) {
             is NativeRerouteControllerState.WaitingForResponse,
             is NativeRerouteControllerState.RouteObjectsParsing,
@@ -250,6 +249,10 @@ internal class NativeMapboxRerouteController(
 
             else -> Unit
         }
+    }
+
+    @Deprecated("native reroute controller identify reroute without external help")
+    override fun rerouteOnDeviation(callback: DeviationRoutesCallback) {
     }
 
     override fun rerouteOnParametersChange(callback: RouteReplanRoutesCallback) {
@@ -302,7 +305,11 @@ internal class NativeMapboxRerouteController(
             it.onValue { value ->
                 activeParsingJob = scope.launch {
                     nativeState = NativeRerouteControllerState.RouteObjectsParsing()
-                    val parsingResult = handleRerouteRoutes(value.routes)
+                    val parsingResult = handleRerouteResponse(
+                        value.routeResponse,
+                        value.routeRequest,
+                        value.origin,
+                    )
                     when (parsingResult) {
                         is RerouteResponseParsingResult.Error -> {
                             nativeState = NativeRerouteControllerState.Failed(
@@ -394,18 +401,25 @@ internal class NativeMapboxRerouteController(
         rerouteStateObserver: RerouteStateObserver,
     ): Boolean = observers.remove(rerouteStateObserver)
 
-    private suspend fun handleRerouteRoutes(
-        routes: List<RouteInterface>,
+    private suspend fun handleRerouteResponse(
+        routeResponse: DataRef,
+        routeRequest: String,
+        origin: RouterOrigin,
     ): RerouteResponseParsingResult {
-        // The directions response is parsed once inside navigation-native; here we only
-        // build the SDK route models from the already-parsed native routes.
-        return routeInterfacesParser.parseRoutes(routes).map {
+        return routeParser.parseDirectionsResponse(
+            ResponseToParse(
+                routeResponse,
+                routeRequest,
+                origin.mapToSdkRouteOrigin(),
+                responseOriginAPI = ResponseOriginAPI.DIRECTIONS_API,
+            ),
+        ).map {
             RerouteResponseParsingResult.RoutesAvailable(
                 it.routes,
                 0,
             )
         }.getOrElse {
-            logE(TAG) { "error building reroute routes ${it.message}" }
+            logE(TAG) { "error parsing route ${it.message}" }
             RerouteResponseParsingResult.Error(it)
         }
     }

@@ -3,8 +3,8 @@ ext {
 
   androidVersions = [
       minSdkVersion           : 21,
-      targetSdkVersion        : 37,
-      compileSdkVersion       : 37,
+      targetSdkVersion        : 36,
+      compileSdkVersion       : 36,
       carMinSdkVersion        : 23,
       // Vulkan-enabled builds resolve android-core-vulkan, whose minSdk is 31 (Android 12+).
       carVulkanMinSdkVersion  : 31
@@ -14,7 +14,7 @@ ext {
   // Release Train depends on these two lines below
   // https://github.com/mapbox/release-train/blob/bd530da200d62fb45166ef91d7d892d90a453fa6/backend/model/step/navcoreandroid/PrepareChangelogNavCore.py#L122-L124
 
-  def mapboxSdkVersionSuffix = '33.0-SNAPSHOT-10-01--01-50.git-6349023'
+  def mapboxSdkVersionSuffix = '30.0-rc.1'
   def mapboxNavigatorVersion = "324.${mapboxSdkVersionSuffix}"
 
   def ndkVersionSuffix = ""
@@ -39,7 +39,6 @@ ext {
       mapboxNavSdkCpp           : "0.${mapboxSdkVersionSuffix}",
       mapboxSearch              : "2.${mapboxSdkVersionSuffix}",
       mapboxBaseAndroid         : '0.12.0',
-      mapboxPlatformAnnotations : '0.3.0',
       androidXActivity          : '1.7.1',
       androidXActivityCompose   : '1.9.2',
       androidXLifecycle         : '2.4.0',
@@ -50,9 +49,8 @@ ext {
       androidXAnnotationVersion : '1.2.0',
       androidXFragmentVersion   : '1.4.0',
       androidXDataStore         : '1.0.0',
-      androidXWorkManager       : '2.10.5',
+      androidXWorkManager       : '2.7.1',
       androidXAsyncInflater     : '1.0.0',
-      androidXCar               : '1.7.0',
       cardViewVersion           : '1.0.0',
       recyclerViewVersion       : '1.1.0',
       materialDesignVersion     : '1.1.0',
@@ -117,7 +115,6 @@ ext {
       mapboxNavSdkFullHdCpp     : "com.mapbox.navsdk:navsdk-hd$ndkVersionSuffix:${version.mapboxNavSdkCpp}",
       mapboxMapGptExpAndroid    : "com.mapbox.mapgpt.experimental:mapgpt$ndkVersionSuffix:${version.mapboxCommonNative}",
 
-      mapboxPlatformAnnotations : "com.mapbox.annotation:annotation:${version.mapboxPlatformAnnotations}",
       mapboxAnnotations         : "com.mapbox.base:annotations:${version.mapboxBaseAndroid}",
       mapboxAnnotationsProcessor: "com.mapbox.base:annotations-processor:${version.mapboxBaseAndroid}",
       mapboxAndroidCommon       : "com.mapbox.base:common:${version.mapboxBaseAndroid}",
@@ -165,7 +162,6 @@ ext {
       androidXAsyncInflater     : "androidx.asynclayoutinflater:asynclayoutinflater:${version.androidXAsyncInflater}",
       androidXActivity          : "androidx.activity:activity-ktx:${version.androidXActivity}",
       androidXActivityCompose   : "androidx.activity:activity-compose:${version.androidXActivityCompose}",
-      androidXCarApp            : "androidx.car.app:app:${version.androidXCar}",
 
       // compose
      composeUi                  : "androidx.compose.ui:ui:${version.compose}",
@@ -231,7 +227,6 @@ ext {
 
   pluginVersion = [
       checkstyle           : '8.2',
-      detekt               : '1.23.7',
       pmd                  : '5.8.1',
       gradle               : '8.10.1',
       dependencyGraph      : '0.8.0',
@@ -256,7 +251,6 @@ ext {
   ]
 
   pluginDependencies = [
-      detektCli            : "io.gitlab.arturbosch.detekt:detekt-cli:${pluginVersion.detekt}",
       gradle               : "com.android.tools.build:gradle:${pluginVersion.gradle}",
       kotlin               : "org.jetbrains.kotlin:kotlin-gradle-plugin:${pluginVersion.kotlin}",
       checkstyle           : "com.puppycrawl.tools:checkstyle:${pluginVersion.checkstyle}",

@@ -1,6 +1,3 @@
-import com.vanniktech.dependency.graph.generator.DependencyGraphGeneratorPlugin
-import com.vanniktech.dependency.graph.generator.DependencyGraphGeneratorExtension.Generator
-
 buildscript {
   apply from: "${rootDir}/gradle/dependencies.gradle"
   repositories {
@@ -23,7 +20,6 @@ buildscript {
     classpath pluginDependencies.gradle
     classpath pluginDependencies.kotlin
     classpath pluginDependencies.dependencyUpdates
-    classpath pluginDependencies.dependencyGraph
     classpath pluginDependencies.jacoco
     classpath pluginDependencies.kover
     classpath pluginDependencies.googleServices
@@ -93,22 +89,7 @@ subprojects {
   apply from: "${rootDir}/gradle/dependencies.gradle"
   apply from: "${rootDir}/gradle/dependency-updates.gradle"
   apply from: "${rootDir}/gradle/checkstyle.gradle"
-  apply from: "${rootDir}/gradle/detekt.gradle"
-
-  // Inlined rather than kept in gradle/dependencies-graph.gradle: that script needed
-  // `import`s, and a script plugin compiles against its own buildscript classpath only.
-  // Declaring one there gave it an isolated ScriptHandler that ignored the centrally
-  // configured repositories and resolved straight from Maven Central.
-  plugins.apply(DependencyGraphGeneratorPlugin)
-  dependencyGraphGenerator {
-    generators {
-      add(new Generator(
-              "mapboxLibraries", // Suffix for our Gradle task.
-              { dependency -> dependency.getModuleGroup().startsWith("com.mapbox") }, // Only want Mapbox libs.
-              { dependency -> true }, // Include transitive dependencies.
-      ))
-    }
-  }
+  apply from: "${rootDir}/gradle/dependencies-graph.gradle"
 
   plugins.withId('org.jetbrains.kotlin.jvm') {
     compileKotlin {

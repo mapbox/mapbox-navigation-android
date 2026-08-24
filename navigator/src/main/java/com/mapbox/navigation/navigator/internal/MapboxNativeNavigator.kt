@@ -12,8 +12,6 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigator.ADASISv2MessageCallback
 import com.mapbox.navigator.AdasisConfig
 import com.mapbox.navigator.CacheHandle
-import com.mapbox.navigator.ChangeLegCallback
-import com.mapbox.navigator.ChargingState
 import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.ElectronicHorizonObserver
 import com.mapbox.navigator.EventsMetadataInterface
@@ -29,7 +27,6 @@ import com.mapbox.navigator.NavigatorInterface
 import com.mapbox.navigator.NavigatorObserver
 import com.mapbox.navigator.NavigatorOperationsDelegate
 import com.mapbox.navigator.PredictiveCacheControllerInterface
-import com.mapbox.navigator.RefreshRouteResult
 import com.mapbox.navigator.RerouteControllerInterface
 import com.mapbox.navigator.RerouteDetectorInterface
 import com.mapbox.navigator.ResetCallback
@@ -114,15 +111,12 @@ interface MapboxNativeNavigator : MapboxNativeRerouteInterface {
      * @param route [NavigationRoute]
      * @param refreshResponse Optional DataRef from refresh response to avoid JSON reconstruction
      * @param geometryIndex Optional geometry index from which the route refresh was requested
-     * @param refreshedDirectionsRouteContext the already-refreshed native route context (sourced
-     * from and to be pushed back into the route's native peer), computed for every route
-     * regardless of whether it is NRO-backed.
      */
     suspend fun refreshRoute(
         route: NavigationRoute,
         refreshResponse: DataRef?,
         geometryIndex: Int?,
-    ): Expected<String, RefreshRouteResult>
+    ): Expected<String, List<RouteAlternative>>
 
     /**
      * Follows a new leg of the already loaded directions.
@@ -151,25 +145,6 @@ interface MapboxNativeNavigator : MapboxNativeRerouteInterface {
      * @param retained true when the user keeps the station, false to release it
      */
     fun retainUserChargingStation(routeId: String, stationId: String, retained: Boolean)
-
-    /**
-     * Reports that the driver has started charging at the current charging station,
-     * transitioning the native charging FSM from `AwaitCharging` to `Charging`.
-     */
-    fun startCharging()
-
-    /**
-     * Reports that charging has stopped, transitioning the native charging FSM back
-     * to `NotCharging` and, if applicable, automatically advancing the route leg.
-     *
-     * @param callback invoked with the result of the leg change triggered by stopping charging
-     */
-    fun stopCharging(callback: ChangeLegCallback)
-
-    /**
-     * Returns the current state of the native charging FSM.
-     */
-    fun getChargingState(): ChargingState
 
     // EH
 

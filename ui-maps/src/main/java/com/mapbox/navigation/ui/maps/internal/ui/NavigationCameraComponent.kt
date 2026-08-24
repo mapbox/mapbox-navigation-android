@@ -18,16 +18,15 @@ class NavigationCameraComponent(
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
-        mapboxNavigation.flowRouteProgress(tag = "NavigationCameraComponent").observe {
+        mapboxNavigation.flowRouteProgress().observe {
             viewportDataSource.onRouteProgressChanged(it)
             viewportDataSource.evaluate()
         }
 
-        mapboxNavigation.flowLocationMatcherResult(tag = "NavigationCameraComponent")
-            .map { it.enhancedLocation }.observe {
-                viewportDataSource.onLocationChanged(it)
-                viewportDataSource.evaluate()
-            }
+        mapboxNavigation.flowLocationMatcherResult().map { it.enhancedLocation }.observe {
+            viewportDataSource.onLocationChanged(it)
+            viewportDataSource.evaluate()
+        }
     }
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {

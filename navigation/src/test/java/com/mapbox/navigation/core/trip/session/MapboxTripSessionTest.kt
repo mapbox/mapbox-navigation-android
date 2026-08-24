@@ -4,20 +4,13 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.annotation.MapboxExperimental
 import com.mapbox.api.directions.v5.models.BannerInstructions
-import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.location.Location
 import com.mapbox.common.location.LocationServiceFactory
-import com.mapbox.directions.route.DirectionsRouteContext
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory
-import com.mapbox.navigation.base.internal.performance.PerformanceTraceNameProvider
-import com.mapbox.navigation.base.internal.performance.PerformanceTracker
-import com.mapbox.navigation.base.internal.route.directionsRouteContext
-import com.mapbox.navigation.base.internal.route.isEVRoute
 import com.mapbox.navigation.base.internal.route.refreshNativePeer
-import com.mapbox.navigation.base.internal.route.routeOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.LegWaypoint
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -38,6 +31,7 @@ import com.mapbox.navigation.core.navigator.getTripStatusFrom
 import com.mapbox.navigation.core.navigator.toFixLocation
 import com.mapbox.navigation.core.navigator.toLocation
 import com.mapbox.navigation.core.navigator.toLocations
+import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.routerefresh.RouteRefresherResult
 import com.mapbox.navigation.core.routerefresh.RouteRefresherStatus
 import com.mapbox.navigation.core.routerefresh.RouteRefresherStatus.Success
@@ -54,19 +48,14 @@ import com.mapbox.navigation.navigator.internal.utils.getCurrentLegDestination
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.assertIs
-import com.mapbox.navigation.testing.factories.createNavigationRoute
 import com.mapbox.navigation.testing.factories.createNavigationStatus
-import com.mapbox.navigation.testing.factories.createRouteInterface
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
-import com.mapbox.navigator.ChargingState
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigationStatusOrigin
 import com.mapbox.navigator.NavigatorObserver
-import com.mapbox.navigator.RefreshRouteResult
 import com.mapbox.navigator.RouteAlternative
-import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouteState
 import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.SetRoutesResult
@@ -203,7 +192,7 @@ class MapboxTripSessionTest {
         coEvery { navigator.setAlternativeRoutes(any()) } returns listOf()
         coEvery {
             navigator.refreshRoute(any(), any(), any())
-        } returns ExpectedFactory.createValue(mockRefreshRouteResult())
+        } returns ExpectedFactory.createValue(listOf())
         every { navigationStatus.getTripStatusFrom(any()) } returns tripStatus
 
         every { navigationStatus.location } returns fixLocation
@@ -221,7 +210,7 @@ class MapboxTripSessionTest {
         every { routeProgress.voiceInstructions } returns null
         every { routeProgress.currentLegProgress } returns mockk(relaxed = true)
         every {
-            getRouteProgressFrom(any(), any(), any(), any(), any(), any(), any(), any(), any())
+            getRouteProgressFrom(any(), any(), any(), any(), any(), any(), any(), any())
         } returns routeProgress
         every { routeProgress.currentState } returns RouteProgressState.TRACKING
         every { routes[0].responseUUID } returns "uuid"
@@ -244,6 +233,7 @@ class MapboxTripSessionTest {
             navigator,
             threadController,
             eHorizonSubscriptionManager,
+            5,
         )
     }
 
@@ -394,7 +384,6 @@ class MapboxTripSessionTest {
                 any(),
                 any(),
                 nextLegWaypoint,
-                any(),
             )
         }
     }
@@ -512,189 +501,9 @@ class MapboxTripSessionTest {
     }
 
     @Test
-    fun chargingStateIsFetchedFromNavigatorForEvRouteWhenInitialized() =
-        coroutineRule.runBlockingTest {
-            mockkStatic(RouteOptions::isEVRoute) {
-                setUpChargingStateAndStartSession(
-                    isEvRoute = true,
-                    routeState = RouteState.INITIALIZED,
-                )
-                updateLocationAndJoin()
-
-                // chargingState comes straight from NavigationStatus.stateOfCharging and is
-                // surfaced on the route progress while the route is still INITIALIZED.
-                verifyRouteProgressChargingState(ChargingState.CHARGING)
-                tripSession.stop()
-            }
-        }
-
-    @Test
-    fun chargingStateIsFetchedFromNavigatorForEvRouteWhenTracking() =
-        coroutineRule.runBlockingTest {
-            mockkStatic(RouteOptions::isEVRoute) {
-                // A vehicle can drive away from a departure charging station without
-                // unplugging: routeState advances to TRACKING while the native charging FSM
-                // keeps reporting CHARGING until stopCharging() is called explicitly, so it
-                // must still be surfaced here.
-                setUpChargingStateAndStartSession(
-                    isEvRoute = true,
-                    routeState = RouteState.TRACKING,
-                )
-                updateLocationAndJoin()
-
-                verifyRouteProgressChargingState(ChargingState.CHARGING)
-                tripSession.stop()
-            }
-        }
-
-    @Test
-    fun chargingStatePassesThroughStatusSnapshotRegardlessOfRouteType() =
-        coroutineRule.runBlockingTest {
-            mockkStatic(RouteOptions::isEVRoute) {
-                // chargingState is no longer gated on isEVRoute() on the platform side - it's
-                // trusted to come straight from NavigationStatus.stateOfCharging, relying on NN
-                // to always report NOT_CHARGING for a non-EV route.
-                setUpChargingStateAndStartSession(
-                    isEvRoute = false,
-                    routeState = RouteState.TRACKING,
-                )
-                updateLocationAndJoin()
-
-                verifyRouteProgressChargingState(ChargingState.CHARGING)
-                tripSession.stop()
-            }
-        }
-
-    @Test
-    fun chargingStateReflectsStatusSnapshotOnFirstTickAfterPrimaryRouteReplacement() =
-        coroutineRule.runBlockingTest {
-            mockkStatic(RouteOptions::isEVRoute) {
-                val evRouteOptions = mockk<RouteOptions> {
-                    every { isEVRoute() } returns true
-                }
-                val originalPrimary = mockk<NavigationRoute>(relaxed = true) {
-                    every { id } returns "primary-1"
-                    every { routeOptions } returns evRouteOptions
-                }
-                val originalAlternative = mockk<NavigationRoute>(relaxed = true) {
-                    every { id } returns "alt-1"
-                }
-                // A reroute replaces both the primary and its alternatives - a realistic
-                // multi-route update, not just a single-route corner case.
-                val reroutedPrimary = mockk<NavigationRoute>(relaxed = true) {
-                    every { id } returns "primary-2"
-                    every { routeOptions } returns evRouteOptions
-                }
-                val reroutedAlternative = mockk<NavigationRoute>(relaxed = true) {
-                    every { id } returns "alt-2"
-                }
-                val surfacedChargingStates = mutableListOf<ChargingState>()
-                every {
-                    getRouteProgressFrom(
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        any(),
-                        capture(surfacedChargingStates),
-                    )
-                } returns routeProgress
-                every { navigationStatus.stateOfCharging } returns ChargingState.CHARGING
-
-                tripSession = buildTripSession()
-                tripSession.start(true)
-                tripSession.setRoutes(
-                    listOf(originalPrimary, originalAlternative),
-                    setRoutesInfo,
-                )
-                navigatorObserverImplSlot.captured.onStatus(
-                    navigationStatusOrigin,
-                    navigationStatus,
-                )
-
-                tripSession.setRoutes(
-                    listOf(reroutedPrimary, reroutedAlternative),
-                    setRoutesInfo,
-                )
-                // First tick after the primary was replaced: the snapshot is surfaced as-is.
-                every { navigationStatus.stateOfCharging } returns ChargingState.AWAIT_CHARGING
-                navigatorObserverImplSlot.captured.onStatus(
-                    navigationStatusOrigin,
-                    navigationStatus,
-                )
-                // Steady state on the new primary: each later tick keeps tracking the snapshot.
-                every { navigationStatus.stateOfCharging } returns ChargingState.CHARGING
-                navigatorObserverImplSlot.captured.onStatus(
-                    navigationStatusOrigin,
-                    navigationStatus,
-                )
-
-                assertEquals(
-                    listOf(
-                        ChargingState.CHARGING,
-                        ChargingState.AWAIT_CHARGING,
-                        ChargingState.CHARGING,
-                    ),
-                    surfacedChargingStates,
-                )
-
-                tripSession.stop()
-            }
-        }
-
-    @Test
-    fun chargingStateTracksStatusSnapshotWhenOnlyAlternativesChange() =
-        coroutineRule.runBlockingTest {
-            mockkStatic(RouteOptions::isEVRoute) {
-                val evRouteOptions = mockk<RouteOptions> {
-                    every { isEVRoute() } returns true
-                }
-                val primary = mockk<NavigationRoute>(relaxed = true) {
-                    every { id } returns "primary-1"
-                    every { routeOptions } returns evRouteOptions
-                }
-                val originalAlternative = mockk<NavigationRoute>(relaxed = true) {
-                    every { id } returns "alt-1"
-                }
-                val newAlternative = mockk<NavigationRoute>(relaxed = true) {
-                    every { id } returns "alt-2"
-                }
-                every { navigationStatus.stateOfCharging } returns ChargingState.CHARGING
-
-                tripSession = buildTripSession()
-                tripSession.start(true)
-                tripSession.setRoutes(listOf(primary, originalAlternative), setRoutesInfo)
-                navigatorObserverImplSlot.captured.onStatus(
-                    navigationStatusOrigin,
-                    navigationStatus,
-                )
-                verifyRouteProgressChargingState(ChargingState.CHARGING)
-
-                // Continuous alternatives keep swapping the non-primary route throughout
-                // charging. The vehicle unplugs in the same tick; the status snapshot must be
-                // surfaced immediately regardless of the routes update.
-                tripSession.setRoutes(
-                    listOf(primary, newAlternative),
-                    SetRoutes.Alternatives(legIndex),
-                )
-                every { navigationStatus.stateOfCharging } returns ChargingState.NOT_CHARGING
-                navigatorObserverImplSlot.captured.onStatus(
-                    navigationStatusOrigin,
-                    navigationStatus,
-                )
-                verifyRouteProgressChargingState(ChargingState.NOT_CHARGING)
-
-                tripSession.stop()
-            }
-        }
-
-    @Test
     fun routeProgressObserverNotCalledWhenInFreeDrive() = coroutineRule.runBlockingTest {
         every {
-            getRouteProgressFrom(any(), any(), any(), any(), any(), any(), any(), any(), any())
+            getRouteProgressFrom(any(), any(), any(), any(), any(), any(), any(), any())
         } returns null
         tripSession = buildTripSession()
         tripSession.start(true)
@@ -765,118 +574,6 @@ class MapboxTripSessionTest {
         verify(exactly = 2) { observer.onRouteProgressChanged(routeProgress) }
         tripSession.stop()
     }
-
-    @Test
-    fun routeProgressObserverPerformanceTraceNameUsesProviderWhenAvailable() =
-        coroutineRule.runBlockingTest {
-            every { routeProgress.currentLegProgress } returns null
-            tripSession = buildTripSession()
-            tripSession.start(true)
-            val sectionNames = mutableListOf<String>()
-            mockkObject(PerformanceTracker)
-            every { PerformanceTracker.trackingIsActive } returns true
-            every { PerformanceTracker.syncSectionStarted(capture(sectionNames)) } just Runs
-            every { PerformanceTracker.syncSectionCompleted(any(), any()) } just Runs
-            val observer = object : RouteProgressObserver, PerformanceTraceNameProvider {
-                override fun onRouteProgressChanged(routeProgress: RouteProgress) = Unit
-                override val performanceTraceName = "customName"
-            }
-            tripSession.registerRouteProgressObserver(observer)
-
-            updateLocationAndJoin()
-
-            assertTrue(
-                sectionNames.contains("MapboxTripSession#routeProgressObserver#customName"),
-            )
-
-            unmockkObject(PerformanceTracker)
-            tripSession.stop()
-        }
-
-    @Test
-    fun routeProgressObserverPerformanceTraceNameFallsBackToClassName() =
-        coroutineRule.runBlockingTest {
-            every { routeProgress.currentLegProgress } returns null
-            tripSession = buildTripSession()
-            tripSession.start(true)
-            val sectionNames = mutableListOf<String>()
-            mockkObject(PerformanceTracker)
-            every { PerformanceTracker.trackingIsActive } returns true
-            every { PerformanceTracker.syncSectionStarted(capture(sectionNames)) } just Runs
-            every { PerformanceTracker.syncSectionCompleted(any(), any()) } just Runs
-            val observer = object : RouteProgressObserver {
-                override fun onRouteProgressChanged(routeProgress: RouteProgress) = Unit
-            }
-            tripSession.registerRouteProgressObserver(observer)
-
-            updateLocationAndJoin()
-
-            val expectedName = observer.javaClass.name.takeLast(70)
-            assertTrue(
-                sectionNames.contains("MapboxTripSession#routeProgressObserver#$expectedName"),
-            )
-
-            unmockkObject(PerformanceTracker)
-            tripSession.stop()
-        }
-
-    @Test
-    fun locationObserverPerformanceTraceNameUsesProviderWhenAvailable() =
-        coroutineRule.runBlockingTest {
-            tripSession = buildTripSession()
-            tripSession.start(true)
-            val sectionNames = mutableListOf<String>()
-            mockkObject(PerformanceTracker)
-            every { PerformanceTracker.trackingIsActive } returns true
-            every { PerformanceTracker.syncSectionStarted(capture(sectionNames)) } just Runs
-            every { PerformanceTracker.syncSectionCompleted(any(), any()) } just Runs
-            val observer = object : LocationObserver, PerformanceTraceNameProvider {
-                override fun onNewRawLocation(rawLocation: Location) = Unit
-                override fun onNewLocationMatcherResult(
-                    locationMatcherResult: LocationMatcherResult,
-                ) = Unit
-                override val performanceTraceName = "customName"
-            }
-            tripSession.registerLocationObserver(observer)
-
-            updateLocationAndJoin()
-
-            assertTrue(
-                sectionNames.contains("MapboxTripSession#locationObserver#customName"),
-            )
-
-            unmockkObject(PerformanceTracker)
-            tripSession.stop()
-        }
-
-    @Test
-    fun locationObserverPerformanceTraceNameFallsBackToClassName() =
-        coroutineRule.runBlockingTest {
-            tripSession = buildTripSession()
-            tripSession.start(true)
-            val sectionNames = mutableListOf<String>()
-            mockkObject(PerformanceTracker)
-            every { PerformanceTracker.trackingIsActive } returns true
-            every { PerformanceTracker.syncSectionStarted(capture(sectionNames)) } just Runs
-            every { PerformanceTracker.syncSectionCompleted(any(), any()) } just Runs
-            val observer = object : LocationObserver {
-                override fun onNewRawLocation(rawLocation: Location) = Unit
-                override fun onNewLocationMatcherResult(
-                    locationMatcherResult: LocationMatcherResult,
-                ) = Unit
-            }
-            tripSession.registerLocationObserver(observer)
-
-            updateLocationAndJoin()
-
-            val expectedName = observer.javaClass.name.takeLast(70)
-            assertTrue(
-                sectionNames.contains("MapboxTripSession#locationObserver#$expectedName"),
-            )
-
-            unmockkObject(PerformanceTracker)
-            tripSession.stop()
-        }
 
     @Test
     fun offRouteObserverCalledWhenStatusIsDifferentToCurrent() = coroutineRule.runBlockingTest {
@@ -1094,17 +791,12 @@ class MapboxTripSessionTest {
     @Test
     fun `only primary route was updated during refresh`() =
         coroutineRule.runBlockingTest {
-            val primaryRouteNroContext0 = mockk<DirectionsRouteContext>()
-            val primaryRouteNroContext1 = mockk<DirectionsRouteContext>()
-
             val refreshedRoutes = listOf(
                 mockk<NavigationRoute>(relaxed = true) {
                     every { id } returns "id0"
-                    every { directionsRouteContext() } returns primaryRouteNroContext0
                 },
                 mockk<NavigationRoute>(relaxed = true) {
                     every { id } returns "id1"
-                    every { directionsRouteContext() } returns primaryRouteNroContext1
                 },
             )
             tripSession.start(true)
@@ -1141,30 +833,6 @@ class MapboxTripSessionTest {
             coVerify(exactly = 1) {
                 navigator.refreshRoute(any(), any(), any())
             }
-        }
-
-    @Test
-    fun `refresh route propagates the refreshed directionsRouteContext into the route`() =
-        coroutineRule.runBlockingTest {
-            val route = createNavigationRoute()
-            val refreshedContext = mockk<DirectionsRouteContext>(relaxed = true)
-            val refreshedNativePeer = object : RouteInterface by createRouteInterface() {
-                override fun getDirectionsRouteContext() = refreshedContext
-            }
-            coEvery {
-                navigator.refreshRoute(route, any(), any())
-            } returns ExpectedFactory.createValue(
-                mockRefreshRouteResult(nativeRoute = refreshedNativePeer),
-            )
-
-            tripSession.start(true)
-            val result = tripSession.setRoutes(
-                listOf(route),
-                mockSuccessfulSetRouteRefresh(listOf(route)),
-            )
-
-            val refreshedRoute = (result as NativeSetRouteValue).routes.first()
-            assertEquals(refreshedContext, refreshedRoute.directionsRouteContext())
         }
 
     @Test
@@ -1339,22 +1007,15 @@ class MapboxTripSessionTest {
                     every { id } returns "id1"
                 },
             )
-            val refreshedNativePeers = refreshedRoutes.map { mockk<RouteInterface>(relaxed = true) }
             coEvery {
                 navigator.refreshRoute(refreshedRoutes[0], any(), any())
-            } returns ExpectedFactory.createValue(
-                mockRefreshRouteResult(mockAlternativesMetadata2, refreshedNativePeers[0]),
-            )
+            } returns ExpectedFactory.createValue(mockAlternativesMetadata2)
             coEvery {
                 navigator.refreshRoute(refreshedRoutes[1], any(), any())
-            } returns ExpectedFactory.createValue(
-                mockRefreshRouteResult(mockAlternativesMetadata1, refreshedNativePeers[1]),
-            )
+            } returns ExpectedFactory.createValue(mockAlternativesMetadata1)
 
             refreshedRoutes.forEachIndexed { i, route ->
-                every {
-                    route.refreshNativePeer(refreshedNativePeers[i])
-                } returns refreshedRoutes[i]
+                every { route.refreshNativePeer() } returns refreshedRoutes[i]
             }
 
             tripSession.start(true)
@@ -1375,64 +1036,10 @@ class MapboxTripSessionTest {
         }
 
     @Test
-    fun `route set result - only refreshed routes adopt a new native peer`() =
-        coroutineRule.runBlockingTest {
-            val primaryRoute = mockk<NavigationRoute>(relaxed = true) {
-                every { id } returns "id0"
-            }
-            val alternativeRoute = mockk<NavigationRoute>(relaxed = true) {
-                every { id } returns "id1"
-            }
-            val refreshedAlternativeNativePeer = mockk<RouteInterface>()
-            val refreshedAlternativeRoute = mockk<NavigationRoute>(relaxed = true) {
-                every { id } returns "id1"
-            }
-            coEvery {
-                navigator.refreshRoute(alternativeRoute, any(), any())
-            } returns ExpectedFactory.createValue(
-                mockRefreshRouteResult(nativeRoute = refreshedAlternativeNativePeer),
-            )
-            every {
-                alternativeRoute.refreshNativePeer(refreshedAlternativeNativePeer)
-            } returns refreshedAlternativeRoute
-
-            tripSession.start(true)
-            val result = tripSession.setRoutes(
-                listOf(primaryRoute, alternativeRoute),
-                SetRoutes.RefreshRoutes.RefreshControllerRefresh(
-                    RoutesRefresherResult(
-                        // the primary route was not updated, so it's not refreshed in the navigator
-                        // and must keep its current native peer
-                        RouteRefresherResult(
-                            primaryRoute,
-                            RouteProgressData(1, 2, 3),
-                            RouteRefresherStatus.Failure,
-                            wasRouteUpdated = false,
-                        ),
-                        listOf(
-                            RouteRefresherResult(
-                                alternativeRoute,
-                                RouteProgressData(2, 2, 3),
-                                Success(mockk()),
-                            ),
-                        ),
-                    ),
-                ),
-            )
-
-            coVerify(exactly = 0) { navigator.refreshRoute(primaryRoute, any(), any()) }
-            assertEquals(
-                listOf(primaryRoute, refreshedAlternativeRoute),
-                (result as NativeSetRouteValue).routes,
-            )
-            assertEquals(primaryRoute, tripSession.primaryRoute)
-        }
-
-    @Test
     fun `refresh route updates primary route only when all routes are refreshed`() =
         coroutineRule.runBlockingTest {
             every {
-                getRouteProgressFrom(any(), any(), any(), any(), any(), any(), any(), any(), any())
+                getRouteProgressFrom(any(), any(), any(), any(), any(), any(), any(), any())
             } answers {
                 callOriginal()
             }
@@ -1466,28 +1073,21 @@ class MapboxTripSessionTest {
                     every { id } returns "id1"
                 },
             )
-            val refreshedNativePeers = refreshedRoutes.map { mockk<RouteInterface>(relaxed = true) }
             coEvery {
                 navigator.refreshRoute(refreshedRoutes[0], any(), any())
             } coAnswers {
                 delay(300)
-                ExpectedFactory.createValue(
-                    mockRefreshRouteResult(mockAlternativesMetadata2, refreshedNativePeers[0]),
-                )
+                ExpectedFactory.createValue(mockAlternativesMetadata2)
             }
             coEvery {
                 navigator.refreshRoute(refreshedRoutes[1], any(), any())
             } coAnswers {
                 delay(500)
-                ExpectedFactory.createValue(
-                    mockRefreshRouteResult(mockAlternativesMetadata1, refreshedNativePeers[1]),
-                )
+                ExpectedFactory.createValue(mockAlternativesMetadata1)
             }
 
             refreshedRoutes.forEachIndexed { i, route ->
-                every {
-                    route.refreshNativePeer(refreshedNativePeers[i])
-                } returns refreshedRoutes[i]
+                every { route.refreshNativePeer() } returns refreshedRoutes[i]
             }
 
             tripSession.start(true)
@@ -1547,19 +1147,16 @@ class MapboxTripSessionTest {
                     every { id } returns "id1"
                 },
             )
-            val refreshedNativePeer = mockk<RouteInterface>(relaxed = true)
             coEvery {
                 navigator.refreshRoute(refreshedRoutes[0], any(), any())
-            } returns ExpectedFactory.createValue(
-                mockRefreshRouteResult(mockAlternativesMetadata1, refreshedNativePeer),
-            )
+            } returns ExpectedFactory.createValue(mockAlternativesMetadata1)
             coEvery {
                 navigator.refreshRoute(refreshedRoutes[1], any(), any())
             } returns ExpectedFactory.createError(error)
 
-            every {
-                refreshedRoutes[0].refreshNativePeer(refreshedNativePeer)
-            } returns refreshedRoutes[0]
+            refreshedRoutes.forEachIndexed { i, route ->
+                every { route.refreshNativePeer() } returns refreshedRoutes[i]
+            }
 
             tripSession.start(true)
             val result = tripSession.setRoutes(
@@ -2044,7 +1641,7 @@ class MapboxTripSessionTest {
             val alternative = mockNavigationRoute()
             coEvery { navigator.refreshRoute(primary, any(), any()) } coAnswers {
                 delay(100)
-                ExpectedFactory.createValue(mockRefreshRouteResult())
+                ExpectedFactory.createValue(emptyList())
             }
 
             val observer = mockk<RouteProgressObserver>(relaxUnitFun = true)
@@ -2290,6 +1887,39 @@ class MapboxTripSessionTest {
         }
 
     @Test
+    fun `reroute invocation handler handles reroute completion when user is still off-route`() =
+        coroutineRule.runBlockingTest {
+            // Arrange
+            val mockRerouteController = mockk<RerouteController>(relaxed = true)
+            val mockOffRouteObserver = mockk<OffRouteObserver>(relaxed = true)
+
+            val offRouteNavigationStatus = mockk<NavigationStatus>(relaxed = true) {
+                every { routeState } returns RouteState.OFF_ROUTE
+            }
+            val offRouteTripStatus = mockk<TripStatus>(relaxed = true) {
+                every { navigationStatus } returns offRouteNavigationStatus
+            }
+
+            tripSession.setOffRouteObserverForReroute(mockOffRouteObserver, mockRerouteController)
+            tripSession.start(true)
+
+            // Act - trigger off-route state multiple times to simulate reroute logic
+            every { offRouteNavigationStatus.getTripStatusFrom(any()) } returns offRouteTripStatus
+            navigatorObserverImplSlot.captured.onStatus(
+                navigationStatusOrigin,
+                offRouteNavigationStatus,
+            )
+            navigatorObserverImplSlot.captured.onStatus(
+                navigationStatusOrigin,
+                offRouteNavigationStatus,
+            )
+
+            verify { mockOffRouteObserver.onOffRouteStateChanged(true) }
+
+            tripSession.stop()
+        }
+
+    @Test
     fun `start of routes update should toggle isUpdatingRoutes flag`() =
         coroutineRule.runBlockingTest {
             val startObserver = slot<SetNavigationRoutesStartedObserver>()
@@ -2441,36 +2071,6 @@ class MapboxTripSessionTest {
         navigatorObserverImplSlot.captured.onStatus(navigationStatusOrigin, navigationStatus)
         parentJob.cancelAndJoin()
     }
-
-    private suspend fun setUpChargingStateAndStartSession(
-        isEvRoute: Boolean,
-        routeState: RouteState,
-    ) {
-        val routeOptions = mockk<RouteOptions>()
-        every { routeOptions.isEVRoute() } returns isEvRoute
-        every { routes[0].routeOptions } returns routeOptions
-        every { navigationStatus.routeState } returns routeState
-        every { navigationStatus.stateOfCharging } returns ChargingState.CHARGING
-        tripSession = buildTripSession()
-        tripSession.start(true)
-        tripSession.setRoutes(routes, setRoutesInfo)
-    }
-
-    private fun verifyRouteProgressChargingState(chargingState: ChargingState) {
-        verify {
-            getRouteProgressFrom(
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                chargingState,
-            )
-        }
-    }
 }
 
 private fun mockNavigationRoute(
@@ -2504,11 +2104,3 @@ fun createSetRouteError(
 fun createSetRouteResult(
     nativeAlternatives: List<RouteAlternative> = emptyList(),
 ) = ExpectedFactory.createValue<String, SetRoutesResult>(SetRoutesResult(null, nativeAlternatives))
-
-fun mockRefreshRouteResult(
-    alternatives: List<RouteAlternative> = emptyList(),
-    nativeRoute: RouteInterface = mockk(relaxed = true),
-): RefreshRouteResult = mockk(relaxed = true) {
-    every { this@mockk.alternatives } returns alternatives
-    every { this@mockk.route } returns nativeRoute
-}

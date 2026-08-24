@@ -44,12 +44,6 @@ internal class DirectionsRouteFBWrapper private constructor(
                 Point.fromLngLat(coordinate.longitude, coordinate.latitude)
             }
 
-    /**
-     * Content based 64 bit hash of the whole route. Native code computes it once, while building
-     * the buffer, and stores it in the table, so this is a plain field read.
-     */
-    internal val contentHash: Long = fb.hash.toLong()
-
     override val unrecognized: ByteBuffer?
         get() = fb.unrecognizedPropertiesAsByteBuffer
 
@@ -97,18 +91,16 @@ internal class DirectionsRouteFBWrapper private constructor(
         }
     }
 
-    fun mapMatchingConfidence(): Double? = fb.confidence
-
     override fun toBuilder(): Builder? {
         NotSupportedForNativeRouteObject("DirectionsRoute#toBuilder()")
     }
 
     override fun unrecognized(): Map<String, SerializableJsonElement?>? {
         val nroUnrecognizedProperties = super<BaseFBWrapper>.unrecognized()?.let {
+            // TODO: could be removed once change bellow is adopted
+            // https://github.com/mapbox/mapbox-sdk/pull/10279
             if (it.contains("requestUuid")) {
                 it.toMutableMap().apply {
-                    // TODO: could be removed once change below is adapted
-                    // https://github.com/mapbox/mapbox-sdk/pull/10279
                     remove("requestUuid")
                 }
             } else {
@@ -135,16 +127,10 @@ internal class DirectionsRouteFBWrapper private constructor(
             throwNotComparableRouteObjects()
         }
         if (other !is DirectionsRouteFBWrapper) return false
-
-        // Index and UUID identify the route, so comparing them first is exact: routes from
-        // different responses, or different routes of one response, can never be reported equal
-        // by a hash collision.
-        if (fb.routeIndex != other.fb.routeIndex) return false
-        if (fb.requestUuid != other.fb.requestUuid) return false
-        return contentHash == other.contentHash
+        return fb.contentEquals(other.fb)
     }
 
-    override fun hashCode(): Int = contentHash.toHashCode()
+    override fun hashCode() = fb.contentHash().toHashCode()
 
     override fun toString(): String {
         return "DirectionsRoute(" +
@@ -166,7 +152,6 @@ internal class DirectionsRouteFBWrapper private constructor(
     }
 
     internal companion object {
-
         internal fun wrap(
             routeOptions: RouteOptions?,
             bindgenContext: DirectionsRouteContext,
@@ -177,12 +162,7 @@ internal class DirectionsRouteFBWrapper private constructor(
             val fb = routeContext.route
             return when {
                 fb.isNull -> null
-                else -> DirectionsRouteFBWrapper(
-                    fb,
-                    routeOptions,
-                    routeContext,
-                    bindgenContext,
-                )
+                else -> DirectionsRouteFBWrapper(fb, routeOptions, routeContext, bindgenContext)
             }
         }
     }

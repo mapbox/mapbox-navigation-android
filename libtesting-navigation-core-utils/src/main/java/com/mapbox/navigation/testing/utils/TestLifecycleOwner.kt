@@ -13,6 +13,7 @@ class TestLifecycleOwner : LifecycleOwner {
         lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
     }
 
-    override val lifecycle: Lifecycle
-        get() = lifecycleRegistry
+    override fun getLifecycle(): Lifecycle {
+        return lifecycleRegistry
+    }
 }

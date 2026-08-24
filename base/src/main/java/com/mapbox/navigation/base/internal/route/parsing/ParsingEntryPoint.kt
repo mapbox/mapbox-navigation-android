@@ -9,13 +9,11 @@ import com.mapbox.navigation.base.internal.route.parsing.models.directions.Navig
 import com.mapbox.navigation.base.internal.route.parsing.models.mapmaptching.MapMatchingMatchParser
 import com.mapbox.navigation.base.internal.route.parsing.models.nn.RouteInterfacesParser
 import com.mapbox.navigation.base.internal.route.parsing.parser.directions.DirectionsRoutesParserJava
+import com.mapbox.navigation.base.internal.route.parsing.parser.directions.DirectionsRoutesParserNro
 import com.mapbox.navigation.base.internal.route.parsing.parser.directions.NnAndModelsParallelNavigationRoutesParser
-import com.mapbox.navigation.base.internal.route.parsing.parser.directions.NroFromNativeRouteNavigationRoutesParser
 import com.mapbox.navigation.base.internal.route.parsing.parser.mapmatching.MapMatchedRoutesParserJava
 import com.mapbox.navigation.base.internal.route.parsing.parser.mapmatching.NnAndModelsParallelMapMatchedRoutesParser
-import com.mapbox.navigation.base.internal.route.parsing.parser.mapmatching.NroFromNativeRouteMapMatchedRoutesParser
-import com.mapbox.navigation.base.internal.route.parsing.parser.nn.JsonRouteInterfaceParser
-import com.mapbox.navigation.base.internal.route.parsing.parser.nn.NroRouteInterfacesParser
+import com.mapbox.navigation.base.internal.route.parsing.parser.nn.JsonResponseOptimizedRouteInterfaceParser
 import com.mapbox.navigation.base.internal.utils.PrepareForParsingAction
 import com.mapbox.navigation.base.internal.utils.createImmediateNoOptimizationsParsingQueue
 import com.mapbox.navigation.base.internal.utils.createOptimizedRoutesParsingQueue
@@ -51,64 +49,43 @@ fun setupParsing(
     prepareForParsingAction: PrepareForParsingAction = {},
     loggerFrontend: LoggerFrontend = LoggerProvider.getLoggerFrontend(),
 ): ParsingEntryPoint {
+    val modelParser = if (nativeRoute) {
+        DirectionsRoutesParserNro(loggerFrontend)
+    } else {
+        DirectionsRoutesParserJava(loggerFrontend)
+    }
     val parsingQueue = if (nativeRoute) {
         createImmediateNoOptimizationsParsingQueue()
     } else {
         createOptimizedRoutesParsingQueue(prepareForParsingAction)
     }
-    val navigationRoutesParser = if (nativeRoute) {
-        NroFromNativeRouteNavigationRoutesParser(
-            routeParsingTracking,
-            parsingDispatcher,
-            time,
-            nnParser,
-            loggerFrontend,
-        )
-    } else {
-        NnAndModelsParallelNavigationRoutesParser(
-            routeParsingTracking,
-            parsingDispatcher,
-            time,
-            DirectionsRoutesParserJava(loggerFrontend),
-            nnParser,
-            parsingQueue,
-            loggerFrontend,
-        )
-    }
+    val navigationRoutesParser = NnAndModelsParallelNavigationRoutesParser(
+        routeParsingTracking,
+        parsingDispatcher,
+        time,
+        modelParser,
+        nnParser,
+        parsingQueue,
+        loggerFrontend,
+    )
 
-    val mapMatchedRoutesParser = if (nativeRoute) {
-        NroFromNativeRouteMapMatchedRoutesParser(
-            routeParsingTracking,
-            parsingDispatcher,
-            time,
-            nnParser,
-        )
-    } else {
-        NnAndModelsParallelMapMatchedRoutesParser(
-            routeParsingTracking,
-            parsingDispatcher,
-            time,
-            MapMatchedRoutesParserJava(),
-            nnParser,
-            parsingQueue,
-            loggerFrontend,
-        )
-    }
+    val mapMatchedRoutesParser = NnAndModelsParallelMapMatchedRoutesParser(
+        routeParsingTracking,
+        parsingDispatcher,
+        time,
+        MapMatchedRoutesParserJava(),
+        nnParser,
+        parsingQueue,
+        loggerFrontend,
+    )
 
-    val routeInterfacesParser = if (nativeRoute) {
-        NroRouteInterfacesParser(
-            parsingDispatcher,
-            time,
-        )
-    } else {
-        JsonRouteInterfaceParser(
-            existingParsedRoutesLookup,
-            parsingDispatcher,
-            time,
-            DirectionsRoutesParserJava(loggerFrontend),
-            parsingQueue,
-        )
-    }
+    val routeInterfacesParser = JsonResponseOptimizedRouteInterfaceParser(
+        existingParsedRoutesLookup,
+        parsingDispatcher,
+        time,
+        modelParser,
+        parsingQueue,
+    )
 
     return ParsingEntryPoint(
         navigationRoutesParser,

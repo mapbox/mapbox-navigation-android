@@ -11,9 +11,9 @@ import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.matching.v5.models.MapMatchingResponse
 import com.mapbox.bindgen.DataRef
-import com.mapbox.directions.route.DirectionsRouteContext
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.CongestionNumericOverride
+import com.mapbox.navigation.base.route.MapMatchingMatch
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.ResponseOriginAPI
 import com.mapbox.navigation.base.route.RouteRefreshMetadata
@@ -34,17 +34,6 @@ val NavigationRoute.routerOrigin: RouterOrigin get() = nativeRoute.routerOrigin
  * Internal handle for the route's native peer.
  */
 fun NavigationRoute.nativeRoute(): RouteInterface = this.nativeRoute
-
-/**
- * The route's native [DirectionsRouteContext] snapshot, computed for every route regardless of
- * whether it is NRO-backed.
- *
- * For a route returned by a refresh it's the refreshed instance, which has to be pushed back
- * into the native navigator so that it keeps holding the up-to-date NRO.
- */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-fun NavigationRoute.directionsRouteContext(): DirectionsRouteContext =
-    this.directionsRouteContext
 
 /**
  * Returns the value of the `reason` query parameter from the route's native request URI,
@@ -84,6 +73,17 @@ val NavigationRoute.routeOptions get() = this.routeOptions
 
 val NavigationRoute.overriddenTraffic get() = this.overriddenTraffic
 
+/**
+ * Creates a [MapMatchingMatch] from a [NavigationRoute] with optional confidence.
+ * Used when converting from native map matching flow where confidence may not be available.
+ */
+@OptIn(com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI::class)
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+fun mapMatchingMatchFrom(
+    navigationRoute: NavigationRoute,
+    confidence: Double = 1.0,
+): MapMatchingMatch = MapMatchingMatch(navigationRoute, confidence)
+
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 fun NavigationRoute.toDirectionsRefreshResponseInternal() = this.toDirectionsRefreshResponse()
 
@@ -120,7 +120,6 @@ fun NavigationRoute.updateOrNull(
 ): NavigationRoute? = this.clientSideUpdate(
     directionsRouteBlock,
     waypointsBlock,
-    this.directionsRouteContext,
     overriddenTraffic,
     routeRefreshMetadata,
 ).getOrElse {
@@ -140,18 +139,11 @@ fun NavigationRoute.isExpired(): Boolean {
 }
 
 /**
- * Re-points this route to its refreshed native peer, updating [directionsRouteContext] with it.
- * [NavigationRoute.directionsRoute], [waypoints], and operations are left as-is: callers must
- * ensure those already reflect the refreshed state before calling this.
+ * Used to rebuild any [NavigationRoute] fields that are backed by a native peer, which might've been refreshed.
  *
- * @param refreshedNativeRoute the up-to-date native peer of this route, returned by
- * `RefreshRouteResult.route` of its native refresh.
+ * At the moment, all fields are `val`s, so a simple re-instantiation is enough.
  */
-fun NavigationRoute.refreshNativePeer(refreshedNativeRoute: RouteInterface): NavigationRoute =
-    copy(
-        nativeRoute = refreshedNativeRoute,
-        directionsRouteContext = refreshedNativeRoute.directionsRouteContext,
-    )
+fun NavigationRoute.refreshNativePeer(): NavigationRoute = copy()
 
 /**
  * Returns a copy of this route with the given [responseOriginAPI].

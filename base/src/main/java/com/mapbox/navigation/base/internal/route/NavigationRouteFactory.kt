@@ -14,7 +14,7 @@ fun createNavigationRoutes(
     routerOrigin: String,
 ) = runBlocking {
     setupParsing(nativeRoute = false).parseDirectionsResponse(
-        ResponseToParse(
+        ResponseToParse.from(
             responseBody = directionsResponseJson.toDataRefJava(),
             routeRequest = routeRequestUrl,
             routerOrigin = routerOrigin,

@@ -364,7 +364,7 @@ internal fun String.mapToOpenLRStandard(): com.mapbox.navigator.match.openlr.Sta
  */
 internal fun EHorizonGraphPath.mapToNativeGraphPath(): GraphPath {
     return GraphPath(
-        edgesArray,
+        edges,
         percentAlongBegin,
         percentAlongEnd,
         length,

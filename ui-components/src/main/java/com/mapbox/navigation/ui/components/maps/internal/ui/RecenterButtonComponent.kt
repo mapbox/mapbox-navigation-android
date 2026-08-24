@@ -69,7 +69,7 @@ internal class MapboxRecenterButtonComponentContract(
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
-        mapboxNavigation.flowLocationMatcherResult(tag = "RecenterButtonComponent")
+        mapboxNavigation.flowLocationMatcherResult()
             .map { it.enhancedLocation }
             .observe { location.set(it) }
     }

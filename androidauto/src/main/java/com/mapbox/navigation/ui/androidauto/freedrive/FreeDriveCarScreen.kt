@@ -21,17 +21,12 @@ import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen
 
 /**
  * When the app is launched from Android Auto
- *
- * @deprecated Use [MapboxScreen.NAVIGATION] instead.
  */
-@Deprecated("Use MapboxScreen.NAVIGATION instead.")
 internal class FreeDriveCarScreen @UiThread constructor(
     private val mapboxCarContext: MapboxCarContext,
 ) : Screen(mapboxCarContext.carContext) {
 
-    val carRouteLineRenderer = CarRouteLineRenderer(
-        options = mapboxCarContext.options.routeLineRendererOptions,
-    )
+    val carRouteLineRenderer = CarRouteLineRenderer()
     val carLocationRenderer = CarLocationRenderer()
     val carSpeedLimitRenderer = CarSpeedLimitRenderer(mapboxCarContext)
     val carNavigationCamera = CarNavigationCamera(

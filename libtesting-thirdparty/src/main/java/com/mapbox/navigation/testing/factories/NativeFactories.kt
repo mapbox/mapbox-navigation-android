@@ -1,6 +1,5 @@
 package com.mapbox.navigation.testing.factories
 
-import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.bindgen.DataRef
 import com.mapbox.directions.route.DirectionsRouteContext
@@ -9,7 +8,6 @@ import com.mapbox.navigator.ActiveGuidanceInfo
 import com.mapbox.navigator.AlternativeRouteInfo
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.BannerSection
-import com.mapbox.navigator.ChargingState
 import com.mapbox.navigator.CorrectedLocationData
 import com.mapbox.navigator.FallbackReason
 import com.mapbox.navigator.FixLocation
@@ -38,14 +36,12 @@ import com.mapbox.navigator.UpcomingRouteAlertUpdate
 import com.mapbox.navigator.VoiceInstruction
 import com.mapbox.navigator.Waypoint
 import com.mapbox.navigator.WaypointType
-import io.mockk.mockk
 import java.nio.ByteBuffer
 import java.time.Instant
 import java.util.Date
 
 fun createNavigationStatus(
     routeState: RouteState = RouteState.TRACKING,
-    chargingState: ChargingState = ChargingState.NOT_CHARGING,
     locatedAlternativeId: String? = null,
     primaryRouteId: String? = null,
     stale: Boolean = false,
@@ -86,7 +82,6 @@ fun createNavigationStatus(
 ): NavigationStatus {
     return NavigationStatus(
         routeState,
-        chargingState,
         stale,
         location,
         isFallback,
@@ -230,8 +225,12 @@ fun createRouteInterface(
 
     override fun getRouteIndex() = routeIndex
 
+    override fun getResponseJsonRef(): DataRef {
+        return responseJson.toDataRef()
+    }
+
     override fun getDirectionsRouteContext(): DirectionsRouteContext {
-        return mockk(relaxed = true)
+        TODO("Not yet implemented")
     }
 
     override fun getRequestUri() = requestURI
@@ -249,15 +248,7 @@ fun createRouteInterface(
     override fun getLastRefreshTimestamp(): Date? = lastRefreshTimestamp
 
     override fun getRouteGeometry() = routeGeometry
-
-    override fun toJson(): DataRef {
-        val response = DirectionsResponse.fromJson(responseJson)
-        return response.toBuilder()
-            .routes(listOf(response.routes()[routeIndex]))
-            .build()
-            .toJson()
-            .toDataRef()
-    }
+    override fun toJson() = TODO("Not yet implemented")
 }
 
 fun String.toDataRef(): DataRef {

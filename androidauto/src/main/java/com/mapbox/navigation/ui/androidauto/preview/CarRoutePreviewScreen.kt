@@ -18,7 +18,6 @@ import com.mapbox.navigation.ui.androidauto.MapboxCarContext
 import com.mapbox.navigation.ui.androidauto.R
 import com.mapbox.navigation.ui.androidauto.internal.extensions.addBackPressedHandler
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAuto
-import com.mapbox.navigation.ui.androidauto.internal.logAndroidAutoFailure
 import com.mapbox.navigation.ui.androidauto.location.CarLocationRenderer
 import com.mapbox.navigation.ui.androidauto.navigation.CarActiveGuidanceMarkers
 import com.mapbox.navigation.ui.androidauto.navigation.CarCameraMode
@@ -33,10 +32,7 @@ import com.mapbox.navigation.ui.androidauto.search.PlaceRecord
 /**
  * After a destination has been selected. This view previews the route and lets
  * you select alternatives. From here, you can start turn-by-turn navigation.
- *
- * @deprecated Use [MapboxScreen.NAVIGATION] instead.
  */
-@Deprecated("Use MapboxScreen.NAVIGATION instead.")
 internal class CarRoutePreviewScreen @UiThread constructor(
     private val mapboxCarContext: MapboxCarContext,
     private val placeRecord: PlaceRecord,
@@ -45,10 +41,7 @@ internal class CarRoutePreviewScreen @UiThread constructor(
 
     private val carRoutesProvider = PreviewCarRoutesProvider(navigationRoutes)
     private var selectedIndex = 0
-    private val carRouteLineRenderer = CarRouteLineRenderer(
-        options = mapboxCarContext.options.routeLineRendererOptions,
-        carRoutesProvider = carRoutesProvider,
-    )
+    private val carRouteLineRenderer = CarRouteLineRenderer(carRoutesProvider)
     private val carLocationRenderer = CarLocationRenderer()
     private val carSpeedLimitRenderer = CarSpeedLimitRenderer(mapboxCarContext)
     private val carNavigationCamera = CarNavigationCamera(
@@ -94,7 +87,7 @@ internal class CarRoutePreviewScreen @UiThread constructor(
         val listBuilder = ItemList.Builder()
         navigationRoutes.forEach { navigationRoute ->
             val route = navigationRoute.directionsRoute
-            val title = route.legs()?.firstOrNull()?.summary() ?: placeRecord.name
+            val title = route.legs()?.first()?.summary() ?: placeRecord.name
             val routeSpannableString = SpannableString("  $title")
             val span = DurationSpan.create(route.duration().toLong())
             routeSpannableString.setSpan(span, 0, 1, 0)
@@ -131,23 +124,9 @@ internal class CarRoutePreviewScreen @UiThread constructor(
                 Action.Builder()
                     .setTitle(carContext.getString(R.string.car_action_preview_navigate_button))
                     .setOnClickListener {
-                        val mapboxNavigation = MapboxNavigationApp.current()
-                        if (mapboxNavigation == null) {
-                            logAndroidAutoFailure(
-                                "CarRoutePreviewScreen navigate ignored, " +
-                                    "MapboxNavigation is detached",
-                            )
-                            return@setOnClickListener
-                        }
-                        val routes = carRoutesProvider.navigationRoutes.value
-                        if (routes.isEmpty()) {
-                            // Setting no routes would clear guidance instead of starting it.
-                            logAndroidAutoFailure(
-                                "CarRoutePreviewScreen navigate ignored, there are no routes",
-                            )
-                            return@setOnClickListener
-                        }
-                        mapboxNavigation.setNavigationRoutes(routes)
+                        MapboxNavigationApp.current()!!.setNavigationRoutes(
+                            carRoutesProvider.navigationRoutes.value,
+                        )
                         MapboxScreenManager.replaceTop(MapboxScreen.ACTIVE_GUIDANCE)
                     }
                     .build(),

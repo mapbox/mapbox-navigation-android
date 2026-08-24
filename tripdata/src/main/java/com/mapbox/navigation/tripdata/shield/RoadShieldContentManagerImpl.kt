@@ -1,6 +1,5 @@
 package com.mapbox.navigation.tripdata.shield
 
-import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
@@ -76,14 +75,11 @@ internal class RoadShieldContentManagerImpl(
         private const val TAG = "RoadShieldContentManagerImpl"
     }
 
-    @VisibleForTesting
-    internal val resultMap =
+    private val resultMap =
         hashMapOf<ShieldRequest, Expected<RouteShieldError, RouteShieldResult>>()
 
     private val mainJob = InternalJobControlFactory.createMainScopeJobControl()
-
-    @VisibleForTesting
-    internal val awaitingCallbacks = mutableListOf<() -> Boolean>()
+    private val awaitingCallbacks = mutableListOf<() -> Boolean>()
 
     override suspend fun getShields(
         shieldsToDownload: List<RouteShieldToDownload>,
@@ -211,14 +207,12 @@ internal class RoadShieldContentManagerImpl(
         }.toSet()
     }
 
-    @VisibleForTesting
-    internal fun invalidate() {
-        // Make a snapshot to avoid ConcurrentModificationException.
-        val awaitingCallbacksSnapshot = awaitingCallbacks.toList()
-        awaitingCallbacksSnapshot.forEach { callback ->
-            val remove = callback.invoke()
+    private fun invalidate() {
+        val iterator = awaitingCallbacks.iterator()
+        while (iterator.hasNext()) {
+            val remove = iterator.next().invoke()
             if (remove) {
-                awaitingCallbacks.remove(callback)
+                iterator.remove()
             }
         }
     }
@@ -259,8 +253,7 @@ internal class RoadShieldContentManagerImpl(
     }
 }
 
-@VisibleForTesting
-internal class ShieldRequest(
+private class ShieldRequest(
     val toDownload: RouteShieldToDownload,
 ) {
     val id: UUID = UUID.randomUUID()

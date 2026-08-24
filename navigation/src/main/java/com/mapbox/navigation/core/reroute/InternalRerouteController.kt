@@ -13,19 +13,27 @@ internal abstract class InternalRerouteController : RerouteController() {
      */
     abstract fun interrupt()
 
+    abstract fun rerouteOnDeviation(callback: DeviationRoutesCallback)
     abstract fun rerouteOnParametersChange(callback: RouteReplanRoutesCallback)
     abstract fun setRerouteOptionsAdapter(rerouteOptionsAdapter: RerouteOptionsAdapter?)
 
     abstract fun setEnabled(enabled: Boolean)
 
-    /**
-     * Releases any resources that would otherwise prevent garbage collection of this controller.
-     */
-    abstract fun shutdown()
+    sealed interface RoutesCallback
 
     @UiThread
-    fun interface RouteReplanRoutesCallback {
+    fun interface RouteReplanRoutesCallback : RoutesCallback {
         fun onNewRoutes(rerouteResult: RerouteResult)
+    }
+
+    @UiThread
+    fun interface DeviationRoutesCallback : RoutesCallback {
+        /**
+         * Returns:
+         *  - true if route was accepted (will be set to the navigator);
+         *  - false is it was ignored (for example, we got back on te original route).
+         */
+        fun onNewRoutes(rerouteResult: RerouteResult): Boolean
     }
 }
 

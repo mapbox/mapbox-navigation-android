@@ -21,9 +21,7 @@ class MapboxMapActionStrip(
     init {
         screen.lifecycleScope.launch {
             screen.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch { carNavigationCamera.nextCameraMode.collect { screen.invalidate() } }
-                // The Recenter action depends on whether automatic zoom is on.
-                carNavigationCamera.zoomUpdatesAllowedFlow.collect { screen.invalidate() }
+                carNavigationCamera.nextCameraMode.collect { screen.invalidate() }
             }
         }
     }
@@ -70,7 +68,10 @@ class MapboxMapActionStrip(
                 ),
             ).build(),
         )
-        .setOnClickListener { zoomManually(carNavigationCamera::zoomInAction) }
+        .setOnClickListener {
+            carNavigationCamera.zoomUpdatesAllowed(false)
+            carNavigationCamera.zoomInAction()
+        }
         .build()
 
     private fun buildZoomOutAction(carNavigationCamera: CarNavigationCamera) = Action.Builder()
@@ -82,16 +83,11 @@ class MapboxMapActionStrip(
                 ),
             ).build(),
         )
-        .setOnClickListener { zoomManually(carNavigationCamera::zoomOutAction) }
+        .setOnClickListener {
+            carNavigationCamera.zoomUpdatesAllowed(false)
+            carNavigationCamera.zoomOutAction()
+        }
         .build()
-
-    // A manual zoom turns off automatic zoom. Before the map surface is attached the zoom has no
-    // effect, so automatic zoom is left on rather than locking the camera at its initial zoom.
-    private fun zoomManually(zoomAction: () -> Unit) {
-        if (!carNavigationCamera.isMapSurfaceAttached) return
-        carNavigationCamera.zoomUpdatesAllowed(false)
-        zoomAction()
-    }
 
     private fun buildRecenterAction() =
         buildCameraAction(R.drawable.ic_recenter_24, CarCameraMode.FOLLOWING)

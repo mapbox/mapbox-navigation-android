@@ -4,7 +4,6 @@ import android.location.Location
 import android.util.Log
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
@@ -49,6 +48,7 @@ import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracki
 import com.mapbox.navigation.testing.utils.readRawFileText
 import com.mapbox.navigation.testing.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.utils.routes.requestMockRoutes
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
@@ -83,7 +83,7 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
 
     @After
     fun tearDown() {
-        runBlocking(SdkDispatchers.Main.immediate) {
+        runBlocking(Dispatchers.Main.immediate) {
             val path = mapboxNavigation.historyRecorder.stopRecording()
             Log.i("Tests", "history file recorder: $path")
             MapboxNavigationProvider.destroy()

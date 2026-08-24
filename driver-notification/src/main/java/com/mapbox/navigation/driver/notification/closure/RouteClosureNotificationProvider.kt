@@ -69,7 +69,7 @@ class RouteClosureNotificationProvider(
 
     /** Continuously monitors route progress and emits monitoring/resolved notifications. */
     private fun MapboxNavigation.monitoringFlow(): Flow<DriverNotification> =
-        flowRouteProgress(tag = "$TAG#monitoring")
+        flowRouteProgress()
             .map { routeProgress ->
                 routeProgress.upcomingRoadObjects.firstClosure()
                     ?.takeIf { (dist, _) -> dist > alternativeTriggerThresholdMeters }
@@ -94,7 +94,7 @@ class RouteClosureNotificationProvider(
         flowRoutesUpdated()
             .filter { it.hasClosureAlternative() }
             .mapLatest { routeUpdate ->
-                val routeProgress = flowRouteProgress(tag = "$TAG#alternative").first()
+                val routeProgress = flowRouteProgress().first()
                 val (distance, incidentId) = routeProgress.upcomingRoadObjects.firstClosure()
                     ?: return@mapLatest null
                 if (distance > alternativeTriggerThresholdMeters) return@mapLatest null

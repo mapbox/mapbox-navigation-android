@@ -41,9 +41,8 @@ internal abstract class CarRoadNameObserver(
                 onRoadUpdate(newRoad, currentShields)
                 routeShieldApi.getRouteShields(
                     locationMatcherResult.road,
-                    // Empty ids mean there are no designed shields to load for this style.
-                    mapUserStyleObserver.userId.ifEmpty { null },
-                    mapUserStyleObserver.styleId.ifEmpty { null },
+                    mapUserStyleObserver.userId,
+                    mapUserStyleObserver.styleId,
                     roadNameShieldsCallback,
                 )
             }

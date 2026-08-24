@@ -16,6 +16,6 @@ class SearchPlacesFeedbackScreenFactory(
 
     override fun getCarFeedbackPoll(carContext: CarContext): CarFeedbackPoll {
         return mapboxCarContext.options.feedbackPollProvider
-            .getPlaceFeedbackPoll(carContext)
+            .getSearchFeedbackPoll(carContext)
     }
 }

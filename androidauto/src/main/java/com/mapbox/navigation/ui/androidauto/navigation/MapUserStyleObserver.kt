@@ -23,9 +23,10 @@ class MapUserStyleObserver : MapboxCarMapObserver {
 
     private fun updateState() {
         mapboxCarMapSurface?.mapSurface?.getMapboxMap()?.getStyle()?.let { style ->
-            val (parsedUserId, parsedStyleId) = parseStyleUri(style.styleURI)
-            userId = parsedUserId
-            styleId = parsedStyleId
+            val splits = style.styleURI.substringAfter("mapbox://styles/")
+                .split("/", limit = 2)
+            userId = splits[0]
+            styleId = splits[1]
         }
     }
 
@@ -37,23 +38,4 @@ class MapUserStyleObserver : MapboxCarMapObserver {
         styleId = ""
         this.mapboxCarMapSurface = null
     }
-}
-
-private const val MAPBOX_STYLE_URI_PREFIX = "mapbox://styles/"
-
-/**
- * Extracts the user and style ids from a `mapbox://styles/{user}/{style}` URI. Any other URI, such
- * as a style loaded from JSON or from an `https://` URL, and a Mapbox URI without both ids,
- * produce empty ids. Callers pass empty ids to the shield APIs as null, so only the legacy shields
- * are used for those styles.
- */
-internal fun parseStyleUri(styleUri: String): Pair<String, String> {
-    if (!styleUri.startsWith(MAPBOX_STYLE_URI_PREFIX)) return "" to ""
-    val segments = styleUri.removePrefix(MAPBOX_STYLE_URI_PREFIX)
-        .substringBefore('?')
-        // limit = 2 keeps any further path, such as "/draft", in the style id.
-        .split("/", limit = 2)
-    val userId = segments.getOrNull(0).orEmpty()
-    val styleId = segments.getOrNull(1).orEmpty()
-    return if (userId.isEmpty() || styleId.isEmpty()) "" to "" else userId to styleId
 }

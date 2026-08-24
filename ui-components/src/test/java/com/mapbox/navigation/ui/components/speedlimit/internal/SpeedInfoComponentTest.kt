@@ -46,9 +46,7 @@ class SpeedInfoComponentTest {
     fun `speed limit is rendered when location matcher results are available`() =
         coroutineRule.runBlockingTest {
             val locationMatcher = mockk<LocationMatcherResult>()
-            every {
-                mockNavigation.flowLocationMatcherResult(any())
-            } returns flowOf(locationMatcher)
+            every { mockNavigation.flowLocationMatcherResult() } returns flowOf(locationMatcher)
             every {
                 mockNavigation.registerLocationObserver(any())
             } answers {
@@ -75,9 +73,7 @@ class SpeedInfoComponentTest {
     fun `speed limit is not rendered when value is null`() =
         coroutineRule.runBlockingTest {
             val locationMatcher = mockk<LocationMatcherResult>()
-            every {
-                mockNavigation.flowLocationMatcherResult(any())
-            } returns flowOf(locationMatcher)
+            every { mockNavigation.flowLocationMatcherResult() } returns flowOf(locationMatcher)
             every {
                 mockNavigation.registerLocationObserver(any())
             } answers {

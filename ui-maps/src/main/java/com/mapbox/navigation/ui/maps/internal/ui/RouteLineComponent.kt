@@ -124,36 +124,35 @@ class RouteLineComponent(
             }
         }
         coroutineScope.launch {
-            mapboxNavigation.flowRouteProgress(tag = "RouteLineComponent")
-                .collect { routeProgress ->
-                    if (routeProgress.currentState == RouteProgressState.TRACKING) {
-                        currentRoutesProgressData = routeProgress.currentLegProgress?.let {
-                            RoutesProgressData(
+            mapboxNavigation.flowRouteProgress().collect { routeProgress ->
+                if (routeProgress.currentState == RouteProgressState.TRACKING) {
+                    currentRoutesProgressData = routeProgress.currentLegProgress?.let {
+                        RoutesProgressData(
+                            RouteProgressData(
+                                it.legIndex,
+                                routeProgress.currentRouteGeometryIndex,
+                                it.geometryIndex,
+                            ),
+                            routeProgress.internalAlternativeRouteIndices().mapValues { entry ->
                                 RouteProgressData(
-                                    it.legIndex,
-                                    routeProgress.currentRouteGeometryIndex,
-                                    it.geometryIndex,
-                                ),
-                                routeProgress.internalAlternativeRouteIndices().mapValues { entry ->
-                                    RouteProgressData(
-                                        entry.value.legIndex,
-                                        entry.value.routeGeometryIndex,
-                                        entry.value.legGeometryIndex,
-                                    )
-                                },
-                            )
-                        }
+                                    entry.value.legIndex,
+                                    entry.value.routeGeometryIndex,
+                                    entry.value.legGeometryIndex,
+                                )
+                            },
+                        )
                     }
-                    mapboxMap.style?.let { style ->
-                        routeLineApi.updateWithRouteProgress(routeProgress) { result ->
-                            routeLineView.renderRouteLineUpdate(style, result).also {
-                                result.error?.let {
-                                    logE(TAG) { "${it.errorMessage}: ${it.throwable}" }
-                                }
+                }
+                mapboxMap.style?.let { style ->
+                    routeLineApi.updateWithRouteProgress(routeProgress) { result ->
+                        routeLineView.renderRouteLineUpdate(style, result).also {
+                            result.error?.let {
+                                logE(TAG) { "${it.errorMessage}: ${it.throwable}" }
                             }
                         }
                     }
                 }
+            }
         }
 
         coroutineScope.launch {

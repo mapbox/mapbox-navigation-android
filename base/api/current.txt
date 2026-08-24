@@ -917,9 +917,11 @@ package com.mapbox.navigation.base.options {
 
   public final class RerouteOptions {
     method public int getAvoidManeuverSeconds();
+    method public int getRepeatRerouteAfterOffRouteDelaySeconds();
     method public com.mapbox.navigation.base.options.RerouteStrategyForMapMatchedRoutes getRerouteStrategyForMapMatchedRoutes();
     method public com.mapbox.navigation.base.options.RerouteOptions.Builder toBuilder();
     property public final int avoidManeuverSeconds;
+    property public final int repeatRerouteAfterOffRouteDelaySeconds;
     property public final com.mapbox.navigation.base.options.RerouteStrategyForMapMatchedRoutes rerouteStrategyForMapMatchedRoutes;
   }
 
@@ -1498,13 +1500,6 @@ package com.mapbox.navigation.base.time.span {
 
 package com.mapbox.navigation.base.trip.model {
 
-  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public enum ChargingState {
-    enum_constant public static final com.mapbox.navigation.base.trip.model.ChargingState AWAIT_CHARGING;
-    enum_constant public static final com.mapbox.navigation.base.trip.model.ChargingState CHARGING;
-    enum_constant public static final com.mapbox.navigation.base.trip.model.ChargingState EXTRA_CHARGING;
-    enum_constant public static final com.mapbox.navigation.base.trip.model.ChargingState NOT_CHARGING;
-  }
-
   public final class RouteLegProgress {
     method public com.mapbox.navigation.base.trip.model.RouteStepProgress? getCurrentStepProgress();
     method public float getDistanceRemaining();
@@ -1530,7 +1525,6 @@ package com.mapbox.navigation.base.trip.model {
 
   public final class RouteProgress {
     method public com.mapbox.api.directions.v5.models.BannerInstructions? getBannerInstructions();
-    method public com.mapbox.navigation.base.trip.model.ChargingState getChargingState();
     method public com.mapbox.navigation.base.trip.model.RouteLegProgress? getCurrentLegProgress();
     method public int getCurrentRouteGeometryIndex();
     method public com.mapbox.navigation.base.trip.model.RouteProgressState getCurrentState();
@@ -1548,9 +1542,7 @@ package com.mapbox.navigation.base.trip.model {
     method public java.util.List<com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject> getUpcomingRoadObjects();
     method public java.util.List<com.mapbox.geojson.Point>? getUpcomingStepPoints();
     method public com.mapbox.api.directions.v5.models.VoiceInstructions? getVoiceInstructions();
-    method public boolean isChargingExpected();
     property public final com.mapbox.api.directions.v5.models.BannerInstructions? bannerInstructions;
-    property public final com.mapbox.navigation.base.trip.model.ChargingState chargingState;
     property public final com.mapbox.navigation.base.trip.model.RouteLegProgress? currentLegProgress;
     property public final int currentRouteGeometryIndex;
     property public final com.mapbox.navigation.base.trip.model.RouteProgressState currentState;
@@ -1560,7 +1552,6 @@ package com.mapbox.navigation.base.trip.model {
     property public final float fractionTraveled;
     property public final boolean inParkingAisle;
     property public final boolean inTunnel;
-    property public final boolean isChargingExpected;
     property public final com.mapbox.navigation.base.route.NavigationRoute navigationRoute;
     property public final int remainingWaypoints;
     property public final com.mapbox.api.directions.v5.models.DirectionsRoute route;
@@ -1693,13 +1684,11 @@ package com.mapbox.navigation.base.trip.model.eh {
   }
 
   public final class EHorizonGraphPath {
-    method @Deprecated public java.util.List<java.lang.Long> getEdges();
-    method public long[] getEdgesArray();
+    method public java.util.List<java.lang.Long> getEdges();
     method public double getLength();
     method public double getPercentAlongBegin();
     method public double getPercentAlongEnd();
-    property @Deprecated public final java.util.List<java.lang.Long> edges;
-    property public final long[] edgesArray;
+    property public final java.util.List<java.lang.Long> edges;
     property public final double length;
     property public final double percentAlongBegin;
     property public final double percentAlongEnd;
@@ -2063,8 +2052,7 @@ package com.mapbox.navigation.base.trip.model.roadobject.incident {
 
   public final class IncidentInfo {
     method public java.util.List<java.lang.String>? getAffectedRoadNames();
-    method @Deprecated public java.util.List<java.lang.Integer>? getAlertcCodes();
-    method public int[]? getAlertcCodesArray();
+    method public java.util.List<java.lang.Integer>? getAlertcCodes();
     method public com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentCongestion? getCongestion();
     method public String? getCountryCodeAlpha2();
     method public String? getCountryCodeAlpha3();
@@ -2086,8 +2074,7 @@ package com.mapbox.navigation.base.trip.model.roadobject.incident {
     method public int getType();
     method public boolean isClosed();
     property public final java.util.List<java.lang.String>? affectedRoadNames;
-    property @Deprecated public final java.util.List<java.lang.Integer>? alertcCodes;
-    property public final int[]? alertcCodesArray;
+    property public final java.util.List<java.lang.Integer>? alertcCodes;
     property public final com.mapbox.navigation.base.trip.model.roadobject.incident.IncidentCongestion? congestion;
     property public final String? countryCodeAlpha2;
     property public final String? countryCodeAlpha3;
@@ -2228,18 +2215,14 @@ package com.mapbox.navigation.base.trip.model.roadobject.location {
 
   public final class SubgraphEdge {
     method public long getId();
-    method @Deprecated public java.util.List<java.lang.Long> getInnerEdgeIds();
-    method public long[] getInnerEdgeIdsArray();
+    method public java.util.List<java.lang.Long> getInnerEdgeIds();
     method public double getLength();
-    method @Deprecated public java.util.List<java.lang.Long> getOuterEdgeIds();
-    method public long[] getOuterEdgeIdsArray();
+    method public java.util.List<java.lang.Long> getOuterEdgeIds();
     method public com.mapbox.geojson.Geometry getShape();
     property public final long id;
-    property @Deprecated public final java.util.List<java.lang.Long> innerEdgeIds;
-    property public final long[] innerEdgeIdsArray;
+    property public final java.util.List<java.lang.Long> innerEdgeIds;
     property public final double length;
-    property @Deprecated public final java.util.List<java.lang.Long> outerEdgeIds;
-    property public final long[] outerEdgeIdsArray;
+    property public final java.util.List<java.lang.Long> outerEdgeIds;
     property public final com.mapbox.geojson.Geometry shape;
   }
 

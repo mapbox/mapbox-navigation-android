@@ -34,10 +34,11 @@ internal class CarFeedbackSender {
             )
         }
 
-        // Search feedback reasons are only recorded in history, not sent to the Search SDK's
-        // analytics service: that needs the SearchResult/SearchSuggestion and ResponseInfo
-        // that originated a search, and those don't reach the feedback screens.
-        // See CarFeedbackPollProvider.getPlaceFeedbackPoll.
+        // TODO send search feedback
+//        ifNonNull(selectedItem?.searchFeedbackReason) { _ ->
+//            val analyticsService = MapboxSearchSdk.serviceProvider.analyticsService()
+//            analyticsService.sendRawFeedbackEvent()
+//        }
 
         // Collect feedback in the history recorder.
         recordFeedbackInHistory(

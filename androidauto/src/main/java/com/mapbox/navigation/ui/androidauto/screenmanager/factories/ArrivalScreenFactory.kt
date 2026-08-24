@@ -22,13 +22,6 @@ class ArrivalScreenFactory(
 
     override fun onFinish() {
         MapboxNavigationApp.current()?.setNavigationRoutes(emptyList())
-        val isUnifiedNavigation = mapboxCarContext.mapboxScreenManager
-            .isScreenBelowTop(MapboxScreen.NAVIGATION)
-        val nextScreen = if (isUnifiedNavigation) {
-            MapboxScreen.NAVIGATION
-        } else {
-            MapboxScreen.FREE_DRIVE
-        }
-        MapboxScreenManager.replaceTop(nextScreen)
+        MapboxScreenManager.replaceTop(MapboxScreen.FREE_DRIVE)
     }
 }

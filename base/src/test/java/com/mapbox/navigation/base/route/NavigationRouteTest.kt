@@ -86,7 +86,6 @@ class NavigationRouteTest {
             expirationTimeElapsedSeconds = null,
             responseOriginAPI = ResponseOriginAPI.DIRECTIONS_API,
             operations = mockk<RouteOperations>(),
-            directionsRouteContext = mockk(relaxed = true),
         )
 
         assertEquals(
@@ -110,7 +109,6 @@ class NavigationRouteTest {
             expirationTimeElapsedSeconds = null,
             responseOriginAPI = ResponseOriginAPI.DIRECTIONS_API,
             operations = mockk<RouteOperations>(),
-            directionsRouteContext = mockk(relaxed = true),
         )
 
         val newRouteJson = FileUtils.loadJsonFixture("route_closure_second_silent_waypoint.json")
@@ -137,7 +135,6 @@ class NavigationRouteTest {
             expirationTimeElapsedSeconds = null,
             responseOriginAPI = ResponseOriginAPI.DIRECTIONS_API,
             operations = mockk<RouteOperations>(),
-            directionsRouteContext = mockk(relaxed = true),
         )
 
         navigationRoute.updateExpirationTime(45)

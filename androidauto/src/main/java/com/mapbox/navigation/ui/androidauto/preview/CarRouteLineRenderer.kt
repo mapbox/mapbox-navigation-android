@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.androidauto.preview
 
+import androidx.car.app.CarContext
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
@@ -12,14 +13,17 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.ui.androidauto.internal.extensions.mapboxNavigationForward
 import com.mapbox.navigation.ui.androidauto.internal.extensions.styleFlow
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAuto
-import com.mapbox.navigation.ui.androidauto.internal.logAndroidAutoFailure
 import com.mapbox.navigation.ui.androidauto.routes.CarRoutesProvider
 import com.mapbox.navigation.ui.androidauto.routes.NavigationCarRoutesProvider
+import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
+import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
-import kotlinx.coroutines.CancellationException
+import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions
+import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions
+import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -31,32 +35,36 @@ import kotlinx.coroutines.launch
  * [MapboxRouteArrowApi], and [RouteProgressObserver] use cases that the app needs in the car.
  *
  * Anything for rendering the car's route line, is handled here at this point.
- *
- * @param options customizes the route line and maneuver arrow rendering components, see
- * [CarRouteLineRendererOptions].
  */
 class CarRouteLineRenderer(
-    private val options: CarRouteLineRendererOptions = CarRouteLineRendererOptions.Builder()
-        .build(),
     private val carRoutesProvider: CarRoutesProvider = NavigationCarRoutesProvider(),
 ) : MapboxCarMapObserver {
 
-    private var routeLineResources: RouteLineResources? = null
-    private var coroutineScope: CoroutineScope? = null
+    private val routeLineColorResources by lazy {
+        RouteLineColorResources.Builder().build()
+    }
+
+    private var style: Style? = null
+
+    private lateinit var routeLineView: MapboxRouteLineView
+    private lateinit var routeLineApi: MapboxRouteLineApi
+    private lateinit var routeArrowApi: MapboxRouteArrowApi
+    private lateinit var routeArrowView: MapboxRouteArrowView
+    private lateinit var coroutineScope: CoroutineScope
 
     private val onPositionChangedListener = OnIndicatorPositionChangedListener { point ->
-        val resources = routeLineResources ?: return@OnIndicatorPositionChangedListener
-        val result = resources.routeLineApi.updateTraveledRouteLine(point)
-        resources.routeLineView.renderRouteLineUpdate(resources.style, result)
+        val style = style ?: return@OnIndicatorPositionChangedListener
+        val result = routeLineApi.updateTraveledRouteLine(point)
+        routeLineView.renderRouteLineUpdate(style, result)
     }
 
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
-        val resources = routeLineResources ?: return@RouteProgressObserver
-        resources.routeLineApi.updateWithRouteProgress(routeProgress) { result ->
-            resources.routeLineView.renderRouteLineUpdate(resources.style, result)
+        val style = style ?: return@RouteProgressObserver
+        routeLineApi.updateWithRouteProgress(routeProgress) { result ->
+            routeLineView.renderRouteLineUpdate(style, result)
         }
-        resources.routeArrowApi.addUpcomingManeuverArrow(routeProgress).also { arrowUpdate ->
-            resources.routeArrowView.renderManeuverUpdate(resources.style, arrowUpdate)
+        routeArrowApi.addUpcomingManeuverArrow(routeProgress).also { arrowUpdate ->
+            routeArrowView.renderManeuverUpdate(style, arrowUpdate)
         }
     }
 
@@ -64,38 +72,23 @@ class CarRouteLineRenderer(
 
     override fun onAttached(mapboxCarMapSurface: MapboxCarMapSurface) {
         logAndroidAuto("CarRouteLine carMapSurface loaded $mapboxCarMapSurface")
-        val coroutineScope = MainScope()
-        this.coroutineScope = coroutineScope
+        coroutineScope = MainScope()
         coroutineScope.launch {
             mapboxCarMapSurface.styleFlow().collectLatest { style ->
-                clearRouteLineResources()
-                val resources = try {
-                    val routeLineView = MapboxRouteLineView(
-                        options.routeLineViewOptionsProvider(mapboxCarMapSurface),
-                    )
-                    routeLineView.initializeLayers(style)
-                    RouteLineResources(
-                        style = style,
-                        routeLineApi = MapboxRouteLineApi(
-                            options.routeLineApiOptionsProvider(mapboxCarMapSurface),
-                        ),
-                        routeLineView = routeLineView,
-                        routeArrowApi = options.routeArrowApiProvider(mapboxCarMapSurface),
-                        routeArrowView = MapboxRouteArrowView(
-                            options.routeArrowOptionsProvider(mapboxCarMapSurface),
-                        ),
-                    )
-                } catch (exception: CancellationException) {
-                    throw exception
-                } catch (exception: Exception) {
-                    logAndroidAutoFailure(
-                        "CarRouteLine failed to build options from a customized provider",
-                        exception,
-                    )
-                    return@collectLatest
-                }
-                this@CarRouteLineRenderer.routeLineResources = resources
-                carRoutesProvider.navigationRoutes.collect { onRoutesChanged(resources, it) }
+                val carContext = mapboxCarMapSurface.carContext
+                routeLineView = MapboxRouteLineView(
+                    getMapboxRouteLineViewOptions(carContext, style),
+                )
+                routeLineView.initializeLayers(style)
+                routeLineApi = MapboxRouteLineApi(getMapboxRouteLineApiOptions(style))
+                routeArrowApi = MapboxRouteArrowApi()
+                routeArrowView = MapboxRouteArrowView(
+                    RouteArrowOptions.Builder(carContext)
+                        .withAboveLayerId(TOP_LEVEL_ROUTE_LINE_LAYER_ID)
+                        .build(),
+                )
+                this@CarRouteLineRenderer.style = style
+                carRoutesProvider.navigationRoutes.collect { onRoutesChanged(style, it) }
             }
         }
         val locationPlugin = mapboxCarMapSurface.mapSurface.location
@@ -108,9 +101,8 @@ class CarRouteLineRenderer(
         val mapSurface = mapboxCarMapSurface.mapSurface
         mapSurface.location.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
         MapboxNavigationApp.unregisterObserver(navigationObserver)
-        coroutineScope?.cancel()
-        coroutineScope = null
-        clearRouteLineResources()
+        coroutineScope.cancel()
+        style = null
     }
 
     private fun onAttached(mapboxNavigation: MapboxNavigation) {
@@ -121,38 +113,44 @@ class CarRouteLineRenderer(
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
     }
 
-    private fun clearRouteLineResources() {
-        val resources = routeLineResources ?: return
-        routeLineResources = null
-        resources.routeLineApi.cancel()
-        resources.routeLineView.cancel()
+    private fun getMapboxRouteLineApiOptions(
+        style: Style,
+    ): MapboxRouteLineApiOptions {
+        return MapboxRouteLineApiOptions.Builder()
+            .vanishingRouteLineEnabled(true)
+            .build()
     }
 
-    private fun onRoutesChanged(
-        resources: RouteLineResources,
-        routes: List<NavigationRoute>,
-    ) {
+    private fun getMapboxRouteLineViewOptions(
+        carContext: CarContext,
+        style: Style,
+    ): MapboxRouteLineViewOptions {
+        return MapboxRouteLineViewOptions.Builder(carContext)
+            .routeLineColorResources(routeLineColorResources)
+            .routeLineBelowLayerId(findRoadLabelsLayerId(style))
+            .build()
+    }
+
+    private fun findRoadLabelsLayerId(style: Style): String {
+        return style.styleLayers
+            .firstOrNull { layer -> layer.id.contains("road-label") }
+            ?.id ?: "road-label-navigation"
+    }
+
+    private fun onRoutesChanged(style: Style, routes: List<NavigationRoute>) {
         logAndroidAuto("CarRouteLine onRoutesChanged ${routes.size}")
         if (routes.isNotEmpty()) {
             val routesMetadata = MapboxNavigationApp.current()
                 ?.getAlternativeMetadataFor(routes).orEmpty()
-            resources.routeLineApi.setNavigationRoutes(routes, routesMetadata) { value ->
-                resources.routeLineView.renderRouteDrawData(resources.style, value)
+            routeLineApi.setNavigationRoutes(routes, routesMetadata) { value ->
+                routeLineView.renderRouteDrawData(style, value)
             }
         } else {
-            resources.routeLineApi.clearRouteLine { value ->
-                resources.routeLineView.renderClearRouteLineValue(resources.style, value)
+            routeLineApi.clearRouteLine { value ->
+                routeLineView.renderClearRouteLineValue(style, value)
             }
-            val clearArrowValue = resources.routeArrowApi.clearArrows()
-            resources.routeArrowView.render(resources.style, clearArrowValue)
+            val clearArrowValue = routeArrowApi.clearArrows()
+            routeArrowView.render(style, clearArrowValue)
         }
     }
-
-    private data class RouteLineResources(
-        val style: Style,
-        val routeLineApi: MapboxRouteLineApi,
-        val routeLineView: MapboxRouteLineView,
-        val routeArrowApi: MapboxRouteArrowApi,
-        val routeArrowView: MapboxRouteArrowView,
-    )
 }

@@ -9,8 +9,8 @@ import com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackOption
 import com.mapbox.navigation.ui.androidauto.navigation.speedlimit.SpeedLimitOptions
 import com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotification
 import com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotificationOptions
-import com.mapbox.navigation.ui.androidauto.preview.CarRouteLineRendererOptions
 import com.mapbox.navigation.ui.androidauto.preview.CarRouteOptionsInterceptor
+import com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions
 import com.mapbox.navigation.ui.androidauto.search.CarSearchMode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,26 +36,14 @@ class MapboxCarOptions {
         private set
 
     /**
-     * @see CarRouteLineRendererOptions
-     */
-    var routeLineRendererOptions: CarRouteLineRendererOptions =
-        CarRouteLineRendererOptions.Builder().build()
-        private set
-
-    /**
      * @see SpeedLimitOptions
      */
     val speedLimitOptions: StateFlow<SpeedLimitOptions> = speedLimitOptionsMutable.asStateFlow()
 
     /**
-     * @see com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions
+     * @see CarPlaceSearchOptions
      */
-    @Deprecated(
-        "CarPlaceSearchOptions has no effect and will be removed in a future major release.",
-    )
-    @Suppress("DEPRECATION")
-    var carPlaceSearchOptions: com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions =
-        com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions.Builder().build()
+    var carPlaceSearchOptions: CarPlaceSearchOptions = CarPlaceSearchOptions.Builder().build()
         private set
 
     /**
@@ -88,11 +76,9 @@ class MapboxCarOptions {
      * Apply the desired customization.
      */
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-    @Suppress("DEPRECATION")
     fun applyCustomization(customization: Customization) {
         customization.notificationOptions?.also { this.notificationOptions = it }
         customization.routeOptionsInterceptor?.also { this.routeOptionsInterceptor = it }
-        customization.routeLineRendererOptions?.also { this.routeLineRendererOptions = it }
         customization.speedLimitOptions?.also { this.speedLimitOptionsMutable.tryEmit(it) }
         customization.placeSearchOptions?.also { this.carPlaceSearchOptions = it }
         customization.carFeedbackOptions?.also { this.carFeedbackOptions = it }
@@ -117,20 +103,9 @@ class MapboxCarOptions {
         var routeOptionsInterceptor: CarRouteOptionsInterceptor? = null
 
         /**
-         * Modify the route line and upcoming-maneuver arrow rendering, for example their
-         * colors or the arrow icon pack.
-         */
-        var routeLineRendererOptions: CarRouteLineRendererOptions? = null
-
-        /**
          * Modify car place search.
          */
-        @Deprecated(
-            "CarPlaceSearchOptions has no effect and will be removed in a future major release.",
-        )
-        @Suppress("DEPRECATION")
-        var placeSearchOptions: com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions? =
-            null
+        var placeSearchOptions: CarPlaceSearchOptions? = null
 
         /**
          * Modify behavior of the speed limit widget.

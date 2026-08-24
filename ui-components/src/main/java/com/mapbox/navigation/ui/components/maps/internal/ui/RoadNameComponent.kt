@@ -99,7 +99,7 @@ internal class MapboxRoadNameComponentContract(
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
-        mapboxNavigation.flowLocationMatcherResult(tag = "RoadNameComponent").observe {
+        mapboxNavigation.flowLocationMatcherResult().observe {
             _roadInfo.value = it.road
         }
 

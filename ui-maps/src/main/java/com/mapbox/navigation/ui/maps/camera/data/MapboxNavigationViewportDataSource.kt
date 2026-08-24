@@ -10,6 +10,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.CameraState
 import com.mapbox.maps.EdgeInsets
+import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.MapboxMapException
 import com.mapbox.maps.ScreenBox
@@ -31,7 +32,6 @@ import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.pro
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteIntersections
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRoutePoints
 import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger
-import com.mapbox.navigation.ui.maps.internal.MapHdRoadsVisibilityController
 import com.mapbox.navigation.ui.maps.internal.camera.FollowingFramingMode
 import com.mapbox.navigation.ui.maps.internal.camera.FollowingFramingModeHolder
 import com.mapbox.navigation.ui.maps.internal.camera.InternalFollowingOverviewOptions
@@ -280,8 +280,6 @@ class MapboxNavigationViewportDataSource private constructor(
             routeOverviewViewportDataSource.debugger = value
             pointsOverviewViewportDataSource.debugger = value
         }
-
-    private val mapHdRoadsVisibilityController = MapHdRoadsVisibilityController(mapboxMap)
 
     private var navigationRoutes: List<NavigationRoute> = emptyList()
     private val navigationRoute: NavigationRoute?
@@ -546,7 +544,6 @@ class MapboxNavigationViewportDataSource private constructor(
      */
     fun onDestroy() {
         cancelPendingMapSizeCallback()
-        mapHdRoadsVisibilityController.onDestroy()
     }
 
     private fun cancelPendingMapSizeCallback() {
@@ -945,28 +942,12 @@ class MapboxNavigationViewportDataSource private constructor(
         box: ScreenBox,
     ): CameraOptions {
         return try {
-            cameraForCoordinates(coordinates, camera, box).restorePaddingsFrom(camera)
+            cameraForCoordinates(coordinates, camera, box)
         } catch (ex: MapboxMapException) {
             logE {
                 "safeCameraForCoordinates exception: ${ex.cause}\n${ex.message}\n${ex.stackTrace}"
             }
             cameraState.toCameraOptions()
-        }
-    }
-
-    /**
-     * The padding is an input of camera-for-coordinates, not its result, but it comes back
-     * converted to logical pixels and back with a single-precision pixel ratio, e.g. 900.0 comes
-     * back as 899.9999999999999. A padding that collapses the viewport to the focal point then
-     * no longer collapses it exactly, and a flyTo to such a camera keeps the camera center still
-     * until the very end of the animation while the zoom changes. Restores the exact padding.
-     */
-    private fun CameraOptions.restorePaddingsFrom(input: CameraOptions): CameraOptions {
-        val inputPadding = input.padding
-        return if (isEmpty || inputPadding == null) {
-            this
-        } else {
-            toBuilder().padding(inputPadding).build()
         }
     }
 }

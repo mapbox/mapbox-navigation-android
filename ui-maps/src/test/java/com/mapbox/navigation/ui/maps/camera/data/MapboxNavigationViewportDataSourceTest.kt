@@ -1092,45 +1092,6 @@ class MapboxNavigationViewportDataSourceTest {
     }
 
     @Test
-    fun `verify frame - following padding is not affected by camera for coordinates rounding`() {
-        val location = createLocation()
-        val additionalPoint = Point.fromLngLat(-30.0, -40.0)
-        val expectedPoints = listOf(location.toPoint(), additionalPoint)
-        val fallbackOptions = createCameraOptions {
-            center(location.toPoint())
-            bearing(smoothedBearing)
-            pitch(viewportDataSource.options.followingFrameOptions.defaultPitch)
-            zoom(viewportDataSource.options.followingFrameOptions.maxZoom)
-            padding(singlePixelEdgeInsets)
-        }
-        val framedCenter = Point.fromLngLat(-15.0, -20.0)
-        val framedZoom = 16.0
-        // The padding comes back converted to logical pixels and back.
-        val roundedPadding = EdgeInsets(
-            singlePixelEdgeInsets.top - 1e-13,
-            singlePixelEdgeInsets.left + 2e-13,
-            singlePixelEdgeInsets.bottom - 1e-13,
-            singlePixelEdgeInsets.right + 2e-13,
-        )
-        every {
-            mapboxMap.cameraForCoordinates(expectedPoints, fallbackOptions, followingScreenBox)
-        } returns fallbackOptions.toBuilder()
-            .center(framedCenter)
-            .zoom(framedZoom)
-            .padding(roundedPadding)
-            .build()
-
-        viewportDataSource.onLocationChanged(location)
-        viewportDataSource.additionalPointsToFrameForFollowing(listOf(additionalPoint))
-        viewportDataSource.evaluate()
-        val cameraForFollowing = viewportDataSource.getViewportData().cameraForFollowing
-
-        assertEquals(singlePixelEdgeInsets, cameraForFollowing.padding)
-        assertEquals(framedCenter, cameraForFollowing.center)
-        assertEquals(framedZoom, cameraForFollowing.zoom)
-    }
-
-    @Test
     fun `verify frame - location + route + progress`() {
         val stepProgress = mockk<RouteStepProgress>(relaxed = true) {
             every { distanceRemaining } returns 123f

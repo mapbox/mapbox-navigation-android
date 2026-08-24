@@ -9,7 +9,6 @@ import com.mapbox.common.TileStore
 import com.mapbox.common.TilesetDescriptor
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.performance.PerformanceTracker
-import com.mapbox.navigation.base.internal.route.directionsRouteContext
 import com.mapbox.navigation.base.internal.route.nativeRoute
 import com.mapbox.navigation.base.internal.route.toDirectionsRefreshResponseInternal
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
@@ -21,14 +20,11 @@ import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logW
-import com.mapbox.navigation.utils.internal.toDataRef
 import com.mapbox.navigator.ADASISv2MessageCallback
 import com.mapbox.navigator.AdasisConfig
 import com.mapbox.navigator.AdasisFacadeHandleInterface
 import com.mapbox.navigator.CacheDataDomain
 import com.mapbox.navigator.CacheHandle
-import com.mapbox.navigator.ChangeLegCallback
-import com.mapbox.navigator.ChargingState
 import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.ElectronicHorizonObserver
 import com.mapbox.navigator.EventsMetadataInterface
@@ -105,12 +101,10 @@ class MapboxNativeNavigatorImpl(
     override val inputsService: InputsServiceHandle =
         NavigatorLoader.createInputService(config, historyRecorderComposite)
 
-    private var _navigatorHandleRef: NavigatorHandle? =
+    // Built once and kept stable; its internal Navigator/CacheHandle are replaced on every
+    // (re)create in [init].
+    override val navigatorHandle: NavigatorHandle =
         NavigatorLoader.createNavigatorHandle(historyRecorderComposite)
-
-    // Nulled in shutdown() so the C++ peer can be released before GC sweeps this island.
-    override val navigatorHandle: NavigatorHandle
-        get() = _navigatorHandleRef ?: error("NavigatorHandle accessed after shutdown")
 
     private val nativeNavigatorRecreationObservers =
         CopyOnWriteArraySet<NativeNavigatorRecreationObserver>()
@@ -333,12 +327,12 @@ class MapboxNativeNavigatorImpl(
         route: NavigationRoute,
         refreshResponse: DataRef?,
         geometryIndex: Int?,
-    ): Expected<String, RefreshRouteResult> {
+    ): Expected<String, List<RouteAlternative>> {
         if (warnIfShutdown("refreshRoute")) {
             return ExpectedFactory.createError("Navigator is shut down")
         }
         val callback = {
-                continuation: Continuation<Expected<String, RefreshRouteResult>>,
+                continuation: Continuation<Expected<String, List<RouteAlternative>>>,
                 expected: Expected<String, RefreshRouteResult>,
             ->
             expected.fold(
@@ -360,12 +354,12 @@ class MapboxNativeNavigatorImpl(
                                 .ifBlank { "[no alternatives]" },
                         LOG_CATEGORY,
                     )
-                    continuation.resume(ExpectedFactory.createValue(refreshRouteResult))
+                    continuation.resume(
+                        ExpectedFactory.createValue(refreshRouteResult.alternatives),
+                    )
                 },
             )
         }
-
-        val refreshedDirectionsRouteContext = route.directionsRouteContext()
 
         return if (refreshResponse != null && geometryIndex != null) {
             logD(
@@ -376,7 +370,6 @@ class MapboxNativeNavigatorImpl(
             suspendCancellableCoroutine { continuation ->
                 navigator.refreshRoute(
                     refreshResponse,
-                    refreshedDirectionsRouteContext,
                     route.nativeRoute().routeId,
                     geometryIndex,
                 ) { callback(continuation, it) }
@@ -399,8 +392,7 @@ class MapboxNativeNavigatorImpl(
                 )
 
                 navigator.refreshRoute(
-                    refreshResponseJson.toDataRef(),
-                    refreshedDirectionsRouteContext,
+                    refreshResponseJson,
                     route.nativeRoute().routeId,
                     0,
                 ) { callback(continuation, it) }
@@ -429,21 +421,6 @@ class MapboxNativeNavigatorImpl(
     override fun retainUserChargingStation(routeId: String, stationId: String, retained: Boolean) {
         if (warnIfShutdown("retainUserChargingStation")) return
         navigator.retainUserChargingStation(routeId, stationId, retained)
-    }
-
-    override fun startCharging() {
-        if (warnIfShutdown("startCharging")) return
-        navigator.startCharging()
-    }
-
-    override fun stopCharging(callback: ChangeLegCallback) {
-        if (warnIfShutdown("stopCharging")) return
-        navigator.stopCharging(callback)
-    }
-
-    override fun getChargingState(): ChargingState {
-        if (warnIfShutdown("getChargingState")) return ChargingState.NOT_CHARGING
-        return navigator.stateOfCharging()
     }
 
     // EH
@@ -545,7 +522,6 @@ class MapboxNativeNavigatorImpl(
 
         isShutdown = true
         navigator.shutdown()
-        _navigatorHandleRef = null
     }
 
     override fun createMapsPredictiveCacheController(

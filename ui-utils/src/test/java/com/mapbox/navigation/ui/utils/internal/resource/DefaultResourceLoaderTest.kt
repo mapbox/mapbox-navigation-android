@@ -3,7 +3,6 @@ package com.mapbox.navigation.ui.utils.internal.resource
 import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.bindgen.Value
 import com.mapbox.common.Cancelable
 import com.mapbox.common.NetworkRestriction
 import com.mapbox.common.ReachabilityInterface
@@ -284,8 +283,6 @@ object Fixtures {
         contentType: String = "image/png",
         etag: String = "",
         belongsToGroup: Boolean = false,
-        transferSize: Long = 0,
-        extraMetadata: Value = Value.nullValue(),
     ): ResourceLoadResult {
         return ResourceLoadResult(
             data,
@@ -298,8 +295,6 @@ object Fixtures {
             contentType,
             etag,
             belongsToGroup,
-            transferSize,
-            extraMetadata,
         )
     }
 }
