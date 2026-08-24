@@ -1,3 +1,23 @@
+## Navigation SDK Core Framework 3.30.0-rc.1 - 24 August, 2026
+#### Features
+- Added `MapboxNavigation#changeUserChargingStationsRetainState` method that allows to retain/release user-provided charging stations. For retained charging stations navigator will not request alternatives that skip those stops. [#17368](https://github.com/mapbox/mapbox-sdk/pull/17368)
+
+#### Bug fixes and improvements
+- Fixed an issue where `RoadShieldContentManagerImpl` could crash if the coroutine was canceled while waiting for the road shields to return. [#17444](https://github.com/mapbox/mapbox-sdk/pull/17444)
+- Fixed an issue with `NativeMapboxRerouteController` reroute parsing job not being interrupted when a new route is set. [#17628](https://github.com/mapbox/mapbox-sdk/pull/17628)
+
+#### Known issues
+
+#### Other changes
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.30.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.30.0-rc.1))
+- Mapbox Navigation Native `v324.30.0-rc.1`
+- Mapbox Core Common `v24.30.0-rc.1`
+- Mapbox Java `v7.10.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.1))
+
 ## Navigation SDK Core Framework 3.29.0-rc.1 - 10 August, 2026
 #### Features
 - Extended PredictiveCacheMapsOptions with an optional tilesets property. [#14408](https://github.com/mapbox/mapbox-sdk/pull/14408)
