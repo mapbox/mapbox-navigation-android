@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maps.internal.route.callout.api
 
 import android.view.View
 import androidx.annotation.RestrictTo
+import com.mapbox.maps.AnnotatedLayerFeature
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.SourceDataLoadedType
 import com.mapbox.maps.ViewAnnotationAnchorConfig
@@ -48,9 +49,6 @@ class MapboxRouteCalloutsView(
     private val styleResolvedSources = mutableMapOf<String, String>()
 
     private val currentLayersToAttach = mutableSetOf<String>()
-
-    // Tracked directly since annotations are now keyed by (layerId, featureId), not layerId alone.
-    private val currentViews = mutableListOf<View>()
 
     private val onViewAnnotationUpdatedListener = object : OnViewAnnotationUpdatedListener {
         override fun onViewAnnotationAnchorUpdated(
@@ -130,11 +128,7 @@ class MapboxRouteCalloutsView(
     ) {
         val layerId = calloutState.layerId
         val options = viewHolder.options.toBuilder()
-            .annotatedLayerFeature(layerId) {
-                // Scopes to this route's feature so a reused layer slot can't resolve to a
-                // stale route's geometry.
-                featureId(calloutState.routeCallout.route.id)
-            }
+            .annotatedLayerFeature(layerId)
             .build()
 
         val sourceId = sourceIdOfLayer(layerId)
@@ -149,7 +143,6 @@ class MapboxRouteCalloutsView(
                     "the callout will not self-heal if its first placement fails"
             }
         }
-        currentViews.add(viewHolder.view)
         viewAnnotationManager.addViewAnnotation(
             view = viewHolder.view,
             options = options,
@@ -160,14 +153,12 @@ class MapboxRouteCalloutsView(
         pendingCallouts.filterValues { it.second == sourceId }.forEach { (view, pending) ->
             pendingCallouts.remove(view)
             viewAnnotationManager.removeViewAnnotation(view)
-            currentViews.remove(view)
             addViewAnnotation(pending.first, createViewHolder(pending.first.routeCallout))
         }
     }
 
     private fun clear() {
-        currentViews.forEach { viewAnnotationManager.removeViewAnnotation(it) }
-        currentViews.clear()
+        getAllCalloutViews().forEach { viewAnnotationManager.removeViewAnnotation(it) }
         viewAnnotationManager.viewAnnotationAvoidLayers =
             HashSet(viewAnnotationManager.viewAnnotationAvoidLayers - currentLayersToAttach)
         currentLayersToAttach.clear()
@@ -178,6 +169,14 @@ class MapboxRouteCalloutsView(
         val viewHolder = routeCalloutAdapter.onCreateViewHolder(callout)
 
         return viewHolder
+    }
+
+    private fun getAllCalloutViews(): List<View> {
+        return currentLayersToAttach.mapNotNull {
+            viewAnnotationManager.getViewAnnotation(
+                AnnotatedLayerFeature.Builder().layerId(it).build(),
+            )
+        }
     }
 
     private fun sourceIdOfLayer(layerId: String): String? {
