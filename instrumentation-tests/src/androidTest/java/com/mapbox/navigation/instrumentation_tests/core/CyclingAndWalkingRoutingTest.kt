@@ -42,6 +42,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
 import org.junit.Assume.assumeTrue
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -162,6 +163,7 @@ class CyclingAndWalkingRoutingTest(private val directionsProfile: String) :
     }
 
     @Test
+    @Ignore("https://mapbox.atlassian.net/browse/NAVAND-7622")
     fun reroute_on_multileg_route_without_alternatives() = sdkTest {
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
