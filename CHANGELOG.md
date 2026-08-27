@@ -1,3 +1,18 @@
+## Navigation SDK Core Framework 3.29.1 - 27 August, 2026
+#### Features
+
+
+#### Bug fixes and improvements
+- Fixed missing alternative routes callouts.
+- Fixed a leak where `MapboxNavigationViewportDataSource` and the `MapboxMap`/`MapView` it references could remain permanently retained if a pending map-size-ready callback was never cancelled on teardown. Added `MapboxNavigationViewportDataSource#onDestroy` to cancel it explicitly; `NavigationCameraComponent` now calls it on detach.
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.29.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.29.1))
+- Mapbox Navigation Native `v324.29.1`
+- Mapbox Core Common `v24.29.1`
+- Mapbox Java `v7.10.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.1))
+
 ## Navigation SDK Core Framework 3.29.0 - 21 August, 2026
 #### Features
 - Added `MapboxNavigation#changeUserChargingStationsRetainState` method that allows to retain/release user-provided charging stations. For retained charging stations navigator will not request alternatives that skip those stops. [#17368](https://github.com/mapbox/mapbox-sdk/pull/17368)
