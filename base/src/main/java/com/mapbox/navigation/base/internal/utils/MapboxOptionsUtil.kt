@@ -27,4 +27,10 @@ object MapboxOptionsUtil {
 object NavSDKServices {
     const val ISOCHRONE = "ISOCHRONE"
     const val CHM = "CHM"
+
+    // Matches `mapbox_services::Directions` (native `mapbox_services.hpp`). This is the service
+    // name consulted by TileStoreURLFormatter for the Navigation/NavigationHD/Adas/
+    // EvChargingStations tile domains, so toggling staging for it also routes tile store
+    // requests (route/HD tiles) to staging.
+    const val DIRECTIONS = "directions"
 }
