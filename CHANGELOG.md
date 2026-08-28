@@ -33,6 +33,65 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Core Common `v24.29.1`
 - Mapbox Java `v7.10.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.1))
 
+## Navigation SDK Core Framework 3.29.0 - 21 August, 2026
+#### Features
+- Added `MapboxNavigation#changeUserChargingStationsRetainState` method that allows to retain/release user-provided charging stations. For retained charging stations navigator will not request alternatives that skip those stops. [#17368](https://github.com/mapbox/mapbox-sdk/pull/17368)
+- Extended PredictiveCacheMapsOptions with an optional tilesets property. [#14408](https://github.com/mapbox/mapbox-sdk/pull/14408)
+- Added PredictiveCacheController.createTilesetsMapController for tilesets based predictive cache configuration. [#14408](https://github.com/mapbox/mapbox-sdk/pull/14408)
+- Added `NavigationOptions#timeFormatter` parameter that allows to inject custom `TimeFormatter` implementation. [#14825](https://github.com/mapbox/mapbox-sdk/pull/14825)
+- Deprecated `NavigationOptions#timeFormatType`. Default `TimeFormater` implementation should be used instead: [#14825](https://github.com/mapbox/mapbox-sdk/pull/14825)
+- Before: [#14825](https://github.com/mapbox/mapbox-sdk/pull/14825)
+- ```kotlin [#14825](https://github.com/mapbox/mapbox-sdk/pull/14825)
+- NavigationOptions.Builder(context) [#14825](https://github.com/mapbox/mapbox-sdk/pull/14825)
+- ... [#14825](https://github.com/mapbox/mapbox-sdk/pull/14825)
+- .timeFormatType(type) [#14825](https://github.com/mapbox/mapbox-sdk/pull/14825)
+- ``` [#14825](https://github.com/mapbox/mapbox-sdk/pull/14825)
+- After: [#14825](https://github.com/mapbox/mapbox-sdk/pull/14825)
+- ```kotlin [#14825](https://github.com/mapbox/mapbox-sdk/pull/14825)
+- NavigationOptions.Builder(context) [#14825](https://github.com/mapbox/mapbox-sdk/pull/14825)
+- ... [#14825](https://github.com/mapbox/mapbox-sdk/pull/14825)
+- .timeFormatter(MapboxTimeFormatter(context, type)) [#14825](https://github.com/mapbox/mapbox-sdk/pull/14825)
+- ``` [#14825](https://github.com/mapbox/mapbox-sdk/pull/14825)
+- Added `NavigationOptions#distanceFormatter` parameter that allows to inject custom `DistanceFormatter` implementation. [#14975](https://github.com/mapbox/mapbox-sdk/pull/14975)
+- Added support for configuring the route line's cap, join, and dash pattern (e.g. rendering a dotted route line) via `MapboxRouteLineViewOptions#lineLayersConfigs` [#15845](https://github.com/mapbox/mapbox-sdk/pull/15845)
+- Added `MapboxRouteLineView#hideCasing`/`showCasing` to control the visibility of the route line casing layer. [#15845](https://github.com/mapbox/mapbox-sdk/pull/15845)
+- Added `EvBetterRouteNotification#unnecessaryChargingStationIds` that reports the charging stations the primary route no longer needs to visit, so that a driver's decision to keep those stops can be passed to the navigator. [#17032](https://github.com/mapbox/mapbox-sdk/pull/17032)
+
+
+#### Bug fixes and improvements
+- Fixed an issue where `RoadShieldContentManagerImpl` could crash if the coroutine was canceled while waiting for the road shields to return. [#17444](https://github.com/mapbox/mapbox-sdk/pull/17444)
+- Fixed an issue where planned route refresh would not resume after `requestImmediateRouteRefresh` was cancelled by a route change. The `ImmediateRouteRefreshCallback` now also receives a `Cancelled` result in this case. [#13897](https://github.com/mapbox/mapbox-sdk/pull/13897)
+- Better EV route notifications now detect when a planned charging stop becomes unnecessary after a route refresh and propose an alternative that drops the obsolete stop. [#14602](https://github.com/mapbox/mapbox-sdk/pull/14602)
+- Fixed co-located EV charging stations being hidden at high zoom levels. Both stations are now visible at zoom ≥ 17, with the higher-power charger rendered on top. [#15161](https://github.com/mapbox/mapbox-sdk/pull/15161)
+- Better EV route notifications now resolve a charging-station shortfall on the active route consistently whether it surfaces on a route refresh or when a new alternative arrives, and no longer suggest an alternative that has its own charging shortfall. [#15290](https://github.com/mapbox/mapbox-sdk/pull/15290)
+- Changed `equals` and `hashCode` of native route objects (routes and their nested models) to compare by content, fixing the previous implementation which had undefined and unstable behavior. Comparing a native route object with a plain Java route object of the same type now throws `IllegalArgumentException`, while comparing with `null` or an unrelated type returns `false`. [#15587](https://github.com/mapbox/mapbox-sdk/pull/15587)
+- Made `MapboxManeuverApi` class thread-safe. [#16009](https://github.com/mapbox/mapbox-sdk/pull/16009)
+- Fixed a small memory leak when `MapboxNavigationViewportDataSource::evaluate` was repeatedly called on a map with an unknown size. [#16036](https://github.com/mapbox/mapbox-sdk/pull/16036)
+- Fixed `MapboxRouteLineView` resetting the visibility of route line layers (e.g. traffic) on the next route redraw. [#16167](https://github.com/mapbox/mapbox-sdk/pull/16167)
+- Example: [#16167](https://github.com/mapbox/mapbox-sdk/pull/16167)
+- ```kotlin [#16167](https://github.com/mapbox/mapbox-sdk/pull/16167)
+- routeLineView.hideTraffic(style) // makes traffic hidden [#16167](https://github.com/mapbox/mapbox-sdk/pull/16167)
+- // on the next route draw, traffic visibility would be reset and incorrectly became visible [#16167](https://github.com/mapbox/mapbox-sdk/pull/16167)
+- routeLineApi.getRouteDrawData { routeLineView.renderRouteDrawData(style, it) } [#16167](https://github.com/mapbox/mapbox-sdk/pull/16167)
+- ``` [#16167](https://github.com/mapbox/mapbox-sdk/pull/16167)
+- Now in order to show traffic, an explicit call is required (`routeLineView.showTraffic(style)`) [#16167](https://github.com/mapbox/mapbox-sdk/pull/16167)
+- Started re-using last raw location update in case of online-offline switch in case no new raw locations are present. [#16189](https://github.com/mapbox/mapbox-sdk/pull/16189)
+- Requesting transition to following/overview in NavigationCamera before current transition finished, now will restart the transition with the new parameters [#16234](https://github.com/mapbox/mapbox-sdk/pull/16234)
+- Fixed an issue where route callouts could stay invisible until the map was moved if they were attached before the route line was rendered. For callouts rendered via `MapboxRouteLineView`, use the new `setCalloutAdapter(MapboxMap, ViewAnnotationManager, MapboxRouteCalloutAdapter)` overload to enable this fix; the overload without MapboxMap is now deprecated. [#16473](https://github.com/mapbox/mapbox-sdk/pull/16473)
+- Fixed an issue inside `NavigationScaleGestureHandler `where an inactive handler could still leave detectors stuck on  FOLLOWING threshold, now they are being reset to the non-following baseline again. [#16539](https://github.com/mapbox/mapbox-sdk/pull/16539)
+- Fixed `RouteOverviewViewportDataSource` redundantly re-decoding all route step geometries every time the camera switches to route overview mode. Previously, switching to overview on a long route could cause a GC pause of several hundred milliseconds due to excessive object allocation. [#16818](https://github.com/mapbox/mapbox-sdk/pull/16818)
+- Fixed the issue that caused banner instructions to be provided in the language of the previous route, if the new one has the same geometry. [#16965](https://github.com/mapbox/mapbox-sdk/pull/16965)
+- Fixed a better EV route not being offered when the alternative resolved a critical charge alert but arrived at a newly added charging stop slightly below the requested minimum. Alternatives are now compared by how much of the primary's charge shortfall they remove, instead of being rejected for carrying any charge violation at all. [#17070](https://github.com/mapbox/mapbox-sdk/pull/17070)
+- Better EV route decisions now mirror the route planner's own cost model: charge shortfalls the planner accepted on purpose are treated as clean, and an alternative that noticeably cuts the shortfall's time penalty is offered even when both routes are flagged. [#17210](https://github.com/mapbox/mapbox-sdk/pull/17210)
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.29.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.29.0))
+- Mapbox Navigation Native `v324.29.0`
+- Mapbox Core Common `v24.29.0`
+- Mapbox Java `v7.10.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.1))
+
 ## Navigation SDK Core Framework 3.29.0-rc.1 - 10 August, 2026
 #### Features
 - Extended PredictiveCacheMapsOptions with an optional tilesets property. [#14408](https://github.com/mapbox/mapbox-sdk/pull/14408)
