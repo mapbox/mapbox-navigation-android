@@ -20,7 +20,7 @@ import java.util.Date
  * users.
  * @param subType sub-type of the incident.
  * @param subTypeDescription sub-type-specific description.
- * @param alertcCodes alertC codes.
+ * @param alertcCodesArray alertC codes.
  * @param trafficCodes map of traffic code names to their values.
  *  For example, the map may contain info about jartic_regulation_code and jartic_cause_code.
  * @param countryCodeAlpha2 ISO 3166-1, 2 letter country code.
@@ -52,7 +52,7 @@ class IncidentInfo internal constructor(
     val description: String?,
     val subType: String?,
     val subTypeDescription: String?,
-    val alertcCodes: List<Int>?,
+    val alertcCodesArray: IntArray?,
     val trafficCodes: Map<String, Int>,
     val countryCodeAlpha2: String?,
     val countryCodeAlpha3: String?,
@@ -64,6 +64,17 @@ class IncidentInfo internal constructor(
     val multilingualAffectedRoadNames: Map<String, List<String>>,
     val length: Int?,
 ) {
+
+    /**
+     * @return alertC codes.
+     */
+    @Deprecated(
+        message = "Use alertcCodesArray instead - avoids per-element boxing. " +
+            "This getter rebuilds the list on every call.",
+        replaceWith = ReplaceWith("alertcCodesArray"),
+    )
+    val alertcCodes: List<Int>?
+        get() = alertcCodesArray?.toList()
 
     /**
      * Indicates whether some other object is "equal to" this one.
@@ -85,7 +96,7 @@ class IncidentInfo internal constructor(
         if (description != other.description) return false
         if (subType != other.subType) return false
         if (subTypeDescription != other.subTypeDescription) return false
-        if (alertcCodes != other.alertcCodes) return false
+        if (!alertcCodesArray.contentEquals(other.alertcCodesArray)) return false
         if (trafficCodes != other.trafficCodes) return false
         if (countryCodeAlpha2 != other.countryCodeAlpha2) return false
         if (countryCodeAlpha3 != other.countryCodeAlpha3) return false
@@ -115,7 +126,7 @@ class IncidentInfo internal constructor(
         result = 31 * result + description.hashCode()
         result = 31 * result + subType.hashCode()
         result = 31 * result + subTypeDescription.hashCode()
-        result = 31 * result + alertcCodes.hashCode()
+        result = 31 * result + alertcCodesArray.contentHashCode()
         result = 31 * result + trafficCodes.hashCode()
         result = 31 * result + countryCodeAlpha2.hashCode()
         result = 31 * result + countryCodeAlpha3.hashCode()
@@ -145,7 +156,7 @@ class IncidentInfo internal constructor(
             "description=$description, " +
             "subType=$subType, " +
             "subTypeDescription=$subTypeDescription, " +
-            "alertcCodes=$alertcCodes, " +
+            "alertcCodesArray=${alertcCodesArray?.contentToString()}, " +
             "trafficCodes=$trafficCodes, " +
             "countryCodeAlpha2=$countryCodeAlpha2, " +
             "countryCodeAlpha3=$countryCodeAlpha3, " +

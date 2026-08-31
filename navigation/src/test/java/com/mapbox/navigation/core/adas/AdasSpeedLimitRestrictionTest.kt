@@ -6,6 +6,7 @@ import com.mapbox.navigation.base.model.VehicleType
 import com.mapbox.navigation.base.model.WeatherCondition
 import com.mapbox.navigator.Weather
 import nl.jqno.equalsverifier.EqualsVerifier
+import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -30,7 +31,7 @@ class AdasSpeedLimitRestrictionTest {
                 com.mapbox.navigator.VehicleType.TRUCK,
                 com.mapbox.navigator.VehicleType.TRAILER,
             ),
-            listOf(0, 1),
+            byteArrayOf(0, 1),
         )
 
         val platform = AdasSpeedLimitRestriction.createFromNativeObject(native)
@@ -43,6 +44,6 @@ class AdasSpeedLimitRestrictionTest {
             listOf(VehicleType.TRUCK, VehicleType.TRAILER),
             platform.vehicleTypes,
         )
-        assertEquals(native.lanes, platform.lanes)
+        assertArrayEquals(native.lanes, platform.lanes)
     }
 }

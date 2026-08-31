@@ -290,11 +290,11 @@ package com.mapbox.navigation.core.adas {
   }
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasRoadItem {
-    method public java.util.List<java.lang.Byte> getLanes();
+    method public byte[] getLanes();
     method public Integer? getLocation();
     method public int getType();
     method public Integer? getValue();
-    property public final java.util.List<java.lang.Byte> lanes;
+    property public final byte[] lanes;
     property public final Integer? location;
     property public final int type;
     property public final Integer? value;
@@ -438,11 +438,11 @@ package com.mapbox.navigation.core.adas {
 
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class AdasSpeedLimitRestriction {
     method public String getDateTimeCondition();
-    method public java.util.List<java.lang.Byte> getLanes();
+    method public byte[] getLanes();
     method public java.util.List<java.lang.Integer> getVehicleTypes();
     method public java.util.List<java.lang.Integer> getWeatherConditionTypes();
     property public final String dateTimeCondition;
-    property public final java.util.List<java.lang.Byte> lanes;
+    property public final byte[] lanes;
     property public final java.util.List<java.lang.Integer> vehicleTypes;
     property public final java.util.List<java.lang.Integer> weatherConditionTypes;
   }

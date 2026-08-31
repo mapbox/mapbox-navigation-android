@@ -15,7 +15,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 class AdasRoadItem private constructor(
     @AdasRoadItemType.Type val type: Int,
     @AdasRoadItemLocation.Location val location: Int?,
-    val lanes: List<Byte>,
+    val lanes: ByteArray,
     val value: Int?,
 ) {
 
@@ -44,7 +44,7 @@ class AdasRoadItem private constructor(
         if (type != other.type) return false
         if (value != other.value) return false
         if (location != other.location) return false
-        if (lanes != other.lanes) return false
+        if (!lanes.contentEquals(other.lanes)) return false
 
         return true
     }
@@ -56,7 +56,7 @@ class AdasRoadItem private constructor(
         var result = type
         result = 31 * result + (value ?: 0)
         result = 31 * result + (location?.hashCode() ?: 0)
-        result = 31 * result + lanes.hashCode()
+        result = 31 * result + lanes.contentHashCode()
         return result
     }
 
@@ -67,7 +67,7 @@ class AdasRoadItem private constructor(
         return "AdasRoadItem(" +
             "type=$type, " +
             "location=$location, " +
-            "lanes=$lanes, " +
+            "lanes=${lanes.contentToString()}, " +
             "value=$value" +
             ")"
     }

@@ -16,11 +16,21 @@ package com.mapbox.navigation.base.trip.model.eh
  * @param length length of a path
  */
 class EHorizonGraphPath internal constructor(
-    val edges: List<Long>,
+    val edgesArray: LongArray,
     val percentAlongBegin: Double,
     val percentAlongEnd: Double,
     val length: Double,
 ) {
+    /**
+     * @return Ids of edges on a road graph
+     */
+    @Deprecated(
+        message = "Use edgesArray instead - avoids per-element boxing. " +
+            "This getter rebuilds the list on every call.",
+        replaceWith = ReplaceWith("edgesArray"),
+    )
+    val edges: List<Long>
+        get() = edgesArray.toList()
 
     /**
      * Regenerate whenever a change is made
@@ -31,7 +41,7 @@ class EHorizonGraphPath internal constructor(
 
         other as EHorizonGraphPath
 
-        if (edges != other.edges) return false
+        if (edgesArray.contentEquals(other.edgesArray).not()) return false
         if (percentAlongBegin != other.percentAlongBegin) return false
         if (percentAlongEnd != other.percentAlongEnd) return false
         if (length != other.length) return false
@@ -43,7 +53,7 @@ class EHorizonGraphPath internal constructor(
      * Regenerate whenever a change is made
      */
     override fun hashCode(): Int {
-        var result = edges.hashCode()
+        var result = edgesArray.contentHashCode()
         result = 31 * result + percentAlongBegin.hashCode()
         result = 31 * result + percentAlongEnd.hashCode()
         result = 31 * result + length.hashCode()
@@ -55,7 +65,7 @@ class EHorizonGraphPath internal constructor(
      */
     override fun toString(): String {
         return "EHorizonGraphPath(" +
-            "edges=$edges, " +
+            "edgesArray=${edgesArray.contentToString()}, " +
             "percentAlongBegin=$percentAlongBegin, " +
             "percentAlongEnd=$percentAlongEnd, " +
             "length=$length" +

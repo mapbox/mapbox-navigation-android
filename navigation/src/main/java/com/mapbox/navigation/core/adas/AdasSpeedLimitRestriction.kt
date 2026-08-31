@@ -19,7 +19,7 @@ class AdasSpeedLimitRestriction private constructor(
     val weatherConditionTypes: List<Int>,
     val dateTimeCondition: String,
     val vehicleTypes: List<Int>,
-    val lanes: List<Byte>,
+    val lanes: ByteArray,
 ) {
 
     /**
@@ -34,7 +34,7 @@ class AdasSpeedLimitRestriction private constructor(
         if (weatherConditionTypes != other.weatherConditionTypes) return false
         if (dateTimeCondition != other.dateTimeCondition) return false
         if (vehicleTypes != other.vehicleTypes) return false
-        return lanes == other.lanes
+        return lanes.contentEquals(other.lanes)
     }
 
     /**
@@ -44,7 +44,7 @@ class AdasSpeedLimitRestriction private constructor(
         var result = weatherConditionTypes.hashCode()
         result = 31 * result + dateTimeCondition.hashCode()
         result = 31 * result + vehicleTypes.hashCode()
-        result = 31 * result + lanes.hashCode()
+        result = 31 * result + lanes.contentHashCode()
         return result
     }
 
@@ -56,7 +56,7 @@ class AdasSpeedLimitRestriction private constructor(
             "weatherConditionTypes=$weatherConditionTypes, " +
             "dateTimeCondition='$dateTimeCondition', " +
             "vehicleTypes=$vehicleTypes, " +
-            "lanes=$lanes" +
+            "lanes=${lanes.contentToString()}" +
             ")"
     }
 

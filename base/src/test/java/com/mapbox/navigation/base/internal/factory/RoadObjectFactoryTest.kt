@@ -249,7 +249,7 @@ class RoadObjectFactoryTest {
                 INCIDENT_DESCRIPTION,
                 INCIDENT_SUB_TYPE,
                 INCIDENT_SUB_TYPE_DESCRIPTION,
-                INCIDENT_ALERT_CODES,
+                INCIDENT_ALERT_CODES.toIntArray(),
                 mapOf(
                     "jartic_regulation_code" to 600,
                     "jartic_cause_code" to 400,
@@ -506,7 +506,7 @@ class RoadObjectFactoryTest {
             INCIDENT_DESCRIPTION,
             INCIDENT_SUB_TYPE,
             INCIDENT_SUB_TYPE_DESCRIPTION,
-            INCIDENT_ALERT_CODES,
+            INCIDENT_ALERT_CODES.toIntArray(),
             hashMapOf(
                 "jartic_regulation_code" to 600,
                 "jartic_cause_code" to 400,

@@ -23,7 +23,7 @@ internal object AdasTypeFactory {
         com.mapbox.navigator.RoadItem(
             com.mapbox.navigator.RoadItemType.STEEP_DESCENT_SIGN,
             com.mapbox.navigator.RoadItemLocation.LEFT,
-            listOf(1, 2, 3),
+            byteArrayOf(1, 2, 3),
             4,
         ),
     )
@@ -36,7 +36,7 @@ internal object AdasTypeFactory {
             com.mapbox.navigator.VehicleType.TRUCK,
             com.mapbox.navigator.VehicleType.TRAILER,
         ),
-        listOf(0, 1),
+        byteArrayOf(0, 1),
     )
 
     val SPEED_LIMIT_RESTRICTION = AdasSpeedLimitRestriction.createFromNativeObject(
