@@ -1,0 +1,1 @@
+- Fixed a `ConcurrentModificationException` crash in road shield handling.
