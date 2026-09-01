@@ -23,7 +23,7 @@ import java.util.Date
  * only if you're building a [MapboxNavigation] instance without that helper.
  */
 class MockLocationUpdatesRule @JvmOverloads constructor(
-    private val useFakeDeviceLocationProvider: Boolean = false,
+    private val useFakeDeviceLocationProvider: Boolean = true,
 ) : ExternalResource() {
 
     private val appContext = (ApplicationProvider.getApplicationContext() as Context)
