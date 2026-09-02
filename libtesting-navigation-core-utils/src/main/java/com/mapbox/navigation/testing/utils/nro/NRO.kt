@@ -2,10 +2,18 @@ package com.mapbox.navigation.testing.utils.nro
 
 import com.mapbox.navigation.base.BuildConfig.NATIVE_ROUTE_OBJECT_DEFAULT
 import org.junit.Assume.assumeFalse
+import org.junit.Assume.assumeTrue
 
 private fun assumeNotNRO(reason: String) {
     assumeFalse(
         "test is disabled as NRO is enabled while: $reason",
+        NATIVE_ROUTE_OBJECT_DEFAULT,
+    )
+}
+
+private fun assumeNRO(reason: String) {
+    assumeTrue(
+        "test is disabled as NRO is disabled while: $reason",
         NATIVE_ROUTE_OBJECT_DEFAULT,
     )
 }
@@ -34,6 +42,13 @@ fun assumeNotNROBecauseEmptyRefreshTllBreaksExpirationTime() {
     assumeNotNRO(
         "NRO doesn't handle empty refresh ttl well" +
         ": https://mapbox.atlassian.net/browse/NAVAND-6952",
+    )
+}
+
+fun assumeNROBecauseExpiredDataCleanupIsNROSpecific() {
+    assumeNRO(
+        "with NRO the expired data cleanup can't update the routes," +
+            " so it must not publish a refresh result",
     )
 }
 

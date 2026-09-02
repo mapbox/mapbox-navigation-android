@@ -21,9 +21,12 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_REASON_REFRESH
+import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
+import com.mapbox.navigation.core.internal.extensions.flowOnFinalDestinationArrival
 import com.mapbox.navigation.core.routerefresh.RouteRefreshExtra
 import com.mapbox.navigation.core.routerefresh.RouteRefreshStateResult
 import com.mapbox.navigation.core.routerefresh.RouteRefreshStatesObserver
@@ -33,6 +36,7 @@ import com.mapbox.navigation.testing.ui.BaseTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.clearNavigationRoutesAndWaitForUpdate
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
+import com.mapbox.navigation.testing.ui.utils.coroutines.refreshStates
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
 import com.mapbox.navigation.testing.ui.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
@@ -50,16 +54,20 @@ import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.testing.utils.http.MockRoutingTileEndpointErrorRequestHandler
 import com.mapbox.navigation.testing.utils.idling.IdlingPolicyTimeoutRule
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
+import com.mapbox.navigation.testing.utils.nro.assumeNROBecauseExpiredDataCleanupIsNROSpecific
 import com.mapbox.navigation.testing.utils.nro.assumeNotNROBecauseOfClientSideUpdate
 import com.mapbox.navigation.testing.utils.readRawFileText
 import com.mapbox.navigation.testing.utils.routes.MockRoute
+import com.mapbox.navigation.testing.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.utils.routes.requestMockRoutes
+import com.mapbox.navigation.testing.utils.withoutInternet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -126,16 +134,9 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         )
 
         runOnMainSync {
-            val routeRefreshOptions = RouteRefreshOptions.Builder()
-                .intervalMillis(TimeUnit.SECONDS.toMillis(30))
-                .build()
-            RouteRefreshOptions::class.java.getDeclaredField("intervalMillis").apply {
-                isAccessible = true
-                set(routeRefreshOptions, 3_000L)
-            }
             mapboxNavigation = MapboxNavigationProvider.create(
                 NavigationOptions.Builder(activity)
-                    .routeRefreshOptions(routeRefreshOptions)
+                    .routeRefreshOptions(createShortIntervalRouteRefreshOptions())
                     .navigatorPredictionMillis(0L)
                     .build(),
             )
@@ -446,6 +447,81 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         assertEquals(
             listOf(true, true),
             mapboxNavigation.getNavigationRoutes().map { it.routeRefreshMetadata?.isUpToDate },
+        )
+    }
+
+    /**
+     * When route refresh requests keep failing for longer than three refresh intervals, the
+     * expired-data cleanup runs ([RouteRefresherResultProcessor]). With native route objects
+     * there is no java route model to strip congestion/incidents from, so the cleanup cannot
+     * change the routes and must not publish them as a refresh result. Then the next sequence
+     * happened:
+     * 1. Mark the unchanged routes as updated anyway, which published a bogus refresh.
+     * 2. Started a route set that native rejects,
+     * 3. And on the affected versions left route progress delivery gated off for the rest of the
+     * drive: banner, off-route, arrival and reroute callbacks all froze while the puck kept moving.
+     *
+     * The assertions only hold for native route objects (with the java route model the cleanup
+     * does strip the routes and publishes them), so the test runs in the `nroDefault=true`
+     * instrumentation variant only and is skipped otherwise.
+     *
+     * The test replays the reported scenario end to end: start active guidance, lose internet,
+     * let the refreshes fail until the expired-data cleanup gives up (CLEARED_EXPIRED), then
+     * drive to the destination while still offline and verify that:
+     * 1. no routes update with reason [ROUTES_UPDATE_REASON_REFRESH] is ever published;
+     * 2. route progress keeps being delivered and final destination arrival is triggered.
+     */
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    @Test
+    fun expiredDataCleanupWithNativeRouteObjectsDoesNotBlockArrival() = sdkTest(120_000) {
+        assumeNROBecauseExpiredDataCleanupIsNROSpecific()
+        val mockRoute = RoutesProvider.dc_very_short(context)
+        val origin = mockRoute.routeWaypoints.first()
+
+        val refreshStatesObserver = TestObserver()
+        mapboxNavigation.routeRefreshController
+            .registerRouteRefreshStateObserver(refreshStatesObserver)
+        val refreshRouteUpdates = mutableListOf<RoutesUpdatedResult>()
+        val refreshRouteUpdatesJob = launch {
+            mapboxNavigation.routesUpdates()
+                .filter { it.reason == ROUTES_UPDATE_REASON_REFRESH }
+                .collect { refreshRouteUpdates.add(it) }
+        }
+
+        // 1. Start active guidance at the route origin. There is no refresh handler
+        // for this route, so refresh attempts have nothing to succeed against.
+        stayOnPosition(origin.latitude(), origin.longitude(), bearing = 0f)
+        mapboxNavigation.startTripSession()
+        val routes = mapboxNavigation.requestMockRoutes(mockWebServerRule, mockRoute)
+        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
+        mapboxNavigation.routeProgressUpdates()
+            .first { it.currentState == RouteProgressState.TRACKING }
+
+        withoutInternet {
+            // 2-3. Refresh requests fail offline. Once they keep failing for longer than
+            // three refresh intervals, the expired-data cleanup runs; with NRO it can't
+            // update the routes and must give up without publishing a refresh.
+            mapboxNavigation.refreshStates()
+                .first { it.state == RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED }
+
+            // 4. Drive to the destination while still offline. Before the fix the bogus
+            // cleanup publish gated route progress delivery off, so arrival never fired
+            // and this wait timed out.
+            mockLocationReplayerRule.playRoute(routes.first().directionsRoute)
+            mapboxNavigation.flowOnFinalDestinationArrival().first()
+        }
+
+        refreshRouteUpdatesJob.cancel()
+        val refreshStates = refreshStatesObserver.getStatesSnapshot()
+        assertTrue(
+            "expected only failed refreshes, but got $refreshStates",
+            refreshStates.contains(RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED) &&
+                !refreshStates.contains(RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS),
+        )
+        assertEquals(
+            "expired-data cleanup must not be published as a refresh for native route objects",
+            emptyList<RoutesUpdatedResult>(),
+            refreshRouteUpdates,
         )
     }
 
@@ -1061,6 +1137,21 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             },
             times = 120,
         )
+    }
+
+    /**
+     * [RouteRefreshOptions.intervalMillis] doesn't allow values below 30 seconds,
+     * so the test interval is forced through reflection.
+     */
+    private fun createShortIntervalRouteRefreshOptions(): RouteRefreshOptions {
+        val routeRefreshOptions = RouteRefreshOptions.Builder()
+            .intervalMillis(TimeUnit.SECONDS.toMillis(30))
+            .build()
+        RouteRefreshOptions::class.java.getDeclaredField("intervalMillis").apply {
+            isAccessible = true
+            set(routeRefreshOptions, 3_000L)
+        }
+        return routeRefreshOptions
     }
 
     private suspend fun waitForRouteToSuccessfullyRefresh(): RouteProgress =
