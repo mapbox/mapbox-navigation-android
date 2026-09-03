@@ -122,38 +122,6 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
     }
 
     /**
-     * Test: Same as [arriveOnMapMatchedRoute] but with NRO (Native Route Object) forced on via
-     * [NavigationOptions]. Ensures map-matched routes work and do not crash with NRO; runs on every
-     * build regardless of BuildConfig NRO default.
-     */
-    @Test
-    fun withNroEnabledReturnsRoutesNavigationCompletes() = sdkTest {
-        withMapboxNavigation(
-            historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = "",
-        ) { navigation ->
-            val options = setupTestMapMatchingRoute()
-            val result = navigation.requestMapMatching(options).getSuccessfulOrThrowException()
-            assertEquals(1, result.matches.size)
-            navigation.setNavigationRoutes(listOf(result.matches.first().navigationRoute))
-            mockLocationReplayerRule.playRoute(
-                result.matches.first().navigationRoute.directionsRoute,
-            )
-            navigation.startTripSession()
-            navigation.routeProgressUpdates().first {
-                it.currentState == RouteProgressState.COMPLETE
-            }
-            assertEquals(
-                listOf(
-                    Point.fromLngLat(-117.172877, 32.712021),
-                    Point.fromLngLat(-117.173337, 32.71253),
-                ),
-                result.matches.first().navigationRoute.waypoints?.map { it.location() },
-            )
-        }
-    }
-
-    /**
      * Test: Navigation using OpenLR (Open Location Reference) encoded route
      *
      * Use Case: Validates that OpenLR format is supported for map matching requests.

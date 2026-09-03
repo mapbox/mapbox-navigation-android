@@ -1,0 +1,1 @@
+https://api.mapbox.com/matching/v5/mapbox/driving-traffic/11.359198%2C47.642065%3B11.351664%2C47.637488%3B11.352736%2C47.63392%3B11.351706%2C47.632409%3B11.353961%2C47.631334%3B11.355387%2C47.62796?geometries=polyline6&overview=full&steps=true&annotations=duration,distance,speed,congestion,maxspeed,speed_source&access_token=***&waypoints=0;5
