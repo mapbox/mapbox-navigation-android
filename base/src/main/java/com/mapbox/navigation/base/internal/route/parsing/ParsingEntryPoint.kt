@@ -12,6 +12,7 @@ import com.mapbox.navigation.base.internal.route.parsing.parser.directions.Direc
 import com.mapbox.navigation.base.internal.route.parsing.parser.directions.DirectionsRoutesParserNro
 import com.mapbox.navigation.base.internal.route.parsing.parser.directions.NnAndModelsParallelNavigationRoutesParser
 import com.mapbox.navigation.base.internal.route.parsing.parser.mapmatching.MapMatchedRoutesParserJava
+import com.mapbox.navigation.base.internal.route.parsing.parser.mapmatching.MapMatchedRoutesParserNro
 import com.mapbox.navigation.base.internal.route.parsing.parser.mapmatching.NnAndModelsParallelMapMatchedRoutesParser
 import com.mapbox.navigation.base.internal.route.parsing.parser.nn.JsonResponseOptimizedRouteInterfaceParser
 import com.mapbox.navigation.base.internal.utils.PrepareForParsingAction
@@ -49,15 +50,16 @@ fun setupParsing(
     prepareForParsingAction: PrepareForParsingAction = {},
     loggerFrontend: LoggerFrontend = LoggerProvider.getLoggerFrontend(),
 ): ParsingEntryPoint {
-    val modelParser = if (nativeRoute) {
-        DirectionsRoutesParserNro(loggerFrontend)
-    } else {
-        DirectionsRoutesParserJava(loggerFrontend)
-    }
     val parsingQueue = if (nativeRoute) {
         createImmediateNoOptimizationsParsingQueue()
     } else {
         createOptimizedRoutesParsingQueue(prepareForParsingAction)
+    }
+
+    val modelParser = if (nativeRoute) {
+        DirectionsRoutesParserNro(loggerFrontend)
+    } else {
+        DirectionsRoutesParserJava(loggerFrontend)
     }
     val navigationRoutesParser = NnAndModelsParallelNavigationRoutesParser(
         routeParsingTracking,
@@ -69,11 +71,16 @@ fun setupParsing(
         loggerFrontend,
     )
 
+    val mapMatchedRoutesModelParser = if (nativeRoute) {
+        MapMatchedRoutesParserNro()
+    } else {
+        MapMatchedRoutesParserJava()
+    }
     val mapMatchedRoutesParser = NnAndModelsParallelMapMatchedRoutesParser(
         routeParsingTracking,
         parsingDispatcher,
         time,
-        MapMatchedRoutesParserJava(),
+        mapMatchedRoutesModelParser,
         nnParser,
         parsingQueue,
         loggerFrontend,
