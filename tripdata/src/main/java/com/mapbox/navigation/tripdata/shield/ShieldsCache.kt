@@ -113,11 +113,12 @@ internal abstract class ResourceCache<Argument, Value>(cacheSize: Int) {
      * Notifies all awaiting callbacks that the result might be available.
      */
     private fun invalidate() {
-        val iterator = awaitingCallbacks.iterator()
-        while (iterator.hasNext()) {
-            val remove = iterator.next().invoke()
+        // Make a snapshot to avoid ConcurrentModificationException.
+        val awaitingCallbacksSnapshot = awaitingCallbacks.toList()
+        awaitingCallbacksSnapshot.forEach { callback ->
+            val remove = callback.invoke()
             if (remove) {
-                iterator.remove()
+                awaitingCallbacks.remove(callback)
             }
         }
     }
