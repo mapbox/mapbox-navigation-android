@@ -6,8 +6,8 @@ import com.mapbox.bindgen.DataRef
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 
 internal class MapMatchedRouteOperations(
-    val javaRouteOperations: JavaRouteOperations,
-) : RouteOperations by javaRouteOperations {
+    val routeOperations: RouteOperations,
+) : RouteOperations by routeOperations {
     override fun refresh(
         refreshResponse: DataRef,
         legIndex: Int,

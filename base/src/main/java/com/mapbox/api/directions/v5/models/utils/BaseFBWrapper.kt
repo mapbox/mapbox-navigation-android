@@ -65,7 +65,7 @@ internal interface BaseFBWrapper {
         }
     }
 
-    private fun mapReference(value: FlexBuffers.Reference): Any? {
+    fun mapReference(value: FlexBuffers.Reference): Any? {
         return when {
             // Important: don't change order,
             // Some checks are too broad, i.e. map is also a vector, float is also an int, etc.

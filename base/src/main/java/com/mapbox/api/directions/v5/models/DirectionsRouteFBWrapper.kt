@@ -16,6 +16,8 @@ internal class DirectionsRouteFBWrapper private constructor(
     private val routeOptions: RouteOptions?,
     val fbContext: FBDirectionsRouteContext,
     val context: DirectionsRouteContext,
+    val isMapMatching: Boolean,
+    val mapMatchingOverriddenWaypoints: List<DirectionsWaypoint?>?,
 ) : DirectionsRoute(), BaseFBWrapper {
 
     internal val stepsCountWithGeometry: Int by lazy {
@@ -73,6 +75,7 @@ internal class DirectionsRouteFBWrapper private constructor(
     }
 
     override fun waypoints(): List<DirectionsWaypoint?>? {
+        mapMatchingOverriddenWaypoints?.let { return it }
         return FlatbuffersListWrapper.get(fb.waypointsLength) {
             DirectionsWaypointFBWrapper.wrap(fb.waypoints(it))
         }
@@ -97,11 +100,16 @@ internal class DirectionsRouteFBWrapper private constructor(
 
     override fun unrecognized(): Map<String, SerializableJsonElement?>? {
         val nroUnrecognizedProperties = super<BaseFBWrapper>.unrecognized()?.let {
-            // TODO: could be removed once change bellow is adopted
-            // https://github.com/mapbox/mapbox-sdk/pull/10279
-            if (it.contains("requestUuid")) {
+            if (it.contains("requestUuid") || it.contains(KEY_CONFIDENCE)) {
                 it.toMutableMap().apply {
+                    // TODO: could be removed once change below is adapted
+                    // https://github.com/mapbox/mapbox-sdk/pull/10279
                     remove("requestUuid")
+
+                    // FIXME(NAVSDKCPP-1440): confidence should be available as a typed field
+                    if (isMapMatching) {
+                        remove(KEY_CONFIDENCE)
+                    }
                 }
             } else {
                 it
@@ -117,6 +125,13 @@ internal class DirectionsRouteFBWrapper private constructor(
                 )
         } else {
             nroUnrecognizedProperties
+        }
+    }
+
+    // FIXME(NAVSDKCPP-1440): confidence should be available as a typed field
+    fun mapMatchingConfidence(): Double? {
+        return unrecognizeFlexBufferMap?.let {
+            (mapReference(it.get(KEY_CONFIDENCE)) as? Number)?.toDouble()
         }
     }
 
@@ -152,9 +167,19 @@ internal class DirectionsRouteFBWrapper private constructor(
     }
 
     internal companion object {
+
+        private const val KEY_CONFIDENCE = "confidence"
+
+        /**
+         * @param externalWaypoints resolves the waypoints of routes which don't carry them in
+         *   their own flatbuffer table, given the enclosing response context. Only Map Matching
+         *   matchings need this; Directions routes leave it at the default.
+         */
         internal fun wrap(
             routeOptions: RouteOptions?,
             bindgenContext: DirectionsRouteContext,
+            isMapMatching: Boolean = false,
+            externalWaypoints: (FBDirectionsRouteContext) -> List<DirectionsWaypoint?>? = { null },
         ): DirectionsRouteFBWrapper? {
             val routeContext = FBDirectionsRouteContext.getRootAsDirectionsRouteContext(
                 bindgenContext.getData().buffer,
@@ -162,7 +187,14 @@ internal class DirectionsRouteFBWrapper private constructor(
             val fb = routeContext.route
             return when {
                 fb.isNull -> null
-                else -> DirectionsRouteFBWrapper(fb, routeOptions, routeContext, bindgenContext)
+                else -> DirectionsRouteFBWrapper(
+                    fb,
+                    routeOptions,
+                    routeContext,
+                    bindgenContext,
+                    isMapMatching,
+                    externalWaypoints(routeContext),
+                )
             }
         }
     }
