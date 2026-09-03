@@ -68,6 +68,8 @@ import org.junit.Test
 import java.io.InputStreamReader
 import java.net.URL
 import java.util.concurrent.CountDownLatch
+import kotlin.collections.drop
+import kotlin.collections.map
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -670,6 +672,14 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
 
                 val result = mapboxNavigation.switchToAlternativeAsync(differentRoutes[0])
                 assertTrue(result.isError)
+                assertEquals(
+                    "the pending switch must be dismissed once the routes it was " +
+                        "computed against are obsolete",
+                    "Can't switch to alternative ${differentRoutes[0].id} as it isn't " +
+                        "present among currently tracked alternatives: " +
+                        "${routes.drop(1).map { it.id }}",
+                    result.error?.message,
+                )
             }
         }
     }
@@ -692,6 +702,58 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
             }
         }
     }
+
+    @Test
+    fun switch_to_alternative_of_a_route_that_was_replaced_while_the_switch_was_pending() =
+        sdkTest {
+            withMapboxNavigation(
+                historyRecorderRule = mapboxHistoryTestRule,
+            ) { mapboxNavigation ->
+                // GIVEN
+                setupMockRequestHandlers()
+                val initialRoutes = mapboxNavigation.requestNavigationRoutes(startCoordinates)
+                val replacementRoute = mapboxNavigation
+                    .requestNavigationRoutes(continueCoordinates)
+                val alternativeToSwitchTo = initialRoutes[1]
+
+                val (setRoutesResult, switchResult) = stayOnPosition(startCoordinates.first(), 0f) {
+                    mapboxNavigation.startTripSession()
+                    mapboxNavigation.setNavigationRoutesAsync(initialRoutes)
+                    mapboxNavigation.routeProgressUpdates().first()
+
+                    // WHEN
+                    // New route is set
+                    val setRoutes = async {
+                        mapboxNavigation.setNavigationRoutesAsync(replacementRoute).also {
+                            mapboxNavigation.routeProgressUpdates().first()
+                        }
+                    }
+                    // Alternative switch for initial route is called in parallel
+                    val switch = async {
+                        mapboxNavigation.switchToAlternativeAsync(alternativeToSwitchTo)
+                    }
+                    setRoutes.await() to switch.await()
+                }
+
+                // THEN new route should complete successfully
+                assertIs<RoutesSetSuccess>(setRoutesResult.value)
+
+                // switch alternative for obsolete routes should be dismissed by gate conditions
+                assertEquals(
+                    "the pending switch must be dismissed once the routes it was " +
+                        "computed against are obsolete",
+                    "No route progress available",
+                    switchResult.error?.message,
+                )
+                assertEquals(
+                    "the routes set while the switch was pending must stay active; " +
+                        "the dismissed switch must not reorder them back to the " +
+                        "replaced routes",
+                    replacementRoute.first().id,
+                    mapboxNavigation.getNavigationRoutes().first().id,
+                )
+            }
+        }
 
     @Test
     fun late_online_route() = sdkTest {
