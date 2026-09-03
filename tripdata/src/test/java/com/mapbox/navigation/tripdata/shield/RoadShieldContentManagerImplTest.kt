@@ -217,7 +217,7 @@ class RoadShieldContentManagerImplTest {
 
                 // We grab the callback before cancellation removes it, and invoke it manually
                 // afterwards.
-                staleCallback = contentManager.awaitingCallbacksSnapshot().single()
+                staleCallback = contentManager.awaitingCallbacks.single()
 
                 job.cancel()
                 job.join()
@@ -226,13 +226,32 @@ class RoadShieldContentManagerImplTest {
                 // the caller's job - finish and leave its result behind in resultMap
                 advanceTimeBy(1000L)
             }
-            assertTrue(contentManager.resultMapSnapshot().isNotEmpty())
+            assertTrue(contentManager.resultMap.isNotEmpty())
 
             val handled = staleCallback()
 
             assertTrue(handled)
-            assertTrue(contentManager.resultMapSnapshot().isEmpty())
+            assertTrue(contentManager.resultMap.isEmpty())
         }
+
+    @Test
+    fun `invalidate does not crash when a callback reentrantly mutates awaitingCallbacks`() {
+        val contentManager = createContentManager()
+
+        val reentrantCallback: () -> Boolean = { false }
+        val callbackThatReentrantlyRegistersAnother: () -> Boolean = {
+            // Simulates a resumed continuation immediately triggering a new request, which
+            // registers another callback on the same list invalidate() is currently iterating -
+            // this is what previously caused a ConcurrentModificationException.
+            contentManager.awaitingCallbacks.add(reentrantCallback)
+            true
+        }
+        contentManager.awaitingCallbacks.add(callbackThatReentrantlyRegistersAnother)
+
+        contentManager.invalidate()
+
+        assertEquals(listOf(reentrantCallback), contentManager.awaitingCallbacks)
+    }
 
     @Test
     fun `request waits for all results to be available (success and failure), async`() =
@@ -543,18 +562,4 @@ class RoadShieldContentManagerImplTest {
     private fun createContentManager(
         shieldResultCache: ShieldResultCache = mockk(),
     ): RoadShieldContentManagerImpl = RoadShieldContentManagerImpl(shieldResultCache)
-
-    @Suppress("UNCHECKED_CAST")
-    private fun RoadShieldContentManagerImpl.awaitingCallbacksSnapshot(): List<() -> Boolean> {
-        val field = RoadShieldContentManagerImpl::class.java.getDeclaredField("awaitingCallbacks")
-        field.isAccessible = true
-        return (field.get(this) as MutableList<() -> Boolean>).toList()
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    private fun RoadShieldContentManagerImpl.resultMapSnapshot(): Map<Any, Any> {
-        val field = RoadShieldContentManagerImpl::class.java.getDeclaredField("resultMap")
-        field.isAccessible = true
-        return (field.get(this) as Map<Any, Any>).toMap()
-    }
 }
