@@ -2,23 +2,29 @@ package com.mapbox.navigation.core
 
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.extensions.internalAlternativeRouteIndices
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.core.directions.session.DirectionsSessionRoutes
 import com.mapbox.navigation.core.routealternatives.SuggestionType
 import com.mapbox.navigation.core.routealternatives.UpdateRouteSuggestion
 import com.mapbox.navigation.core.routealternatives.UpdateRoutesSuggestionObserver
+import com.mapbox.navigation.core.trip.session.NativeSetRouteValue
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createNativeWaypoint
 import com.mapbox.navigation.testing.factories.createNavigationRoute
 import com.mapbox.navigator.WaypointType
 import io.mockk.CapturingSlot
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -38,6 +44,10 @@ internal class MapboxNavigationSwitchToOnlineAlternativeTest : MapboxNavigationB
     private val origin = Point.fromLngLat(1.0, 1.0)
     private val stopA = Point.fromLngLat(2.0, 2.0)
     private val destination = Point.fromLngLat(3.0, 3.0)
+    private val routeA1 = mockk<NavigationRoute>(relaxed = true) { every { id } returns "A1" }
+    private val routeA2 = mockk<NavigationRoute>(relaxed = true) { every { id } returns "A2" }
+    private val routeB1 = mockk<NavigationRoute>(relaxed = true) { every { id } returns "B1" }
+    private var currentRoutes: List<NavigationRoute> = emptyList()
 
     private fun capturedUpdateRoutesListener(): CapturingSlot<UpdateRoutesSuggestionObserver> {
         val slot = slot<UpdateRoutesSuggestionObserver>()
@@ -153,5 +163,61 @@ internal class MapboxNavigationSwitchToOnlineAlternativeTest : MapboxNavigationB
             coVerify(exactly = 1) {
                 tripSession.setRoutes(updatedAlternatives, SetRoutes.Alternatives(0))
             }
+        }
+
+    @Test
+    fun `stale reorder from switchToAlternativeRoute is dismissed if a new route is already active`() =
+        coroutineRule.runBlockingTest {
+            // GIVEN
+            createMapboxNavigation()
+
+            // Guidance is already active on route A: primary A1, alternative A2.
+            currentRoutes = listOf(routeA1, routeA2)
+            every { directionsSession.routes } answers { currentRoutes }
+            every {
+                directionsSession.setNavigationRoutesFinished(any())
+            } answers {
+                currentRoutes = firstArg<DirectionsSessionRoutes>().acceptedRoutes
+            }
+            every { tripSession.getRouteProgress() } returns mockk(relaxed = true) {
+                every {
+                    internalAlternativeRouteIndices()
+                } returns mapOf("A2" to mockk { every { legIndex } returns 0 })
+            }
+
+            // setNavigationRoutes(B1) starts and suspends returning result
+            val bRouteApplied = CompletableDeferred<Unit>()
+            coEvery {
+                tripSession.setRoutes(listOf(routeB1), SetRoutes.NewRoutes(0))
+            } coAnswers {
+                bRouteApplied.await()
+                NativeSetRouteValue(routes = listOf(routeB1), nativeAlternatives = emptyList())
+            }
+            coEvery {
+                tripSession.setRoutes(listOf(routeA2, routeA1), SetRoutes.Reorder(0))
+            } returns NativeSetRouteValue(
+                routes = listOf(routeA2, routeA1),
+                nativeAlternatives = emptyList(),
+            )
+
+            mapboxNavigation.setNavigationRoutes(listOf(routeB1))
+
+            // WHEN
+            // While B1 is still in flight, a switch to the A2 alternative is requested.
+            mapboxNavigation.switchToAlternativeRoute(routeA2)
+
+            // B1 finishes and is committed correctly
+            bRouteApplied.complete(Unit)
+            coroutineRule.testDispatcher.scheduler.advanceUntilIdle()
+
+            // THEN
+            // Expect to see B1 as current route
+            assertEquals(
+                "setNavigationRoutes(B1) should remain the latest applied routes; a stale " +
+                    "switchToAlternativeRoute(A2) scheduled before it must not silently " +
+                    "overwrite it",
+                listOf(routeB1),
+                currentRoutes,
+            )
         }
 }
