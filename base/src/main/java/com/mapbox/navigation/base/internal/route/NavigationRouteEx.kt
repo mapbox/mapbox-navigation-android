@@ -13,7 +13,6 @@ import com.mapbox.api.matching.v5.models.MapMatchingResponse
 import com.mapbox.bindgen.DataRef
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.CongestionNumericOverride
-import com.mapbox.navigation.base.route.MapMatchingMatch
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.ResponseOriginAPI
 import com.mapbox.navigation.base.route.RouteRefreshMetadata
@@ -72,17 +71,6 @@ fun NavigationRoute.internalRefreshRoute(
 val NavigationRoute.routeOptions get() = this.routeOptions
 
 val NavigationRoute.overriddenTraffic get() = this.overriddenTraffic
-
-/**
- * Creates a [MapMatchingMatch] from a [NavigationRoute] with optional confidence.
- * Used when converting from native map matching flow where confidence may not be available.
- */
-@OptIn(com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI::class)
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-fun mapMatchingMatchFrom(
-    navigationRoute: NavigationRoute,
-    confidence: Double = 1.0,
-): MapMatchingMatch = MapMatchingMatch(navigationRoute, confidence)
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 fun NavigationRoute.toDirectionsRefreshResponseInternal() = this.toDirectionsRefreshResponse()

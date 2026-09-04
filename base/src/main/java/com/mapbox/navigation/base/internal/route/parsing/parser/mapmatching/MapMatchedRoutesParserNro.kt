@@ -91,7 +91,6 @@ internal class MapMatchedRoutesParserNro : MapMatchedRoutesParser {
             val route = DirectionsRouteFBWrapper.wrap(
                 routeOptions = routeOptions,
                 bindgenContext = this,
-                isMapMatching = true,
                 // FIXME(NAVSDKCPP-1438)
                 // A matching carries no `waypoints` of its own; its waypoints are the response-level
                 // tracepoints which point back at it. Supplying them here keeps both
