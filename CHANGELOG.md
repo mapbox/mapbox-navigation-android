@@ -1,18 +1,3 @@
-## Navigation SDK Core Framework 3.29.2 - 04 September, 2026
-#### Features
-
-
-#### Bug fixes and improvements
-- Fixed a race condition in MapboxNavigation between switching to an alternative route and setting a new route. The race could cause a stale route ID to be applied, leaving the route line visible on the map even after the (new) route had ended. [#18487](https://github.com/mapbox/mapbox-sdk/pull/18487)
-
-
-### Mapbox dependencies
-This release depends on, and has been tested with, the following Mapbox dependencies:
-- Mapbox Maps SDK `v11.29.2` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.29.2))
-- Mapbox Navigation Native `v324.29.2`
-- Mapbox Core Common `v24.29.2`
-- Mapbox Java `v7.10.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.1))
-
 ## Navigation SDK Core Framework 3.29.1 - 27 August, 2026
 #### Features
 
