@@ -6,9 +6,7 @@ import com.adevinta.android.barista.rule.cleardata.ClearFilesRule
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.DirectionsCriteria.EXCLUDE_MOTORWAY
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.bindgen.Value
 import com.mapbox.common.TileDataDomain
-import com.mapbox.common.TileStore
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
@@ -17,8 +15,6 @@ import com.mapbox.navigation.base.internal.route.routeOptions
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.HistoryRecorderOptions
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
-import com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -29,7 +25,6 @@ import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE
 import com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_REASON_REFRESH
 import com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
-import com.mapbox.navigation.core.internal.PredictiveCache
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.core.reroute.RerouteOptionsAdapter
 import com.mapbox.navigation.core.reroute.RerouteState
@@ -38,7 +33,6 @@ import com.mapbox.navigation.core.reroute.internal.NativeRerouteControllerState
 import com.mapbox.navigation.core.reroute.internal.nativeRerouteControllerStateFlow
 import com.mapbox.navigation.core.routerefresh.RouteRefreshExtra
 import com.mapbox.navigation.instrumentation_tests.R
-import com.mapbox.navigation.instrumentation_tests.utils.PredictiveCacheMonitor
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
@@ -70,6 +64,7 @@ import com.mapbox.navigation.testing.utils.assertions.assertSuccessfulRouteRepla
 import com.mapbox.navigation.testing.utils.assertions.interruptedReplanRerouteStateTransitionAssertion
 import com.mapbox.navigation.testing.utils.assertions.recordRerouteStates
 import com.mapbox.navigation.testing.utils.assertions.recordRerouteStatesV2
+import com.mapbox.navigation.testing.utils.createTileStoreWithFastRetryBackoff
 import com.mapbox.navigation.testing.utils.getTestRerouteCustomConfig
 import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRefreshHandler
@@ -78,7 +73,6 @@ import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.testing.utils.location.moveAlongTheCurrentRouteUntilLocation
 import com.mapbox.navigation.testing.utils.location.moveAlongTheRouteUntilTracking
 import com.mapbox.navigation.testing.utils.location.stayOnPosition
-import com.mapbox.navigation.testing.utils.nro.assumeNotNROBecauseOfRerouteIssueWhileOffline
 import com.mapbox.navigation.testing.utils.offline.Tileset
 import com.mapbox.navigation.testing.utils.offline.unpackTiles
 import com.mapbox.navigation.testing.utils.readRawFileText
@@ -245,7 +239,6 @@ class CoreRerouteTest(
      * This test could become flaky in case NN manage to download enough navigation tiles
      * so that switching to offline pack won't be needed during navigation.
      */
-    @Ignore("Broken by the 3.26.0-rc.1 update , need to be fixed")
     @Test
     fun reroute_triggered_after_navigator_recreation_with_fallback() = sdkTest(120_000) {
         val mockRoute = RoutesProvider.near_munich_with_waypoints(context)
@@ -253,10 +246,9 @@ class CoreRerouteTest(
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
         val tilesVersion = context.unpackTiles(Tileset.NearMunich)[TileDataDomain.NAVIGATION]!!
         withMapboxNavigation(
-            useRealTiles = true,
             historyRecorderRule = mapboxHistoryTestRule,
             customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
-            tileStore = TileStore.create(),
+            tileStore = createTileStoreWithFastRetryBackoff(),
         ) { navigation ->
             val routes = stayOnPosition(originLocation, bearing = 0.0f) {
                 navigation.startTripSession()
@@ -298,11 +290,9 @@ class CoreRerouteTest(
      * The scenario reproduces a state where, after a short offline window with a deviation-
      * driven reroute, the SDK ends up refreshes
      */
-    @Ignore("uncomment after stabilization https://github.com/mapbox/navigation/pull/14371")
     @Test
     fun route_refresh_resumes_after_offline_reroute_and_back_online() = sdkTest(120_000) {
-        assumeNotNROBecauseOfRerouteIssueWhileOffline()
-        val mockRoute = RoutesProvider.near_munich_with_waypoints(context)
+        val mockRoute = RoutesProvider.near_munich_tile_boundary_crossing(context)
         val originLocation = mockRoute.routeWaypoints.first()
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
 
@@ -311,35 +301,24 @@ class CoreRerouteTest(
             .build()
             .also { it.setTestRouteRefreshInterval(5_000L) }
 
-        val tileStore = TileStore.create()
+        // The offline deviation reroute below needs navigation tiles for the area to be
+        // present onboard.Unpacking a pre-bundled tileset and pin the navigator to its version:
+        // no tile downloads are needed at all,
+        // and no FallbackToOffline navigator recreation happens because the pinned version
+        // is available from the start.
+        val tilesVersion = context.unpackTiles(Tileset.NearMunich)[TileDataDomain.NAVIGATION]!!
+        val tileStore = createTileStoreWithFastRetryBackoff()
         withMapboxNavigation(
-            useRealTiles = true,
             historyRecorderRule = mapboxHistoryTestRule,
             customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
             tileStore = tileStore,
+            tilesVersion = tilesVersion,
             routeRefreshOptions = refreshOptions,
         ) { navigation ->
             val refreshStates = mutableListOf<String>()
             navigation.routeRefreshController.registerRouteRefreshStateObserver { result ->
                 refreshStates.add(result.state)
             }
-
-            // Need tiles to have successful offline reroute
-            PredictiveCache(navigation).apply {
-                createNavigationController(
-                    PredictiveCacheNavigationOptions.Builder()
-                        .predictiveCacheLocationOptions(
-                            PredictiveCacheLocationOptions.Builder()
-                                .routeBufferRadiusInMeters(300)
-                                .build(),
-                        )
-                        .build(),
-                )
-            }
-            val predictiveCacheMonitor = PredictiveCacheMonitor(
-                tileStore = tileStore,
-                descriptors = listOf(navigation.tilesetDescriptorFactory.getLatest()),
-            )
 
             // 1. Online primary → TRACKING.
             val routes = stayOnPosition(originLocation, bearing = 0.0f) {
@@ -366,20 +345,19 @@ class CoreRerouteTest(
                 endReplay = false,
             )
 
-            val rerouteLocation =
-                RoutesProvider.near_munich_with_waypoints_for_reroute(context)
-                    .waypoints()!!
-                    .first()
-                    .location()
+            val mockDeviationRoute =
+                RoutesProvider.near_munich_tile_boundary_crossing_replan(context)
+            val rerouteLocation = mockDeviationRoute.routeWaypoints.first()
 
-            val mockBackOnlineRoute = RoutesProvider.near_munich_with_waypoints_back_online(context)
+            val mockBackOnlineRoute =
+                RoutesProvider.near_munich_tile_boundary_crossing_back_online(context)
             mockWebServerRule.requestHandlers.addAll(mockBackOnlineRoute.mockRequestHandlers)
 
             val refreshHandler = MockDirectionsRefreshHandler(
                 testUuid = mockBackOnlineRoute.routeResponse.uuid()!!,
                 readRawFileText(
                     context,
-                    R.raw.route_response_near_munich_with_waypoints_back_online_refresh,
+                    R.raw.route_response_near_munich_tile_boundary_crossing_back_online_refresh,
                 ),
                 acceptedGeometryIndex = 0,
             )
@@ -392,15 +370,9 @@ class CoreRerouteTest(
             navigation.moveAlongTheCurrentRouteUntilLocation(rerouteLocation)
             mockLocationReplayerRule.stopAndClearEvents()
 
-            runCatching {
-                predictiveCacheMonitor.awaitCoversRoute(
-                    route = routes.first(),
-                    tag = "initial-online",
-                )
-            }
             withoutInternet {
                 mockLocationReplayerRule.playRoute(
-                    RoutesProvider.near_munich_with_waypoints_for_reroute(context),
+                    mockDeviationRoute.routeResponse.routes()[0],
                 )
                 navigation.offRouteUpdates().first { it }
                 navigation.routesUpdates().first {
@@ -409,11 +381,12 @@ class CoreRerouteTest(
                 }
             }
 
-            // 3. Park the puck at its current position so the back-online response stays
-            //    geometrically relevant
+            // 3. Park the puck at the back-online mock route's origin — a fixed point on the
+            //    deviation path right around where the offline reroute lands. Pinning to a
+            //    fixed point (instead of the current enhanced location) keeps the back-online
+            //    request coordinates and the refresh geometry index deterministic across runs.
             mockLocationReplayerRule.stopAndClearEvents()
-            val parkLocation = navigation.flowLocationMatcherResult().first()
-                .enhancedLocation.toPoint()
+            val parkLocation = mockBackOnlineRoute.routeWaypoints.first()
 
             // 4. Wait for an ONLINE-origin primary delivered by BackOnlineImpl (via
             //    onLateOnlineRoutes → primary swap) OR by any subsequent reroute. Both are
@@ -480,23 +453,13 @@ class CoreRerouteTest(
         val originLocation = mockRoute.routeWaypoints.first()
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
         val tilesVersion = context.unpackTiles(Tileset.NearMunich)[TileDataDomain.NAVIGATION]!!
-        // On CI, there is a chance that tiles won't be downloaded due to a couple of unlucky
-        // transient network errors while re-downloading the online tiles after `withoutInternet`
-        // Since retry is delayed exponentially, waiting for next retry can eat this test's
-        // whole timeout before a retry succeeds, even though the SDK is
-        // still retrying correctly in the background. Shrinking the backoff timer allows to
-        // do more retry attempts land inside the test timeout window.
-        val testTileStore = TileStore.create().apply {
-            setOption("backoff-timer-scale", Value(0.1))
-            setOption("backoff-timer-base", Value(1.5))
-        }
         withMapboxNavigation(
             useRealTiles = true,
             historyRecorderRule = mapboxHistoryTestRule,
             customConfig = getTestRerouteCustomConfig(
                 runOptions.nativeReroute,
             ),
-            tileStore = testTileStore,
+            tileStore = createTileStoreWithFastRetryBackoff(),
         ) { navigation ->
 
             // 1. Request the initial online route from the mock web server and start tracking
