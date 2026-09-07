@@ -222,8 +222,8 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
             }
             newAlternatives.forEach {
                 assertNoDiffs(
-                    it.directionsRoute.toBuilder().routeOptions(null).build(),
-                    mockedAlternativesResponse.routes()[it.routeIndex].toBuilder()
+                    actual = it.directionsRoute.toBuilder().routeOptions(null).build(),
+                    expected = mockedAlternativesResponse.routes()[it.routeIndex].toBuilder()
                         .legs(
                             mockedAlternativesResponse.routes()[it.routeIndex].legs()
                                 ?.map { originalLeg ->
@@ -234,8 +234,8 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
                                 },
                         )
                         .build(),
-                    emptyList(),
-                    true,
+                    ignoreGetters = emptyList(),
+                    emptyAndNullCollectionsAreTheSame = true,
                 )
             }
         }

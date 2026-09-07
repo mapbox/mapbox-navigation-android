@@ -64,6 +64,7 @@ private fun parseDirectionsResponseNRO(
             routeOptions,
             responseToParse.routerOrigin,
             responseToParse.responseOriginAPI,
+            responseToParse.routeIndexOverride,
         )
     }
     return DirectionsResponseParsingResult(
@@ -78,6 +79,7 @@ internal fun DirectionsRouteContext.toRouteModelsParsingResult(
     routeOptions: RouteOptions,
     @RouterOrigin routerOrigin: String,
     @ResponseOriginAPI responseOriginApi: String,
+    routeIndexOverride: Int? = null,
 ): DirectionsRouteModelParsingResult {
     val route = DirectionsRouteFBWrapper.wrap(
         routeOptions = routeOptions,
@@ -90,7 +92,7 @@ internal fun DirectionsRouteContext.toRouteModelsParsingResult(
         ),
         requestUUID = route.fbContext.uuid,
         routeOptions = routeOptions,
-        routeIndex = route.fbContext.route.routeIndex.toInt(),
+        routeIndex = routeIndexOverride ?: route.fbContext.route.routeIndex.toInt(),
         routerOrigin = routerOrigin,
         responseOriginAPI = responseOriginApi,
     )

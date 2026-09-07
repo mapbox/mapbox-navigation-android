@@ -1,5 +1,6 @@
 package com.mapbox.navigation.testing.factories
 
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.bindgen.DataRef
 import com.mapbox.directions.route.DirectionsRouteContext
@@ -249,7 +250,15 @@ fun createRouteInterface(
     override fun getLastRefreshTimestamp(): Date? = lastRefreshTimestamp
 
     override fun getRouteGeometry() = routeGeometry
-    override fun toJson() = TODO("Not yet implemented")
+
+    override fun toJson(): DataRef {
+        val response = DirectionsResponse.fromJson(responseJson)
+        return response.toBuilder()
+            .routes(listOf(response.routes()[routeIndex]))
+            .build()
+            .toJson()
+            .toDataRef()
+    }
 }
 
 fun String.toDataRef(): DataRef {

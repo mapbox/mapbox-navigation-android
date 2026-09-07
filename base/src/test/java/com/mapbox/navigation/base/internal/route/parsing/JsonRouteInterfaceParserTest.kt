@@ -4,7 +4,7 @@ import com.mapbox.navigation.base.internal.route.parsing.models.directions.Direc
 import com.mapbox.navigation.base.internal.route.parsing.models.directions.DirectionsRoutesParser
 import com.mapbox.navigation.base.internal.route.parsing.models.nn.ContinuousAlternativesParsingSuccessfulResult
 import com.mapbox.navigation.base.internal.route.parsing.parser.directions.DirectionsRoutesParserJava
-import com.mapbox.navigation.base.internal.route.parsing.parser.nn.JsonResponseOptimizedRouteInterfaceParser
+import com.mapbox.navigation.base.internal.route.parsing.parser.nn.JsonRouteInterfaceParser
 import com.mapbox.navigation.base.internal.utils.AlternativesParsingResult
 import com.mapbox.navigation.base.internal.utils.createImmediateNoOptimizationsParsingQueue
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -28,7 +28,7 @@ import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class JsonResponseOptimizedParserTest {
+class JsonRouteInterfaceParserTest {
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()
@@ -41,7 +41,7 @@ class JsonResponseOptimizedParserTest {
     }
 
     @Test
-    fun `routes from different responses `() = runTest {
+    fun `routes from different responses are each parsed`() = runTest {
         val response1 = createDirectionsResponse(uuid = "uuid1")
         val response1Json = response1.toJson()
         val response2 = createDirectionsResponse(uuid = "uuid2")
@@ -90,7 +90,7 @@ class JsonResponseOptimizedParserTest {
     }
 
     @Test
-    fun `mixed scenario - some routes from lookup, some from different responses`() = runTest {
+    fun `mixed scenario - some routes from lookup, rest parsed individually`() = runTest {
         val response1 = createDirectionsResponse(uuid = "uuid1")
         val response1Json = response1.toJson()
         val response2 = createDirectionsResponse(
@@ -177,8 +177,11 @@ class JsonResponseOptimizedParserTest {
             parsedRoutes.map { it.id }.sorted(),
         )
 
+        // uuid1#0 and uuid2#1 come from the lookup and are never parsed; the remaining
+        // three routes (including both routes from response "uuid3") are each parsed
+        // individually since there's no dedup across routes sharing the same response.
         assertEquals(
-            listOf("uuid2", "uuid3").sorted(),
+            listOf("uuid2", "uuid3", "uuid3").sorted(),
             parsingStrategy.parsedResponses.sorted(),
         )
 
@@ -230,7 +233,7 @@ class JsonResponseOptimizedParserTest {
     private fun createRouteInterfaceParser(
         modelsParser: DirectionsRoutesParser,
         routeLookup: (String) -> NavigationRoute? = { null },
-    ): JsonResponseOptimizedRouteInterfaceParser = JsonResponseOptimizedRouteInterfaceParser(
+    ): JsonRouteInterfaceParser = JsonRouteInterfaceParser(
         existingParsedRoutesLookup = routeLookup,
         parsingDispatcher = coroutineRule.testDispatcher,
         time = mockTime,

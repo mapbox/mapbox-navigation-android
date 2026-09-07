@@ -38,6 +38,9 @@ class ParsingTest {
 
     @Test
     fun `preparation callback is called when parsing long CA`() = runTest {
+        // Each route is parsed from its own single-route JSON now, so neither of this fixture's
+        // two routes alone crosses the size threshold; together they do, since sizing sums
+        // across the batch being parsed.
         var preparationCallbackInvoked = 0
         val parser = createParsing(
             prepareForParsingAction = {
@@ -47,13 +50,20 @@ class ParsingTest {
         val longResponseJson = FileUtils.loadJsonFixture("long_route_7k.json")
         val longResponse = DirectionsResponse.fromJson(longResponseJson)
 
-        val routeInterface = createRouteInterface(
+        val routeInterface0 = createRouteInterface(
+            responseUUID = longResponse.uuid()!!,
+            routeIndex = 0,
+            responseJson = longResponseJson,
+        )
+        val routeInterface1 = createRouteInterface(
             responseUUID = longResponse.uuid()!!,
             routeIndex = 1,
             responseJson = longResponseJson,
         )
 
-        val result = parser.parserContinuousAlternatives(listOf(routeInterface))
+        val result = parser.parserContinuousAlternatives(
+            listOf(routeInterface0, routeInterface1),
+        )
 
         assertEquals(1, preparationCallbackInvoked)
         val parsedResult = assertIs<
@@ -65,7 +75,10 @@ class ParsingTest {
         )
         assertNull(parsedResult.value.exceptionOrNull())
         assertEquals(
-            listOf("Hx9dSjQIDnHkThyjoziZBodVBvaSGynKcAZEd2Ha5O05s3pKsvYkAQ==#1"),
+            listOf(
+                "Hx9dSjQIDnHkThyjoziZBodVBvaSGynKcAZEd2Ha5O05s3pKsvYkAQ==#0",
+                "Hx9dSjQIDnHkThyjoziZBodVBvaSGynKcAZEd2Ha5O05s3pKsvYkAQ==#1",
+            ),
             parsedResult.value.getOrThrow().routes.map { it.id },
         )
     }

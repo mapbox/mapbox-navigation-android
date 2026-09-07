@@ -13,7 +13,7 @@ data class ContinuousAlternativesParsingSuccessfulResult(
 /**
  * Entry point for parsing multiple route interfaces into navigation routes.
  * This API is supposed to be used for continuous alternatives parsing.
- * @see [com.mapbox.navigation.base.internal.route.parsing.parser.nn.JsonResponseOptimizedRouteInterfaceParser]
+ * @see [com.mapbox.navigation.base.internal.route.parsing.parser.nn.JsonRouteInterfaceParser]
  */
 interface RouteInterfacesParser {
     suspend fun parserContinuousAlternatives(

@@ -118,7 +118,7 @@ data class RouteResponseInfo(
         fun fromResponse(response: ByteBuffer) =
             RouteResponseInfo(sizeBytes = response.capacity())
 
-        fun fromResponses(responses: List<ByteBuffer>) =
-            RouteResponseInfo(sizeBytes = responses.maxOfOrNull { it.capacity() } ?: 0)
+        fun fromRoutes(routes: List<ByteBuffer>) =
+            RouteResponseInfo(sizeBytes = routes.sumOf { it.capacity() })
     }
 }
