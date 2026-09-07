@@ -36,6 +36,7 @@ import com.mapbox.navigator.UpcomingRouteAlertUpdate
 import com.mapbox.navigator.VoiceInstruction
 import com.mapbox.navigator.Waypoint
 import com.mapbox.navigator.WaypointType
+import io.mockk.mockk
 import java.nio.ByteBuffer
 import java.time.Instant
 import java.util.Date
@@ -230,7 +231,7 @@ fun createRouteInterface(
     }
 
     override fun getDirectionsRouteContext(): DirectionsRouteContext {
-        TODO("Not yet implemented")
+        return mockk(relaxed = true)
     }
 
     override fun getRequestUri() = requestURI

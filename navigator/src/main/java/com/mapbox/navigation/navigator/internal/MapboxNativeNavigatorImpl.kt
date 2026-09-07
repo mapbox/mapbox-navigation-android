@@ -9,6 +9,7 @@ import com.mapbox.common.TileStore
 import com.mapbox.common.TilesetDescriptor
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.performance.PerformanceTracker
+import com.mapbox.navigation.base.internal.route.directionsRouteContext
 import com.mapbox.navigation.base.internal.route.nativeRoute
 import com.mapbox.navigation.base.internal.route.toDirectionsRefreshResponseInternal
 import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
@@ -20,6 +21,7 @@ import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logW
+import com.mapbox.navigation.utils.internal.toDataRef
 import com.mapbox.navigator.ADASISv2MessageCallback
 import com.mapbox.navigator.AdasisConfig
 import com.mapbox.navigator.AdasisFacadeHandleInterface
@@ -327,12 +329,12 @@ class MapboxNativeNavigatorImpl(
         route: NavigationRoute,
         refreshResponse: DataRef?,
         geometryIndex: Int?,
-    ): Expected<String, List<RouteAlternative>> {
+    ): Expected<String, RefreshRouteResult> {
         if (warnIfShutdown("refreshRoute")) {
             return ExpectedFactory.createError("Navigator is shut down")
         }
         val callback = {
-                continuation: Continuation<Expected<String, List<RouteAlternative>>>,
+                continuation: Continuation<Expected<String, RefreshRouteResult>>,
                 expected: Expected<String, RefreshRouteResult>,
             ->
             expected.fold(
@@ -354,12 +356,12 @@ class MapboxNativeNavigatorImpl(
                                 .ifBlank { "[no alternatives]" },
                         LOG_CATEGORY,
                     )
-                    continuation.resume(
-                        ExpectedFactory.createValue(refreshRouteResult.alternatives),
-                    )
+                    continuation.resume(ExpectedFactory.createValue(refreshRouteResult))
                 },
             )
         }
+
+        val refreshedDirectionsRouteContext = route.directionsRouteContext()
 
         return if (refreshResponse != null && geometryIndex != null) {
             logD(
@@ -370,6 +372,7 @@ class MapboxNativeNavigatorImpl(
             suspendCancellableCoroutine { continuation ->
                 navigator.refreshRoute(
                     refreshResponse,
+                    refreshedDirectionsRouteContext,
                     route.nativeRoute().routeId,
                     geometryIndex,
                 ) { callback(continuation, it) }
@@ -392,7 +395,8 @@ class MapboxNativeNavigatorImpl(
                 )
 
                 navigator.refreshRoute(
-                    refreshResponseJson,
+                    refreshResponseJson.toDataRef(),
+                    refreshedDirectionsRouteContext,
                     route.nativeRoute().routeId,
                     0,
                 ) { callback(continuation, it) }

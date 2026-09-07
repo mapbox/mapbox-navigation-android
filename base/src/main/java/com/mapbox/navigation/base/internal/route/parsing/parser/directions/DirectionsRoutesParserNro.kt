@@ -96,7 +96,7 @@ internal fun DirectionsRouteContext.toRouteModelsParsingResult(
     )
     return DirectionsRouteModelParsingResult(
         data,
-        operations = NroRouteOperations(this, data),
+        operations = NroRouteOperations(data),
     )
 }
 

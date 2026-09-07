@@ -114,5 +114,6 @@ private fun RouteInterface.toNavigationRoute(
         // TODO: NAVAND-6774, move overriden traffic to native route
         overriddenTraffic = null,
         operations = parsedRoutes.routesParsingResult[routeIndex].operations,
+        directionsRouteContext = directionsRouteContext,
     )
 }

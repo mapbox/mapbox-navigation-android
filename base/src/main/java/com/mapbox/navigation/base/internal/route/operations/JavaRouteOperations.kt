@@ -26,6 +26,7 @@ import com.mapbox.api.directionsrefresh.v1.models.DirectionsRefreshResponse
 import com.mapbox.api.directionsrefresh.v1.models.DirectionsRouteRefresh
 import com.mapbox.api.directionsrefresh.v1.models.RouteLegRefresh
 import com.mapbox.bindgen.DataRef
+import com.mapbox.directions.route.DirectionsRouteContext
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.PointAsCoordinatesTypeAdapter
@@ -69,6 +70,7 @@ internal class JavaRouteOperations(
         legIndex: Int,
         legGeometryIndex: Int,
         responseTimeElapsedSeconds: Long,
+        refreshedDirectionsRouteContext: DirectionsRouteContext,
     ): Result<RouteUpdate> =
         parseDirectionsRouteRefresh(refreshResponse)
             .onSuccess {
@@ -324,6 +326,7 @@ internal class JavaRouteOperations(
                             state.responseOriginAPI,
                         ),
                     ),
+                    directionsRouteContext = nativeRoute.directionsRouteContext,
                 )
             }
         }

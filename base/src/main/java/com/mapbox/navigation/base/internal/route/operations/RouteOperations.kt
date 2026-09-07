@@ -5,6 +5,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directionsrefresh.v1.models.DirectionsRefreshResponse
 import com.mapbox.bindgen.DataRef
+import com.mapbox.directions.route.DirectionsRouteContext
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.CongestionNumericOverride
 import com.mapbox.navigation.base.internal.route.NavigationRouteData
@@ -26,6 +27,7 @@ internal interface RouteOperations {
         legIndex: Int,
         legGeometryIndex: Int,
         responseTimeElapsedSeconds: Long,
+        refreshedDirectionsRouteContext: DirectionsRouteContext,
     ): Result<RouteUpdate>
 
     @OptIn(ExperimentalMapboxNavigationAPI::class)

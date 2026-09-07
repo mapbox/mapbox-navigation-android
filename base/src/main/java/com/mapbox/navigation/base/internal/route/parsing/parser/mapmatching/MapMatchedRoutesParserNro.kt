@@ -114,7 +114,7 @@ internal class MapMatchedRoutesParserNro : MapMatchedRoutesParser {
                     directionsData = directionsData,
                     mapMatchingConfidence = route.mapMatchingConfidence(),
                 ),
-                operations = MapMatchedRouteOperations(NroRouteOperations(this, directionsData)),
+                operations = MapMatchedRouteOperations(NroRouteOperations(directionsData)),
             )
         }
 

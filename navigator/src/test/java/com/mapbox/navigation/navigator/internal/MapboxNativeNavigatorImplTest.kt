@@ -1,7 +1,14 @@
 package com.mapbox.navigation.navigator.internal
 
 import com.mapbox.annotation.MapboxExperimental
+import com.mapbox.bindgen.DataRef
+import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.directions.route.DirectionsRouteContext
+import com.mapbox.navigation.base.internal.route.directionsRouteContext
+import com.mapbox.navigation.base.internal.route.toDirectionsRefreshResponseInternal
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
+import com.mapbox.navigation.testing.toDataRef
 import com.mapbox.navigation.utils.internal.LoggerFrontend
 import com.mapbox.navigator.AdasisFacadeHandleInterface
 import com.mapbox.navigator.CacheHandle
@@ -11,6 +18,8 @@ import com.mapbox.navigator.InputsServiceHandle
 import com.mapbox.navigator.NavigatorHandle
 import com.mapbox.navigator.NavigatorInterface
 import com.mapbox.navigator.NavigatorObserver
+import com.mapbox.navigator.RefreshRouteCallback
+import com.mapbox.navigator.RefreshRouteResult
 import com.mapbox.navigator.RoadObjectMatcherConfig
 import com.mapbox.navigator.RoadObjectsStoreInterface
 import com.mapbox.navigator.TilesConfig
@@ -20,10 +29,14 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import io.mockk.unmockkObject
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import io.mockk.verifyOrder
+import kotlinx.coroutines.runBlocking
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -86,6 +99,7 @@ class MapboxNativeNavigatorImplTest {
     @After
     fun tearDown() {
         unmockkObject(NavigatorLoader)
+        unmockkStatic("com.mapbox.navigation.base.internal.route.NavigationRouteEx")
     }
 
     @Test
@@ -296,6 +310,73 @@ class MapboxNativeNavigatorImplTest {
         assertNull(result)
         verify(exactly = 1) { loggingFrontend.logW(any(), LOG_CATEGORY) }
     }
+
+    @Test
+    fun `refreshRoute with a refreshed NRO instance passes it to native along with the response`() =
+        runBlocking {
+            val refreshRouteResult = mockk<RefreshRouteResult>(relaxed = true)
+            val directionsRouteContext = mockk<DirectionsRouteContext>()
+            val refreshResponse = """{"code":"Ok"}""".encodeToByteArray().toDataRef()
+            every {
+                mockNavigator.refreshRoute(
+                    any<DataRef>(),
+                    any<DirectionsRouteContext>(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            } answers {
+                lastArg<RefreshRouteCallback>().run(
+                    ExpectedFactory.createValue(refreshRouteResult),
+                )
+            }
+            val route = mockk<NavigationRoute>(relaxed = true)
+            every { route.directionsRouteContext() } returns directionsRouteContext
+
+            val result = navigatorImpl.refreshRoute(
+                route = route,
+                refreshResponse = refreshResponse,
+                geometryIndex = 123,
+            )
+
+            assertEquals(refreshRouteResult, result.value)
+            verify(exactly = 1) {
+                mockNavigator.refreshRoute(
+                    refreshResponse,
+                    directionsRouteContext,
+                    any(),
+                    123,
+                    any(),
+                )
+            }
+        }
+
+    @Test
+    fun `refreshRoute with a refreshed NRO instance and no response fails without native call`() =
+        runBlocking {
+            // without a response to forward, one is generated from the route itself
+            val route = mockk<NavigationRoute>(relaxed = true)
+            mockkStatic("com.mapbox.navigation.base.internal.route.NavigationRouteEx")
+            every { route.toDirectionsRefreshResponseInternal() } returns
+                Result.failure(IllegalStateException("cannot generate a refresh response"))
+
+            val result = navigatorImpl.refreshRoute(
+                route = route,
+                refreshResponse = null,
+                geometryIndex = 123,
+            )
+
+            assertTrue(result.isError)
+            verify(exactly = 0) {
+                mockNavigator.refreshRoute(
+                    any<DataRef>(),
+                    any<DirectionsRouteContext>(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            }
+        }
 
     private companion object {
         const val LOG_CATEGORY = "MapboxNativeNavigatorImpl"

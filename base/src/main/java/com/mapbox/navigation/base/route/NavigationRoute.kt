@@ -14,11 +14,13 @@ import com.mapbox.api.matching.v5.models.MapMatchingResponse
 import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.directions.route.DirectionsRouteContext
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.CongestionNumericOverride
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.toUpcomingRoadObjects
 import com.mapbox.navigation.base.internal.performance.PerformanceTracker
+import com.mapbox.navigation.base.internal.route.DirectionsRouteContextRefresher
 import com.mapbox.navigation.base.internal.route.NavigationRouteData
 import com.mapbox.navigation.base.internal.route.Waypoint
 import com.mapbox.navigation.base.internal.route.operations.JavaRouteOperations
@@ -66,6 +68,14 @@ class NavigationRoute internal constructor(
         ?.map { leg -> leg.closures().orEmpty() }
         .orEmpty(),
     internal val overriddenTraffic: CongestionNumericOverride? = null,
+    /**
+     * The native route object this route is backed by.
+     *
+     * [RouteInterface] is mutable, its native peer can be replaced underneath us, while the
+     * context is an immutable snapshot, so it is stored separately instead of being read from
+     * [nativeRoute] on demand.
+     */
+    internal val directionsRouteContext: DirectionsRouteContext,
 ) {
 
     /**
@@ -127,19 +137,38 @@ class NavigationRoute internal constructor(
         responseTimeElapsedSeconds: Long,
         experimentalProperties: Map<String, String>? = null,
     ): Result<NavigationRoute> {
-        return operations.refresh(
-            refreshResponse,
-            legIndex,
-            legGeometryIndex,
-            responseTimeElapsedSeconds,
-        ).map {
-            refresh(it, experimentalProperties)
+        // A refreshed instance  of Nro is unconditionally presented in NavigationRoute
+        val refreshedContextExpected = PerformanceTracker.trackPerformanceSync(
+            "DirectionsRouteContext#refreshRoute",
+        ) {
+            DirectionsRouteContextRefresher.default.refresh(
+                directionsRouteContext,
+                refreshResponse,
+                legIndex,
+                legGeometryIndex,
+            )
         }
+
+        return refreshedContextExpected.fold(
+            { error ->
+                Result.failure(Throwable("error refreshing native route context: $error"))
+            },
+            { refreshedContext ->
+                operations.refresh(
+                    refreshResponse,
+                    legIndex,
+                    legGeometryIndex,
+                    responseTimeElapsedSeconds,
+                    refreshedContext,
+                ).map { refresh(it, refreshedContext, experimentalProperties) }
+            },
+        )
     }
 
     internal fun clientSideUpdate(
         directionsRouteBlock: DirectionsRoute.() -> DirectionsRoute,
         waypointsBlock: List<DirectionsWaypoint>?.() -> List<DirectionsWaypoint>?,
+        directionsRouteContext: DirectionsRouteContext,
         overriddenTraffic: CongestionNumericOverride?,
         routeRefreshMetadata: RouteRefreshMetadata?,
     ): Result<NavigationRoute> {
@@ -148,18 +177,20 @@ class NavigationRoute internal constructor(
             waypointsBlock,
             overriddenTraffic,
             routeRefreshMetadata,
-        ).map { refresh(it) }
+        ).map { refresh(it, directionsRouteContext) }
     }
 
     internal fun toDirectionsRefreshResponse() = operations.toDirectionsRefreshResponse()
 
     private fun refresh(
         route: RouteUpdate,
+        refreshedDirectionsRouteContext: DirectionsRouteContext,
         experimentalProperties: Map<String, String>? = null,
     ): NavigationRoute = this.copy(
         directionsRoute = route.routeModelsParsingResult.data.route,
         waypoints = route.routeModelsParsingResult.data.routesWaypoint,
         operations = route.routeModelsParsingResult.operations,
+        directionsRouteContext = refreshedDirectionsRouteContext,
         routeRefreshMetadata = if (experimentalProperties != null) {
             RouteRefreshMetadata(
                 isUpToDate = route.routeRefreshMetadata?.isUpToDate ?: true,
@@ -220,6 +251,7 @@ class NavigationRoute internal constructor(
                     responseOriginAPI = directionsData.responseOriginAPI,
                     overriddenTraffic = null,
                     operations = parsingResult.routesParsingResult[index].operations,
+                    directionsRouteContext = routeInterface.directionsRouteContext,
                 )
                 MapMatchingMatch(route, matchedData.mapMatchingConfidence ?: 1.0)
             }
@@ -241,7 +273,8 @@ class NavigationRoute internal constructor(
                     value
                 },
             ).mapIndexed { index, routeInterface ->
-                val data = directionsResponseParsingResult.routesParsingResult[index].data
+                val parsingResult = directionsResponseParsingResult.routesParsingResult[index]
+                val data = parsingResult.data
                 NavigationRoute(
                     directionsRoute = data.route,
                     waypoints = data.routesWaypoint,
@@ -255,8 +288,8 @@ class NavigationRoute internal constructor(
                     },
                     responseOriginAPI = responseOriginAPI,
                     overriddenTraffic = null,
-                    operations = directionsResponseParsingResult
-                        .routesParsingResult[index].operations,
+                    operations = parsingResult.operations,
+                    directionsRouteContext = routeInterface.directionsRouteContext,
                 )
             }
         }
@@ -345,6 +378,7 @@ class NavigationRoute internal constructor(
         routeRefreshMetadata: RouteRefreshMetadata? = this.routeRefreshMetadata,
         operations: RouteOperations = this.operations,
         responseOriginAPI: String = this.responseOriginAPI,
+        directionsRouteContext: DirectionsRouteContext = this.directionsRouteContext,
     ): NavigationRoute = NavigationRoute(
         directionsRoute = directionsRoute,
         waypoints = waypoints,
@@ -356,6 +390,7 @@ class NavigationRoute internal constructor(
         responseOriginAPI = responseOriginAPI,
         routeRefreshMetadata = routeRefreshMetadata,
         operations = operations,
+        directionsRouteContext = directionsRouteContext,
     )
 
     /** Exposed for [copyWithResponseOriginAPI] in NavigationRouteEx only. */

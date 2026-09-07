@@ -28,6 +28,7 @@ import com.mapbox.navigation.core.internal.router.util.TestRouteFixtures
 import com.mapbox.navigation.core.mapmatching.MapMatchingAPICallback
 import com.mapbox.navigation.core.mapmatching.MapMatchingOptions
 import com.mapbox.navigation.navigator.internal.mapToRoutingMode
+import com.mapbox.navigation.testing.FakeDirectionsRouteContextRefresherRule
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.NativeRouteParserRule
@@ -87,6 +88,9 @@ class RouterWrapperTests {
 
     @get:Rule
     val routeParserRule = NativeRouteParserRule()
+
+    @get:Rule
+    val fakeDirectionsRouteContextRefresherRule = FakeDirectionsRouteContextRefresherRule()
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()

@@ -28,6 +28,7 @@ import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.utils.Constants
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.testing.FakeDirectionsRouteContextRefresherRule
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.NativeRouteParserRule
@@ -53,6 +54,9 @@ class RouteProgressExTest {
 
     @get:Rule
     val loggingFrontendTestRule = LoggingFrontendTestRule()
+
+    @get:Rule
+    val fakeDirectionsRouteContextRefresherRule = FakeDirectionsRouteContextRefresherRule()
 
     @Test
     fun `update Navigation route`() {
@@ -1014,6 +1018,9 @@ class RouteProgressExTest {
 
         @get:Rule
         val loggerRule = LoggingFrontendTestRule()
+
+        @get:Rule
+        val fakeDirectionsRouteContextRefresherRule = FakeDirectionsRouteContextRefresherRule()
 
         companion object {
 

@@ -9,7 +9,9 @@ import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.location.Location
 import com.mapbox.common.location.LocationServiceFactory
+import com.mapbox.directions.route.DirectionsRouteContext
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory
+import com.mapbox.navigation.base.internal.route.directionsRouteContext
 import com.mapbox.navigation.base.internal.route.refreshNativePeer
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.LegWaypoint
@@ -48,14 +50,18 @@ import com.mapbox.navigation.navigator.internal.utils.getCurrentLegDestination
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.assertIs
+import com.mapbox.navigation.testing.factories.createNavigationRoute
 import com.mapbox.navigation.testing.factories.createNavigationStatus
+import com.mapbox.navigation.testing.factories.createRouteInterface
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigationStatusOrigin
 import com.mapbox.navigator.NavigatorObserver
+import com.mapbox.navigator.RefreshRouteResult
 import com.mapbox.navigator.RouteAlternative
+import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouteState
 import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.SetRoutesResult
@@ -192,7 +198,7 @@ class MapboxTripSessionTest {
         coEvery { navigator.setAlternativeRoutes(any()) } returns listOf()
         coEvery {
             navigator.refreshRoute(any(), any(), any())
-        } returns ExpectedFactory.createValue(listOf())
+        } returns ExpectedFactory.createValue(mockRefreshRouteResult())
         every { navigationStatus.getTripStatusFrom(any()) } returns tripStatus
 
         every { navigationStatus.location } returns fixLocation
@@ -791,12 +797,17 @@ class MapboxTripSessionTest {
     @Test
     fun `only primary route was updated during refresh`() =
         coroutineRule.runBlockingTest {
+            val primaryRouteNroContext0 = mockk<DirectionsRouteContext>()
+            val primaryRouteNroContext1 = mockk<DirectionsRouteContext>()
+
             val refreshedRoutes = listOf(
                 mockk<NavigationRoute>(relaxed = true) {
                     every { id } returns "id0"
+                    every { directionsRouteContext() } returns primaryRouteNroContext0
                 },
                 mockk<NavigationRoute>(relaxed = true) {
                     every { id } returns "id1"
+                    every { directionsRouteContext() } returns primaryRouteNroContext1
                 },
             )
             tripSession.start(true)
@@ -833,6 +844,30 @@ class MapboxTripSessionTest {
             coVerify(exactly = 1) {
                 navigator.refreshRoute(any(), any(), any())
             }
+        }
+
+    @Test
+    fun `refresh route propagates the refreshed directionsRouteContext into the route`() =
+        coroutineRule.runBlockingTest {
+            val route = createNavigationRoute()
+            val refreshedContext = mockk<DirectionsRouteContext>(relaxed = true)
+            val refreshedNativePeer = object : RouteInterface by createRouteInterface() {
+                override fun getDirectionsRouteContext() = refreshedContext
+            }
+            coEvery {
+                navigator.refreshRoute(route, any(), any())
+            } returns ExpectedFactory.createValue(
+                mockRefreshRouteResult(nativeRoute = refreshedNativePeer),
+            )
+
+            tripSession.start(true)
+            val result = tripSession.setRoutes(
+                listOf(route),
+                mockSuccessfulSetRouteRefresh(listOf(route)),
+            )
+
+            val refreshedRoute = (result as NativeSetRouteValue).routes.first()
+            assertEquals(refreshedContext, refreshedRoute.directionsRouteContext())
         }
 
     @Test
@@ -1007,15 +1042,22 @@ class MapboxTripSessionTest {
                     every { id } returns "id1"
                 },
             )
+            val refreshedNativePeers = refreshedRoutes.map { mockk<RouteInterface>(relaxed = true) }
             coEvery {
                 navigator.refreshRoute(refreshedRoutes[0], any(), any())
-            } returns ExpectedFactory.createValue(mockAlternativesMetadata2)
+            } returns ExpectedFactory.createValue(
+                mockRefreshRouteResult(mockAlternativesMetadata2, refreshedNativePeers[0]),
+            )
             coEvery {
                 navigator.refreshRoute(refreshedRoutes[1], any(), any())
-            } returns ExpectedFactory.createValue(mockAlternativesMetadata1)
+            } returns ExpectedFactory.createValue(
+                mockRefreshRouteResult(mockAlternativesMetadata1, refreshedNativePeers[1]),
+            )
 
             refreshedRoutes.forEachIndexed { i, route ->
-                every { route.refreshNativePeer() } returns refreshedRoutes[i]
+                every {
+                    route.refreshNativePeer(refreshedNativePeers[i])
+                } returns refreshedRoutes[i]
             }
 
             tripSession.start(true)
@@ -1033,6 +1075,60 @@ class MapboxTripSessionTest {
                 assertTrue(route === refreshedRoutes[i])
             }
             assertEquals(tripSession.primaryRoute, refreshedRoutes.first())
+        }
+
+    @Test
+    fun `route set result - only refreshed routes adopt a new native peer`() =
+        coroutineRule.runBlockingTest {
+            val primaryRoute = mockk<NavigationRoute>(relaxed = true) {
+                every { id } returns "id0"
+            }
+            val alternativeRoute = mockk<NavigationRoute>(relaxed = true) {
+                every { id } returns "id1"
+            }
+            val refreshedAlternativeNativePeer = mockk<RouteInterface>()
+            val refreshedAlternativeRoute = mockk<NavigationRoute>(relaxed = true) {
+                every { id } returns "id1"
+            }
+            coEvery {
+                navigator.refreshRoute(alternativeRoute, any(), any())
+            } returns ExpectedFactory.createValue(
+                mockRefreshRouteResult(nativeRoute = refreshedAlternativeNativePeer),
+            )
+            every {
+                alternativeRoute.refreshNativePeer(refreshedAlternativeNativePeer)
+            } returns refreshedAlternativeRoute
+
+            tripSession.start(true)
+            val result = tripSession.setRoutes(
+                listOf(primaryRoute, alternativeRoute),
+                SetRoutes.RefreshRoutes.RefreshControllerRefresh(
+                    RoutesRefresherResult(
+                        // the primary route was not updated, so it's not refreshed in the navigator
+                        // and must keep its current native peer
+                        RouteRefresherResult(
+                            primaryRoute,
+                            RouteProgressData(1, 2, 3),
+                            RouteRefresherStatus.Failure,
+                            wasRouteUpdated = false,
+                        ),
+                        listOf(
+                            RouteRefresherResult(
+                                alternativeRoute,
+                                RouteProgressData(2, 2, 3),
+                                Success(mockk()),
+                            ),
+                        ),
+                    ),
+                ),
+            )
+
+            coVerify(exactly = 0) { navigator.refreshRoute(primaryRoute, any(), any()) }
+            assertEquals(
+                listOf(primaryRoute, refreshedAlternativeRoute),
+                (result as NativeSetRouteValue).routes,
+            )
+            assertEquals(primaryRoute, tripSession.primaryRoute)
         }
 
     @Test
@@ -1073,21 +1169,28 @@ class MapboxTripSessionTest {
                     every { id } returns "id1"
                 },
             )
+            val refreshedNativePeers = refreshedRoutes.map { mockk<RouteInterface>(relaxed = true) }
             coEvery {
                 navigator.refreshRoute(refreshedRoutes[0], any(), any())
             } coAnswers {
                 delay(300)
-                ExpectedFactory.createValue(mockAlternativesMetadata2)
+                ExpectedFactory.createValue(
+                    mockRefreshRouteResult(mockAlternativesMetadata2, refreshedNativePeers[0]),
+                )
             }
             coEvery {
                 navigator.refreshRoute(refreshedRoutes[1], any(), any())
             } coAnswers {
                 delay(500)
-                ExpectedFactory.createValue(mockAlternativesMetadata1)
+                ExpectedFactory.createValue(
+                    mockRefreshRouteResult(mockAlternativesMetadata1, refreshedNativePeers[1]),
+                )
             }
 
             refreshedRoutes.forEachIndexed { i, route ->
-                every { route.refreshNativePeer() } returns refreshedRoutes[i]
+                every {
+                    route.refreshNativePeer(refreshedNativePeers[i])
+                } returns refreshedRoutes[i]
             }
 
             tripSession.start(true)
@@ -1147,16 +1250,19 @@ class MapboxTripSessionTest {
                     every { id } returns "id1"
                 },
             )
+            val refreshedNativePeer = mockk<RouteInterface>(relaxed = true)
             coEvery {
                 navigator.refreshRoute(refreshedRoutes[0], any(), any())
-            } returns ExpectedFactory.createValue(mockAlternativesMetadata1)
+            } returns ExpectedFactory.createValue(
+                mockRefreshRouteResult(mockAlternativesMetadata1, refreshedNativePeer),
+            )
             coEvery {
                 navigator.refreshRoute(refreshedRoutes[1], any(), any())
             } returns ExpectedFactory.createError(error)
 
-            refreshedRoutes.forEachIndexed { i, route ->
-                every { route.refreshNativePeer() } returns refreshedRoutes[i]
-            }
+            every {
+                refreshedRoutes[0].refreshNativePeer(refreshedNativePeer)
+            } returns refreshedRoutes[0]
 
             tripSession.start(true)
             val result = tripSession.setRoutes(
@@ -1641,7 +1747,7 @@ class MapboxTripSessionTest {
             val alternative = mockNavigationRoute()
             coEvery { navigator.refreshRoute(primary, any(), any()) } coAnswers {
                 delay(100)
-                ExpectedFactory.createValue(emptyList())
+                ExpectedFactory.createValue(mockRefreshRouteResult())
             }
 
             val observer = mockk<RouteProgressObserver>(relaxUnitFun = true)
@@ -2104,3 +2210,11 @@ fun createSetRouteError(
 fun createSetRouteResult(
     nativeAlternatives: List<RouteAlternative> = emptyList(),
 ) = ExpectedFactory.createValue<String, SetRoutesResult>(SetRoutesResult(null, nativeAlternatives))
+
+fun mockRefreshRouteResult(
+    alternatives: List<RouteAlternative> = emptyList(),
+    nativeRoute: RouteInterface = mockk(relaxed = true),
+): RefreshRouteResult = mockk(relaxed = true) {
+    every { this@mockk.alternatives } returns alternatives
+    every { this@mockk.route } returns nativeRoute
+}

@@ -32,7 +32,9 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 
 internal sealed class RouteRefresherStatus {
-    data class Success(val refreshResponse: DataRef) : RouteRefresherStatus()
+    data class Success(
+        val refreshResponse: DataRef,
+    ) : RouteRefresherStatus()
     object Failure : RouteRefresherStatus()
     object Invalid : RouteRefresherStatus()
     object Invalidated : RouteRefresherStatus()

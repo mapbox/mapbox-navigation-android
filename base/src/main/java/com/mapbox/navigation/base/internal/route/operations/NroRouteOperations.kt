@@ -9,7 +9,6 @@ import com.mapbox.directions.route.DirectionsRouteContext
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.CongestionNumericOverride
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObjectException
-import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.route.NavigationRouteData
 import com.mapbox.navigation.base.internal.route.parsing.models.DirectionsParsedRouteData
 import com.mapbox.navigation.base.internal.route.parsing.parser.directions.toRouteModelsParsingResult
@@ -20,7 +19,6 @@ import com.mapbox.navigation.utils.internal.logD
 private val LOG_CATEGORY = "NRO-ROUTE-OPERATIONS"
 
 internal class NroRouteOperations(
-    val directionsRouteContext: DirectionsRouteContext,
     val parsedRouteData: DirectionsParsedRouteData,
 ) : RouteOperations {
 
@@ -31,39 +29,41 @@ internal class NroRouteOperations(
         legIndex: Int,
         legGeometryIndex: Int,
         responseTimeElapsedSeconds: Long,
+        refreshedDirectionsRouteContext: DirectionsRouteContext,
     ): Result<RouteUpdate> {
+        return Result.runCatching {
+            buildRefreshedRouteUpdate(refreshedDirectionsRouteContext, responseTimeElapsedSeconds)
+        }
+    }
+
+    /**
+     * Builds the [RouteUpdate] from [refreshedDirectionsRouteContext], which [NavigationRoute]
+     * already obtained by calling [DirectionsRouteContext.refreshRoute] itself before invoking
+     * [refresh].
+     */
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
+    @WorkerThread
+    private fun buildRefreshedRouteUpdate(
+        refreshedDirectionsRouteContext: DirectionsRouteContext,
+        responseTimeElapsedSeconds: Long,
+    ): RouteUpdate {
         logD(LOG_CATEGORY) {
             "Refreshing native route model"
         }
-        return directionsRouteContext.let {
-            PerformanceTracker.trackPerformanceSync("DirectionsRouteContext#refreshRoute") {
-                it.refreshRoute(refreshResponse, legIndex, legGeometryIndex)
-            }
-        }
-            .mapValue {
-                val updatedRouteModel = it.toRouteModelsParsingResult(
-                    routeOptions = parsedRouteData.routeOptions,
-                    routerOrigin = parsedRouteData.routerOrigin,
-                    responseOriginApi = parsedRouteData.responseOriginAPI,
-                )
-                val ttlUpdate = updatedRouteModel.data.route.refreshTtl()?.let {
-                    OptionallyRefreshedData.Updated<Long?>(
-                        it.plus(
-                            responseTimeElapsedSeconds,
-                        ),
-                    )
-                } ?: OptionallyRefreshedData.NoUpdates()
-                Result.success(
-                    RouteUpdate(
-                        routeModelsParsingResult = updatedRouteModel,
-                        routeRefreshMetadata = RouteRefreshMetadata(isUpToDate = true),
-                        newExpirationTimeElapsedSeconds = ttlUpdate,
-                        overriddenTraffic = OptionallyRefreshedData.NoUpdates(),
-                    ),
-                )
-            }.getValueOrElse {
-                Result.failure(Throwable("error refreshing NRO: $it"))
-            }
+        val updatedRouteModel = refreshedDirectionsRouteContext.toRouteModelsParsingResult(
+            routeOptions = parsedRouteData.routeOptions,
+            routerOrigin = parsedRouteData.routerOrigin,
+            responseOriginApi = parsedRouteData.responseOriginAPI,
+        )
+        val ttlUpdate = updatedRouteModel.data.route.refreshTtl()?.let {
+            OptionallyRefreshedData.Updated<Long?>(it.plus(responseTimeElapsedSeconds))
+        } ?: OptionallyRefreshedData.NoUpdates()
+        return RouteUpdate(
+            routeModelsParsingResult = updatedRouteModel,
+            routeRefreshMetadata = RouteRefreshMetadata(isUpToDate = true),
+            newExpirationTimeElapsedSeconds = ttlUpdate,
+            overriddenTraffic = OptionallyRefreshedData.NoUpdates(),
+        )
     }
 
     @OptIn(ExperimentalMapboxNavigationAPI::class)

@@ -53,7 +53,8 @@ import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigationStatusOrigin
 import com.mapbox.navigator.NavigatorObserver
-import com.mapbox.navigator.RouteAlternative
+import com.mapbox.navigator.RefreshRouteResult
+import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouteState
 import com.mapbox.navigator.RoutesChangeInfo
 import com.mapbox.navigator.SetRoutesReason
@@ -177,9 +178,12 @@ internal class MapboxTripSession(
                         val refreshControllerRefresh = setRoutes
                             as? SetRoutes.RefreshRoutes.RefreshControllerRefresh
                         val primaryRoute = routes.first()
-                        var refreshRouteResult: Expected<String, List<RouteAlternative>> =
+                        var refreshRouteResult: Expected<String, RefreshRouteResult> =
                             ExpectedFactory.createError("None of the routes were refreshed")
-                        var lastSavedResultValue: Expected<String, List<RouteAlternative>>? = null
+                        var lastSavedResultValue: Expected<String, RefreshRouteResult>? = null
+                        // up-to-date native peers of the routes that were actually refreshed,
+                        // keyed by route id
+                        val refreshedNativePeers = mutableMapOf<String, RouteInterface>()
                         // primary route must be refreshed at the very end,
                         // because after it is refreshed,
                         // statuses that correspond to the refreshed route will start coming
@@ -190,15 +194,18 @@ internal class MapboxTripSession(
                                 // skip refresh in NN if route was not updated
                                 continue
                             }
+                            val refreshSuccess =
+                                refreshMetadata?.status as? RouteRefresherStatus.Success
                             refreshRouteResult = navigator.refreshRoute(
-                                route,
-                                (refreshMetadata?.status as? RouteRefresherStatus.Success)
-                                    ?.refreshResponse,
+                                route = route,
+                                refreshResponse = refreshSuccess?.refreshResponse,
+                                geometryIndex =
                                 refreshMetadata?.routeProgressData?.routeGeometryIndex,
                             )
 
-                            if (refreshRouteResult.isValue) {
+                            refreshRouteResult.value?.let {
                                 lastSavedResultValue = refreshRouteResult
+                                refreshedNativePeers[route.id] = it.route
                             }
                         }
                         // The latest result contains the most actual cumulated data.
@@ -206,17 +213,19 @@ internal class MapboxTripSession(
                         (lastSavedResultValue ?: refreshRouteResult).fold(
                             { NativeSetRouteError(it) },
                             { value ->
-                                val refreshedPrimaryRoute = primaryRoute.refreshNativePeer()
+                                // each route adopts its own native peer, the cumulated result
+                                // above can belong to any of the refreshed routes
+                                val refreshedRoutes = routes.map { route ->
+                                    refreshedNativePeers[route.id]
+                                        ?.let { route.refreshNativePeer(it) }
+                                        ?: route
+                                }
+                                val refreshedPrimaryRoute = refreshedRoutes.first()
                                 this@MapboxTripSession.primaryRoute = refreshedPrimaryRoute
                                 roadObjects = refreshedPrimaryRoute.upcomingRoadObjects
-                                val refreshedRoutes = routes
-                                    .drop(1)
-                                    .toMutableList().apply {
-                                        add(0, refreshedPrimaryRoute)
-                                    }
                                 NativeSetRouteValue(
                                     routes = refreshedRoutes,
-                                    nativeAlternatives = value,
+                                    nativeAlternatives = value.alternatives,
                                 )
                             },
                         ).also {

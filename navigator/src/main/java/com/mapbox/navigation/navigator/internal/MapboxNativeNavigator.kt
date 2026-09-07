@@ -27,6 +27,7 @@ import com.mapbox.navigator.NavigatorInterface
 import com.mapbox.navigator.NavigatorObserver
 import com.mapbox.navigator.NavigatorOperationsDelegate
 import com.mapbox.navigator.PredictiveCacheControllerInterface
+import com.mapbox.navigator.RefreshRouteResult
 import com.mapbox.navigator.RerouteControllerInterface
 import com.mapbox.navigator.RerouteDetectorInterface
 import com.mapbox.navigator.ResetCallback
@@ -111,12 +112,15 @@ interface MapboxNativeNavigator : MapboxNativeRerouteInterface {
      * @param route [NavigationRoute]
      * @param refreshResponse Optional DataRef from refresh response to avoid JSON reconstruction
      * @param geometryIndex Optional geometry index from which the route refresh was requested
+     * @param refreshedDirectionsRouteContext the already-refreshed native route context (sourced
+     * from and to be pushed back into the route's native peer), computed for every route
+     * regardless of whether it is NRO-backed.
      */
     suspend fun refreshRoute(
         route: NavigationRoute,
         refreshResponse: DataRef?,
         geometryIndex: Int?,
-    ): Expected<String, List<RouteAlternative>>
+    ): Expected<String, RefreshRouteResult>
 
     /**
      * Follows a new leg of the already loaded directions.
