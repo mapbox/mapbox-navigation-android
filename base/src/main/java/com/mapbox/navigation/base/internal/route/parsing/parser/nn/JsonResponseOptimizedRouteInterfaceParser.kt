@@ -2,9 +2,7 @@
 
 package com.mapbox.navigation.base.internal.route.parsing.parser.nn
 
-import com.mapbox.bindgen.DataRef
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
-import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.route.parsing.ResponseToParse
 import com.mapbox.navigation.base.internal.route.parsing.models.directions.DirectionsResponseParsingResult
 import com.mapbox.navigation.base.internal.route.parsing.models.directions.DirectionsRoutesParser
@@ -25,13 +23,14 @@ import com.mapbox.navigator.RouteInterface
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
-private const val LOG_CATEGORY = "JsonRouteInterfaceParser"
+private const val LOG_CATEGORY = "JsonResponseOptimizedRouteInterfaceParser"
 
 /**
- * Parses [RouteInterface]s into [NavigationRoute]s, reusing an already parsed [NavigationRoute]
- * for a given route id instead of parsing it again.
+ * Optimized parser contains the following optimizations:
+ * 1. Makes sure that every response is parsed only once in case routes in list are from different responses
+ * 2. Makes sure that routes which already parsed aren't parsed again
  */
-internal class JsonRouteInterfaceParser(
+internal class JsonResponseOptimizedRouteInterfaceParser(
     private val existingParsedRoutesLookup: (id: String) -> NavigationRoute?,
     private val parsingDispatcher: CoroutineDispatcher,
     private val time: Time,
@@ -43,30 +42,16 @@ internal class JsonRouteInterfaceParser(
     ): AlternativesParsingResult<Result<ContinuousAlternativesParsingSuccessfulResult>> {
         val responseTimeElapsedSeconds = time.seconds()
 
-        val routesToParse = routes.map { route ->
-            val cachedRoute = existingParsedRoutesLookup(route.routeId)
-            RouteToParse(
-                route = route,
-                cachedRoute = cachedRoute,
-                // toJson() produces new data every call, so it's computed once and reused.
-                json = if (cachedRoute == null) {
-                    PerformanceTracker.trackPerformanceSync("RouteInterface#toJson") {
-                        route.toJson()
-                    }
-                } else {
-                    null
-                },
-            )
-        }
-
         return parsingQueue.parseAlternatives(
             AlternativesInfo(
-                RouteResponseInfo.fromRoutes(routesToParse.mapNotNull { it.json?.buffer }),
+                RouteResponseInfo.fromResponses(
+                    routes.map { it.responseJsonRef.buffer },
+                ),
             ),
         ) {
             withContext(parsingDispatcher) {
                 Result.runCatching {
-                    parse(routesToParse, responseTimeElapsedSeconds)
+                    parse(routes, responseTimeElapsedSeconds)
                 }.onFailure {
                     logE { "Alternative route parsing failed: ${it.message}" }
                 }.map {
@@ -77,47 +62,45 @@ internal class JsonRouteInterfaceParser(
     }
 
     private fun parse(
-        routesToParse: List<RouteToParse>,
+        routes: List<RouteInterface>,
         responseTimeElapsedSeconds: Long,
-    ): List<NavigationRoute> = routesToParse.map { (route, cachedRoute, json) ->
-        cachedRoute ?: run {
-            logI(LOG_CATEGORY) {
-                "parsing ${route.routeId}"
+    ): List<NavigationRoute> = routes.groupBy { it.responseUuid }
+        .map { (_, routes) ->
+            val routesFromAssociatedResponse by lazy {
+                routes.first().let {
+                    logI(LOG_CATEGORY) {
+                        "parsing ${it.responseUuid}"
+                    }
+                    parser.parse(
+                        ResponseToParse(
+                            it.responseJsonRef,
+                            it.requestUri,
+                            routerOrigin = it.routerOrigin.mapToSdkRouteOrigin(),
+                            responseOriginAPI = it.mapboxAPI.mapToSDKResponseOriginAPI(),
+                        ),
+                    )
+                }.getOrThrow()
             }
-            route.toNavigationRoute(
-                responseTimeElapsedSeconds,
-                parser.parse(
-                    ResponseToParse(
-                        // json is always set when cachedRoute is null, see routesToParse above
-                        requireNotNull(json),
-                        route.requestUri,
-                        routerOrigin = route.routerOrigin.mapToSdkRouteOrigin(),
-                        responseOriginAPI = route.mapboxAPI.mapToSDKResponseOriginAPI(),
-                        routeIndexOverride = route.routeIndex,
-                    ),
-                ).getOrThrow(),
-            )
+            routes.map {
+                existingParsedRoutesLookup(it.routeId) ?: it.toNavigationRoute(
+                    responseTimeElapsedSeconds,
+                    routesFromAssociatedResponse,
+                )
+            }
         }
-    }
+        .flatten()
+        .sortedBy { routes.indexOf(it.nativeRoute) }
 }
-
-private data class RouteToParse(
-    val route: RouteInterface,
-    val cachedRoute: NavigationRoute?,
-    val json: DataRef?,
-)
 
 @OptIn(ExperimentalMapboxNavigationAPI::class)
 private fun RouteInterface.toNavigationRoute(
     responseTimeElapsedSeconds: Long,
-    parsedRoute: DirectionsResponseParsingResult,
+    parsedRoutes: DirectionsResponseParsingResult,
 ): NavigationRoute {
-    // toJson() always yields a single route, so it's at index 0 regardless of this route's
-    // true index (restored via ResponseToParse.routeIndexOverride).
     val refreshTtl =
-        parsedRoute.routesParsingResult.getOrNull(0)?.data?.route?.refreshTtl()
-    val routeOptions = parsedRoute.routeOptions
-    val data = parsedRoute.routesParsingResult[0].data
+        parsedRoutes.routesParsingResult.getOrNull(routeIndex)?.data?.route?.refreshTtl()
+    val routeOptions = parsedRoutes.routeOptions
+    val data = parsedRoutes.routesParsingResult[routeIndex].data
     return NavigationRoute(
         routeOptions = routeOptions,
         // TODO: test that route options are the same as with direct parsing
@@ -130,7 +113,7 @@ private fun RouteInterface.toNavigationRoute(
         responseOriginAPI = data.responseOriginAPI,
         // TODO: NAVAND-6774, move overriden traffic to native route
         overriddenTraffic = null,
-        operations = parsedRoute.routesParsingResult[0].operations,
+        operations = parsedRoutes.routesParsingResult[routeIndex].operations,
         directionsRouteContext = directionsRouteContext,
     )
 }
