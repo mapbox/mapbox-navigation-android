@@ -20,7 +20,6 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.BaseMapboxInitializer
 import com.mapbox.common.TilesetDescriptor
-import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -45,7 +44,6 @@ import com.mapbox.navigation.base.route.MapMatchingMatch
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterOrigin
-import com.mapbox.navigation.base.trip.model.ChargingState
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.eh.EHorizonEdge
 import com.mapbox.navigation.base.trip.model.eh.EHorizonEdgeMetadata
@@ -174,9 +172,9 @@ import com.mapbox.navigator.PollingConfig
 import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.navigator.TilesConfig
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -315,6 +313,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     )
     private val internalRoutesObserver: RoutesObserver
     private val routesCacheClearer = NavigationComponentProvider.createRoutesCacheClearer()
+    private val internalOffRouteObserver: OffRouteObserver
     private val internalFallbackVersionsObserver: FallbackVersionsObserver
     private val routeAlternativesController: RouteAlternativesController
     private val arrivalProgressObserver: ArrivalProgressObserver
@@ -344,8 +343,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         NavigationComponentProvider.createRouteRefreshRequestDataProvider()
 
     private val evDynamicDataHolder = NavigationComponentProvider.createEVDynamicDataHolder()
-
-    private val chargerConnected = MutableStateFlow(false)
 
     private val routerWrapper: RouterWrapper
 
@@ -691,8 +688,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         routeAlternativesController.setRouteUpdateSuggestionListener(::updateRoutes)
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         routeRefreshController = RouteRefreshControllerProvider.createRouteRefreshController(
-            SdkDispatchers.Main,
-            SdkDispatchers.Main.immediate,
+            Dispatchers.Main,
+            Dispatchers.Main.immediate,
             navigationOptions.routeRefreshOptions,
             directionsSession,
             routesProgressDataProvider,
@@ -725,13 +722,17 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 }
             },
             scope = mainJobController.scope,
-            routeInterfacesParser = parsing,
+            routeParser = parsing,
         )
         rerouteController = defaultRerouteController
 
         internalRoutesObserver = createInternalRoutesObserver()
+        internalOffRouteObserver = createInternalOffRouteObserver()
         internalFallbackVersionsObserver = createInternalFallbackVersionsObserver()
         tripSession.registerFallbackVersionsObserver(internalFallbackVersionsObserver)
+        rerouteController?.let {
+            tripSession.setOffRouteObserverForReroute(internalOffRouteObserver, it)
+        }
         registerRoutesObserver(internalRoutesObserver)
         registerRoutesObserver(routeRefreshController::onRoutesChanged)
         setUpRouteCacheClearer()
@@ -974,7 +975,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         logD(LOG_CATEGORY) {
             "Resetting trip session"
         }
-        mainJobController.scope.launch(SdkDispatchers.Main.immediate) {
+        mainJobController.scope.launch(Dispatchers.Main.immediate) {
             navigator.resetRideSession()
             logI(LOG_CATEGORY) {
                 "Trip session reset"
@@ -1220,7 +1221,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         body: suspend () -> Unit,
     ) {
         val job = threadController.getMainScopeAndRootJob().scope
-            .launch(SdkDispatchers.Main.immediate) {
+            .launch(Dispatchers.Main.immediate) {
                 logI(LOG_CATEGORY) {
                     "[$tag] Coroutine launched, waiting to acquire routeUpdateMutex; " +
                         "hasCallback=$hasCallback;$extraLogInfo " +
@@ -1579,7 +1580,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     private fun resetTripSessionRoutes() {
-        threadController.getMainScopeAndRootJob().scope.launch(SdkDispatchers.Main.immediate) {
+        threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
             routeUpdateMutex.withLock {
                 val routes = directionsSession.routes
                 val legIndex = latestLegIndex ?: directionsSession.initialLegIndex
@@ -1642,10 +1643,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         tripSession.unregisterAllVoiceInstructionsObservers()
         tripSession.unregisterAllEHorizonObservers()
         tripSession.unregisterAllFallbackVersionsObservers()
+        tripSession.resetOffRouteObserverForReroute()
         tripSessionLocationEngine.destroy()
         routeAlternativesController.unregisterAll()
         navigationTelemetry.clearObservers()
-        rerouteController?.shutdown()
         rerouteController?.interrupt()
 
         navigator.shutdown()
@@ -1737,7 +1738,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * the observer waits for the processing to finish before delivering the latest result.
      */
     fun registerRoutesObserver(routesObserver: RoutesObserver) {
-        threadController.getMainScopeAndRootJob().scope.launch(SdkDispatchers.Main.immediate) {
+        threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
             routeUpdateMutex.withLock {
                 directionsSession.registerSetNavigationRoutesFinishedObserver(routesObserver)
             }
@@ -2353,13 +2354,20 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      *     )
      * ```
      *
-     * Of the battery preconditioning model parameters, only `ev_battery_temperature` (the
-     * current battery temperature in °C, e.g. `"25.0"`) is compatible with an EV route refresh
-     * and can be passed via this method. The other model parameters
-     * (`ev_battery_charging_power_at_temperature`,
-     * `ev_battery_charging_power_optimal_temperature`, `ev_battery_heating_parameters`) are valid
-     * only on the directions request: set them in the initial [RouteOptions] instead, as passing
-     * them here makes the refresh request fail.
+     * Battery preconditioning model parameters are also supported:
+     * - `ev_battery_temperature`: current battery temperature, e.g. `"25.0"`. Valid on both
+     *   directions and EV route refresh requests.
+     * - `ev_battery_charging_power_at_temperature`: maximum charging power at a given battery
+     *   temperature, as semicolon-separated `temperature,power` pairs, e.g.
+     *   `"-5.0,10.0;0.0,100.0;5.0,350.0"`.
+     * - `ev_battery_charging_power_optimal_temperature`: minimal battery temperature for a given
+     *   charging power, as semicolon-separated `power,temperature` pairs.
+     * - `ev_battery_heating_parameters`: comma-separated triplet of
+     *   `passiveHeating,activeHeating,activeHeatingPower`.
+     *
+     * The last three are **directions-request-only** and are not compatible with an EV route
+     * refresh — per the note above, do not pass them via this method while relying on the route
+     * being refreshed, or the refresh request will fail.
      *
      * @param data Map describing the changed EV data
      */
@@ -2396,40 +2404,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 stationId,
                 retain,
             )
-        }
-    }
-
-    /**
-     * Reports that the charger has been connected. At an EV charging station of the route,
-     * transitions the charging phase from [ChargingState.AWAIT_CHARGING] to
-     * [ChargingState.CHARGING], otherwise to [ChargingState.EXTRA_CHARGING].
-     *
-     * Call this when your application detects, from vehicle telemetry, that the charger has
-     * been connected. This does not affect the navigation state; see [stopCharging] to resume
-     * navigation once charging finishes.
-     *
-     * @see ChargingState
-     */
-    @ExperimentalMapboxNavigationAPI
-    fun startCharging() {
-        chargerConnected.value = true
-        navigator.startCharging()
-    }
-
-    /**
-     * Reports that the charger has been disconnected, exiting the charging state entered via
-     * [startCharging]. If the vehicle was charging at a reached waypoint, resumes navigation and
-     * automatically advances to the next route leg.
-     *
-     * @param callback invoked with whether the next leg was started, once changing leg is
-     * resolved (or immediately if changing leg isn't possible)
-     */
-    @ExperimentalMapboxNavigationAPI
-    @JvmOverloads
-    fun stopCharging(callback: StopChargingCallback = StopChargingCallback {}) {
-        chargerConnected.value = false
-        navigator.stopCharging { legChanged ->
-            callback.onFinished(ChargingFinishedData(legChanged))
         }
     }
 
@@ -2480,17 +2454,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     /**
-     * Overrides the languages the navigator uses, or restores tracking of the system locale when
-     * [locales] is null.
-     *
-     * @param locales preferred languages, most preferred first; null restores the system locale
-     */
-    @ExperimentalPreviewMapboxNavigationAPI
-    fun setUserLanguagesOverride(locales: List<Locale>?) {
-        systemLocaleWatcher.setOverrideLanguages(locales?.map(Locale::toLanguageTag))
-    }
-
-    /**
      * Allows other Nav SDK modules observe the latest EV state which is
      * accumulated based on data provided in [onEVDataUpdated].
      * Route options of the current route isn't taken into account in
@@ -2499,12 +2462,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     internal fun internalEvUpdatedData(): StateFlow<Map<String, String>> {
         return evDynamicDataHolder.updatedRawData()
     }
-
-    /**
-     * Allows other Nav SDK modules observe whether a charger is connected, as reported by
-     * [startCharging] and [stopCharging].
-     */
-    internal fun internalChargerConnected(): StateFlow<Boolean> = chargerConnected
 
     internal fun registerOnRoutesSetStartedObserver(observer: SetNavigationRoutesStartedObserver) {
         directionsSession.registerSetNavigationRoutesStartedObserver(observer)
@@ -2558,6 +2515,12 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     private fun createInternalRoutesObserver() = RoutesObserver { result ->
         latestLegIndex = null
         routesProgressDataProvider.onNewRoutes(result.navigationRoutes)
+    }
+
+    private fun createInternalOffRouteObserver() = OffRouteObserver { offRoute ->
+        if (offRoute) {
+            rerouteOnDeviation()
+        }
     }
 
     private fun createInternalFallbackVersionsObserver() = object : FallbackVersionsObserver {
@@ -2623,6 +2586,24 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             tripSession.getRawLocation()?.let { lastRawLocation ->
                 logI(LOG_CATEGORY) { "Re-pushing last raw location $lastRawLocation" }
                 navigator.updateLocation(lastRawLocation.toFixLocation())
+            }
+        }
+    }
+
+    private fun rerouteOnDeviation() {
+        rerouteController?.rerouteOnDeviation { result: RerouteResult ->
+            logI(LOG_CATEGORY) {
+                "Reroute on deviation: $result, " +
+                    "tripSession.isOffRoute = ${tripSession.isOffRoute}"
+            }
+            if (tripSession.isOffRoute) {
+                internalSetNavigationRoutes(
+                    result.routes,
+                    SetRoutes.Reroute(result.initialLegIndex),
+                )
+                true
+            } else {
+                false
             }
         }
     }
@@ -2706,7 +2687,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     private suspend fun prepareNavigationForRoutesParsing() {
-        withContext(SdkDispatchers.Main.immediate) {
+        withContext(Dispatchers.Main.immediate) {
             if (directionsSession.routesPlusIgnored.size > 1) {
                 suspendCoroutine<Unit> { continuation ->
                     setNavigationRoutes(directionsSession.routes.take(1), currentLegIndex()) {

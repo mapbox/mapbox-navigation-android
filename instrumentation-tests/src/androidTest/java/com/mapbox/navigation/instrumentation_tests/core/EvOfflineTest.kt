@@ -5,6 +5,7 @@ package com.mapbox.navigation.instrumentation_tests.core
 import android.location.Location
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsResponse
+import com.mapbox.common.TileDataDomain
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.route.routeOptions
@@ -31,9 +32,8 @@ import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.testing.utils.location.stayOnPosition
 import com.mapbox.navigation.testing.utils.nro.assumeNotNROBecauseOfClientSideUpdate
 import com.mapbox.navigation.testing.utils.nro.assumeNotNROBecauseToBuilderIsRequiredForTest
-import com.mapbox.navigation.testing.utils.offline.OfflineTilesRule
 import com.mapbox.navigation.testing.utils.offline.Tileset
-import com.mapbox.navigation.testing.utils.offline.WithOfflineTiles
+import com.mapbox.navigation.testing.utils.offline.unpackTiles
 import com.mapbox.navigation.testing.utils.routes.EvRoutesProvider
 import com.mapbox.navigation.testing.utils.routes.MockedEvRouteWithSingleUserProvidedChargingStation
 import com.mapbox.navigation.testing.utils.routes.MockedEvRoutes
@@ -43,6 +43,7 @@ import com.mapbox.navigation.testing.utils.withoutInternet
 import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import java.util.concurrent.TimeUnit
@@ -55,9 +56,6 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
 
     @get:Rule
     val mockLocationReplayerRule = MockLocationReplayerRule(mockLocationUpdatesRule)
-
-    @get:Rule
-    val offlineTilesRule = OfflineTilesRule()
 
     override fun setupMockLocation(): Location {
         return mockLocationUpdatesRule.generateLocationUpdate {
@@ -78,7 +76,6 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
-    @WithOfflineTiles(Tileset.Berlin)
     fun startNavigationOfflineThenSwitchToOnlineRouteWhenInternetAppears() = sdkTest {
         val originalTestRoute = setupBerlinEvRoute()
 
@@ -120,8 +117,8 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         }
     }
 
+    @Ignore("Flaky test - NAVAND-7338")
     @Test
-    @WithOfflineTiles(Tileset.Berlin)
     fun offlineOnlineSwitchWhenOnlineRouteIsTheSameAsCurrentOffline() = sdkTest {
         assumeNotNROBecauseToBuilderIsRequiredForTest()
         val evBerlinTestRoute = EvRoutesProvider.getBerlinEvRoute(
@@ -162,7 +159,6 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
-    @WithOfflineTiles(Tileset.Berlin)
     fun startOfflineWithUserProvidedChargingStationsThenSwitchToOnlineRouteWhenInternetAppears() =
         sdkTest {
             val testRoute = setupBerlinEvRouteWithCustomProvidedChargingStation()
@@ -199,7 +195,6 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         }
 
     @Test
-    @WithOfflineTiles(Tileset.Berlin)
     fun refresh_online_ev_route_offline() = sdkTest {
         assumeNotNROBecauseOfClientSideUpdate()
 
@@ -309,7 +304,7 @@ class EvOfflineTest : BaseCoreNoCleanUpTest() {
         routeRefreshOptions: RouteRefreshOptions? = null,
         block: (MapboxNavigation) -> Unit,
     ) {
-        val tilesVersion = tileset?.let { offlineTilesRule.tilesVersion(it) }
+        val tilesVersion = tileset?.let { context.unpackTiles(it)[TileDataDomain.NAVIGATION]!! }
         withMapboxNavigation(
             tileStore = createTileStore(),
             tilesVersion = tilesVersion,

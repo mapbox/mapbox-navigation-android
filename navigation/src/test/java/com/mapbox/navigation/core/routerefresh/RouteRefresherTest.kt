@@ -11,7 +11,6 @@ import com.mapbox.navigation.core.directions.session.RouteRefresh
 import com.mapbox.navigation.core.ev.EVRefreshDataProvider
 import com.mapbox.navigation.core.internal.RouteProgressData
 import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshCallback
-import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshError
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.factories.createDirectionsRoute
@@ -25,7 +24,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
-import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
@@ -33,8 +31,6 @@ import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -86,12 +82,15 @@ class RouteRefresherTest {
 
     private val routesRefreshDataProvider = mockk<RoutesRefreshDataProvider>(relaxed = true)
     private val evRefreshDataProvider = mockk<EVRefreshDataProvider>(relaxed = true)
+    private val routeDiffProvider = mockk<DirectionsRouteDiffProvider>(relaxed = true)
     private val routeRefresh = mockk<RouteRefresh>(relaxed = true)
     private val sut = RouteRefresher(
         routesRefreshDataProvider,
         evRefreshDataProvider,
+        routeDiffProvider,
         routeRefresh,
         globalScope = coroutineRule.createTestScope(),
+        computationDispatcher = coroutineRule.testDispatcher,
     )
 
     @Before
@@ -123,7 +122,7 @@ class RouteRefresherTest {
     @Test
     fun refresh_allRoutesAreRefreshed() = coroutineRule.runBlockingTest {
         every {
-            RouteRefreshValidator.validateRoute(any(), any())
+            RouteRefreshValidator.validateRoute(any())
         } returns RouteRefreshValidator.RouteValidationResult.Valid
         every { routeRefresh.requestRouteRefresh(route1, any(), any()) } answers {
             (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute1, refreshResponse1)
@@ -133,6 +132,14 @@ class RouteRefresherTest {
             (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute2, refreshResponse2)
             0
         }
+        every { routeDiffProvider.buildRouteDiffs(route1, newRoute1, legIndex1) } returns listOf(
+            "diff#1",
+            "diff#2",
+        )
+        every { routeDiffProvider.buildRouteDiffs(route2, newRoute2, legIndex2) } returns listOf(
+            "diff#3",
+            "diff#4",
+        )
         val expected = RoutesRefresherResult(
             RouteRefresherResult(
                 newRoute1,
@@ -153,40 +160,17 @@ class RouteRefresherTest {
         verify(exactly = 1) {
             logger.logI("Received refreshed route $route1Id", "RouteRefreshController")
             logger.logI("Received refreshed route $route2Id", "RouteRefreshController")
+            logger.logI("diff#1", "RouteRefreshController")
+            logger.logI("diff#2", "RouteRefreshController")
+            logger.logI("diff#3", "RouteRefreshController")
+            logger.logI("diff#4", "RouteRefreshController")
         }
-    }
-
-    @Test
-    fun refresh_chargeOnlyRefreshIsKeptInTheStatus() = coroutineRule.runBlockingTest {
-        every {
-            RouteRefreshValidator.validateRoute(any(), any())
-        } returns RouteRefreshValidator.RouteValidationResult.Valid
-        every { routeRefresh.requestRouteRefresh(route1, any(), any()) } answers {
-            (args[2] as NavigationRouterRefreshCallback)
-                .onRefreshReady(newRoute1, refreshResponse1, chargeOnly = true)
-            0
-        }
-        every { routeRefresh.requestRouteRefresh(route2, any(), any()) } answers {
-            (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute2, refreshResponse2)
-            0
-        }
-
-        val actual = sut.refresh(listOf(route1, route2), 10)
-
-        assertEquals(
-            RouteRefresherStatus.Success(refreshResponse1, chargeOnly = true),
-            actual.primaryRouteRefresherResult.status,
-        )
-        assertEquals(
-            RouteRefresherStatus.Success(refreshResponse2, chargeOnly = false),
-            actual.alternativesRouteRefresherResults.single().status,
-        )
     }
 
     @Test
     fun refresh_allRoutesAreRefreshed_noDiff() = coroutineRule.runBlockingTest {
         every {
-            RouteRefreshValidator.validateRoute(any(), any())
+            RouteRefreshValidator.validateRoute(any())
         } returns RouteRefreshValidator.RouteValidationResult.Valid
         every { routeRefresh.requestRouteRefresh(route1, any(), any()) } answers {
             (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute1, refreshResponse1)
@@ -196,19 +180,27 @@ class RouteRefresherTest {
             (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute2, refreshResponse2)
             0
         }
+        every {
+            routeDiffProvider.buildRouteDiffs(route1, newRoute1, legIndex1)
+        } returns emptyList()
+        every {
+            routeDiffProvider.buildRouteDiffs(route2, newRoute2, legIndex2)
+        } returns emptyList()
 
         sut.refresh(listOf(route1, route2), 10)
 
         verify(exactly = 1) {
             logger.logI("Received refreshed route $route1Id", "RouteRefreshController")
             logger.logI("Received refreshed route $route2Id", "RouteRefreshController")
+            logger.logI("No changes in annotations for route $route1Id", "RouteRefreshController")
+            logger.logI("No changes in annotations for route $route2Id", "RouteRefreshController")
         }
     }
 
     @Test
     fun refresh_onlyOneRouteIsRefreshed() = coroutineRule.runBlockingTest {
         every {
-            RouteRefreshValidator.validateRoute(any(), any())
+            RouteRefreshValidator.validateRoute(any())
         } returns RouteRefreshValidator.RouteValidationResult.Valid
         every { routeRefresh.requestRouteRefresh(route1, any(), any()) } answers {
             (args[2] as NavigationRouterRefreshCallback).onFailure(
@@ -224,6 +216,10 @@ class RouteRefresherTest {
             (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute2, refreshResponse2)
             0
         }
+        every { routeDiffProvider.buildRouteDiffs(any(), any(), any()) } returns listOf(
+            "diff#1",
+            "diff#2",
+        )
         val expected = RoutesRefresherResult(
             RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.Failure),
             listOf(
@@ -245,6 +241,8 @@ class RouteRefresherTest {
                 "RouteRefreshController",
             )
             logger.logI("Received refreshed route $route2Id", "RouteRefreshController")
+            logger.logI("diff#1", "RouteRefreshController")
+            logger.logI("diff#2", "RouteRefreshController")
         }
     }
 
@@ -322,7 +320,7 @@ class RouteRefresherTest {
             routesRefreshDataProvider.getRoutesRefreshData(listOf(route1, route2, route3))
         } returns routesRefreshData
         every {
-            RouteRefreshValidator.validateRoute(any(), any())
+            RouteRefreshValidator.validateRoute(any())
         } returns RouteRefreshValidator.RouteValidationResult.Valid
         every { routeRefresh.requestRouteRefresh(route1, any(), any()) } answers {
             (args[2] as NavigationRouterRefreshCallback).onFailure(
@@ -466,7 +464,7 @@ class RouteRefresherTest {
             routesRefreshDataProvider.getRoutesRefreshData(listOf(route1, route2, route3))
         } returns routesRefreshData
         every {
-            RouteRefreshValidator.validateRoute(any(), any())
+            RouteRefreshValidator.validateRoute(any())
         } returns RouteRefreshValidator.RouteValidationResult.Valid
         every { routeRefresh.requestRouteRefresh(route1, any(), any()) } answers {
             (args[2] as NavigationRouterRefreshCallback).onFailure(
@@ -539,7 +537,7 @@ class RouteRefresherTest {
     @Test
     fun refresh_oneRouteRefreshFailsByTimeout() = coroutineRule.runBlockingTest {
         every {
-            RouteRefreshValidator.validateRoute(any(), any())
+            RouteRefreshValidator.validateRoute(any())
         } returns RouteRefreshValidator.RouteValidationResult.Valid
         every { routeRefresh.requestRouteRefresh(route1, any(), any()) } returns 0
         every { routeRefresh.requestRouteRefresh(route2, any(), any()) } answers {
@@ -570,152 +568,13 @@ class RouteRefresherTest {
     }
 
     @Test
-    fun refresh_validatesWithTheOnDeviceRefreshCapability() = coroutineRule.runBlockingTest {
-        val capability = slot<() -> Boolean>()
-        every {
-            RouteRefreshValidator.validateRoute(any(), capture(capability))
-        } returns RouteRefreshValidator.RouteValidationResult.Invalid("some reason")
-        every { routeRefresh.supportsOnDeviceRefresh() } returns true
-
-        sut.refresh(listOf(route1, route2), 10)
-
-        assertTrue(capability.captured())
-        verify(exactly = 1) { routeRefresh.supportsOnDeviceRefresh() }
-    }
-
-    @Test
-    fun refresh_permanentFailureIsUnsupportedAndNotRequestedAgain() =
-        coroutineRule.runBlockingTest {
-            every {
-                RouteRefreshValidator.validateRoute(any(), any())
-            } returns RouteRefreshValidator.RouteValidationResult.Valid
-            every { routeRefresh.requestRouteRefresh(route1, any(), any()) } answers {
-                (args[2] as NavigationRouterRefreshCallback).onFailure(
-                    NavigationRouterRefreshError("can't refresh", permanent = true),
-                )
-                0
-            }
-            every { routeRefresh.requestRouteRefresh(route2, any(), any()) } answers {
-                (args[2] as NavigationRouterRefreshCallback)
-                    .onRefreshReady(newRoute2, refreshResponse2)
-                0
-            }
-            val expected = RoutesRefresherResult(
-                RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.Unsupported),
-                listOf(
-                    RouteRefresherResult(
-                        newRoute2,
-                        routesProgressData2,
-                        RouteRefresherStatus.Success(refreshResponse2),
-                    ),
-                ),
-            )
-
-            assertEquals(expected, sut.refresh(listOf(route1, route2), 10))
-            assertFalse(expected.anyRequestFailed())
-
-            // The router is not asked again for a route it can never refresh.
-            assertEquals(expected, sut.refresh(listOf(route1, route2), 10))
-            verify(exactly = 1) {
-                routeRefresh.requestRouteRefresh(route1, any(), any())
-                RouteRefreshValidator.validateRoute(route1, any())
-            }
-            verify(exactly = 2) { routeRefresh.requestRouteRefresh(route2, any(), any()) }
-        }
-
-    @Test
-    fun refresh_expiredRefreshTtlWinsOverAPermanentFailure() = coroutineRule.runBlockingTest {
-        every {
-            RouteRefreshValidator.validateRoute(any(), any())
-        } returns RouteRefreshValidator.RouteValidationResult.Valid
-        every { routeRefresh.requestRouteRefresh(any(), any(), any()) } answers {
-            (args[2] as NavigationRouterRefreshCallback).onFailure(
-                NavigationRouterRefreshError("expired", refreshTtl = 0, permanent = true),
-            )
-            0
-        }
-
-        val result = sut.refresh(listOf(route1, route2), 10)
-        assertEquals(RouteRefresherStatus.Invalidated, result.primaryRouteRefresherResult.status)
-
-        // An invalidated route is not remembered as unrefreshable: the router is asked again.
-        sut.refresh(listOf(route1, route2), 10)
-        verify(exactly = 2) { routeRefresh.requestRouteRefresh(route1, any(), any()) }
-    }
-
-    @Test
-    fun refresh_primaryKeepsRefreshingWhenAnAlternativeIsUnrefreshable() =
-        coroutineRule.runBlockingTest {
-            every {
-                RouteRefreshValidator.validateRoute(any(), any())
-            } returns RouteRefreshValidator.RouteValidationResult.Valid
-            every { routeRefresh.requestRouteRefresh(route1, any(), any()) } answers {
-                (args[2] as NavigationRouterRefreshCallback)
-                    .onRefreshReady(newRoute1, refreshResponse1)
-                0
-            }
-            every { routeRefresh.requestRouteRefresh(route2, any(), any()) } answers {
-                (args[2] as NavigationRouterRefreshCallback).onFailure(
-                    NavigationRouterRefreshError("can't refresh", permanent = true),
-                )
-                0
-            }
-            val expected = RoutesRefresherResult(
-                RouteRefresherResult(
-                    newRoute1,
-                    routesProgressData1,
-                    RouteRefresherStatus.Success(refreshResponse1),
-                ),
-                listOf(
-                    RouteRefresherResult(
-                        route2,
-                        routesProgressData2,
-                        RouteRefresherStatus.Unsupported,
-                    ),
-                ),
-            )
-
-            assertEquals(expected, sut.refresh(listOf(route1, route2), 10))
-            assertEquals(expected, sut.refresh(listOf(route1, route2), 10))
-            assertFalse(expected.allUnsupported())
-            verify(exactly = 2) { routeRefresh.requestRouteRefresh(route1, any(), any()) }
-            verify(exactly = 1) { routeRefresh.requestRouteRefresh(route2, any(), any()) }
-        }
-
-    @Test
-    fun refresh_forgetsAnUnrefreshableRouteThatIsGone() = coroutineRule.runBlockingTest {
-        every {
-            RouteRefreshValidator.validateRoute(any(), any())
-        } returns RouteRefreshValidator.RouteValidationResult.Valid
-        every { routeRefresh.requestRouteRefresh(route1, any(), any()) } answers {
-            (args[2] as NavigationRouterRefreshCallback).onFailure(
-                NavigationRouterRefreshError("can't refresh", permanent = true),
-            )
-            0
-        }
-        every { routeRefresh.requestRouteRefresh(route2, any(), any()) } answers {
-            (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute2, refreshResponse2)
-            0
-        }
-        coEvery {
-            routesRefreshDataProvider.getRoutesRefreshData(listOf(route2))
-        } returns RoutesRefreshData(route2, routesProgressData2, emptyList())
-
-        sut.refresh(listOf(route1, route2), 10)
-        sut.refresh(listOf(route2), 10)
-        sut.refresh(listOf(route1, route2), 10)
-
-        verify(exactly = 2) { routeRefresh.requestRouteRefresh(route1, any(), any()) }
-    }
-
-    @Test
     fun refresh_oneRouteIsInvalid() = coroutineRule.runBlockingTest {
         val reason = "some reason"
         every {
-            RouteRefreshValidator.validateRoute(route1, any())
+            RouteRefreshValidator.validateRoute(route1)
         } returns RouteRefreshValidator.RouteValidationResult.Invalid(reason)
         every {
-            RouteRefreshValidator.validateRoute(route2, any())
+            RouteRefreshValidator.validateRoute(route2)
         } returns RouteRefreshValidator.RouteValidationResult.Valid
         every { routeRefresh.requestRouteRefresh(route2, any(), any()) } answers {
             (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute2, refreshResponse2)
@@ -807,10 +666,10 @@ class RouteRefresherTest {
             ),
         ) { every { id } returns route2Id }
         every {
-            RouteRefreshValidator.validateRoute(route1, any())
+            RouteRefreshValidator.validateRoute(route1)
         } returns RouteRefreshValidator.RouteValidationResult.Invalid(reason1)
         every {
-            RouteRefreshValidator.validateRoute(route2, any())
+            RouteRefreshValidator.validateRoute(route2)
         } returns RouteRefreshValidator.RouteValidationResult.Invalid(reason2)
         val routesRefreshData = RoutesRefreshData(
             route1,
@@ -849,10 +708,10 @@ class RouteRefresherTest {
     @Test
     fun refresh_oneRouteIsInvalidated() = coroutineRule.runBlockingTest {
         every {
-            RouteRefreshValidator.validateRoute(route1, any())
+            RouteRefreshValidator.validateRoute(route1)
         } returns RouteRefreshValidator.RouteValidationResult.Valid
         every {
-            RouteRefreshValidator.validateRoute(route2, any())
+            RouteRefreshValidator.validateRoute(route2)
         } returns RouteRefreshValidator.RouteValidationResult.Valid
         every { route1.isExpired() } returns true
         every { route2.isExpired() } returns false
@@ -889,175 +748,6 @@ class RouteRefresherTest {
             )
             logger.logI("Received refreshed route $route2Id", "RouteRefreshController")
         }
-    }
-
-    @Test
-    fun refresh_expiredRouteTheDeviceRefreshesIsRefreshed() = coroutineRule.runBlockingTest {
-        every {
-            RouteRefreshValidator.validateRoute(any(), any())
-        } returns RouteRefreshValidator.RouteValidationResult.Valid
-        every { route1.isExpired() } returns true
-        every { routeRefresh.refreshesOnDevice(route1) } returns true
-        every { routeRefresh.requestRouteRefresh(route1, any(), any()) } answers {
-            (args[2] as NavigationRouterRefreshCallback)
-                .onRefreshReady(newRoute1, refreshResponse1, chargeOnly = true)
-            0
-        }
-        every { routeRefresh.requestRouteRefresh(route2, any(), any()) } answers {
-            (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute2, refreshResponse2)
-            0
-        }
-
-        val actual = sut.refresh(listOf(route1, route2), 10)
-
-        assertEquals(
-            RouteRefresherResult(
-                newRoute1,
-                routesProgressData1,
-                RouteRefresherStatus.Success(refreshResponse1, chargeOnly = true),
-            ),
-            actual.primaryRouteRefresherResult,
-        )
-        verify {
-            logger.logI(
-                "route $route1Id is expired, refreshing it on the device",
-                "RouteRefreshController",
-            )
-        }
-    }
-
-    @Test
-    fun refresh_expiredRouteTheDeviceFailsToRefreshIsInvalidated() =
-        coroutineRule.runBlockingTest {
-            every {
-                RouteRefreshValidator.validateRoute(any(), any())
-            } returns RouteRefreshValidator.RouteValidationResult.Valid
-            every { route1.isExpired() } returns true
-            every { routeRefresh.refreshesOnDevice(route1) } returns true
-            every { routeRefresh.requestRouteRefresh(route1, any(), any()) } answers {
-                (args[2] as NavigationRouterRefreshCallback)
-                    .onFailure(NavigationRouterRefreshError("route not found on server"))
-                0
-            }
-            every { routeRefresh.requestRouteRefresh(route2, any(), any()) } answers {
-                (args[2] as NavigationRouterRefreshCallback)
-                    .onFailure(NavigationRouterRefreshError("network error"))
-                0
-            }
-
-            val actual = sut.refresh(listOf(route1, route2), 10)
-
-            assertEquals(
-                RouteRefresherStatus.Invalidated,
-                actual.primaryRouteRefresherResult.status,
-            )
-            assertEquals(
-                RouteRefresherStatus.Failure,
-                actual.alternativesRouteRefresherResults.single().status,
-            )
-        }
-
-    @Test
-    fun refresh_expiredRouteTheDeviceRefreshesTimesOutAsAFailure() =
-        coroutineRule.runBlockingTest {
-            every {
-                RouteRefreshValidator.validateRoute(any(), any())
-            } returns RouteRefreshValidator.RouteValidationResult.Valid
-            every { route1.isExpired() } returns true
-            every { routeRefresh.refreshesOnDevice(route1) } returns true
-            every { routeRefresh.requestRouteRefresh(route1, any(), any()) } returns 0
-
-            val actual = sut.refresh(listOf(route1, route2), 10)
-
-            assertEquals(RouteRefresherStatus.Failure, actual.primaryRouteRefresherResult.status)
-        }
-
-    @Test
-    fun refresh_expiredRouteWithAPermanentFailureIsUnsupported() =
-        coroutineRule.runBlockingTest {
-            every {
-                RouteRefreshValidator.validateRoute(any(), any())
-            } returns RouteRefreshValidator.RouteValidationResult.Valid
-            every { route1.isExpired() } returns true
-            every { routeRefresh.refreshesOnDevice(route1) } returns true
-            every { routeRefresh.requestRouteRefresh(route1, any(), any()) } answers {
-                (args[2] as NavigationRouterRefreshCallback).onFailure(
-                    NavigationRouterRefreshError("can't refresh", permanent = true),
-                )
-                0
-            }
-
-            val actual = sut.refresh(listOf(route1, route2), 10)
-
-            assertEquals(
-                RouteRefresherStatus.Unsupported,
-                actual.primaryRouteRefresherResult.status,
-            )
-        }
-
-    @Test
-    fun refresh_expiredRouteWithATransientFailureIsAFailure() = coroutineRule.runBlockingTest {
-        every {
-            RouteRefreshValidator.validateRoute(any(), any())
-        } returns RouteRefreshValidator.RouteValidationResult.Valid
-        every { route1.isExpired() } returns true
-        every { routeRefresh.refreshesOnDevice(route1) } returns true
-        every { routeRefresh.requestRouteRefresh(route1, any(), any()) } answers {
-            (args[2] as NavigationRouterRefreshCallback).onFailure(
-                NavigationRouterRefreshError("router recreated", transient = true),
-            )
-            0
-        }
-
-        val actual = sut.refresh(listOf(route1, route2), 10)
-
-        assertEquals(RouteRefresherStatus.Failure, actual.primaryRouteRefresherResult.status)
-    }
-
-    @Test
-    fun refresh_expiredRouteTheDeviceDoesNotRefreshIsNotRequested() =
-        coroutineRule.runBlockingTest {
-            every {
-                RouteRefreshValidator.validateRoute(any(), any())
-            } returns RouteRefreshValidator.RouteValidationResult.Valid
-            every { route1.isExpired() } returns true
-            every { routeRefresh.refreshesOnDevice(route1) } returns false
-
-            val actual = sut.refresh(listOf(route1, route2), 10)
-
-            assertEquals(
-                RouteRefresherStatus.Invalidated,
-                actual.primaryRouteRefresherResult.status,
-            )
-            verify(exactly = 0) { routeRefresh.requestRouteRefresh(route1, any(), any()) }
-        }
-
-    @Test
-    fun refresh_routeThatIsNotExpiredDoesNotAskTheDevice() = coroutineRule.runBlockingTest {
-        every {
-            RouteRefreshValidator.validateRoute(any(), any())
-        } returns RouteRefreshValidator.RouteValidationResult.Valid
-
-        sut.refresh(listOf(route1, route2), 10)
-
-        verify(exactly = 0) { routeRefresh.refreshesOnDevice(any()) }
-    }
-
-    @Test
-    fun refresh_routeExpiredDuringAFailedRequestIsInvalidated() = coroutineRule.runBlockingTest {
-        every {
-            RouteRefreshValidator.validateRoute(any(), any())
-        } returns RouteRefreshValidator.RouteValidationResult.Valid
-        every { routeRefresh.requestRouteRefresh(route1, any(), any()) } answers {
-            every { route1.isExpired() } returns true
-            (args[2] as NavigationRouterRefreshCallback)
-                .onFailure(NavigationRouterRefreshError("route not found on server"))
-            0
-        }
-
-        val actual = sut.refresh(listOf(route1, route2), 10)
-
-        assertEquals(RouteRefresherStatus.Invalidated, actual.primaryRouteRefresherResult.status)
     }
 
     @Test
@@ -1121,10 +811,10 @@ class RouteRefresherTest {
             ),
         ) { every { id } returns route2Id }
         every {
-            RouteRefreshValidator.validateRoute(route1, any())
+            RouteRefreshValidator.validateRoute(route1)
         } returns RouteRefreshValidator.RouteValidationResult.Valid
         every {
-            RouteRefreshValidator.validateRoute(route2, any())
+            RouteRefreshValidator.validateRoute(route2)
         } returns RouteRefreshValidator.RouteValidationResult.Valid
         every { route1.isExpired() } returns true
         every { route2.isExpired() } returns true

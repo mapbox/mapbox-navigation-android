@@ -1,12 +1,11 @@
 package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.bindgen.DataRef
-import com.mapbox.common.dispatchers.SdkDispatchers
+import com.mapbox.common.LoggingLevel
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.internal.route.isExpired
 import com.mapbox.navigation.base.internal.route.routeOptions
 import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.RoutesRefreshData
 import com.mapbox.navigation.core.RoutesRefreshDataProvider
 import com.mapbox.navigation.core.directions.session.RouteRefresh
@@ -15,49 +14,39 @@ import com.mapbox.navigation.core.internal.RouteProgressData
 import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshCallback
 import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshError
 import com.mapbox.navigation.core.internal.utils.CoroutineUtils.withTimeoutOrDefault
+import com.mapbox.navigation.utils.internal.LoggerProvider
+import com.mapbox.navigation.utils.internal.accepts
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.logW
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 
 internal sealed class RouteRefresherStatus {
-    /**
-     * @param chargeOnly the refresh updated only the charge, see
-     *  [NavigationRouterRefreshCallback.onRefreshReady]
-     */
     data class Success(
         val refreshResponse: DataRef,
-        val chargeOnly: Boolean = false,
     ) : RouteRefresherStatus()
     object Failure : RouteRefresherStatus()
     object Invalid : RouteRefresherStatus()
     object Invalidated : RouteRefresherStatus()
-
-    /** Permanent: this route cannot be refreshed (e.g. OfflineRefresh). Do not retry. */
-    object Unsupported : RouteRefresherStatus()
 }
 
-/**
- * @param expiringDataRemoved the expiring data was removed from [route] after the refresh, so the
- *  refresh response of [status] is older than [route]
- */
 internal data class RouteRefresherResult<out T>(
     val route: NavigationRoute,
     val routeProgressData: T,
     val status: RouteRefresherStatus,
     val wasRouteUpdated: Boolean = status is RouteRefresherStatus.Success,
-    val expiringDataRemoved: Boolean = false,
 ) {
     fun isSuccess(): Boolean = status is RouteRefresherStatus.Success
-
-    fun isFullSuccess(): Boolean = (status as? RouteRefresherStatus.Success)?.chargeOnly == false
 }
 
 internal data class RoutesRefresherResult(
@@ -69,36 +58,9 @@ internal data class RoutesRefresherResult(
             alternativesRouteRefresherResults.any { it.isSuccess() }
     }
 
-    /**
-     * Whether a route got more than its charge refreshed. An offline route refreshed on the
-     * device has no server traffic, so when refreshable routes the server built are among them,
-     * only their refresh counts: a device-built alternative must not keep a server-built route's
-     * old traffic fresh. A route that is never refreshed (Invalid, Unsupported) has no traffic
-     * to keep fresh and doesn't count.
-     *
-     * The routes share one stale-data timer, so when a server-built route fails, an offline
-     * route refreshed meanwhile is cleared along with it after the timeout.
-     */
-    fun anyFullSuccess(): Boolean {
-        val results = listOf(primaryRouteRefresherResult) + alternativesRouteRefresherResults
-        val serverBuilt = results.filter {
-            it.route.origin != RouterOrigin.OFFLINE &&
-                it.status != RouteRefresherStatus.Invalid &&
-                it.status != RouteRefresherStatus.Unsupported
-        }
-        return serverBuilt.ifEmpty { results }.any { it.isFullSuccess() }
-    }
-
     fun anyRequestFailed(): Boolean {
         return primaryRouteRefresherResult.status == RouteRefresherStatus.Failure ||
             alternativesRouteRefresherResults.any { it.status == RouteRefresherStatus.Failure }
-    }
-
-    fun allUnsupported(): Boolean {
-        return primaryRouteRefresherResult.status == RouteRefresherStatus.Unsupported &&
-            alternativesRouteRefresherResults.all {
-                it.status == RouteRefresherStatus.Unsupported
-            }
     }
 
     fun find(routeId: String?): RouteRefresherResult<RouteProgressData?>? {
@@ -114,15 +76,11 @@ internal data class RoutesRefresherResult(
 internal class RouteRefresher(
     private val routesRefreshDataProvider: RoutesRefreshDataProvider,
     private val evRefreshDataProvider: EVRefreshDataProvider,
+    private val routeDiffProvider: DirectionsRouteDiffProvider,
     private val routeRefresh: RouteRefresh,
     private val globalScope: CoroutineScope = GlobalScope,
+    private val computationDispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) {
-
-    // Routes the router answered can never be refreshed. They are not requested again.
-    // A plain set: every refresh coroutine runs on the single main dispatcher
-    // (RouteRefreshControllerProvider gets SdkDispatchers.Main), so two refreshes never touch it
-    // at the same time, even when a cancelled one is still finishing.
-    private val unrefreshableRouteIds = mutableSetOf<String>()
 
     /**
      * Refreshes routes.
@@ -134,7 +92,6 @@ internal class RouteRefresher(
         routes: List<NavigationRoute>,
         routeRefreshTimeout: Long,
     ): RoutesRefresherResult {
-        unrefreshableRouteIds.retainAll(routes.map { it.id }.toSet())
         val routesRefreshData = routesRefreshDataProvider.getRoutesRefreshData(routes)
         val refreshedRoutes = refreshRoutes(routesRefreshData, routeRefreshTimeout)
         val primaryRoute = if (refreshedRoutes.first().isSuccess()) {
@@ -202,15 +159,7 @@ internal class RouteRefresher(
         route: NavigationRoute,
         routeProgressData: RouteProgressData,
     ): RouteRefresherResult<RouteProgressData?> {
-        if (route.id in unrefreshableRouteIds) {
-            logI(
-                "route ${route.id} is not refreshed again: the router can't refresh it",
-                RouteRefreshLog.LOG_CATEGORY,
-            )
-            return RouteRefresherResult(route, routeProgressData, RouteRefresherStatus.Unsupported)
-        }
-        val validationResult =
-            RouteRefreshValidator.validateRoute(route, routeRefresh::supportsOnDeviceRefresh)
+        val validationResult = RouteRefreshValidator.validateRoute(route)
         if (validationResult is RouteRefreshValidator.RouteValidationResult.Invalid) {
             logI(
                 "route ${route.id} can't be refreshed because ${validationResult.reason}",
@@ -222,11 +171,7 @@ internal class RouteRefresher(
                 RouteRefresherStatus.Invalid,
             )
         }
-        // The expiry is the server's refresh session. The device doesn't need it, so an expired
-        // route it may refresh is still requested. It is invalidated when the router fails it.
-        // A timeout is a Failure and is retried, as for any route.
-        val expired = route.isExpired()
-        if (expired && !routeRefresh.refreshesOnDevice(route)) {
+        if (route.isExpired()) {
             logI(
                 "route ${route.id} will not be refreshed because it is invalidated",
                 RouteRefreshLog.LOG_CATEGORY,
@@ -235,12 +180,6 @@ internal class RouteRefresher(
                 route,
                 routeProgressData,
                 RouteRefresherStatus.Invalidated,
-            )
-        }
-        if (expired) {
-            logI(
-                "route ${route.id} is expired, refreshing it on the device",
-                RouteRefreshLog.LOG_CATEGORY,
             )
         }
         val routeRefreshRequestData = RouteRefreshRequestData(
@@ -256,17 +195,10 @@ internal class RouteRefresher(
                         "throwable=${result.error.throwable}",
                     RouteRefreshLog.LOG_CATEGORY,
                 )
-                val status = when {
-                    result.error.refreshTtl == 0 -> RouteRefresherStatus.Invalidated
-                    // Not a Failure: a failure is retried, and this route never refreshes.
-                    result.error.permanent -> {
-                        unrefreshableRouteIds.add(route.id)
-                        RouteRefresherStatus.Unsupported
-                    }
-                    // Read again: the refresh_ttl of an error extends the expiry.
-                    !result.error.transient && route.isExpired() ->
-                        RouteRefresherStatus.Invalidated
-                    else -> RouteRefresherStatus.Failure
+                val status = if (result.error.refreshTtl == 0) {
+                    RouteRefresherStatus.Invalidated
+                } else {
+                    RouteRefresherStatus.Failure
                 }
                 RouteRefresherResult(route, routeProgressData, status)
             }
@@ -275,10 +207,15 @@ internal class RouteRefresher(
                     "Received refreshed route ${result.route.id}",
                     RouteRefreshLog.LOG_CATEGORY,
                 )
+                logRoutesDiff(
+                    newRoute = result.route,
+                    oldRoute = route,
+                    currentLegIndex = routeRefreshRequestData.legIndex,
+                )
                 RouteRefresherResult(
                     result.route,
                     routeProgressData,
-                    RouteRefresherStatus.Success(result.refreshResponse, result.chargeOnly),
+                    RouteRefresherStatus.Success(result.refreshResponse),
                 )
             }
         }
@@ -293,14 +230,8 @@ internal class RouteRefresher(
                 route,
                 routeRefreshRequestData,
                 object : NavigationRouterRefreshCallback {
-                    override fun onRefreshReady(
-                        route: NavigationRoute,
-                        refreshResponse: DataRef,
-                        chargeOnly: Boolean,
-                    ) {
-                        continuation.resume(
-                            RouteRefreshResult.Success(route, refreshResponse, chargeOnly),
-                        )
+                    override fun onRefreshReady(route: NavigationRoute, refreshResponse: DataRef) {
+                        continuation.resume(RouteRefreshResult.Success(route, refreshResponse))
                     }
 
                     override fun onFailure(error: NavigationRouterRefreshError) {
@@ -317,17 +248,43 @@ internal class RouteRefresher(
                     "Route refresh for route ${route.id} was cancelled after timeout",
                     RouteRefreshLog.LOG_CATEGORY,
                 )
-                globalScope.launch(SdkDispatchers.Main.immediate) {
+                globalScope.launch(Dispatchers.Main.immediate) {
                     routeRefresh.cancelRouteRefreshRequest(requestId)
                 }
             }
         }
 
+    private suspend fun logRoutesDiff(
+        newRoute: NavigationRoute,
+        oldRoute: NavigationRoute,
+        currentLegIndex: Int,
+    ) {
+        if (!LoggerProvider.getLoggerFrontend().getLogLevel().accepts(LoggingLevel.INFO)) {
+            return
+        }
+        withContext(computationDispatcher) {
+            val routeDiffs = routeDiffProvider.buildRouteDiffs(
+                oldRoute,
+                newRoute,
+                currentLegIndex,
+            )
+            if (routeDiffs.isEmpty()) {
+                logI(
+                    "No changes in annotations for route ${newRoute.id}",
+                    RouteRefreshLog.LOG_CATEGORY,
+                )
+            } else {
+                for (diff in routeDiffs) {
+                    logI(diff, RouteRefreshLog.LOG_CATEGORY)
+                }
+            }
+        }
+    }
+
     private sealed class RouteRefreshResult {
         data class Success(
             val route: NavigationRoute,
             val refreshResponse: DataRef,
-            val chargeOnly: Boolean,
         ) : RouteRefreshResult()
         data class Fail(val error: NavigationRouterRefreshError) : RouteRefreshResult()
     }

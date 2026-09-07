@@ -17,7 +17,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import java.util.Date
@@ -49,65 +48,6 @@ class ExpiringDataRemoverTest {
             val actual = sut.removeExpiringDataFromRoutesProgressData(input)
 
             assertEquals(input, actual)
-        }
-    }
-
-    @Test
-    fun `keeps a refreshed route marked as updated when client side update is not supported`() {
-        mockkStatic(NavigationRoute::updateOrNull) {
-            val route = createNavigationRoute(
-                directionsRoute = createDirectionsRoute(legs = null),
-            )
-            every { route.updateOrNull(any(), any(), any(), any()) } returns null
-            val input = RoutesRefresherResult(
-                RouteRefresherResult(
-                    route,
-                    RouteProgressData(0, 0, 0),
-                    RouteRefresherStatus.Success(mockk(), chargeOnly = true),
-                ),
-                emptyList(),
-            )
-
-            val actual = sut.removeExpiringDataFromRoutesProgressData(input)
-
-            assertEquals(input, actual)
-            assertTrue(actual.primaryRouteRefresherResult.wasRouteUpdated)
-        }
-    }
-
-    @Test
-    fun `keeps the update flags of each route when client side update is not supported`() {
-        mockkStatic(NavigationRoute::updateOrNull) {
-            val routes = List(3) {
-                createNavigationRoute(directionsRoute = createDirectionsRoute(legs = null))
-            }
-            routes.forEach { every { it.updateOrNull(any(), any(), any(), any()) } returns null }
-            val input = RoutesRefresherResult(
-                RouteRefresherResult(
-                    routes[0],
-                    RouteProgressData(0, 0, 0),
-                    RouteRefresherStatus.Success(mockk(), chargeOnly = true),
-                ),
-                listOf(
-                    RouteRefresherResult(
-                        routes[1],
-                        RouteProgressData(0, 0, 0),
-                        RouteRefresherStatus.Success(mockk(), chargeOnly = true),
-                    ),
-                    RouteRefresherResult(
-                        routes[2],
-                        RouteProgressData(0, 0, 0),
-                        RouteRefresherStatus.Failure,
-                    ),
-                ),
-            )
-
-            val actual = sut.removeExpiringDataFromRoutesProgressData(input)
-
-            val results = listOf(actual.primaryRouteRefresherResult) +
-                actual.alternativesRouteRefresherResults
-            assertEquals(listOf(true, true, false), results.map { it.wasRouteUpdated })
-            assertEquals(listOf(false, false, false), results.map { it.expiringDataRemoved })
         }
     }
 
@@ -285,7 +225,6 @@ class ExpiringDataRemoverTest {
                 route1RouteProgressData,
                 RouteRefresherStatus.Failure,
                 wasRouteUpdated = true,
-                expiringDataRemoved = true,
             ),
             listOf(
                 RouteRefresherResult(
@@ -293,14 +232,12 @@ class ExpiringDataRemoverTest {
                     route2RouteProgressData,
                     RouteRefresherStatus.Failure,
                     wasRouteUpdated = true,
-                    expiringDataRemoved = true,
                 ),
                 RouteRefresherResult(
                     expectedNewRoute3,
                     route3RouteProgressData,
                     RouteRefresherStatus.Invalidated,
                     wasRouteUpdated = true,
-                    expiringDataRemoved = true,
                 ),
             ),
         )

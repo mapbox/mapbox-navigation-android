@@ -1,13 +1,9 @@
 package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.base.internal.route.isExpired
-import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.testing.assertIs
-import io.mockk.every
-import io.mockk.mockkStatic
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -50,28 +46,6 @@ internal class RouteRefreshOnDemandIntegrationTest : RouteRefreshIntegrationTest
         assertEquals(0, refreshObserver.refreshes.size)
         testDispatcher.advanceTimeBy(20_000)
         assertEquals(1, refreshObserver.refreshes.size)
-    }
-
-    @Test
-    fun expiredRouteTheDeviceRefreshesIsRefreshedOnDemand() = runBlocking {
-        val routes = setUpRoutes("route_response_single_route_refresh.json", chargeOnly = true)
-        every { router.refreshesOnDevice(any()) } returns true
-        routeRefreshController = createRefreshController(100_000)
-        routeRefreshController.registerRouteRefreshObserver(refreshObserver)
-
-        mockkStatic(NavigationRoute::isExpired) {
-            every { any<NavigationRoute>().isExpired() } returns true
-            routeRefreshController.onRoutesChanged(
-                RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW),
-            )
-            routeRefreshController.requestImmediateRouteRefresh()
-        }
-
-        assertEquals(1, refreshObserver.refreshes.size)
-        assertEquals(
-            RouteRefresherStatus.Success::class,
-            refreshObserver.refreshes.first().primaryRouteRefresherResult.status::class,
-        )
     }
 
     @Test
@@ -239,9 +213,9 @@ internal class RouteRefreshOnDemandIntegrationTest : RouteRefreshIntegrationTest
             RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW),
         )
 
-        val immediateRefreshResults = mutableListOf<ImmediateRouteRefreshResult>()
+        var immediateRefreshResult: ImmediateRouteRefreshResult? = null
         routeRefreshController.requestImmediateRouteRefresh { result ->
-            immediateRefreshResults.add(result)
+            immediateRefreshResult = result
         }
 
         setUpRouteRefresh("route_response_single_route_refresh.json", responseDelay = 0)
@@ -251,10 +225,7 @@ internal class RouteRefreshOnDemandIntegrationTest : RouteRefreshIntegrationTest
 
         testDispatcher.advanceTimeBy(30_000)
 
-        // cancelled while the refresh request is in flight: notified once, from the
-        // completion handler
-        assertEquals(1, immediateRefreshResults.size)
-        assertIs<ImmediateRouteRefreshResult.Cancelled>(immediateRefreshResults.first())
+        assertIs<ImmediateRouteRefreshResult.Cancelled>(immediateRefreshResult)
         assertEquals(1, refreshObserver.refreshes.size)
         assertEquals(
             listOf(
@@ -282,18 +253,13 @@ internal class RouteRefreshOnDemandIntegrationTest : RouteRefreshIntegrationTest
         // does not start before the new routes are set, mirroring how Dispatchers.Main
         // queues a launch and the next Main-thread message cancels it before it runs.
         testDispatcher.pauseDispatcher()
-        val immediateRefreshResults = mutableListOf<ImmediateRouteRefreshResult>()
-        routeRefreshController.requestImmediateRouteRefresh { result ->
-            immediateRefreshResults.add(result)
-        }
+        routeRefreshController.requestImmediateRouteRefresh()
         routeRefreshController.onRoutesChanged(
             RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW),
         )
 
         testDispatcher.advanceTimeBy(30_000)
 
-        assertEquals(1, immediateRefreshResults.size)
-        assertIs<ImmediateRouteRefreshResult.Cancelled>(immediateRefreshResults.first())
         assertEquals(1, refreshObserver.refreshes.size)
         assertEquals(
             listOf(

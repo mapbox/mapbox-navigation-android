@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="car_action_search_favorites">Lemmikud</string>
+  <string name="car_search_no_results">Tulemusi ei leitud</string>
+  <string name="car_search_unknown_current_location">Tundmatu praegune asukoht</string>
+  <string name="car_search_unknown_search_location">Tundmatu otsingu asukoht</string>
+  <string name="car_label_ok">OK</string>
+  <string name="car_action_preview_title">Marsruudi eelvaade</string>
+  <string name="car_action_preview_no_location">Praegust asukohta ei leitud</string>
+  <string name="car_action_preview_navigate_button">Jätka marsruudile</string>
+  <string name="car_action_navigation_stop_button">Peata</string>
+  <string name="car_settings_title">Seaded</string>
+  <string name="car_settings_toggle_place_holder">Seadete kohatäide</string>
+  <string name="car_settings_preload_failure_title">Seadete eelkoormamine ebaõnnestus</string>
+  <string name="car_settings_preload_failure_message">Proovi rakendust uuesti avada.</string>
+  <string name="car_message_location_permissions">Palun avage rakendus ja lubage asukohaõigused.</string>
+  <string name="car_message_location_permissions_title">Vajab asukoha luba</string>
+  <string name="car_preference_audio_guidance_enabled_description">Lubab helijuhiseid</string>
+  <string name="car_feedback_title">Anna tagasisidet</string>
+  <string name="car_feedback_submit">Esita</string>
+  <string name="car_feedback_submit_toast_select_item">Palun valige tagasiside üksus</string>
+  <string name="car_feedback_submit_toast_success">Aitäh tagasiside eest!</string>
+  <string name="car_feedback_negative_routing_error">Marsruudi kvaliteet</string>
+  <string name="car_feedback_negative_incorrect_visual">Vale visuaal</string>
+  <string name="car_feedback_negative_incorrect_audio">Vale heli</string>
+  <string name="car_feedback_negative_road_issue">Teeprobleem</string>
+  <string name="car_feedback_negative_road_closed">Tee suletud</string>
+  <string name="car_feedback_negative_traffic_issue">Liiklusprobleem</string>
+  <string name="car_feedback_negative_route_not_allowed">Ebaseaduslik marsruut</string>
+  <string name="car_feedback_negative_positioning_issue">Positsioneerimise probleem</string>
+  <string name="car_feedback_negative_other_issue">Muu probleem</string>
+  <string name="car_feedback_search_incorrect_address">Vale aadress</string>
+  <string name="car_feedback_search_incorrect_location">Vale asukoht</string>
+  <string name="car_feedback_search_incorrect_name">Vale nimi</string>
+  <string name="car_feedback_search_other">Muu probleem</string>
+  <string name="car_feedback_arrival_positive">Hea</string>
+  <string name="car_feedback_arrival_negative">Pole hea</string>
+</resources>

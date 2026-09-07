@@ -91,9 +91,5 @@ fun createTestHttpService(
         override fun cancelUpload(id: Long, callback: ResultCallback) {
             TODO("Not yet implemented")
         }
-
-        override fun evictAllConnections() {
-            TODO("Not yet implemented")
-        }
     }
 }

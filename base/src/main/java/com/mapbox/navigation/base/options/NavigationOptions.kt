@@ -54,10 +54,9 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1000L
  * - Subtypes of [DirectionsJsonObject] (for example,
  *   [com.mapbox.api.directions.v5.models.DirectionsResponse]) do not support the
  *   `toBuilder()` function.
- * - `equals()` between a route object parsed with the native route object and one
- *   parsed with [nativeRouteObject] set to `false` throws [IllegalArgumentException]
- *   instead of returning `false`. Among native route objects, `equals()` and
- *   `hashCode()` are based on the route content.
+ * - The contract of `equals()` / `hashCode()` is not met for subtypes of
+ *   [DirectionsJsonObject].
+ * - Route refresh is not supported.
  * - A route parsed using the native route object may not fully match the same route
  *   parsed with [nativeRouteObject] set to `false`. In particular, coordinates
  *   returned by polyline-decoding APIs (such as
@@ -408,10 +407,9 @@ private constructor(
          * - Subtypes of [DirectionsJsonObject] (for example,
          *   [com.mapbox.api.directions.v5.models.DirectionsResponse]) do not support the
          *   `toBuilder()` function.
-         * - `equals()` between a route object parsed with the native route object and one
-         *   parsed with [nativeRouteObject] set to `false` throws [IllegalArgumentException]
-         *   instead of returning `false`. Among native route objects, `equals()` and
-         *   `hashCode()` are based on the route content.
+         * - The contract of `equals()` / `hashCode()` is not met for subtypes of
+         *   [DirectionsJsonObject].
+         * - Route refresh is not supported.
          * - A route parsed using the native route object may not fully match the same route
          *   parsed with [nativeRouteObject] set to `false`. In particular, coordinates
          *   returned by polyline-decoding APIs (such as

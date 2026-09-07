@@ -16,6 +16,7 @@ internal class DirectionsRouteFBWrapper private constructor(
     private val routeOptions: RouteOptions?,
     val fbContext: FBDirectionsRouteContext,
     val context: DirectionsRouteContext,
+    val mapMatchingOverriddenWaypoints: List<DirectionsWaypoint?>?,
 ) : DirectionsRoute(), BaseFBWrapper {
 
     internal val stepsCountWithGeometry: Int by lazy {
@@ -43,12 +44,6 @@ internal class DirectionsRouteFBWrapper private constructor(
                 val coordinate = fb.geometryNumeric(it)!!
                 Point.fromLngLat(coordinate.longitude, coordinate.latitude)
             }
-
-    /**
-     * Content based 64 bit hash of the whole route. Native code computes it once, while building
-     * the buffer, and stores it in the table, so this is a plain field read.
-     */
-    internal val contentHash: Long = fb.hash.toLong()
 
     override val unrecognized: ByteBuffer?
         get() = fb.unrecognizedPropertiesAsByteBuffer
@@ -79,6 +74,7 @@ internal class DirectionsRouteFBWrapper private constructor(
     }
 
     override fun waypoints(): List<DirectionsWaypoint?>? {
+        mapMatchingOverriddenWaypoints?.let { return it }
         return FlatbuffersListWrapper.get(fb.waypointsLength) {
             DirectionsWaypointFBWrapper.wrap(fb.waypoints(it))
         }
@@ -135,16 +131,10 @@ internal class DirectionsRouteFBWrapper private constructor(
             throwNotComparableRouteObjects()
         }
         if (other !is DirectionsRouteFBWrapper) return false
-
-        // Index and UUID identify the route, so comparing them first is exact: routes from
-        // different responses, or different routes of one response, can never be reported equal
-        // by a hash collision.
-        if (fb.routeIndex != other.fb.routeIndex) return false
-        if (fb.requestUuid != other.fb.requestUuid) return false
-        return contentHash == other.contentHash
+        return fb.contentEquals(other.fb)
     }
 
-    override fun hashCode(): Int = contentHash.toHashCode()
+    override fun hashCode() = fb.contentHash().toHashCode()
 
     override fun toString(): String {
         return "DirectionsRoute(" +
@@ -167,9 +157,15 @@ internal class DirectionsRouteFBWrapper private constructor(
 
     internal companion object {
 
+        /**
+         * @param externalWaypoints resolves the waypoints of routes which don't carry them in
+         *   their own flatbuffer table, given the enclosing response context. Only Map Matching
+         *   matchings need this; Directions routes leave it at the default.
+         */
         internal fun wrap(
             routeOptions: RouteOptions?,
             bindgenContext: DirectionsRouteContext,
+            externalWaypoints: (FBDirectionsRouteContext) -> List<DirectionsWaypoint?>? = { null },
         ): DirectionsRouteFBWrapper? {
             val routeContext = FBDirectionsRouteContext.getRootAsDirectionsRouteContext(
                 bindgenContext.getData().buffer,
@@ -182,6 +178,7 @@ internal class DirectionsRouteFBWrapper private constructor(
                     routeOptions,
                     routeContext,
                     bindgenContext,
+                    externalWaypoints(routeContext),
                 )
             }
         }

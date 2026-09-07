@@ -9,7 +9,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapboxMap
@@ -72,6 +71,7 @@ import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancelChildren
@@ -343,7 +343,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
      * from the [MapboxRouteLineApiOptions]
      */
     fun setRoadClasses(roadClasses: List<String>) {
-        calculationsScope.launch(SdkDispatchers.Main) {
+        calculationsScope.launch(Dispatchers.Main) {
             mutex.withLock {
                 trafficBackfillRoadClasses.clear()
                 trafficBackfillRoadClasses.addAll(roadClasses)
@@ -563,7 +563,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         } else {
             startMemoryMonitoring()
 
-            calculationsScope.launch(SdkDispatchers.Main) {
+            calculationsScope.launch(Dispatchers.Main) {
                 mutex.withLock {
                     // To not depend on FreeDrive recording: we want options all the time,
                     // but the object is usually created in FreeDrive
@@ -593,7 +593,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
     fun getRouteDrawData(
         consumer: MapboxNavigationConsumer<Expected<RouteLineError, RouteSetValue>>,
     ) {
-        calculationsScope.launch(SdkDispatchers.Main) {
+        calculationsScope.launch(Dispatchers.Main) {
             mutex.withLock {
                 val featureDataProvider: () -> List<RouteFeatureData> =
                     MapboxRouteLineUtils.getRouteFeatureDataProvider(routes)
@@ -616,31 +616,16 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         point: Point,
     ): Expected<RouteLineError, RouteLineUpdateValue> {
         val currentNanoTime = System.nanoTime()
-        val nanosSinceLastIndexUpdate = currentNanoTime - lastIndexUpdateTimeNano
-        if (vanishingRouteLine?.vanishingPointState == VanishingPointState.DISABLED) {
-            return ExpectedFactory.createError(
-                RouteLineError(
-                    "Vanishing point state is disabled.",
-                    null,
-                ),
-            )
-        }
-        if (nanosSinceLastIndexUpdate > RouteLayerConstants.MAX_ELAPSED_SINCE_INDEX_UPDATE_NANO) {
-            return ExpectedFactory.createError(
-                RouteLineError(
-                    "The update doesn't fall within the configured interval window: " +
-                        "the route progress-driven geometry index is stale.",
-                    null,
-                ),
-            )
-        }
-        if (currentNanoTime - lastPointUpdateTimeNano <
+        if (vanishingRouteLine?.vanishingPointState ==
+            VanishingPointState.DISABLED || currentNanoTime - lastIndexUpdateTimeNano >
+            RouteLayerConstants.MAX_ELAPSED_SINCE_INDEX_UPDATE_NANO ||
+            currentNanoTime - lastPointUpdateTimeNano <
             routeLineOptions.vanishingRouteLineUpdateIntervalNano
         ) {
             return ExpectedFactory.createError(
                 RouteLineError(
-                    "The update doesn't fall within the configured interval window: " +
-                        "called again too soon after the last point update.",
+                    "Vanishing point state is disabled or the update doesn't fall " +
+                        "within the configured interval window.",
                     null,
                 ),
             )
@@ -692,7 +677,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
 
         stopMemoryMonitoring()
 
-        calculationsScope.launch(SdkDispatchers.Main) {
+        calculationsScope.launch(Dispatchers.Main) {
             mutex.withLock {
                 sender.sendClearRouteLineEvent()
                 lastLocationPoint = null
@@ -1052,7 +1037,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         padding: Float,
         resultConsumer: MapboxNavigationConsumer<Expected<RouteNotFound, ClosestRouteValue>>,
     ) {
-        calculationsScope.launch(SdkDispatchers.Main) {
+        calculationsScope.launch(Dispatchers.Main) {
             if (!mapboxMap.isValid()) {
                 resultConsumer.accept(
                     ExpectedFactory.createError(
@@ -1676,9 +1661,6 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         scope: CoroutineScope,
     ): List<RouteLineExpressionData> =
         runBlocking {
-            map { scope.async(SdkDispatchers.Default) { f(it) } }.awaitAll()
+            map { scope.async(Dispatchers.Default) { f(it) } }.awaitAll()
         }
-
-    private fun Long.nanoToMs(): Long = this / 1_000_000
-    private fun Double.nanoToMs(): Long = (this / 1_000_000).toLong()
 }

@@ -3,7 +3,6 @@ package com.mapbox.navigation.ui.utils.internal.resource
 import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.bindgen.Value
 import com.mapbox.common.Cancelable
 import com.mapbox.common.NetworkRestriction
 import com.mapbox.common.ReachabilityInterface
@@ -19,7 +18,6 @@ import com.mapbox.common.ResourceLoadResultCallback
 import com.mapbox.common.ResourceLoadStatus
 import com.mapbox.common.TileDataDomain
 import com.mapbox.common.TileStore
-import com.mapbox.common.TileStoreInternalFuncs
 import com.mapbox.navigation.testing.toDataRef
 import com.mapbox.navigation.utils.internal.NavigationTileStore
 import io.mockk.every
@@ -36,15 +34,13 @@ import java.util.Date
 class DefaultResourceLoaderTest {
 
     private lateinit var mockTileStore: TileStore
-    private lateinit var mockTileStoreInternalFuncs: TileStoreInternalFuncs
     private lateinit var mockNavigationTileStore: NavigationTileStore
     private lateinit var mockReachability: ReachabilityInterface
     private lateinit var sut: ResourceLoader
 
     @Before
     fun setUp() {
-        mockTileStore = mockk(relaxed = true)
-        mockTileStoreInternalFuncs = mockk<StubTileStoreInternalFuncs>(relaxed = true)
+        mockTileStore = mockk<StubTileStore>(relaxed = true)
         mockNavigationTileStore = mockk<NavigationTileStore>(relaxed = true)
         every { mockNavigationTileStore.invoke() } returns mockTileStore
 
@@ -54,7 +50,6 @@ class DefaultResourceLoaderTest {
         sut = DefaultResourceLoader(
             mockNavigationTileStore,
             mockReachability,
-            internalFuncs = { mockTileStoreInternalFuncs },
         )
     }
 
@@ -69,7 +64,7 @@ class DefaultResourceLoaderTest {
         val descriptionCapture = slot<ResourceDescription>()
         val optionsCapture = slot<ResourceLoadOptions>()
         every {
-            mockTileStoreInternalFuncs.loadResource(
+            mockTileStore.loadResource(
                 capture(descriptionCapture),
                 capture(optionsCapture),
                 ofType(ResourceLoadProgressCallback::class),
@@ -96,7 +91,7 @@ class DefaultResourceLoaderTest {
         val progressCallbackCapture = slot<ResourceLoadProgressCallback>()
         val resultCallbackCapture = slot<ResourceLoadResultCallback>()
         every {
-            mockTileStoreInternalFuncs.loadResource(
+            mockTileStore.loadResource(
                 any(),
                 any(),
                 capture(progressCallbackCapture),
@@ -128,7 +123,7 @@ class DefaultResourceLoaderTest {
 
         val optionsCapture = slot<ResourceLoadOptions>()
         verify {
-            mockTileStoreInternalFuncs.loadResource(
+            mockTileStore.loadResource(
                 ResourceDescription(TileDataDomain.NAVIGATION, loadRequest.url),
                 capture(optionsCapture),
                 any(),
@@ -150,7 +145,7 @@ class DefaultResourceLoaderTest {
         }
         val cancelable = spyk(stubCancelable())
         every {
-            mockTileStoreInternalFuncs.loadResource(any(), any(), any(), any())
+            mockTileStore.loadResource(any(), any(), any(), any())
         } returns cancelable
 
         val requestId = sut.load(loadRequest, mockk(relaxed = true))
@@ -171,7 +166,7 @@ class DefaultResourceLoaderTest {
         val progressCallbackCapture = slot<ResourceLoadProgressCallback>()
         val resultCallbackCapture = slot<ResourceLoadResultCallback>()
         every {
-            mockTileStoreInternalFuncs.loadResource(
+            mockTileStore.loadResource(
                 any(),
                 any(),
                 capture(progressCallbackCapture),
@@ -213,7 +208,7 @@ class DefaultResourceLoaderTest {
         val progressCallbackCapture = slot<ResourceLoadProgressCallback>()
         val resultCallbackCapture = slot<ResourceLoadResultCallback>()
         every {
-            mockTileStoreInternalFuncs.loadResource(
+            mockTileStore.loadResource(
                 any(),
                 any(),
                 capture(progressCallbackCapture),
@@ -255,8 +250,8 @@ class DefaultResourceLoaderTest {
     }
 }
 
-// Stub TileStoreInternalFuncs to avoid java.lang.UnsatisfiedLinkError
-private class StubTileStoreInternalFuncs : TileStoreInternalFuncs(0) {
+// Stub TileStore to avoid java.lang.UnsatisfiedLinkError
+private class StubTileStore : TileStore(0) {
     override fun loadResource(
         description: ResourceDescription,
         options: ResourceLoadOptions,
@@ -288,8 +283,6 @@ object Fixtures {
         contentType: String = "image/png",
         etag: String = "",
         belongsToGroup: Boolean = false,
-        transferSize: Long = 0,
-        extraMetadata: Value = Value.nullValue(),
     ): ResourceLoadResult {
         return ResourceLoadResult(
             data,
@@ -302,8 +295,6 @@ object Fixtures {
             contentType,
             etag,
             belongsToGroup,
-            transferSize,
-            extraMetadata,
         )
     }
 }

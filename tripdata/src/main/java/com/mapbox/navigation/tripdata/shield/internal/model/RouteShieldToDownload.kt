@@ -4,12 +4,12 @@ import com.mapbox.api.directions.v5.models.MapboxShield
 import com.mapbox.api.directions.v5.models.ShieldSprite
 import com.mapbox.common.MapboxOptions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.base.internal.utils.MapboxApiUrlUtils
 import com.mapbox.navigation.tripdata.shield.api.ShieldFontConfig
 
 private const val SPRITE = "/sprite"
 private const val SPRITE_BASE_URL = "https://api.mapbox.com/styles/v1/"
 private const val SPRITE_JSON = "sprite.json"
+private const val REQUEST_ACCESS_TOKEN = "?access_token="
 private const val SVG_EXTENSION = ".svg"
 
 sealed class RouteShieldToDownload {
@@ -20,16 +20,13 @@ sealed class RouteShieldToDownload {
         val legacyFallback: MapboxLegacy? = null,
     ) : RouteShieldToDownload() {
 
-        /**
-         * The shield `base_url` comes from the route response, so the access token is added only
-         * when it points at the Mapbox API.
-         */
         fun generateUrl(sprite: ShieldSprite): String = this.mapboxShield.baseUrl()
             .plus("/${this.shieldSpriteToDownload.userId}")
             .plus("/${this.shieldSpriteToDownload.styleId}")
             .plus(SPRITE)
             .plus("/${sprite.spriteName()}")
-            .withAccessToken()
+            .plus(REQUEST_ACCESS_TOKEN)
+            .plus(MapboxOptions.accessToken)
     }
 
     /**
@@ -48,11 +45,9 @@ internal fun RouteShieldToDownload.MapboxDesign.generateSpriteSheetUrl(): String
         .plus("${this.shieldSpriteToDownload.userId}/")
         .plus("${this.shieldSpriteToDownload.styleId}/")
         .plus(SPRITE_JSON)
-        .withAccessToken()
+        .plus(REQUEST_ACCESS_TOKEN)
+        .plus(MapboxOptions.accessToken)
 }
-
-private fun String.withAccessToken(): String =
-    MapboxApiUrlUtils.withMapboxAccessToken(this, MapboxOptions.accessToken)
 
 internal data class SizeSpecificSpriteInfo(
     val name: String,

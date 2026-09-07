@@ -37,7 +37,7 @@ internal class JunctionFBWrapper private constructor(
         return fb.contentEquals(other.fb)
     }
 
-    override fun hashCode() = fb.hash.toHashCode()
+    override fun hashCode() = fb.contentHash().toHashCode()
 
     override fun toString(): String {
         return "Junction(name=${name()})"

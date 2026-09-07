@@ -1,21 +1,10 @@
 package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.base.internal.RouteRefreshRequestData
-import com.mapbox.navigation.base.internal.route.isExpired
-import com.mapbox.navigation.base.route.NavigationRoute
-import com.mapbox.navigation.core.RoutesInvalidatedObserver
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
-import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshCallback
-import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshError
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.mockkStatic
-import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -239,116 +228,6 @@ internal class PlannedRouteRefreshIntegrationTest : RouteRefreshIntegrationTest(
             ),
             stateObserver.getStatesSnapshot(),
         )
-    }
-
-    @Test
-    fun offlineRouteTheRouterCanNeverRefreshStopsPlannedRefreshes() = runBlocking {
-        // The harness has no progress data for alternatives, so only the primary route.
-        val routes = createOfflineEvRoutes("route_response_route_refresh_multileg.json").take(1)
-        every { router.supportsOnDeviceRefresh() } returns true
-        every { router.getRouteRefresh(any(), any<RouteRefreshRequestData>(), any()) } answers {
-            (thirdArg() as NavigationRouterRefreshCallback).onFailure(
-                NavigationRouterRefreshError("can't refresh", permanent = true),
-            )
-            0
-        }
-        routeRefreshController = createRefreshController(30_000)
-        routeRefreshController.registerRouteRefreshObserver(refreshObserver)
-        routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
-
-        routeRefreshController.onRoutesChanged(
-            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW),
-        )
-        testDispatcher.advanceTimeBy(30_000 * 5)
-
-        // One attempt fails, then nothing more: no retries and no expired-data clean-up.
-        verify(exactly = 1) {
-            router.getRouteRefresh(any(), any<RouteRefreshRequestData>(), any())
-        }
-        assertEquals(
-            listOf(
-                RouteRefreshExtra.REFRESH_STATE_STARTED,
-                RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
-            ),
-            stateObserver.getStatesSnapshot(),
-        )
-        assertEquals(0, refreshObserver.refreshes.size)
-    }
-
-    @Test
-    fun offlineEvRouteIsRefreshedWhenTheDeviceCanRefreshIt() = runBlocking {
-        val routes = setUpRoutes("route_response_route_refresh_multileg.json")
-        val offlineRoutes = createOfflineEvRoutes("route_response_route_refresh_multileg.json")
-        every { router.supportsOnDeviceRefresh() } returns true
-        routeRefreshController = createRefreshController(30_000)
-        routeRefreshController.registerRouteRefreshObserver(refreshObserver)
-
-        routeRefreshController.onRoutesChanged(
-            RoutesUpdatedResult(offlineRoutes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW),
-        )
-        testDispatcher.advanceTimeBy(30_000)
-
-        assertEquals(1, refreshObserver.refreshes.size)
-        assertEquals(
-            routes.map { it.id },
-            refreshObserver.refreshes.first().let { result ->
-                listOf(result.primaryRouteRefresherResult.route.id) +
-                    result.alternativesRouteRefresherResults.map { it.route.id }
-            },
-        )
-        assertEquals(true, refreshObserver.refreshes.first().anySuccess())
-    }
-
-    @Test
-    fun expiredRouteTheDeviceRefreshesKeepsBeingRefreshed() = runBlocking {
-        val routes = setUpRoutes("route_response_route_refresh_multileg.json", chargeOnly = true)
-            .take(1)
-        every { router.refreshesOnDevice(any()) } returns true
-        routeRefreshController = createRefreshController(30_000)
-        routeRefreshController.registerRouteRefreshObserver(refreshObserver)
-        val invalidatedObserver = mockk<RoutesInvalidatedObserver>(relaxed = true)
-        routeRefreshController.registerRoutesInvalidatedObserver(invalidatedObserver)
-
-        mockkStatic(NavigationRoute::isExpired) {
-            every { any<NavigationRoute>().isExpired() } returns true
-            routeRefreshController.onRoutesChanged(
-                RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW),
-            )
-            testDispatcher.advanceTimeBy(30_000 * 3)
-        }
-
-        assertEquals(3, refreshObserver.refreshes.size)
-        assertTrue(refreshObserver.refreshes.all { it.anySuccess() })
-        verify(exactly = 0) { invalidatedObserver.onRoutesInvalidated(any()) }
-    }
-
-    @Test
-    fun expiredRouteTheDeviceFailsToRefreshIsInvalidatedOnceAndStillRequested() = runBlocking {
-        val routes = createOfflineEvRoutes("route_response_route_refresh_multileg.json").take(1)
-        every { router.supportsOnDeviceRefresh() } returns true
-        every { router.refreshesOnDevice(any()) } returns true
-        every { router.getRouteRefresh(any(), any<RouteRefreshRequestData>(), any()) } answers {
-            (thirdArg() as NavigationRouterRefreshCallback)
-                .onFailure(NavigationRouterRefreshError("can't refresh"))
-            0
-        }
-        routeRefreshController = createRefreshController(30_000)
-        val invalidatedObserver = mockk<RoutesInvalidatedObserver>(relaxed = true)
-        routeRefreshController.registerRoutesInvalidatedObserver(invalidatedObserver)
-
-        mockkStatic(NavigationRoute::isExpired) {
-            every { any<NavigationRoute>().isExpired() } returns true
-            routeRefreshController.onRoutesChanged(
-                RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW),
-            )
-            testDispatcher.advanceTimeBy(30_000 * 3)
-        }
-
-        // Invalidated is not retried: one request per interval, and the observer fires once.
-        verify(exactly = 3) {
-            router.getRouteRefresh(any(), any<RouteRefreshRequestData>(), any())
-        }
-        verify(exactly = 1) { invalidatedObserver.onRoutesInvalidated(any()) }
     }
 
     @Test

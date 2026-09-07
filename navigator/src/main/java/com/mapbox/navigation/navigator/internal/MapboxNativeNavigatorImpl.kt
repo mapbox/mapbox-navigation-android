@@ -27,8 +27,6 @@ import com.mapbox.navigator.AdasisConfig
 import com.mapbox.navigator.AdasisFacadeHandleInterface
 import com.mapbox.navigator.CacheDataDomain
 import com.mapbox.navigator.CacheHandle
-import com.mapbox.navigator.ChangeLegCallback
-import com.mapbox.navigator.ChargingState
 import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.ElectronicHorizonObserver
 import com.mapbox.navigator.EventsMetadataInterface
@@ -105,12 +103,10 @@ class MapboxNativeNavigatorImpl(
     override val inputsService: InputsServiceHandle =
         NavigatorLoader.createInputService(config, historyRecorderComposite)
 
-    private var _navigatorHandleRef: NavigatorHandle? =
+    // Built once and kept stable; its internal Navigator/CacheHandle are replaced on every
+    // (re)create in [init].
+    override val navigatorHandle: NavigatorHandle =
         NavigatorLoader.createNavigatorHandle(historyRecorderComposite)
-
-    // Nulled in shutdown() so the C++ peer can be released before GC sweeps this island.
-    override val navigatorHandle: NavigatorHandle
-        get() = _navigatorHandleRef ?: error("NavigatorHandle accessed after shutdown")
 
     private val nativeNavigatorRecreationObservers =
         CopyOnWriteArraySet<NativeNavigatorRecreationObserver>()
@@ -431,21 +427,6 @@ class MapboxNativeNavigatorImpl(
         navigator.retainUserChargingStation(routeId, stationId, retained)
     }
 
-    override fun startCharging() {
-        if (warnIfShutdown("startCharging")) return
-        navigator.startCharging()
-    }
-
-    override fun stopCharging(callback: ChangeLegCallback) {
-        if (warnIfShutdown("stopCharging")) return
-        navigator.stopCharging(callback)
-    }
-
-    override fun getChargingState(): ChargingState {
-        if (warnIfShutdown("getChargingState")) return ChargingState.NOT_CHARGING
-        return navigator.stateOfCharging()
-    }
-
     // EH
 
     override fun setElectronicHorizonObserver(eHorizonObserver: ElectronicHorizonObserver?) {
@@ -545,7 +526,6 @@ class MapboxNativeNavigatorImpl(
 
         isShutdown = true
         navigator.shutdown()
-        _navigatorHandleRef = null
     }
 
     override fun createMapsPredictiveCacheController(

@@ -1,7 +1,7 @@
 package com.mapbox.navigation.ui.maps.guidance.junction.api
 
+import android.net.Uri
 import androidx.annotation.UiThread
-import androidx.core.net.toUri
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.bindgen.DataRef
@@ -12,7 +12,6 @@ import com.mapbox.common.MapboxServices
 import com.mapbox.common.ResourceLoadError
 import com.mapbox.common.ResourceLoadResult
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.base.internal.utils.MapboxApiUrlUtils
 import com.mapbox.navigation.base.internal.utils.MapboxOptionsUtil
 import com.mapbox.navigation.base.internal.utils.toByteArray
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
@@ -68,13 +67,11 @@ class MapboxJunctionApi {
                     }
                 }
             }
-
             is JunctionResult.JunctionUnavailable -> {
                 consumer.accept(
                     createJunctionErrorResult("No junction available for current maneuver."),
                 )
             }
-
             else -> {
                 consumer.accept(
                     createJunctionErrorResult("Inappropriate $result emitted for $action."),
@@ -117,13 +114,11 @@ class MapboxJunctionApi {
                     }
                 }
             }
-
             is JunctionResult.JunctionUnavailable -> {
                 consumer.accept(
                     createJunctionErrorResult("No junction available for current maneuver."),
                 )
             }
-
             else -> {
                 consumer.accept(
                     createJunctionErrorResult("Inappropriate $result emitted for $action."),
@@ -146,7 +141,8 @@ class MapboxJunctionApi {
         callback: (Expected<ResourceLoadError, ResourceLoadResult>) -> Unit,
     ) {
         val accessToken = MapboxOptionsUtil.getTokenForService(MapboxServices.DIRECTIONS)
-        val urlWithFormat = junctionUrl.toUri().buildUpon()
+        val url = Uri.parse(junctionUrl).buildUpon()
+            .appendQueryParameter(ACCESS_TOKEN, accessToken)
             .apply {
                 // For backwards compatibility we should not pass format parameter
                 // if request is made from a function which doesn't accept format
@@ -155,7 +151,6 @@ class MapboxJunctionApi {
                 }
             }
             .build().toString()
-        val url = MapboxApiUrlUtils.withMapboxAccessToken(urlWithFormat, accessToken)
 
         val requestAction = JunctionAction.PrepareJunctionRequest(url)
         val junctionRequest = JunctionProcessor.process(requestAction)
@@ -174,15 +169,12 @@ class MapboxJunctionApi {
             is JunctionResult.JunctionRaster.Success -> {
                 createValue(result.dataRef to result.contentType)
             }
-
             is JunctionResult.JunctionRaster.Failure -> {
                 createJunctionErrorResult(result.error)
             }
-
             is JunctionResult.JunctionRaster.Empty -> {
                 createJunctionErrorResult("No junction available for current maneuver.")
             }
-
             else -> {
                 createJunctionErrorResult("Inappropriate $result emitted for $action.")
             }
@@ -195,11 +187,9 @@ class MapboxJunctionApi {
             is JunctionResult.JunctionBitmap.Success -> {
                 createValue(JunctionValue(result.junction))
             }
-
             is JunctionResult.JunctionBitmap.Failure -> {
                 createJunctionErrorResult(result.message)
             }
-
             else -> {
                 createJunctionErrorResult("Inappropriate $result emitted for $action.")
             }
@@ -208,6 +198,7 @@ class MapboxJunctionApi {
 
     private companion object {
 
+        private const val ACCESS_TOKEN = "access_token"
         private const val IMAGE_FORMAT = "image_format"
 
         private fun <R> createJunctionErrorResult(

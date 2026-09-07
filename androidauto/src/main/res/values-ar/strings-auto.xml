@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="car_action_search_favorites">المفضلة</string>
+  <string name="car_search_no_results">لا توجد نتائج</string>
+  <string name="car_search_unknown_current_location">الموقع الحالي غير معروف</string>
+  <string name="car_search_unknown_search_location">موقع البحث غير معروف</string>
+  <string name="car_label_ok">حسنًا</string>
+  <string name="car_action_preview_title">معاينة المسار</string>
+  <string name="car_action_preview_no_location">الموقع الحالي غير موجود</string>
+  <string name="car_action_preview_navigate_button">استمر في المسار</string>
+  <string name="car_action_navigation_stop_button">توقف</string>
+  <string name="car_settings_title">الإعدادات</string>
+  <string name="car_settings_toggle_place_holder">إعدادات العنصر النائب</string>
+  <string name="car_settings_preload_failure_title">فشل في تحميل الإعدادات مسبقًا</string>
+  <string name="car_settings_preload_failure_message">حاول فتح التطبيق مرة أخرى.</string>
+  <string name="car_message_location_permissions">يرجى فتح التطبيق وتمكين إذن الموقع.</string>
+  <string name="car_message_location_permissions_title">يحتاج إلى إذن الموقع</string>
+  <string name="car_preference_audio_guidance_enabled_description">يُمكّن التوجيه الصوتي</string>
+  <string name="car_feedback_title">الإبلاغ عن ملاحظات</string>
+  <string name="car_feedback_submit">إرسال</string>
+  <string name="car_feedback_submit_toast_select_item">يرجى اختيار عنصر ملاحظات</string>
+  <string name="car_feedback_submit_toast_success">شكرًا لك على ملاحظاتك!</string>
+  <string name="car_feedback_negative_routing_error">جودة الطريق</string>
+  <string name="car_feedback_negative_incorrect_visual">صورة غير صحيحة</string>
+  <string name="car_feedback_negative_incorrect_audio">الصوت غير صحيح</string>
+  <string name="car_feedback_negative_road_issue">مشكلة في الطريق</string>
+  <string name="car_feedback_negative_road_closed">الطريق مغلق</string>
+  <string name="car_feedback_negative_traffic_issue">مشكلة المرور</string>
+  <string name="car_feedback_negative_route_not_allowed">مسار غير قانوني</string>
+  <string name="car_feedback_negative_positioning_issue">مشكلة في تحديد الموقع</string>
+  <string name="car_feedback_negative_other_issue">مشكلة أخرى</string>
+  <string name="car_feedback_search_incorrect_address">عنوان غير صحيح</string>
+  <string name="car_feedback_search_incorrect_location">موقع غير صحيح</string>
+  <string name="car_feedback_search_incorrect_name">اسم غير صحيح</string>
+  <string name="car_feedback_search_other">مشكلة أخرى</string>
+  <string name="car_feedback_arrival_positive">جيد</string>
+  <string name="car_feedback_arrival_negative">ليس جيدًا</string>
+</resources>

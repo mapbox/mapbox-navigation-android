@@ -12,9 +12,9 @@ import com.mapbox.navigation.base.internal.route.parsing.parser.directions.Direc
 import com.mapbox.navigation.base.internal.route.parsing.parser.directions.NnAndModelsParallelNavigationRoutesParser
 import com.mapbox.navigation.base.internal.route.parsing.parser.directions.NroFromNativeRouteNavigationRoutesParser
 import com.mapbox.navigation.base.internal.route.parsing.parser.mapmatching.MapMatchedRoutesParserJava
+import com.mapbox.navigation.base.internal.route.parsing.parser.mapmatching.MapMatchedRoutesParserNro
 import com.mapbox.navigation.base.internal.route.parsing.parser.mapmatching.NnAndModelsParallelMapMatchedRoutesParser
-import com.mapbox.navigation.base.internal.route.parsing.parser.mapmatching.NroFromNativeRouteMapMatchedRoutesParser
-import com.mapbox.navigation.base.internal.route.parsing.parser.nn.JsonRouteInterfaceParser
+import com.mapbox.navigation.base.internal.route.parsing.parser.nn.JsonResponseOptimizedRouteInterfaceParser
 import com.mapbox.navigation.base.internal.route.parsing.parser.nn.NroRouteInterfacesParser
 import com.mapbox.navigation.base.internal.utils.PrepareForParsingAction
 import com.mapbox.navigation.base.internal.utils.createImmediateNoOptimizationsParsingQueue
@@ -76,24 +76,20 @@ fun setupParsing(
         )
     }
 
-    val mapMatchedRoutesParser = if (nativeRoute) {
-        NroFromNativeRouteMapMatchedRoutesParser(
-            routeParsingTracking,
-            parsingDispatcher,
-            time,
-            nnParser,
-        )
+    val mapMatchedRoutesModelParser = if (nativeRoute) {
+        MapMatchedRoutesParserNro()
     } else {
-        NnAndModelsParallelMapMatchedRoutesParser(
-            routeParsingTracking,
-            parsingDispatcher,
-            time,
-            MapMatchedRoutesParserJava(),
-            nnParser,
-            parsingQueue,
-            loggerFrontend,
-        )
+        MapMatchedRoutesParserJava()
     }
+    val mapMatchedRoutesParser = NnAndModelsParallelMapMatchedRoutesParser(
+        routeParsingTracking,
+        parsingDispatcher,
+        time,
+        mapMatchedRoutesModelParser,
+        nnParser,
+        parsingQueue,
+        loggerFrontend,
+    )
 
     val routeInterfacesParser = if (nativeRoute) {
         NroRouteInterfacesParser(
@@ -101,7 +97,7 @@ fun setupParsing(
             time,
         )
     } else {
-        JsonRouteInterfaceParser(
+        JsonResponseOptimizedRouteInterfaceParser(
             existingParsedRoutesLookup,
             parsingDispatcher,
             time,

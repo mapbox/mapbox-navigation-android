@@ -30,7 +30,7 @@ CORE_MODULES = $(RELEASED_CORE_MODULES)
 RELEASED_UI_MODULES = \
 ui-maps \
 ui-components \
-android-auto-components \
+androidauto \
 ui-base \
 ui-utils \
 libnavigation-android
@@ -56,10 +56,6 @@ check-kotlin-lint:
 	$(call run-gradle-tasks,$(CORE_MODULES),ktlint)
 	$(call run-gradle-tasks,$(UI_MODULES),ktlint)
 	$(call run-gradle-tasks,$(APPLICATION_MODULES),ktlint)
-
-.PHONY: check-detekt
-check-detekt:
-	./gradlew detekt
 
 .PHONY: format-kotlin-lint
 format-kotlin-lint:
@@ -143,7 +139,6 @@ core-dependency-graph:
 .PHONY: core-check-api
 core-check-api: assemble-core-release
 	./gradlew :base:checkApi -PhidePackage=com.mapbox.navigation.base.internal
-	./gradlew :dispatchers:checkApi
 	./gradlew :metrics:checkApi -PhidePackage=com.mapbox.navigation.metrics.internal
 	./gradlew :utils:checkApi -PhidePackage=com.mapbox.navigation.utils.internal
 	./gradlew :navigator:checkApi -PhidePackage=com.mapbox.navigation.navigator.internal
@@ -158,7 +153,6 @@ core-check-api: assemble-core-release
 .PHONY: core-update-api
 core-update-api: assemble-core-release
 	./gradlew :base:updateApi -PhidePackage=com.mapbox.navigation.base.internal
-	./gradlew :dispatchers:updateApi
 	./gradlew :metrics:updateApi -PhidePackage=com.mapbox.navigation.metrics.internal
 	./gradlew :utils:updateApi -PhidePackage=com.mapbox.navigation.utils.internal
 	./gradlew :navigator:updateApi -PhidePackage=com.mapbox.navigation.navigator.internal
@@ -226,7 +220,7 @@ ui-check-api: assemble-ui-release
 	# TODO Remove -PhideId=ReferencesHidden after fixing errors
 	./gradlew :ui-maps:checkApi -PhidePackage=com.mapbox.navigation.ui.maps.internal -PhideId=ReferencesHidden
 	./gradlew :ui-components:updateApi -PhidePackage=com.mapbox.navigation.ui.components.internal,com.mapbox.navigation.ui.components.maneuver.internal,com.mapbox.navigation.ui.components.maps.internal,com.mapbox.navigation.ui.components.speedlimit.internal,com.mapbox.navigation.ui.components.status.internal,com.mapbox.navigation.ui.components.tripprogress.internal,com.mapbox.navigation.ui.components.voice.internal
-	./gradlew :android-auto-components:updateApi -PhidePackage=com.mapbox.navigation.ui.androidauto.internal
+	./gradlew :androidauto:updateApi -PhidePackage=com.mapbox.navigation.ui.androidauto.internal
 	./gradlew :ui-base:checkApi -PhidePackage=com.mapbox.navigation.ui.base.internal -PhideId=ReferencesHidden
 	./gradlew :ui-utils:checkApi -PhidePackage=com.mapbox.navigation.ui.utils.internal -PhideId=ReferencesHidden
 
@@ -234,7 +228,7 @@ ui-check-api: assemble-ui-release
 ui-update-api: assemble-ui-release
 	./gradlew :ui-maps:updateApi -PhidePackage=com.mapbox.navigation.ui.maps.internal
 	./gradlew :ui-components:updateApi -PhidePackage=com.mapbox.navigation.ui.components.internal,com.mapbox.navigation.ui.components.maneuver.internal,com.mapbox.navigation.ui.components.maps.internal,com.mapbox.navigation.ui.components.speedlimit.internal,com.mapbox.navigation.ui.components.status.internal,com.mapbox.navigation.ui.components.tripprogress.internal,com.mapbox.navigation.ui.components.voice.internal
-	./gradlew :android-auto-components:updateApi -PhidePackage=com.mapbox.navigation.ui.androidauto.internal
+	./gradlew :androidauto:updateApi -PhidePackage=com.mapbox.navigation.ui.androidauto.internal
 	./gradlew :ui-base:updateApi -PhidePackage=com.mapbox.navigation.ui.base.internal
 	./gradlew :ui-utils:updateApi -PhidePackage=com.mapbox.navigation.ui.utils.internal
 

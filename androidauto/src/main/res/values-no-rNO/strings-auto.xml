@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="car_action_search_favorites">Favoritter</string>
+  <string name="car_search_no_results">Ingen resultater</string>
+  <string name="car_search_unknown_current_location">Ukjent nåværende posisjon</string>
+  <string name="car_search_unknown_search_location">Ukjent søkested</string>
+  <string name="car_label_ok">OK</string>
+  <string name="car_action_preview_title">Rute forhåndsvisning</string>
+  <string name="car_action_preview_no_location">Gjeldende plassering ikke funnet</string>
+  <string name="car_action_preview_navigate_button">Fortsett å rute</string>
+  <string name="car_action_navigation_stop_button">Stopp</string>
+  <string name="car_settings_title">Innstillinger</string>
+  <string name="car_settings_toggle_place_holder">Innstillinger plassholder</string>
+  <string name="car_settings_preload_failure_title">Kunne ikke forhåndslaste innstillinger</string>
+  <string name="car_settings_preload_failure_message">Prøv å åpne appen igjen.</string>
+  <string name="car_message_location_permissions">Vennligst åpne applikasjonen og aktiver posisjonstillatelse.</string>
+  <string name="car_message_location_permissions_title">Trenger steds-tillatelse</string>
+  <string name="car_preference_audio_guidance_enabled_description">Aktiverer lydveiledningen</string>
+  <string name="car_feedback_title">Rapporter tilbakemelding</string>
+  <string name="car_feedback_submit">Send inn</string>
+  <string name="car_feedback_submit_toast_select_item">Vennligst velg et tilbakemeldingspunkt</string>
+  <string name="car_feedback_submit_toast_success">Takk for tilbakemeldingen din!</string>
+  <string name="car_feedback_negative_routing_error">Rutekvalitet</string>
+  <string name="car_feedback_negative_incorrect_visual">Feil visuell</string>
+  <string name="car_feedback_negative_incorrect_audio">Feil lyd</string>
+  <string name="car_feedback_negative_road_issue">Veiproblem</string>
+  <string name="car_feedback_negative_road_closed">Vei stengt</string>
+  <string name="car_feedback_negative_traffic_issue">Trafikkproblem</string>
+  <string name="car_feedback_negative_route_not_allowed">Ulovlig rute</string>
+  <string name="car_feedback_negative_positioning_issue">Plasseringsproblem</string>
+  <string name="car_feedback_negative_other_issue">Annet problem</string>
+  <string name="car_feedback_search_incorrect_address">Feil adresse</string>
+  <string name="car_feedback_search_incorrect_location">Feil plassering</string>
+  <string name="car_feedback_search_incorrect_name">Feil navn</string>
+  <string name="car_feedback_search_other">Annet problem</string>
+  <string name="car_feedback_arrival_positive">God</string>
+  <string name="car_feedback_arrival_negative">Ikke bra</string>
+</resources>

@@ -3,7 +3,6 @@ package com.mapbox.navigation.core.trip
 import android.annotation.SuppressLint
 import androidx.annotation.VisibleForTesting
 import com.mapbox.android.core.permissions.PermissionsManager
-import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
@@ -16,6 +15,7 @@ import com.mapbox.navigation.core.replay.route.ReplayRouteSessionOptions
 import com.mapbox.navigation.core.trip.MapboxTripStarter.Companion.getRegisteredInstance
 import com.mapbox.navigation.utils.internal.logI
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
@@ -60,7 +60,7 @@ class MapboxTripStarter internal constructor(
      */
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         this.mapboxNavigation = mapboxNavigation
-        coroutineScope = CoroutineScope(SupervisorJob() + SdkDispatchers.Main.immediate)
+        coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
         // Initialize the options to be aware of the location permissions
         val context = mapboxNavigation.navigationOptions.applicationContext

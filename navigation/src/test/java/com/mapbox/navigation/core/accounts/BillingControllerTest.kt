@@ -31,7 +31,6 @@ import io.mockk.unmockkObject
 import io.mockk.verify
 import io.mockk.verifyOrder
 import org.junit.After
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Rule
@@ -926,26 +925,6 @@ class BillingControllerTest {
         billingController.onDestroy()
         verify { navigationSession.unregisterNavigationSessionStateObserver(sessionStateObserver) }
         verify { arrivalProgressObserver.unregisterObserver(arrivalObserver) }
-    }
-
-    // The native billing service can keep these callbacks long after the controller is destroyed,
-    // e.g. a user event queued while offline. A callback that captured the controller would keep
-    // the whole MapboxNavigation instance and its native navigator alive until the request is sent.
-    @Test
-    fun `error callbacks that outlive the controller do not capture it`() {
-        sessionStateObserver.onNavigationSessionStateChanged(NavigationSessionState.FreeDrive("1"))
-
-        val callbacks = listOf(
-            triggerBillingServiceErrorCallback.captured,
-            beginBillingServiceErrorCallback.captured,
-        )
-
-        callbacks.forEach { callback ->
-            val capturesController = callback.javaClass.declaredFields.any {
-                it.type == BillingController::class.java
-            }
-            assertFalse("$callback captures the BillingController", capturesController)
-        }
     }
 
     @After

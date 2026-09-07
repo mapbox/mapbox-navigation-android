@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="car_action_search_favorites">Yêu thích</string>
+  <string name="car_search_no_results">Không có kết quả</string>
+  <string name="car_search_unknown_current_location">Vị trí hiện tại không xác định</string>
+  <string name="car_search_unknown_search_location">Vị trí tìm kiếm không xác định</string>
+  <string name="car_label_ok">OK</string>
+  <string name="car_action_preview_title">Xem trước tuyến đường</string>
+  <string name="car_action_preview_no_location">Không tìm thấy vị trí hiện tại</string>
+  <string name="car_action_preview_navigate_button">Tiếp tục đến tuyến đường</string>
+  <string name="car_action_navigation_stop_button">Dừng</string>
+  <string name="car_settings_title">Cài đặt</string>
+  <string name="car_settings_toggle_place_holder">Chỗ giữ chỗ cài đặt</string>
+  <string name="car_settings_preload_failure_title">Không tải trước được cài đặt</string>
+  <string name="car_settings_preload_failure_message">Hãy thử mở lại ứng dụng.</string>
+  <string name="car_message_location_permissions">Vui lòng mở ứng dụng và bật quyền truy cập vị trí.</string>
+  <string name="car_message_location_permissions_title">Cần quyền truy cập vị trí</string>
+  <string name="car_preference_audio_guidance_enabled_description">Kích hoạt hướng dẫn âm thanh</string>
+  <string name="car_feedback_title">Báo cáo phản hồi</string>
+  <string name="car_feedback_submit">Gửi</string>
+  <string name="car_feedback_submit_toast_select_item">Vui lòng chọn một mục phản hồi</string>
+  <string name="car_feedback_submit_toast_success">Cảm ơn bạn đã phản hồi!</string>
+  <string name="car_feedback_negative_routing_error">Chất lượng tuyến đường</string>
+  <string name="car_feedback_negative_incorrect_visual">Hình ảnh không chính xác</string>
+  <string name="car_feedback_negative_incorrect_audio">Âm thanh không chính xác</string>
+  <string name="car_feedback_negative_road_issue">Vấn đề con đường</string>
+  <string name="car_feedback_negative_road_closed">Đường bị đóng</string>
+  <string name="car_feedback_negative_traffic_issue">Vấn đề giao thông</string>
+  <string name="car_feedback_negative_route_not_allowed">Tuyến đường bất hợp pháp</string>
+  <string name="car_feedback_negative_positioning_issue">Vấn đề định vị</string>
+  <string name="car_feedback_negative_other_issue">Vấn đề khác</string>
+  <string name="car_feedback_search_incorrect_address">Địa chỉ không chính xác</string>
+  <string name="car_feedback_search_incorrect_location">Vị trí không chính xác</string>
+  <string name="car_feedback_search_incorrect_name">Tên không chính xác</string>
+  <string name="car_feedback_search_other">Vấn đề khác</string>
+  <string name="car_feedback_arrival_positive">Tốt</string>
+  <string name="car_feedback_arrival_negative">Không tốt</string>
+</resources>

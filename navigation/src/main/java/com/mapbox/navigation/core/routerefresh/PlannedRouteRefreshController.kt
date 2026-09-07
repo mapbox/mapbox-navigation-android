@@ -26,7 +26,6 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
     private val retryStrategy: RetryRouteRefreshStrategy,
     private val routeRefreshUtils: RouteRefreshUtils,
     private val currentPrimaryRouteIdProvider: () -> String?,
-    private val onDeviceRefreshSupported: () -> Boolean,
     private val historyRecorder: RouteRefreshHistoryRecorder,
 ) {
 
@@ -40,7 +39,6 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
         timeProvider: Time,
         routeRefreshUtils: RouteRefreshUtils,
         currentPrimaryRouteIdProvider: () -> String?,
-        onDeviceRefreshSupported: () -> Boolean,
         historyRecorder: RouteRefreshHistoryRecorder = NoOpRouteRefreshHistoryRecorder,
     ) : this(
         routeRefresherExecutor,
@@ -52,7 +50,6 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
         RetryRouteRefreshStrategy(maxAttemptsCount = MAX_RETRY_COUNT),
         routeRefreshUtils,
         currentPrimaryRouteIdProvider,
-        onDeviceRefreshSupported,
         historyRecorder,
     )
 
@@ -71,9 +68,7 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
             stateHolder.reset()
             return
         }
-        val routesValidationResults = routes.map {
-            RouteRefreshValidator.validateRoute(it, onDeviceRefreshSupported)
-        }
+        val routesValidationResults = routes.map { RouteRefreshValidator.validateRoute(it) }
         if (
             routesValidationResults.any { it is RouteRefreshValidator.RouteValidationResult.Valid }
         ) {
@@ -223,15 +218,6 @@ internal class PlannedRouteRefreshController @VisibleForTesting constructor(
                     }
                     routesToRefresh = refreshedRoutes
                     scheduleNewUpdate(refreshedRoutes, false)
-                } else if (routeRefresherResult.value.allUnsupported()) {
-                    // The router answered none of the routes can ever be refreshed. Stop as for
-                    // routes the validator rejects up front, instead of failing every interval.
-                    routesToRefresh = null
-                    val message = "No routes which could be refreshed: " +
-                        "the router can't refresh any of them"
-                    logI(message, RouteRefreshLog.LOG_CATEGORY)
-                    stateHolder.onFailure(message)
-                    stateHolder.reset()
                 } else {
                     if (
                         routeRefresherResult.value.anyRequestFailed() &&

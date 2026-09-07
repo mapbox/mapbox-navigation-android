@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="car_action_search_favorites">Favoriler</string>
+  <string name="car_search_no_results">Sonuç yok</string>
+  <string name="car_search_unknown_current_location">Bilinmeyen mevcut konum</string>
+  <string name="car_search_unknown_search_location">Bilinmeyen arama konumu</string>
+  <string name="car_label_ok">Tamam</string>
+  <string name="car_action_preview_title">Rota önizlemesi</string>
+  <string name="car_action_preview_no_location">Geçerli konum bulunamadı</string>
+  <string name="car_action_preview_navigate_button">Yönlendirmeye devam et</string>
+  <string name="car_action_navigation_stop_button">Dur</string>
+  <string name="car_settings_title">Ayarlar</string>
+  <string name="car_settings_toggle_place_holder">Ayarlar yer tutucu</string>
+  <string name="car_settings_preload_failure_title">Ayarlar önceden yüklenemedi</string>
+  <string name="car_settings_preload_failure_message">Uygulamayı tekrar açmayı deneyin.</string>
+  <string name="car_message_location_permissions">Lütfen uygulamayı açın ve konum iznini etkinleştirin.</string>
+  <string name="car_message_location_permissions_title">Konum izni gerekiyor</string>
+  <string name="car_preference_audio_guidance_enabled_description">Sesli kılavuzu etkinleştirir</string>
+  <string name="car_feedback_title">Geri bildirim bildir</string>
+  <string name="car_feedback_submit">Gönder</string>
+  <string name="car_feedback_submit_toast_select_item">Lütfen bir geri bildirim öğesi seçin</string>
+  <string name="car_feedback_submit_toast_success">Geri bildiriminiz için teşekkür ederiz!</string>
+  <string name="car_feedback_negative_routing_error">Rota kalitesi</string>
+  <string name="car_feedback_negative_incorrect_visual">Yanlış görsel</string>
+  <string name="car_feedback_negative_incorrect_audio">Yanlış ses</string>
+  <string name="car_feedback_negative_road_issue">Yol sorunu</string>
+  <string name="car_feedback_negative_road_closed">Yol kapalı</string>
+  <string name="car_feedback_negative_traffic_issue">Trafik sorunu</string>
+  <string name="car_feedback_negative_route_not_allowed">Yasadışı rota</string>
+  <string name="car_feedback_negative_positioning_issue">Konumlandırma sorunu</string>
+  <string name="car_feedback_negative_other_issue">Diğer sorun</string>
+  <string name="car_feedback_search_incorrect_address">Yanlış adres</string>
+  <string name="car_feedback_search_incorrect_location">Yanlış konum</string>
+  <string name="car_feedback_search_incorrect_name">Yanlış isim</string>
+  <string name="car_feedback_search_other">Diğer sorun</string>
+  <string name="car_feedback_arrival_positive">İyi</string>
+  <string name="car_feedback_arrival_negative">İyi değil</string>
+</resources>

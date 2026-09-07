@@ -1,7 +1,6 @@
 package com.mapbox.navigation.tripdata.shield.model
 
 import com.mapbox.common.MapboxOptions
-import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.tripdata.shield.internal.model.RouteShieldToDownload
 import com.mapbox.navigation.tripdata.shield.internal.model.ShieldSpriteToDownload
 import com.mapbox.navigation.tripdata.shield.internal.model.generateSpriteSheetUrl
@@ -14,7 +13,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class RouteShieldToDownloadTest {
 
     @Before
@@ -29,11 +27,11 @@ class RouteShieldToDownloadTest {
     }
 
     @Test
-    fun `designed url adds the token to a Mapbox API shield base url`() {
+    fun `test mapbox designed url generation`() {
         val toDownload = RouteShieldToDownload.MapboxDesign(
             shieldSpriteToDownload = ShieldSpriteToDownload("userId", "styleId"),
             mapboxShield = mockk {
-                every { baseUrl() } returns "https://api.mapbox.com/styles/v1"
+                every { baseUrl() } returns "https://mapbox.base.url"
                 every { name() } returns "default"
                 every { displayRef() } returns "RT 82"
                 every { textColor() } returns "black"
@@ -41,8 +39,7 @@ class RouteShieldToDownloadTest {
             legacyFallback = null,
         )
         val expected =
-            "https://api.mapbox.com/styles/v1/userId/styleId/sprite/default-5" +
-                "?access_token=$ACCESS_TOKEN"
+            "https://mapbox.base.url/userId/styleId/sprite/default-5?access_token=$ACCESS_TOKEN"
 
         val actual = toDownload.generateUrl(
             mockk { every { spriteName() } returns "default-5" },
@@ -69,23 +66,6 @@ class RouteShieldToDownloadTest {
         val actual = toDownload.generateSpriteSheetUrl()
 
         assertEquals(expected, actual)
-    }
-
-    @Test
-    fun `designed url does not add the token to a shield base url on another host`() {
-        val toDownload = RouteShieldToDownload.MapboxDesign(
-            shieldSpriteToDownload = ShieldSpriteToDownload("userId", "styleId"),
-            mapboxShield = mockk {
-                every { baseUrl() } returns "https://test.example"
-            },
-            legacyFallback = null,
-        )
-
-        val actual = toDownload.generateUrl(
-            mockk { every { spriteName() } returns "default-5" },
-        )
-
-        assertEquals("https://test.example/userId/styleId/sprite/default-5", actual)
     }
 
     @Test

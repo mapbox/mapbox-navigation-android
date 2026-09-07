@@ -62,12 +62,6 @@ fun NavigationRoute.requestReason(): String? =
 fun NavigationRoute.isClosureAlternative(): Boolean =
     requestReason() == NATIVE_ROUTE_REQUEST_REASON_CLOSURE
 
-/**
- * Refreshes the route with [refreshResponse].
- *
- * @param chargeOnly the response updates only the charge, as a refresh on the device does for a
- *  route the server built: the refreshed route keeps the `isUpToDate` of this one.
- */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 @WorkerThread
 fun NavigationRoute.internalRefreshRoute(
@@ -76,7 +70,6 @@ fun NavigationRoute.internalRefreshRoute(
     legGeometryIndex: Int,
     responseTimeElapsedSeconds: Long,
     experimentalProperties: Map<String, String>? = null,
-    chargeOnly: Boolean = false,
 ): Result<NavigationRoute> {
     return this.refresh(
         refreshResponse = refreshResponse,
@@ -84,7 +77,6 @@ fun NavigationRoute.internalRefreshRoute(
         legGeometryIndex = legGeometryIndex,
         responseTimeElapsedSeconds = responseTimeElapsedSeconds,
         experimentalProperties = experimentalProperties,
-        chargeOnly = chargeOnly,
     )
 }
 

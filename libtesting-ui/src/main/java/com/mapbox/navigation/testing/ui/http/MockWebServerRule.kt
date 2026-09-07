@@ -1,7 +1,7 @@
 package com.mapbox.navigation.testing.ui.http
 
 import android.util.Log
-import com.mapbox.common.dispatchers.SdkDispatchers
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -92,7 +92,7 @@ class MockWebServerRule : TestWatcher() {
         try {
             block()
         } finally {
-            withContext(SdkDispatchers.IO) {
+            withContext(Dispatchers.IO) {
                 val serverRestarted = retryStarting(previousPort)
                 assumeTrue("Mock web server could not be restarted", serverRestarted)
                 initDispatcher()

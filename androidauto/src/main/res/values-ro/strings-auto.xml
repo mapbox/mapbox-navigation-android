@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="car_action_search_favorites">Favorite</string>
+  <string name="car_search_no_results">Niciun rezultat</string>
+  <string name="car_search_unknown_current_location">Locație curentă necunoscută</string>
+  <string name="car_search_unknown_search_location">Locație de căutare necunoscută</string>
+  <string name="car_label_ok">OK</string>
+  <string name="car_action_preview_title">Previzualizare rută</string>
+  <string name="car_action_preview_no_location">Locația curentă nu a fost găsită</string>
+  <string name="car_action_preview_navigate_button">Continuați să direcționați</string>
+  <string name="car_action_navigation_stop_button">Oprește</string>
+  <string name="car_settings_title">Setări</string>
+  <string name="car_settings_toggle_place_holder">Loc pentru setări</string>
+  <string name="car_settings_preload_failure_title">Nu s-a reușit preîncărcarea setărilor</string>
+  <string name="car_settings_preload_failure_message">Încercați să deschideți din nou aplicația.</string>
+  <string name="car_message_location_permissions">Vă rugăm să deschideți aplicația și să activați permisiunea de localizare.</string>
+  <string name="car_message_location_permissions_title">Necesită permisiunea de locație</string>
+  <string name="car_preference_audio_guidance_enabled_description">Activează ghidul audio</string>
+  <string name="car_feedback_title">Raportează feedback</string>
+  <string name="car_feedback_submit">Trimite</string>
+  <string name="car_feedback_submit_toast_select_item">Vă rugăm să selectați un element de feedback</string>
+  <string name="car_feedback_submit_toast_success">Mulțumim pentru feedback-ul dumneavoastră!</string>
+  <string name="car_feedback_negative_routing_error">Calitatea traseului</string>
+  <string name="car_feedback_negative_incorrect_visual">Vizual incorect</string>
+  <string name="car_feedback_negative_incorrect_audio">Audio incorect</string>
+  <string name="car_feedback_negative_road_issue">Problemă de drum</string>
+  <string name="car_feedback_negative_road_closed">Drum închis</string>
+  <string name="car_feedback_negative_traffic_issue">Problemă de trafic</string>
+  <string name="car_feedback_negative_route_not_allowed">Rută ilegală</string>
+  <string name="car_feedback_negative_positioning_issue">Problemă de poziționare</string>
+  <string name="car_feedback_negative_other_issue">Altă problemă</string>
+  <string name="car_feedback_search_incorrect_address">Adresă incorectă</string>
+  <string name="car_feedback_search_incorrect_location">Locație incorectă</string>
+  <string name="car_feedback_search_incorrect_name">Nume incorect</string>
+  <string name="car_feedback_search_other">Altă problemă</string>
+  <string name="car_feedback_arrival_positive">Bun</string>
+  <string name="car_feedback_arrival_negative">Nu este bine</string>
+</resources>

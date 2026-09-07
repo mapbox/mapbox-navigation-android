@@ -60,7 +60,7 @@ class MapboxRestAreaApiTest {
         every { id } returns "A1B2C3"
         every { restStopType } returns RestStopType.SERVICE_AREA
         every { name } returns "Service Area"
-        every { guideMapUri } returns "https://api.mapbox.com/guidance-views/v1/abc"
+        every { guideMapUri } returns "https//abc.mapbox.com"
     }
     private val tollBooth: TollCollection = mockk {
         every { id } returns "A2B3C4"
@@ -220,7 +220,7 @@ class MapboxRestAreaApiTest {
     @Test
     fun `process banner instruction guide map available guide map empty`() {
         val expectedError = "No service/parking area guide map available."
-        val url = "https://api.mapbox.com/guidance-views/v1/abc"
+        val url = "https//abc.mapbox.com"
         val loadRequest = mockk<ResourceLoadRequest>()
         val loadResponse = mockk<Expected<ResourceLoadError, ResourceLoadResult>>()
 
@@ -252,7 +252,7 @@ class MapboxRestAreaApiTest {
             ),
         )
         val expectedError = "No service/parking area guide map available."
-        val url = "https://api.mapbox.com/guidance-views/v1/abc"
+        val url = "https//abc.mapbox.com"
         val loadRequest = mockk<ResourceLoadRequest>()
         val loadResponse = mockk<Expected<ResourceLoadError, ResourceLoadResult>>()
 
@@ -276,7 +276,7 @@ class MapboxRestAreaApiTest {
     @Test
     fun `process banner instruction guide map available guide map failure`() {
         val expectedError = "Resource is missing"
-        val url = "https://api.mapbox.com/guidance-views/v1/abc"
+        val url = "https//abc.mapbox.com"
         val loadRequest = mockk<ResourceLoadRequest>()
         val loadResponse = mockk<Expected<ResourceLoadError, ResourceLoadResult>>()
         val svgResult = mockk<RestAreaResult.RestAreaMapSvg.Failure> {
@@ -311,7 +311,7 @@ class MapboxRestAreaApiTest {
             ),
         )
         val expectedError = "Resource is missing"
-        val url = "https://api.mapbox.com/guidance-views/v1/abc"
+        val url = "https//abc.mapbox.com"
         val loadRequest = mockk<ResourceLoadRequest>()
         val loadResponse = mockk<Expected<ResourceLoadError, ResourceLoadResult>>()
         val svgResult = mockk<RestAreaResult.RestAreaMapSvg.Failure> {
@@ -338,7 +338,7 @@ class MapboxRestAreaApiTest {
     @Test
     fun `process banner instruction guide map available guide map svg success parse fail`() {
         val expectedError = "This is an error"
-        val url = "https://api.mapbox.com/guidance-views/v1/abc"
+        val url = "https//abc.mapbox.com"
         val loadRequest = mockk<ResourceLoadRequest>()
         val loadResponse = mockk<Expected<ResourceLoadError, ResourceLoadResult>>()
         val svgData = byteArrayOf().toDataRef()
@@ -391,7 +391,7 @@ class MapboxRestAreaApiTest {
             ),
         )
         val expectedError = "This is an error"
-        val url = "https://api.mapbox.com/guidance-views/v1/abc"
+        val url = "https//abc.mapbox.com"
         val loadRequest = mockk<ResourceLoadRequest>()
         val loadResponse = mockk<Expected<ResourceLoadError, ResourceLoadResult>>()
         val svgData = byteArrayOf().toDataRef()
@@ -419,7 +419,7 @@ class MapboxRestAreaApiTest {
     fun `process banner instruction guide map available guide map svg success parse success`() {
         mockkObject(SvgUtil)
         val expectedBitmap = mockk<Bitmap>()
-        val url = "https://api.mapbox.com/guidance-views/v1/abc"
+        val url = "https//abc.mapbox.com"
         val loadRequest = mockk<ResourceLoadRequest>()
         val loadResponse = mockk<Expected<ResourceLoadError, ResourceLoadResult>>()
         val svgData = byteArrayOf(-12, 12, 34, 55, -45).toDataRef()
@@ -457,7 +457,7 @@ class MapboxRestAreaApiTest {
         )
         mockkObject(SvgUtil)
         val expectedBitmap = mockk<Bitmap>()
-        val url = "https://api.mapbox.com/guidance-views/v1/abc"
+        val url = "https//abc.mapbox.com"
         val loadRequest = mockk<ResourceLoadRequest>()
         val loadResponse = mockk<Expected<ResourceLoadError, ResourceLoadResult>>()
         val svgData = byteArrayOf(-12, 12, 34, 55, -45).toDataRef()
@@ -491,23 +491,6 @@ class MapboxRestAreaApiTest {
         every { mockResourceLoader.load(request, capture(loadCallbackSlot)) } answers {
             loadCallbackSlot.captured.onFinish(request, response)
             0L
-        }
-    }
-
-    @Test
-    fun `access token is not sent to a rest area url on another host`() {
-        val url = "https://evil.example/guidance-views/v1/abc"
-        val loadRequest = mockk<ResourceLoadRequest>()
-        givenResourceLoaderResponse(request = loadRequest, response = mockk(relaxed = true))
-        givenProcessorResults(checkSapaAvailability = RestAreaResult.RestAreaMapAvailable(url))
-        every {
-            RestAreaProcessor.process(RestAreaAction.PrepareRestAreaMapRequest(url))
-        } returns RestAreaResult.RestAreaMapRequest(loadRequest)
-
-        sapaApi.generateRestAreaGuideMap(bannerInstructions, consumer)
-
-        verify(exactly = 1) {
-            RestAreaProcessor.process(RestAreaAction.PrepareRestAreaMapRequest(url))
         }
     }
 

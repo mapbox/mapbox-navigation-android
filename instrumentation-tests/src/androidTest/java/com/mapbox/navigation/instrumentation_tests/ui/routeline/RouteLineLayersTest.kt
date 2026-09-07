@@ -7,7 +7,6 @@ import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Value
-import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapboxMap
@@ -45,6 +44,7 @@ import com.mapbox.navigation.ui.maps.route.line.api.RoutesRenderedCallback
 import com.mapbox.navigation.ui.maps.route.line.api.RoutesRenderedResult
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.take
@@ -747,7 +747,7 @@ class RouteLineLayersTest : BaseTest<BasicNavigationViewActivity>(
         }
 
         latch.await()
-        runBlocking(SdkDispatchers.Main) {
+        runBlocking(Dispatchers.Main) {
             val primaryRouteVisibility = style.getLayer("mapbox-layerGroup-1-main")
                 ?.visibility
             val maskingRouteVisibility = style.getLayer("mapbox-masking-layer-main")

@@ -25,6 +25,7 @@ class EVDynamicDataHolderTest {
         "auxiliary_consumption" to JsonPrimitive(auxConsumption),
         "ev_pre_conditioning_time" to JsonPrimitive(preConditioningTime),
         "ev_unconditioned_charging_curve" to JsonPrimitive(unconditionedChargingCurve),
+        "ev_battery_temperature" to JsonPrimitive(batteryTemperature),
         "aaa" to JsonPrimitive("bbb"),
     )
 
@@ -42,6 +43,7 @@ class EVDynamicDataHolderTest {
             "auxiliary_consumption" to auxConsumption,
             "ev_pre_conditioning_time" to preConditioningTime,
             "ev_unconditioned_charging_curve" to unconditionedChargingCurve,
+            "ev_battery_temperature" to batteryTemperature,
         )
         assertEquals(expected, evDynamicDataHolder.currentData(initial))
         assertEquals(emptyMap<String, String>(), evDynamicDataHolder.updatedRawData().value)
@@ -69,6 +71,7 @@ class EVDynamicDataHolderTest {
             "auxiliary_consumption" to "80",
             "ev_pre_conditioning_time" to preConditioningTime,
             "ev_unconditioned_charging_curve" to unconditionedChargingCurve,
+            "ev_battery_temperature" to batteryTemperature,
         )
         evDynamicDataHolder.updateData(data)
 
@@ -109,6 +112,7 @@ class EVDynamicDataHolderTest {
             "auxiliary_consumption" to "80",
             "ev_pre_conditioning_time" to preConditioningTime,
             "ev_unconditioned_charging_curve" to unconditionedChargingCurve,
+            "ev_battery_temperature" to batteryTemperature,
         )
 
         evDynamicDataHolder.updateData(data1)
@@ -127,6 +131,7 @@ class EVDynamicDataHolderTest {
             "auxiliary_consumption" to JsonObject(),
             "ev_pre_conditioning_time" to JsonPrimitive(preConditioningTime),
             "ev_unconditioned_charging_curve" to JsonPrimitive(unconditionedChargingCurve),
+            "ev_battery_temperature" to JsonPrimitive(batteryTemperature),
             "aaa" to JsonPrimitive("bbb"),
         )
         val expected = mapOf(
@@ -135,6 +140,7 @@ class EVDynamicDataHolderTest {
             "ev_initial_charge" to charge,
             "ev_pre_conditioning_time" to preConditioningTime,
             "ev_unconditioned_charging_curve" to unconditionedChargingCurve,
+            "ev_battery_temperature" to batteryTemperature,
         )
 
         assertEquals(expected, evDynamicDataHolder.currentData(initial))
@@ -142,52 +148,18 @@ class EVDynamicDataHolderTest {
 
     @Test
     fun `currentData() drops directions-only battery conditioning keys from EV fallback`() {
-        // A valid battery-model route: ev_battery_temperature is the only battery parameter that may
-        // be refreshed, so the other three must be dropped from the data carried on a refresh.
-        val batteryModelInitial = mapOf(
-            "energy_consumption_curve" to JsonPrimitive(curve),
-            "ev_freeflow_consumption_curve" to JsonPrimitive(freeflowCurve),
-            "ev_initial_charge" to JsonPrimitive(charge),
-            "auxiliary_consumption" to JsonPrimitive(auxConsumption),
-            "ev_battery_temperature" to JsonPrimitive(batteryTemperature),
+        val initialWithDirectionsOnlyKeys = initial + mapOf(
             "ev_battery_charging_power_at_temperature" to JsonPrimitive("-5.0,10.0;0.0,100.0"),
             "ev_battery_charging_power_optimal_temperature" to JsonPrimitive("10.0,-5.0;100.0,0.0"),
             "ev_battery_heating_parameters" to JsonPrimitive("1.0,2.0,3.0"),
-            "aaa" to JsonPrimitive("bbb"),
         )
 
-        val result = evDynamicDataHolder.currentData(batteryModelInitial)
+        val result = evDynamicDataHolder.currentData(initialWithDirectionsOnlyKeys)
 
         assertEquals(null, result["ev_battery_charging_power_at_temperature"])
         assertEquals(null, result["ev_battery_charging_power_optimal_temperature"])
         assertEquals(null, result["ev_battery_heating_parameters"])
         assertEquals(batteryTemperature, result["ev_battery_temperature"])
-    }
-
-    @Test
-    fun `route refresh keeps the updated battery temperature and drops directions-only battery keys`() {
-        // During guidance the integrator pushes a new battery temperature; the other battery model
-        // parameters stay on the initial directions request only and must not survive the refresh.
-        val updatedBatteryTemperature = "30.0"
-        evDynamicDataHolder.updateData(
-            mapOf("ev_battery_temperature" to updatedBatteryTemperature),
-        )
-        val batteryModelInitial = mapOf(
-            "energy_consumption_curve" to JsonPrimitive(curve),
-            "ev_initial_charge" to JsonPrimitive(charge),
-            "ev_battery_temperature" to JsonPrimitive(batteryTemperature),
-            "ev_battery_charging_power_at_temperature" to JsonPrimitive("-5.0,10.0;0.0,100.0"),
-            "ev_battery_charging_power_optimal_temperature" to JsonPrimitive("10.0,-5.0;100.0,0.0"),
-            "ev_battery_heating_parameters" to JsonPrimitive("1.0,2.0,3.0"),
-        )
-
-        val result = evDynamicDataHolder.currentData(batteryModelInitial)
-
-        assertEquals(updatedBatteryTemperature, result["ev_battery_temperature"])
-        assertEquals(charge, result["ev_initial_charge"])
-        assertEquals(null, result["ev_battery_charging_power_at_temperature"])
-        assertEquals(null, result["ev_battery_charging_power_optimal_temperature"])
-        assertEquals(null, result["ev_battery_heating_parameters"])
     }
 
     @Test
@@ -218,90 +190,5 @@ class EVDynamicDataHolderTest {
             data,
             evDynamicDataHolder.updatedRawData().value,
         )
-    }
-
-    @Test
-    fun `battery conditioning update drops the stale legacy preconditioning pair`() {
-        evDynamicDataHolder.updateData(
-            mapOf(
-                "ev_pre_conditioning_time" to preConditioningTime,
-                "ev_unconditioned_charging_curve" to unconditionedChargingCurve,
-            ),
-        )
-        evDynamicDataHolder.updateData(
-            mapOf(
-                "ev_battery_temperature" to batteryTemperature,
-                "ev_battery_heating_parameters" to "1.0,2.0,3.0",
-            ),
-        )
-
-        val expected = mapOf(
-            "ev_battery_temperature" to batteryTemperature,
-            "ev_battery_heating_parameters" to "1.0,2.0,3.0",
-        )
-        assertEquals(expected, evDynamicDataHolder.updatedRawData().value)
-        assertEquals(expected, evDynamicDataHolder.currentData(emptyMap()))
-    }
-
-    @Test
-    fun `legacy preconditioning update drops the stale battery conditioning model`() {
-        evDynamicDataHolder.updateData(
-            mapOf(
-                "ev_battery_temperature" to batteryTemperature,
-                "ev_battery_heating_parameters" to "1.0,2.0,3.0",
-            ),
-        )
-        evDynamicDataHolder.updateData(
-            mapOf(
-                "ev_pre_conditioning_time" to preConditioningTime,
-                "ev_unconditioned_charging_curve" to unconditionedChargingCurve,
-            ),
-        )
-
-        // ev_battery_temperature is part of the battery model, so it is dropped together with the
-        // rest of it: it cannot be sent alongside the legacy pair.
-        val expected = mapOf(
-            "ev_pre_conditioning_time" to preConditioningTime,
-            "ev_unconditioned_charging_curve" to unconditionedChargingCurve,
-        )
-        assertEquals(expected, evDynamicDataHolder.updatedRawData().value)
-    }
-
-    @Test
-    fun `single update with both preconditioning groups keeps battery model and drops legacy`() {
-        evDynamicDataHolder.updateData(
-            mapOf(
-                "ev_battery_temperature" to batteryTemperature,
-                "ev_battery_heating_parameters" to "1.0,2.0,3.0",
-                "ev_pre_conditioning_time" to preConditioningTime,
-                "ev_unconditioned_charging_curve" to unconditionedChargingCurve,
-            ),
-        )
-
-        val expected = mapOf(
-            "ev_battery_temperature" to batteryTemperature,
-            "ev_battery_heating_parameters" to "1.0,2.0,3.0",
-        )
-        assertEquals(expected, evDynamicDataHolder.updatedRawData().value)
-        assertEquals(expected, evDynamicDataHolder.currentData(emptyMap()))
-    }
-
-    @Test
-    fun `currentData() does not restore legacy preconditioning from initial when battery model is active`() {
-        evDynamicDataHolder.updateData(
-            mapOf(
-                "ev_battery_temperature" to batteryTemperature,
-                "ev_battery_heating_parameters" to "1.0,2.0,3.0",
-            ),
-        )
-        val initialWithLegacy = mapOf(
-            "ev_pre_conditioning_time" to JsonPrimitive(preConditioningTime),
-            "ev_unconditioned_charging_curve" to JsonPrimitive(unconditionedChargingCurve),
-        )
-
-        val result = evDynamicDataHolder.currentData(initialWithLegacy)
-
-        assertEquals(null, result["ev_pre_conditioning_time"])
-        assertEquals(null, result["ev_unconditioned_charging_curve"])
     }
 }

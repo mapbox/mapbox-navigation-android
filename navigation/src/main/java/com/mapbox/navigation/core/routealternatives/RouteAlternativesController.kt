@@ -249,14 +249,9 @@ internal class RouteAlternativesController(
                     val onlineAlternatives = alternatives.filter {
                         it.origin == RouterOrigin.ONLINE
                     }
-                    // Onboard alternatives are offered only when there is no online one:
-                    // a server-built route that fits the charge wins over a device-built one.
-                    val offeredAlternatives = onlineAlternatives.ifEmpty {
-                        alternatives.filter { it.origin == RouterOrigin.OFFLINE }
-                    }
                     suggestRouteUpdate(
                         UpdateRouteSuggestion(
-                            listOf(routeProgress.navigationRoute) + offeredAlternatives,
+                            listOf(routeProgress.navigationRoute) + onlineAlternatives,
                             SuggestionType.AlternativesUpdated,
                         ),
                     )

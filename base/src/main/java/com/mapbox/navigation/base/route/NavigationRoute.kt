@@ -7,11 +7,9 @@ import androidx.annotation.WorkerThread
 import com.mapbox.api.directions.v5.models.Closure
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.api.directions.v5.models.DirectionsRouteFBWrapper
 import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.api.matching.v5.models.MapMatchingResponse
 import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
@@ -138,7 +136,6 @@ class NavigationRoute internal constructor(
         legGeometryIndex: Int,
         responseTimeElapsedSeconds: Long,
         experimentalProperties: Map<String, String>? = null,
-        chargeOnly: Boolean = false,
     ): Result<NavigationRoute> {
         // A refreshed instance  of Nro is unconditionally presented in NavigationRoute
         val refreshedContextExpected = PerformanceTracker.trackPerformanceSync(
@@ -163,7 +160,7 @@ class NavigationRoute internal constructor(
                     legGeometryIndex,
                     responseTimeElapsedSeconds,
                     refreshedContext,
-                ).map { refresh(it, refreshedContext, experimentalProperties, chargeOnly) }
+                ).map { refresh(it, refreshedContext, experimentalProperties) }
             },
         )
     }
@@ -189,54 +186,26 @@ class NavigationRoute internal constructor(
         route: RouteUpdate,
         refreshedDirectionsRouteContext: DirectionsRouteContext,
         experimentalProperties: Map<String, String>? = null,
-        chargeOnly: Boolean = false,
     ): NavigationRoute = this.copy(
         directionsRoute = route.routeModelsParsingResult.data.route,
         waypoints = route.routeModelsParsingResult.data.routesWaypoint,
         operations = route.routeModelsParsingResult.operations,
         directionsRouteContext = refreshedDirectionsRouteContext,
-        routeRefreshMetadata = refreshMetadata(route, experimentalProperties, chargeOnly),
-        // The expiry is the server's refresh session, which a refresh on the device doesn't
-        // renew. The native route model keeps the old refresh_ttl when a response has none,
-        // and adding it to the time of the response would push the expiry on every refresh.
-        expirationTimeElapsedSeconds = if (chargeOnly) {
-            expirationTimeElapsedSeconds
+        routeRefreshMetadata = if (experimentalProperties != null) {
+            RouteRefreshMetadata(
+                isUpToDate = route.routeRefreshMetadata?.isUpToDate ?: true,
+                experimentalProperties = experimentalProperties,
+            )
         } else {
-            route.newExpirationTimeElapsedSeconds.update(expirationTimeElapsedSeconds)
+            route.routeRefreshMetadata
         },
+        expirationTimeElapsedSeconds = route.newExpirationTimeElapsedSeconds.update(
+            expirationTimeElapsedSeconds,
+        ),
         overriddenTraffic = route.overriddenTraffic.update(overriddenTraffic),
     )
 
-    private fun refreshMetadata(
-        route: RouteUpdate,
-        experimentalProperties: Map<String, String>?,
-        chargeOnly: Boolean,
-    ): RouteRefreshMetadata? {
-        if (experimentalProperties == null && !chargeOnly) {
-            return route.routeRefreshMetadata
-        }
-        // A refresh of the charge only leaves the traffic as it was, so the route stays
-        // as up to date as it was before.
-        val isUpToDate = if (chargeOnly) {
-            routeRefreshMetadata?.isUpToDate
-        } else {
-            route.routeRefreshMetadata?.isUpToDate
-        } ?: true
-        return RouteRefreshMetadata(
-            isUpToDate = isUpToDate,
-            experimentalProperties = experimentalProperties,
-        )
-    }
-
     companion object {
-
-        /**
-         * "Not computed yet" markers, one per cache width. Cheaper than `by lazy`, which would
-         * add synchronization; the price is that a content hashing to 0 is rehashed every time.
-         */
-        private const val NOT_HASHED = 0L
-        private const val NOT_HASHED_INT = 0
-
         /**
          * Deserializes instance of [NavigationRoute] from string so that it could be passed to a
          * different application which uses the same version of Navigation Core Framework.
@@ -268,13 +237,6 @@ class NavigationRoute internal constructor(
             ).mapIndexed { index, routeInterface ->
                 val matchedData = parsingResult.routesParsingResult[index].data
                 val directionsData = matchedData.directionsData
-                check(
-                    directionsData.route.routeIndex()?.toIntOrNull() == routeInterface.routeIndex,
-                ) {
-                    "Parsed route index (${directionsData.route.routeIndex()}) doesn't match " +
-                        "RouteInterface's routeIndex (${routeInterface.routeIndex}) " +
-                        "for route ${routeInterface.routeId}"
-                }
                 val route = NavigationRoute(
                     directionsRoute = directionsData.route,
                     waypoints = directionsData.routesWaypoint,
@@ -313,11 +275,6 @@ class NavigationRoute internal constructor(
             ).mapIndexed { index, routeInterface ->
                 val parsingResult = directionsResponseParsingResult.routesParsingResult[index]
                 val data = parsingResult.data
-                check(data.route.routeIndex()?.toIntOrNull() == routeInterface.routeIndex) {
-                    "Parsed route index (${data.route.routeIndex()}) doesn't match " +
-                        "RouteInterface's routeIndex (${routeInterface.routeIndex}) " +
-                        "for route ${routeInterface.routeId}"
-                }
                 NavigationRoute(
                     directionsRoute = data.route,
                     waypoints = data.routesWaypoint,
@@ -368,44 +325,6 @@ class NavigationRoute internal constructor(
 
     internal val nativeWaypoints: List<Waypoint> = nativeRoute.waypoints.mapToSdk()
 
-    @Volatile
-    private var directionsRouteHashCache: Long = NOT_HASHED
-
-    @Volatile
-    private var waypointsHashCache: Int = NOT_HASHED_INT
-
-    /**
-     * Content based hashes of [directionsRoute] and [waypoints], walked once and cached lazily.
-     * The route cache is a `Long` so that a native route object can contribute its own 64 bit
-     * content hash unfolded: that full width is what keeps a collision between two different
-     * routes negligible. The java model and the waypoints expose only a 32 bit `hashCode`, a
-     * much weaker fingerprint on which collisions are far more likely.
-     * Deliberately not synchronized - the worst a race costs is computing the same value twice.
-     */
-    private val directionsRouteHash: Long
-        get() {
-            var hash = directionsRouteHashCache
-            if (hash == NOT_HASHED) {
-                hash = if (directionsRoute is DirectionsRouteFBWrapper) {
-                    directionsRoute.contentHash
-                } else {
-                    directionsRoute.hashCode().toLong()
-                }
-                directionsRouteHashCache = hash
-            }
-            return hash
-        }
-
-    private val waypointsHash: Int
-        get() {
-            var hash = waypointsHashCache
-            if (hash == NOT_HASHED_INT) {
-                hash = waypoints.hashCode()
-                waypointsHashCache = hash
-            }
-            return hash
-        }
-
     /**
      * Indicates whether some other object is "equal to" this one.
      *
@@ -422,12 +341,9 @@ class NavigationRoute internal constructor(
 
             other as NavigationRoute
 
-            // Comparing route id first is exact: routes from different responses,
-            // or different routes of one response, can never be reported equal
-            // by a hash collision.
             if (id != other.id) return false
-            if (waypointsHash != other.waypointsHash) return false
-            if (directionsRouteHash != other.directionsRouteHash) return false
+            if (directionsRoute != other.directionsRoute) return false
+            if (waypoints != other.waypoints) return false
 
             return true
         }
@@ -439,8 +355,8 @@ class NavigationRoute internal constructor(
     override fun hashCode(): Int {
         PerformanceTracker.trackPerformanceSync("NavRoute#hashCode") {
             var result = id.hashCode()
-            result = 31 * result + directionsRouteHash.toHashCode()
-            result = 31 * result + waypointsHash
+            result = 31 * result + directionsRoute.hashCode()
+            result = 31 * result + waypoints.hashCode()
             return result
         }
     }

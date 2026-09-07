@@ -1,0 +1,26 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath pluginDependencies.dependencyGraph
+    }
+}
+
+import com.vanniktech.dependency.graph.generator.DependencyGraphGeneratorPlugin
+import com.vanniktech.dependency.graph.generator.DependencyGraphGeneratorExtension.Generator
+
+plugins.apply(DependencyGraphGeneratorPlugin)
+
+def mapboxGenerator = new Generator(
+        "mapboxLibraries", // Suffix for our Gradle task.
+        { dependency -> dependency.getModuleGroup().startsWith("com.mapbox") }, // Only want Mapbox libs.
+        { dependency -> true }, // Include transitive dependencies.
+)
+
+dependencyGraphGenerator {
+    generators {
+        add(mapboxGenerator)
+    }
+}

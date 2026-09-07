@@ -126,6 +126,7 @@ internal open class RouteRefreshIntegrationTest {
                 override fun seconds() = millis() / 1000
             },
             NoOpRouteRefreshHistoryRecorder,
+            computationDispatcher = testDispatcher,
         )
     }
 
@@ -134,9 +135,8 @@ internal open class RouteRefreshIntegrationTest {
         enableRefresh: Boolean = true,
         successfulAttemptNumber: Int = 0,
         responseDelay: Long = 0,
-        chargeOnly: Boolean = false,
     ): List<NavigationRoute> {
-        setUpRouteRefresh(fileName, successfulAttemptNumber, responseDelay, chargeOnly)
+        setUpRouteRefresh(fileName, successfulAttemptNumber, responseDelay)
         return createNavigationRoutes(
             DirectionsResponse.fromJson(FileUtils.loadJsonFixture(fileName)),
             RouteOptions.builder()
@@ -153,23 +153,6 @@ internal open class RouteRefreshIntegrationTest {
         )
     }
 
-    fun createOfflineEvRoutes(fileName: String): List<NavigationRoute> =
-        createNavigationRoutes(
-            DirectionsResponse.fromJson(FileUtils.loadJsonFixture(fileName)),
-            RouteOptions.builder()
-                .coordinatesList(
-                    listOf(
-                        Point.fromLngLat(-121.496066, 38.577764),
-                        Point.fromLngLat(-121.480256, 38.576795),
-                    ),
-                )
-                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                .annotationsList(listOf("state_of_charge"))
-                .enableRefresh(true)
-                .build(),
-            RouterOrigin.OFFLINE,
-        )
-
     fun failRouteRefreshResponse() {
         every { router.getRouteRefresh(any(), any<RouteRefreshRequestData>(), any()) } answers {
             val callback = thirdArg() as NavigationRouterRefreshCallback
@@ -183,7 +166,6 @@ internal open class RouteRefreshIntegrationTest {
         fileName: String,
         successfulAttemptNumber: Int = 0,
         responseDelay: Long = 0,
-        chargeOnly: Boolean = false,
     ) {
         val refreshedRoutes = createNavigationRoutes(
             DirectionsResponse.fromJson(FileUtils.loadJsonFixture(fileName)),
@@ -236,7 +218,6 @@ internal open class RouteRefreshIntegrationTest {
                             .getOrThrow()
                             .toJson()
                             .toDataRef(),
-                        chargeOnly,
                     )
                 } else {
                     callback.onFailure(NavigationRouterRefreshError())

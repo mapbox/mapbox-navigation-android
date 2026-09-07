@@ -42,7 +42,7 @@ import kotlin.time.times
 import kotlin.time.toDuration
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalMapboxNavigationAPI::class)
-class RouteCalloutsTest : BaseCoreNoCleanUpTest() {
+class RouteCalloutsTest : BaseCoreNoCleanUpTest(useFakeDeviceLocationProvider = true) {
 
     @get:Rule
     val clearFilesRule = ClearFilesRule()

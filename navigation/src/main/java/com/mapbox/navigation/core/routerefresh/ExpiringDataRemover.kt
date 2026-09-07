@@ -28,15 +28,13 @@ internal class ExpiringDataRemover(
             )
             it.copy(
                 route = updatedRoute ?: it.route,
-                wasRouteUpdated = it.wasRouteUpdated || updatedRoute != null,
-                expiringDataRemoved = updatedRoute != null,
+                wasRouteUpdated = updatedRoute != null,
             )
         }
         return RoutesRefresherResult(
             primaryResult.copy(
                 route = primaryRoute ?: primaryResult.route,
-                wasRouteUpdated = primaryResult.wasRouteUpdated || primaryRoute != null,
-                expiringDataRemoved = primaryRoute != null,
+                wasRouteUpdated = primaryRoute != null,
             ),
             alternativeRoutesData,
         )

@@ -6,7 +6,6 @@ import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.DEFAULT_FRAME_TRANSITION_OPT
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.DEFAULT_STATE_TRANSITION_OPT
-import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.INSTANT_FRAME_TRANSITION_OPT
 import com.mapbox.navigation.ui.maps.camera.data.ViewportData
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceUpdateObserver
@@ -81,10 +80,9 @@ class NavigationCameraTest {
     }
 
     private val internalDataSourceObserverSlot = slot<ViewportDataSourceUpdateObserver>()
-    private val followingCameraOptions: CameraOptions = CameraOptions.Builder().zoom(1.0).build()
-    private val overviewCameraOptions: CameraOptions = CameraOptions.Builder().zoom(2.0).build()
-    private val pointsOverviewCameraOptions: CameraOptions =
-        CameraOptions.Builder().zoom(3.0).build()
+    private val followingCameraOptions: CameraOptions = mockk()
+    private val overviewCameraOptions: CameraOptions = mockk()
+    private val pointsOverviewCameraOptions: CameraOptions = mockk()
     private val viewportData: ViewportData = mockk {
         every { cameraForFollowing } returns followingCameraOptions
         every { cameraForOverview } returns overviewCameraOptions
@@ -784,14 +782,14 @@ class NavigationCameraTest {
         internalTransitionListenerSlot.captured.onAnimationEnd(overviewAnimatorSet)
 
         val frameTransition = mockFrameTransitionForOverview(
-            INSTANT_FRAME_TRANSITION_OPT,
+            DEFAULT_FRAME_TRANSITION_OPT,
         )
         navigationCamera.resetFrame()
 
         verifyTransitionExecuted(
             AnimatorsCreator::updateFrameForOverview,
             frameTransition.frameCamera,
-            INSTANT_FRAME_TRANSITION_OPT,
+            DEFAULT_FRAME_TRANSITION_OPT,
             frameTransition.frameAnimatorSet,
             instant = true,
         )
@@ -805,14 +803,14 @@ class NavigationCameraTest {
         internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
 
         val frameTransition = mockFrameTransitionForFollowing(
-            INSTANT_FRAME_TRANSITION_OPT,
+            DEFAULT_FRAME_TRANSITION_OPT,
         )
         navigationCamera.resetFrame()
 
         verifyTransitionExecuted(
             AnimatorsCreator::updateFrameForFollowing,
             frameTransition.frameCamera,
-            INSTANT_FRAME_TRANSITION_OPT,
+            DEFAULT_FRAME_TRANSITION_OPT,
             frameTransition.frameAnimatorSet,
             instant = true,
         )
@@ -979,7 +977,7 @@ class NavigationCameraTest {
     private fun mockFrameTransitionForFollowing(
         transitionOptions: NavigationCameraTransitionOptions,
     ): MockFrameTransition {
-        val frameCamera = CameraOptions.Builder().zoom(4.0).build()
+        val frameCamera = mockk<CameraOptions>()
         val frameAnimatorSet = mockk(
             relaxUnitFun = true,
             block = frameBlock,
@@ -995,7 +993,7 @@ class NavigationCameraTest {
     private fun mockFrameTransitionForOverview(
         transitionOptions: NavigationCameraTransitionOptions,
     ): MockFrameTransition {
-        val frameCamera = CameraOptions.Builder().zoom(5.0).build()
+        val frameCamera = mockk<CameraOptions>()
         val frameAnimatorSet = mockk(
             relaxUnitFun = true,
             block = frameBlock,

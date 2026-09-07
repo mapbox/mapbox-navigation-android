@@ -1,14 +1,14 @@
 package com.mapbox.navigation.testing.factories
 
-import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.navigation.base.internal.route.parsing.models.mapmaptching.MapMatchingMatchParser
 import com.mapbox.navigation.base.internal.route.parsing.noTracking
 import com.mapbox.navigation.base.internal.route.parsing.setupParsing
 import com.mapbox.navigation.utils.internal.Time
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 
 fun createTestNavigationRoutesParsing(
-    parsingDispatcher: CoroutineDispatcher = SdkDispatchers.Default,
+    parsingDispatcher: CoroutineDispatcher = Dispatchers.Default,
     time: Time = Time.SystemClockImpl
 ) = setupTestParsing(
     testParsingDispatcher = parsingDispatcher,
@@ -22,14 +22,14 @@ fun createTestRouteInterfaceParser(
 )
 
 fun createTestMapMatchingResponseParser(
-    parsingDispatcher: CoroutineDispatcher = SdkDispatchers.Default,
+    parsingDispatcher: CoroutineDispatcher = Dispatchers.Default,
 ): MapMatchingMatchParser = setupTestParsing(
     testParsingDispatcher = parsingDispatcher,
 )
 
 private fun setupTestParsing(
     testTime: Time = Time.SystemClockImpl,
-    testParsingDispatcher: CoroutineDispatcher = SdkDispatchers.Default
+    testParsingDispatcher: CoroutineDispatcher = Dispatchers.Default
 ) = setupParsing(
     false,
     time = testTime,

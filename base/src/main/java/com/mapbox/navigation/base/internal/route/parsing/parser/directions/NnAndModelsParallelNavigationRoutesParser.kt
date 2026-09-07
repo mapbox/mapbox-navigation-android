@@ -116,7 +116,6 @@ internal suspend fun parseRoutesInParallel(
                 PerformanceTracker.trackPerformanceSync("RouteModelsParser#parse") {
                     modelParser.parse(
                         response,
-                        routeIndexOverride = null,
                     ).let {
                         val parseMillis = currentElapsedMillis() - startElapsedMillis
                         val parseThread = Thread.currentThread().name

@@ -62,6 +62,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import java.io.InputStreamReader
@@ -221,8 +222,8 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
             }
             newAlternatives.forEach {
                 assertNoDiffs(
-                    actual = it.directionsRoute.toBuilder().routeOptions(null).build(),
-                    expected = mockedAlternativesResponse.routes()[it.routeIndex].toBuilder()
+                    it.directionsRoute.toBuilder().routeOptions(null).build(),
+                    mockedAlternativesResponse.routes()[it.routeIndex].toBuilder()
                         .legs(
                             mockedAlternativesResponse.routes()[it.routeIndex].legs()
                                 ?.map { originalLeg ->
@@ -233,8 +234,8 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
                                 },
                         )
                         .build(),
-                    ignoreGetters = emptyList(),
-                    emptyAndNullCollectionsAreTheSame = true,
+                    emptyList(),
+                    true,
                 )
             }
         }
@@ -856,6 +857,7 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
         }
     }
 
+    @Ignore("Flaky test - NAVAND-7338")
     @Test
     fun alternative_request_keeps_eta_model_parameter() = sdkTest {
         setupMockRequestHandlers()

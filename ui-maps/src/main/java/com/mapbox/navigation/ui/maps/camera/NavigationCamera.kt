@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.maps.camera
 
-import android.animation.AnimatorSet
 import android.os.SystemClock
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
@@ -13,7 +12,6 @@ import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.plugin.animation.CameraAnimationsLifecycleListener
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.maps.plugin.animation.animator.CameraAnimator
-import com.mapbox.maps.util.isEmpty
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.ViewportData
@@ -217,8 +215,6 @@ internal constructor(
             NavigationCameraTransitionOptions.Builder().maxDuration(3500L).build()
         internal val DEFAULT_FRAME_TRANSITION_OPT =
             NavigationCameraTransitionOptions.Builder().maxDuration(1000L).build()
-        internal val INSTANT_FRAME_TRANSITION_OPT =
-            NavigationCameraTransitionOptions.Builder().maxDuration(0L).build()
 
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -401,12 +397,10 @@ internal constructor(
         frameTransitionOptions: NavigationCameraTransitionOptions,
     ): FullAnimatorSet {
         val cameraForFollowing = viewportDataSource.getViewportData().cameraForFollowing
-        val animators = if (cameraForFollowing.isEmpty) {
-            noTransition("following")
-        } else {
-            animatorsCreator.transitionToFollowing(cameraForFollowing, stateTransitionOptions)
-        }
-        return animators.apply {
+        return animatorsCreator.transitionToFollowing(
+            cameraForFollowing,
+            stateTransitionOptions,
+        ).apply {
             addListener(
                 createTransitionListener(
                     TRANSITION_TO_FOLLOWING,
@@ -493,12 +487,10 @@ internal constructor(
         frameTransitionOptions: NavigationCameraTransitionOptions,
     ): FullAnimatorSet {
         val cameraForOverview = viewportDataSource.getViewportData().cameraForOverview
-        val animators = if (cameraForOverview.isEmpty) {
-            noTransition("route overview")
-        } else {
-            animatorsCreator.transitionToRouteOverview(cameraForOverview, stateTransitionOptions)
-        }
-        return animators.apply {
+        return animatorsCreator.transitionToRouteOverview(
+            cameraForOverview,
+            stateTransitionOptions,
+        ).apply {
             addListener(
                 createTransitionListener(
                     TRANSITION_TO_ROUTE_OVERVIEW,
@@ -559,15 +551,10 @@ internal constructor(
     ): FullAnimatorSet {
         val cameraForPointsOverview =
             viewportDataSource.getViewportData().cameraForPointsOverview
-        val animators = if (cameraForPointsOverview.isEmpty) {
-            noTransition("points overview")
-        } else {
-            animatorsCreator.transitionToPointsOverview(
-                cameraForPointsOverview,
-                stateTransitionOptions,
-            )
-        }
-        return animators.apply {
+        return animatorsCreator.transitionToPointsOverview(
+            cameraForPointsOverview,
+            stateTransitionOptions,
+        ).apply {
             addListener(
                 createTransitionListener(
                     TRANSITION_TO_POINTS_OVERVIEW,
@@ -602,30 +589,43 @@ internal constructor(
 
     private fun updateFrame(viewportData: ViewportData, instant: Boolean) {
         if (!isMapValid()) return
-        val transitionOptions = if (instant) {
-            INSTANT_FRAME_TRANSITION_OPT
-        } else {
-            frameTransitionOptions
-        }
         when (stateInternal) {
             FOLLOWING -> {
-                startFrameAnimation(viewportData.cameraForFollowing, instant) {
-                    animatorsCreator.updateFrameForFollowing(it, transitionOptions)
-                }
+                startAnimation(
+                    animatorsCreator.updateFrameForFollowing(
+                        viewportData.cameraForFollowing,
+                        frameTransitionOptions,
+                    ).apply {
+                        addAnimationEndListener(createFrameListener())
+                    },
+                    instant,
+                )
             }
 
             ROUTE_OVERVIEW -> {
                 setCameraAnimationHintWhileInOverview(viewportData.cameraForFollowing)
-                startFrameAnimation(viewportData.cameraForOverview, instant) {
-                    animatorsCreator.updateFrameForOverview(it, transitionOptions)
-                }
+                startAnimation(
+                    animatorsCreator.updateFrameForOverview(
+                        viewportData.cameraForOverview,
+                        frameTransitionOptions,
+                    ).apply {
+                        addAnimationEndListener(createFrameListener())
+                    },
+                    instant,
+                )
             }
 
             POINTS_OVERVIEW -> {
                 setCameraAnimationHintWhileInOverview(viewportData.cameraForFollowing)
-                startFrameAnimation(viewportData.cameraForPointsOverview, instant) {
-                    animatorsCreator.updateFrameForOverview(it, transitionOptions)
-                }
+                startAnimation(
+                    animatorsCreator.updateFrameForOverview(
+                        viewportData.cameraForPointsOverview,
+                        frameTransitionOptions,
+                    ).apply {
+                        addAnimationEndListener(createFrameListener())
+                    },
+                    instant,
+                )
             }
 
             IDLE,
@@ -715,34 +715,6 @@ internal constructor(
     private fun cancelAnimation() {
         runningAnimation?.cancel()
         runningAnimation = null
-    }
-
-    /**
-     * A frame without any value has nothing to animate to: it is not passed to the transitions.
-     * That is the case for following before an override or a location is known, and for an
-     * overview that has no points to frame yet.
-     */
-    private fun noAnimation() = FullAnimatorSet(cameraPlugin, mapboxMap, AnimatorSet())
-
-    /**
-     * [noAnimation] for a requested state transition, which is logged to explain why the camera
-     * stays where it is. Frame updates are not logged, they happen on every location update.
-     */
-    private fun noTransition(state: String): FullAnimatorSet {
-        logI("No frame to move to for $state, the camera stays where it is", LOG_CATEGORY)
-        return noAnimation()
-    }
-
-    private fun startFrameAnimation(
-        frame: CameraOptions,
-        instant: Boolean,
-        createAnimators: (CameraOptions) -> MapboxAnimatorSet,
-    ) {
-        val animators = if (frame.isEmpty) noAnimation() else createAnimators(frame)
-        startAnimation(
-            animators.apply { addAnimationEndListener(createFrameListener()) },
-            instant,
-        )
     }
 
     private fun startAnimation(

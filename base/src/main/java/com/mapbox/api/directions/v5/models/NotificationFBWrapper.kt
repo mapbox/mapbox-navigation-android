@@ -84,7 +84,7 @@ internal class NotificationFBWrapper private constructor(
         return fb.contentEquals(other.fb)
     }
 
-    override fun hashCode() = fb.hash.toHashCode()
+    override fun hashCode() = fb.contentHash().toHashCode()
 
     override fun toString(): String {
         return "Notification(" +
@@ -150,8 +150,6 @@ internal class NotificationFBWrapper private constructor(
                     "unnecessaryChargingAtNextCPOI"
                 FBNotificationSubtype.Vignette ->
                     "vignette"
-                FBNotificationSubtype.BetterStationsPossible ->
-                    "betterStationsPossible"
                 FBNotificationSubtype.Unknown -> unrecognized?.get(propertyName)?.asString()
             }
         }

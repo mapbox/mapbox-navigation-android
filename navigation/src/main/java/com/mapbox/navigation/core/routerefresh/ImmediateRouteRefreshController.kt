@@ -26,6 +26,7 @@ internal class ImmediateRouteRefreshController(
     fun requestRoutesRefresh(
         routes: List<NavigationRoute>,
         callback: (RoutesRefresherExecutorResult) -> Unit,
+        onCancellation: () -> Unit = {},
     ): Job {
         if (routes.isEmpty()) {
             throw IllegalArgumentException("Routes to refresh should not be empty")
@@ -38,6 +39,7 @@ internal class ImmediateRouteRefreshController(
                 )
             } catch (ex: CancellationException) {
                 stateHolder.onCancel()
+                onCancellation()
                 throw ex
             }
 

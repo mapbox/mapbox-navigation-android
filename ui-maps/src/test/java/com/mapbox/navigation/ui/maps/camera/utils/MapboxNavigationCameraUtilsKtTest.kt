@@ -3,21 +3,14 @@ package com.mapbox.navigation.ui.maps.camera.utils
 import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
-import com.mapbox.geojson.Point
-import com.mapbox.maps.MapboxMap
-import com.mapbox.maps.MercatorCoordinate
 import com.mapbox.maps.plugin.animation.animator.CameraAnimator
 import com.mapbox.navigation.ui.maps.internal.camera.constraintDurationTo
 import com.mapbox.navigation.ui.maps.internal.camera.normalizeBearing
-import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import kotlin.math.hypot
-import kotlin.math.pow
 
 @RunWith(RobolectricTestRunner::class)
 class MapboxNavigationCameraUtilsKtTest {
@@ -128,27 +121,6 @@ class MapboxNavigationCameraUtilsKtTest {
         )
 
         assertEquals(expected, actual, 1E-14)
-    }
-
-    @Test
-    fun `projectedDistance - returns correct distance between two points`() {
-        // GIVEN
-        val targetZL = 14.0
-        val expectedScale = 2.0.pow(targetZL)
-        val currentPoint = Point.fromLngLat(0.0, 0.0)
-        val targetPoint = Point.fromLngLat(1.0, 1.0)
-        val mapboxMap = mockk<MapboxMap> {
-            every { project(currentPoint, expectedScale) } returns MercatorCoordinate(10.0, 20.0)
-            every { project(targetPoint, expectedScale) } returns MercatorCoordinate(30.0, 50.0)
-        }
-
-        // WHEN
-        val result = projectedDistance(mapboxMap, currentPoint, targetPoint, targetZL)
-
-        // THEN
-        assertEquals(hypot(10.0 - 30.0, 20.0 - 50.0), result, 0.000001)
-        verify(exactly = 1) { mapboxMap.project(currentPoint, expectedScale) }
-        verify(exactly = 1) { mapboxMap.project(targetPoint, expectedScale) }
     }
 
     @Test

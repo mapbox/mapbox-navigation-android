@@ -2,20 +2,20 @@ package com.mapbox.navigation.testing.ui.utils
 
 import android.app.Activity
 import androidx.test.core.app.ActivityScenario
-import com.mapbox.common.dispatchers.SdkDispatchers
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 
 suspend inline fun <reified T: Activity> withActivityScenario(block: suspend (ActivityScenario<T>) -> Unit) {
-    val scenario = withContext(SdkDispatchers.Default) {
+    val scenario = withContext(Dispatchers.Default) {
         ActivityScenario.launch(T::class.java)
     }
     try {
         block(scenario)
     } finally {
-        withContext(SdkDispatchers.Default) {
+        withContext(Dispatchers.Default) {
             scenario.close()
         }
     }

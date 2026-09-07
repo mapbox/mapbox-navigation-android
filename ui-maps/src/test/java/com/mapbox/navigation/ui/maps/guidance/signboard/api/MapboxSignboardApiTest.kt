@@ -127,7 +127,7 @@ class MapboxSignboardApiTest {
     @Test
     fun `process state signboard available signboard empty`() {
         val expectedError = "No signboard available for current maneuver."
-        val url = "https://api.mapbox.com/guidance-views/v1/abc"
+        val url = "https//abc.mapbox.com"
         val loadRequest = mockk<ResourceLoadRequest>()
         val loadResponse = mockk<Expected<ResourceLoadError, ResourceLoadResult>>()
         val svgResult = mockk<SignboardResult.SignboardSvg.Empty>()
@@ -152,7 +152,7 @@ class MapboxSignboardApiTest {
     @Test
     fun `process state signboard available signboard failure`() {
         val expectedError = "Resource is missing"
-        val url = "https://api.mapbox.com/guidance-views/v1/abc"
+        val url = "https//abc.mapbox.com"
         val loadRequest = mockk<ResourceLoadRequest>()
         val loadResponse = mockk<Expected<ResourceLoadError, ResourceLoadResult>>()
         val svgResult = mockk<SignboardResult.SignboardSvg.Failure> {
@@ -179,7 +179,7 @@ class MapboxSignboardApiTest {
     @Test
     fun `process state signboard available signboard svg success parse fail`() {
         val expectedError = "This is an error"
-        val url = "https://api.mapbox.com/guidance-views/v1/abc"
+        val url = "https//abc.mapbox.com"
         val loadRequest = mockk<ResourceLoadRequest>()
         val loadResponse = mockk<Expected<ResourceLoadError, ResourceLoadResult>>()
         val svgData = byteArrayOf().toDataRef()
@@ -206,7 +206,7 @@ class MapboxSignboardApiTest {
     @Test
     fun `process state signboard available signboard svg success parse success`() {
         val expectedBitmap = mockk<Bitmap>()
-        val url = "https://api.mapbox.com/guidance-views/v1/abc"
+        val url = "https//abc.mapbox.com"
         val loadRequest = mockk<ResourceLoadRequest>()
         val loadResponse = mockk<Expected<ResourceLoadError, ResourceLoadResult>>()
         val svgData = byteArrayOf(-12, 12, 34, 55, -45).toDataRef()
@@ -284,26 +284,6 @@ class MapboxSignboardApiTest {
         every { mockResourceLoader.load(request, capture(loadCallbackSlot)) } answers {
             loadCallbackSlot.captured.onFinish(request, response)
             0L
-        }
-    }
-
-    @Test
-    fun `access token is not sent to a signboard url on another host`() {
-        val url = "https://test.example/guidance-views/v1/abc"
-        val loadRequest = mockk<ResourceLoadRequest>()
-        givenResourceLoaderResponse(request = loadRequest, response = mockk())
-        givenProcessorResults(
-            checkSignboardAvailability = SignboardResult.SignboardAvailable(url),
-            processSignboardResponse = mockk<SignboardResult.SignboardSvg.Empty>(),
-        )
-        every {
-            SignboardProcessor.process(SignboardAction.PrepareSignboardRequest(url))
-        } returns SignboardResult.SignboardRequest(loadRequest)
-
-        signboardApi.generateSignboard(bannerInstructions, consumer)
-
-        verify(exactly = 1) {
-            SignboardProcessor.process(SignboardAction.PrepareSignboardRequest(url))
         }
     }
 

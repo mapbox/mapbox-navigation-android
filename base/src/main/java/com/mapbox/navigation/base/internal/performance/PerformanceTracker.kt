@@ -128,16 +128,6 @@ object PerformanceTracker {
     }
 }
 
-/**
- * Implemented by an observer that wants to control the name it is reported under in
- * performance traces, instead of the caller falling back to the observer's (possibly
- * generic, SAM-lambda-generated) class name.
- */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-interface PerformanceTraceNameProvider {
-    val performanceTraceName: String
-}
-
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 internal interface PerformanceObserver {
     /**

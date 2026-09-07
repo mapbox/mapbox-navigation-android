@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="car_action_search_favorites">Oblíbené</string>
+  <string name="car_search_no_results">Žádné výsledky</string>
+  <string name="car_search_unknown_current_location">Neznámá aktuální poloha</string>
+  <string name="car_search_unknown_search_location">Neznámé místo hledání</string>
+  <string name="car_label_ok">OK</string>
+  <string name="car_action_preview_title">Náhled trasy</string>
+  <string name="car_action_preview_no_location">Aktuální poloha nebyla nalezena</string>
+  <string name="car_action_preview_navigate_button">Pokračovat na trasu</string>
+  <string name="car_action_navigation_stop_button">Stop</string>
+  <string name="car_settings_title">Nastavení</string>
+  <string name="car_settings_toggle_place_holder">Zástupce nastavení</string>
+  <string name="car_settings_preload_failure_title">Nepodařilo se předem načíst nastavení</string>
+  <string name="car_settings_preload_failure_message">Zkuste znovu otevřít aplikaci.</string>
+  <string name="car_message_location_permissions">Prosím, otevřete aplikaci a povolte přístup k poloze.</string>
+  <string name="car_message_location_permissions_title">Vyžaduje oprávnění k poloze</string>
+  <string name="car_preference_audio_guidance_enabled_description">Povolí zvukové navádění</string>
+  <string name="car_feedback_title">Nahlásit zpětnou vazbu</string>
+  <string name="car_feedback_submit">Odeslat</string>
+  <string name="car_feedback_submit_toast_select_item">Vyberte prosím položku zpětné vazby</string>
+  <string name="car_feedback_submit_toast_success">Děkujeme za vaši zpětnou vazbu!</string>
+  <string name="car_feedback_negative_routing_error">Kvalita trasy</string>
+  <string name="car_feedback_negative_incorrect_visual">Nesprávný vizuál</string>
+  <string name="car_feedback_negative_incorrect_audio">Nesprávný zvuk</string>
+  <string name="car_feedback_negative_road_issue">Problém na silnici</string>
+  <string name="car_feedback_negative_road_closed">Silnice uzavřena</string>
+  <string name="car_feedback_negative_traffic_issue">Dopravní problém</string>
+  <string name="car_feedback_negative_route_not_allowed">Nelegální trasa</string>
+  <string name="car_feedback_negative_positioning_issue">Problém s umístěním</string>
+  <string name="car_feedback_negative_other_issue">Jiný problém</string>
+  <string name="car_feedback_search_incorrect_address">Nesprávná adresa</string>
+  <string name="car_feedback_search_incorrect_location">Nesprávná poloha</string>
+  <string name="car_feedback_search_incorrect_name">Nesprávné jméno</string>
+  <string name="car_feedback_search_other">Jiný problém</string>
+  <string name="car_feedback_arrival_positive">Dobře</string>
+  <string name="car_feedback_arrival_negative">Není dobré</string>
+</resources>

@@ -6,7 +6,6 @@ import android.content.res.Resources
 import com.mapbox.navigation.base.formatter.Rounding
 import com.mapbox.navigation.base.formatter.UnitType
 import com.mapbox.navigation.core.R
-import com.mapbox.navigation.core.internal.formatter.DistanceFormattingData
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfConversion
 import java.text.NumberFormat
@@ -55,12 +54,12 @@ object MapboxDistanceUtil {
         )
     }
 
-    internal fun getFormattingData(
+    private fun getFormattingData(
         distanceInMeters: Double,
         roundingIncrement: Int,
         unitType: UnitType,
         locale: Locale,
-    ): DistanceFormattingData {
+    ): FormattingData {
         return when (unitType) {
             UnitType.METRIC -> getMetricDistance(distanceInMeters, roundingIncrement, locale)
             UnitType.IMPERIAL -> {
@@ -82,7 +81,7 @@ object MapboxDistanceUtil {
         distanceInMeters: Double,
         roundingIncrement: Int,
         locale: Locale,
-    ): DistanceFormattingData {
+    ): FormattingData {
         return when {
             distanceInMeters !in 0.0..Double.MAX_VALUE -> smallValue(
                 0.0,
@@ -147,7 +146,7 @@ object MapboxDistanceUtil {
         distanceInMiles: Double,
         roundingIncrement: Int,
         locale: Locale,
-    ): DistanceFormattingData {
+    ): FormattingData {
         return when {
             distanceInMiles !in 0.0..Double.MAX_VALUE -> smallValue(
                 0.0,
@@ -212,7 +211,7 @@ object MapboxDistanceUtil {
         distanceInMiles: Double,
         roundingIncrement: Int,
         locale: Locale,
-    ): DistanceFormattingData {
+    ): FormattingData {
         return when {
             distanceInMiles !in 0.0..Double.MAX_VALUE -> smallValue(
                 0.0,
@@ -261,7 +260,7 @@ object MapboxDistanceUtil {
         defaultRoundingIncrement: Int,
         unitTypeString: String,
         unitType: UnitType,
-    ): DistanceFormattingData {
+    ): FormattingData {
         val inferredRoundingIncrement =
             if (roundingIncrement == Rounding.INCREMENT_DISTANCE_DEPENDENT) {
                 defaultRoundingIncrement
@@ -272,12 +271,11 @@ object MapboxDistanceUtil {
             distance,
             inferredRoundingIncrement,
         )
-        return DistanceFormattingData(
+        return FormattingData(
             roundedValue.toDouble(),
             roundedValue.toString(),
             unitTypeString,
             unitType,
-            fractionDigits = 0,
         )
     }
 
@@ -287,17 +285,11 @@ object MapboxDistanceUtil {
         unitTypeString: String,
         unitType: UnitType,
         locale: Locale,
-    ): DistanceFormattingData {
+    ): FormattingData {
         val roundedValue = NumberFormat.getNumberInstance(locale).also {
             it.maximumFractionDigits = maxFractionDigits
         }.format(distance)
-        return DistanceFormattingData(
-            distance,
-            roundedValue,
-            unitTypeString,
-            unitType,
-            maxFractionDigits,
-        )
+        return FormattingData(distance, roundedValue, unitTypeString, unitType)
     }
 
     /**
@@ -398,4 +390,11 @@ object MapboxDistanceUtil {
         }
         return this.createConfigurationContext(config).resources
     }
+
+    private data class FormattingData(
+        val distance: Double,
+        val distanceAsString: String,
+        val turfDistanceUnit: String,
+        val unitType: UnitType,
+    )
 }

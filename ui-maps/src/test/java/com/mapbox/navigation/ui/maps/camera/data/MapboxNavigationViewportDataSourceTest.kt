@@ -305,7 +305,7 @@ class MapboxNavigationViewportDataSourceTest {
 
     @Test
     fun initialOverviewViewportDataIsTakenFromOverviewDataSource() {
-        val overviewOptions = CameraOptions.Builder().zoom(1.0).build()
+        val overviewOptions = mockk<CameraOptions>()
         val routeOverviewViewportDataSource = mockk<RouteOverviewViewportDataSource>(
             relaxed = true,
         ) {
@@ -331,7 +331,7 @@ class MapboxNavigationViewportDataSourceTest {
 
         clearMocks(routeOverviewViewportDataSource)
 
-        val overviewOptions = CameraOptions.Builder().zoom(1.0).build()
+        val overviewOptions = mockk<CameraOptions>()
         every { routeOverviewViewportDataSource.cameraOptions } returns overviewOptions
 
         viewportDataSource.evaluate()
@@ -358,7 +358,7 @@ class MapboxNavigationViewportDataSourceTest {
 
         clearMocks(pointsOverviewViewportDataSource)
 
-        val pointsOverviewOptions = CameraOptions.Builder().zoom(1.0).build()
+        val pointsOverviewOptions = mockk<CameraOptions>()
         every { pointsOverviewViewportDataSource.cameraOptions } returns pointsOverviewOptions
 
         viewportDataSource.evaluate()
@@ -803,154 +803,29 @@ class MapboxNavigationViewportDataSourceTest {
     // endregion mocked RouteOverviewViewportDataSource
 
     @Test
-    fun `empty source has no frame to move the camera to`() {
+    fun `empty source initializes at null island`() {
         val data = viewportDataSource.getViewportData()
 
-        assertEquals(CameraOptions.Builder().build(), data.cameraForFollowing)
-        assertEquals(CameraOptions.Builder().build(), data.cameraForOverview)
-        assertEquals(CameraOptions.Builder().build(), data.cameraForPointsOverview)
-    }
-
-    @Test
-    fun `before the first frame a known location moves only the center`() {
-        val location = createLocation()
-
-        viewportDataSource.onLocationChanged(location)
+        assertEquals(
+            createCameraOptions {
+                center(NULL_ISLAND_POINT)
+                bearing(BEARING_NORTH)
+                pitch(viewportDataSource.options.followingFrameOptions.defaultPitch)
+                zoom(viewportDataSource.options.followingFrameOptions.maxZoom)
+                padding(EMPTY_EDGE_INSETS)
+            },
+            data.cameraForFollowing,
+        )
 
         assertEquals(
-            CameraOptions.Builder().center(location.toPoint()).build(),
-            viewportDataSource.getViewportData().cameraForFollowing,
-        )
-    }
-
-    @Test
-    fun `before the first frame the overrides are used instead of the location`() {
-        val overrideCenter = Point.fromLngLat(11.0, 12.0)
-
-        viewportDataSource.onLocationChanged(createLocation())
-        viewportDataSource.followingCenterPropertyOverride(overrideCenter)
-        viewportDataSource.followingZoomPropertyOverride(14.0)
-        viewportDataSource.followingBearingPropertyOverride(90.0)
-        viewportDataSource.followingPitchPropertyOverride(30.0)
-
-        assertEquals(
-            CameraOptions.Builder()
-                .center(overrideCenter)
-                .zoom(14.0)
-                .bearing(90.0)
-                .pitch(30.0)
-                .build(),
-            viewportDataSource.getViewportData().cameraForFollowing,
-        )
-    }
-
-    @Test
-    fun `an evaluation with nothing to frame leaves the frame provisional`() {
-        viewportDataSource.evaluate()
-
-        val location = createLocation()
-        viewportDataSource.onLocationChanged(location)
-
-        // a location that arrives after that evaluation still reaches the frame
-        assertEquals(
-            CameraOptions.Builder().center(location.toPoint()).build(),
-            viewportDataSource.getViewportData().cameraForFollowing,
-        )
-    }
-
-    @Test
-    fun `a frame computed from data replaces the provisional one`() {
-        val location = createLocation()
-
-        viewportDataSource.onLocationChanged(location)
-        viewportDataSource.evaluate()
-        val following = viewportDataSource.getViewportData().cameraForFollowing
-
-        assertEquals(location.toPoint(), following.center)
-        assertEquals(viewportDataSource.options.followingFrameOptions.maxZoom, following.zoom)
-        assertEquals(viewportDataSource.options.followingFrameOptions.defaultPitch, following.pitch)
-    }
-
-    @Test
-    fun `points the map cannot frame leave the following frame provisional`() {
-        val location = createLocation()
-        val additionalPoint = Point.fromLngLat(-30.0, -40.0)
-        every {
-            mapboxMap.cameraForCoordinates(
-                any<List<Point>>(),
-                any<CameraOptions>(),
-                any<ScreenBox>(),
-            )
-        } returns CameraOptions.Builder().build()
-
-        viewportDataSource.onLocationChanged(location)
-        viewportDataSource.additionalPointsToFrameForFollowing(listOf(additionalPoint))
-        viewportDataSource.evaluate()
-
-        assertEquals(
-            CameraOptions.Builder().center(location.toPoint()).build(),
-            viewportDataSource.getViewportData().cameraForFollowing,
-        )
-    }
-
-    @Test
-    fun `a later evaluation that cannot frame keeps the computed following frame`() {
-        val location = createLocation()
-        viewportDataSource.onLocationChanged(location)
-        viewportDataSource.evaluate()
-        val computed = viewportDataSource.getViewportData().cameraForFollowing
-        every {
-            mapboxMap.cameraForCoordinates(
-                any<List<Point>>(),
-                any<CameraOptions>(),
-                any<ScreenBox>(),
-            )
-        } returns CameraOptions.Builder().build()
-
-        viewportDataSource.additionalPointsToFrameForFollowing(
-            listOf(Point.fromLngLat(-30.0, -40.0)),
-        )
-        viewportDataSource.evaluate()
-
-        assertEquals(
-            viewportDataSource.options.followingFrameOptions.maxZoom,
-            viewportDataSource.getViewportData().cameraForFollowing.zoom,
-        )
-        assertEquals(computed, viewportDataSource.getViewportData().cameraForFollowing)
-    }
-
-    @Test
-    fun `before the first frame center and zoom stay out when their updates are not allowed`() {
-        viewportDataSource.onLocationChanged(createLocation())
-        viewportDataSource.followingZoomPropertyOverride(14.0)
-        viewportDataSource.followingBearingPropertyOverride(90.0)
-        viewportDataSource.followingPitchPropertyOverride(30.0)
-        viewportDataSource.options.followingFrameOptions.apply {
-            centerUpdatesAllowed = false
-            zoomUpdatesAllowed = false
-        }
-
-        assertEquals(
-            CameraOptions.Builder().bearing(90.0).pitch(30.0).build(),
-            viewportDataSource.getViewportData().cameraForFollowing,
-        )
-    }
-
-    @Test
-    fun `before the first frame bearing and pitch stay out when their updates are not allowed`() {
-        val location = createLocation()
-        viewportDataSource.onLocationChanged(location)
-        viewportDataSource.followingZoomPropertyOverride(14.0)
-        viewportDataSource.followingBearingPropertyOverride(90.0)
-        viewportDataSource.followingPitchPropertyOverride(30.0)
-        viewportDataSource.options.followingFrameOptions.apply {
-            bearingUpdatesAllowed = false
-            pitchUpdatesAllowed = false
-        }
-
-        assertEquals(
-            CameraOptions.Builder().center(location.toPoint()).zoom(14.0).build(),
-            viewportDataSource.getViewportData().cameraForFollowing,
+            createCameraOptions {
+                center(NULL_ISLAND_POINT)
+                bearing(BEARING_NORTH)
+                pitch(ZERO_PITCH)
+                zoom(viewportDataSource.options.overviewFrameOptions.maxZoom)
+                padding(EMPTY_EDGE_INSETS)
+            },
+            data.cameraForOverview,
         )
     }
 
@@ -1077,9 +952,29 @@ class MapboxNavigationViewportDataSourceTest {
         viewportDataSource.evaluate()
         val data = viewportDataSource.getViewportData()
 
-        // no frame was computed from data, so the frames stay empty
-        assertEquals(CameraOptions.Builder().build(), data.cameraForFollowing)
-        assertEquals(CameraOptions.Builder().build(), data.cameraForOverview)
+        assertEquals(
+            createCameraOptions {
+                center(NULL_ISLAND_POINT)
+                bearing(BEARING_NORTH)
+                pitch(viewportDataSource.options.followingFrameOptions.defaultPitch)
+                zoom(viewportDataSource.options.followingFrameOptions.minZoom)
+                padding(EMPTY_EDGE_INSETS)
+                anchor(null)
+            },
+            data.cameraForFollowing,
+        )
+
+        assertEquals(
+            createCameraOptions {
+                center(NULL_ISLAND_POINT)
+                bearing(BEARING_NORTH)
+                pitch(ZERO_PITCH)
+                zoom(0.0)
+                padding(EMPTY_EDGE_INSETS)
+                anchor(null)
+            },
+            data.cameraForOverview,
+        )
     }
 
     @Test
@@ -1111,8 +1006,17 @@ class MapboxNavigationViewportDataSourceTest {
         viewportDataSource.evaluate()
         val data = viewportDataSource.getViewportData()
 
-        // there is no location or progress to frame, so the following frame stays empty
-        assertEquals(CameraOptions.Builder().build(), data.cameraForFollowing)
+        assertEquals(
+            createCameraOptions {
+                center(NULL_ISLAND_POINT)
+                bearing(BEARING_NORTH)
+                pitch(viewportDataSource.options.followingFrameOptions.defaultPitch)
+                zoom(viewportDataSource.options.followingFrameOptions.minZoom)
+                padding(EMPTY_EDGE_INSETS)
+                anchor(null)
+            },
+            data.cameraForFollowing,
+        )
 
         assertEquals(
             overviewCameraOptions,
@@ -1185,45 +1089,6 @@ class MapboxNavigationViewportDataSourceTest {
             overviewCameraOptions,
             data.cameraForOverview,
         )
-    }
-
-    @Test
-    fun `verify frame - following padding is not affected by camera for coordinates rounding`() {
-        val location = createLocation()
-        val additionalPoint = Point.fromLngLat(-30.0, -40.0)
-        val expectedPoints = listOf(location.toPoint(), additionalPoint)
-        val fallbackOptions = createCameraOptions {
-            center(location.toPoint())
-            bearing(smoothedBearing)
-            pitch(viewportDataSource.options.followingFrameOptions.defaultPitch)
-            zoom(viewportDataSource.options.followingFrameOptions.maxZoom)
-            padding(singlePixelEdgeInsets)
-        }
-        val framedCenter = Point.fromLngLat(-15.0, -20.0)
-        val framedZoom = 16.0
-        // The padding comes back converted to logical pixels and back.
-        val roundedPadding = EdgeInsets(
-            singlePixelEdgeInsets.top - 1e-13,
-            singlePixelEdgeInsets.left + 2e-13,
-            singlePixelEdgeInsets.bottom - 1e-13,
-            singlePixelEdgeInsets.right + 2e-13,
-        )
-        every {
-            mapboxMap.cameraForCoordinates(expectedPoints, fallbackOptions, followingScreenBox)
-        } returns fallbackOptions.toBuilder()
-            .center(framedCenter)
-            .zoom(framedZoom)
-            .padding(roundedPadding)
-            .build()
-
-        viewportDataSource.onLocationChanged(location)
-        viewportDataSource.additionalPointsToFrameForFollowing(listOf(additionalPoint))
-        viewportDataSource.evaluate()
-        val cameraForFollowing = viewportDataSource.getViewportData().cameraForFollowing
-
-        assertEquals(singlePixelEdgeInsets, cameraForFollowing.padding)
-        assertEquals(framedCenter, cameraForFollowing.center)
-        assertEquals(framedZoom, cameraForFollowing.zoom)
     }
 
     @Test

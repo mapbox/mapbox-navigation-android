@@ -1,6 +1,5 @@
 package com.mapbox.navigation.core.routerefresh
 
-import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.core.directions.session.RoutesExtra
@@ -11,11 +10,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-@OptIn(
-    ExperimentalPreviewMapboxNavigationAPI::class,
-    ExperimentalCoroutinesApi::class,
-    ExperimentalMapboxNavigationAPI::class,
-)
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalCoroutinesApi::class)
 internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegrationTest() {
 
     @Test
@@ -193,40 +188,6 @@ internal class RouteRefreshStateObserverIntegrationTest : RouteRefreshIntegratio
                 RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED,
             ),
             stateObserver.getStatesSnapshot(),
-        )
-    }
-
-    @Test
-    fun chargeOnlyRefreshesClearExpiringDataAfterTimeoutTest() = runBlocking {
-        val routes = setUpRoutes("route_response_single_route_refresh.json", chargeOnly = true)
-        routeRefreshController = createRefreshController(40_000)
-        routeRefreshController.registerRouteRefreshStateObserver(stateObserver)
-        routeRefreshController.registerRouteRefreshObserver(refreshObserver)
-
-        routeRefreshController.onRoutesChanged(
-            RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW),
-        )
-        testDispatcher.advanceTimeBy(160_000)
-
-        assertEquals(
-            listOf(
-                RouteRefreshExtra.REFRESH_STATE_STARTED,
-                RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS,
-                RouteRefreshExtra.REFRESH_STATE_STARTED,
-                RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS,
-                RouteRefreshExtra.REFRESH_STATE_STARTED,
-                RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS,
-                RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED,
-                RouteRefreshExtra.REFRESH_STATE_STARTED,
-                RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS,
-            ),
-            stateObserver.getStatesSnapshot(),
-        )
-        val refreshes = refreshObserver.refreshes.map { it.primaryRouteRefresherResult }
-        assertEquals(listOf(false, false, true, true), refreshes.map { it.expiringDataRemoved })
-        assertEquals(
-            listOf(false, false),
-            refreshes.drop(2).map { it.route.routeRefreshMetadata?.isUpToDate },
         )
     }
 

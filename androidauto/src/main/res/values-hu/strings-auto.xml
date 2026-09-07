@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="car_action_search_favorites">Kedvencek</string>
+  <string name="car_search_no_results">Nincs találat</string>
+  <string name="car_search_unknown_current_location">Ismeretlen jelenlegi helyzet</string>
+  <string name="car_search_unknown_search_location">Ismeretlen keresési hely</string>
+  <string name="car_label_ok">OK</string>
+  <string name="car_action_preview_title">Útvonal előnézet</string>
+  <string name="car_action_preview_no_location">A jelenlegi hely nem található</string>
+  <string name="car_action_preview_navigate_button">Folytassa az útvonalat</string>
+  <string name="car_action_navigation_stop_button">Állj</string>
+  <string name="car_settings_title">Beállítások</string>
+  <string name="car_settings_toggle_place_holder">Beállítások helyőrző</string>
+  <string name="car_settings_preload_failure_title">Nem sikerült előre betölteni a beállításokat</string>
+  <string name="car_settings_preload_failure_message">Próbálja meg újra megnyitni az alkalmazást.</string>
+  <string name="car_message_location_permissions">Kérjük, nyissa meg az alkalmazást, és engedélyezze a helymeghatározási engedélyt.</string>
+  <string name="car_message_location_permissions_title">Helymeghatározási engedély szükséges</string>
+  <string name="car_preference_audio_guidance_enabled_description">Engedélyezi a hangos útmutatást</string>
+  <string name="car_feedback_title">Jelentés visszajelzés</string>
+  <string name="car_feedback_submit">Beküldés</string>
+  <string name="car_feedback_submit_toast_select_item">Kérjük, válasszon egy visszajelzési elemet</string>
+  <string name="car_feedback_submit_toast_success">Köszönjük a visszajelzését!</string>
+  <string name="car_feedback_negative_routing_error">Útvonal minősége</string>
+  <string name="car_feedback_negative_incorrect_visual">Helytelen vizuális</string>
+  <string name="car_feedback_negative_incorrect_audio">Helytelen hang</string>
+  <string name="car_feedback_negative_road_issue">Útprobléma</string>
+  <string name="car_feedback_negative_road_closed">Útlezárás</string>
+  <string name="car_feedback_negative_traffic_issue">Forgalmi probléma</string>
+  <string name="car_feedback_negative_route_not_allowed">Illegális útvonal</string>
+  <string name="car_feedback_negative_positioning_issue">Pozicionálási probléma</string>
+  <string name="car_feedback_negative_other_issue">Egyéb probléma</string>
+  <string name="car_feedback_search_incorrect_address">Helytelen cím</string>
+  <string name="car_feedback_search_incorrect_location">Helytelen helyszín</string>
+  <string name="car_feedback_search_incorrect_name">Helytelen név</string>
+  <string name="car_feedback_search_other">Egyéb probléma</string>
+  <string name="car_feedback_arrival_positive">Jó</string>
+  <string name="car_feedback_arrival_negative">Nem jó</string>
+</resources>

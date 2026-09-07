@@ -1,6 +1,5 @@
 package com.mapbox.navigation.base.internal.route
 
-import com.mapbox.api.directions.v5.models.Closure
 import com.mapbox.api.directions.v5.models.Incident
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -104,122 +103,6 @@ class RoadObjectsRefresherTest {
             result,
         )
     }
-
-    @Test
-    fun objectsOutsideTheRangeAreKeptWhereverTheyAreListed() {
-        val result = incidentsRefresher.getRefreshedRoadObjects(
-            listOf(
-                incident("overlaps-start", 10, 50),
-                incident("before", 20, 25),
-                incident("after", 70, 80),
-                incident("inside", 40, 45),
-                incident("overlaps-end", 55, 65),
-                incident("after-2", 61, 62),
-            ),
-            listOf(incident("new", 5, 8)),
-            30,
-            60,
-        )
-
-        assertEquals(
-            listOf("before", "new", "after", "after-2").zip(
-                listOf(20 to 25, 35 to 38, 70 to 80, 61 to 62),
-            ).map { (id, range) -> incident(id, range.first, range.second) },
-            result,
-        )
-    }
-
-    @Test
-    fun rangeBoundariesAreStrict() {
-        val result = incidentsRefresher.getRefreshedRoadObjects(
-            listOf(
-                incident("ends-before-start", 20, 29),
-                incident("ends-at-start", 20, 30),
-                incident("starts-at-last", 60, 70),
-                incident("starts-after-last", 61, 70),
-            ),
-            emptyList(),
-            30,
-            60,
-        )
-
-        assertEquals(listOf("ends-before-start", "starts-after-last"), result.map { it.id() })
-    }
-
-    @Test
-    fun objectsWithOneGeometryIndexAreTestedByIt() {
-        val result = incidentsRefresher.getRefreshedRoadObjects(
-            listOf(
-                incident("overlaps", 10, 50),
-                incident("ends-before", null, 20),
-                incident("starts-before", 25, null),
-                incident("starts-inside", 40, null),
-                incident("ends-after", null, 61),
-                incident("starts-after", 70, null),
-            ),
-            emptyList(),
-            30,
-            60,
-        )
-
-        assertEquals(
-            listOf("ends-before", "starts-before", "ends-after", "starts-after"),
-            result.map { it.id() },
-        )
-    }
-
-    @Test
-    fun objectWithoutGeometryIndexBetweenRangeObjectsIsDropped() {
-        val result = incidentsRefresher.getRefreshedRoadObjects(
-            listOf(
-                incident("overlaps-start", 10, 50),
-                incident("unplaced", null, null),
-                incident("overlaps-end", 55, 65),
-            ),
-            emptyList(),
-            30,
-            60,
-        )
-
-        assertEquals(emptyList<Incident>(), result)
-    }
-
-    @Test
-    fun onlyObjectWithoutGeometryIndexIsKeptAsBeforeAndAfter() {
-        val unplaced = incident("unplaced", null, null)
-
-        val result = incidentsRefresher.getRefreshedRoadObjects(
-            listOf(unplaced),
-            emptyList(),
-            30,
-            60,
-        )
-
-        assertEquals(listOf(unplaced, unplaced), result)
-    }
-
-    @Test
-    fun closuresOutsideTheRangeAreKeptWhereverTheyAreListed() {
-        fun closure(start: Int, end: Int) = Closure.builder()
-            .geometryIndexStart(start)
-            .geometryIndexEnd(end)
-            .build()
-
-        val result = ClosuresRefresher.getRefreshedRoadObjects(
-            listOf(closure(10, 50), closure(20, 25), closure(55, 65), closure(61, 62)),
-            listOf(closure(0, 2)),
-            30,
-            60,
-        )
-
-        assertEquals(listOf(closure(20, 25), closure(30, 32), closure(61, 62)), result)
-    }
-
-    private fun incident(id: String, start: Int?, end: Int?) = Incident.builder()
-        .id(id)
-        .geometryIndexStart(start)
-        .geometryIndexEnd(end)
-        .build()
 
     @Test
     fun nullOldRoadObjectsHasNewRoadObjects() {

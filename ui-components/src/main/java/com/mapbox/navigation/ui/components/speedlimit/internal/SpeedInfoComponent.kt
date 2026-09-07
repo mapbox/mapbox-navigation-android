@@ -41,14 +41,13 @@ class SpeedInfoComponent(
         }
 
         coroutineScope.launch {
-            mapboxNavigation.flowLocationMatcherResult(tag = "SpeedInfoComponent")
-                .collect { locationMatcher ->
-                    val value = speedInfoApi.updatePostedAndCurrentSpeed(
-                        locationMatcher,
-                        distanceFormatterOptions,
-                    )
-                    value?.let { speedInfoView.render(it) }
-                }
+            mapboxNavigation.flowLocationMatcherResult().collect { locationMatcher ->
+                val value = speedInfoApi.updatePostedAndCurrentSpeed(
+                    locationMatcher,
+                    distanceFormatterOptions,
+                )
+                value?.let { speedInfoView.render(it) }
+            }
         }
     }
 }

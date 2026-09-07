@@ -12,7 +12,7 @@ class LocationComponent(
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
-        mapboxNavigation.flowLocationMatcherResult(tag = "LocationComponent").observe {
+        mapboxNavigation.flowLocationMatcherResult().observe {
             locationProvider.changePosition(
                 location = it.enhancedLocation,
                 keyPoints = it.keyPoints,

@@ -18,7 +18,6 @@ import com.mapbox.navigation.base.trip.model.roadobject.location.PolylineLocatio
 import com.mapbox.navigation.base.trip.model.roadobject.location.RoadObjectLocation
 import com.mapbox.navigation.base.trip.model.roadobject.location.RouteAlertLocation
 import com.mapbox.navigation.base.trip.model.roadobject.location.SubgraphLocation
-import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigator.EdgeMetadata
 import com.mapbox.navigator.ElectronicHorizon
 import com.mapbox.navigator.ElectronicHorizonEdge
@@ -32,7 +31,6 @@ import com.mapbox.navigator.MatchableOpenLr
 import com.mapbox.navigator.MatchablePoint
 import com.mapbox.navigator.MatchedRoadObjectLocation
 import com.mapbox.navigator.Position
-import com.mapbox.navigator.RoadName
 import com.mapbox.navigator.RoadObjectDistance
 import com.mapbox.navigator.RoadObjectDistanceInfo
 import com.mapbox.navigator.RoadObjectEdgeLocation
@@ -45,8 +43,6 @@ import com.mapbox.navigator.SubgraphEdge
 import com.mapbox.navigator.match.openlr.OpenLR
 import com.mapbox.navigator.match.openlr.Orientation
 import com.mapbox.navigator.match.openlr.SideOfRoad
-
-private const val LOG_CATEGORY = "EHorizonMapper"
 
 private typealias SDKRoadObjectType =
     com.mapbox.navigation.base.trip.model.roadobject.RoadObjectType
@@ -420,26 +416,15 @@ private fun FunctionalRoadClass.mapToRoadClass(): String {
     }
 }
 
-private fun mapNames(names: List<RoadName>): List<RoadComponent> {
-    return names.mapNotNull { it.mapToRoadComponent() }
+private fun mapNames(names: List<com.mapbox.navigator.RoadName>): List<RoadComponent> {
+    val roadComponents = mutableListOf<RoadComponent>()
+    names.forEach {
+        roadComponents.add(it.mapToRoadComponent())
+    }
+    return roadComponents.toList()
 }
 
-/**
- * Returns null for a name that arrives from native code without its text or language, which
- * the native model declares non-null, so that a malformed name drops out of the edge's names
- * instead of failing the whole edge metadata read.
- */
-private fun RoadName.mapToRoadComponent(): RoadComponent? {
-    // The native getters are annotated @NonNull, yet null has been observed at runtime.
-    // Reading them as String? skips Kotlin's inserted null assertion so the check below can run.
-    val text: String? = text
-    val language: String? = language
-    if (text == null || language == null) {
-        logE(LOG_CATEGORY) {
-            "Skipping road name with text = \$text, language = \$language"
-        }
-        return null
-    }
+private fun com.mapbox.navigator.RoadName.mapToRoadComponent(): RoadComponent {
     return RoadComponent(
         text,
         language,

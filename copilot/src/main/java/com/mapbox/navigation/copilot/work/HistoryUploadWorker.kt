@@ -15,7 +15,6 @@ import androidx.work.WorkerParameters
 import com.mapbox.common.MapboxOptions
 import com.mapbox.common.TransferState
 import com.mapbox.common.UploadOptions
-import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.copilot.AttachmentMetadata
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils
@@ -39,6 +38,7 @@ import com.mapbox.navigation.copilot.internal.saveFilename
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logW
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -63,7 +63,7 @@ internal class HistoryUploadWorker(
      * Result. After this time has expired, the worker will be signalled to stop and its
      * com.google.common.util.concurrent.ListenableFuture will be cancelled.
      */
-    override suspend fun doWork(): Result = withContext(SdkDispatchers.IO) {
+    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         val copilotSession = copilotSessionFrom(workerParams.inputData)
         val recordingFile =
             rename(File(copilotSession.recording), attachmentFilename(copilotSession))
@@ -100,24 +100,6 @@ internal class HistoryUploadWorker(
             )
         }
 
-        val accessToken = resolveAccessToken(workerParams.inputData)
-        if (accessToken.isBlank()) {
-            failure(copilotSession)
-            reportCopilotError("Access token is empty")
-            // A missing token counts as a failed attempt: the recording must not outlive the
-            // retry window, see [MAX_RUN_ATTEMPT_COUNT].
-            if (runAttemptCount >= MAX_RUN_ATTEMPT_COUNT) {
-                logW(
-                    "Result.failure(${recordingFile.name}|${sessionFile.name}), " +
-                        "access token is still not set",
-                )
-                cleanup(copilotSession, recordingFile, sessionFile)
-                return@withContext Result.failure()
-            }
-            logW("Access token is not set, will retry later. runAttemptCount: $runAttemptCount")
-            return@withContext Result.retry()
-        }
-
         val uploadSessionId = workerParams.inputData.getString(UPLOAD_SESSION_ID)!!
 
         val metadataList = arrayListOf(
@@ -132,7 +114,7 @@ internal class HistoryUploadWorker(
         )
         val uploadOptions = UploadOptions(
             /* filePath = */ recordingFile.absolutePath,
-            /* url = */ uploadUrl(accessToken),
+            /* url = */ workerParams.inputData.getString(UPLOAD_URL)!!,
             /* headers = */ HashMap(),
             /* metadata = */ gson.toJson(metadataList),
             /* mediaType = */ MEDIA_TYPE_ZIP,
@@ -291,16 +273,8 @@ internal class HistoryUploadWorker(
         private const val APP_VERSION = "app_version"
         private const val APP_USER_ID = "app_user_id"
         private const val APP_SESSION_ID = "app_session_id"
+        private const val UPLOAD_URL = "upload_url"
         private const val UPLOAD_SESSION_ID = "upload_session_id"
-        private const val ACCESS_TOKEN = "access_token"
-
-        /**
-         * Key written by earlier SDK versions, which stored the complete upload URL, including the
-         * token, in the input data. Jobs scheduled before an app update are still in the
-         * WorkManager database and run with this key, so it must stay readable.
-         */
-        private const val LEGACY_UPLOAD_URL = "upload_url"
-        private const val ACCESS_TOKEN_QUERY = "access_token="
         private const val OWNER = "owner"
 
         /**
@@ -362,40 +336,14 @@ internal class HistoryUploadWorker(
         private fun requireInternet() =
             Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
 
-        /**
-         * The token is resolved when the job runs, in this order:
-         * 1. the current [MapboxOptions.accessToken]: it may have been rotated since the job was
-         *    scheduled;
-         * 2. the token saved at scheduling time: the current one can still be empty, because
-         *    WorkManager may start this worker in a fresh process before the app has set it;
-         * 3. the token embedded in the URL saved by earlier SDK versions.
-         *
-         * The result can still be blank, for example when the job was scheduled before the app
-         * set the token and the app has not set it yet.
-         */
-        private fun resolveAccessToken(data: Data): String {
-            val current = MapboxOptions.accessToken
-            if (current.isNotBlank()) return current
-
-            val scheduled = data.getString(ACCESS_TOKEN).orEmpty()
-            if (scheduled.isNotBlank()) return scheduled
-
-            return data.getString(LEGACY_UPLOAD_URL)
-                ?.substringAfter(ACCESS_TOKEN_QUERY, "")
-                ?.substringBefore('&')
-                .orEmpty()
-        }
-
-        private fun uploadUrl(accessToken: String) =
-            "$PROD_BASE_URL/attachments/v1?access_token=$accessToken"
-
         private fun inputData(copilotSession: CopilotSession): Data {
+            val url = "$PROD_BASE_URL/attachments/v1?access_token=${MapboxOptions.accessToken}"
             val uploadSessionId = generateSessionId(copilotSession)
 
             return Data.Builder()
                 .putCopilotSession(copilotSession)
+                .putString(UPLOAD_URL, url)
                 .putString(UPLOAD_SESSION_ID, uploadSessionId)
-                .putString(ACCESS_TOKEN, MapboxOptions.accessToken)
                 .build()
         }
 

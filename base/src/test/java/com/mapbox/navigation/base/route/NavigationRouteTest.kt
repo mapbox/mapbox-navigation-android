@@ -9,17 +9,11 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
-import com.mapbox.navigation.base.internal.route.internalRefreshRoute
-import com.mapbox.navigation.base.internal.route.operations.OptionallyRefreshedData
 import com.mapbox.navigation.base.internal.route.operations.RouteOperations
-import com.mapbox.navigation.base.internal.route.operations.RouteUpdate
 import com.mapbox.navigation.base.internal.route.parsing.ResponseToParse
-import com.mapbox.navigation.base.internal.route.parsing.models.DirectionsParsedRouteData
-import com.mapbox.navigation.base.internal.route.parsing.models.directions.DirectionsRouteModelParsingResult
 import com.mapbox.navigation.base.internal.route.parsing.setupParsing
 import com.mapbox.navigation.base.internal.route.testing.toDataRefJava
 import com.mapbox.navigation.base.internal.route.updateExpirationTime
-import com.mapbox.navigation.testing.FakeDirectionsRouteContextRefresherRule
 import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.NativeRouteParserRule
@@ -28,7 +22,6 @@ import com.mapbox.navigation.testing.factories.createDirectionsRoute
 import com.mapbox.navigation.testing.factories.createNavigationRoute
 import com.mapbox.navigation.testing.factories.createRouteOptions
 import com.mapbox.navigation.testing.factories.createTestMapMatchingResponseParser
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -44,9 +37,6 @@ class NavigationRouteTest {
 
     @get:Rule
     val loggerFrontendTestRule = LoggingFrontendTestRule()
-
-    @get:Rule
-    val directionsRouteContextRefresherRule = FakeDirectionsRouteContextRefresherRule()
 
     @Test
     fun `origin access`() {
@@ -130,65 +120,6 @@ class NavigationRouteTest {
         )
 
         assertEquals(original.unavoidableClosures, copied.unavoidableClosures)
-    }
-
-    @Test
-    fun `refresh of the charge only keeps the expiry, a full refresh takes the new one`() {
-        val route = DirectionsRoute.fromJson(
-            FileUtils.loadJsonFixture("route_closure_second_waypoint.json"),
-        )
-        val routeOptions = RouteOptions.builder()
-            .applyDefaultNavigationOptions()
-            .coordinates("0.0,0.0;1.1,1.1")
-            .build()
-        // As the native route model does: the old refresh_ttl, added to the time of the response.
-        val operations = mockk<RouteOperations>()
-        every { operations.refresh(any(), any(), any(), any(), any()) } returns Result.success(
-            RouteUpdate(
-                routeModelsParsingResult = DirectionsRouteModelParsingResult(
-                    DirectionsParsedRouteData(
-                        route = route,
-                        routesWaypoint = route.waypoints(),
-                        requestUUID = route.requestUuid(),
-                        routeOptions = routeOptions,
-                        routeIndex = 0,
-                        routerOrigin = RouterOrigin.ONLINE,
-                        responseOriginAPI = ResponseOriginAPI.DIRECTIONS_API,
-                    ),
-                    operations,
-                ),
-                routeRefreshMetadata = null,
-                newExpirationTimeElapsedSeconds = OptionallyRefreshedData.Updated(999L),
-                overriddenTraffic = OptionallyRefreshedData.NoUpdates(),
-            ),
-        )
-        val navigationRoute = NavigationRoute(
-            directionsRoute = route,
-            waypoints = route.waypoints(),
-            routeOptions = routeOptions,
-            nativeRoute = mockk(relaxed = true),
-            expirationTimeElapsedSeconds = 45L,
-            responseOriginAPI = ResponseOriginAPI.DIRECTIONS_API,
-            operations = operations,
-            directionsRouteContext = mockk(relaxed = true),
-        )
-
-        val chargeOnly = navigationRoute.internalRefreshRoute(
-            "{}".toDataRefJava(),
-            legIndex = 0,
-            legGeometryIndex = 0,
-            responseTimeElapsedSeconds = 900,
-            chargeOnly = true,
-        ).getOrThrow()
-        val full = navigationRoute.internalRefreshRoute(
-            "{}".toDataRefJava(),
-            legIndex = 0,
-            legGeometryIndex = 0,
-            responseTimeElapsedSeconds = 900,
-        ).getOrThrow()
-
-        assertEquals(45L, chargeOnly.expirationTimeElapsedSeconds)
-        assertEquals(999L, full.expirationTimeElapsedSeconds)
     }
 
     @Test
