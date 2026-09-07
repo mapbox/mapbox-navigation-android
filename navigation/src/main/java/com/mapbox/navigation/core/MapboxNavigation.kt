@@ -32,7 +32,6 @@ import com.mapbox.navigation.base.internal.clearCache
 import com.mapbox.navigation.base.internal.extensions.internalAlternativeRouteIndices
 import com.mapbox.navigation.base.internal.nativeRerouteStrategyForMatchRoute
 import com.mapbox.navigation.base.internal.performance.PerformanceTracker
-import com.mapbox.navigation.base.internal.reroute.getRepeatRerouteAfterOffRouteDelaySeconds
 import com.mapbox.navigation.base.internal.route.Waypoint
 import com.mapbox.navigation.base.internal.route.parsing.setupParsing
 import com.mapbox.navigation.base.internal.tilestore.NavigationTileStoreOwner
@@ -98,7 +97,6 @@ import com.mapbox.navigation.core.preview.RoutesPreview
 import com.mapbox.navigation.core.preview.RoutesPreviewObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.reroute.InternalRerouteController
-import com.mapbox.navigation.core.reroute.NativeMapboxRerouteController
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteController.RerouteStateObserver
 import com.mapbox.navigation.core.reroute.RerouteOptionsAdapter
@@ -113,7 +111,6 @@ import com.mapbox.navigation.core.routealternatives.SuggestionType
 import com.mapbox.navigation.core.routealternatives.UpdateRouteSuggestion
 import com.mapbox.navigation.core.routealternatives.matchesByLocationAndType
 import com.mapbox.navigation.core.routealternatives.upcomingWaypoints
-import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.routerefresh.MapboxHistoryRecorderWrapper
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
@@ -640,7 +637,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             tripSessionLocationEngine = tripSessionLocationEngine,
             navigator = navigator,
             threadController,
-            navigationOptions.rerouteOptions.getRepeatRerouteAfterOffRouteDelaySeconds(),
         )
 
         tripSession.registerRouteProgressObserver(routesProgressDataProvider)
@@ -682,8 +678,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
         navigationTelemetry = NavigationTelemetry.create(tripSession, navigator)
 
-        val routeOptionsProvider = RouteOptionsUpdater()
-
         routeAlternativesController = RouteAlternativesControllerProvider.create(
             navigationOptions.routeAlternativesOptions,
             navigator,
@@ -712,39 +706,24 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             )
         }
 
-        // NN initializes detector and controller in case reroute is enabled in custom config
-        // {"features": {"useInternalReroute": true }}
-        // until https://mapbox.atlassian.net/browse/NAVAND-3575 is completed
-        // useInternalReroute is supposed to be used only for internal testing
-        defaultRerouteController = if (navigator.nativeRerouteEnabled()) {
-            NativeMapboxRerouteController(
-                rerouteInterface = nativeNavigator,
-                getCurrentRoutes = directionsSession::routesPlusIgnored,
-                updateRoutes = { routes, legIndex ->
-                    when {
-                        !tripSession.hadOffRouteDeviation ||
-                            (tripSession.hadOffRouteDeviation && tripSession.isOffRoute) -> {
-                            internalSetNavigationRoutes(routes, SetRoutes.Reroute(legIndex))
-                            tripSession.resetOffRouteDeviationFlag()
-                            true
-                        }
-
-                        else -> false
+        defaultRerouteController = NavigationComponentProvider.createRerouteController(
+            rerouteInterface = nativeNavigator,
+            getCurrentRoutes = directionsSession::routesPlusIgnored,
+            updateRoutes = { routes, legIndex ->
+                when {
+                    !tripSession.hadOffRouteDeviation ||
+                        (tripSession.hadOffRouteDeviation && tripSession.isOffRoute) -> {
+                        internalSetNavigationRoutes(routes, SetRoutes.Reroute(legIndex))
+                        tripSession.resetOffRouteDeviationFlag()
+                        true
                     }
-                },
-                scope = mainJobController.scope,
-                routeParser = parsing,
-            )
-        } else {
-            NavigationComponentProvider.createRerouteController(
-                directionsSession,
-                tripSession,
-                routeOptionsProvider,
-                navigationOptions.rerouteOptions,
-                threadController,
-                evDynamicDataHolder,
-            )
-        }
+
+                    else -> false
+                }
+            },
+            scope = mainJobController.scope,
+            routeParser = parsing,
+        )
         rerouteController = defaultRerouteController
 
         internalRoutesObserver = createInternalRoutesObserver()

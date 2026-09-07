@@ -6,10 +6,11 @@ import com.mapbox.common.TileStore
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.accounts.SkuIdProvider
 import com.mapbox.navigation.base.internal.performance.PerformanceTracker
+import com.mapbox.navigation.base.internal.route.parsing.models.directions.NavigationRoutesParser
 import com.mapbox.navigation.base.options.EventsAppMetadata
 import com.mapbox.navigation.base.options.LocationOptions
-import com.mapbox.navigation.base.options.RerouteOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.core.accounts.BillingController
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
@@ -24,8 +25,8 @@ import com.mapbox.navigation.core.navigator.offline.TilesetVersionManagerImpl
 import com.mapbox.navigation.core.preview.NativeRoutesDataParser
 import com.mapbox.navigation.core.preview.RoutesPreviewController
 import com.mapbox.navigation.core.reroute.InternalRerouteController
-import com.mapbox.navigation.core.reroute.MapboxRerouteController
-import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
+import com.mapbox.navigation.core.reroute.NativeMapboxRerouteController
+import com.mapbox.navigation.core.reroute.UpdateRoutes
 import com.mapbox.navigation.core.telemetry.ApplicationLifecycleMonitor
 import com.mapbox.navigation.core.telemetry.EventsMetadataInterfaceImpl
 import com.mapbox.navigation.core.trip.service.MapboxTripService
@@ -38,6 +39,7 @@ import com.mapbox.navigation.core.trip.session.TripSessionLocationEngine
 import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManagerImpl
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
+import com.mapbox.navigation.navigator.internal.MapboxNativeRerouteInterface
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ConfigHandle
@@ -111,7 +113,6 @@ internal object NavigationComponentProvider {
         tripSessionLocationEngine: TripSessionLocationEngine,
         navigator: MapboxNativeNavigator,
         threadController: ThreadController,
-        repeatRerouteAfterOffRouteDelaySeconds: Int,
     ): TripSession = PerformanceTracker.trackPerformanceSync("createTripSession") {
         MapboxTripSession(
             tripService,
@@ -120,7 +121,6 @@ internal object NavigationComponentProvider {
             navigator = navigator,
             threadController,
             EHorizonSubscriptionManagerImpl(navigator, threadController),
-            repeatRerouteAfterOffRouteDelaySeconds,
         )
     }
 
@@ -172,19 +172,17 @@ internal object NavigationComponentProvider {
     fun createRoutesCacheClearer(): RoutesCacheClearer = RoutesCacheClearer()
 
     fun createRerouteController(
-        directionsSession: DirectionsSession,
-        tripSession: TripSession,
-        routeOptionsProvider: RouteOptionsUpdater,
-        rerouteOptions: RerouteOptions,
-        threadController: ThreadController,
-        evDynamicDataHolder: EVDynamicDataHolder,
-    ): InternalRerouteController = MapboxRerouteController(
-        directionsSession,
-        tripSession,
-        routeOptionsProvider,
-        rerouteOptions,
-        threadController,
-        evDynamicDataHolder,
+        rerouteInterface: MapboxNativeRerouteInterface,
+        getCurrentRoutes: () -> List<NavigationRoute>,
+        updateRoutes: UpdateRoutes,
+        scope: CoroutineScope,
+        routeParser: NavigationRoutesParser,
+    ): InternalRerouteController = NativeMapboxRerouteController(
+        rerouteInterface = rerouteInterface,
+        getCurrentRoutes = getCurrentRoutes,
+        updateRoutes = updateRoutes,
+        scope = scope,
+        routeParser = routeParser,
     )
 
     fun createForkPointPassedObserver(

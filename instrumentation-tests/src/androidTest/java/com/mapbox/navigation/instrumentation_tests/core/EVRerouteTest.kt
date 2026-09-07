@@ -48,8 +48,6 @@ import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 import java.net.URI
 
 private const val KEY_ENGINE = "engine"
@@ -69,31 +67,7 @@ private val userProvidedCpoiKeys = setOf(
 )
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-@RunWith(Parameterized::class)
-class EVRerouteTest(
-    private val runOptions: RerouteTestRunOptions,
-) : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
-
-    data class RerouteTestRunOptions(
-        val nativeReroute: Boolean,
-    ) {
-        override fun toString(): String {
-            return if (nativeReroute) {
-                "native reroute"
-            } else {
-                "platform reroute"
-            }
-        }
-    }
-
-    companion object {
-        @JvmStatic
-        @Parameterized.Parameters(name = "{0}")
-        fun data() = listOf(
-            RerouteTestRunOptions(nativeReroute = false),
-            RerouteTestRunOptions(nativeReroute = true),
-        )
-    }
+class EVRerouteTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
 
     @get:Rule
     val mapboxNavigationRule = MapboxNavigationRule()
@@ -147,7 +121,7 @@ class EVRerouteTest(
                     .navigatorPredictionMillis(0L)
                     .deviceProfile(
                         DeviceProfile.Builder().customConfig(
-                            getTestRerouteCustomConfig(runOptions.nativeReroute),
+                            getTestRerouteCustomConfig(),
                         ).build(),
                     )
                     .build(),

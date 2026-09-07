@@ -1,11 +1,7 @@
 package com.mapbox.navigation.testing.utils
 
 
-fun getTestRerouteCustomConfig(nativeReroute: Boolean): String = if (nativeReroute) {
-    stableNativeSimulationConfig
-} else {
-    platformRerouteConfig
-}
+fun getTestRerouteCustomConfig(): String = stableNativeSimulationConfig
 
 private const val stableNativeSimulationConfig =
     """
@@ -16,22 +12,14 @@ private const val stableNativeSimulationConfig =
                 }
             },
         "input": {
-                "extrapolation": { 
-                    "mode": 0 
+                "extrapolation": {
+                    "mode": 0
                 }
             },
         "navigation": {
-                "noSignalSimulation": { 
-                    "enabled": false 
+                "noSignalSimulation": {
+                    "enabled": false
                 }
             }
     """
-
-private const val platformRerouteConfig =
-    """{
-            "features": {
-                "useInternalReroute": false
-            },
-            $stableNativeSimulationConfig
-        }"""
 

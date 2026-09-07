@@ -97,12 +97,9 @@ import kotlinx.coroutines.yield
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
-import org.junit.Assume.assumeTrue
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 import java.net.URI
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
@@ -111,33 +108,7 @@ import kotlin.math.abs
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalMapboxNavigationAPI::class)
-@RunWith(Parameterized::class)
-class CoreRerouteTest(
-    private val runOptions: RerouteTestRunOptions,
-) : BaseCoreNoCleanUpTest() {
-
-    data class RerouteTestRunOptions(
-        val nativeReroute: Boolean,
-    ) {
-
-        override fun toString(): String {
-            return if (nativeReroute) {
-                "native reroute"
-            } else {
-                "platform reroute"
-            }
-        }
-    }
-
-    companion object {
-
-        @JvmStatic
-        @Parameterized.Parameters(name = "{0}")
-        fun data() = listOf(
-            RerouteTestRunOptions(nativeReroute = false),
-            RerouteTestRunOptions(nativeReroute = true),
-        )
-    }
+class CoreRerouteTest : BaseCoreNoCleanUpTest() {
 
     @get:Rule
     val mapboxNavigationRule = MapboxNavigationRule()
@@ -201,7 +172,7 @@ class CoreRerouteTest(
 
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
+            customConfig = getTestRerouteCustomConfig(),
         ) { navigation ->
             val rerouteStates = navigation.recordRerouteStates()
             val rerouteStatesV2 = navigation.recordRerouteStatesV2()
@@ -247,7 +218,7 @@ class CoreRerouteTest(
         val tilesVersion = context.unpackTiles(Tileset.NearMunich)[TileDataDomain.NAVIGATION]!!
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
+            customConfig = getTestRerouteCustomConfig(),
             tileStore = createTileStoreWithFastRetryBackoff(),
         ) { navigation ->
             val routes = stayOnPosition(originLocation, bearing = 0.0f) {
@@ -310,7 +281,7 @@ class CoreRerouteTest(
         val tileStore = createTileStoreWithFastRetryBackoff()
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
+            customConfig = getTestRerouteCustomConfig(),
             tileStore = tileStore,
             tilesVersion = tilesVersion,
             routeRefreshOptions = refreshOptions,
@@ -456,9 +427,7 @@ class CoreRerouteTest(
         withMapboxNavigation(
             useRealTiles = true,
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestRerouteCustomConfig(
-                runOptions.nativeReroute,
-            ),
+            customConfig = getTestRerouteCustomConfig(),
             tileStore = createTileStoreWithFastRetryBackoff(),
         ) { navigation ->
 
@@ -834,9 +803,6 @@ class CoreRerouteTest(
      */
     @Test
     fun reroute_after_subsequent_alternative_request() = sdkTest {
-        // Skipping platform as it doesn't support this behavior
-        if (!runOptions.nativeReroute) return@sdkTest
-
         val mapboxNavigation = createMapboxNavigation(
             customConfig = """
             {
@@ -999,7 +965,7 @@ class CoreRerouteTest(
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
+            customConfig = getTestRerouteCustomConfig(),
         ) { navigation ->
             val routeOptions = RouteOptions.builder()
                 .coordinatesList(
@@ -1068,7 +1034,7 @@ class CoreRerouteTest(
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
+            customConfig = getTestRerouteCustomConfig(),
         ) { navigation ->
             val routeOptions = RouteOptions.builder()
                 .coordinatesList(
@@ -1191,7 +1157,7 @@ class CoreRerouteTest(
     fun reroute_on_multieg_route_without_alternatives() = sdkTest {
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
+            customConfig = getTestRerouteCustomConfig(),
         ) { mapboxNavigation ->
             val mockRoute = RoutesProvider.dc_very_short_two_legs(context)
             val originalLocation = mockLocationUpdatesRule.generateLocationUpdate {
@@ -1369,7 +1335,7 @@ class CoreRerouteTest(
     fun reroute_on_single_leg_route_with_alternatives() = sdkTest {
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
+            customConfig = getTestRerouteCustomConfig(),
         ) { mapboxNavigation ->
             val rerouteState = mapboxNavigation.recordRerouteStates()
             val rerouteStateV2 = mapboxNavigation.recordRerouteStatesV2()
@@ -1417,7 +1383,7 @@ class CoreRerouteTest(
     fun reroute_on_multileg_route_first_leg_with_alternatives() = sdkTest {
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
+            customConfig = getTestRerouteCustomConfig(),
         ) { mapboxNavigation ->
             val rerouteStates = mapboxNavigation.recordRerouteStates()
             val rerouteStatesV2 = mapboxNavigation.recordRerouteStatesV2()
@@ -1462,7 +1428,7 @@ class CoreRerouteTest(
     fun reroute_from_single_leg_primary_to_multileg_alternative() = sdkTest {
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
+            customConfig = getTestRerouteCustomConfig(),
         ) { mapboxNavigation ->
             val mockSingleLegPrimaryRoute = RoutesProvider
                 .dc_short_alternative_after_parssing_waypoint(context)
@@ -1550,7 +1516,7 @@ class CoreRerouteTest(
         )
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
+            customConfig = getTestRerouteCustomConfig(),
         ) { mapboxNavigation ->
 
             val rerouteStates = mapboxNavigation.recordRerouteStates()
@@ -1813,10 +1779,6 @@ class CoreRerouteTest(
 
     @Test
     fun replan_interrupts_ongoing_reroute_request_while_parsing() = sdkTest {
-        assumeTrue(
-            "test is relevant only for native reroute controller implementation",
-            runOptions.nativeReroute,
-        )
         val mapboxNavigation = createMapboxNavigation()
         mapboxHistoryTestRule.historyRecorder = mapboxNavigation.historyRecorder.apply {
             startRecording()
@@ -1895,10 +1857,6 @@ class CoreRerouteTest(
 
     @Test
     fun replan_interrupts_ongoing_replan_while_parsing() = sdkTest {
-        assumeTrue(
-            "test is relevant only for native reroute controller implementation",
-            runOptions.nativeReroute,
-        )
         val mapboxNavigation = createMapboxNavigation()
         mapboxHistoryTestRule.historyRecorder = mapboxNavigation.historyRecorder.apply {
             startRecording()
@@ -2271,7 +2229,7 @@ class CoreRerouteTest(
                         .build(),
                 ).deviceProfile(
                     DeviceProfile.Builder().customConfig(
-                        customConfig ?: getTestRerouteCustomConfig(runOptions.nativeReroute),
+                        customConfig ?: getTestRerouteCustomConfig(),
                     ).build(),
                 )
                 .routingTilesOptions(

@@ -281,7 +281,6 @@ internal open class MapboxNavigationBaseTest {
                 any(),
                 any(),
                 any(),
-                any(),
             )
         } returns defaultRerouteController
 
@@ -367,7 +366,6 @@ internal open class MapboxNavigationBaseTest {
         every { navigator.telemetry } returns telemetry
         every { navigator.getRerouteDetector() } returns null
         every { navigator.getRerouteController() } returns null
-        every { navigator.nativeRerouteEnabled() } returns false
         every { navigator.reset(null) } just Runs
     }
 
@@ -393,7 +391,6 @@ internal open class MapboxNavigationBaseTest {
                 tripSessionLocationEngine = tripSessionLocationEngine,
                 navigator = navigator,
                 threadController,
-                any(),
             )
         } returns tripSession
         every { tripSession.getRouteProgress() } returns routeProgress

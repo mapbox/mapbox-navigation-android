@@ -31,7 +31,6 @@ import com.mapbox.navigation.core.navigator.toFixLocation
 import com.mapbox.navigation.core.navigator.toLocation
 import com.mapbox.navigation.core.navigator.toLocations
 import com.mapbox.navigation.core.reroute.RerouteController
-import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.routerefresh.RouteRefresherStatus
 import com.mapbox.navigation.core.trip.RelevantVoiceInstructionsCallback
 import com.mapbox.navigation.core.trip.VoiceInstructionsAvailableObserver
@@ -70,9 +69,6 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.ExperimentalTime
-import kotlin.time.TimeSource
 
 /**
  * Default implementation of [TripSession]
@@ -82,8 +78,6 @@ import kotlin.time.TimeSource
  * @param tripSessionLocationEngine the location engine
  * @param navigator Native navigator
  * @param threadController controller for main/io jobs
- * @param repeatRerouteAfterOffRouteDelaySeconds max delay in seconds before repeating reroute after
- * off-route event (when RerouteState.FetchingRoute is not invoked after off-route event)
  */
 @MainThread
 internal class MapboxTripSession(
@@ -93,7 +87,6 @@ internal class MapboxTripSession(
     private val navigator: MapboxNativeNavigator,
     private val threadController: ThreadController,
     private val eHorizonSubscriptionManager: EHorizonSubscriptionManager,
-    private val repeatRerouteAfterOffRouteDelaySeconds: Int = -1,
 ) : TripSession {
 
     private companion object {
@@ -347,8 +340,6 @@ internal class MapboxTripSession(
     override var locationMatcherResult: LocationMatcherResult? = null
         private set
 
-    private var rerouteInvocationHandler: RerouteInvocationHandler? = null
-
     private val nativeFallbackVersionsObserver =
         object : FallbackVersionsObserver {
             override fun onFallbackVersionsFound(versions: MutableList<String>) {
@@ -398,83 +389,6 @@ internal class MapboxTripSession(
 
     @OptIn(MapboxExperimental::class)
     private var voiceInstructionsObserver: VoiceInstructionsCallback? = null
-
-    /**
-     * Helper class that handles the reroute invocation logic based on the off-route state changes.
-     * It uses the [RerouteController] to monitor the reroute state and ensure that reroutes are
-     * triggered appropriately when the user goes off-route.
-     *
-     * Rely on the fact that all triggerRerouteIfRequired() should be called from the same thread.
-     * It allows to build state machine based on variables without additional locks.
-     */
-    private class RerouteInvocationHandler(
-        val tripSession: MapboxTripSession,
-        val rerouteController: RerouteController,
-        val repeatRerouteAfterOffRouteDelaySeconds: Int,
-    ) {
-
-        private companion object {
-            private const val LOG_CATEGORY = "RerouteInvocationHandler"
-        }
-
-        @OptIn(ExperimentalTime::class)
-        private var startTimeMark = TimeSource.Monotonic.markNow()
-
-        fun triggerRerouteIfRequired(tripStatus: TripStatus) {
-            if (repeatRerouteAfterOffRouteDelaySeconds == -1) {
-                if (tripSession.isOffRoute != tripStatus.isOffRoute) {
-                    tripSession.offRouteObserverForReroute?.onOffRouteStateChanged(
-                        tripStatus.isOffRoute,
-                    )
-                }
-            } else {
-                when {
-                    // Send signal via callback to MapboxNavigation for the reroute logic
-                    !tripSession.isOffRoute && tripStatus.isOffRoute -> {
-                        logI("Trigger off-route observer for re-route", LOG_CATEGORY)
-                        resetState()
-                        tripSession.offRouteObserverForReroute?.onOffRouteStateChanged(true)
-                    }
-
-                    // Checks if the reroute was invoked the last time the user was off route
-                    tripSession.isOffRoute && tripStatus.isOffRoute -> {
-                        val rerouteState = rerouteController.state
-                        if (rerouteState.isInProgress()) {
-                            logI(
-                                "Re-route is in progress [$rerouteState]",
-                                LOG_CATEGORY,
-                            )
-                            resetState()
-                        } else {
-                            if (exceedDelay()) {
-                                logI(
-                                    "Re-route not invoked [$rerouteState]. " +
-                                        "Repeating off-route observer call for re-route",
-                                    LOG_CATEGORY,
-                                )
-                                resetState()
-                                tripSession.offRouteObserverForReroute?.onOffRouteStateChanged(true)
-                            }
-                        }
-                    }
-
-                    // Resets the state
-                    !tripSession.isOffRoute -> {
-                        resetState()
-                    }
-                }
-            }
-        }
-
-        @OptIn(ExperimentalTime::class)
-        private fun exceedDelay() =
-            startTimeMark.elapsedNow() >= repeatRerouteAfterOffRouteDelaySeconds.seconds
-
-        @OptIn(ExperimentalTime::class)
-        private fun resetState() {
-            startTimeMark = TimeSource.Monotonic.markNow()
-        }
-    }
 
     init {
         navigator.addNativeNavigatorRecreationObserver {
@@ -893,16 +807,10 @@ internal class MapboxTripSession(
         rerouteController: RerouteController,
     ) {
         offRouteObserverForReroute = offRouteObserver
-        rerouteInvocationHandler = RerouteInvocationHandler(
-            this,
-            rerouteController,
-            repeatRerouteAfterOffRouteDelaySeconds,
-        )
     }
 
     override fun resetOffRouteObserverForReroute() {
         offRouteObserverForReroute = null
-        rerouteInvocationHandler = null
     }
 
     override fun resetOffRouteDeviationFlag() {
@@ -1017,7 +925,9 @@ internal class MapboxTripSession(
             }
         updateRouteProgress(routeProgress, triggerObserver)
         triggerVoiceInstructionEvent(routeProgress, status)
-        rerouteInvocationHandler?.triggerRerouteIfRequired(tripStatus)
+        if (isOffRoute != tripStatus.isOffRoute) {
+            offRouteObserverForReroute?.onOffRouteStateChanged(tripStatus.isOffRoute)
+        }
         isOffRoute = tripStatus.isOffRoute
     }
 
@@ -1159,5 +1069,3 @@ private val TripStatus.isOffRoute: Boolean
 
 private class NativeStatusProcessingError(cause: Throwable) :
     Throwable("Error processing native status update", cause)
-
-private fun RerouteState.isInProgress(): Boolean = this is RerouteState.FetchingRoute

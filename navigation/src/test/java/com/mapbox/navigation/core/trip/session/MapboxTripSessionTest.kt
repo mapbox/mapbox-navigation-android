@@ -239,7 +239,6 @@ class MapboxTripSessionTest {
             navigator,
             threadController,
             eHorizonSubscriptionManager,
-            5,
         )
     }
 

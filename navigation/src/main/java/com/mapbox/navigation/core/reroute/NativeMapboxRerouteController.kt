@@ -237,8 +237,7 @@ internal class NativeMapboxRerouteController(
 
     override fun interrupt() {
         // Interrupt only while a reroute is actually in flight. Once a route has been
-        // fetched, the result is delivered synchronously and must not cancel the delivery
-        // (same guard as MapboxRerouteController#onRequestInterrupted).
+        // fetched, the result is delivered synchronously and must not cancel the delivery.
         when (nativeState) {
             is NativeRerouteControllerState.WaitingForResponse,
             is NativeRerouteControllerState.RouteObjectsParsing,

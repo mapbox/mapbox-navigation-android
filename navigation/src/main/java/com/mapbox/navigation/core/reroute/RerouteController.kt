@@ -135,8 +135,7 @@ sealed class RerouteState {
      * - another reroute call [RerouteController.reroute];
      * - when reroute has been disabled by [MapboxNavigation.setRerouteEnabled];
      * - user is back to route, see [OffRouteObserver];
-     * - from the SDK internally if another route request has been requested (only when using the default
-     * implementation [MapboxRerouteController]).
+     * - from the SDK internally if another route request has been requested.
      */
     object Interrupted : RerouteState()
 
@@ -283,8 +282,7 @@ sealed class RerouteStateV2 protected constructor() {
      * - [MapboxNavigation.requestRoutes] called;
      * - another reroute call [RerouteController.reroute];
      * - when reroute has been disabled by [MapboxNavigation.setRerouteEnabled];
-     * - from the SDK internally if another route request has been requested (only when using the default
-     * implementation [MapboxRerouteController]).
+     * - from the SDK internally if another route request has been requested.
      */
     class Interrupted internal constructor() : RerouteStateV2() {
 

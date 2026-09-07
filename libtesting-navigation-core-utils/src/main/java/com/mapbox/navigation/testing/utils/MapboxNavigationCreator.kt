@@ -8,7 +8,6 @@ import com.mapbox.bindgen.Value
 import com.mapbox.common.TileStore
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.base.internal.reroute.setRepeatRerouteAfterOffRouteDelaySeconds
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.DeviceType
 import com.mapbox.navigation.base.options.LocationOptions
@@ -68,7 +67,6 @@ suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigation(
             rerouteOptions(
                 RerouteOptions.Builder()
                     .rerouteStrategyForMapMatchedRoutes(rerouteStrategyForMapMatchedRoutes)
-                    .setRepeatRerouteAfterOffRouteDelaySeconds(-1)
                     .build()
             )
             if (routeRefreshOptions != null) {

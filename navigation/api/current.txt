@@ -1212,13 +1212,7 @@ package com.mapbox.navigation.core.replay.route {
 
 package com.mapbox.navigation.core.reroute {
 
-  public final class MapboxRerouteControllerKt {
-  }
-
   public final class NativeMapboxRerouteControllerKt {
-  }
-
-  public final class RerouteContextReasonOptionsAdapterKt {
   }
 
   @UiThread public abstract class RerouteController {
@@ -1328,9 +1322,6 @@ package com.mapbox.navigation.core.reroute {
     property public final String routerOrigin;
   }
 
-  public final class RouteHistoryOptionsAdapterKt {
-  }
-
 }
 
 package com.mapbox.navigation.core.routealternatives {
@@ -1384,13 +1375,6 @@ package com.mapbox.navigation.core.routealternatives.internal {
 
   public final class AlternativeRoutesMetadataCalculatorKt {
     method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) @WorkerThread public static Object calculateAlternativesMetadata(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
-  }
-
-}
-
-package com.mapbox.navigation.core.routeoptions {
-
-  public final class RouteOptionsUpdaterKt {
   }
 
 }

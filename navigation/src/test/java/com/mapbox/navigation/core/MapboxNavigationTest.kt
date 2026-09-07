@@ -2966,7 +2966,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                 tripSessionLocationEngine = any(),
                 navigator = any(),
                 any(),
-                any(),
             )
         } returns MapboxTripSession(
             tripService,
@@ -2975,7 +2974,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             navigator,
             threadController,
             eHorizonSubscriptionManager,
-            5,
         )
 
         val fallbackObserverSlot = slot<FallbackVersionsObserver>()

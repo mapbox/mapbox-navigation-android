@@ -33,35 +33,9 @@ import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 
 @OptIn(ExperimentalMapboxNavigationAPI::class)
-@RunWith(Parameterized::class)
-class EvOfflineRerouteTest(
-    private val runOptions: RerouteTestRunOptions,
-) : BaseCoreNoCleanUpTest() {
-
-    data class RerouteTestRunOptions(
-        val nativeReroute: Boolean,
-    ) {
-        override fun toString(): String {
-            return if (nativeReroute) {
-                "native reroute"
-            } else {
-                "platform reroute"
-            }
-        }
-    }
-
-    companion object {
-        @JvmStatic
-        @Parameterized.Parameters(name = "{0}")
-        fun data() = listOf(
-            RerouteTestRunOptions(nativeReroute = false),
-            RerouteTestRunOptions(nativeReroute = true),
-        )
-    }
+class EvOfflineRerouteTest : BaseCoreNoCleanUpTest() {
 
     @get:Rule
     val mapboxHistoryTestRule = MapboxHistoryTestRule()
@@ -155,7 +129,7 @@ class EvOfflineRerouteTest(
             tilesVersion = tilesVersion,
             deviceType = DeviceType.HANDHELD,
             historyRecorderRule = mapboxHistoryTestRule,
-            customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
+            customConfig = getTestRerouteCustomConfig(),
             routeRefreshOptions = routeRefreshOptions,
             block = block,
         )
