@@ -1,1 +1,0 @@
-Added explicit implementation of the RoutesInfo.equals/hashcode methods to address excessive comparisons of NavigationRoute instances by reducing frequencies of states emissions.
