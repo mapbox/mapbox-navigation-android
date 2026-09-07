@@ -1,3 +1,22 @@
+## Navigation SDK Core Framework 3.31.0-rc.1 - 07 September, 2026
+#### Features
+
+#### Bug fixes and improvements
+
+#### Known issues
+
+#### Other changes
+- Deprecated `EHorizonGraphPath.edges`, `IncidentInfo.alertcCodes`, and `SubgraphEdge.innerEdgeIds`/`outerEdgeIds` in favor of new primitive-array-typed accessors (`edgesArray`, `alertcCodesArray`, `innerEdgeIdsArray`/`outerEdgeIdsArray`), which avoid per-element boxing. The deprecated `List<T>`-typed accessors keep working unchanged. [#18209](https://github.com/mapbox/mapbox-sdk/pull/18209)
+- Breaking (experimental only): `AdasRoadItem.lanes` and `AdasSpeedLimitRestriction.lanes` changed from `List<Byte>` to `ByteArray` to avoid per-element boxing. Both classes are `@ExperimentalPreviewMapboxNavigationAPI`. [#18209](https://github.com/mapbox/mapbox-sdk/pull/18209)
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.31.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.31.0-rc.1))
+- Mapbox Navigation Native `v324.31.0-rc.1`
+- Mapbox Core Common `v24.31.0-rc.1`
+- Mapbox Java `v7.10.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.1))
+
 ## Navigation SDK Core Framework 3.30.0 - 03 September, 2026
 #### Features
 - Added `MapboxNavigation#changeUserChargingStationsRetainState` method that allows to retain/release user-provided charging stations. For retained charging stations navigator will not request alternatives that skip those stops. [#17368](https://github.com/mapbox/mapbox-sdk/pull/17368)
