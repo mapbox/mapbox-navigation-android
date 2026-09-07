@@ -14,7 +14,7 @@ import com.mapbox.navigation.base.internal.route.parsing.parser.directions.NroFr
 import com.mapbox.navigation.base.internal.route.parsing.parser.mapmatching.MapMatchedRoutesParserJava
 import com.mapbox.navigation.base.internal.route.parsing.parser.mapmatching.MapMatchedRoutesParserNro
 import com.mapbox.navigation.base.internal.route.parsing.parser.mapmatching.NnAndModelsParallelMapMatchedRoutesParser
-import com.mapbox.navigation.base.internal.route.parsing.parser.nn.JsonRouteInterfaceParser
+import com.mapbox.navigation.base.internal.route.parsing.parser.nn.JsonResponseOptimizedRouteInterfaceParser
 import com.mapbox.navigation.base.internal.route.parsing.parser.nn.NroRouteInterfacesParser
 import com.mapbox.navigation.base.internal.utils.PrepareForParsingAction
 import com.mapbox.navigation.base.internal.utils.createImmediateNoOptimizationsParsingQueue
@@ -97,7 +97,7 @@ fun setupParsing(
             time,
         )
     } else {
-        JsonRouteInterfaceParser(
+        JsonResponseOptimizedRouteInterfaceParser(
             existingParsedRoutesLookup,
             parsingDispatcher,
             time,

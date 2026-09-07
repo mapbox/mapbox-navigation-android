@@ -54,7 +54,6 @@ private fun parseDirectionsResponseJava(
         response,
         routeOptions,
         responseToParse.routerOrigin,
-        responseToParse.routeIndexOverride,
     )
 }
 
@@ -63,18 +62,16 @@ internal fun createResponseParsingResult(
     response: DirectionsResponse,
     routeOptions: RouteOptions,
     @RouterOrigin routerOrigin: String,
-    routeIndexOverride: Int? = null,
 ): DirectionsResponseParsingResult = DirectionsResponseParsingResult(
     response.routes().mapIndexed { index, route ->
-        val resultRouteIndex = routeIndexOverride ?: index
-        val route = response.getDirectionsRoute(index, routeOptions, resultRouteIndex)
+        val route = response.getDirectionsRoute(index, routeOptions)
         val waypoints = response.getDirectionsWaypoint(index)
         val routeData = DirectionsParsedRouteData(
             route,
             waypoints,
             response.uuid(),
             routeOptions,
-            routeIndex = resultRouteIndex,
+            routeIndex = index,
             routerOrigin = routerOrigin,
             responseOriginAPI = ResponseOriginAPI.DIRECTIONS_API,
         )
