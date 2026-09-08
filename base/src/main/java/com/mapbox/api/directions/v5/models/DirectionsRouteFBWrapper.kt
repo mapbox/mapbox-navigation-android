@@ -45,6 +45,24 @@ internal class DirectionsRouteFBWrapper private constructor(
                 Point.fromLngLat(coordinate.longitude, coordinate.latitude)
             }
 
+    @Volatile
+    private var contentHashCache: Long = NOT_HASHED
+
+    /**
+     * Content based 64 bit hash of the whole route, walked in native code and cached lazily.
+     * Deliberately not synchronized - the worst a race costs is computing the same value twice.
+     * The cache is `@Volatile` because a non-volatile `Long` read can tear on `armeabi-v7a`.
+     */
+    internal val contentHash: Long
+        get() {
+            var hash = contentHashCache
+            if (hash == NOT_HASHED) {
+                hash = fb.contentHash()
+                contentHashCache = hash
+            }
+            return hash
+        }
+
     override val unrecognized: ByteBuffer?
         get() = fb.unrecognizedPropertiesAsByteBuffer
 
@@ -131,10 +149,16 @@ internal class DirectionsRouteFBWrapper private constructor(
             throwNotComparableRouteObjects()
         }
         if (other !is DirectionsRouteFBWrapper) return false
-        return fb.contentEquals(other.fb)
+
+        // Index and UUID identify the route, so comparing them first is exact: routes from
+        // different responses, or different routes of one response, can never be reported equal
+        // by a hash collision.
+        if (fb.routeIndex != other.fb.routeIndex) return false
+        if (fb.requestUuid != other.fb.requestUuid) return false
+        return contentHash == other.contentHash
     }
 
-    override fun hashCode() = fb.contentHash().toHashCode()
+    override fun hashCode(): Int = contentHash.toHashCode()
 
     override fun toString(): String {
         return "DirectionsRoute(" +
@@ -156,6 +180,12 @@ internal class DirectionsRouteFBWrapper private constructor(
     }
 
     internal companion object {
+
+        /**
+         * "Not computed yet" marker. Cheaper than `by lazy`, which would add synchronization;
+         * the price is that a route whose real hash is 0 gets rehashed every time - 1 in 2^64.
+         */
+        private const val NOT_HASHED = 0L
 
         /**
          * @param externalWaypoints resolves the waypoints of routes which don't carry them in
