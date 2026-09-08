@@ -146,6 +146,7 @@ class NavigationRouteHashCodeTest {
             expirationTimeElapsedSeconds = null,
             responseOriginAPI = ResponseOriginAPI.DIRECTIONS_API,
             operations = mockk<RouteOperations>(),
+            directionsRouteContext = mockk(relaxed = true),
         )
 
         class HashCountingList<T>(
