@@ -10,7 +10,6 @@ import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.CameraState
 import com.mapbox.maps.EdgeInsets
-import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.MapboxMapException
 import com.mapbox.maps.ScreenBox
@@ -32,6 +31,7 @@ import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.pro
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRouteIntersections
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceProcessor.processRoutePoints
 import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger
+import com.mapbox.navigation.ui.maps.internal.MapHdRoadsVisibilityController
 import com.mapbox.navigation.ui.maps.internal.camera.FollowingFramingMode
 import com.mapbox.navigation.ui.maps.internal.camera.FollowingFramingModeHolder
 import com.mapbox.navigation.ui.maps.internal.camera.InternalFollowingOverviewOptions
@@ -280,6 +280,8 @@ class MapboxNavigationViewportDataSource private constructor(
             routeOverviewViewportDataSource.debugger = value
             pointsOverviewViewportDataSource.debugger = value
         }
+
+    private val mapHdRoadsVisibilityController = MapHdRoadsVisibilityController(mapboxMap)
 
     private var navigationRoutes: List<NavigationRoute> = emptyList()
     private val navigationRoute: NavigationRoute?
@@ -544,6 +546,7 @@ class MapboxNavigationViewportDataSource private constructor(
      */
     fun onDestroy() {
         cancelPendingMapSizeCallback()
+        mapHdRoadsVisibilityController.onDestroy()
     }
 
     private fun cancelPendingMapSizeCallback() {
