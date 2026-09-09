@@ -5,7 +5,6 @@ import com.mapbox.common.location.Location
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.SetRoutes
-import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.trip.RelevantVoiceInstructionsCallback
 import com.mapbox.navigation.core.trip.VoiceInstructionsAvailableObserver
 import com.mapbox.navigation.core.trip.service.TripService
@@ -78,10 +77,5 @@ internal interface TripSession {
     fun unregisterFallbackVersionsObserver(fallbackVersionsObserver: FallbackVersionsObserver)
     fun unregisterAllFallbackVersionsObservers()
 
-    fun setOffRouteObserverForReroute(
-        offRouteObserver: OffRouteObserver,
-        rerouteController: RerouteController,
-    )
-    fun resetOffRouteObserverForReroute()
     fun resetOffRouteDeviationFlag()
 }

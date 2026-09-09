@@ -313,7 +313,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     )
     private val internalRoutesObserver: RoutesObserver
     private val routesCacheClearer = NavigationComponentProvider.createRoutesCacheClearer()
-    private val internalOffRouteObserver: OffRouteObserver
     private val internalFallbackVersionsObserver: FallbackVersionsObserver
     private val routeAlternativesController: RouteAlternativesController
     private val arrivalProgressObserver: ArrivalProgressObserver
@@ -727,12 +726,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         rerouteController = defaultRerouteController
 
         internalRoutesObserver = createInternalRoutesObserver()
-        internalOffRouteObserver = createInternalOffRouteObserver()
         internalFallbackVersionsObserver = createInternalFallbackVersionsObserver()
         tripSession.registerFallbackVersionsObserver(internalFallbackVersionsObserver)
-        rerouteController?.let {
-            tripSession.setOffRouteObserverForReroute(internalOffRouteObserver, it)
-        }
         registerRoutesObserver(internalRoutesObserver)
         registerRoutesObserver(routeRefreshController::onRoutesChanged)
         setUpRouteCacheClearer()
@@ -1643,7 +1638,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         tripSession.unregisterAllVoiceInstructionsObservers()
         tripSession.unregisterAllEHorizonObservers()
         tripSession.unregisterAllFallbackVersionsObservers()
-        tripSession.resetOffRouteObserverForReroute()
         tripSessionLocationEngine.destroy()
         routeAlternativesController.unregisterAll()
         navigationTelemetry.clearObservers()
@@ -2517,12 +2511,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         routesProgressDataProvider.onNewRoutes(result.navigationRoutes)
     }
 
-    private fun createInternalOffRouteObserver() = OffRouteObserver { offRoute ->
-        if (offRoute) {
-            rerouteOnDeviation()
-        }
-    }
-
     private fun createInternalFallbackVersionsObserver() = object : FallbackVersionsObserver {
         override fun onFallbackVersionsFound(versions: List<String>) {
             logI(
@@ -2586,24 +2574,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             tripSession.getRawLocation()?.let { lastRawLocation ->
                 logI(LOG_CATEGORY) { "Re-pushing last raw location $lastRawLocation" }
                 navigator.updateLocation(lastRawLocation.toFixLocation())
-            }
-        }
-    }
-
-    private fun rerouteOnDeviation() {
-        rerouteController?.rerouteOnDeviation { result: RerouteResult ->
-            logI(LOG_CATEGORY) {
-                "Reroute on deviation: $result, " +
-                    "tripSession.isOffRoute = ${tripSession.isOffRoute}"
-            }
-            if (tripSession.isOffRoute) {
-                internalSetNavigationRoutes(
-                    result.routes,
-                    SetRoutes.Reroute(result.initialLegIndex),
-                )
-                true
-            } else {
-                false
             }
         }
     }

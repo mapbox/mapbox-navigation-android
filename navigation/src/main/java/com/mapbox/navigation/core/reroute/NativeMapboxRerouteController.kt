@@ -250,10 +250,6 @@ internal class NativeMapboxRerouteController(
         }
     }
 
-    @Deprecated("native reroute controller identify reroute without external help")
-    override fun rerouteOnDeviation(callback: DeviationRoutesCallback) {
-    }
-
     override fun rerouteOnParametersChange(callback: RouteReplanRoutesCallback) {
         mainThreadAssertion()
         logI(TAG) { "Forcing reroute because of parameters change" }

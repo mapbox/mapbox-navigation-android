@@ -33,7 +33,6 @@ import com.mapbox.navigation.core.navigator.getTripStatusFrom
 import com.mapbox.navigation.core.navigator.toFixLocation
 import com.mapbox.navigation.core.navigator.toLocation
 import com.mapbox.navigation.core.navigator.toLocations
-import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.routerefresh.RouteRefresherResult
 import com.mapbox.navigation.core.routerefresh.RouteRefresherStatus
 import com.mapbox.navigation.core.routerefresh.RouteRefresherStatus.Success
@@ -1989,39 +1988,6 @@ class MapboxTripSessionTest {
                 tripSession.lastVoiceInstruction = null
             }
             assertNull(tripSession.lastVoiceInstruction)
-        }
-
-    @Test
-    fun `reroute invocation handler handles reroute completion when user is still off-route`() =
-        coroutineRule.runBlockingTest {
-            // Arrange
-            val mockRerouteController = mockk<RerouteController>(relaxed = true)
-            val mockOffRouteObserver = mockk<OffRouteObserver>(relaxed = true)
-
-            val offRouteNavigationStatus = mockk<NavigationStatus>(relaxed = true) {
-                every { routeState } returns RouteState.OFF_ROUTE
-            }
-            val offRouteTripStatus = mockk<TripStatus>(relaxed = true) {
-                every { navigationStatus } returns offRouteNavigationStatus
-            }
-
-            tripSession.setOffRouteObserverForReroute(mockOffRouteObserver, mockRerouteController)
-            tripSession.start(true)
-
-            // Act - trigger off-route state multiple times to simulate reroute logic
-            every { offRouteNavigationStatus.getTripStatusFrom(any()) } returns offRouteTripStatus
-            navigatorObserverImplSlot.captured.onStatus(
-                navigationStatusOrigin,
-                offRouteNavigationStatus,
-            )
-            navigatorObserverImplSlot.captured.onStatus(
-                navigationStatusOrigin,
-                offRouteNavigationStatus,
-            )
-
-            verify { mockOffRouteObserver.onOffRouteStateChanged(true) }
-
-            tripSession.stop()
         }
 
     @Test

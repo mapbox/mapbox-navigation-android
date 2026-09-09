@@ -30,7 +30,6 @@ import com.mapbox.navigation.core.navigator.mapToDirectionsApi
 import com.mapbox.navigation.core.navigator.toFixLocation
 import com.mapbox.navigation.core.navigator.toLocation
 import com.mapbox.navigation.core.navigator.toLocations
-import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.routerefresh.RouteRefresherStatus
 import com.mapbox.navigation.core.trip.RelevantVoiceInstructionsCallback
 import com.mapbox.navigation.core.trip.VoiceInstructionsAvailableObserver
@@ -319,8 +318,6 @@ internal class MapboxTripSession(
         }
 
     override var hadOffRouteDeviation: Boolean = false
-
-    private var offRouteObserverForReroute: OffRouteObserver? = null
 
     // MutableStateFlow is used to ensure that observers receive only the latest location
     // and location updates bursts (rapidly received large number of locations) are ignored
@@ -802,17 +799,6 @@ internal class MapboxTripSession(
         navigator.setFallbackVersionsObserver(null)
     }
 
-    override fun setOffRouteObserverForReroute(
-        offRouteObserver: OffRouteObserver,
-        rerouteController: RerouteController,
-    ) {
-        offRouteObserverForReroute = offRouteObserver
-    }
-
-    override fun resetOffRouteObserverForReroute() {
-        offRouteObserverForReroute = null
-    }
-
     override fun resetOffRouteDeviationFlag() {
         hadOffRouteDeviation = false
     }
@@ -925,9 +911,6 @@ internal class MapboxTripSession(
             }
         updateRouteProgress(routeProgress, triggerObserver)
         triggerVoiceInstructionEvent(routeProgress, status)
-        if (isOffRoute != tripStatus.isOffRoute) {
-            offRouteObserverForReroute?.onOffRouteStateChanged(tripStatus.isOffRoute)
-        }
         isOffRoute = tripStatus.isOffRoute
     }
 

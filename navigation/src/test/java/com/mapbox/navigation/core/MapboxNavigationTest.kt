@@ -78,7 +78,6 @@ import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.navigator.TilesConfig
-import io.mockk.Ordering
 import io.mockk.Runs
 import io.mockk.called
 import io.mockk.clearAllMocks
@@ -240,12 +239,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
-    fun init_registerOffRouteObserver() {
-        createMapboxNavigation()
-        verify(exactly = 1) { tripSession.setOffRouteObserverForReroute(any(), any()) }
-    }
-
-    @Test
     fun destroy_unregisterOffRouteObserver() {
         createMapboxNavigation()
         mapboxNavigation.onDestroy()
@@ -277,17 +270,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         verify(exactly = 1) {
             navigator.shutdown()
         }
-    }
-
-    @Test
-    fun init_registerOffRouteObserver_MapboxNavigation_recreated() {
-        createMapboxNavigation()
-        mapboxNavigation.onDestroy()
-        threadController.cancelAllUICoroutines()
-
-        createMapboxNavigation()
-
-        verify(exactly = 2) { tripSession.setOffRouteObserverForReroute(any(), any()) }
     }
 
     @Test
@@ -507,146 +489,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         mapboxNavigation.setArrivalController(arrivalController)
 
         verify { tripSession.unregisterRouteProgressObserver(any<ArrivalProgressObserver>()) }
-    }
-
-    @Test
-    fun offroute_lead_to_reroute() {
-        createMapboxNavigation()
-        val observers = mutableListOf<OffRouteObserver>()
-        verify { tripSession.setOffRouteObserverForReroute(capture(observers), any()) }
-
-        observers.forEach {
-            it.onOffRouteStateChanged(true)
-        }
-
-        verify(exactly = 1) {
-            defaultRerouteController.rerouteOnDeviation(
-                any<InternalRerouteController.DeviationRoutesCallback>(),
-            )
-        }
-
-        verify(ordering = Ordering.ORDERED) {
-            tripSession.setOffRouteObserverForReroute(any(), any())
-            defaultRerouteController.rerouteOnDeviation(
-                any<InternalRerouteController.DeviationRoutesCallback>(),
-            )
-        }
-    }
-
-    @Test
-    fun non_offroute_cancels_reroute() {
-        createMapboxNavigation()
-        val observers = mutableListOf<OffRouteObserver>()
-        verify { tripSession.setOffRouteObserverForReroute(capture(observers), any()) }
-
-        observers.forEach {
-            it.onOffRouteStateChanged(false)
-        }
-
-        verify(exactly = 0) { defaultRerouteController.interrupt() }
-        verify(exactly = 0) {
-            tripSession.registerOffRouteObserver(any())
-        }
-    }
-
-    @Test
-    fun `new routes are set after reroute`() {
-        val newInputRoutes = listOf(
-            routeWithId("id#0"),
-            routeWithId("id#1"),
-            routeWithId("id#2"),
-        )
-        val validAlternatives = listOf(
-            alternativeWithId("id#0"),
-            alternativeWithId("id#2"),
-        )
-        val newAcceptedRoutes = listOf(newInputRoutes[0], newInputRoutes[2])
-        val newIgnoredRoutes = listOf(IgnoredRoute(newInputRoutes[1], invalidRouteReason))
-        val initialLegIndex = 2
-        var actualRouteAccepted: Boolean? = null
-
-        every {
-            defaultRerouteController.rerouteOnDeviation(
-                any<InternalRerouteController.DeviationRoutesCallback>(),
-            )
-        } answers {
-            actualRouteAccepted = (firstArg() as InternalRerouteController.DeviationRoutesCallback)
-                .onNewRoutes(
-                    RerouteResult(newInputRoutes, initialLegIndex, RouterOrigin.ONLINE),
-                )
-        }
-
-        coEvery {
-            tripSession.setRoutes(any(), any())
-        } returns NativeSetRouteValue(newInputRoutes, validAlternatives)
-
-        createMapboxNavigation()
-        val observers = mutableListOf<OffRouteObserver>()
-        verify { tripSession.setOffRouteObserverForReroute(capture(observers), any()) }
-
-        every { tripSession.isOffRoute } returns true
-
-        observers.forEach {
-            it.onOffRouteStateChanged(true)
-        }
-
-        coVerify(exactly = 1) {
-            directionsSession.setNavigationRoutesFinished(
-                DirectionsSessionRoutes(
-                    newAcceptedRoutes,
-                    newIgnoredRoutes,
-                    SetRoutes.Reroute(initialLegIndex),
-                ),
-            )
-        }
-        assertEquals(true, actualRouteAccepted)
-    }
-
-    @Test
-    fun `new routes are not set after reroute if they are invalid`() {
-        val newRoutes = listOf(mockk<NavigationRoute>(relaxed = true), mockk(relaxed = true))
-
-        var actualRouteAccepted: Boolean? = null
-
-        every {
-            defaultRerouteController.rerouteOnDeviation(
-                any<InternalRerouteController.DeviationRoutesCallback>(),
-            )
-        } answers {
-            actualRouteAccepted = (firstArg() as InternalRerouteController.DeviationRoutesCallback)
-                .onNewRoutes(RerouteResult(newRoutes, 1, RouterOrigin.ONLINE))
-        }
-
-        coEvery {
-            tripSession.setRoutes(any(), any())
-        } returns NativeSetRouteError("some error")
-
-        createMapboxNavigation()
-        val observers = mutableListOf<OffRouteObserver>()
-        verify { tripSession.setOffRouteObserverForReroute(capture(observers), any()) }
-
-        observers.forEach {
-            it.onOffRouteStateChanged(true)
-        }
-        coVerify(exactly = 0) {
-            directionsSession.setNavigationRoutesFinished(any())
-        }
-        assertEquals(false, actualRouteAccepted)
-    }
-
-    @Test
-    fun reRoute_not_called() {
-        createMapboxNavigation()
-        val offRouteObserverSlot = slot<OffRouteObserver>()
-        verify { tripSession.setOffRouteObserverForReroute(capture(offRouteObserverSlot), any()) }
-
-        offRouteObserverSlot.captured.onOffRouteStateChanged(false)
-
-        verify(exactly = 0) {
-            defaultRerouteController.rerouteOnDeviation(
-                any<InternalRerouteController.DeviationRoutesCallback>(),
-            )
-        }
     }
 
     @Test
@@ -1544,36 +1386,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         }
 
     @Test
-    fun `set route - reroute immediately interrupts reroute`() =
-        coroutineRule.runBlockingTest {
-            val rerouteCallbackSlot = slot<InternalRerouteController.DeviationRoutesCallback>()
-            every {
-                defaultRerouteController.rerouteOnDeviation(capture(rerouteCallbackSlot))
-            } just Runs
-            val observers = mutableListOf<OffRouteObserver>()
-            every { tripSession.setOffRouteObserverForReroute(capture(observers), any()) } just Runs
-            val initialRoutes = mutableListOf<NavigationRoute>(mockk(relaxed = true))
-            every { directionsSession.routes } returns initialRoutes
-            val newRoutes = listOf<NavigationRoute>(mockk(relaxed = true))
-            coEvery {
-                tripSession.setRoutes(newRoutes, any())
-            } returns NativeSetRouteValue(newRoutes, emptyList())
-            createMapboxNavigation()
-
-            every { tripSession.isOffRoute } returns true
-
-            observers.forEach {
-                it.onOffRouteStateChanged(true)
-            }
-            pauseDispatcher {
-                rerouteCallbackSlot.captured.onNewRoutes(
-                    RerouteResult(newRoutes, 0, RouterOrigin.ONLINE),
-                )
-                verify(exactly = 1) { defaultRerouteController.interrupt() }
-            }
-        }
-
-    @Test
     fun `set route - alternatives update does not interrupt reroute`() =
         coroutineRule.runBlockingTest {
             createMapboxNavigation()
@@ -1665,15 +1477,10 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                 delay(500L) // simulates slow native processing, keeping the mutex held
                 NativeSetRouteValue(rerouteRoutes, emptyList())
             }
+            val rerouteCallbackSlot = slot<InternalRerouteController.RouteReplanRoutesCallback>()
             every {
-                defaultRerouteController.rerouteOnDeviation(
-                    any<InternalRerouteController.DeviationRoutesCallback>(),
-                )
-            } answers {
-                every { tripSession.isOffRoute } returns true
-                firstArg<InternalRerouteController.DeviationRoutesCallback>()
-                    .onNewRoutes(RerouteResult(rerouteRoutes, 0, RouterOrigin.ONLINE))
-            }
+                defaultRerouteController.rerouteOnParametersChange(capture(rerouteCallbackSlot))
+            } just Runs
 
             createMapboxNavigation()
 
@@ -1686,8 +1493,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
                     every { directionsSession.routes } returns accepted
                 }
             }
-            val offRouteObservers = mutableListOf<OffRouteObserver>()
-            verify { tripSession.setOffRouteObserverForReroute(capture(offRouteObservers), any()) }
 
             val staleRefreshResult = RoutesRefresherResult(
                 RouteRefresherResult(
@@ -1705,10 +1510,13 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
             )
 
             pauseDispatcher {
-                // Off-route detection triggers reroute, which synchronously calls back
-                // with rerouteRoutes. internalSetNavigationRoutes(rerouteRoutes, Reroute)
-                // is launched but queued (dispatcher is paused).
-                offRouteObservers.forEach { it.onOffRouteStateChanged(true) }
+                // Replanning the route synchronously calls back with rerouteRoutes.
+                // internalSetNavigationRoutes(rerouteRoutes, Reroute) is launched but queued
+                // (dispatcher is paused).
+                mapboxNavigation.replanRoute()
+                rerouteCallbackSlot.captured.onNewRoutes(
+                    RerouteResult(rerouteRoutes, 0, RouterOrigin.ONLINE),
+                )
                 // Stale refresh completes while reroute processing is pending.
                 // internalSetNavigationRoutes(staleRefreshRoutes, RefreshRoutes) is queued
                 // behind the reroute coroutine on routeUpdateMutex.
@@ -3031,13 +2839,6 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         verify(exactly = 1) { navigator.recreate(any()) }
 
         verify(exactly = 1) { offRouteObserver.onOffRouteStateChanged(true) }
-
-        // Additional verification that reroute was triggered on off-route
-        verify(exactly = 1) {
-            defaultRerouteController.rerouteOnDeviation(
-                any<InternalRerouteController.DeviationRoutesCallback>(),
-            )
-        }
 
         mapboxNavigation.onDestroy()
     }
