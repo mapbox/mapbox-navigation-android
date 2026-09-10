@@ -1,16 +1,8 @@
-buildscript {
-    apply from: "$rootDir/gradle/dependencies.gradle"
-
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath pluginDependencies.gradle
-        classpath pluginDependencies.kotlin
-    }
-}
+// No buildscript { } block here on purpose. The Android Gradle plugin and the
+// Kotlin plugin are already on the root project's buildscript classpath, which
+// this script plugin inherits. Re-declaring them forced a second, redundant
+// dependency resolution: `apply from:` scripts get their own isolated
+// ScriptHandler, so it also ignored any centrally configured repositories.
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
