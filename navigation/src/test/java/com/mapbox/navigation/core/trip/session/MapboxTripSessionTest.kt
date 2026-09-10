@@ -11,6 +11,8 @@ import com.mapbox.common.location.Location
 import com.mapbox.common.location.LocationServiceFactory
 import com.mapbox.directions.route.DirectionsRouteContext
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory
+import com.mapbox.navigation.base.internal.performance.PerformanceTraceNameProvider
+import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.route.directionsRouteContext
 import com.mapbox.navigation.base.internal.route.refreshNativePeer
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -578,6 +580,118 @@ class MapboxTripSessionTest {
         verify(exactly = 2) { observer.onRouteProgressChanged(routeProgress) }
         tripSession.stop()
     }
+
+    @Test
+    fun routeProgressObserverPerformanceTraceNameUsesProviderWhenAvailable() =
+        coroutineRule.runBlockingTest {
+            every { routeProgress.currentLegProgress } returns null
+            tripSession = buildTripSession()
+            tripSession.start(true)
+            val sectionNames = mutableListOf<String>()
+            mockkObject(PerformanceTracker)
+            every { PerformanceTracker.trackingIsActive } returns true
+            every { PerformanceTracker.syncSectionStarted(capture(sectionNames)) } just Runs
+            every { PerformanceTracker.syncSectionCompleted(any(), any()) } just Runs
+            val observer = object : RouteProgressObserver, PerformanceTraceNameProvider {
+                override fun onRouteProgressChanged(routeProgress: RouteProgress) = Unit
+                override val performanceTraceName = "customName"
+            }
+            tripSession.registerRouteProgressObserver(observer)
+
+            updateLocationAndJoin()
+
+            assertTrue(
+                sectionNames.contains("MapboxTripSession#routeProgressObserver#customName"),
+            )
+
+            unmockkObject(PerformanceTracker)
+            tripSession.stop()
+        }
+
+    @Test
+    fun routeProgressObserverPerformanceTraceNameFallsBackToClassName() =
+        coroutineRule.runBlockingTest {
+            every { routeProgress.currentLegProgress } returns null
+            tripSession = buildTripSession()
+            tripSession.start(true)
+            val sectionNames = mutableListOf<String>()
+            mockkObject(PerformanceTracker)
+            every { PerformanceTracker.trackingIsActive } returns true
+            every { PerformanceTracker.syncSectionStarted(capture(sectionNames)) } just Runs
+            every { PerformanceTracker.syncSectionCompleted(any(), any()) } just Runs
+            val observer = object : RouteProgressObserver {
+                override fun onRouteProgressChanged(routeProgress: RouteProgress) = Unit
+            }
+            tripSession.registerRouteProgressObserver(observer)
+
+            updateLocationAndJoin()
+
+            val expectedName = observer.javaClass.name.takeLast(70)
+            assertTrue(
+                sectionNames.contains("MapboxTripSession#routeProgressObserver#$expectedName"),
+            )
+
+            unmockkObject(PerformanceTracker)
+            tripSession.stop()
+        }
+
+    @Test
+    fun locationObserverPerformanceTraceNameUsesProviderWhenAvailable() =
+        coroutineRule.runBlockingTest {
+            tripSession = buildTripSession()
+            tripSession.start(true)
+            val sectionNames = mutableListOf<String>()
+            mockkObject(PerformanceTracker)
+            every { PerformanceTracker.trackingIsActive } returns true
+            every { PerformanceTracker.syncSectionStarted(capture(sectionNames)) } just Runs
+            every { PerformanceTracker.syncSectionCompleted(any(), any()) } just Runs
+            val observer = object : LocationObserver, PerformanceTraceNameProvider {
+                override fun onNewRawLocation(rawLocation: Location) = Unit
+                override fun onNewLocationMatcherResult(
+                    locationMatcherResult: LocationMatcherResult,
+                ) = Unit
+                override val performanceTraceName = "customName"
+            }
+            tripSession.registerLocationObserver(observer)
+
+            updateLocationAndJoin()
+
+            assertTrue(
+                sectionNames.contains("MapboxTripSession#locationObserver#customName"),
+            )
+
+            unmockkObject(PerformanceTracker)
+            tripSession.stop()
+        }
+
+    @Test
+    fun locationObserverPerformanceTraceNameFallsBackToClassName() =
+        coroutineRule.runBlockingTest {
+            tripSession = buildTripSession()
+            tripSession.start(true)
+            val sectionNames = mutableListOf<String>()
+            mockkObject(PerformanceTracker)
+            every { PerformanceTracker.trackingIsActive } returns true
+            every { PerformanceTracker.syncSectionStarted(capture(sectionNames)) } just Runs
+            every { PerformanceTracker.syncSectionCompleted(any(), any()) } just Runs
+            val observer = object : LocationObserver {
+                override fun onNewRawLocation(rawLocation: Location) = Unit
+                override fun onNewLocationMatcherResult(
+                    locationMatcherResult: LocationMatcherResult,
+                ) = Unit
+            }
+            tripSession.registerLocationObserver(observer)
+
+            updateLocationAndJoin()
+
+            val expectedName = observer.javaClass.name.takeLast(70)
+            assertTrue(
+                sectionNames.contains("MapboxTripSession#locationObserver#$expectedName"),
+            )
+
+            unmockkObject(PerformanceTracker)
+            tripSession.stop()
+        }
 
     @Test
     fun offRouteObserverCalledWhenStatusIsDifferentToCurrent() = coroutineRule.runBlockingTest {

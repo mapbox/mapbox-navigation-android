@@ -22,12 +22,13 @@ class RouteArrowComponent(
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
         coroutineScope.launch {
-            mapboxNavigation.flowRouteProgress().collect { routeProgress ->
-                val arrowUpdate = routeArrowApi.addUpcomingManeuverArrow(routeProgress)
-                mapboxMap.getStyle()?.let { style ->
-                    routeArrowView.renderManeuverUpdate(style, arrowUpdate)
+            mapboxNavigation.flowRouteProgress(tag = "RouteArrowComponent")
+                .collect { routeProgress ->
+                    val arrowUpdate = routeArrowApi.addUpcomingManeuverArrow(routeProgress)
+                    mapboxMap.getStyle()?.let { style ->
+                        routeArrowView.renderManeuverUpdate(style, arrowUpdate)
+                    }
                 }
-            }
         }
 
         coroutineScope.launch {

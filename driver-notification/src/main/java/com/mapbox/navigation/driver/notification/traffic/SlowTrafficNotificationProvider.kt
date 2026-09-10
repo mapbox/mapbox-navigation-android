@@ -76,7 +76,9 @@ class SlowTrafficNotificationProvider(
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun trackNotifications(): Flow<DriverNotification> =
         mapboxNavigationFlow
-            .flatMapLatest { it?.flowRouteProgress() ?: emptyFlow() }
+            .flatMapLatest {
+                it?.flowRouteProgress(tag = "SlowTrafficNotificationProvider") ?: emptyFlow()
+            }
             .mapNotNull { getSlowTrafficNotification(it) }
 
     private suspend fun getSlowTrafficNotification(

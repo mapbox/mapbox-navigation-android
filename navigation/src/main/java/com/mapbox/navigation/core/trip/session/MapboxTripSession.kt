@@ -12,6 +12,7 @@ import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.factory.RoadFactory
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.getUpdatedObjectsAhead
 import com.mapbox.navigation.base.internal.factory.TripNotificationStateFactory.buildTripNotificationState
+import com.mapbox.navigation.base.internal.performance.PerformanceTraceNameProvider
 import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.route.refreshNativePeer
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -278,8 +279,13 @@ internal class MapboxTripSession(
     private val mainJobController: JobControl = threadController.getMainScopeAndRootJob()
     private val ioJobController: JobControl = threadController.getIOScopeAndRootJob()
 
-    private val locationObservers = CopyOnWriteArraySet<LocationObserver>()
-    private val routeProgressObservers = CopyOnWriteArraySet<RouteProgressObserver>()
+    // the String is this observer's performance trace name, resolved once at registration
+    // time (see locationObserverName) so it isn't recomputed on every dispatch
+    private val locationObservers = CopyOnWriteArraySet<Pair<LocationObserver, String>>()
+
+    // the String is this observer's performance trace name, resolved once at registration
+    // time (see routeProgressObserverName) so it isn't recomputed on every dispatch
+    private val routeProgressObservers = CopyOnWriteArraySet<Pair<RouteProgressObserver, String>>()
     private val offRouteObservers = CopyOnWriteArraySet<OffRouteObserver>()
     private val stateObservers = CopyOnWriteArraySet<TripSessionStateObserver>()
     private val bannerInstructionsObservers = CopyOnWriteArraySet<BannerInstructionsObserver>()
@@ -363,7 +369,7 @@ internal class MapboxTripSession(
 
     private suspend fun publishRawLocation(rawLocation: Location) {
         val locationHash = rawLocation.hashCode()
-        locationObservers.forEach { it.onNewRawLocation(rawLocation) }
+        locationObservers.forEach { (observer, _) -> observer.onNewRawLocation(rawLocation) }
         val monotonicStart = System.nanoTime()
         navigator.updateLocation(rawLocation.toFixLocation())
         val diffMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - monotonicStart)
@@ -503,7 +509,9 @@ internal class MapboxTripSession(
      * Register [LocationObserver] to receive location updates
      */
     override fun registerLocationObserver(locationObserver: LocationObserver) {
-        locationObservers.add(locationObserver)
+        locationObservers.add(
+            locationObserver to locationObserverName(locationObserver),
+        )
         rawLocationState.value?.let { locationObserver.onNewRawLocation(it) }
         locationMatcherResult?.let { locationObserver.onNewLocationMatcherResult(it) }
     }
@@ -512,8 +520,18 @@ internal class MapboxTripSession(
      * Unregister [LocationObserver]
      */
     override fun unregisterLocationObserver(locationObserver: LocationObserver) {
-        locationObservers.remove(locationObserver)
+        locationObservers.remove(
+            locationObserver to locationObserverName(locationObserver),
+        )
     }
+
+    /**
+     * Either get the name that we'll use for performance tracking or use the default name based on
+     * the class name of the observer.
+     */
+    private fun locationObserverName(locationObserver: LocationObserver): String =
+        (locationObserver as? PerformanceTraceNameProvider)?.performanceTraceName
+            ?: locationObserver.javaClass.name.takeLast(70)
 
     /**
      * Unregister all [LocationObserver]
@@ -531,7 +549,9 @@ internal class MapboxTripSession(
      * @see [RouteProgress]
      */
     override fun registerRouteProgressObserver(routeProgressObserver: RouteProgressObserver) {
-        routeProgressObservers.add(routeProgressObserver)
+        routeProgressObservers.add(
+            routeProgressObserver to routeProgressObserverName(routeProgressObserver),
+        )
         routeProgress?.let { routeProgressObserver.onRouteProgressChanged(it) }
     }
 
@@ -539,8 +559,18 @@ internal class MapboxTripSession(
      * Unregister [RouteProgressObserver]
      */
     override fun unregisterRouteProgressObserver(routeProgressObserver: RouteProgressObserver) {
-        routeProgressObservers.remove(routeProgressObserver)
+        routeProgressObservers.remove(
+            routeProgressObserver to routeProgressObserverName(routeProgressObserver),
+        )
     }
+
+    /**
+     * Either get the name that we'll use for performance tracking or use the default name based on
+     * the class name of the observer.
+     */
+    private fun routeProgressObserverName(routeProgressObserver: RouteProgressObserver): String =
+        (routeProgressObserver as? PerformanceTraceNameProvider)?.performanceTraceName
+            ?: routeProgressObserver.javaClass.name.takeLast(70)
 
     /**
      * Unregister all [RouteProgressObserver]
@@ -806,9 +836,8 @@ internal class MapboxTripSession(
     private fun updateLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
         PerformanceTracker.trackPerformanceSync("MapboxTripSession#updateLocationMatcherResult") {
             this.locationMatcherResult = locationMatcherResult
-            locationObservers.forEach { observer ->
+            locationObservers.forEach { (observer, observerName) ->
                 mainJobController.scope.launch {
-                    val observerName = observer.javaClass.name.takeLast(70)
                     PerformanceTracker.trackPerformanceSync(
                         "MapboxTripSession#locationObserver#$observerName",
                     ) {
@@ -935,9 +964,8 @@ internal class MapboxTripSession(
             PerformanceTracker.trackPerformanceSync(
                 "MapboxTripSession#updateRouteProgress-dispatch-route-progress-update",
             ) {
-                routeProgressObservers.forEach { observer ->
+                routeProgressObservers.forEach { (observer, observerName) ->
                     mainJobController.scope.launch {
-                        val observerName = observer.javaClass.name.takeLast(70)
                         PerformanceTracker.trackPerformanceSync(
                             "MapboxTripSession#routeProgressObserver#$observerName",
                         ) {

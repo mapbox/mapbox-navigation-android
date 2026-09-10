@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.internal.extensions
 
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.common.location.Location
+import com.mapbox.navigation.base.internal.performance.PerformanceTraceNameProvider
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -30,6 +31,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Rule
 import org.junit.Test
 
@@ -123,6 +125,56 @@ class MapboxNavigationExtensionsTest {
     }
 
     @Test
+    fun navigationRouteProgressFlowableWithoutTagHasNoTraceNameProvider() =
+        coroutineRule.runBlockingTest {
+            val navigation = mockk<MapboxNavigation>()
+            val callbackSlot = slot<RouteProgressObserver>()
+            every {
+                navigation.registerRouteProgressObserver(capture(callbackSlot))
+            } just Runs
+            every { navigation.unregisterRouteProgressObserver(any()) } just Runs
+
+            val flow = navigation.flowRouteProgress()
+            val job = coroutineRule.coroutineScope.launch { flow.collect() }
+            advanceUntilIdle()
+
+            assertFalse(callbackSlot.captured is PerformanceTraceNameProvider)
+
+            job.cancel()
+            advanceUntilIdle()
+        }
+
+    @Test
+    fun navigationRouteProgressFlowableWithTagExposesTraceName() =
+        coroutineRule.runBlockingTest {
+            val navigation = mockk<MapboxNavigation>()
+            val callbackSlot = slot<RouteProgressObserver>()
+            every {
+                navigation.registerRouteProgressObserver(capture(callbackSlot))
+            } just Runs
+            every { navigation.unregisterRouteProgressObserver(any()) } just Runs
+            var actual = mockk<RouteProgress>(relaxed = true)
+
+            val flow = navigation.flowRouteProgress(tag = "myTag").onEach { actual = it }
+            val job = coroutineRule.coroutineScope.launch { flow.collect() }
+            advanceUntilIdle()
+
+            val traceNameProvider = callbackSlot.captured as PerformanceTraceNameProvider
+            assertEquals("flow#myTag", traceNameProvider.performanceTraceName)
+
+            val expected = mockk<RouteProgress>(relaxed = true)
+            callbackSlot.captured.onRouteProgressChanged(expected)
+            advanceUntilIdle()
+
+            assertEquals(expected, actual)
+
+            job.cancel()
+            advanceUntilIdle()
+
+            verify { navigation.unregisterRouteProgressObserver(callbackSlot.captured) }
+        }
+
+    @Test
     fun navigationNewRawLocationFlowable() = coroutineRule.runBlockingTest {
         val navigation = mockk<MapboxNavigation>()
         val callbackSlot = slot<LocationObserver>()
@@ -148,6 +200,36 @@ class MapboxNavigationExtensionsTest {
     }
 
     @Test
+    fun navigationNewRawLocationFlowableWithTagExposesTraceName() =
+        coroutineRule.runBlockingTest {
+            val navigation = mockk<MapboxNavigation>()
+            val callbackSlot = slot<LocationObserver>()
+            every {
+                navigation.registerLocationObserver(capture(callbackSlot))
+            } just Runs
+            every { navigation.unregisterLocationObserver(any()) } just Runs
+            var actual = mockk<Location>(relaxed = true)
+
+            val flow = navigation.flowNewRawLocation(tag = "myTag").onEach { actual = it }
+            val job = coroutineRule.coroutineScope.launch { flow.collect() }
+            advanceUntilIdle()
+
+            val traceNameProvider = callbackSlot.captured as PerformanceTraceNameProvider
+            assertEquals("flow#myTag", traceNameProvider.performanceTraceName)
+
+            val expected = mockk<Location>(relaxed = true)
+            callbackSlot.captured.onNewRawLocation(expected)
+            advanceUntilIdle()
+
+            assertEquals(expected, actual)
+
+            job.cancel()
+            advanceUntilIdle()
+
+            verify { navigation.unregisterLocationObserver(callbackSlot.captured) }
+        }
+
+    @Test
     fun navigationNewLocationMatcherResultFlowable() = coroutineRule.runBlockingTest {
         val navigation = mockk<MapboxNavigation>()
         val callbackSlot = slot<LocationObserver>()
@@ -171,6 +253,36 @@ class MapboxNavigationExtensionsTest {
 
         verify { navigation.unregisterLocationObserver(callbackSlot.captured) }
     }
+
+    @Test
+    fun navigationNewLocationMatcherResultFlowableWithTagExposesTraceName() =
+        coroutineRule.runBlockingTest {
+            val navigation = mockk<MapboxNavigation>()
+            val callbackSlot = slot<LocationObserver>()
+            every {
+                navigation.registerLocationObserver(capture(callbackSlot))
+            } just Runs
+            every { navigation.unregisterLocationObserver(any()) } just Runs
+            var actual = mockk<LocationMatcherResult>(relaxed = true)
+
+            val flow = navigation.flowLocationMatcherResult(tag = "myTag").onEach { actual = it }
+            val job = coroutineRule.coroutineScope.launch { flow.collect() }
+            advanceUntilIdle()
+
+            val traceNameProvider = callbackSlot.captured as PerformanceTraceNameProvider
+            assertEquals("flow#myTag", traceNameProvider.performanceTraceName)
+
+            val expected = mockk<LocationMatcherResult>(relaxed = true)
+            callbackSlot.captured.onNewLocationMatcherResult(expected)
+            advanceUntilIdle()
+
+            assertEquals(expected, actual)
+
+            job.cancel()
+            advanceUntilIdle()
+
+            verify { navigation.unregisterLocationObserver(callbackSlot.captured) }
+        }
 
     @Test
     fun navigationVoiceInstructionsFlowable() = coroutineRule.runBlockingTest {

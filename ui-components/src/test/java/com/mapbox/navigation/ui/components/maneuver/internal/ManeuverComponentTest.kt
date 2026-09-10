@@ -54,7 +54,7 @@ class ManeuverComponentTest {
     @Before
     fun setUp() {
         mockkStatic("com.mapbox.navigation.core.internal.extensions.MapboxNavigationExtensions")
-        every { mockNavigation.flowRouteProgress() } returns flowOf(routeProgress)
+        every { mockNavigation.flowRouteProgress(any()) } returns flowOf(routeProgress)
     }
 
     @After

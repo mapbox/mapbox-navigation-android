@@ -45,7 +45,7 @@ class ManeuverComponent(
         coroutineScope.launch {
             combine(
                 mapboxNavigation.flowRoutesUpdated(),
-                mapboxNavigation.flowRouteProgress(),
+                mapboxNavigation.flowRouteProgress(tag = "ManeuverComponent"),
                 mapboxNavigation.flowTripSessionState(),
             ) { routes, routeProgress, tripSessionState ->
                 if (

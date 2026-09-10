@@ -59,7 +59,7 @@ class RouteClosureNotificationProviderTest {
 
     @Test
     fun `emits monitoring notification for far closure`() = coroutineRule.runBlockingTest {
-        every { any<MapboxNavigation>().flowRouteProgress() } answers {
+        every { any<MapboxNavigation>().flowRouteProgress(any()) } answers {
             flowOf(routeProgressWithClosure(INCIDENT_ID, FAR_DISTANCE_M))
         }
         every { any<MapboxNavigation>().flowRoutesUpdated() } answers { emptyFlow() }
@@ -78,7 +78,7 @@ class RouteClosureNotificationProviderTest {
         coroutineRule.runBlockingTest {
             val altRoute = cleanRoute("alt-clean")
             val progress = routeProgressWithClosure(INCIDENT_ID, 0.0)
-            every { any<MapboxNavigation>().flowRouteProgress() } answers { flowOf(progress) }
+            every { any<MapboxNavigation>().flowRouteProgress(any()) } answers { flowOf(progress) }
             every { any<MapboxNavigation>().flowRoutesUpdated() } answers {
                 flowOf(closureUpdate(listOf(primaryRoute(), altRoute)))
             }
@@ -93,7 +93,7 @@ class RouteClosureNotificationProviderTest {
 
     @Test
     fun `emits resolved when no closure in upcomingRoadObjects`() = coroutineRule.runBlockingTest {
-        every { any<MapboxNavigation>().flowRouteProgress() } answers {
+        every { any<MapboxNavigation>().flowRouteProgress(any()) } answers {
             flowOf(routeProgressWithoutClosure())
         }
         every { any<MapboxNavigation>().flowRoutesUpdated() } answers { emptyFlow() }
@@ -107,7 +107,7 @@ class RouteClosureNotificationProviderTest {
     @Test
     fun `emits resolved when closure is at or within threshold (close)`() =
         coroutineRule.runBlockingTest {
-            every { any<MapboxNavigation>().flowRouteProgress() } answers {
+            every { any<MapboxNavigation>().flowRouteProgress(any()) } answers {
                 flowOf(routeProgressWithClosure(INCIDENT_ID, CLOSE_DISTANCE_M))
             }
             every { any<MapboxNavigation>().flowRoutesUpdated() } answers { emptyFlow() }
@@ -123,7 +123,7 @@ class RouteClosureNotificationProviderTest {
         coroutineRule.runBlockingTest {
             val altRoute = cleanRoute("alt-clean")
             val progress = routeProgressWithClosure(INCIDENT_ID, CLOSE_DISTANCE_M)
-            every { any<MapboxNavigation>().flowRouteProgress() } answers { flowOf(progress) }
+            every { any<MapboxNavigation>().flowRouteProgress(any()) } answers { flowOf(progress) }
             every { any<MapboxNavigation>().flowRoutesUpdated() } answers {
                 flowOf(closureUpdate(listOf(primaryRoute(), altRoute)))
             }
@@ -142,7 +142,7 @@ class RouteClosureNotificationProviderTest {
     fun `does not emit alternative when closure is far (beyond threshold)`() =
         coroutineRule.runBlockingTest {
             val progress = routeProgressWithClosure(INCIDENT_ID, FAR_DISTANCE_M)
-            every { any<MapboxNavigation>().flowRouteProgress() } answers { flowOf(progress) }
+            every { any<MapboxNavigation>().flowRouteProgress(any()) } answers { flowOf(progress) }
             every { any<MapboxNavigation>().flowRoutesUpdated() } answers {
                 flowOf(closureUpdate(listOf(primaryRoute(), cleanRoute())))
             }
@@ -159,7 +159,7 @@ class RouteClosureNotificationProviderTest {
     fun `does not emit alternative when update has no closure alternative`() =
         coroutineRule.runBlockingTest {
             val progress = routeProgressWithClosure(INCIDENT_ID, CLOSE_DISTANCE_M)
-            every { any<MapboxNavigation>().flowRouteProgress() } answers { flowOf(progress) }
+            every { any<MapboxNavigation>().flowRouteProgress(any()) } answers { flowOf(progress) }
             every { any<MapboxNavigation>().flowRoutesUpdated() } answers {
                 // primary plus a regular (non-closure) alternative
                 val routes = listOf(primaryRoute(), regularAlternative())
@@ -183,7 +183,7 @@ class RouteClosureNotificationProviderTest {
         coroutineRule.runBlockingTest {
             // Live primary already avoids the closure: no upcoming closure incident.
             val progress = routeProgressWithoutClosure()
-            every { any<MapboxNavigation>().flowRouteProgress() } answers { flowOf(progress) }
+            every { any<MapboxNavigation>().flowRouteProgress(any()) } answers { flowOf(progress) }
             // Routes still carry reason=closure from when they were generated.
             every { any<MapboxNavigation>().flowRoutesUpdated() } answers {
                 flowOf(closureUpdate(listOf(cleanRoute("b1"), cleanRoute("b2"))))
@@ -202,7 +202,7 @@ class RouteClosureNotificationProviderTest {
         coroutineRule.runBlockingTest {
             val altRoute = cleanRoute("alt-1")
             val progress = routeProgressWithClosure(INCIDENT_ID, CLOSE_DISTANCE_M)
-            every { any<MapboxNavigation>().flowRouteProgress() } answers { flowOf(progress) }
+            every { any<MapboxNavigation>().flowRouteProgress(any()) } answers { flowOf(progress) }
             every { any<MapboxNavigation>().flowRoutesUpdated() } answers {
                 flowOf(closureUpdate(listOf(primaryRoute(), altRoute, cleanRoute("alt-2"))))
             }
@@ -217,7 +217,7 @@ class RouteClosureNotificationProviderTest {
 
     @Test
     fun `no notifications emitted after onDetached`() = coroutineRule.runBlockingTest {
-        every { any<MapboxNavigation>().flowRouteProgress() } answers {
+        every { any<MapboxNavigation>().flowRouteProgress(any()) } answers {
             flowOf(routeProgressWithClosure(INCIDENT_ID, FAR_DISTANCE_M))
         }
         every { any<MapboxNavigation>().flowRoutesUpdated() } answers { emptyFlow() }

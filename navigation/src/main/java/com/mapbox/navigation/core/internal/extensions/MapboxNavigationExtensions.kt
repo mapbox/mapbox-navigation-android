@@ -6,6 +6,7 @@ import androidx.annotation.UiThread
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.common.location.Location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.performance.PerformanceTraceNameProvider
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -99,21 +100,43 @@ fun MapboxNavigation.flowRoutesUpdated(): Flow<RoutesUpdatedResult> = callbackFl
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-fun MapboxNavigation.flowRouteProgress(): Flow<RouteProgress> = callbackFlow {
-    val observer = RouteProgressObserver { trySend(it) }
+fun MapboxNavigation.flowRouteProgress(tag: String? = null): Flow<RouteProgress> = callbackFlow {
+    val observer = if (tag != null) {
+        object : RouteProgressObserver, PerformanceTraceNameProvider {
+            override fun onRouteProgressChanged(routeProgress: RouteProgress) {
+                trySend(routeProgress)
+            }
+            override val performanceTraceName = "flow#$tag"
+        }
+    } else {
+        RouteProgressObserver { trySend(it) }
+    }
     registerRouteProgressObserver(observer)
     awaitClose { unregisterRouteProgressObserver(observer) }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-fun MapboxNavigation.flowNewRawLocation(): Flow<Location> = callbackFlow {
-    val observer = object : LocationObserver {
-        override fun onNewRawLocation(rawLocation: Location) {
-            trySend(rawLocation)
-        }
+fun MapboxNavigation.flowNewRawLocation(tag: String? = null): Flow<Location> = callbackFlow {
+    val observer = if (tag != null) {
+        object : LocationObserver, PerformanceTraceNameProvider {
+            override fun onNewRawLocation(rawLocation: Location) {
+                trySend(rawLocation)
+            }
 
-        override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
-            // use the flowLocationMatcherResult
+            override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
+                // use the flowLocationMatcherResult
+            }
+            override val performanceTraceName = "flow#$tag"
+        }
+    } else {
+        object : LocationObserver {
+            override fun onNewRawLocation(rawLocation: Location) {
+                trySend(rawLocation)
+            }
+
+            override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
+                // use the flowLocationMatcherResult
+            }
         }
     }
     registerLocationObserver(observer)
@@ -121,14 +144,29 @@ fun MapboxNavigation.flowNewRawLocation(): Flow<Location> = callbackFlow {
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-fun MapboxNavigation.flowLocationMatcherResult(): Flow<LocationMatcherResult> = callbackFlow {
-    val observer = object : LocationObserver {
-        override fun onNewRawLocation(rawLocation: Location) {
-            // use the flowNewRawLocation
-        }
+fun MapboxNavigation.flowLocationMatcherResult(
+    tag: String? = null,
+): Flow<LocationMatcherResult> = callbackFlow {
+    val observer = if (tag != null) {
+        object : LocationObserver, PerformanceTraceNameProvider {
+            override fun onNewRawLocation(rawLocation: Location) {
+                // use the flowNewRawLocation
+            }
 
-        override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
-            trySend(locationMatcherResult)
+            override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
+                trySend(locationMatcherResult)
+            }
+            override val performanceTraceName = "flow#$tag"
+        }
+    } else {
+        object : LocationObserver {
+            override fun onNewRawLocation(rawLocation: Location) {
+                // use the flowNewRawLocation
+            }
+
+            override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
+                trySend(locationMatcherResult)
+            }
         }
     }
     registerLocationObserver(observer)

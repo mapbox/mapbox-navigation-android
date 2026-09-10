@@ -34,7 +34,7 @@ class TripProgressComponent(
             .map { tripProgressApi.getTripDetails(it.first()) }
             .observe { tripProgressView.renderTripOverview(it) }
 
-        mapboxNavigation.flowRouteProgress()
+        mapboxNavigation.flowRouteProgress(tag = "TripProgressComponent")
             .map { tripProgressApi.getTripProgress(it) }
             .observe { tripProgressView.render(it) }
     }

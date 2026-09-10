@@ -43,7 +43,7 @@ class SlowTrafficNotificationProviderTest {
     @Test
     fun `verify slow traffic notification sampling`() = runBlocking {
         val routeProgress = mockk<RouteProgress>(relaxed = true)
-        every { any<MapboxNavigation>().flowRouteProgress() } answers {
+        every { any<MapboxNavigation>().flowRouteProgress(any()) } answers {
             flow {
                 emit(routeProgress)
                 delay(1000.milliseconds)
@@ -104,7 +104,7 @@ class SlowTrafficNotificationProviderTest {
         val routeProgress = mockk<RouteProgress>(relaxed = true) {
             every { distanceTraveled } returns 0.0f
         }
-        every { any<MapboxNavigation>().flowRouteProgress() } answers { flowOf(routeProgress) }
+        every { any<MapboxNavigation>().flowRouteProgress(any()) } answers { flowOf(routeProgress) }
 
         val provider = SlowTrafficNotificationProvider(
             SlowTrafficNotificationOptions.Builder()
