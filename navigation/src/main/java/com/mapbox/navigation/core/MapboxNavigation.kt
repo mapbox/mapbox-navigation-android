@@ -2448,6 +2448,17 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     /**
+     * Overrides the languages the navigator uses, or restores tracking of the system locale when
+     * [locales] is null.
+     *
+     * @param locales preferred languages, most preferred first; null restores the system locale
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    fun setUserLanguagesOverride(locales: List<Locale>?) {
+        systemLocaleWatcher.setOverrideLanguages(locales?.map(Locale::toLanguageTag))
+    }
+
+    /**
      * Allows other Nav SDK modules observe the latest EV state which is
      * accumulated based on data provided in [onEVDataUpdated].
      * Route options of the current route isn't taken into account in

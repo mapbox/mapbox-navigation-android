@@ -97,6 +97,7 @@ package com.mapbox.navigation.core {
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void setRoutesPreview(java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void setTestingContext(com.mapbox.navigation.core.history.TestingContext testingContext);
     method public void setTripNotificationInterceptor(com.mapbox.navigation.base.trip.notification.TripNotificationInterceptor? interceptor);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void setUserLanguagesOverride(java.util.List<java.util.Locale>? locales);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void startReplayTripSession(boolean withForegroundService = true);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void startReplayTripSessionWithPermissionCheck(boolean withForegroundService = true);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void startTripSession(boolean withForegroundService = true);
