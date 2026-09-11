@@ -135,6 +135,115 @@ class SystemLocaleWatcherTest {
         }
     }
 
+    @Test
+    fun setsOverriddenUserLanguagesWhenOverrideIsApplied() {
+        createWatcher()
+
+        systemLocaleWatcher.setOverrideLanguages(listOf("de-DE", "fr-FR"))
+
+        verify(exactly = 1) {
+            navigator.setUserLanguages(listOf("de-DE", "fr-FR"))
+        }
+    }
+
+    @Test
+    fun restoresSystemUserLanguagesWhenOverrideIsCleared() {
+        createWatcher()
+        systemLocaleWatcher.setOverrideLanguages(listOf("de-DE"))
+
+        systemLocaleWatcher.setOverrideLanguages(null)
+
+        verify(exactly = 2) {
+            navigator.setUserLanguages(defaultLocaleTags)
+        }
+    }
+
+    @Test
+    fun keepsOverriddenUserLanguagesOnNavigationRecreationEvent() {
+        val navRecreationObserverSlot = slot<NativeNavigatorRecreationObserver>()
+        every {
+            navigator.addNativeNavigatorRecreationObserver(capture(navRecreationObserverSlot))
+        } just Runs
+
+        createWatcher()
+        systemLocaleWatcher.setOverrideLanguages(listOf("de-DE"))
+        navRecreationObserverSlot.captured.onNativeNavigatorRecreated()
+
+        verify(exactly = 2) {
+            navigator.setUserLanguages(listOf("de-DE"))
+        }
+    }
+
+    @Test
+    fun doesNotUpdateUserLanguagesWhenSameOverrideIsSetTwice() {
+        createWatcher()
+        systemLocaleWatcher.setOverrideLanguages(listOf("de-DE"))
+
+        systemLocaleWatcher.setOverrideLanguages(listOf("de-DE"))
+
+        verify(exactly = 1) {
+            navigator.setUserLanguages(listOf("de-DE"))
+        }
+    }
+
+    @Test
+    fun unregistersLocaleChangeReceiverWhenOverrideIsApplied() {
+        createWatcher()
+
+        systemLocaleWatcher.setOverrideLanguages(listOf("de-DE"))
+
+        verify(exactly = 1) {
+            context.unregisterReceiver(broadcastReceiverSlot.captured)
+        }
+    }
+
+    @Test
+    fun reregistersLocaleChangeReceiverWhenOverrideIsCleared() {
+        createWatcher()
+        systemLocaleWatcher.setOverrideLanguages(listOf("de-DE"))
+
+        systemLocaleWatcher.setOverrideLanguages(null)
+
+        verify(exactly = 2) {
+            ContextCompat.registerReceiver(
+                context,
+                any(),
+                any(),
+                ContextCompat.RECEIVER_NOT_EXPORTED,
+            )
+        }
+    }
+
+    @Test
+    fun doesNotReregisterLocaleChangeReceiverAfterDestroy() {
+        createWatcher()
+        systemLocaleWatcher.setOverrideLanguages(listOf("de-DE"))
+        systemLocaleWatcher.destroy()
+
+        systemLocaleWatcher.setOverrideLanguages(null)
+
+        verify(exactly = 1) {
+            ContextCompat.registerReceiver(
+                context,
+                any(),
+                any(),
+                ContextCompat.RECEIVER_NOT_EXPORTED,
+            )
+        }
+    }
+
+    @Test
+    fun ignoresOverrideChangesAfterDestroy() {
+        createWatcher()
+        systemLocaleWatcher.destroy()
+
+        systemLocaleWatcher.setOverrideLanguages(listOf("de-DE"))
+
+        verify(exactly = 0) {
+            navigator.setUserLanguages(listOf("de-DE"))
+        }
+    }
+
     private companion object {
         fun List<String>.toLocales() = map { Locale(it) }
     }
