@@ -12,36 +12,72 @@ import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 
 internal class SystemLocaleWatcher private constructor(
     private val context: Context,
-    navigator: MapboxNativeNavigator,
+    private val navigator: MapboxNativeNavigator,
     private val handler: Handler,
 ) {
+
+    private var overrideLanguages: List<String>? = null
+    private var isLocaleChangeReceiverRegistered = false
+    private var isDestroyed = false
 
     private val localeChangeReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             // When we receive this event, the system's configuration update might not have been
             // fully propagated, so we introduce a small delay before we update language
-            handler.postDelayed({
-                navigator.setUserLanguages(context.deviceLanguageTags)
-            }, LOCALE_UPDATE_DELAY_MILLIS,)
+            handler.postDelayed(::updateUserLanguages, LOCALE_UPDATE_DELAY_MILLIS)
         }
     }
 
     init {
+        registerLocaleChangeReceiver()
+
+        navigator.addNativeNavigatorRecreationObserver {
+            updateUserLanguages()
+        }
+    }
+
+    fun setOverrideLanguages(languages: List<String>?) {
+        if (isDestroyed || overrideLanguages == languages) {
+            return
+        }
+        overrideLanguages = languages
+        if (languages == null) {
+            registerLocaleChangeReceiver()
+        } else {
+            unregisterLocaleChangeReceiver()
+            updateUserLanguages()
+        }
+    }
+
+    fun destroy() {
+        isDestroyed = true
+        unregisterLocaleChangeReceiver()
+    }
+
+    private fun updateUserLanguages() {
+        navigator.setUserLanguages(overrideLanguages ?: context.deviceLanguageTags)
+    }
+
+    private fun registerLocaleChangeReceiver() {
+        if (isLocaleChangeReceiverRegistered || isDestroyed) {
+            return
+        }
         ContextCompat.registerReceiver(
             context,
             localeChangeReceiver,
             IntentFilter(Intent.ACTION_LOCALE_CHANGED),
             ContextCompat.RECEIVER_NOT_EXPORTED,
         )
-
-        navigator.addNativeNavigatorRecreationObserver {
-            navigator.setUserLanguages(context.deviceLanguageTags)
-        }
-        navigator.setUserLanguages(context.deviceLanguageTags)
+        isLocaleChangeReceiverRegistered = true
+        updateUserLanguages()
     }
 
-    fun destroy() {
+    private fun unregisterLocaleChangeReceiver() {
+        if (!isLocaleChangeReceiverRegistered) {
+            return
+        }
         context.unregisterReceiver(localeChangeReceiver)
+        isLocaleChangeReceiverRegistered = false
     }
 
     companion object {
