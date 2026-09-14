@@ -6,6 +6,7 @@ import com.mapbox.api.directions.v5.models.BannerView
 import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory.createValue
+import com.mapbox.bindgen.Value
 import com.mapbox.common.ResourceData
 import com.mapbox.common.ResourceLoadError
 import com.mapbox.common.ResourceLoadResult
@@ -427,6 +428,8 @@ class RestAreaProcessorTest {
             contentType,
             etag,
             belongsToGroup,
+            0L,
+            Value.nullValue(),
         )
     }
 

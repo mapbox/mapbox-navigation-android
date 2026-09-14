@@ -2,6 +2,7 @@ package com.mapbox.navigation.voice.testutils
 
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.bindgen.DataRef
+import com.mapbox.bindgen.Value
 import com.mapbox.common.ResourceData
 import com.mapbox.common.ResourceLoadResult
 import com.mapbox.common.ResourceLoadStatus
@@ -75,6 +76,8 @@ internal object Fixtures {
             contentType,
             etag,
             belongsToGroup,
+            0L,
+            Value.nullValue(),
         )
     }
 }

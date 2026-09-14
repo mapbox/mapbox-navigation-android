@@ -3,6 +3,7 @@ package com.mapbox.navigation.tripdata.shield
 import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.bindgen.Value
 import com.mapbox.common.ResourceData
 import com.mapbox.common.ResourceLoadError
 import com.mapbox.common.ResourceLoadResult
@@ -184,6 +185,8 @@ object Fixtures {
             contentType,
             etag,
             belongsToGroup,
+            0L,
+            Value.nullValue(),
         )
     }
 

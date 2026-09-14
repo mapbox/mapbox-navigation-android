@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.utils.internal.resource
 import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.bindgen.Value
 import com.mapbox.common.Cancelable
 import com.mapbox.common.NetworkRestriction
 import com.mapbox.common.ReachabilityInterface
@@ -295,6 +296,8 @@ object Fixtures {
             contentType,
             etag,
             belongsToGroup,
+            0L,
+            Value.nullValue(),
         )
     }
 }
