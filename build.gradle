@@ -20,6 +20,7 @@ buildscript {
     classpath pluginDependencies.gradle
     classpath pluginDependencies.kotlin
     classpath pluginDependencies.dependencyUpdates
+    classpath pluginDependencies.dependencyGraph
     classpath pluginDependencies.jacoco
     classpath pluginDependencies.kover
     classpath pluginDependencies.googleServices
