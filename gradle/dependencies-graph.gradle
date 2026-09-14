@@ -1,12 +1,8 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath pluginDependencies.dependencyGraph
-    }
-}
+// No buildscript { } block here on purpose. pluginDependencies.dependencyGraph is
+// declared on the root project's buildscript classpath, which this script plugin
+// inherits. Declaring it here instead forced a second, redundant dependency
+// resolution: `apply from:` scripts get their own isolated ScriptHandler, so it also
+// ignored any centrally configured repositories and went straight to Maven Central.
 
 import com.vanniktech.dependency.graph.generator.DependencyGraphGeneratorPlugin
 import com.vanniktech.dependency.graph.generator.DependencyGraphGeneratorExtension.Generator
