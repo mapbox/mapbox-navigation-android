@@ -20,6 +20,7 @@ import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
+import com.mapbox.navigation.testing.utils.offline.clearTileStore
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.stopRecording
 import java.net.URI
@@ -37,6 +38,10 @@ suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigation(
     locationOptions: LocationOptions? = mockLocationUpdatesRule.locationOptions,
     block: (navigation: MapboxNavigation) -> Unit,
 ) {
+
+    if (!useRealTiles && tileStore == null && tilesVersion == null) {
+        context.clearTileStore()
+    }
     val navigation = MapboxNavigationProvider.create(
         NavigationOptions.Builder(
             InstrumentationRegistry.getInstrumentation().targetContext
