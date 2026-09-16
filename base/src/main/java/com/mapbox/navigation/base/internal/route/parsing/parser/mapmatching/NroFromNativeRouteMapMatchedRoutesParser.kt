@@ -4,11 +4,7 @@ package com.mapbox.navigation.base.internal.route.parsing.parser.mapmatching
 
 import com.mapbox.annotation.MapboxExperimental
 import com.mapbox.api.directions.v5.models.DirectionsRouteFBWrapper
-import com.mapbox.api.directions.v5.models.DirectionsWaypoint
-import com.mapbox.api.directions.v5.models.DirectionsWaypointFBWrapper
-import com.mapbox.api.directions.v5.models.FBDirectionsRouteContext
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.api.directions.v5.models.utils.FlatbuffersListWrapper
 import com.mapbox.directions.route.DirectionsRouteContext
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -30,7 +26,6 @@ import com.mapbox.navigation.base.route.ResponseOriginAPI
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.Time
-import com.mapbox.navigation.utils.internal.asIntOrNull
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import kotlinx.coroutines.CoroutineDispatcher
@@ -85,7 +80,6 @@ internal class NroFromNativeRouteMapMatchedRoutesParser(
 
             val routesParsingResult = nativeRoutes.mapIndexed { matchingIndex, routeInterface ->
                 routeInterface.directionsRouteContext.toMatchedRouteModelsParsingResult(
-                    matchingIndex = matchingIndex,
                     routeOptions = routeOptions,
                     routerOrigin = response.routerOrigin,
                     responseOriginApi = response.responseOriginAPI,
@@ -127,8 +121,7 @@ internal class NroFromNativeRouteMapMatchedRoutesParser(
         logE("Map matched route parsing failed: ${it.message}", LOG_CATEGORY)
     }
 
-    internal fun DirectionsRouteContext.toMatchedRouteModelsParsingResult(
-        matchingIndex: Int,
+    private fun DirectionsRouteContext.toMatchedRouteModelsParsingResult(
         routeOptions: RouteOptions,
         @RouterOrigin routerOrigin: String,
         @ResponseOriginAPI responseOriginApi: String,
@@ -136,14 +129,6 @@ internal class NroFromNativeRouteMapMatchedRoutesParser(
         val route = DirectionsRouteFBWrapper.wrap(
             routeOptions = routeOptions,
             bindgenContext = this,
-            // FIXME(NAVSDKCPP-1438)
-            // A matching carries no `waypoints` of its own; its waypoints are the response-level
-            // tracepoints which point back at it. Supplying them here keeps both
-            // `DirectionsRoute.waypoints()` and `NavigationRoute.waypoints` aligned with the Java
-            // model, which synthesizes the same per-route waypoints.
-            externalWaypoints = { context ->
-                getTracepointsFromMMResponse(context, matchingIndex)
-            },
         ) ?: throw IllegalStateException("matching returned by the native parser is null")
         val directionsData = DirectionsParsedRouteData(
             route = route,
@@ -163,26 +148,7 @@ internal class NroFromNativeRouteMapMatchedRoutesParser(
         )
     }
 
-    private fun getTracepointsFromMMResponse(
-        routeContext: FBDirectionsRouteContext,
-        matchingIndex: Int,
-    ): List<DirectionsWaypoint?>? {
-        return FlatbuffersListWrapper.get(routeContext.waypointsLength) {
-            DirectionsWaypointFBWrapper.wrap(routeContext.waypoints(it))
-        }
-            ?.filterNotNull()
-            ?.filter { tracepoint ->
-                val properties = tracepoint.unrecognizedJsonProperties
-                val belongsToMatchingIndex = properties?.get(KEY_MATCHINGS_INDEX)?.asIntOrNull()
-                val waypointIndex = properties?.get(KEY_WAYPOINT_INDEX)?.asIntOrNull()
-                belongsToMatchingIndex == matchingIndex && waypointIndex != null
-            }
-            ?.takeIf { it.isNotEmpty() }
-    }
-
     private companion object {
         const val LOG_CATEGORY = "NRO-FROM-NATIVE-ROUTE-MAP-MATCHED-PARSING"
-        const val KEY_MATCHINGS_INDEX = "matchings_index"
-        const val KEY_WAYPOINT_INDEX = "waypoint_index"
     }
 }

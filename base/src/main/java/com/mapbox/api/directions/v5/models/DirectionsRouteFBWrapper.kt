@@ -16,7 +16,6 @@ internal class DirectionsRouteFBWrapper private constructor(
     private val routeOptions: RouteOptions?,
     val fbContext: FBDirectionsRouteContext,
     val context: DirectionsRouteContext,
-    val mapMatchingOverriddenWaypoints: List<DirectionsWaypoint?>?,
 ) : DirectionsRoute(), BaseFBWrapper {
 
     internal val stepsCountWithGeometry: Int by lazy {
@@ -92,7 +91,6 @@ internal class DirectionsRouteFBWrapper private constructor(
     }
 
     override fun waypoints(): List<DirectionsWaypoint?>? {
-        mapMatchingOverriddenWaypoints?.let { return it }
         return FlatbuffersListWrapper.get(fb.waypointsLength) {
             DirectionsWaypointFBWrapper.wrap(fb.waypoints(it))
         }
@@ -187,15 +185,9 @@ internal class DirectionsRouteFBWrapper private constructor(
          */
         private const val NOT_HASHED = 0L
 
-        /**
-         * @param externalWaypoints resolves the waypoints of routes which don't carry them in
-         *   their own flatbuffer table, given the enclosing response context. Only Map Matching
-         *   matchings need this; Directions routes leave it at the default.
-         */
         internal fun wrap(
             routeOptions: RouteOptions?,
             bindgenContext: DirectionsRouteContext,
-            externalWaypoints: (FBDirectionsRouteContext) -> List<DirectionsWaypoint?>? = { null },
         ): DirectionsRouteFBWrapper? {
             val routeContext = FBDirectionsRouteContext.getRootAsDirectionsRouteContext(
                 bindgenContext.getData().buffer,
@@ -208,7 +200,6 @@ internal class DirectionsRouteFBWrapper private constructor(
                     routeOptions,
                     routeContext,
                     bindgenContext,
-                    externalWaypoints(routeContext),
                 )
             }
         }
