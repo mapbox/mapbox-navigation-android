@@ -338,6 +338,30 @@ class ReplayRouteInterpolatorTest {
     }
 
     @Test
+    fun `should start the speed profile from a standstill by default`() {
+        val jsonResource = FileUtils.loadJsonFixture("route_with_wide_turns.txt")
+        val coordinates = LineString.fromJson(jsonResource).coordinates()
+
+        val speedProfile = routeInterpolator.createSpeedProfile(defaultOptions, coordinates)
+
+        assertEquals(0.0, speedProfile.first().speedMps, 0.001)
+    }
+
+    @Test
+    fun `should start the speed profile at the speed the driver already has`() {
+        val jsonResource = FileUtils.loadJsonFixture("route_with_wide_turns.txt")
+        val coordinates = LineString.fromJson(jsonResource).coordinates()
+
+        val speedProfile = routeInterpolator.createSpeedProfile(
+            defaultOptions,
+            coordinates,
+            startSpeedMps = 25.0,
+        )
+
+        assertEquals(25.0, speedProfile.first().speedMps, 0.001)
+    }
+
+    @Test
     fun `should not slow down on a freeway`() {
         val jsonResource = FileUtils.loadJsonFixture("route_with_wide_turns.txt")
         val coordinates = LineString.fromJson(jsonResource).coordinates()

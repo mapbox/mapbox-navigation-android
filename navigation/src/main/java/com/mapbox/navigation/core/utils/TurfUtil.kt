@@ -73,7 +73,7 @@ fun nearestPointOnGeometryEcef(
     require(endIndex > startIndex) { "endIndex must be > startIndex" }
     val buf = route.directionsRouteContextDataRefOrNull() ?: return null
     return DirectionsRouteGeometryUtils.nearestPointOnGeometryEcef(buf, startIndex, endIndex, point)
-        ?.mapToPlatform()
+        .mapToPlatform()
 }
 
 /**
@@ -106,7 +106,7 @@ fun nearestPointOnGeometryCheapRuler(
         startIndex,
         endIndex,
         point,
-    )?.mapToPlatform()
+    ).mapToPlatform()
 }
 
 /**
@@ -134,5 +134,5 @@ fun nearestPointOnGeometryTurf(
     require(endIndex > startIndex) { "endIndex must be > startIndex" }
     val buf = route.directionsRouteContextDataRefOrNull() ?: return null
     return DirectionsRouteGeometryUtils.nearestPointOnGeometryTurf(buf, startIndex, endIndex, point)
-        ?.mapToPlatform()
+        .mapToPlatform()
 }

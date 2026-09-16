@@ -85,8 +85,22 @@ class ReplayRouteMapper @JvmOverloads constructor(
      * @param points containing location coordinates to be replayed.
      * @return [ReplayEventBase] [List]
      */
-    fun mapPointList(points: List<Point>): List<ReplayEventBase> {
-        return replayRouteDriver.drivePointList(options, points)
+    fun mapPointList(points: List<Point>): List<ReplayEventBase> = mapPointList(points, 0.0)
+
+    /**
+     * Same as [mapPointList], but the simulated driver sets off at [startSpeedMps] instead of from
+     * a standstill. Used when the replay is rebuilt while the driver is already moving, so that a
+     * route change does not drop the simulated speed to zero.
+     *
+     * @param points containing location coordinates to be replayed.
+     * @param startSpeedMps speed the driver is already travelling at in meters per second.
+     * @return [ReplayEventBase] [List]
+     */
+    internal fun mapPointList(
+        points: List<Point>,
+        startSpeedMps: Double,
+    ): List<ReplayEventBase> {
+        return replayRouteDriver.drivePointList(options, points, startSpeedMps)
             .map { mapToUpdateLocation(it) }
     }
 

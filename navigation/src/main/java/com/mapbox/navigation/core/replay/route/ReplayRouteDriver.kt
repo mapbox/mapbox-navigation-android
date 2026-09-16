@@ -21,11 +21,14 @@ internal class ReplayRouteDriver {
      *
      * @param options allow you to control the driver and car behavior
      * @param points list of points describing a route
+     * @param startSpeedMps speed the driver is already travelling at in meters per second, see
+     *  [ReplayRouteInterpolator.createSpeedProfile]
      * @return [ReplayRouteLocation] [List]
      */
     fun drivePointList(
         options: ReplayRouteOptions,
         points: List<Point>,
+        startSpeedMps: Double = 0.0,
     ): List<ReplayRouteLocation> {
         val distinctPoints = routeSmoother.distinctPoints(points)
         if (distinctPoints.isEmpty()) return emptyList()
@@ -36,7 +39,8 @@ internal class ReplayRouteDriver {
             return listOf(location)
         }
 
-        val smoothLocations = routeInterpolator.createSpeedProfile(options, distinctPoints)
+        val smoothLocations =
+            routeInterpolator.createSpeedProfile(options, distinctPoints, startSpeedMps)
         val replayRouteLocations = interpolateLocations(options, distinctPoints, smoothLocations)
         routeInterpolator.createBearingProfile(replayRouteLocations)
         timeMillis += 1000.0 / options.frequency
