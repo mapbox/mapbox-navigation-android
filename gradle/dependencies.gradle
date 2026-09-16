@@ -3,8 +3,8 @@ ext {
 
   androidVersions = [
       minSdkVersion           : 21,
-      targetSdkVersion        : 36,
-      compileSdkVersion       : 36,
+      targetSdkVersion        : 37,
+      compileSdkVersion       : 37,
       carMinSdkVersion        : 23,
       // Vulkan-enabled builds resolve android-core-vulkan, whose minSdk is 31 (Android 12+).
       carVulkanMinSdkVersion  : 31
