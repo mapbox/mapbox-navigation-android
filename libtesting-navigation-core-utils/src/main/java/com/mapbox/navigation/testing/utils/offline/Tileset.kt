@@ -14,6 +14,26 @@ private const val SD_TILE_STORE_FILE_PATH = "navigation/dmapbox%2fdriving-traffi
 @Suppress("SpellCheckingInspection")
 private const val HD_TILE_STORE_FILE_PATH = "navigationhd/dmapbox"
 
+private const val TILE_STORE_DIR_NAME = ".mapbox"
+
+/**
+ * Directory that the default tile store - the one the SDK creates when routing tiles options are
+ * built without an explicit one - keeps its tilesets in.
+ */
+val Context.tileStoreDir: File
+    get() = File(filesDir, TILE_STORE_DIR_NAME)
+
+/**
+ * Removes every tileset from the default tile store.
+ *
+ * Tilesets unpacked by a test outlive it, because the core test base class keeps the app's files
+ * between tests on purpose. Anything that expects to run without onboard tiles has to clear them
+ * first, or it inherits whatever ran before it in the same process.
+ */
+fun Context.clearTileStore() {
+    tileStoreDir.deleteRecursively()
+}
+
 enum class Tileset(
     val assetName: String,
     val domains: List<TileDataDomain>,
@@ -33,7 +53,7 @@ enum class Tileset(
  */
 fun Context.unpackTiles(tileset: Tileset): Map<TileDataDomain, String> {
     val domainToVersions = assets.open("${tileset.assetName}.zip").use { tilesetStream ->
-        val mapboxDir = File(filesDir, ".mapbox").apply {
+        val mapboxDir = tileStoreDir.apply {
             deleteRecursively()
             mkdir()
         }
