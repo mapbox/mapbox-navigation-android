@@ -4,18 +4,22 @@ import android.annotation.SuppressLint
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.common.location.LocationServiceFactory
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
-import com.mapbox.navigation.core.replay.history.ReplayEventBase
 import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
 import com.mapbox.navigation.core.replay.history.ReplayEventsObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
+import com.mapbox.navigation.core.utils.nearestPointOnGeometryCheapRuler
 import com.mapbox.navigation.utils.internal.logW
+import com.mapbox.turf.TurfConstants
+import com.mapbox.turf.TurfMisc
 import java.util.Collections
 
 /**
@@ -58,6 +62,14 @@ class ReplayRouteSession : MapboxNavigationObserver {
     private var polylineDecodeStream: ReplayPolylineDecodeStream? = null
     private var currentRoute: NavigationRoute? = null
 
+    /**
+     * Speed and position of the last location the replayer actually played. When the route
+     * changes mid-drive, the replay of the new route continues from here rather than restarting
+     * from a standstill at the nearest geometry vertex.
+     */
+    private var currentSpeedMps = 0.0
+    private var lastPlayedPoint: Point? = null
+
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
         if (currentRoute?.id != routeProgress.navigationRoute.id) {
             currentRoute = routeProgress.navigationRoute
@@ -77,12 +89,22 @@ class ReplayRouteSession : MapboxNavigationObserver {
             // If we have location updates, we'll update the route from RouteProgressObserver,
             // because it has more information, e. g. current route geometry index.
             currentRoute = result.navigationRoutes.first()
+            // Nothing is playing, so whatever was played before says nothing about where the
+            // driver is or how fast it is going.
+            currentSpeedMps = 0.0
+            lastPlayedPoint = null
             onRouteChanged(result.navigationRoutes.first(), 0)
         }
     }
 
     private val replayEventsObserver = ReplayEventsObserver { events ->
-        if (currentRoute != null && isLastEventPlayed(events)) {
+        val playedLocation = events.lastOrNull { it is ReplayEventUpdateLocation }
+            as? ReplayEventUpdateLocation
+        playedLocation?.location?.let { location ->
+            location.speed?.let { currentSpeedMps = it }
+            lastPlayedPoint = Point.fromLngLat(location.lon, location.lat)
+        }
+        if (currentRoute != null && isLastEventPlayed(playedLocation)) {
             pushMorePoints()
         }
     }
@@ -119,6 +141,8 @@ class ReplayRouteSession : MapboxNavigationObserver {
     }
 
     private fun MapboxNavigation.resetReplayLocation() {
+        currentSpeedMps = 0.0
+        lastPlayedPoint = null
         mapboxReplayer.clearEvents()
         resetTripSession {
             if (options.locationResetEnabled) {
@@ -145,6 +169,8 @@ class ReplayRouteSession : MapboxNavigationObserver {
         mapboxNavigation.mapboxReplayer.clearEvents()
         this.mapboxNavigation = null
         this.currentRoute = null
+        this.currentSpeedMps = 0.0
+        this.lastPlayedPoint = null
     }
 
     private fun onRouteChanged(navigationRoute: NavigationRoute, currentIndex: Int) {
@@ -161,25 +187,67 @@ class ReplayRouteSession : MapboxNavigationObserver {
             }
             return
         }
-        polylineDecodeStream = ReplayPolylineDecodeStream(geometry, 6)
+        val stream = ReplayPolylineDecodeStream(geometry, 6)
+        polylineDecodeStream = stream
 
-        // Skip up to the current geometry index. There is some imprecision here because the
-        // distance traveled is not equal to a route index.
-        polylineDecodeStream?.skip(currentIndex)
-
-        pushMorePoints()
+        val driverPoint = lastPlayedPoint
+        val nextVertexIndex = driverPoint?.let { nextVertexIndexOnRoute(it, navigationRoute) }
+        if (nextVertexIndex != null) {
+            // The driver is already on the new route, so carry on from where it is, at the speed
+            // it is doing, towards the first vertex ahead of it.
+            stream.skip(nextVertexIndex)
+            pushMorePoints(startPoint = driverPoint)
+        } else {
+            // Skip up to the current geometry index. There is some imprecision here because the
+            // distance traveled is not equal to a route index.
+            stream.skip(currentIndex)
+            currentSpeedMps = 0.0
+            pushMorePoints()
+        }
     }
 
-    private fun isLastEventPlayed(events: List<ReplayEventBase>): Boolean {
-        val currentLocationEvent = events.lastOrNull { it is ReplayEventUpdateLocation }
-            ?: return false
+    /**
+     * Index of the first geometry vertex of [navigationRoute] ahead of [driverPoint], found by
+     * projecting the driver onto the route line. The driver's position is trusted over the route
+     * geometry index reported with the route change, which can lag behind the driver and would
+     * otherwise move it backwards.
+     *
+     * @return null when the driver is not on the route, in which case the replay has to restart
+     *  at a geometry vertex instead of continuing from the driver.
+     */
+    private fun nextVertexIndexOnRoute(driverPoint: Point, navigationRoute: NavigationRoute): Int? {
+        val route = navigationRoute.directionsRoute
+        val points = route.completeGeometryToPoints()
+        if (points.size < 2) return null
+
+        val (segmentIndex, distanceToRouteMeters) =
+            nearestPointOnGeometryCheapRuler(route, driverPoint, 0, points.lastIndex)
+                ?.let { it.geometryIndex to it.distanceToRouteMeters }
+                ?: TurfMisc.nearestPointOnLine(driverPoint, points, TurfConstants.UNIT_METERS)
+                    .let {
+                        it.getNumberProperty(NEAREST_SEGMENT_INDEX_KEY).toInt() to
+                            it.getNumberProperty(NEAREST_DISTANCE_KEY).toDouble()
+                    }
+        if (distanceToRouteMeters > MAX_RESUME_DISTANCE_METERS) return null
+        // The index names the segment the nearest point lies on, so its end is the vertex ahead.
+        return segmentIndex + 1
+    }
+
+    private fun isLastEventPlayed(currentLocationEvent: ReplayEventUpdateLocation?): Boolean {
+        if (currentLocationEvent == null) return false
         val lastEventTimestamp = this.lastLocationEvent?.eventTimestamp ?: 0.0
         return currentLocationEvent.eventTimestamp >= lastEventTimestamp
     }
 
-    private fun pushMorePoints() {
+    /**
+     * Decodes and pushes the next batch of the route. The batch is driven from the decoded
+     * geometry at [currentSpeedMps], or from [startPoint] first when the replay resumes from a
+     * position between two geometry vertices.
+     */
+    private fun pushMorePoints(startPoint: Point? = null) {
         val nextPoints = polylineDecodeStream?.decode(options.decodeMinDistance) ?: return
-        val nextReplayLocations = replayRouteMapper.mapPointList(nextPoints)
+        val points = if (startPoint != null) listOf(startPoint) + nextPoints else nextPoints
+        val nextReplayLocations = replayRouteMapper.mapPointList(points, currentSpeedMps)
         lastLocationEvent = nextReplayLocations.lastOrNull { it is ReplayEventUpdateLocation }
             as? ReplayEventUpdateLocation
         mapboxNavigation?.mapboxReplayer?.clearPlayedEvents()
@@ -207,5 +275,16 @@ class ReplayRouteSession : MapboxNavigationObserver {
 
     private companion object {
         private const val LOG_CATEGORY = "MapboxReplayRouteTripSession"
+
+        /**
+         * How far the driver may be from the new route's line and still count as being on it.
+         * Replayed locations sit on the geometry they were interpolated from, so anything beyond
+         * this is a genuine relocation, such as a route set from somewhere else entirely.
+         */
+        private const val MAX_RESUME_DISTANCE_METERS = 50.0
+
+        /** Property names of the feature returned by [TurfMisc.nearestPointOnLine]. */
+        private const val NEAREST_DISTANCE_KEY = "dist"
+        private const val NEAREST_SEGMENT_INDEX_KEY = "index"
     }
 }
