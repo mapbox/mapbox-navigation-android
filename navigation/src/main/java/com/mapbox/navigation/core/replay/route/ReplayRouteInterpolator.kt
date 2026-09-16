@@ -17,13 +17,21 @@ internal class ReplayRouteInterpolator {
     /**
      * Given a list of coordinates on a route, detect sections of the route that have significant
      * turns. Return a smaller list of locations that have calculated speeds.
+     *
+     * @param startSpeedMps speed the driver is already travelling at in meters per second. Defaults
+     *  to zero, which is correct when the drive begins from a standstill. A profile built while the
+     *  driver is already moving, for example when the route changes mid-drive, has to pass the
+     *  current speed instead, otherwise the driver decelerates to a stop and accelerates again.
+     *  Note that [reduceSpeedForDistances] may still lower it when the geometry ahead makes it
+     *  infeasible, such as a sharp turn a few meters away.
      */
     fun createSpeedProfile(
         options: ReplayRouteOptions,
         distinctPoints: List<Point>,
+        startSpeedMps: Double = 0.0,
     ): List<ReplayRouteLocation> {
         val smoothLocations = routeSmoother.smoothRoute(distinctPoints, SMOOTH_THRESHOLD_METERS)
-        smoothLocations.first().speedMps = 0.0
+        smoothLocations.first().speedMps = startSpeedMps
         smoothLocations.last().speedMps = 0.0
 
         createSpeedForTurns(options, smoothLocations)

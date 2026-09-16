@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.replay.route
 
 import android.content.Context
 import com.mapbox.android.core.permissions.PermissionsManager
+import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.Cancelable
 import com.mapbox.common.location.DeviceLocationProvider
@@ -19,10 +20,13 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.history.ReplayEventBase
+import com.mapbox.navigation.core.replay.history.ReplayEventLocation
 import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
 import com.mapbox.navigation.core.replay.history.ReplayEventsObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
+import com.mapbox.turf.TurfMeasurement
+import com.mapbox.turf.TurfMisc
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.just
@@ -395,7 +399,7 @@ class ReplayRouteSessionTest {
             every { navigationRoute } returns firstRoute
             every { currentRouteGeometryIndex } returns 12
         }
-        val secondRoutesUpdatedResult = mockActiveRoutesUpdatedResult()
+        val secondRoutesUpdatedResult = mockActiveRoutesUpdatedResult(divergingRouteGeometry)
         val secondRoute = secondRoutesUpdatedResult.navigationRoutes.first()
         every { secondRoute.id } returns "test-second-route-id"
         val secondRouteProgress = mockk<RouteProgress> {
@@ -426,22 +430,266 @@ class ReplayRouteSessionTest {
         }
     }
 
+    @Test
+    fun `onRouteProgress - should start from a standstill for the first route`() {
+        val progressObserver = slot<RouteProgressObserver>()
+        every {
+            mapboxNavigation.registerRouteProgressObserver(capture(progressObserver))
+        } just runs
+        val route = mockNavigationRoute()
+
+        sut.onAttached(mapboxNavigation)
+        progressObserver.captured.onRouteProgressChanged(mockRouteProgressFor(route, 0))
+
+        assertEquals(0.0, firstPushedSpeed(), 0.001)
+    }
+
+    @Test
+    fun `onRouteProgress - should keep the played speed when the route changes mid-drive`() {
+        val progressObserver = slot<RouteProgressObserver>()
+        val eventsObserver = slot<ReplayEventsObserver>()
+        every {
+            mapboxNavigation.registerRouteProgressObserver(capture(progressObserver))
+        } just runs
+        every { replayer.registerObserver(capture(eventsObserver)) } just runs
+        val firstRoute = mockNavigationRoute()
+        every { firstRoute.id } returns "test-first-route-id"
+        val secondRoute = mockNavigationRoute(divergingRouteGeometry)
+        every { secondRoute.id } returns "test-second-route-id"
+
+        sut.onAttached(mapboxNavigation)
+        progressObserver.captured.onRouteProgressChanged(mockRouteProgressFor(firstRoute, 0))
+        // The replayer reports a location it has played, so the driver is doing 15 m/s. The
+        // eventTimestamp stays low so that this does not also request the next batch of points.
+        // Keep the speed feasible for the geometry ahead, otherwise createSpeedProfile legitimately
+        // reduces it and the assertion below is no longer exact.
+        eventsObserver.captured.replayEvents(
+            listOf(mockReplayLocation(eventTimestamp = 0.5, speedMps = 15.0, pointAfterVertex(0))),
+        )
+        clearAllMocks(answers = false)
+        progressObserver.captured.onRouteProgressChanged(mockRouteProgressFor(secondRoute, 0))
+
+        assertEquals(15.0, firstPushedSpeed(), 0.001)
+    }
+
+    @Test
+    fun `onRouteProgress - should resume from the driver position along the new route`() {
+        val progressObserver = slot<RouteProgressObserver>()
+        val eventsObserver = slot<ReplayEventsObserver>()
+        every {
+            mapboxNavigation.registerRouteProgressObserver(capture(progressObserver))
+        } just runs
+        every { replayer.registerObserver(capture(eventsObserver)) } just runs
+        val firstRoute = mockNavigationRoute()
+        every { firstRoute.id } returns "test-first-route-id"
+        val secondRoute = mockNavigationRoute(divergingRouteGeometry)
+        every { secondRoute.id } returns "test-second-route-id"
+        val driverPoint = pointAfterVertex(12)
+
+        sut.onAttached(mapboxNavigation)
+        progressObserver.captured.onRouteProgressChanged(mockRouteProgressFor(firstRoute, 0))
+        eventsObserver.captured.replayEvents(
+            listOf(mockReplayLocation(eventTimestamp = 0.5, speedMps = 15.0, driverPoint)),
+        )
+        clearAllMocks(answers = false)
+        progressObserver.captured.onRouteProgressChanged(mockRouteProgressFor(secondRoute, 12))
+
+        // Without this the drive would restart at vertex 12, behind where the driver already is.
+        val pushedPoints = pushedPoints()
+        assertEquals(driverPoint, pushedPoints.first())
+        // From there the drive has to follow the new route, not the one that was being played.
+        assertEquals(PolylineUtils.decode(divergingRouteGeometry, 6).last(), pushedPoints.last())
+    }
+
+    @Test
+    fun `onRouteProgress - should not move the driver backwards when the route index is stale`() {
+        val progressObserver = slot<RouteProgressObserver>()
+        val eventsObserver = slot<ReplayEventsObserver>()
+        every {
+            mapboxNavigation.registerRouteProgressObserver(capture(progressObserver))
+        } just runs
+        every { replayer.registerObserver(capture(eventsObserver)) } just runs
+        val firstRoute = mockNavigationRoute()
+        every { firstRoute.id } returns "test-first-route-id"
+        val secondRoute = mockNavigationRoute(divergingRouteGeometry)
+        every { secondRoute.id } returns "test-second-route-id"
+        // The driver has moved well past the vertex the route index still points at, which is what
+        // repeated route changes produced on device: index frozen at 5 while the driver reached 20.
+        val driverPoint = pointAfterVertex(20)
+
+        sut.onAttached(mapboxNavigation)
+        progressObserver.captured.onRouteProgressChanged(mockRouteProgressFor(firstRoute, 0))
+        eventsObserver.captured.replayEvents(
+            listOf(mockReplayLocation(eventTimestamp = 0.5, speedMps = 15.0, driverPoint)),
+        )
+        clearAllMocks(answers = false)
+        progressObserver.captured.onRouteProgressChanged(mockRouteProgressFor(secondRoute, 5))
+
+        // Previously this snapped back to vertex 5 with the speed reset, a jump of tens of meters.
+        val pushedPoints = pushedPoints()
+        assertEquals(driverPoint, pushedPoints.first())
+        assertEquals(15.0, firstPushedSpeed(), 0.001)
+        val newRouteVertices = PolylineUtils.decode(divergingRouteGeometry, 6)
+        assertTrue(pushedPoints.all { segmentIndexOn(newRouteVertices, it) >= 20 })
+    }
+
+    @Test
+    fun `onRouteProgress - should continue from the driver when an alternative shares the road`() {
+        val progressObserver = slot<RouteProgressObserver>()
+        val eventsObserver = slot<ReplayEventsObserver>()
+        every {
+            mapboxNavigation.registerRouteProgressObserver(capture(progressObserver))
+        } just runs
+        every { replayer.registerObserver(capture(eventsObserver)) } just runs
+        val firstRoute = mockNavigationRoute()
+        every { firstRoute.id } returns "test-first-route-id"
+        // Shares the road with the first route until vertex 40, the way an alternative does.
+        val alternative = mockNavigationRoute(routeDivergingAtVertex(40))
+        every { alternative.id } returns "test-alternative-route-id"
+        val driverPoint = pointAfterVertex(3)
+
+        sut.onAttached(mapboxNavigation)
+        progressObserver.captured.onRouteProgressChanged(mockRouteProgressFor(firstRoute, 0))
+        eventsObserver.captured.replayEvents(
+            listOf(mockReplayLocation(eventTimestamp = 0.5, speedMps = 15.0, driverPoint)),
+        )
+        clearAllMocks(answers = false)
+        progressObserver.captured.onRouteProgressChanged(mockRouteProgressFor(alternative, 3))
+
+        // The alternative is taken over right away, seamlessly: same position, same speed, and
+        // the drive follows the alternative once the roads part.
+        val pushedPoints = pushedPoints()
+        assertEquals(driverPoint, pushedPoints.first())
+        assertEquals(15.0, firstPushedSpeed(), 0.001)
+        assertEquals(
+            PolylineUtils.decode(routeDivergingAtVertex(40), 6).last(),
+            pushedPoints.last(),
+        )
+    }
+
+    @Test
+    fun `onRouteProgress - should restart at the vertex when the driver is off the new route`() {
+        val progressObserver = slot<RouteProgressObserver>()
+        val eventsObserver = slot<ReplayEventsObserver>()
+        every {
+            mapboxNavigation.registerRouteProgressObserver(capture(progressObserver))
+        } just runs
+        every { replayer.registerObserver(capture(eventsObserver)) } just runs
+        val firstRoute = mockNavigationRoute()
+        every { firstRoute.id } returns "test-first-route-id"
+        val secondRoute = mockNavigationRoute(divergingRouteGeometry)
+        every { secondRoute.id } returns "test-second-route-id"
+
+        sut.onAttached(mapboxNavigation)
+        progressObserver.captured.onRouteProgressChanged(mockRouteProgressFor(firstRoute, 0))
+        // Nowhere near the route, so this is a relocation rather than a continuation.
+        eventsObserver.captured.replayEvents(
+            listOf(
+                mockReplayLocation(
+                    eventTimestamp = 0.5,
+                    speedMps = 15.0,
+                    Point.fromLngLat(0.0, 0.0),
+                ),
+            ),
+        )
+        clearAllMocks(answers = false)
+        progressObserver.captured.onRouteProgressChanged(mockRouteProgressFor(secondRoute, 12))
+
+        assertEquals(PolylineUtils.decode(divergingRouteGeometry, 6)[12], pushedPoints().first())
+        assertEquals(0.0, firstPushedSpeed(), 0.001)
+    }
+
+    @Test
+    fun `onRouteProgress - should start from a standstill again after the routes are cleared`() {
+        val progressObserver = slot<RouteProgressObserver>()
+        val routesObserver = slot<RoutesObserver>()
+        val eventsObserver = slot<ReplayEventsObserver>()
+        every {
+            mapboxNavigation.registerRouteProgressObserver(capture(progressObserver))
+        } just runs
+        every { mapboxNavigation.registerRoutesObserver(capture(routesObserver)) } just runs
+        every { replayer.registerObserver(capture(eventsObserver)) } just runs
+        val firstRoute = mockNavigationRoute()
+        every { firstRoute.id } returns "test-first-route-id"
+        val secondRoute = mockNavigationRoute(divergingRouteGeometry)
+        every { secondRoute.id } returns "test-second-route-id"
+
+        sut.onAttached(mapboxNavigation)
+        progressObserver.captured.onRouteProgressChanged(mockRouteProgressFor(firstRoute, 0))
+        eventsObserver.captured.replayEvents(
+            listOf(mockReplayLocation(eventTimestamp = 0.5, speedMps = 15.0, pointAfterVertex(0))),
+        )
+        routesObserver.captured.onRoutesChanged(
+            mockk { every { navigationRoutes } returns listOf() },
+        )
+        clearAllMocks(answers = false)
+        progressObserver.captured.onRouteProgressChanged(mockRouteProgressFor(secondRoute, 0))
+
+        assertEquals(0.0, firstPushedSpeed(), 0.001)
+    }
+
+    /** Index of the geometry segment of [vertices] that [point] is nearest to. */
+    private fun segmentIndexOn(vertices: List<Point>, point: Point): Int =
+        TurfMisc.nearestPointOnLine(point, vertices).getNumberProperty("index").toInt()
+
+    private fun pushedPoints(): List<Point> {
+        val pushedEvents = slot<List<ReplayEventBase>>()
+        verify { replayer.pushEvents(capture(pushedEvents)) }
+        return pushedEvents.captured.map {
+            val location = (it as ReplayEventUpdateLocation).location
+            Point.fromLngLat(location.lon, location.lat)
+        }
+    }
+
+    private fun firstPushedSpeed(): Double {
+        val pushedEvents = slot<List<ReplayEventBase>>()
+        verify { replayer.pushEvents(capture(pushedEvents)) }
+        return (pushedEvents.captured.first() as ReplayEventUpdateLocation).location.speed!!
+    }
+
+    private fun mockRouteProgressFor(route: NavigationRoute, geometryIndex: Int): RouteProgress =
+        mockk {
+            every { navigationRoute } returns route
+            every { currentRouteGeometryIndex } returns geometryIndex
+        }
+
+    private fun mockReplayLocation(
+        eventTimestamp: Double,
+        speedMps: Double,
+        point: Point,
+    ) = ReplayEventUpdateLocation(
+        eventTimestamp = eventTimestamp,
+        location = ReplayEventLocation(
+            lon = point.longitude(),
+            lat = point.latitude(),
+            provider = "ReplayRoute",
+            time = eventTimestamp,
+            altitude = null,
+            accuracyHorizontal = null,
+            bearing = null,
+            speed = speedMps,
+        ),
+    )
+
     private fun verifySkipToIndex(
         pushedEvents: List<ReplayEventBase>,
         primaryRoute: NavigationRoute,
-        currentRouteGeometryIndex: Int,
+        skipIndex: Int,
     ) {
+        val firstReplayEvent = pushedEvents.first() as ReplayEventUpdateLocation
+        val firstReplayPoint = Point.fromLngLat(
+            firstReplayEvent.location.lon,
+            firstReplayEvent.location.lat,
+        )
         val geometry = primaryRoute.directionsRoute.geometry()!!
-        val fullRoute = PolylineUtils.decode(geometry, 6)
-        val expected = fullRoute[currentRouteGeometryIndex]
-        val firstReplayLocation = (pushedEvents.first() as ReplayEventUpdateLocation).location
-        val firstReplayPoint = Point.fromLngLat(firstReplayLocation.lon, firstReplayLocation.lat)
-
+        val expected = PolylineUtils.decode(geometry, 6)[skipIndex]
         assertEquals(expected, firstReplayPoint)
     }
 
-    private fun mockActiveRoutesUpdatedResult(): RoutesUpdatedResult = mockk {
-        every { navigationRoutes } returns listOf(mockNavigationRoute())
+    private fun mockActiveRoutesUpdatedResult(
+        geometry: String = TEST_ROUTE_GEOMETRY,
+    ): RoutesUpdatedResult = mockk {
+        every { navigationRoutes } returns listOf(mockNavigationRoute(geometry))
     }
 
     private fun mockRouteProgress(): RouteProgress = mockk {
@@ -449,16 +697,46 @@ class ReplayRouteSessionTest {
         every { currentRouteGeometryIndex } returns 0
     }
 
-    private fun mockNavigationRoute(): NavigationRoute = mockk {
-        val geometry = "_kmbgAppafhFwXaOuC}ApAoEbNqe@jAaEhEcOtAwEdAoD`DaLnCiJ|M_e@`Je[rAyEnEgO" +
-            "tGiUxByHlDjBp@^zKdG`Ah@`HtDx@d@rGlDl@\\pAp@dAl@p@^nItEpQvJfAh@fDjB`D`Br@`@nKpFbDhB" +
-            "~KlGtDvBvAwE|EqPzFeSvHaXtA{ElAiE|@_D"
+    private val testRouteVertices by lazy { PolylineUtils.decode(TEST_ROUTE_GEOMETRY, 6) }
+
+    /** A route that follows the test route until [index], then leaves it for good. */
+    private fun routeDivergingAtVertex(index: Int): String {
+        val points = testRouteVertices.toMutableList()
+        for (i in index until points.size) {
+            points[i] = Point.fromLngLat(
+                points[i].longitude() + 0.00005,
+                points[i].latitude() + 0.00005,
+            )
+        }
+        return PolylineUtils.encode(points, 6)
+    }
+
+    /**
+     * Leaves [TEST_ROUTE_GEOMETRY] right after its first vertex, so that a change to it is a
+     * change to the road ahead wherever the driver is.
+     */
+    private val divergingRouteGeometry: String by lazy { routeDivergingAtVertex(1) }
+
+    /** A point on the test route, partway between vertex [index] and the one after it. */
+    private fun pointAfterVertex(index: Int): Point =
+        TurfMeasurement.midpoint(testRouteVertices[index], testRouteVertices[index + 1])
+
+    private fun mockNavigationRoute(
+        geometry: String = TEST_ROUTE_GEOMETRY,
+    ): NavigationRoute = mockk {
         every { id } returns "test-navigation-route-id"
         every { directionsRoute } returns mockk {
             every { routeOptions() } returns mockk {
-                every { geometries() } returns "polyline6"
-                every { geometry() } returns geometry
+                every { geometries() } returns DirectionsCriteria.GEOMETRY_POLYLINE6
             }
+            every { geometry() } returns geometry
         }
+    }
+
+    private companion object {
+        private const val TEST_ROUTE_GEOMETRY =
+            "_kmbgAppafhFwXaOuC}ApAoEbNqe@jAaEhEcOtAwEdAoD`DaLnCiJ|M_e@`Je[rAyEnEgO" +
+                "tGiUxByHlDjBp@^zKdG`Ah@`HtDx@d@rGlDl@\\pAp@dAl@p@^nItEpQvJfAh@fDjB`D`Br@`@" +
+                "nKpFbDhB~KlGtDvBvAwE|EqPzFeSvHaXtA{ElAiE|@_D"
     }
 }
