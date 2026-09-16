@@ -12,12 +12,14 @@ fun createNavigationRoutes(
     routeRequestUrl: String,
     @com.mapbox.navigation.base.route.RouterOrigin
     routerOrigin: String,
+    routeIndexOverride: Int? = null,
 ) = runBlocking {
     setupParsing(nativeRoute = false).parseDirectionsResponse(
-        ResponseToParse.from(
+        ResponseToParse(
             responseBody = directionsResponseJson.toDataRefJava(),
             routeRequest = routeRequestUrl,
             routerOrigin = routerOrigin,
+            routeIndexOverride = routeIndexOverride,
         ),
     ).getOrThrow().routes
 }

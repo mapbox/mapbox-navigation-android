@@ -5,7 +5,10 @@ import com.mapbox.navigation.base.internal.route.parsing.models.directions.Direc
 import com.mapbox.navigation.base.internal.route.parsing.models.nn.ContinuousAlternativesParsingSuccessfulResult
 import com.mapbox.navigation.base.internal.route.parsing.parser.directions.DirectionsRoutesParserJava
 import com.mapbox.navigation.base.internal.route.parsing.parser.nn.JsonRouteInterfaceParser
+import com.mapbox.navigation.base.internal.utils.AlternativesInfo
 import com.mapbox.navigation.base.internal.utils.AlternativesParsingResult
+import com.mapbox.navigation.base.internal.utils.RouteParsingQueue
+import com.mapbox.navigation.base.internal.utils.RouteResponseInfo
 import com.mapbox.navigation.base.internal.utils.createImmediateNoOptimizationsParsingQueue
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
@@ -230,6 +233,45 @@ class JsonRouteInterfaceParserTest {
         assertEquals(emptyList<String>(), parsingStrategy.parsedResponses)
     }
 
+    @Test
+    fun `parseRoutes parses each route same as parserContinuousAlternatives`() = runTest {
+        val response = createDirectionsResponse(uuid = "uuid1")
+        val routeInterface = createRouteInterface(
+            responseUUID = response.uuid()!!,
+            routeIndex = 0,
+            responseJson = response.toJson(),
+        )
+        val parser = createRouteInterfaceParser(modelsParser = JavaParserWrapper())
+
+        val result = parser.parseRoutes(listOf(routeInterface))
+
+        assertEquals(listOf("uuid1#0"), result.getOrThrow().routes.map { it.id })
+    }
+
+    @Test
+    fun `parseRoutes goes through the non-skippable queue entry point, unlike parserContinuousAlternatives`() =
+        runTest {
+            val queue = MockRouteParsingQueue()
+            val parser = JsonRouteInterfaceParser(
+                existingParsedRoutesLookup = { null },
+                parsingDispatcher = coroutineRule.testDispatcher,
+                time = mockTime,
+                parser = JavaParserWrapper(),
+                parsingQueue = queue,
+            )
+            val routeInterface = createRouteInterface(
+                responseUUID = "uuid1",
+                routeIndex = 0,
+                responseJson = createDirectionsResponse(uuid = "uuid1").toJson(),
+            )
+
+            val result = parser.parseRoutes(listOf(routeInterface))
+
+            assertEquals(listOf("uuid1#0"), result.getOrThrow().routes.map { it.id })
+            assertEquals(1, queue.parseRouteResponseCalls)
+            assertEquals(0, queue.parseAlternativesCalls)
+        }
+
     private fun createRouteInterfaceParser(
         modelsParser: DirectionsRoutesParser,
         routeLookup: (String) -> NavigationRoute? = { null },
@@ -266,5 +308,28 @@ internal class JavaParserWrapper : DirectionsRoutesParser {
         return parser.parse(response).onSuccess {
             parsedResponses.add(it.responseUUID!!)
         }
+    }
+}
+
+// A handwritten fake, not MockK: MockK throws a ClassCastException mocking a generic
+// suspend function whose type parameter resolves to `kotlin.Result`, an inline class.
+private class MockRouteParsingQueue : RouteParsingQueue {
+    var parseRouteResponseCalls = 0
+    var parseAlternativesCalls = 0
+
+    override suspend fun <T> parseRouteResponse(
+        routeResponseInfo: RouteResponseInfo,
+        parsing: suspend () -> T,
+    ): T {
+        parseRouteResponseCalls++
+        return parsing()
+    }
+
+    override suspend fun <T> parseAlternatives(
+        arguments: AlternativesInfo,
+        parsing: suspend () -> T,
+    ): AlternativesParsingResult<T> {
+        parseAlternativesCalls++
+        return AlternativesParsingResult.Parsed(parsing())
     }
 }

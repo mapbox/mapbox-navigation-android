@@ -42,8 +42,32 @@ internal class JsonRouteInterfaceParser(
         routes: List<RouteInterface>,
     ): AlternativesParsingResult<Result<ContinuousAlternativesParsingSuccessfulResult>> {
         val responseTimeElapsedSeconds = time.seconds()
+        val routesToParse = buildRoutesToParse(routes)
 
-        val routesToParse = routes.map { route ->
+        return parsingQueue.parseAlternatives(
+            AlternativesInfo(
+                RouteResponseInfo.fromRoutes(routesToParse.mapNotNull { it.json?.buffer }),
+            ),
+        ) {
+            parseCatching(routesToParse, responseTimeElapsedSeconds)
+        }
+    }
+
+    override suspend fun parseRoutes(
+        routes: List<RouteInterface>,
+    ): Result<ContinuousAlternativesParsingSuccessfulResult> {
+        val responseTimeElapsedSeconds = time.seconds()
+        val routesToParse = buildRoutesToParse(routes)
+
+        return parsingQueue.parseRouteResponse(
+            RouteResponseInfo.fromRoutes(routesToParse.mapNotNull { it.json?.buffer }),
+        ) {
+            parseCatching(routesToParse, responseTimeElapsedSeconds)
+        }
+    }
+
+    private fun buildRoutesToParse(routes: List<RouteInterface>): List<RouteToParse> =
+        routes.map { route ->
             val cachedRoute = existingParsedRoutesLookup(route.routeId)
             RouteToParse(
                 route = route,
@@ -59,20 +83,16 @@ internal class JsonRouteInterfaceParser(
             )
         }
 
-        return parsingQueue.parseAlternatives(
-            AlternativesInfo(
-                RouteResponseInfo.fromRoutes(routesToParse.mapNotNull { it.json?.buffer }),
-            ),
-        ) {
-            withContext(parsingDispatcher) {
-                Result.runCatching {
-                    parse(routesToParse, responseTimeElapsedSeconds)
-                }.onFailure {
-                    logE { "Alternative route parsing failed: ${it.message}" }
-                }.map {
-                    ContinuousAlternativesParsingSuccessfulResult(it)
-                }
-            }
+    private suspend fun parseCatching(
+        routesToParse: List<RouteToParse>,
+        responseTimeElapsedSeconds: Long,
+    ): Result<ContinuousAlternativesParsingSuccessfulResult> = withContext(parsingDispatcher) {
+        Result.runCatching {
+            parse(routesToParse, responseTimeElapsedSeconds)
+        }.onFailure {
+            logE { "Route parsing failed: ${it.message}" }
+        }.map {
+            ContinuousAlternativesParsingSuccessfulResult(it)
         }
     }
 

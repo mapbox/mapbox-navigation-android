@@ -40,18 +40,23 @@ internal class NroRouteInterfacesParser(
 ) : RouteInterfacesParser {
     override suspend fun parserContinuousAlternatives(
         routes: List<RouteInterface>,
-    ): AlternativesParsingResult<Result<ContinuousAlternativesParsingSuccessfulResult>> {
+    ): AlternativesParsingResult<Result<ContinuousAlternativesParsingSuccessfulResult>> =
+        AlternativesParsingResult.Parsed(parseRoutes(routes))
+
+    override suspend fun parseRoutes(
+        routes: List<RouteInterface>,
+    ): Result<ContinuousAlternativesParsingSuccessfulResult> {
         val responseTimeElapsedSeconds = time.seconds()
 
         return withContext(parsingDispatcher) {
             Result.runCatching {
                 routes.map { it.toNavigationRouteFromNativeContext(responseTimeElapsedSeconds) }
             }.onFailure {
-                logE(LOG_CATEGORY) { "Alternative route parsing failed: ${it.message}" }
+                logE(LOG_CATEGORY) { "Route parsing failed: ${it.message}" }
             }.map {
                 ContinuousAlternativesParsingSuccessfulResult(it)
             }
-        }.let { AlternativesParsingResult.Parsed(it) }
+        }
     }
 }
 
