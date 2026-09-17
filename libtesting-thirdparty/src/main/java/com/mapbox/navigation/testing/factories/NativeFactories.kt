@@ -227,10 +227,6 @@ fun createRouteInterface(
 
     override fun getRouteIndex() = routeIndex
 
-    override fun getResponseJsonRef(): DataRef {
-        return responseJson.toDataRef()
-    }
-
     override fun getDirectionsRouteContext(): DirectionsRouteContext {
         return mockk(relaxed = true)
     }
