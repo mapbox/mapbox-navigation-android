@@ -64,7 +64,9 @@ class MapboxCarNavigationManager internal constructor(
             logAndroidAuto("$LOG_CATEGORY onStopNavigation")
             super.onStopNavigation()
             mapboxNavigation?.setNavigationRoutes(emptyList())
-            MapboxScreenManager.replaceTop(MapboxScreen.FREE_DRIVE)
+            if (MapboxScreenManager.current()?.key != MapboxScreen.NAVIGATION) {
+                MapboxScreenManager.replaceTop(MapboxScreen.FREE_DRIVE)
+            }
         }
 
         override fun onAutoDriveEnabled() {

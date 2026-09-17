@@ -1,3 +1,5 @@
+@file:OptIn(com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI::class)
+
 package com.mapbox.navigation.ui.androidauto.preview
 
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -44,6 +46,7 @@ class CarRoutePreviewRequestTest {
             requestRoutes(capture(routeOptionsSlot), capture(routerCallbackSlot))
         } returns requestCount++
         every { cancelRouteRequest(any()) } just Runs
+        every { setRoutesPreview(any(), any()) } just Runs
         every { navigationOptions } returns mockk {
             every { applicationContext } returns mockk()
             every { distanceFormatterOptions } returns mockk {
@@ -86,6 +89,7 @@ class CarRoutePreviewRequestTest {
         val routes = listOf(mockk<NavigationRoute>())
         routerCallbackSlot.captured.onRoutesReady(routes, RouterOrigin.ONLINE)
 
+        verify(exactly = 1) { mapboxNavigation.setRoutesPreview(routes) }
         verify(exactly = 1) { callback.onRoutesReady(any(), any()) }
     }
 

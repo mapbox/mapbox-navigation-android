@@ -56,6 +56,9 @@ dependencies {
 
     implementation dependenciesList.androidXCore
     implementation dependenciesList.androidXAppCompat
+    // mapboxMapsAndroidAuto has an outdated androidXCarApp dependency,
+    // so we need to add new version here to use the latest features
+    implementation dependenciesList.androidXCarApp
     implementation dependenciesList.glide
 
     testImplementation(project(':libtesting-utils'))

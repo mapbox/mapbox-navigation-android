@@ -72,6 +72,7 @@ class CarNavigationCamera(
     val nextCameraMode: StateFlow<CarCameraMode?> = _nextCameraMode
 
     private var isLocationInitialized = false
+    private var requestedCameraMode: CarCameraMode? = null
 
     private val locationObserver = object : LocationObserver {
 
@@ -89,7 +90,7 @@ class CarNavigationCamera(
                 val instantTransition = NavigationCameraTransitionOptions.Builder()
                     .maxDuration(0)
                     .build()
-                when (initialCarCameraMode) {
+                when (requestedCameraMode ?: initialCarCameraMode) {
                     CarCameraMode.IDLE -> navigationCamera.requestNavigationCameraToIdle()
                     CarCameraMode.FOLLOWING -> navigationCamera.requestNavigationCameraToFollowing(
                         stateTransitionOptions = instantTransition,
@@ -208,11 +209,13 @@ class CarNavigationCamera(
     }
 
     fun updateCameraMode(carCameraMode: CarCameraMode) {
+        requestedCameraMode = carCameraMode
         _nextCameraMode.value = if (carCameraMode != initialCarCameraMode) {
             initialCarCameraMode
         } else {
             alternativeCarCameraMode
         }
+        if (mapboxCarMapSurface == null || !this::navigationCamera.isInitialized) return
         when (carCameraMode) {
             CarCameraMode.IDLE -> navigationCamera.requestNavigationCameraToIdle()
             CarCameraMode.FOLLOWING -> navigationCamera.requestNavigationCameraToFollowing()

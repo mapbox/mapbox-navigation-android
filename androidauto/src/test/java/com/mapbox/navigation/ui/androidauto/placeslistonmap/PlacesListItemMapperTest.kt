@@ -44,7 +44,7 @@ class PlacesListItemMapperTest : MapboxRobolectricTestRunner() {
         val result = mapper.mapToItemList(location, places, null)
 
         assertEquals(
-            "[title: name, text count: 1, image: null, isBrowsable: false]",
+            "[title: name, text count: 1, image: null, isBrowsable: false, isEnabled: true]",
             result.items.first().toString(),
         )
     }

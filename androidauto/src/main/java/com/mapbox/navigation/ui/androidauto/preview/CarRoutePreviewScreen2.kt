@@ -37,8 +37,11 @@ import kotlinx.coroutines.launch
  * you select alternatives. From here, you can start turn-by-turn navigation.
  * The difference between [CarRoutePreviewScreen] and this class is that
  * the latter uses the experimental route preview state in Navigation SDK.
+ *
+ * @deprecated Use [MapboxScreen.NAVIGATION] instead.
  */
 @ExperimentalPreviewMapboxNavigationAPI
+@Deprecated("Use MapboxScreen.NAVIGATION instead.")
 internal class CarRoutePreviewScreen2 @UiThread constructor(
     private val mapboxCarContext: MapboxCarContext,
 ) : Screen(mapboxCarContext.carContext) {

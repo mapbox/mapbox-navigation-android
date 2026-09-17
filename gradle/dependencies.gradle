@@ -51,6 +51,7 @@ ext {
       androidXDataStore         : '1.0.0',
       androidXWorkManager       : '2.7.1',
       androidXAsyncInflater     : '1.0.0',
+      androidXCar               : '1.7.0',
       cardViewVersion           : '1.0.0',
       recyclerViewVersion       : '1.1.0',
       materialDesignVersion     : '1.1.0',
@@ -162,6 +163,7 @@ ext {
       androidXAsyncInflater     : "androidx.asynclayoutinflater:asynclayoutinflater:${version.androidXAsyncInflater}",
       androidXActivity          : "androidx.activity:activity-ktx:${version.androidXActivity}",
       androidXActivityCompose   : "androidx.activity:activity-compose:${version.androidXActivityCompose}",
+      androidXCarApp            : "androidx.car.app:app:${version.androidXCar}",
 
       // compose
      composeUi                  : "androidx.compose.ui:ui:${version.compose}",

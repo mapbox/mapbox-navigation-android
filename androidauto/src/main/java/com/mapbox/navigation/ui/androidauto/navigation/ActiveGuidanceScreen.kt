@@ -20,7 +20,10 @@ import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen
 /**
  * After a route has been selected. This view gives turn-by-turn instructions
  * for completing the route.
+ *
+ * @deprecated Use [MapboxScreen.NAVIGATION] instead.
  */
+@Deprecated("Use MapboxScreen.NAVIGATION instead.")
 internal class ActiveGuidanceScreen constructor(
     private val mapboxCarContext: MapboxCarContext,
 ) : Screen(mapboxCarContext.carContext) {

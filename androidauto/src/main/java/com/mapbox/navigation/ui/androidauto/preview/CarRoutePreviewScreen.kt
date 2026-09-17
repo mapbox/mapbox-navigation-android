@@ -32,7 +32,10 @@ import com.mapbox.navigation.ui.androidauto.search.PlaceRecord
 /**
  * After a destination has been selected. This view previews the route and lets
  * you select alternatives. From here, you can start turn-by-turn navigation.
+ *
+ * @deprecated Use [MapboxScreen.NAVIGATION] instead.
  */
+@Deprecated("Use MapboxScreen.NAVIGATION instead.")
 internal class CarRoutePreviewScreen @UiThread constructor(
     private val mapboxCarContext: MapboxCarContext,
     private val placeRecord: PlaceRecord,

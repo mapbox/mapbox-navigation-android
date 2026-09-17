@@ -176,6 +176,10 @@ class MapboxScreenManager internal constructor(
         return screenFactoryMap.contains(key)
     }
 
+    internal fun isScreenBelowTop(key: String): Boolean {
+        return screenStack.elementAtOrNull(1)?.first == key
+    }
+
     /**
      * Provides access to the [MapboxScreenFactory] for the specified screen key. This will throw
      * an exception if it is accessed when it is not available.

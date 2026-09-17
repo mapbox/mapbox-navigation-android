@@ -70,6 +70,7 @@ class MapboxCarNavigationManagerTest {
     fun setup() {
         mockkStatic(MapboxScreenManager::class)
         mockkObject(MapboxScreenManager)
+        every { MapboxScreenManager.current() } returns null
         mockkObject(CarManeuverMapper)
         every { CarManeuverMapper.from(any<RouteProgress>(), any()) } returns mockk()
     }
@@ -226,6 +227,20 @@ class MapboxCarNavigationManagerTest {
         navigationManagerCallbackSlot.captured.onStopNavigation()
 
         verify { MapboxScreenManager.replaceTop(MapboxScreen.FREE_DRIVE) }
+    }
+
+    @Test
+    fun `onStopNavigation should remain on unified navigation screen`() {
+        val mapboxNavigation: MapboxNavigation = mockk(relaxed = true)
+        every { MapboxScreenManager.current() } returns mockk {
+            every { key } returns MapboxScreen.NAVIGATION
+        }
+        sut.onAttached(mapboxNavigation)
+
+        navigationManagerCallbackSlot.captured.onStopNavigation()
+
+        verify { mapboxNavigation.setNavigationRoutes(emptyList()) }
+        verify(exactly = 0) { MapboxScreenManager.replaceTop(any()) }
     }
 
     @Test

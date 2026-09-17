@@ -4,6 +4,7 @@ import androidx.annotation.UiThread
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.formatter.UnitType
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -31,6 +32,7 @@ interface CarRoutePreviewRequestCallback {
 /**
  * Service class that requests routes for the preview screen.
  */
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 class CarRoutePreviewRequest internal constructor(
     private val options: MapboxCarOptions,
 ) : MapboxNavigationObserver {
@@ -141,6 +143,7 @@ class CarRoutePreviewRequest internal constructor(
                 currentRequestId = null
 
                 logAndroidAuto("CarRoutePreview.onRoutesReady ${routes.size}")
+                mapboxNavigation?.setRoutesPreview(routes)
                 repository?.setRoutePreview(placeRecord, routes)
                 callback.onRoutesReady(placeRecord, routes)
             }

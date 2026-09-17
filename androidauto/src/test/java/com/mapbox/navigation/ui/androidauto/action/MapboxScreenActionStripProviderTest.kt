@@ -9,6 +9,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+@Suppress("DEPRECATION")
 class MapboxScreenActionStripProviderTest {
 
     @Test

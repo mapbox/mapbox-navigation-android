@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.mapbox.navigation.ui.androidauto.screenmanager
 
 import androidx.annotation.StringDef
@@ -26,8 +28,18 @@ object MapboxScreen {
     const val SETTINGS = "MAPBOX_SETTINGS"
 
     /**
-     * Gives the user an ability to navigate without a specified route.
+     * Combines free drive, route preview, and active guidance on one map screen.
+     *
+     * This screen requires Car API 7 or newer.
      */
+    const val NAVIGATION = "MAPBOX_NAVIGATION"
+
+    /**
+     * Gives the user an ability to navigate without a specified route.
+     *
+     * @deprecated Use [NAVIGATION] instead.
+     */
+    @Deprecated("Use NAVIGATION instead.")
     const val FREE_DRIVE = "MAPBOX_FREE_DRIVE"
 
     /**
@@ -67,7 +79,10 @@ object MapboxScreen {
 
     /**
      * Gives the user an ability to select a navigation route.
+     *
+     * @deprecated Use [NAVIGATION] instead.
      */
+    @Deprecated("Use NAVIGATION instead.")
     const val ROUTE_PREVIEW = "MAPBOX_ROUTE_PREVIEW"
 
     /**
@@ -77,7 +92,10 @@ object MapboxScreen {
 
     /**
      * Gives the user an ability to follow turn by turn directions to a destination.
+     *
+     * @deprecated Use [NAVIGATION] instead.
      */
+    @Deprecated("Use NAVIGATION instead.")
     const val ACTIVE_GUIDANCE = "MAPBOX_ACTIVE_GUIDANCE"
 
     /**
@@ -97,6 +115,7 @@ object MapboxScreen {
     @StringDef(
         NEEDS_LOCATION_PERMISSION,
         SETTINGS,
+        NAVIGATION,
         FREE_DRIVE,
         FREE_DRIVE_FEEDBACK,
         SEARCH,

@@ -462,6 +462,23 @@ class MapboxScreenManagerTest : MapboxRobolectricTestRunner() {
         mapboxScreenManager.createScreen("SCREEN_DOES_NOT_EXIST")
     }
 
+    @Test
+    fun `isScreenBelowTop returns true for immediate parent`() {
+        mapboxScreenManager.screenStack.push("SCREEN_A" to mockk())
+        mapboxScreenManager.screenStack.push("SCREEN_B" to mockk())
+
+        assertTrue(mapboxScreenManager.isScreenBelowTop("SCREEN_A"))
+    }
+
+    @Test
+    fun `isScreenBelowTop ignores stale entries deeper in stack`() {
+        mapboxScreenManager.screenStack.push("SCREEN_A" to mockk())
+        mapboxScreenManager.screenStack.push("SCREEN_B" to mockk())
+        mapboxScreenManager.screenStack.push("SCREEN_C" to mockk())
+
+        assertFalse(mapboxScreenManager.isScreenBelowTop("SCREEN_A"))
+    }
+
     @Test(expected = IllegalStateException::class)
     fun `requireScreenManager will crash accessed after the lifecycle is destroyed`() {
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)

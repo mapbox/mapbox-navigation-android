@@ -108,7 +108,13 @@ internal class PlacesListOnMapScreen @UiThread constructor(
     private fun onPlaceRecordSelected(placeRecord: PlaceRecord) {
         val carRouteRequestCallback = object : CarRoutePreviewRequestCallback {
             override fun onRoutesReady(placeRecord: PlaceRecord, routes: List<NavigationRoute>) {
-                MapboxScreenManager.push(MapboxScreen.ROUTE_PREVIEW)
+                val screenManager = searchCarContext.mapboxScreenManager
+                if (
+                    !screenManager.isScreenBelowTop(MapboxScreen.NAVIGATION) ||
+                    !screenManager.goBack()
+                ) {
+                    MapboxScreenManager.push(MapboxScreen.ROUTE_PREVIEW)
+                }
             }
 
             override fun onUnknownCurrentLocation() {

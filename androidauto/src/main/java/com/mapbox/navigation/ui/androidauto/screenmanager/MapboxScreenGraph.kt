@@ -13,6 +13,7 @@ import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.FREE_DRIV
 import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.FREE_DRIVE_FEEDBACK
 import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.GEO_DEEPLINK
 import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.GEO_DEEPLINK_FEEDBACK
+import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.NAVIGATION
 import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.NEEDS_LOCATION_PERMISSION
 import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.ROUTE_PREVIEW
 import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.ROUTE_PREVIEW_FEEDBACK
@@ -28,6 +29,7 @@ import com.mapbox.navigation.ui.androidauto.screenmanager.factories.FreeDriveFee
 import com.mapbox.navigation.ui.androidauto.screenmanager.factories.FreeDriveScreenFactory
 import com.mapbox.navigation.ui.androidauto.screenmanager.factories.GeoDeeplinkPlacesCarScreenFactory
 import com.mapbox.navigation.ui.androidauto.screenmanager.factories.GeoDeeplinkPlacesFeedbackScreenFactory
+import com.mapbox.navigation.ui.androidauto.screenmanager.factories.MapboxNavigationScreenFactory
 import com.mapbox.navigation.ui.androidauto.screenmanager.factories.NeedsLocationPermissionScreenFactory
 import com.mapbox.navigation.ui.androidauto.screenmanager.factories.RoutePreviewFeedbackScreenFactory
 import com.mapbox.navigation.ui.androidauto.screenmanager.factories.RoutePreviewScreenFactory
@@ -48,6 +50,8 @@ fun MapboxCarContext.prepareScreens() = apply {
             to NeedsLocationPermissionScreenFactory(),
         SETTINGS
             to SettingsScreenFactory(mapboxCarContext),
+        NAVIGATION
+            to MapboxNavigationScreenFactory(mapboxCarContext),
         FREE_DRIVE
             to FreeDriveScreenFactory(mapboxCarContext),
         FREE_DRIVE_FEEDBACK

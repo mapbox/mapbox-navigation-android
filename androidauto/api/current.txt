@@ -683,25 +683,26 @@ package com.mapbox.navigation.ui.androidauto.routes {
 package com.mapbox.navigation.ui.androidauto.screenmanager {
 
   public final class MapboxScreen {
-    field public static final String ACTIVE_GUIDANCE = "MAPBOX_ACTIVE_GUIDANCE";
+    field @Deprecated public static final String ACTIVE_GUIDANCE = "MAPBOX_ACTIVE_GUIDANCE";
     field public static final String ACTIVE_GUIDANCE_FEEDBACK = "MAPBOX_ACTIVE_GUIDANCE_FEEDBACK";
     field public static final String ARRIVAL = "MAPBOX_ARRIVAL";
     field public static final String FAVORITES = "MAPBOX_FAVORITES";
     field public static final String FAVORITES_FEEDBACK = "MAPBOX_FAVORITES_FEEDBACK";
-    field public static final String FREE_DRIVE = "MAPBOX_FREE_DRIVE";
+    field @Deprecated public static final String FREE_DRIVE = "MAPBOX_FREE_DRIVE";
     field public static final String FREE_DRIVE_FEEDBACK = "MAPBOX_FREE_DRIVE_FEEDBACK";
     field public static final String GEO_DEEPLINK = "MAPBOX_GEO_DEEPLINK";
     field public static final String GEO_DEEPLINK_FEEDBACK = "MAPBOX_GEO_DEEPLINK_FEEDBACK";
     field public static final com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen INSTANCE;
+    field public static final String NAVIGATION = "MAPBOX_NAVIGATION";
     field public static final String NEEDS_LOCATION_PERMISSION = "MAPBOX_NEEDS_LOCATION_PERMISSION";
-    field public static final String ROUTE_PREVIEW = "MAPBOX_ROUTE_PREVIEW";
+    field @Deprecated public static final String ROUTE_PREVIEW = "MAPBOX_ROUTE_PREVIEW";
     field public static final String ROUTE_PREVIEW_FEEDBACK = "MAPBOX_ROUTE_PREVIEW_FEEDBACK";
     field public static final String SEARCH = "MAPBOX_SEARCH";
     field public static final String SEARCH_FEEDBACK = "MAPBOX_SEARCH_FEEDBACK";
     field public static final String SETTINGS = "MAPBOX_SETTINGS";
   }
 
-  @StringDef({com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.NEEDS_LOCATION_PERMISSION, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.SETTINGS, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.FREE_DRIVE, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.FREE_DRIVE_FEEDBACK, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.SEARCH, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.SEARCH_FEEDBACK, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.FAVORITES, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.FAVORITES_FEEDBACK, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.GEO_DEEPLINK, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.GEO_DEEPLINK_FEEDBACK, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.ROUTE_PREVIEW, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.ROUTE_PREVIEW_FEEDBACK, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.ACTIVE_GUIDANCE, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.ACTIVE_GUIDANCE_FEEDBACK, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.ARRIVAL}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface MapboxScreen.Key {
+  @StringDef({com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.NEEDS_LOCATION_PERMISSION, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.SETTINGS, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.NAVIGATION, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.FREE_DRIVE, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.FREE_DRIVE_FEEDBACK, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.SEARCH, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.SEARCH_FEEDBACK, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.FAVORITES, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.FAVORITES_FEEDBACK, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.GEO_DEEPLINK, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.GEO_DEEPLINK_FEEDBACK, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.ROUTE_PREVIEW, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.ROUTE_PREVIEW_FEEDBACK, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.ACTIVE_GUIDANCE, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.ACTIVE_GUIDANCE_FEEDBACK, com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen.ARRIVAL}) @kotlin.annotation.Retention(kotlin.annotation.AnnotationRetention.BINARY) public static @interface MapboxScreen.Key {
   }
 
   public final class MapboxScreenEvent {
@@ -763,7 +764,7 @@ package com.mapbox.navigation.ui.androidauto.screenmanager.factories {
     method public String getSourceName();
   }
 
-  public final class ActiveGuidanceScreenFactory implements com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenFactory {
+  @Deprecated public final class ActiveGuidanceScreenFactory implements com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenFactory {
     ctor public ActiveGuidanceScreenFactory(com.mapbox.navigation.ui.androidauto.MapboxCarContext mapboxCarContext);
     method public androidx.car.app.Screen create(androidx.car.app.CarContext carContext);
   }
@@ -791,7 +792,7 @@ package com.mapbox.navigation.ui.androidauto.screenmanager.factories {
     method public String getSourceName();
   }
 
-  public final class FreeDriveScreenFactory implements com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenFactory {
+  @Deprecated public final class FreeDriveScreenFactory implements com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenFactory {
     ctor public FreeDriveScreenFactory(com.mapbox.navigation.ui.androidauto.MapboxCarContext mapboxCarContext);
     method public androidx.car.app.Screen create(androidx.car.app.CarContext carContext);
   }
@@ -807,6 +808,11 @@ package com.mapbox.navigation.ui.androidauto.screenmanager.factories {
     method public String getSourceName();
   }
 
+  public final class MapboxNavigationScreenFactory implements com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenFactory {
+    ctor public MapboxNavigationScreenFactory(com.mapbox.navigation.ui.androidauto.MapboxCarContext mapboxCarContext);
+    method public androidx.car.app.Screen create(androidx.car.app.CarContext carContext);
+  }
+
   public final class NeedsLocationPermissionScreenFactory implements com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenFactory {
     ctor public NeedsLocationPermissionScreenFactory();
     method public androidx.car.app.Screen create(androidx.car.app.CarContext carContext);
@@ -818,12 +824,12 @@ package com.mapbox.navigation.ui.androidauto.screenmanager.factories {
     method public String getSourceName();
   }
 
-  public final class RoutePreviewScreenFactory implements com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenFactory {
+  @Deprecated public final class RoutePreviewScreenFactory implements com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenFactory {
     ctor public RoutePreviewScreenFactory(com.mapbox.navigation.ui.androidauto.MapboxCarContext mapboxCarContext);
     method public androidx.car.app.Screen create(androidx.car.app.CarContext carContext);
   }
 
-  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RoutePreviewScreenFactory2 implements com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenFactory {
+  @Deprecated @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class RoutePreviewScreenFactory2 implements com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenFactory {
     ctor public RoutePreviewScreenFactory2(com.mapbox.navigation.ui.androidauto.MapboxCarContext mapboxCarContext);
     method public androidx.car.app.Screen create(androidx.car.app.CarContext carContext);
   }

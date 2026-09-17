@@ -9,7 +9,10 @@ import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenFactory
 
 /**
  * Default screen for [MapboxScreen.FREE_DRIVE].
+ *
+ * @deprecated Use [MapboxNavigationScreenFactory] for [MapboxScreen.NAVIGATION] instead.
  */
+@Deprecated("Use MapboxNavigationScreenFactory for MapboxScreen.NAVIGATION instead.")
 class FreeDriveScreenFactory(
     private val mapboxCarContext: MapboxCarContext,
 ) : MapboxScreenFactory {
