@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.androidauto.navigation.maneuver
 
 import androidx.car.app.model.DateTimeWithZone
+import androidx.car.app.navigation.model.Destination
 import androidx.car.app.navigation.model.Maneuver
 import androidx.car.app.navigation.model.Step
 import androidx.car.app.navigation.model.TravelEstimate
@@ -21,19 +22,53 @@ object CarManeuverMapper {
         routeProgress: RouteProgress,
         maneuverApi: MapboxManeuverApi,
     ): Trip {
-        val etaAsCalendar = Calendar.getInstance().also {
-            it.add(Calendar.SECOND, routeProgress.durationRemaining.toInt())
-        }
-
-        val eta = TravelEstimate.Builder(
-            CarDistanceFormatter.carDistance(routeProgress.distanceRemaining.toDouble()),
-            DateTimeWithZone.create(etaAsCalendar.timeInMillis, TimeZone.getDefault()),
-        ).build()
         val maneuvers = maneuverApi.getManeuvers(routeProgress)
         val maneuver = from(maneuvers).build()
         val step = Step.Builder().setManeuver(maneuver).build()
-        return Trip.Builder().addStep(step, eta).build()
+
+        return Trip.Builder()
+            .addStep(step, currentStepTravelEstimate(routeProgress))
+            .addDestination(destination(), destinationTravelEstimate(routeProgress))
+            .build()
     }
+
+    private fun currentStepTravelEstimate(routeProgress: RouteProgress): TravelEstimate {
+        val stepProgress = routeProgress.currentLegProgress?.currentStepProgress
+            ?: return destinationTravelEstimate(routeProgress)
+
+        return TravelEstimate.Builder(
+            CarDistanceFormatter.carDistance(stepProgress.distanceRemaining.toDouble()),
+            arrivalTime(stepProgress.durationRemaining),
+        ).setRemainingTimeSeconds(remainingTimeSeconds(stepProgress.durationRemaining)).build()
+    }
+
+    private fun destinationTravelEstimate(routeProgress: RouteProgress): TravelEstimate {
+        return TravelEstimate.Builder(
+            CarDistanceFormatter.carDistance(routeProgress.distanceRemaining.toDouble()),
+            arrivalTime(routeProgress.durationRemaining),
+        ).setRemainingTimeSeconds(remainingTimeSeconds(routeProgress.durationRemaining)).build()
+    }
+
+    private fun destination(): Destination =
+        Destination.Builder().setName(DESTINATION_NAME).build()
+
+    private fun arrivalTime(secondsRemaining: Double): DateTimeWithZone {
+        val safeSeconds = if (secondsRemaining.isFinite()) secondsRemaining else 0.0
+        val calendar = Calendar.getInstance().also {
+            it.add(Calendar.SECOND, safeSeconds.toInt())
+        }
+        return DateTimeWithZone.create(calendar.timeInMillis, TimeZone.getDefault())
+    }
+
+    private fun remainingTimeSeconds(secondsRemaining: Double): Long {
+        return if (secondsRemaining.isFinite() && secondsRemaining >= 0.0) {
+            secondsRemaining.toLong()
+        } else {
+            TravelEstimate.REMAINING_TIME_UNKNOWN
+        }
+    }
+
+    private const val DESTINATION_NAME = "Destination"
 
     fun from(
         exp: Expected<ManeuverError, List<com.mapbox.navigation.tripdata.maneuver.model.Maneuver>>,

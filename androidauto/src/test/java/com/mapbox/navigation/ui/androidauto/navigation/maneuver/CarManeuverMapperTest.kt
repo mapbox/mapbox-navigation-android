@@ -2,10 +2,13 @@ package com.mapbox.navigation.ui.androidauto.navigation.maneuver
 
 import androidx.car.app.model.Distance
 import androidx.car.app.navigation.model.Maneuver
+import androidx.car.app.navigation.model.TravelEstimate
 import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.tripdata.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.tripdata.maneuver.model.ManeuverError
 import com.mapbox.navigation.ui.androidauto.navigation.CarDistanceFormatter
@@ -31,9 +34,20 @@ class CarManeuverMapperTest {
     }
 
     private val oneHourMilliseconds: Double = 60000.0 * 60.0
+    private val currentStepDistanceMeters = 250f
+    private val currentStepDurationSeconds = 45.0
+    private val mockCurrentStepProgress = mockk<RouteStepProgress> {
+        every { distanceRemaining } returns currentStepDistanceMeters
+        every { durationRemaining } returns currentStepDurationSeconds
+    }
+    private val mockCurrentLegProgress = mockk<RouteLegProgress> {
+        every { currentStepProgress } returns mockCurrentStepProgress
+    }
+
     private val mockRouteProgress = mockk<RouteProgress>(relaxed = true) {
         every { durationRemaining } returns oneHourMilliseconds
         every { distanceRemaining } returns 1609.34f
+        every { currentLegProgress } returns mockCurrentLegProgress
     }
 
     private val mockManeuverApi = mockk<MapboxManeuverApi>(relaxed = true) {
@@ -419,14 +433,19 @@ class CarManeuverMapperTest {
     }
 
     @Test
-    fun `generate Trip data from route progress`() {
+    fun `generate Trip data from route progress uses current-step estimate for the step`() {
         val expectedEta = Calendar.getInstance().also {
-            it.timeInMillis = it.timeInMillis + mockRouteProgress.durationRemaining.toLong()
+            it.timeInMillis = it.timeInMillis + (currentStepDurationSeconds * 1000).toLong()
         }
-        val remainingDistance = mockk<Distance>()
+        val stepDistance = mockk<Distance>()
+        val destinationDistance = mockk<Distance>()
+        every {
+            CarDistanceFormatter.carDistance(currentStepDistanceMeters.toDouble())
+        } returns stepDistance
         every {
             CarDistanceFormatter.carDistance(range(1609.34 - 0.1, 1609.34 + 0.1))
-        } returns remainingDistance
+        } returns destinationDistance
+
         val trip = CarManeuverMapper.from(mockRouteProgress, mockManeuverApi)
 
         val timeDelta = expectedEta.timeInMillis - trip.stepTravelEstimates
@@ -434,8 +453,106 @@ class CarManeuverMapperTest {
             .arrivalTimeAtDestination!!
             .timeSinceEpochMillis
         assertEquals(Maneuver.TYPE_TURN_NORMAL_RIGHT, trip.steps.first().maneuver!!.type)
-        assertEquals(remainingDistance, trip.stepTravelEstimates.first().remainingDistance!!)
+        assertEquals(stepDistance, trip.stepTravelEstimates.first().remainingDistance!!)
+        assertEquals(
+            currentStepDurationSeconds.toLong(),
+            trip.stepTravelEstimates.first().remainingTimeSeconds,
+        )
         assertTrue(timeDelta < 20)
+    }
+
+    @Test
+    fun `generate Trip data from route progress uses whole-route estimate for the destination`() {
+        val expectedEta = Calendar.getInstance().also {
+            it.timeInMillis = it.timeInMillis + mockRouteProgress.durationRemaining.toLong()
+        }
+        val destinationDistance = mockk<Distance>()
+        every {
+            CarDistanceFormatter.carDistance(currentStepDistanceMeters.toDouble())
+        } returns mockk()
+        every {
+            CarDistanceFormatter.carDistance(range(1609.34 - 0.1, 1609.34 + 0.1))
+        } returns destinationDistance
+
+        val trip = CarManeuverMapper.from(mockRouteProgress, mockManeuverApi)
+
+        val timeDelta = expectedEta.timeInMillis - trip.destinationTravelEstimates
+            .first()
+            .arrivalTimeAtDestination!!
+            .timeSinceEpochMillis
+        assertEquals(
+            destinationDistance,
+            trip.destinationTravelEstimates.first().remainingDistance!!,
+        )
+        assertEquals(
+            oneHourMilliseconds.toLong(),
+            trip.destinationTravelEstimates.first().remainingTimeSeconds,
+        )
+        assertTrue(timeDelta < 20)
+    }
+
+    @Test
+    fun `falls back to whole-route estimate when current-step progress is unavailable`() {
+        every { mockCurrentLegProgress.currentStepProgress } returns null
+        val destinationDistance = mockk<Distance>()
+        every {
+            CarDistanceFormatter.carDistance(range(1609.34 - 0.1, 1609.34 + 0.1))
+        } returns destinationDistance
+
+        val trip = CarManeuverMapper.from(mockRouteProgress, mockManeuverApi)
+
+        assertEquals(destinationDistance, trip.stepTravelEstimates.first().remainingDistance!!)
+        assertEquals(
+            oneHourMilliseconds.toLong(),
+            trip.stepTravelEstimates.first().remainingTimeSeconds,
+        )
+    }
+
+    @Test
+    fun `falls back to whole-route estimate when current leg progress is unavailable`() {
+        every { mockRouteProgress.currentLegProgress } returns null
+        val destinationDistance = mockk<Distance>()
+        every {
+            CarDistanceFormatter.carDistance(range(1609.34 - 0.1, 1609.34 + 0.1))
+        } returns destinationDistance
+
+        val trip = CarManeuverMapper.from(mockRouteProgress, mockManeuverApi)
+
+        assertEquals(destinationDistance, trip.stepTravelEstimates.first().remainingDistance!!)
+    }
+
+    @Test
+    fun `reports remaining time unknown when current-step duration is unavailable`() {
+        every { mockCurrentStepProgress.durationRemaining } returns -1.0
+        every {
+            CarDistanceFormatter.carDistance(currentStepDistanceMeters.toDouble())
+        } returns mockk()
+        every {
+            CarDistanceFormatter.carDistance(range(1609.34 - 0.1, 1609.34 + 0.1))
+        } returns mockk()
+
+        val trip = CarManeuverMapper.from(mockRouteProgress, mockManeuverApi)
+
+        assertEquals(
+            TravelEstimate.REMAINING_TIME_UNKNOWN,
+            trip.stepTravelEstimates.first().remainingTimeSeconds,
+        )
+    }
+
+    @Test
+    fun `uses current-step estimate regardless of which leg is active on a multi-leg route`() {
+        every { mockCurrentLegProgress.legIndex } returns 1
+        val stepDistance = mockk<Distance>()
+        every {
+            CarDistanceFormatter.carDistance(currentStepDistanceMeters.toDouble())
+        } returns stepDistance
+        every {
+            CarDistanceFormatter.carDistance(range(1609.34 - 0.1, 1609.34 + 0.1))
+        } returns mockk()
+
+        val trip = CarManeuverMapper.from(mockRouteProgress, mockManeuverApi)
+
+        assertEquals(stepDistance, trip.stepTravelEstimates.first().remainingDistance!!)
     }
 
     @Test
