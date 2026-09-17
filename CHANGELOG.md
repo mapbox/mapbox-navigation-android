@@ -4,6 +4,10 @@
 
 #### Bug fixes and improvements
 - Added explicit implementation of the RoutesInfo.equals/hashcode methods to address excessive comparisons of NavigationRoute instances by reducing frequencies of states emissions. [#18798](https://github.com/mapbox/mapbox-sdk/pull/18798)
+- Improved the performance of NavigationRoute#hashCode and NavigationRoute#equals. [#18819](https://github.com/mapbox/mapbox-sdk/pull/18819)
+- Fixed route replay restarting the simulated driver from a standstill at a geometry vertex behind the puck on every route change. The driver now continues from its current position along the new route. [19377](https://github.com/mapbox/mapbox-sdk/pull/19377)
+- Added MapboxNavigation#setUserLanguagesOverride (@ExperimentalPreviewMapboxNavigationAPI) to let a calling app override the languages the navigator uses independently of the system locale. While an override is active, the navigator stops listening for system locale changes; passing null resumes tracking the system locale and now immediately resyncs the navigator with the device's current languages instead of waiting for the next locale-change broadcast. [#18940](https://github.com/mapbox/mapbox-sdk/pull/18940)
+- Added support of the Map Matching API in case native route object is enabled. Responses from MapboxNavigation#requestMapMatching are now parsed into native route objects, so map-matched routes get the same Java heap savings as routes from the Directions API. [#16832](https://github.com/mapbox/mapbox-sdk/pull/16832)
 
 
 ### Mapbox dependencies
