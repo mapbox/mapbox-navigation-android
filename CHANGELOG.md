@@ -1,3 +1,18 @@
+## Navigation SDK Core Framework 3.31.0 - 17 September, 2026
+#### Features
+
+
+#### Bug fixes and improvements
+- Added explicit implementation of the RoutesInfo.equals/hashcode methods to address excessive comparisons of NavigationRoute instances by reducing frequencies of states emissions. [#18798](https://github.com/mapbox/mapbox-sdk/pull/18798)
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.31.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.31.0))
+- Mapbox Navigation Native `v324.31.0`
+- Mapbox Core Common `v24.31.0`
+- Mapbox Java `v7.10.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.1))
+
 ## Navigation SDK Core Framework 3.31.0-rc.1 - 07 September, 2026
 #### Features
 
