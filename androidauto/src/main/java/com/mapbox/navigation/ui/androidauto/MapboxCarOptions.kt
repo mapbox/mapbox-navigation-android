@@ -9,6 +9,7 @@ import com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackOption
 import com.mapbox.navigation.ui.androidauto.navigation.speedlimit.SpeedLimitOptions
 import com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotification
 import com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotificationOptions
+import com.mapbox.navigation.ui.androidauto.preview.CarRouteLineRendererOptions
 import com.mapbox.navigation.ui.androidauto.preview.CarRouteOptionsInterceptor
 import com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions
 import com.mapbox.navigation.ui.androidauto.search.CarSearchMode
@@ -33,6 +34,13 @@ class MapboxCarOptions {
      * @see CarRouteOptionsInterceptor
      */
     var routeOptionsInterceptor: CarRouteOptionsInterceptor = CarRouteOptionsInterceptor { it }
+        private set
+
+    /**
+     * @see CarRouteLineRendererOptions
+     */
+    var routeLineRendererOptions: CarRouteLineRendererOptions =
+        CarRouteLineRendererOptions.Builder().build()
         private set
 
     /**
@@ -79,6 +87,7 @@ class MapboxCarOptions {
     fun applyCustomization(customization: Customization) {
         customization.notificationOptions?.also { this.notificationOptions = it }
         customization.routeOptionsInterceptor?.also { this.routeOptionsInterceptor = it }
+        customization.routeLineRendererOptions?.also { this.routeLineRendererOptions = it }
         customization.speedLimitOptions?.also { this.speedLimitOptionsMutable.tryEmit(it) }
         customization.placeSearchOptions?.also { this.carPlaceSearchOptions = it }
         customization.carFeedbackOptions?.also { this.carFeedbackOptions = it }
@@ -101,6 +110,12 @@ class MapboxCarOptions {
          * Modify [RouteOptions] used for requesting a route.
          */
         var routeOptionsInterceptor: CarRouteOptionsInterceptor? = null
+
+        /**
+         * Modify the route line and upcoming-maneuver arrow rendering, for example their
+         * colors or the arrow icon pack.
+         */
+        var routeLineRendererOptions: CarRouteLineRendererOptions? = null
 
         /**
          * Modify car place search.

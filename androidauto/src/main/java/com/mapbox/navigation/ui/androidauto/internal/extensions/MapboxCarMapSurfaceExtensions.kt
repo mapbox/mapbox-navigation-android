@@ -23,5 +23,5 @@ fun MapboxCarMapSurface.styleFlow(): Flow<Style> {
 }
 
 fun MapboxCarMapSurface.getStyle(): Style? {
-    return mapSurface.getMapboxMap().getStyle()
+    return mapSurface.mapboxMap.style
 }

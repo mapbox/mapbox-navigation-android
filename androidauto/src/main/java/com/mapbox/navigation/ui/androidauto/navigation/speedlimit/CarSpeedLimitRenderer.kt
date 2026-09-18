@@ -75,11 +75,15 @@ internal constructor(
     }
 
     private fun updateSpeed(locationMatcherResult: LocationMatcherResult) {
+        // MapboxTripSession dispatches each LocationObserver callback as its own coroutine, so
+        // this can still fire with a location update queued before onDetached() unregistered it
+        // and cleared distanceFormatterOptions.
+        val distanceFormatterOptions = distanceFormatterOptions ?: return
         val speedLimitOptions = options.speedLimitOptions.value
         val signFormat = speedLimitOptions.forcedSignFormat
             ?: locationMatcherResult.speedLimitInfo.sign
         val threshold = speedLimitOptions.warningThreshold
-        when (distanceFormatterOptions!!.unitType) {
+        when (distanceFormatterOptions.unitType) {
             UnitType.IMPERIAL -> {
                 val speedLimit = when (locationMatcherResult.speedLimitInfo.unit) {
                     SpeedUnit.MILES_PER_HOUR ->

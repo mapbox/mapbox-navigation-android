@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.androidauto.preview
 
-import androidx.car.app.CarContext
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
@@ -13,17 +12,14 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.ui.androidauto.internal.extensions.mapboxNavigationForward
 import com.mapbox.navigation.ui.androidauto.internal.extensions.styleFlow
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAuto
+import com.mapbox.navigation.ui.androidauto.internal.logAndroidAutoFailure
 import com.mapbox.navigation.ui.androidauto.routes.CarRoutesProvider
 import com.mapbox.navigation.ui.androidauto.routes.NavigationCarRoutesProvider
-import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowView
-import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
-import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions
-import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions
-import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -35,14 +31,15 @@ import kotlinx.coroutines.launch
  * [MapboxRouteArrowApi], and [RouteProgressObserver] use cases that the app needs in the car.
  *
  * Anything for rendering the car's route line, is handled here at this point.
+ *
+ * @param options customizes the route line and maneuver arrow rendering components, see
+ * [CarRouteLineRendererOptions].
  */
 class CarRouteLineRenderer(
+    private val options: CarRouteLineRendererOptions = CarRouteLineRendererOptions.Builder()
+        .build(),
     private val carRoutesProvider: CarRoutesProvider = NavigationCarRoutesProvider(),
 ) : MapboxCarMapObserver {
-
-    private val routeLineColorResources by lazy {
-        RouteLineColorResources.Builder().build()
-    }
 
     private var style: Style? = null
 
@@ -75,18 +72,30 @@ class CarRouteLineRenderer(
         coroutineScope = MainScope()
         coroutineScope.launch {
             mapboxCarMapSurface.styleFlow().collectLatest { style ->
-                val carContext = mapboxCarMapSurface.carContext
-                routeLineView = MapboxRouteLineView(
-                    getMapboxRouteLineViewOptions(carContext, style),
-                )
-                routeLineView.initializeLayers(style)
-                routeLineApi = MapboxRouteLineApi(getMapboxRouteLineApiOptions(style))
-                routeArrowApi = MapboxRouteArrowApi()
-                routeArrowView = MapboxRouteArrowView(
-                    RouteArrowOptions.Builder(carContext)
-                        .withAboveLayerId(TOP_LEVEL_ROUTE_LINE_LAYER_ID)
-                        .build(),
-                )
+                try {
+                    routeLineView = MapboxRouteLineView(
+                        options.routeLineViewOptionsProvider(mapboxCarMapSurface),
+                    )
+                    routeLineView.initializeLayers(style)
+                    routeLineApi = MapboxRouteLineApi(
+                        options.routeLineApiOptionsProvider(mapboxCarMapSurface),
+                    )
+                    routeArrowApi = options.routeArrowApiProvider(mapboxCarMapSurface)
+                    routeArrowView = MapboxRouteArrowView(
+                        options.routeArrowOptionsProvider(mapboxCarMapSurface),
+                    )
+                } catch (exception: CancellationException) {
+                    throw exception
+                } catch (exception: Exception) {
+                    // A customization provider is third-party code (see CarRouteLineRendererOptions);
+                    // a bug in it (for example force-unwrapping the nullable Style read off the
+                    // surface) must not take down the whole Android Auto session.
+                    logAndroidAutoFailure(
+                        "CarRouteLine failed to build options from a customized provider",
+                        exception,
+                    )
+                    return@collectLatest
+                }
                 this@CarRouteLineRenderer.style = style
                 carRoutesProvider.navigationRoutes.collect { onRoutesChanged(style, it) }
             }
@@ -111,30 +120,6 @@ class CarRouteLineRenderer(
 
     private fun onDetached(mapboxNavigation: MapboxNavigation) {
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
-    }
-
-    private fun getMapboxRouteLineApiOptions(
-        style: Style,
-    ): MapboxRouteLineApiOptions {
-        return MapboxRouteLineApiOptions.Builder()
-            .vanishingRouteLineEnabled(true)
-            .build()
-    }
-
-    private fun getMapboxRouteLineViewOptions(
-        carContext: CarContext,
-        style: Style,
-    ): MapboxRouteLineViewOptions {
-        return MapboxRouteLineViewOptions.Builder(carContext)
-            .routeLineColorResources(routeLineColorResources)
-            .routeLineBelowLayerId(findRoadLabelsLayerId(style))
-            .build()
-    }
-
-    private fun findRoadLabelsLayerId(style: Style): String {
-        return style.styleLayers
-            .firstOrNull { layer -> layer.id.contains("road-label") }
-            ?.id ?: "road-label-navigation"
     }
 
     private fun onRoutesChanged(style: Style, routes: List<NavigationRoute>) {

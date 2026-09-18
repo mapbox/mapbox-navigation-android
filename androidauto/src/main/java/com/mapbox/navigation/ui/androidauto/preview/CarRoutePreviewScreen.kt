@@ -44,7 +44,10 @@ internal class CarRoutePreviewScreen @UiThread constructor(
 
     private val carRoutesProvider = PreviewCarRoutesProvider(navigationRoutes)
     private var selectedIndex = 0
-    private val carRouteLineRenderer = CarRouteLineRenderer(carRoutesProvider)
+    private val carRouteLineRenderer = CarRouteLineRenderer(
+        options = mapboxCarContext.options.routeLineRendererOptions,
+        carRoutesProvider = carRoutesProvider,
+    )
     private val carLocationRenderer = CarLocationRenderer()
     private val carSpeedLimitRenderer = CarSpeedLimitRenderer(mapboxCarContext)
     private val carNavigationCamera = CarNavigationCamera(

@@ -30,6 +30,7 @@ package com.mapbox.navigation.ui.androidauto {
     method public com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions getCarPlaceSearchOptions();
     method public com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackPollProvider getFeedbackPollProvider();
     method public com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotificationOptions getNotificationOptions();
+    method public com.mapbox.navigation.ui.androidauto.preview.CarRouteLineRendererOptions getRouteLineRendererOptions();
     method public com.mapbox.navigation.ui.androidauto.preview.CarRouteOptionsInterceptor getRouteOptionsInterceptor();
     method public com.mapbox.navigation.ui.androidauto.search.CarSearchMode getSearchMode();
     method public kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.androidauto.navigation.speedlimit.SpeedLimitOptions> getSpeedLimitOptions();
@@ -38,6 +39,7 @@ package com.mapbox.navigation.ui.androidauto {
     property public final com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions carPlaceSearchOptions;
     property public final com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackPollProvider feedbackPollProvider;
     property public final com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotificationOptions notificationOptions;
+    property public final com.mapbox.navigation.ui.androidauto.preview.CarRouteLineRendererOptions routeLineRendererOptions;
     property public final com.mapbox.navigation.ui.androidauto.preview.CarRouteOptionsInterceptor routeOptionsInterceptor;
     property public final com.mapbox.navigation.ui.androidauto.search.CarSearchMode searchMode;
     property public final kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.androidauto.navigation.speedlimit.SpeedLimitOptions> speedLimitOptions;
@@ -50,6 +52,7 @@ package com.mapbox.navigation.ui.androidauto {
     method public com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackPollProvider? getFeedbackPollProvider();
     method public com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotificationOptions? getNotificationOptions();
     method public com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions? getPlaceSearchOptions();
+    method public com.mapbox.navigation.ui.androidauto.preview.CarRouteLineRendererOptions? getRouteLineRendererOptions();
     method public com.mapbox.navigation.ui.androidauto.preview.CarRouteOptionsInterceptor? getRouteOptionsInterceptor();
     method public com.mapbox.navigation.ui.androidauto.search.CarSearchMode? getSearchMode();
     method public com.mapbox.navigation.ui.androidauto.navigation.speedlimit.SpeedLimitOptions? getSpeedLimitOptions();
@@ -58,6 +61,7 @@ package com.mapbox.navigation.ui.androidauto {
     method public void setFeedbackPollProvider(com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackPollProvider?);
     method public void setNotificationOptions(com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotificationOptions?);
     method public void setPlaceSearchOptions(com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions?);
+    method public void setRouteLineRendererOptions(com.mapbox.navigation.ui.androidauto.preview.CarRouteLineRendererOptions?);
     method public void setRouteOptionsInterceptor(com.mapbox.navigation.ui.androidauto.preview.CarRouteOptionsInterceptor?);
     method public void setSearchMode(com.mapbox.navigation.ui.androidauto.search.CarSearchMode?);
     method public void setSpeedLimitOptions(com.mapbox.navigation.ui.androidauto.navigation.speedlimit.SpeedLimitOptions?);
@@ -66,6 +70,7 @@ package com.mapbox.navigation.ui.androidauto {
     property public final com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackPollProvider? feedbackPollProvider;
     property public final com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotificationOptions? notificationOptions;
     property public final com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions? placeSearchOptions;
+    property public final com.mapbox.navigation.ui.androidauto.preview.CarRouteLineRendererOptions? routeLineRendererOptions;
     property public final com.mapbox.navigation.ui.androidauto.preview.CarRouteOptionsInterceptor? routeOptionsInterceptor;
     property public final com.mapbox.navigation.ui.androidauto.search.CarSearchMode? searchMode;
     property public final com.mapbox.navigation.ui.androidauto.navigation.speedlimit.SpeedLimitOptions? speedLimitOptions;
@@ -615,7 +620,27 @@ package com.mapbox.navigation.ui.androidauto.placeslistonmap {
 package com.mapbox.navigation.ui.androidauto.preview {
 
   public final class CarRouteLineRenderer implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
-    ctor public CarRouteLineRenderer(com.mapbox.navigation.ui.androidauto.routes.CarRoutesProvider carRoutesProvider = com.mapbox.navigation.ui.androidauto.routes.NavigationCarRoutesProvider());
+    ctor public CarRouteLineRenderer(optional com.mapbox.navigation.ui.androidauto.preview.CarRouteLineRendererOptions options, optional com.mapbox.navigation.ui.androidauto.routes.CarRoutesProvider carRoutesProvider);
+  }
+
+  public final class CarRouteLineRendererOptions {
+    method public kotlin.jvm.functions.Function1<com.mapbox.maps.extension.androidauto.MapboxCarMapSurface,com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi> getRouteArrowApiProvider();
+    method public kotlin.jvm.functions.Function1<com.mapbox.maps.extension.androidauto.MapboxCarMapSurface,com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions> getRouteArrowOptionsProvider();
+    method public kotlin.jvm.functions.Function1<com.mapbox.maps.extension.androidauto.MapboxCarMapSurface,com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions> getRouteLineApiOptionsProvider();
+    method public kotlin.jvm.functions.Function1<com.mapbox.maps.extension.androidauto.MapboxCarMapSurface,com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions> getRouteLineViewOptionsProvider();
+    property public final kotlin.jvm.functions.Function1<com.mapbox.maps.extension.androidauto.MapboxCarMapSurface,com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi> routeArrowApiProvider;
+    property public final kotlin.jvm.functions.Function1<com.mapbox.maps.extension.androidauto.MapboxCarMapSurface,com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions> routeArrowOptionsProvider;
+    property public final kotlin.jvm.functions.Function1<com.mapbox.maps.extension.androidauto.MapboxCarMapSurface,com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions> routeLineApiOptionsProvider;
+    property public final kotlin.jvm.functions.Function1<com.mapbox.maps.extension.androidauto.MapboxCarMapSurface,com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions> routeLineViewOptionsProvider;
+  }
+
+  public static final class CarRouteLineRendererOptions.Builder {
+    ctor public CarRouteLineRendererOptions.Builder();
+    method public com.mapbox.navigation.ui.androidauto.preview.CarRouteLineRendererOptions build();
+    method public com.mapbox.navigation.ui.androidauto.preview.CarRouteLineRendererOptions.Builder routeArrowApiProvider(kotlin.jvm.functions.Function1<? super com.mapbox.maps.extension.androidauto.MapboxCarMapSurface,? extends com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi> provider);
+    method public com.mapbox.navigation.ui.androidauto.preview.CarRouteLineRendererOptions.Builder routeArrowOptionsProvider(kotlin.jvm.functions.Function1<? super com.mapbox.maps.extension.androidauto.MapboxCarMapSurface,? extends com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions> provider);
+    method public com.mapbox.navigation.ui.androidauto.preview.CarRouteLineRendererOptions.Builder routeLineApiOptionsProvider(kotlin.jvm.functions.Function1<? super com.mapbox.maps.extension.androidauto.MapboxCarMapSurface,? extends com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions> provider);
+    method public com.mapbox.navigation.ui.androidauto.preview.CarRouteLineRendererOptions.Builder routeLineViewOptionsProvider(kotlin.jvm.functions.Function1<? super com.mapbox.maps.extension.androidauto.MapboxCarMapSurface,? extends com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions> provider);
   }
 
   public fun interface CarRouteOptionsInterceptor {
