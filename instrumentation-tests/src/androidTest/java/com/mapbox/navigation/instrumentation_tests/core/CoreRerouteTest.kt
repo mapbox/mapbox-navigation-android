@@ -253,7 +253,6 @@ class CoreRerouteTest(
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
         val tilesVersion = context.unpackTiles(Tileset.NearMunich)[TileDataDomain.NAVIGATION]!!
         withMapboxNavigation(
-            useRealTiles = true,
             historyRecorderRule = mapboxHistoryTestRule,
             customConfig = getTestRerouteCustomConfig(runOptions.nativeReroute),
             tileStore = TileStore.create(),
