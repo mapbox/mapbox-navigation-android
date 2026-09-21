@@ -1,12 +1,16 @@
 package com.mapbox.navigation.ui.androidauto.navigation
 
+import android.os.SystemClock
 import androidx.car.app.CarContext
 import androidx.car.app.navigation.NavigationManager
 import androidx.car.app.navigation.NavigationManagerCallback
 import androidx.car.app.navigation.model.Trip
+import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.formatter.MapboxDistanceFormatter
+import com.mapbox.navigation.core.formatter.MapboxDistanceUtil
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -25,8 +29,9 @@ import kotlinx.coroutines.flow.StateFlow
  * registered, the trip status of [MapboxNavigation] will be sent to the [NavigationManager].
  * This is needed to keep the vehicle cluster display updated.
  */
-class MapboxCarNavigationManager internal constructor(
+class MapboxCarNavigationManager @JvmOverloads internal constructor(
     carContext: CarContext,
+    private val elapsedRealtimeMillis: () -> Long = SystemClock::elapsedRealtime,
 ) : MapboxNavigationObserver {
 
     private val navigationManager: NavigationManager by lazy {
@@ -35,27 +40,25 @@ class MapboxCarNavigationManager internal constructor(
 
     private var maneuverApi: MapboxManeuverApi? = null
     private var mapboxNavigation: MapboxNavigation? = null
+    private var distanceFormatterOptions: DistanceFormatterOptions? = null
     private val carTelemetry = MapboxCarTelemetry()
 
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
         val maneuverApi = maneuverApi ?: return@RouteProgressObserver
+        if (!routeProgress.shouldUpdateTrip()) return@RouteProgressObserver
         val trip = CarManeuverMapper.from(routeProgress, maneuverApi)
-        onUpdateTrip(trip)
+        onUpdateTrip(routeProgress, trip)
     }
 
     private var inActiveNavigation = false
+    private var lastRouteProgress: RouteProgress? = null
+    private var lastTripUpdateMillis = Long.MIN_VALUE
 
     private val routesObserver = RoutesObserver {
         if (it.navigationRoutes.isEmpty()) {
-            if (inActiveNavigation) {
-                logAndroidAuto("$LOG_CATEGORY stop active navigation")
-                inActiveNavigation = false
-                navigationManager.navigationEnded()
-            }
-        } else if (!inActiveNavigation) {
-            logAndroidAuto("$LOG_CATEGORY start active navigation")
-            inActiveNavigation = true
-            navigationManager.navigationStarted()
+            endActiveNavigation()
+        } else {
+            startActiveNavigation()
         }
     }
 
@@ -63,6 +66,7 @@ class MapboxCarNavigationManager internal constructor(
         override fun onStopNavigation() {
             logAndroidAuto("$LOG_CATEGORY onStopNavigation")
             super.onStopNavigation()
+            endActiveNavigation()
             mapboxNavigation?.setNavigationRoutes(emptyList())
             if (MapboxScreenManager.current()?.key != MapboxScreen.NAVIGATION) {
                 MapboxScreenManager.replaceTop(MapboxScreen.FREE_DRIVE)
@@ -86,9 +90,10 @@ class MapboxCarNavigationManager internal constructor(
         logAndroidAuto("$LOG_CATEGORY onAttached")
         this.mapboxNavigation = mapboxNavigation
         carTelemetry.onAttached(mapboxNavigation)
-        val distanceFormatter = MapboxDistanceFormatter(
-            mapboxNavigation.navigationOptions.distanceFormatterOptions,
-        )
+        val distanceFormatterOptions =
+            mapboxNavigation.navigationOptions.distanceFormatterOptions
+        this.distanceFormatterOptions = distanceFormatterOptions
+        val distanceFormatter = MapboxDistanceFormatter(distanceFormatterOptions)
         maneuverApi = MapboxManeuverApi(distanceFormatter)
         navigationManager.setNavigationManagerCallback(navigationManagerCallback)
         mapboxNavigation.registerRoutesObserver(routesObserver)
@@ -98,36 +103,114 @@ class MapboxCarNavigationManager internal constructor(
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         logAndroidAuto("$LOG_CATEGORY onDetached")
         this.mapboxNavigation = null
+        distanceFormatterOptions = null
         carTelemetry.onDetached(mapboxNavigation)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
 
         // Tell android auto navigation stopped. Navigation can continue with mapbox navigation
         // on another device.
-        navigationManager.navigationEnded()
+        endActiveNavigation()
         navigationManager.clearNavigationManagerCallback()
     }
 
-    private fun onUpdateTrip(trip: Trip) {
-        if (inActiveNavigation) {
-            // There is no way to know if NavigationManager isNavigating and it will crash if false
-            // https://issuetracker.google.com/u/0/issues/260968395
-            try { navigationManager.updateTrip(trip) } catch (e: IllegalStateException) {
-                logAndroidAutoFailure("$LOG_CATEGORY updateTrip failed", e)
-                if (e.message == UPDATE_TRIP_NAVIGATION_NOT_STARTED) {
-                    logAndroidAuto(
-                        "$LOG_CATEGORY calling NavigationManager.navigationStarted(). Use " +
-                            "MapboxNavigation.stopTripSession in order to stop navigation.",
-                    )
-                    navigationManager.navigationStarted()
-                    navigationManager.updateTrip(trip)
-                }
-            }
+    private fun onUpdateTrip(routeProgress: RouteProgress, trip: Trip) {
+        try {
+            navigationManager.updateTrip(trip)
+            lastRouteProgress = routeProgress
+            lastTripUpdateMillis = elapsedRealtimeMillis()
+        } catch (e: IllegalStateException) {
+            logAndroidAutoFailure("$LOG_CATEGORY updateTrip failed", e)
         }
     }
 
+    private fun clearTripState() {
+        lastRouteProgress = null
+        lastTripUpdateMillis = Long.MIN_VALUE
+    }
+
+    private fun startActiveNavigation() {
+        if (inActiveNavigation) return
+        logAndroidAuto("$LOG_CATEGORY start active navigation")
+        inActiveNavigation = true
+        clearTripState()
+        navigationManager.navigationStarted()
+    }
+
+    private fun endActiveNavigation() {
+        if (!inActiveNavigation) return
+        logAndroidAuto("$LOG_CATEGORY stop active navigation")
+        inActiveNavigation = false
+        clearTripState()
+        navigationManager.navigationEnded()
+    }
+
+    private fun RouteProgress.shouldUpdateTrip(): Boolean {
+        if (!inActiveNavigation) return false
+        val previous = lastRouteProgress ?: return true
+        if (hasSameVisibleStateAs(previous)) return false
+        return hasMeaningfulChangeFrom(previous) ||
+            elapsedRealtimeMillis() - lastTripUpdateMillis >= TRIP_UPDATE_INTERVAL_MILLIS
+    }
+
+    private fun RouteProgress.hasSameVisibleStateAs(previous: RouteProgress): Boolean {
+        return hasSameManeuverAs(previous) &&
+            stepDistanceRemaining() == previous.stepDistanceRemaining() &&
+            stepDurationRemaining() == previous.stepDurationRemaining() &&
+            distanceRemaining == previous.distanceRemaining &&
+            durationRemaining == previous.durationRemaining
+    }
+
+    private fun RouteProgress.hasMeaningfulChangeFrom(previous: RouteProgress): Boolean {
+        return !hasSameManeuverAs(previous) ||
+            stepDistanceRemaining().formattedDistance() !=
+            previous.stepDistanceRemaining().formattedDistance() ||
+            distanceRemaining.toDouble().formattedDistance() !=
+            previous.distanceRemaining.toDouble().formattedDistance() ||
+            stepDurationRemaining().hasMeaningfulChangeFrom(previous.stepDurationRemaining()) ||
+            durationRemaining.hasMeaningfulChangeFrom(previous.durationRemaining)
+    }
+
+    private fun RouteProgress.hasSameManeuverAs(previous: RouteProgress): Boolean {
+        val legProgress = currentLegProgress
+        val previousLegProgress = previous.currentLegProgress
+        val stepProgress = legProgress?.currentStepProgress
+        val previousStepProgress = previousLegProgress?.currentStepProgress
+        return navigationRoute.id == previous.navigationRoute.id &&
+            legProgress?.legIndex == previousLegProgress?.legIndex &&
+            stepProgress?.stepIndex == previousStepProgress?.stepIndex &&
+            stepProgress?.instructionIndex == previousStepProgress?.instructionIndex &&
+            bannerInstructions == previous.bannerInstructions
+    }
+
+    private fun RouteProgress.stepDistanceRemaining(): Double =
+        currentLegProgress?.currentStepProgress?.distanceRemaining?.toDouble()
+            ?: distanceRemaining.toDouble()
+
+    private fun RouteProgress.stepDurationRemaining(): Double =
+        currentLegProgress?.currentStepProgress?.durationRemaining ?: durationRemaining
+
+    private fun Double.formattedDistance(): Double {
+        val options = checkNotNull(distanceFormatterOptions)
+        return MapboxDistanceUtil.formatDistance(
+            this,
+            options.roundingIncrement,
+            options.unitType,
+            options.locale,
+        )
+    }
+
+    private fun Double.hasMeaningfulChangeFrom(previous: Double): Boolean =
+        kotlin.math.abs(toRemainingTimeSeconds() - previous.toRemainingTimeSeconds()) >=
+            MEANINGFUL_TIME_CHANGE_SECONDS
+
+    private fun Double.toRemainingTimeSeconds(): Long =
+        if (isFinite() && this >= 0.0) toLong() else UNKNOWN_REMAINING_TIME_SECONDS
+
     private companion object {
         private const val LOG_CATEGORY = "MapboxCarNavigationManager"
-        private const val UPDATE_TRIP_NAVIGATION_NOT_STARTED = "Navigation is not started"
+        private const val TRIP_UPDATE_INTERVAL_MILLIS = 1_000L
+        private const val MEANINGFUL_TIME_CHANGE_SECONDS = 10L
+        private const val UNKNOWN_REMAINING_TIME_SECONDS = -1L
     }
 }
