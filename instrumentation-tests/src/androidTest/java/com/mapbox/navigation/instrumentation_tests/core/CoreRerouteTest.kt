@@ -25,6 +25,7 @@ import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_REASON_ALTERNATIVE
 import com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_REASON_REFRESH
 import com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
+import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.internal.extensions.flowLocationMatcherResult
 import com.mapbox.navigation.core.reroute.RerouteOptionsAdapter
 import com.mapbox.navigation.core.reroute.RerouteState
@@ -93,6 +94,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.yield
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -105,6 +107,8 @@ import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlin.math.abs
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalMapboxNavigationAPI::class)
@@ -2026,6 +2030,135 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
             "Reroute controller should be null after disabling",
             null,
             mapboxNavigation.getRerouteController(),
+        )
+    }
+
+    @Test
+    fun replan_response_received_after_guidance_ended_is_not_applied() = sdkTest {
+        // Long enough to keep the replan request in flight until guidance has ended.
+        val replanResponseDelay = 10_000L
+        val mapboxNavigation = createMapboxNavigation()
+        val mockRoute = RoutesProvider.dc_very_short(context)
+        mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
+        val directionsHandler = mockRoute.mockRequestHandlers
+            .filterIsInstance<MockDirectionsRequestHandler>()
+            .first()
+
+        val rerouteStates = mapboxNavigation.recordRerouteStates()
+        val routes = mapboxNavigation.requestRoutes(
+            RouteOptions.builder()
+                .applyDefaultNavigationOptions()
+                .applyLanguageAndVoiceUnitOptions(context)
+                .baseUrl(mockWebServerRule.baseUrl)
+                .coordinatesList(mockRoute.routeWaypoints)
+                .build(),
+        ).getSuccessfulResultOrThrowException().routes
+
+        stayOnPosition(mockRoute.routeWaypoints.first(), bearing = 0.0f) {
+            mapboxNavigation.startTripSession()
+            mapboxNavigation.setNavigationRoutesAsync(routes)
+            mapboxNavigation.routeProgressUpdates().first {
+                it.currentState == RouteProgressState.TRACKING
+            }
+
+            // Hold the replan response back so that the request is still in flight
+            // when guidance ends.
+            val responseModifier = DelayedResponseModifier(replanResponseDelay)
+            directionsHandler.jsonResponseModifier = responseModifier
+
+            mapboxNavigation.replanRoute()
+            mapboxNavigation.getRerouteController()!!
+                .rerouteStates()
+                .first { it is RerouteState.FetchingRoute }
+
+            // End active guidance while the replan is in flight and wait until the clean-up
+            // has been applied.
+            mapboxNavigation.setNavigationRoutesAsync(emptyList())
+            assertEquals(
+                "guidance did not end",
+                emptyList<String>(),
+                mapboxNavigation.getNavigationRoutes().map { it.id },
+            )
+
+            // Let the now stale replan response come back. The modifier is reset so that a
+            // later request cannot block the mock server thread past the end of the test.
+            responseModifier.interruptDelay()
+            directionsHandler.jsonResponseModifier = { it }
+
+            mapboxNavigation.assertNoRoutesAfterGuidanceEnded(rerouteStates)
+        }
+    }
+
+    @Test
+    fun replan_response_received_while_guidance_is_ending_is_not_applied() = sdkTest {
+        val replanResponseDelay = 10_000L
+        val mapboxNavigation = createMapboxNavigation()
+        val mockRoute = RoutesProvider.dc_very_short(context)
+        mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
+        val directionsHandler = mockRoute.mockRequestHandlers
+            .filterIsInstance<MockDirectionsRequestHandler>()
+            .first()
+
+        val rerouteStates = mapboxNavigation.recordRerouteStates()
+        val routes = mapboxNavigation.requestRoutes(
+            RouteOptions.builder()
+                .applyDefaultNavigationOptions()
+                .applyLanguageAndVoiceUnitOptions(context)
+                .baseUrl(mockWebServerRule.baseUrl)
+                .coordinatesList(mockRoute.routeWaypoints)
+                .build(),
+        ).getSuccessfulResultOrThrowException().routes
+
+        stayOnPosition(mockRoute.routeWaypoints.first(), bearing = 0.0f) {
+            mapboxNavigation.startTripSession()
+            mapboxNavigation.setNavigationRoutesAsync(routes)
+            mapboxNavigation.routeProgressUpdates().first {
+                it.currentState == RouteProgressState.TRACKING
+            }
+
+            val responseModifier = DelayedResponseModifier(replanResponseDelay)
+            directionsHandler.jsonResponseModifier = responseModifier
+
+            mapboxNavigation.replanRoute()
+            mapboxNavigation.getRerouteController()!!
+                .rerouteStates()
+                .first { it is RerouteState.FetchingRoute }
+
+            // End active guidance and release the held response at the same time, without
+            // waiting for the clean-up to be applied first.
+            mapboxNavigation.setNavigationRoutes(emptyList())
+            responseModifier.interruptDelay()
+            directionsHandler.jsonResponseModifier = { it }
+            mapboxNavigation.routesUpdates().first {
+                it.reason == RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
+            }
+
+            mapboxNavigation.assertNoRoutesAfterGuidanceEnded(rerouteStates)
+        }
+    }
+
+    /**
+     * Fails if a reroute route update arrives after active guidance was ended, or if the session
+     * is left with routes.
+     */
+    private suspend fun MapboxNavigation.assertNoRoutesAfterGuidanceEnded(
+        rerouteStates: List<RerouteState>,
+        timeoutMillis: Duration = 5_000.milliseconds,
+    ) {
+        val staleUpdate: RoutesUpdatedResult? = withTimeoutOrNull(timeoutMillis) {
+            routesUpdates().first { it.reason == ROUTES_UPDATE_REASON_REROUTE }
+        }
+        assertEquals(
+            "a replan response that came back after active guidance ended was applied to the " +
+                "cleared session; reroute states: $rerouteStates",
+            null,
+            staleUpdate?.navigationRoutes?.map { it.id },
+        )
+        assertEquals(
+            "navigation routes must stay empty after active guidance ended; " +
+                "reroute states: $rerouteStates",
+            emptyList<String>(),
+            getNavigationRoutes().map { it.id },
         )
     }
 
