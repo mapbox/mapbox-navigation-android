@@ -667,8 +667,10 @@ package com.mapbox.navigation.ui.androidauto.preview {
 
   public interface CarRoutePreviewRequestCallback {
     method public void onDestinationLocationUnknown();
+    method public default void onNetworkFailure();
     method public void onNoRoutesFound();
     method public void onRoutesReady(com.mapbox.navigation.ui.androidauto.search.PlaceRecord placeRecord, java.util.List<com.mapbox.navigation.base.route.NavigationRoute> routes);
+    method public default void onRoutingFailure(java.util.List<com.mapbox.navigation.base.route.RouterFailure> reasons);
     method public void onUnknownCurrentLocation();
   }
 
