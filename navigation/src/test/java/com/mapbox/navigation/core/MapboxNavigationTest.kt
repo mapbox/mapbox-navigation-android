@@ -67,6 +67,7 @@ import com.mapbox.navigation.core.utils.SystemLocaleWatcher
 import com.mapbox.navigation.navigator.internal.NavigatorLoader
 import com.mapbox.navigation.testing.factories.createNavigationRoute
 import com.mapbox.navigation.testing.factories.createNavigationStatus
+import com.mapbox.navigator.ChangeLegCallback
 import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.NavigatorConfig
@@ -2382,6 +2383,32 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         verify(exactly = 0) {
             navigator.retainUserChargingStation(any(), any(), any())
         }
+    }
+
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
+    @Test
+    fun startChargingDelegatesToNavigator() {
+        createMapboxNavigation()
+        every { navigator.startCharging() } just Runs
+
+        mapboxNavigation.startCharging()
+
+        verify(exactly = 1) { navigator.startCharging() }
+    }
+
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
+    @Test
+    fun stopChargingDelegatesToNavigatorAndForwardsCallback() {
+        createMapboxNavigation()
+        val changeLegCallbackSlot = slot<ChangeLegCallback>()
+        every { navigator.stopCharging(capture(changeLegCallbackSlot)) } just Runs
+        var result: ChargingFinishedData? = null
+
+        mapboxNavigation.stopCharging { result = it }
+        changeLegCallbackSlot.captured.run(true)
+
+        verify(exactly = 1) { navigator.stopCharging(any()) }
+        assertEquals(true, result?.legChanged)
     }
 
     @Test(expected = IllegalArgumentException::class)

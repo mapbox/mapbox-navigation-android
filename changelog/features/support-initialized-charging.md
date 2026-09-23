@@ -1,0 +1,1 @@
+- Added support for the `INITIALIZED` route state during EV charging at the departure waypoint. Added `ChargingState`, `RouteProgress#chargingState`, and `RouteProgress#isChargingExpected` to expose the current charging phase, and `MapboxNavigation#startCharging`/`MapboxNavigation#stopCharging` to control charging transitions.
