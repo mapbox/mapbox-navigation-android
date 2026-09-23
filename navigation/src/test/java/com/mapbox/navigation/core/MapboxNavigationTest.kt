@@ -395,6 +395,14 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
     }
 
     @Test
+    fun onDestroy_shutdown_reroute_controller() {
+        createMapboxNavigation()
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 1) { defaultRerouteController.shutdown() }
+    }
+
+    @Test
     fun onDestroyDoesNotSetRoutesToEmptyIfEmptyIsInvalid() = coroutineRule.runBlockingTest {
         createMapboxNavigation()
         coEvery {
