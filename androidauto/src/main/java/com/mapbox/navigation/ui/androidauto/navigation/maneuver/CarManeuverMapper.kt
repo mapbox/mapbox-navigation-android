@@ -6,15 +6,19 @@ import androidx.car.app.navigation.model.Maneuver
 import androidx.car.app.navigation.model.Step
 import androidx.car.app.navigation.model.TravelEstimate
 import androidx.car.app.navigation.model.Trip
+import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.bindgen.Expected
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.tripdata.maneuver.api.MapboxManeuverApi
+import com.mapbox.navigation.tripdata.maneuver.model.Component
+import com.mapbox.navigation.tripdata.maneuver.model.ExitNumberComponentNode
 import com.mapbox.navigation.tripdata.maneuver.model.ManeuverError
 import com.mapbox.navigation.ui.androidauto.navigation.CarDistanceFormatter
 import java.util.Calendar
 import java.util.TimeZone
+import kotlin.math.roundToInt
 
 object CarManeuverMapper {
 
@@ -76,23 +80,34 @@ object CarManeuverMapper {
         return exp.mapValue {
             when (it.isEmpty()) {
                 true -> Maneuver.Builder(Maneuver.TYPE_UNKNOWN)
-                false -> from(
-                    it.first().primary.type,
-                    it.first().primary.modifier,
-                    it.first().primary.degrees,
-                )
+                false -> {
+                    val primary = it.first().primary
+                    from(
+                        primary.type,
+                        primary.modifier,
+                        primary.degrees,
+                        primary.drivingSide,
+                        roundaboutExitNumber(primary.componentList),
+                    )
+                }
             }
-        }.fold({
-            Maneuver.Builder(Maneuver.TYPE_UNKNOWN)
-        }, {
-            it
-        },)
+        }.fold(
+            {
+                Maneuver.Builder(Maneuver.TYPE_UNKNOWN)
+            },
+            {
+                it
+            },
+        )
     }
 
+    @JvmOverloads
     fun from(
         maneuverType: String?,
         maneuverModifier: String?,
         degrees: Double? = null,
+        drivingSide: String? = null,
+        roundaboutExitNumber: Int? = null,
     ): Maneuver.Builder {
         return when (maneuverType) {
             StepManeuver.TURN -> mapTurn(maneuverModifier)
@@ -109,7 +124,8 @@ object CarManeuverMapper {
             StepManeuver.EXIT_ROUNDABOUT,
             StepManeuver.ROUNDABOUT_TURN,
             StepManeuver.ROUNDABOUT,
-            -> mapRoundabout(maneuverModifier, degrees)
+            -> mapRoundabout(maneuverModifier, degrees, drivingSide, roundaboutExitNumber)
+
             StepManeuver.NOTIFICATION -> mapEmptyManeuverType(maneuverModifier)
             else -> mapEmptyManeuverType(maneuverModifier)
         }
@@ -151,10 +167,12 @@ object CarManeuverMapper {
             ManeuverModifier.SLIGHT_RIGHT,
             ManeuverModifier.SHARP_RIGHT,
             -> Maneuver.Builder(Maneuver.TYPE_DESTINATION_RIGHT)
+
             ManeuverModifier.LEFT,
             ManeuverModifier.SLIGHT_LEFT,
             ManeuverModifier.SHARP_LEFT,
             -> Maneuver.Builder(Maneuver.TYPE_DESTINATION_LEFT)
+
             else -> Maneuver.Builder(Maneuver.TYPE_UNKNOWN)
         }
     }
@@ -164,14 +182,17 @@ object CarManeuverMapper {
             ManeuverModifier.UTURN,
             ManeuverModifier.STRAIGHT,
             -> Maneuver.Builder(Maneuver.TYPE_MERGE_SIDE_UNSPECIFIED)
+
             ManeuverModifier.RIGHT,
             ManeuverModifier.SLIGHT_RIGHT,
             ManeuverModifier.SHARP_RIGHT,
             -> Maneuver.Builder(Maneuver.TYPE_MERGE_RIGHT)
+
             ManeuverModifier.LEFT,
             ManeuverModifier.SLIGHT_LEFT,
             ManeuverModifier.SHARP_LEFT,
             -> Maneuver.Builder(Maneuver.TYPE_MERGE_LEFT)
+
             else -> Maneuver.Builder(Maneuver.TYPE_MERGE_SIDE_UNSPECIFIED)
         }
     }
@@ -181,6 +202,7 @@ object CarManeuverMapper {
             ManeuverModifier.UTURN,
             ManeuverModifier.STRAIGHT,
             -> Maneuver.Builder(Maneuver.TYPE_STRAIGHT)
+
             ManeuverModifier.RIGHT -> Maneuver.Builder(Maneuver.TYPE_ON_RAMP_NORMAL_RIGHT)
             ManeuverModifier.SLIGHT_RIGHT -> Maneuver.Builder(Maneuver.TYPE_ON_RAMP_SLIGHT_RIGHT)
             ManeuverModifier.SHARP_RIGHT -> Maneuver.Builder(Maneuver.TYPE_ON_RAMP_SHARP_RIGHT)
@@ -198,10 +220,12 @@ object CarManeuverMapper {
             ManeuverModifier.RIGHT,
             ManeuverModifier.SHARP_RIGHT,
             -> Maneuver.Builder(Maneuver.TYPE_OFF_RAMP_NORMAL_RIGHT)
+
             ManeuverModifier.SLIGHT_RIGHT -> Maneuver.Builder(Maneuver.TYPE_OFF_RAMP_SLIGHT_RIGHT)
             ManeuverModifier.LEFT,
             ManeuverModifier.SHARP_LEFT,
             -> Maneuver.Builder(Maneuver.TYPE_OFF_RAMP_NORMAL_LEFT)
+
             ManeuverModifier.SLIGHT_LEFT -> Maneuver.Builder(Maneuver.TYPE_OFF_RAMP_SLIGHT_LEFT)
             else -> Maneuver.Builder(Maneuver.TYPE_UNKNOWN)
         }
@@ -215,10 +239,12 @@ object CarManeuverMapper {
             ManeuverModifier.SLIGHT_RIGHT,
             ManeuverModifier.SHARP_RIGHT,
             -> Maneuver.Builder(Maneuver.TYPE_FORK_RIGHT)
+
             ManeuverModifier.LEFT,
             ManeuverModifier.SLIGHT_LEFT,
             ManeuverModifier.SHARP_LEFT,
             -> Maneuver.Builder(Maneuver.TYPE_FORK_LEFT)
+
             else -> Maneuver.Builder(Maneuver.TYPE_UNKNOWN)
         }
     }
@@ -228,19 +254,27 @@ object CarManeuverMapper {
             ManeuverModifier.UTURN,
             ManeuverModifier.STRAIGHT,
             -> Maneuver.Builder(Maneuver.TYPE_DESTINATION_STRAIGHT)
+
             ManeuverModifier.RIGHT,
             ManeuverModifier.SLIGHT_RIGHT,
             ManeuverModifier.SHARP_RIGHT,
             -> Maneuver.Builder(Maneuver.TYPE_DESTINATION_RIGHT)
+
             ManeuverModifier.LEFT,
             ManeuverModifier.SLIGHT_LEFT,
             ManeuverModifier.SHARP_LEFT,
             -> Maneuver.Builder(Maneuver.TYPE_DESTINATION_LEFT)
+
             else -> Maneuver.Builder(Maneuver.TYPE_UNKNOWN)
         }
     }
 
-    private fun mapRoundabout(maneuverModifier: String?, degrees: Double?): Maneuver.Builder {
+    private fun mapRoundabout(
+        maneuverModifier: String?,
+        degrees: Double?,
+        drivingSide: String?,
+        roundaboutExitNumber: Int?,
+    ): Maneuver.Builder {
         return when (maneuverModifier) {
             ManeuverModifier.UTURN,
             ManeuverModifier.STRAIGHT,
@@ -251,16 +285,46 @@ object CarManeuverMapper {
             ManeuverModifier.SLIGHT_LEFT,
             ManeuverModifier.SHARP_LEFT,
             -> {
-                // TODO fix hardcoded roundabout exit number https://github.com/mapbox/mapbox-navigation-android/issues/4855
-                if (degrees != null) {
-                    Maneuver.Builder(Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CCW_WITH_ANGLE)
-                        .setRoundaboutExitNumber(1).setRoundaboutExitAngle(degrees.toInt())
+                val exitNumber = roundaboutExitNumber
+                    ?.takeIf { it >= MIN_ROUNDABOUT_EXIT_NUMBER }
+                    ?: DEFAULT_ROUNDABOUT_EXIT_NUMBER
+                val exitAngle = degrees
+                    ?.takeIf { it.isFinite() }
+                    ?.roundToInt()
+                    ?.takeIf { it in MIN_ROUNDABOUT_EXIT_ANGLE..MAX_ROUNDABOUT_EXIT_ANGLE }
+                val (enterAndExitType, enterAndExitWithAngleType) =
+                    if (drivingSide == DRIVING_SIDE_LEFT) {
+                        Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CW to
+                            Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CW_WITH_ANGLE
+                    } else {
+                        Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CCW to
+                            Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CCW_WITH_ANGLE
+                    }
+                if (exitAngle != null) {
+                    Maneuver.Builder(enterAndExitWithAngleType)
+                        .setRoundaboutExitNumber(exitNumber)
+                        .setRoundaboutExitAngle(exitAngle)
                 } else {
-                    Maneuver.Builder(Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CCW)
-                        .setRoundaboutExitNumber(1)
+                    Maneuver.Builder(enterAndExitType)
+                        .setRoundaboutExitNumber(exitNumber)
                 }
             }
+
             else -> Maneuver.Builder(Maneuver.TYPE_UNKNOWN)
         }
     }
+
+    internal fun roundaboutExitNumber(componentList: List<Component>): Int? {
+        return componentList
+            .firstOrNull { it.type == BannerComponents.EXIT_NUMBER }
+            ?.let { it.node as? ExitNumberComponentNode }
+            ?.text
+            ?.toIntOrNull()
+    }
+
+    private const val DRIVING_SIDE_LEFT = "left"
+    private const val DEFAULT_ROUNDABOUT_EXIT_NUMBER = 1
+    private const val MIN_ROUNDABOUT_EXIT_NUMBER = 1
+    private const val MIN_ROUNDABOUT_EXIT_ANGLE = 1
+    private const val MAX_ROUNDABOUT_EXIT_ANGLE = 360
 }

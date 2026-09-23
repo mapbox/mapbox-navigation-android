@@ -10,6 +10,7 @@ import androidx.car.app.navigation.model.LaneDirection
 import androidx.car.app.navigation.model.RoutingInfo
 import androidx.core.graphics.drawable.IconCompat
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.bindgen.ExpectedFactory
@@ -17,6 +18,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.tripdata.maneuver.model.Component
+import com.mapbox.navigation.tripdata.maneuver.model.ExitNumberComponentNode
 import com.mapbox.navigation.tripdata.maneuver.model.LaneFactory
 import com.mapbox.navigation.tripdata.maneuver.model.LaneIndicator
 import com.mapbox.navigation.tripdata.maneuver.model.Maneuver
@@ -24,6 +26,7 @@ import com.mapbox.navigation.tripdata.maneuver.model.ManeuverFactory
 import com.mapbox.navigation.tripdata.maneuver.model.PrimaryManeuverFactory
 import com.mapbox.navigation.tripdata.maneuver.model.RoadShieldComponentNode
 import com.mapbox.navigation.tripdata.maneuver.model.SecondaryManeuverFactory
+import com.mapbox.navigation.tripdata.maneuver.model.SubManeuverFactory
 import com.mapbox.navigation.ui.androidauto.navigation.lanes.CarLanesImage
 import com.mapbox.navigation.ui.androidauto.navigation.lanes.CarLanesImageRenderer
 import com.mapbox.navigation.ui.androidauto.navigation.maneuver.CarManeuverIconRenderer
@@ -175,6 +178,94 @@ class CarNavigationInfoMapperTest {
             CarIcon.Builder(IconCompat.createWithBitmap(junctionBitmap)).build(),
             result.junctionImage,
         )
+    }
+
+    @Test
+    fun `mapNavigationInfo - should map primary roundabout maneuver using driving side and exit number`() {
+        every { imageGenerator.renderLanesImage(any()) } returns null
+        val roundaboutManeuver = ManeuverFactory.buildManeuver(
+            primary = PrimaryManeuverFactory.buildPrimaryManeuver(
+                id = "primary_roundabout",
+                text = "Take the 3rd exit",
+                type = StepManeuver.ROUNDABOUT,
+                degrees = null,
+                modifier = ManeuverModifier.RIGHT,
+                drivingSide = "left",
+                componentList = listOf(
+                    Component(
+                        type = BannerComponents.EXIT_NUMBER,
+                        node = ExitNumberComponentNode.Builder().text("3").build(),
+                    ),
+                ),
+            ),
+            stepDistance = mockk(),
+            secondary = null,
+            sub = null,
+            lane = null,
+            point = Point.fromLngLat(10.0, 20.0),
+        )
+
+        val result = sut.mapNavigationInfo(
+            expectedManeuvers = ExpectedFactory.createValue(listOf(roundaboutManeuver)),
+            routeShields = emptyList(),
+            routeProgress = TEST_ROUTE_PROGRESS,
+            junctionValue = null,
+        ) as RoutingInfo
+
+        val carManeuver = result.currentStep!!.maneuver!!
+        assertEquals(
+            androidx.car.app.navigation.model.Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CW,
+            carManeuver.type,
+        )
+        assertEquals(3, carManeuver.roundaboutExitNumber)
+    }
+
+    @Test
+    fun `mapNavigationInfo - should map next-step roundabout maneuver using driving side and exit number`() {
+        every { imageGenerator.renderLanesImage(any()) } returns null
+        val maneuverWithRoundaboutSub = ManeuverFactory.buildManeuver(
+            primary = PrimaryManeuverFactory.buildPrimaryManeuver(
+                id = "primary_turn",
+                text = "Turn Right",
+                type = StepManeuver.TURN,
+                degrees = 0.0,
+                modifier = ManeuverModifier.RIGHT,
+                drivingSide = "left",
+                componentList = emptyList(),
+            ),
+            stepDistance = mockk(),
+            secondary = null,
+            sub = SubManeuverFactory.buildSubManeuver(
+                id = "sub_roundabout",
+                text = "Then take the 2nd exit",
+                type = StepManeuver.ROUNDABOUT,
+                degrees = null,
+                modifier = ManeuverModifier.RIGHT,
+                drivingSide = "left",
+                componentList = listOf(
+                    Component(
+                        type = BannerComponents.EXIT_NUMBER,
+                        node = ExitNumberComponentNode.Builder().text("2").build(),
+                    ),
+                ),
+            ),
+            lane = null,
+            point = Point.fromLngLat(10.0, 20.0),
+        )
+
+        val result = sut.mapNavigationInfo(
+            expectedManeuvers = ExpectedFactory.createValue(listOf(maneuverWithRoundaboutSub)),
+            routeShields = emptyList(),
+            routeProgress = TEST_ROUTE_PROGRESS,
+            junctionValue = null,
+        ) as RoutingInfo
+
+        val nextCarManeuver = result.nextStep!!.maneuver!!
+        assertEquals(
+            androidx.car.app.navigation.model.Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CW,
+            nextCarManeuver.type,
+        )
+        assertEquals(2, nextCarManeuver.roundaboutExitNumber)
     }
 
     private fun given(

@@ -479,7 +479,7 @@ package com.mapbox.navigation.ui.androidauto.navigation.maneuver {
   public final class CarManeuverMapper {
     method public androidx.car.app.navigation.model.Trip from(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress, com.mapbox.navigation.tripdata.maneuver.api.MapboxManeuverApi maneuverApi);
     method public androidx.car.app.navigation.model.Maneuver.Builder from(com.mapbox.bindgen.Expected<com.mapbox.navigation.tripdata.maneuver.model.ManeuverError,java.util.List<com.mapbox.navigation.tripdata.maneuver.model.Maneuver>> exp);
-    method public androidx.car.app.navigation.model.Maneuver.Builder from(String? maneuverType, String? maneuverModifier, Double? degrees = null);
+    method public androidx.car.app.navigation.model.Maneuver.Builder from(String? maneuverType, String? maneuverModifier, Double? degrees = null, String? drivingSide = null, Integer? roundaboutExitNumber = null);
     field public static final com.mapbox.navigation.ui.androidauto.navigation.maneuver.CarManeuverMapper INSTANCE;
   }
 

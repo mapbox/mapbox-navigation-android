@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.androidauto.navigation.maneuver
 import androidx.car.app.model.Distance
 import androidx.car.app.navigation.model.Maneuver
 import androidx.car.app.navigation.model.TravelEstimate
+import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.bindgen.ExpectedFactory
@@ -10,6 +11,8 @@ import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.tripdata.maneuver.api.MapboxManeuverApi
+import com.mapbox.navigation.tripdata.maneuver.model.Component
+import com.mapbox.navigation.tripdata.maneuver.model.ExitNumberComponentNode
 import com.mapbox.navigation.tripdata.maneuver.model.ManeuverError
 import com.mapbox.navigation.ui.androidauto.navigation.CarDistanceFormatter
 import io.mockk.every
@@ -30,6 +33,8 @@ class CarManeuverMapperTest {
             every { type } returns StepManeuver.TURN
             every { modifier } returns "right"
             every { degrees } returns null
+            every { drivingSide } returns null
+            every { componentList } returns emptyList()
         }
     }
 
@@ -564,5 +569,269 @@ class CarManeuverMapperTest {
         val maneuver = CarManeuverMapper.from(expected).build()
 
         assertEquals(Maneuver.TYPE_TURN_NORMAL_RIGHT, maneuver.type)
+    }
+
+    @Test
+    fun `generate roundabout maneuver for right driving side without angle`() {
+        val actual = CarManeuverMapper.from(
+            StepManeuver.ROUNDABOUT,
+            ManeuverModifier.RIGHT,
+            degrees = null,
+            drivingSide = "right",
+            roundaboutExitNumber = 2,
+        ).build()
+
+        assertEquals(Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CCW, actual.type)
+        assertEquals(2, actual.roundaboutExitNumber)
+    }
+
+    @Test
+    fun `generate roundabout maneuver for left driving side without angle`() {
+        val actual = CarManeuverMapper.from(
+            StepManeuver.ROUNDABOUT,
+            ManeuverModifier.LEFT,
+            degrees = null,
+            drivingSide = "left",
+            roundaboutExitNumber = 3,
+        ).build()
+
+        assertEquals(Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CW, actual.type)
+        assertEquals(3, actual.roundaboutExitNumber)
+    }
+
+    @Test
+    fun `generate roundabout maneuver for right driving side with angle`() {
+        val actual = CarManeuverMapper.from(
+            StepManeuver.ROUNDABOUT_TURN,
+            ManeuverModifier.STRAIGHT,
+            degrees = 180.0,
+            drivingSide = "right",
+            roundaboutExitNumber = 1,
+        ).build()
+
+        assertEquals(Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CCW_WITH_ANGLE, actual.type)
+        assertEquals(180, actual.roundaboutExitAngle)
+    }
+
+    @Test
+    fun `generate roundabout maneuver for left driving side with angle`() {
+        val actual = CarManeuverMapper.from(
+            StepManeuver.EXIT_ROUNDABOUT,
+            ManeuverModifier.STRAIGHT,
+            degrees = 270.0,
+            drivingSide = "left",
+            roundaboutExitNumber = 4,
+        ).build()
+
+        assertEquals(Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CW_WITH_ANGLE, actual.type)
+        assertEquals(270, actual.roundaboutExitAngle)
+        assertEquals(4, actual.roundaboutExitNumber)
+    }
+
+    @Test
+    fun `generate roundabout maneuver falls back to counter-clockwise for missing driving side`() {
+        val actual = CarManeuverMapper.from(
+            StepManeuver.ROTARY,
+            ManeuverModifier.RIGHT,
+            degrees = null,
+            drivingSide = null,
+            roundaboutExitNumber = null,
+        ).build()
+
+        assertEquals(Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CCW, actual.type)
+        assertEquals(1, actual.roundaboutExitNumber)
+    }
+
+    @Test
+    fun `generate roundabout maneuver falls back to counter-clockwise for malformed driving side`() {
+        val actual = CarManeuverMapper.from(
+            StepManeuver.ROTARY,
+            ManeuverModifier.RIGHT,
+            degrees = null,
+            drivingSide = "sideways",
+            roundaboutExitNumber = 2,
+        ).build()
+
+        assertEquals(Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CCW, actual.type)
+    }
+
+    @Test
+    fun `generate roundabout maneuver falls back to default exit number when missing`() {
+        val actual = CarManeuverMapper.from(
+            StepManeuver.EXIT_ROTARY,
+            ManeuverModifier.LEFT,
+            degrees = null,
+            drivingSide = "left",
+            roundaboutExitNumber = null,
+        ).build()
+
+        assertEquals(1, actual.roundaboutExitNumber)
+    }
+
+    @Test
+    fun `generate roundabout maneuver falls back to default exit number when malformed`() {
+        val actual = CarManeuverMapper.from(
+            StepManeuver.ROUNDABOUT,
+            ManeuverModifier.LEFT,
+            degrees = null,
+            drivingSide = "left",
+            roundaboutExitNumber = 0,
+        ).build()
+
+        assertEquals(1, actual.roundaboutExitNumber)
+    }
+
+    @Test
+    fun `generate roundabout maneuver ignores angle that is zero`() {
+        val actual = CarManeuverMapper.from(
+            StepManeuver.ROUNDABOUT,
+            ManeuverModifier.STRAIGHT,
+            degrees = 0.0,
+            drivingSide = "right",
+            roundaboutExitNumber = 1,
+        ).build()
+
+        assertEquals(Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CCW, actual.type)
+    }
+
+    @Test
+    fun `generate roundabout maneuver ignores angle greater than 360`() {
+        val actual = CarManeuverMapper.from(
+            StepManeuver.ROUNDABOUT,
+            ManeuverModifier.STRAIGHT,
+            degrees = 361.0,
+            drivingSide = "right",
+            roundaboutExitNumber = 1,
+        ).build()
+
+        assertEquals(Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CCW, actual.type)
+    }
+
+    @Test
+    fun `generate roundabout maneuver ignores negative angle`() {
+        val actual = CarManeuverMapper.from(
+            StepManeuver.ROUNDABOUT,
+            ManeuverModifier.STRAIGHT,
+            degrees = -45.0,
+            drivingSide = "right",
+            roundaboutExitNumber = 1,
+        ).build()
+
+        assertEquals(Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CCW, actual.type)
+    }
+
+    @Test
+    fun `generate roundabout maneuver accepts minimum valid angle of 1 degree`() {
+        val actual = CarManeuverMapper.from(
+            StepManeuver.ROUNDABOUT,
+            ManeuverModifier.STRAIGHT,
+            degrees = 1.0,
+            drivingSide = "right",
+            roundaboutExitNumber = 1,
+        ).build()
+
+        assertEquals(Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CCW_WITH_ANGLE, actual.type)
+        assertEquals(1, actual.roundaboutExitAngle)
+    }
+
+    @Test
+    fun `generate roundabout maneuver accepts maximum valid angle of 360 degrees`() {
+        val actual = CarManeuverMapper.from(
+            StepManeuver.ROUNDABOUT,
+            ManeuverModifier.STRAIGHT,
+            degrees = 360.0,
+            drivingSide = "left",
+            roundaboutExitNumber = 1,
+        ).build()
+
+        assertEquals(Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CW_WITH_ANGLE, actual.type)
+        assertEquals(360, actual.roundaboutExitAngle)
+    }
+
+    @Test
+    fun `generate roundabout maneuver does not crash and ignores NaN angle`() {
+        val actual = CarManeuverMapper.from(
+            StepManeuver.ROUNDABOUT,
+            ManeuverModifier.STRAIGHT,
+            degrees = Double.NaN,
+            drivingSide = "right",
+            roundaboutExitNumber = 1,
+        ).build()
+
+        assertEquals(Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CCW, actual.type)
+    }
+
+    @Test
+    fun `three-argument overload is generated on the JVM for pre-existing Java callers`() {
+        val method = CarManeuverMapper::class.java.getMethod(
+            "from",
+            String::class.java,
+            String::class.java,
+            java.lang.Double::class.java,
+        )
+
+        val actual = method.invoke(
+            CarManeuverMapper,
+            StepManeuver.DEPART,
+            ManeuverModifier.LEFT,
+            null,
+        ) as Maneuver.Builder
+
+        assertEquals(Maneuver.TYPE_DEPART, actual.build().type)
+    }
+
+    @Test
+    fun `generate roundabout maneuver reads exit number and driving side from expected maneuver`() {
+        val exitNumberNode = mockk<ExitNumberComponentNode> {
+            every { text } returns "3"
+        }
+        val roundaboutManeuver = mockk<com.mapbox.navigation.tripdata.maneuver.model.Maneuver> {
+            every { primary } returns mockk {
+                every { type } returns StepManeuver.ROUNDABOUT
+                every { modifier } returns ManeuverModifier.RIGHT
+                every { degrees } returns null
+                every { drivingSide } returns "left"
+                every { componentList } returns listOf(
+                    Component(BannerComponents.EXIT_NUMBER, exitNumberNode),
+                )
+            }
+        }
+        val expected = ExpectedFactory.createValue<
+            ManeuverError,
+            List<com.mapbox.navigation.tripdata.maneuver.model.Maneuver>,>(
+            listOf(roundaboutManeuver),
+        )
+
+        val actual = CarManeuverMapper.from(expected).build()
+
+        assertEquals(Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CW, actual.type)
+        assertEquals(3, actual.roundaboutExitNumber)
+    }
+
+    @Test
+    fun `generate roundabout maneuver falls back to default exit number when component is malformed`() {
+        val exitNumberNode = mockk<ExitNumberComponentNode> {
+            every { text } returns "not-a-number"
+        }
+        val roundaboutManeuver = mockk<com.mapbox.navigation.tripdata.maneuver.model.Maneuver> {
+            every { primary } returns mockk {
+                every { type } returns StepManeuver.ROUNDABOUT
+                every { modifier } returns ManeuverModifier.RIGHT
+                every { degrees } returns null
+                every { drivingSide } returns "right"
+                every { componentList } returns listOf(
+                    Component(BannerComponents.EXIT_NUMBER, exitNumberNode),
+                )
+            }
+        }
+        val expected = ExpectedFactory.createValue<
+            ManeuverError,
+            List<com.mapbox.navigation.tripdata.maneuver.model.Maneuver>,>(
+            listOf(roundaboutManeuver),
+        )
+
+        val actual = CarManeuverMapper.from(expected).build()
+
+        assertEquals(1, actual.roundaboutExitNumber)
     }
 }
