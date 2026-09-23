@@ -235,6 +235,12 @@ internal class NativeMapboxRerouteController(
         isEnabled = enabled
     }
 
+    override fun shutdown() {
+        isEnabled = false
+        rerouteController?.cancel()
+        rerouteInterface.removeRerouteObserver(nativeRerouteObserver)
+    }
+
     override fun interrupt() {
         // Interrupt only while a reroute is actually in flight. Once a route has been
         // fetched, the result is delivered synchronously and must not cancel the delivery.
