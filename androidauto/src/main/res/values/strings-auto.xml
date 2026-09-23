@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="car_action_search_favorites">Favorites</string>
     <string name="car_search_no_results">No results</string>
     <string name="car_search_unknown_current_location">Unknown current location</string>
     <string name="car_search_unknown_search_location">Unknown search location</string>
+    <string name="car_search_error" tools:ignore="MissingTranslation">Something went wrong. Try again.</string>
     <string name="car_label_ok">OK</string>
 
     <string name="car_action_preview_title">Route preview</string>
