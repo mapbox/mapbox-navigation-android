@@ -21,6 +21,11 @@ internal abstract class InternalRerouteController : RerouteController() {
 
     sealed interface RoutesCallback
 
+    /**
+     * Releases any resources that would otherwise prevent garbage collection of this controller.
+     */
+    abstract fun shutdown()
+
     @UiThread
     fun interface RouteReplanRoutesCallback : RoutesCallback {
         fun onNewRoutes(rerouteResult: RerouteResult)
