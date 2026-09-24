@@ -1,3 +1,18 @@
+## Navigation SDK Core Framework 3.31.1 - 24 September, 2026
+#### Features
+
+
+#### Bug fixes and improvements
+- Fixed native navigator instances not being released after `MapboxNavigationProvider.destroy()`, causing background threads to accumulate across create/destroy cycles. [#19726](https://github.com/mapbox/mapbox-sdk/pull/19726)
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.31.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.31.1))
+- Mapbox Navigation Native `v324.31.1`
+- Mapbox Core Common `v24.31.1`
+- Mapbox Java `v7.10.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.1))
+
 ## Navigation SDK Core Framework 3.31.0 - 17 September, 2026
 #### Features
 
