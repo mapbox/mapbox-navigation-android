@@ -59,6 +59,7 @@ internal class MapboxNavigationScreen @UiThread constructor(
     private val routesProvider = MapboxNavigationRoutesProvider()
     private val carRouteLineRenderer = CarRouteLineRenderer(
         carRoutesProvider = routesProvider,
+        options = mapboxCarContext.options.routeLineRendererOptions,
     )
     private val carLocationRenderer = CarLocationRenderer()
     private val carSpeedLimitRenderer = CarSpeedLimitRenderer(mapboxCarContext)
