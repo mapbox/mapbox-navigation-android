@@ -5,6 +5,7 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.route.nativeRoute
 import com.mapbox.navigation.base.internal.route.testing.createNavigationRouteForTest
@@ -28,7 +29,6 @@ import com.mapbox.navigator.RoutesChangeInfo
 import com.mapbox.navigator.SetRoutesDataParams
 import com.mapbox.navigator.SetRoutesParams
 import com.mapbox.navigator.SetRoutesReason
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -117,7 +117,7 @@ internal class NativeNavigatorCallbackOrderTest :
     }
 
     @Test
-    fun setRoutes() = runBlocking(Dispatchers.Main.immediate) {
+    fun setRoutes() = runBlocking(SdkDispatchers.Main.immediate) {
         navigator.addObserver(
             object : NavigatorObserver {
                 override fun onStatus(origin: NavigationStatusOrigin, status: NavigationStatus) {
@@ -142,7 +142,7 @@ internal class NativeNavigatorCallbackOrderTest :
     }
 
     @Test
-    fun setRoutesData() = runBlocking(Dispatchers.Main.immediate) {
+    fun setRoutesData() = runBlocking(SdkDispatchers.Main.immediate) {
         navigator.addObserver(
             object : NavigatorObserver {
                 override fun onStatus(origin: NavigationStatusOrigin, status: NavigationStatus) {
@@ -176,7 +176,7 @@ internal class NativeNavigatorCallbackOrderTest :
     }
 
     @Test
-    fun refreshRoute() = runBlocking(Dispatchers.Main.immediate) {
+    fun refreshRoute() = runBlocking(SdkDispatchers.Main.immediate) {
         navigator.addObserver(
             object : NavigatorObserver {
                 override fun onStatus(origin: NavigationStatusOrigin, status: NavigationStatus) {
@@ -212,7 +212,7 @@ internal class NativeNavigatorCallbackOrderTest :
     }
 
     @Test
-    fun changeLeg() = runBlocking(Dispatchers.Main.immediate) {
+    fun changeLeg() = runBlocking(SdkDispatchers.Main.immediate) {
         navigator.setRoutesAndWaitForResult(
             SetRoutesParams(multilegRoute.nativeRoute(), 0, emptyList<RouteInterface>()),
             SetRoutesReason.NEW_ROUTE,
@@ -242,7 +242,7 @@ internal class NativeNavigatorCallbackOrderTest :
 
     @Ignore("bump NN to 124.0.0 (includes NN-361)")
     @Test
-    fun updateLocation() = runBlocking(Dispatchers.Main.immediate) {
+    fun updateLocation() = runBlocking(SdkDispatchers.Main.immediate) {
         navigator.addObserver(
             object : NavigatorObserver {
                 override fun onStatus(origin: NavigationStatusOrigin, status: NavigationStatus) {

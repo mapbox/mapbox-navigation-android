@@ -1,10 +1,10 @@
 package com.mapbox.navigation.ui.base.lifecycle
 
 import androidx.annotation.CallSuper
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
@@ -15,7 +15,7 @@ import kotlin.coroutines.EmptyCoroutineContext
 
 /**
  * Using the [UIComponent] gives you access to a [coroutineScope] which uses
- * `Dispatchers.Main.immediate`. All coroutines that you
+ * `SdkDispatchers.Main.immediate`. All coroutines that you
  * launch inside [onAttached] will be canceled when the observer is detached. You do not need to
  * implement onDetached for your flowable components.
  *
@@ -31,7 +31,7 @@ open class UIComponent : MapboxNavigationObserver {
      */
     @CallSuper
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
-        coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+        coroutineScope = CoroutineScope(SupervisorJob() + SdkDispatchers.Main.immediate)
     }
 
     /**

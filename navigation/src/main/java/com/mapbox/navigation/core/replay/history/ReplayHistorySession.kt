@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.replay.history
 
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.history.MapboxHistoryReader
@@ -10,7 +11,6 @@ import com.mapbox.navigation.core.history.model.HistoryEventUpdateLocation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
@@ -68,7 +68,7 @@ class ReplayHistorySession : MapboxNavigationObserver {
      * @param mapboxNavigation
      */
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
-        val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+        val coroutineScope = CoroutineScope(SupervisorJob() + SdkDispatchers.Main.immediate)
             .also { this.coroutineScope = it }
         this.mapboxNavigation = mapboxNavigation
         this.lastHistoryEvent = null

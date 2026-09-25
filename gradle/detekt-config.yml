@@ -1,0 +1,27 @@
+build:
+  maxIssues: 0
+
+# Every ruleset is disabled by default. We only want the one targeted check below
+# (ForbiddenImport) enforced across the whole codebase - not a general Detekt rollout.
+comments:
+  active: false
+complexity:
+  active: false
+coroutines:
+  active: false
+empty-blocks:
+  active: false
+exceptions:
+  active: false
+naming:
+  active: false
+performance:
+  active: false
+potential-bugs:
+  active: false
+
+style:
+  active: true
+  ForbiddenImport:
+    active: true
+    imports: ['kotlinx.coroutines.Dispatchers']

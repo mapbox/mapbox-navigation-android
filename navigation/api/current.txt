@@ -1337,6 +1337,60 @@ package com.mapbox.navigation.core.reroute {
 
 }
 
+package com.mapbox.navigation.core.reroute.internal {
+
+  @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public abstract sealed class NativeRerouteControllerState {
+  }
+
+  public abstract static sealed class NativeRerouteControllerState.Deviation extends com.mapbox.navigation.core.reroute.internal.NativeRerouteControllerState {
+  }
+
+  public static final class NativeRerouteControllerState.Deviation.ApplyingRoute extends com.mapbox.navigation.core.reroute.internal.NativeRerouteControllerState.Deviation {
+    ctor public NativeRerouteControllerState.Deviation.ApplyingRoute();
+  }
+
+  public static final class NativeRerouteControllerState.Deviation.RouteIgnored extends com.mapbox.navigation.core.reroute.internal.NativeRerouteControllerState.Deviation {
+    ctor public NativeRerouteControllerState.Deviation.RouteIgnored();
+  }
+
+  public static final class NativeRerouteControllerState.Failed extends com.mapbox.navigation.core.reroute.internal.NativeRerouteControllerState {
+    method public String getMessage();
+    method public java.util.List<com.mapbox.navigation.base.route.RouterFailure>? getReasons();
+    method public Throwable? getThrowable();
+    method public boolean isRetryable();
+    property public final boolean isRetryable;
+    property public final String message;
+    property public final java.util.List<com.mapbox.navigation.base.route.RouterFailure>? reasons;
+    property public final Throwable? throwable;
+  }
+
+  public static final class NativeRerouteControllerState.Idle extends com.mapbox.navigation.core.reroute.internal.NativeRerouteControllerState {
+    ctor public NativeRerouteControllerState.Idle();
+  }
+
+  public static final class NativeRerouteControllerState.Interrupted extends com.mapbox.navigation.core.reroute.internal.NativeRerouteControllerState {
+    ctor public NativeRerouteControllerState.Interrupted();
+  }
+
+  public static final class NativeRerouteControllerState.RouteFetched extends com.mapbox.navigation.core.reroute.internal.NativeRerouteControllerState {
+    method public String getRouterOrigin();
+    property public final String routerOrigin;
+  }
+
+  public static final class NativeRerouteControllerState.RouteObjectsParsing extends com.mapbox.navigation.core.reroute.internal.NativeRerouteControllerState {
+    ctor public NativeRerouteControllerState.RouteObjectsParsing();
+  }
+
+  public static final class NativeRerouteControllerState.WaitingForResponse extends com.mapbox.navigation.core.reroute.internal.NativeRerouteControllerState {
+    ctor public NativeRerouteControllerState.WaitingForResponse();
+  }
+
+  public final class RerouteControllerExKt {
+    method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public static kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.core.reroute.internal.NativeRerouteControllerState>? nativeRerouteControllerStateFlow(com.mapbox.navigation.core.reroute.RerouteController);
+  }
+
+}
+
 package com.mapbox.navigation.core.routealternatives {
 
   public final class AlternativeRouteInfo {
@@ -1800,7 +1854,21 @@ package com.mapbox.navigation.core.trip.session.location {
 
 package com.mapbox.navigation.core.utils {
 
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class NearestPointOnRoute {
+    method public double getDistanceAlongGeometryMeters();
+    method public double getDistanceToRouteMeters();
+    method public int getGeometryIndex();
+    method public double getSegmentFraction();
+    property public final double distanceAlongGeometryMeters;
+    property public final double distanceToRouteMeters;
+    property public final int geometryIndex;
+    property public final double segmentFraction;
+  }
+
   public final class TurfUtilKt {
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.core.utils.NearestPointOnRoute? nearestPointOnGeometryCheapRuler(com.mapbox.api.directions.v5.models.DirectionsRoute route, com.mapbox.geojson.Point point, int startIndex, int endIndex);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.core.utils.NearestPointOnRoute? nearestPointOnGeometryEcef(com.mapbox.api.directions.v5.models.DirectionsRoute route, com.mapbox.geojson.Point point, int startIndex, int endIndex);
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.core.utils.NearestPointOnRoute? nearestPointOnGeometryTurf(com.mapbox.api.directions.v5.models.DirectionsRoute route, com.mapbox.geojson.Point point, int startIndex, int endIndex);
   }
 
 }

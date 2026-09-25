@@ -9,11 +9,11 @@ import com.mapbox.common.HttpServiceFactory
 import com.mapbox.common.HttpServiceInterceptorInterface
 import com.mapbox.common.HttpServiceInterceptorRequestContinuation
 import com.mapbox.common.HttpServiceInterceptorResponseContinuation
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logI
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -58,7 +58,7 @@ interface CustomRouterRule : TestRule {
 @ExperimentalMapboxNavigationAPI
 private class MapboxNavigationRouterRule : TestWatcher(), CustomRouterRule {
 
-    private var scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    private var scope = CoroutineScope(SdkDispatchers.Default + SupervisorJob())
 
     private var router: MapboxNavigationTestRouter = DefaultRouter()
     private var refresher: MapboxNavigationTestRouteRefresher = DefaultRefresher()

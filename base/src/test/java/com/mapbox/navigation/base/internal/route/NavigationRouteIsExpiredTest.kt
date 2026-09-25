@@ -2,6 +2,7 @@ package com.mapbox.navigation.base.internal.route
 
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.route.parsing.ResponseToParse
 import com.mapbox.navigation.base.route.RouterOrigin
@@ -15,7 +16,6 @@ import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Assert.assertFalse
@@ -40,7 +40,7 @@ class NavigationRouteIsExpiredTest {
     @Before
     fun setUp() {
         mockkObject(ThreadController)
-        every { ThreadController.DefaultDispatcher } returns Dispatchers.Main
+        every { ThreadController.DefaultDispatcher } returns SdkDispatchers.Main
     }
 
     @After

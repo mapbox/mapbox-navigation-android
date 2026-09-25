@@ -1,0 +1,20 @@
+configurations {
+    detekt
+}
+
+dependencies {
+    detekt pluginDependencies.detektCli
+}
+
+def inputFiles = project.fileTree(dir: "src", include: "**/*.kt")
+
+task detekt(type: JavaExec, group: "verification") {
+    inputs.files(inputFiles)
+    onlyIf { !inputFiles.isEmpty() }
+
+    description = "Check for forbidden API usage (e.g. raw kotlinx.coroutines.Dispatchers instead of SdkDispatchers)."
+    main = "io.gitlab.arturbosch.detekt.cli.Main"
+    classpath = configurations.detekt
+    args "--config", "$rootDir/gradle/detekt-config.yml", "--input", "src"
+}
+tasks.matching { it.name == 'check' }.configureEach { dependsOn detekt }

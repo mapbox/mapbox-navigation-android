@@ -20,6 +20,7 @@ import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.BaseMapboxInitializer
 import com.mapbox.common.TilesetDescriptor
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -173,7 +174,6 @@ import com.mapbox.navigator.PollingConfig
 import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.navigator.TilesConfig
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.flow.StateFlow
@@ -688,8 +688,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         routeAlternativesController.setRouteUpdateSuggestionListener(::updateRoutes)
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         routeRefreshController = RouteRefreshControllerProvider.createRouteRefreshController(
-            Dispatchers.Main,
-            Dispatchers.Main.immediate,
+            SdkDispatchers.Main,
+            SdkDispatchers.Main.immediate,
             navigationOptions.routeRefreshOptions,
             directionsSession,
             routesProgressDataProvider,
@@ -971,7 +971,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         logD(LOG_CATEGORY) {
             "Resetting trip session"
         }
-        mainJobController.scope.launch(Dispatchers.Main.immediate) {
+        mainJobController.scope.launch(SdkDispatchers.Main.immediate) {
             navigator.resetRideSession()
             logI(LOG_CATEGORY) {
                 "Trip session reset"
@@ -1217,7 +1217,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         body: suspend () -> Unit,
     ) {
         val job = threadController.getMainScopeAndRootJob().scope
-            .launch(Dispatchers.Main.immediate) {
+            .launch(SdkDispatchers.Main.immediate) {
                 logI(LOG_CATEGORY) {
                     "[$tag] Coroutine launched, waiting to acquire routeUpdateMutex; " +
                         "hasCallback=$hasCallback;$extraLogInfo " +
@@ -1576,7 +1576,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     private fun resetTripSessionRoutes() {
-        threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
+        threadController.getMainScopeAndRootJob().scope.launch(SdkDispatchers.Main.immediate) {
             routeUpdateMutex.withLock {
                 val routes = directionsSession.routes
                 val legIndex = latestLegIndex ?: directionsSession.initialLegIndex
@@ -1734,7 +1734,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * the observer waits for the processing to finish before delivering the latest result.
      */
     fun registerRoutesObserver(routesObserver: RoutesObserver) {
-        threadController.getMainScopeAndRootJob().scope.launch(Dispatchers.Main.immediate) {
+        threadController.getMainScopeAndRootJob().scope.launch(SdkDispatchers.Main.immediate) {
             routeUpdateMutex.withLock {
                 directionsSession.registerSetNavigationRoutesFinishedObserver(routesObserver)
             }
@@ -2704,7 +2704,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     private suspend fun prepareNavigationForRoutesParsing() {
-        withContext(Dispatchers.Main.immediate) {
+        withContext(SdkDispatchers.Main.immediate) {
             if (directionsSession.routesPlusIgnored.size > 1) {
                 suspendCoroutine<Unit> { continuation ->
                     setNavigationRoutes(directionsSession.routes.take(1), currentLegIndex()) {

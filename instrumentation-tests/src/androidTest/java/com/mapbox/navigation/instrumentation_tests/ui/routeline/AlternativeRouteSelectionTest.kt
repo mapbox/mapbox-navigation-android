@@ -1,6 +1,7 @@
 package com.mapbox.navigation.instrumentation_tests.ui.routeline
 
 import android.location.Location
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
@@ -17,7 +18,6 @@ import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineApi
 import com.mapbox.navigation.ui.maps.route.line.api.MapboxRouteLineView
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineApiOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineViewOptions
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -113,7 +113,7 @@ class AlternativeRouteSelectionTest : BaseTest<BasicNavigationViewActivity>(
     }
 
     private fun setupRouteWithAlternatives() {
-        runBlocking(Dispatchers.Main) {
+        runBlocking(SdkDispatchers.Main) {
             val routes = mapboxNavigation.requestMockRoutes(
                 mockWebServerRule,
                 RoutesProvider.multiple_routes(context),

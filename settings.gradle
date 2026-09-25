@@ -1,4 +1,7 @@
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
 include ':app-tests-wrapper',
+        ':dispatchers',
         ':instrumentation-tests',
         ':libnavigation-android',
         ':navigator',
@@ -10,6 +13,7 @@ include ':app-tests-wrapper',
         ':copilot',
         ':tripdata',
         ':voice',
+        ':libtesting-dispatchers',
         ':libtesting-ui',
         ':libtesting-utils',
         ':ui-base',

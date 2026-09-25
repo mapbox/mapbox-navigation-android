@@ -39,6 +39,7 @@ ext {
       mapboxNavSdkCpp           : "0.${mapboxSdkVersionSuffix}",
       mapboxSearch              : "2.${mapboxSdkVersionSuffix}",
       mapboxBaseAndroid         : '0.12.0',
+      mapboxPlatformAnnotations : '0.3.0',
       androidXActivity          : '1.7.1',
       androidXActivityCompose   : '1.9.2',
       androidXLifecycle         : '2.4.0',
@@ -116,6 +117,7 @@ ext {
       mapboxNavSdkFullHdCpp     : "com.mapbox.navsdk:navsdk-hd$ndkVersionSuffix:${version.mapboxNavSdkCpp}",
       mapboxMapGptExpAndroid    : "com.mapbox.mapgpt.experimental:mapgpt$ndkVersionSuffix:${version.mapboxCommonNative}",
 
+      mapboxPlatformAnnotations : "com.mapbox.annotation:annotation:${version.mapboxPlatformAnnotations}",
       mapboxAnnotations         : "com.mapbox.base:annotations:${version.mapboxBaseAndroid}",
       mapboxAnnotationsProcessor: "com.mapbox.base:annotations-processor:${version.mapboxBaseAndroid}",
       mapboxAndroidCommon       : "com.mapbox.base:common:${version.mapboxBaseAndroid}",
@@ -229,6 +231,7 @@ ext {
 
   pluginVersion = [
       checkstyle           : '8.2',
+      detekt               : '1.23.7',
       pmd                  : '5.8.1',
       gradle               : '8.10.1',
       dependencyGraph      : '0.8.0',
@@ -253,6 +256,7 @@ ext {
   ]
 
   pluginDependencies = [
+      detektCli            : "io.gitlab.arturbosch.detekt:detekt-cli:${pluginVersion.detekt}",
       gradle               : "com.android.tools.build:gradle:${pluginVersion.gradle}",
       kotlin               : "org.jetbrains.kotlin:kotlin-gradle-plugin:${pluginVersion.kotlin}",
       checkstyle           : "com.puppycrawl.tools:checkstyle:${pluginVersion.checkstyle}",

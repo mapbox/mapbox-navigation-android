@@ -284,6 +284,8 @@ object Fixtures {
         contentType: String = "image/png",
         etag: String = "",
         belongsToGroup: Boolean = false,
+        transferSize: Long = 0,
+        extraMetadata: Value = Value.nullValue(),
     ): ResourceLoadResult {
         return ResourceLoadResult(
             data,
@@ -296,8 +298,8 @@ object Fixtures {
             contentType,
             etag,
             belongsToGroup,
-            0L,
-            Value.nullValue(),
+            transferSize,
+            extraMetadata,
         )
     }
 }

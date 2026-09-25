@@ -3,6 +3,7 @@ package com.mapbox.navigation.instrumentation_tests.core
 import android.location.Location
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -38,7 +39,6 @@ import com.mapbox.navigation.testing.utils.readRawFileText
 import com.mapbox.navigation.testing.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.utils.routes.requestMockRoutes
 import com.mapbox.navigation.testing.utils.withMapboxNavigation
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
@@ -207,7 +207,7 @@ class ClosuresTest : BaseCoreNoCleanUpTest() {
                 mockRoute,
             )
 
-            val deserializedRouteWithClosure = withContext(Dispatchers.Default) {
+            val deserializedRouteWithClosure = withContext(SdkDispatchers.Default) {
                 deserializeNavigationRouteFrom(
                     routes[1].serialize(),
                 ).value

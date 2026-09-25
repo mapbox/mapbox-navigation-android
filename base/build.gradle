@@ -42,6 +42,7 @@ android {
 
 dependencies {
     implementation(project(':utils'))
+    implementation projects.dispatchers
     api dependenciesList.mapboxCommonNative
     api dependenciesList.mapboxSdkDirectionsModels
     api dependenciesList.mapboxSdkServicesCore

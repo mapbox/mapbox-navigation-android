@@ -2,12 +2,12 @@ package com.mapbox.navigation.voice.api
 
 import android.media.MediaPlayer
 import androidx.annotation.VisibleForTesting
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.voice.model.SpeechVolume
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -21,7 +21,7 @@ import java.io.IOException
  */
 internal class VoiceInstructionsFilePlayer(
     private val playerAttributes: VoiceInstructionsPlayerAttributes,
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val ioDispatcher: CoroutineDispatcher = SdkDispatchers.IO,
 ) : VoiceInstructionsPlayer {
 
     private val jobControl by lazy { InternalJobControlFactory.createMainScopeJobControl() }
