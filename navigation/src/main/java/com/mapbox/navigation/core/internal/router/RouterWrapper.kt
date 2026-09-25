@@ -9,6 +9,7 @@ import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
+import com.mapbox.common.Cancelable
 import com.mapbox.common.MapboxServices
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -78,6 +79,12 @@ internal class RouterWrapper(
 
     private val activeRouteRequests = mutableMapOf<Long, OngoingRequest>()
     private val activeRouteRefreshRequests = mutableMapOf<Long, OngoingRequest>()
+
+    // Native getRoute returns a Cancelable. This wrapper still hands callers a Long, so each
+    // in-flight handle is stored under a local id until the request ends.
+    private val routeHandles = mutableMapOf<Long, Cancelable>()
+    private val refreshHandles = mutableMapOf<Long, Cancelable>()
+    private var nextRequestId = 1L
 
     private val mainJobControl by lazy { threadController.getMainScopeAndRootJob() }
 
@@ -170,17 +177,18 @@ internal class RouterWrapper(
         performanceSectionName: String,
         logRequestMessage: String,
         logResultMessage: String,
-        nativeInvoke: ((Expected<List<RouterError>, DataRef>, RouterOrigin) -> Unit) -> Long,
+        nativeInvoke: ((Expected<List<RouterError>, DataRef>, RouterOrigin) -> Unit) -> Cancelable,
     ): Long {
         val urlWithoutToken = URL(routeUrl.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM))
         logI(LOG_CATEGORY) { "$logRequestMessage $urlWithoutToken" }
         val originRouter = router
         var callbackInvoked = false
         val section = PerformanceTracker.asyncSectionStarted(performanceSectionName)
-        var requestId: Long = 0L
+        val requestId = nextRequestId++
 
-        requestId = nativeInvoke { result, origin ->
+        val handle = nativeInvoke { result, origin ->
             callbackInvoked = true
+            routeHandles.remove(requestId)
             logD(LOG_CATEGORY) { "$logResultMessage $urlWithoutToken; origin: $origin" }
             mainJobControl.scope.launch {
                 PerformanceTracker.asyncSectionCompleted(section)
@@ -199,6 +207,7 @@ internal class RouterWrapper(
             }
         }
         if (!callbackInvoked) {
+            routeHandles[requestId] = handle
             activeRouteRequests[requestId] = OngoingRequest(
                 null,
                 {
@@ -251,17 +260,18 @@ internal class RouterWrapper(
         )
 
         val originRouter = router
-        var id: Long? = null
         var callbackInvoked = false
 
         val routeRefreshSection = PerformanceTracker.asyncSectionStarted(
             "RouterWrapper#getRouteRefresh()",
         )
+        val id = nextRequestId++
 
-        id = originRouter.getRouteRefresh(
+        val handle = originRouter.getRouteRefresh(
             refreshOptions,
         ) { result, _, _ ->
             callbackInvoked = true
+            refreshHandles.remove(id)
             logI("Received result from router.getRouteRefresh for ${route.id}", LOG_CATEGORY)
 
             mainJobControl.scope.launch {
@@ -280,6 +290,7 @@ internal class RouterWrapper(
             }
         }
         if (!callbackInvoked) {
+            refreshHandles[id] = handle
             activeRouteRefreshRequests[id] = OngoingRequest(
                 null,
                 {
@@ -302,12 +313,12 @@ internal class RouterWrapper(
 
     override fun cancelRouteRequest(requestId: Long) {
         removeActiveRequest(requestId)
-        router.cancelRouteRequest(requestId)
+        routeHandles.remove(requestId)?.cancel()
     }
 
     override fun cancelMapMatchedRouteRequest(requestId: Long) {
         removeActiveRequest(requestId)
-        router.cancelRouteMapMatchedRequest(requestId)
+        routeHandles.remove(requestId)?.cancel()
     }
 
     override fun cancelRouteRefreshRequest(requestId: Long) {
@@ -316,7 +327,7 @@ internal class RouterWrapper(
             activeRouteRefreshRequests.remove(requestId)
             it.parsingJob?.cancel()
         }
-        router.cancelRouteRefreshRequest(requestId)
+        refreshHandles.remove(requestId)?.cancel()
     }
 
     override fun cancelAll() {
@@ -330,6 +341,10 @@ internal class RouterWrapper(
             activeRouteRefreshRequests.remove(id)
             request.parsingJob?.cancel()
         }
+        routeHandles.values.forEach { it.cancel() }
+        routeHandles.clear()
+        refreshHandles.values.forEach { it.cancel() }
+        refreshHandles.clear()
         router.cancelAll()
     }
 
