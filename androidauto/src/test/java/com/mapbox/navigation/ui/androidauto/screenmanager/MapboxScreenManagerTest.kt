@@ -463,6 +463,181 @@ class MapboxScreenManagerTest : MapboxRobolectricTestRunner() {
     }
 
     @Test
+    fun `events emitted before the lifecycle is created are replayed to registered factories`() {
+        val screenA: Screen = mockk(relaxed = true)
+        val screenB: Screen = mockk(relaxed = true)
+        every { screenManager.stackSize } returns 0
+        mapboxScreenManager.putAll(
+            "SCREEN_A" to MapboxScreenFactory { screenA },
+            "SCREEN_B" to MapboxScreenFactory { screenB },
+        )
+        MapboxScreenManager.replaceTop("SCREEN_A")
+        MapboxScreenManager.push("SCREEN_B")
+
+        val uncaught = collectUncaughtExceptions {
+            lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+        }
+
+        assertEquals(emptyList<Throwable>(), uncaught)
+        verifyOrder {
+            screenManager.push(screenA)
+            screenManager.push(screenB)
+        }
+        assertEquals(
+            listOf("SCREEN_B", "SCREEN_A"),
+            mapboxScreenManager.screenStack.map { it.first },
+        )
+
+        // Session.onCreateScreen restores the replayed top without pushing it again.
+        every { screenManager.stackSize } returns 2
+        every { screenManager.top } returns screenB
+        val restored = mapboxScreenManager.createScreen(MapboxScreenManager.current()!!.key)
+
+        assertEquals(screenB, restored)
+        verify(exactly = 1) { screenManager.push(screenB) }
+    }
+
+    @Test
+    fun `constructing after the lifecycle is created ignores a replayed replaceTop for an unregistered key`() {
+        val session = IsolatedSession()
+        val screenA: Screen = mockk(relaxed = true)
+        val screenB: Screen = mockk(relaxed = true)
+        MapboxScreenManager.replaceTop("SCREEN_A")
+        session.lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+
+        val uncaught = collectUncaughtExceptions {
+            // Subscribes, and receives the replayed event, from inside the constructor.
+            val lateScreenManager = MapboxScreenManager(session.carContextOwner)
+
+            verify(exactly = 0) { session.screenManager.push(any()) }
+            assertTrue(lateScreenManager.screenStack.isEmpty())
+
+            lateScreenManager.putAll(
+                "SCREEN_A" to MapboxScreenFactory { screenA },
+                "SCREEN_B" to MapboxScreenFactory { screenB },
+            )
+            assertEquals(screenA, lateScreenManager.createScreen("SCREEN_A"))
+            MapboxScreenManager.push("SCREEN_B")
+        }
+
+        assertEquals(emptyList<Throwable>(), uncaught)
+        verifyOrder {
+            session.screenManager.push(screenA)
+            session.screenManager.push(screenB)
+        }
+    }
+
+    @Test
+    fun `constructing after the lifecycle is created ignores a replayed push for an unregistered key`() {
+        val session = IsolatedSession()
+        val screenA: Screen = mockk(relaxed = true)
+        val screenB: Screen = mockk(relaxed = true)
+        MapboxScreenManager.push("SCREEN_A")
+        session.lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+
+        val uncaught = collectUncaughtExceptions {
+            val lateScreenManager = MapboxScreenManager(session.carContextOwner)
+
+            verify(exactly = 0) { session.screenManager.push(any()) }
+            assertTrue(lateScreenManager.screenStack.isEmpty())
+
+            lateScreenManager.putAll(
+                "SCREEN_A" to MapboxScreenFactory { screenA },
+                "SCREEN_B" to MapboxScreenFactory { screenB },
+            )
+            lateScreenManager.createScreen("SCREEN_A")
+            MapboxScreenManager.push("SCREEN_B")
+        }
+
+        assertEquals(emptyList<Throwable>(), uncaught)
+        verifyOrder {
+            session.screenManager.push(screenA)
+            session.screenManager.push(screenB)
+        }
+    }
+
+    @Test
+    fun `replaceTop to an unregistered key is ignored and later events are still handled`() {
+        val screenA: Screen = mockk(relaxed = true)
+        every { screenManager.stackSize } returns 0
+        mapboxScreenManager.putAll("SCREEN_A" to MapboxScreenFactory { screenA })
+
+        val uncaught = collectUncaughtExceptions {
+            lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+            MapboxScreenManager.replaceTop("SCREEN_DOES_NOT_EXIST")
+
+            verify(exactly = 0) { screenManager.push(any()) }
+            assertTrue(mapboxScreenManager.screenStack.isEmpty())
+
+            MapboxScreenManager.replaceTop("SCREEN_A")
+        }
+
+        assertEquals(emptyList<Throwable>(), uncaught)
+        verify(exactly = 1) { screenManager.push(screenA) }
+        assertEquals("SCREEN_A", mapboxScreenManager.screenStack.peek()?.first)
+    }
+
+    @Test
+    fun `push to an unregistered key is ignored and later events are still handled`() {
+        val screenA: Screen = mockk(relaxed = true)
+        every { screenManager.stackSize } returns 0
+        mapboxScreenManager.putAll("SCREEN_A" to MapboxScreenFactory { screenA })
+
+        val uncaught = collectUncaughtExceptions {
+            lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+            MapboxScreenManager.push("SCREEN_DOES_NOT_EXIST")
+
+            verify(exactly = 0) { screenManager.push(any()) }
+            assertTrue(mapboxScreenManager.screenStack.isEmpty())
+
+            MapboxScreenManager.push("SCREEN_A")
+        }
+
+        assertEquals(emptyList<Throwable>(), uncaught)
+        verify(exactly = 1) { screenManager.push(screenA) }
+        assertEquals("SCREEN_A", mapboxScreenManager.screenStack.peek()?.first)
+    }
+
+    /**
+     * A car session whose lifecycle and [ScreenManager] are not shared with the class-level
+     * [mapboxScreenManager], so a test observes only the instance it constructs.
+     */
+    private class IsolatedSession {
+        val lifecycleOwner = TestLifecycleOwner(initialState = Lifecycle.State.INITIALIZED)
+        val screenManager: ScreenManager = mockk(relaxed = true)
+        private val carContext: CarContext = mockk {
+            every { getCarService(ScreenManager::class.java) } returns screenManager
+        }
+        val carContextOwner: MapboxCarContextOwner = mockk {
+            every { carContext() } returns carContext
+            every { lifecycle } returns lifecycleOwner.lifecycle
+        }
+    }
+
+    /**
+     * Screen events are collected on the main dispatcher, so an exception thrown while handling
+     * one does not reach the caller: it goes to the thread's uncaught exception handler, which
+     * crashes the app on a device. Capture those here so a test can assert there were none.
+     *
+     * This relies on [MainCoroutineRule] dispatching eagerly, so every event emitted inside
+     * [block] is handled before it returns, and on coroutine failures outside `runTest` being
+     * delivered to [Thread.getUncaughtExceptionHandler]. Keep the lifecycle transitions and
+     * emissions under test inside [block].
+     */
+    private fun collectUncaughtExceptions(block: () -> Unit): List<Throwable> {
+        val thread = Thread.currentThread()
+        val original = thread.uncaughtExceptionHandler
+        val uncaught = mutableListOf<Throwable>()
+        thread.uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { _, e -> uncaught += e }
+        try {
+            block()
+        } finally {
+            thread.uncaughtExceptionHandler = original
+        }
+        return uncaught
+    }
+
+    @Test
     fun `isScreenBelowTop returns true for immediate parent`() {
         mapboxScreenManager.screenStack.push("SCREEN_A" to mockk())
         mapboxScreenManager.screenStack.push("SCREEN_B" to mockk())

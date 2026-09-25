@@ -26,6 +26,12 @@ import com.mapbox.navigation.ui.androidauto.settings.MapboxCarStorage
  *
  * The [lifecycle] must come from a [Session.getLifecycle] or [Screen.getLifecycle] at this time.
  *
+ * Create this object and register the screen factories (for example with `prepareScreens`) before
+ * the [lifecycle] is [Lifecycle.State.CREATED], for example as a property of your [Session].
+ * Screen events from a previous [Session] are replayed to the [MapboxScreenManager] when the
+ * [lifecycle] is created; events for screens without a registered factory at that moment are
+ * ignored.
+ *
  * @param lifecycle used to access the [CarContext].
  * @param mapboxCarMap controls the Mapbox car map surface.
  */
