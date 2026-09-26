@@ -51,7 +51,7 @@ dependencies {
 
     api project(':base')
     api project(':utils')
-    api projects.dispatchers
+    api project(':dispatchers')
     implementation project(':navigator')
     runtimeOnly project(':notification')
     runtimeOnly dependenciesList.mapboxLogger

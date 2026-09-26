@@ -26,5 +26,5 @@ dependencies {
     implementation dependenciesList.junit
     implementation dependenciesList.mapboxPlatformAnnotations
 
-    implementation projects.dispatchers
+    implementation project(':dispatchers')
 }
