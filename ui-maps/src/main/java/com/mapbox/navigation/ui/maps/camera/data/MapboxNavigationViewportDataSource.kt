@@ -942,12 +942,28 @@ class MapboxNavigationViewportDataSource private constructor(
         box: ScreenBox,
     ): CameraOptions {
         return try {
-            cameraForCoordinates(coordinates, camera, box)
+            cameraForCoordinates(coordinates, camera, box).restorePaddingsFrom(camera)
         } catch (ex: MapboxMapException) {
             logE {
                 "safeCameraForCoordinates exception: ${ex.cause}\n${ex.message}\n${ex.stackTrace}"
             }
             cameraState.toCameraOptions()
+        }
+    }
+
+    /**
+     * The padding is an input of camera-for-coordinates, not its result, but it comes back
+     * converted to logical pixels and back with a single-precision pixel ratio, e.g. 900.0 comes
+     * back as 899.9999999999999. A padding that collapses the viewport to the focal point then
+     * no longer collapses it exactly, and a flyTo to such a camera keeps the camera center still
+     * until the very end of the animation while the zoom changes. Restores the exact padding.
+     */
+    private fun CameraOptions.restorePaddingsFrom(input: CameraOptions): CameraOptions {
+        val inputPadding = input.padding
+        return if (isEmpty || inputPadding == null) {
+            this
+        } else {
+            toBuilder().padding(inputPadding).build()
         }
     }
 }
