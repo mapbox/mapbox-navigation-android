@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.androidauto.placeslistonmap
 
 import androidx.car.app.model.ItemList
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
@@ -16,7 +17,6 @@ import com.mapbox.navigation.ui.androidauto.internal.logAndroidAuto
 import com.mapbox.navigation.ui.androidauto.location.CarLocationProvider
 import com.mapbox.navigation.ui.androidauto.search.PlaceRecord
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -100,7 +100,7 @@ class PlacesListOnMapManager(
 
     private fun loadPlaceRecords() {
         coroutineScope.launch {
-            val expectedPlaceRecords = withContext(Dispatchers.IO) {
+            val expectedPlaceRecords = withContext(SdkDispatchers.IO) {
                 placesListOnMapProvider.getPlaces()
             }
             _placeRecords.value = expectedPlaceRecords.fold(

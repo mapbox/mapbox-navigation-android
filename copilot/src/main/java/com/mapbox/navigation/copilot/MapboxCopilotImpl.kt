@@ -9,6 +9,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.google.gson.GsonBuilder
 import com.mapbox.api.directions.v5.DirectionsAdapterFactory
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.PointAsCoordinatesTypeAdapter
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -42,7 +43,6 @@ import com.mapbox.navigation.core.internal.telemetry.unregisterUserFeedbackObser
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.logD
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -373,7 +373,7 @@ internal class MapboxCopilotImpl(
     }
 
     private fun CopilotSession.saveCopilotSession() =
-        mainJobController.scope.launch(Dispatchers.IO) {
+        mainJobController.scope.launch(SdkDispatchers.IO) {
             val file = File(filepaths.copilotAbsolutePath(), saveFilename())
             file.writeText(toJson())
         }

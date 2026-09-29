@@ -26,6 +26,7 @@ dependencies {
     implementation project(':libtesting-navigation-util')
     // testing modules should not transitively bring in project dependencies
     compileOnly(project(':base'))
+    compileOnly(project(':dispatchers'))
     compileOnly(project(':utils'))
     implementation dependenciesList.coroutinesAndroid
     implementation dependenciesList.junit

@@ -1,10 +1,10 @@
 package com.mapbox.navigation.utils.internal
 
+import com.mapbox.common.dispatchers.SdkDispatchers
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.Channel
@@ -128,7 +128,7 @@ class ThreadControllerTest {
 
         assertEquals(mainRootJob.children.first(), mainJobController.job)
         assertEquals(
-            CoroutineScope(mainJobController.job + Dispatchers.Main).toString(),
+            CoroutineScope(mainJobController.job + SdkDispatchers.Main).toString(),
             mainJobController.scope.toString(),
         )
     }

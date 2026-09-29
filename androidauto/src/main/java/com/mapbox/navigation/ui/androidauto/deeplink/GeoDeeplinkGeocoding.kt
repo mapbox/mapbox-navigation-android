@@ -4,10 +4,10 @@ import com.mapbox.api.geocoding.v5.GeocodingCriteria
 import com.mapbox.api.geocoding.v5.MapboxGeocoding
 import com.mapbox.api.geocoding.v5.models.GeocodingResponse
 import com.mapbox.common.MapboxOptions
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.core.geodeeplink.GeoDeeplink
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAuto
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -66,7 +66,7 @@ class GeoDeeplinkGeocoding private constructor(
                 error("GeoDeepLink must have a point or query")
             }
         }
-        return withContext(Dispatchers.IO) {
+        return withContext(SdkDispatchers.IO) {
             currentMapboxGeocoding?.asFlow()?.first()
         }
     }

@@ -3,8 +3,8 @@ package com.mapbox.navigation.testing.utils
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import com.mapbox.common.OfflineSwitch
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.Assume.assumeTrue
@@ -75,7 +75,7 @@ private suspend inline fun withoutWifiAndMobileData(block: () -> Unit) {
     pingAddress.waitForNetworkStatus(isNetworkReachabilityExpected = true)
 }
 
-private suspend fun getPingAddress(): InetAddress = withContext(Dispatchers.IO) {
+private suspend fun getPingAddress(): InetAddress = withContext(SdkDispatchers.IO) {
     val host = "api.mapbox.com"
     val result = withTimeoutOrNull<InetAddress?>(MILLISECONDS_TO_WAIT_FOR_INTERNET_CONNECTION) {
         var address: InetAddress? = null
@@ -103,7 +103,7 @@ private suspend fun InetAddress.waitForNetworkStatus(isNetworkReachabilityExpect
     val actualReachability = withTimeoutOrNull(MILLISECONDS_TO_WAIT_FOR_INTERNET_CONNECTION) {
         do {
             Log.d(LOG_TAG, "checking reachability")
-            val isReachable = withContext(Dispatchers.IO) {
+            val isReachable = withContext(SdkDispatchers.IO) {
                 isReachable(300)
             }
             Log.d(

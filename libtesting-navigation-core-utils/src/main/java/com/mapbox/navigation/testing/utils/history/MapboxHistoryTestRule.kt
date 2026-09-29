@@ -7,10 +7,10 @@ import android.os.Environment
 import android.provider.MediaStore
 import androidx.annotation.RequiresApi
 import androidx.test.platform.app.InstrumentationRegistry
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.testing.ui.utils.coroutines.stopRecording
 import com.mapbox.navigation.utils.internal.logE
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
@@ -73,7 +73,7 @@ class MapboxHistoryTestRule : TestWatcher() {
         try {
             runner()
         } catch (t: Throwable) {
-            runBlocking(Dispatchers.Main) {
+            runBlocking(SdkDispatchers.Main) {
                 val path = historyRecorder.stopRecording()
                 logE("$message history path=$path", "DEBUG")
             }

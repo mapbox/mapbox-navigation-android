@@ -2,6 +2,7 @@ package com.mapbox.navigation.voice.api
 
 import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.VoiceInstructions
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
@@ -14,7 +15,6 @@ import com.mapbox.navigation.voice.internal.impl.MapboxAudioGuidanceServices
 import com.mapbox.navigation.voice.options.MapboxSpeechApiOptions
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -234,7 +234,7 @@ internal constructor(
             options: MapboxSpeechApiOptions = MapboxSpeechApiOptions.Builder().build(),
         ) = MapboxAudioGuidance(
             MapboxAudioGuidanceServices(),
-            Dispatchers.Main.immediate,
+            SdkDispatchers.Main.immediate,
             options,
         )
 

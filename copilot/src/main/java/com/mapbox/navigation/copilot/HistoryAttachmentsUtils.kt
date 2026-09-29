@@ -1,9 +1,9 @@
 package com.mapbox.navigation.copilot
 
 import android.util.Base64
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.navigation.copilot.internal.CopilotSession
 import com.mapbox.navigation.core.BuildConfig
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.io.File
@@ -61,7 +61,7 @@ internal object HistoryAttachmentsUtils {
     fun size(file: File): Long = file.length()
 
     suspend fun rename(from: File, filename: String): File =
-        withContext(Dispatchers.IO) {
+        withContext(SdkDispatchers.IO) {
             File(from.parent, filename).also { from.renameTo(it) }
         }
 

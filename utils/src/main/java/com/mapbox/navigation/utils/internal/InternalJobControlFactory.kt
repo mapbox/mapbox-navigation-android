@@ -1,9 +1,11 @@
 package com.mapbox.navigation.utils.internal
 
+import com.mapbox.annotation.MapboxExperimental
+import com.mapbox.common.dispatchers.SdkDispatchers
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 
+@OptIn(MapboxExperimental::class)
 object InternalJobControlFactory {
 
     /**
@@ -13,7 +15,7 @@ object InternalJobControlFactory {
      */
     fun createDefaultScopeJobControl(): JobControl {
         val parentJob = SupervisorJob()
-        return JobControl(parentJob, CoroutineScope(parentJob + Dispatchers.Default))
+        return JobControl(parentJob, CoroutineScope(parentJob + SdkDispatchers.Default))
     }
 
     /**
@@ -23,7 +25,7 @@ object InternalJobControlFactory {
      */
     fun createMainScopeJobControl(): JobControl {
         val parentJob = SupervisorJob()
-        return JobControl(parentJob, CoroutineScope(parentJob + Dispatchers.Main))
+        return JobControl(parentJob, CoroutineScope(parentJob + SdkDispatchers.Main))
     }
 
     /**
@@ -33,7 +35,7 @@ object InternalJobControlFactory {
      */
     fun createImmediateMainScopeJobControl(): JobControl {
         val parentJob = SupervisorJob()
-        return JobControl(parentJob, CoroutineScope(parentJob + Dispatchers.Main.immediate))
+        return JobControl(parentJob, CoroutineScope(parentJob + SdkDispatchers.Main.immediate))
     }
 
     /**

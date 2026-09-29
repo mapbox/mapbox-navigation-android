@@ -2,6 +2,7 @@ package com.mapbox.navigation.testing.ui.utils.coroutines
 
 import android.annotation.SuppressLint
 import android.util.Log
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.RoutesSetCallback
@@ -11,7 +12,6 @@ import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.coroutineScope
@@ -31,7 +31,7 @@ fun sdkTest(
     timeout: Long = DEFAULT_TIMEOUT_FOR_SDK_TEST,
     block: suspend CoroutineScope.() -> Unit
 ) {
-    runBlocking(Dispatchers.Main.immediate) {
+    runBlocking(SdkDispatchers.Main.immediate) {
         withTimeout(timeout) {
             block()
         }

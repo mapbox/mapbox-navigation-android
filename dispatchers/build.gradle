@@ -1,0 +1,42 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply from: "../gradle/ktlint.gradle"
+apply from: file("../gradle/artifact-settings.gradle")
+
+group = project.ext.mapboxArtifactGroupId
+
+android {
+    namespace 'com.mapbox.common.dispatchers'
+    compileSdkVersion androidVersions.compileSdkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        minSdkVersion androidVersions.minSdkVersion
+        targetSdkVersion androidVersions.targetSdkVersion
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'proguard-rules.pro', "../proguard/proguard-project.pro"
+    }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
+}
+
+dependencies {
+    implementation dependenciesList.androidXAnnotation
+    implementation dependenciesList.coroutinesAndroid
+    implementation dependenciesList.kotlinStdLib
+    implementation dependenciesList.mapboxPlatformAnnotations
+
+
+    apply from: "../gradle/unit-testing-dependencies.gradle"
+    testImplementation project(':libtesting-dispatchers')
+}
+
+apply from: "../gradle/track-public-apis.gradle"
+apply from: "../gradle/publish.gradle"
+apply from: "../gradle/jacoco.gradle"
