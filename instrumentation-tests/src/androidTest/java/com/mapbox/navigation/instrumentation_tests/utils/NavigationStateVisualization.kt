@@ -1,9 +1,9 @@
 package com.mapbox.navigation.instrumentation_tests.utils
 
 import androidx.test.core.app.ActivityScenario
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.instrumentation_tests.activity.NavigationStateVisualizationActivity
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -15,7 +15,7 @@ suspend fun withVisualization(
     if (!MapboxNavigationProvider.isCreated()) {
         error("withVisualization requires mapbox navigation to be created")
     }
-    withContext(Dispatchers.Default) {
+    withContext(SdkDispatchers.Default) {
         val scenario = ActivityScenario.launch(NavigationStateVisualizationActivity::class.java)
         suspendCoroutine<Unit> { continuation ->
             scenario.onActivity {
@@ -24,7 +24,7 @@ suspend fun withVisualization(
             }
         }
         scenario.use { _ ->
-            withContext(Dispatchers.Main) {
+            withContext(SdkDispatchers.Main) {
                 block()
             }
         }

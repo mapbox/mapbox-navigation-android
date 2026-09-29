@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.bindgen.DataRef
 import com.mapbox.common.LoggingLevel
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.internal.route.isExpired
 import com.mapbox.navigation.base.internal.route.routeOptions
@@ -21,7 +22,6 @@ import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -79,7 +79,7 @@ internal class RouteRefresher(
     private val routeDiffProvider: DirectionsRouteDiffProvider,
     private val routeRefresh: RouteRefresh,
     private val globalScope: CoroutineScope = GlobalScope,
-    private val computationDispatcher: CoroutineDispatcher = Dispatchers.Default,
+    private val computationDispatcher: CoroutineDispatcher = SdkDispatchers.Default,
 ) {
 
     /**
@@ -248,7 +248,7 @@ internal class RouteRefresher(
                     "Route refresh for route ${route.id} was cancelled after timeout",
                     RouteRefreshLog.LOG_CATEGORY,
                 )
-                globalScope.launch(Dispatchers.Main.immediate) {
+                globalScope.launch(SdkDispatchers.Main.immediate) {
                     routeRefresh.cancelRouteRefreshRequest(requestId)
                 }
             }

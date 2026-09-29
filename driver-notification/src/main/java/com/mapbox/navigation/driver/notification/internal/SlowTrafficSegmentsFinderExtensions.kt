@@ -2,10 +2,10 @@ package com.mapbox.navigation.driver.notification.internal
 
 import androidx.annotation.RestrictTo
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.driver.notification.internal.SlowTrafficLogger.logSegment
 import com.mapbox.navigation.driver.notification.internal.SlowTrafficLogger.logSummary
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
@@ -34,7 +34,7 @@ import kotlinx.coroutines.withContext
 suspend fun SlowTrafficSegmentsFinder.findAndSummarizeSlowTrafficSegments(
     route: DirectionsRoute,
     targetCongestionsRanges: List<IntRange>,
-): List<SlowTrafficSegmentsSummary> = withContext(Dispatchers.Default) {
+): List<SlowTrafficSegmentsSummary> = withContext(SdkDispatchers.Default) {
     val routeUuid = route.requestUuid()
     SlowTrafficLogger.logRouteChanged(routeUuid)
     val shouldLog = SlowTrafficLogger.shouldLogNow()

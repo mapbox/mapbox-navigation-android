@@ -23,6 +23,8 @@ android {
 }
 
 dependencies {
+    implementation project(':libtesting-dispatchers')
+    implementation project(':dispatchers')
     implementation dependenciesList.junit
     implementation dependenciesList.androidXAnnotation
     implementation dependenciesList.coroutinesTestAndroid

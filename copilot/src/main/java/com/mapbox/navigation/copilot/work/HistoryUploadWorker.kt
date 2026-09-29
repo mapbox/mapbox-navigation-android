@@ -15,6 +15,7 @@ import androidx.work.WorkerParameters
 import com.mapbox.common.MapboxOptions
 import com.mapbox.common.TransferState
 import com.mapbox.common.UploadOptions
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.copilot.AttachmentMetadata
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils
@@ -38,7 +39,6 @@ import com.mapbox.navigation.copilot.internal.saveFilename
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logW
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -63,7 +63,7 @@ internal class HistoryUploadWorker(
      * Result. After this time has expired, the worker will be signalled to stop and its
      * com.google.common.util.concurrent.ListenableFuture will be cancelled.
      */
-    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
+    override suspend fun doWork(): Result = withContext(SdkDispatchers.IO) {
         val copilotSession = copilotSessionFrom(workerParams.inputData)
         val recordingFile =
             rename(File(copilotSession.recording), attachmentFilename(copilotSession))
