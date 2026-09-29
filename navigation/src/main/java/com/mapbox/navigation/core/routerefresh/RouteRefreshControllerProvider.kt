@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.routerefresh
 
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.core.RoutesProgressDataProvider
@@ -11,7 +12,6 @@ import com.mapbox.navigation.core.internal.utils.CoroutineUtils
 import com.mapbox.navigation.core.utils.routeRefresh.RouteRefreshUtils
 import com.mapbox.navigation.utils.internal.Time
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import java.util.Date
 
@@ -27,7 +27,7 @@ internal object RouteRefreshControllerProvider {
         evDynamicDataHolder: EVDynamicDataHolder,
         timeProvider: Time,
         historyRecorder: RouteRefreshHistoryRecorder,
-        computationDispatcher: CoroutineDispatcher = Dispatchers.Default,
+        computationDispatcher: CoroutineDispatcher = SdkDispatchers.Default,
     ): RouteRefreshController {
         val routeRefresher = RouteRefresher(
             RoutesRefreshDataProvider(routesProgressDataProvider),

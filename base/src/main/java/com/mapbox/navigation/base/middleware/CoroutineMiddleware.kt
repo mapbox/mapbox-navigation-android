@@ -1,8 +1,8 @@
 package com.mapbox.navigation.base.middleware
 
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
@@ -41,8 +41,8 @@ open class CoroutineMiddleware<C : MiddlewareContext> : Middleware<C> {
      * @param middlewareContext The context to which the middleware is being attached
      */
     override fun onAttached(middlewareContext: C) {
-        mainScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
-        ioScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+        mainScope = CoroutineScope(SupervisorJob() + SdkDispatchers.Main.immediate)
+        ioScope = CoroutineScope(SupervisorJob() + SdkDispatchers.IO)
         _middlewareContextFlow.value = middlewareContext
     }
 

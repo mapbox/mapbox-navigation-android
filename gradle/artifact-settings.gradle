@@ -40,6 +40,7 @@ ext {
         'base' : new Tuple2("base$ndkVersionSuffix", 'navigation-core-base'),
         'navigation' : new Tuple2("navigation$ndkVersionSuffix", 'navigation-core-navigation'),
         'copilot' : new Tuple2("copilot$ndkVersionSuffix", 'navigation-core-copilot'),
+        'dispatchers' : new Tuple2("dispatchers$ndkVersionSuffix", 'navigation-core-dispatchers'),
         'metrics' : new Tuple2("metrics$ndkVersionSuffix", 'navigation-core-metrics'),
         'tripdata' : new Tuple2("tripdata$ndkVersionSuffix", 'navigation-core-tripdata'),
         'utils' : new Tuple2("utils$ndkVersionSuffix", 'navigation-core-utils'),

@@ -93,6 +93,7 @@ subprojects {
   apply from: "${rootDir}/gradle/dependencies.gradle"
   apply from: "${rootDir}/gradle/dependency-updates.gradle"
   apply from: "${rootDir}/gradle/checkstyle.gradle"
+  apply from: "${rootDir}/gradle/detekt.gradle"
 
   // Inlined rather than kept in gradle/dependencies-graph.gradle: that script needed
   // `import`s, and a script plugin compiles against its own buildscript classpath only.

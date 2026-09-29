@@ -1,9 +1,9 @@
 package com.mapbox.navigation.base.reachability
 
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.utils.internal.logI
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,7 +35,7 @@ class SharedReachability {
     val isReachable = _isReachable.asStateFlow()
 
     private val reachability: PlatformReachability = PlatformReachability.create(null)
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val scope = CoroutineScope(SupervisorJob() + SdkDispatchers.IO)
 
     private val reachabilityChangedListener = PlatformReachabilityChanged { status ->
         onReachabilityUpdate(status)

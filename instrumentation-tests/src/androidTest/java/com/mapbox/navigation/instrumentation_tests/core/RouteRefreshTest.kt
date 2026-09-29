@@ -13,6 +13,7 @@ import com.mapbox.api.directions.v5.models.Incident
 import com.mapbox.api.directions.v5.models.Notification
 import com.mapbox.api.directions.v5.models.NotificationDetails
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
@@ -61,7 +62,6 @@ import com.mapbox.navigation.testing.utils.routes.MockRoute
 import com.mapbox.navigation.testing.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.utils.routes.requestMockRoutes
 import com.mapbox.navigation.testing.utils.withoutInternet
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -151,7 +151,7 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         if (this::failByRequestRouteRefreshResponse.isInitialized) {
             failByRequestRouteRefreshResponse.failResponse = false
         }
-        runBlocking(Dispatchers.Main.immediate) {
+        runBlocking(SdkDispatchers.Main.immediate) {
             val path = mapboxNavigation.historyRecorder.stopRecording()
             Log.i("RouteRefreshTest", "history file recorder: $path")
         }

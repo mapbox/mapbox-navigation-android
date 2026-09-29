@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.maps.route.line.api
 
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.maps.StylePropertyValue
 import com.mapbox.maps.StylePropertyValueKind
 import com.mapbox.maps.extension.style.expressions.generated.Expression
@@ -7,7 +8,6 @@ import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.maps.internal.route.line.RouteLineViewOptionsData
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
@@ -33,7 +33,7 @@ class RouteLineCommandProviderTest {
     @Test
     fun applyCommand_LightRouteLineExpressionProvider() = runBlocking {
         val testScope = coroutineRule.createTestScope()
-        val deferred = testScope.async(Dispatchers.Main) {
+        val deferred = testScope.async(SdkDispatchers.Main) {
             val mainThreadId = Thread.currentThread().id
             val invocationThreadId = AtomicLong()
             val block: (RouteLineViewOptionsData) -> StylePropertyValue = {
@@ -58,8 +58,8 @@ class RouteLineCommandProviderTest {
 
     @Test
     fun applyCommand_HeavyRouteLineExpressionProvider() = runBlocking {
-        val testScope = CoroutineScope(Dispatchers.Default)
-        val deferred = testScope.async(Dispatchers.Main) {
+        val testScope = CoroutineScope(SdkDispatchers.Default)
+        val deferred = testScope.async(SdkDispatchers.Main) {
             val mainThreadId = Thread.currentThread().id
             val invocationThreadId = AtomicLong()
             val block: (RouteLineViewOptionsData) -> StylePropertyValue = {

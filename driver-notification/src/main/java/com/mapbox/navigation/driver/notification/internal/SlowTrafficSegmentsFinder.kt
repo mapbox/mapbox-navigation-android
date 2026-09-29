@@ -3,10 +3,10 @@ package com.mapbox.navigation.driver.notification.internal
 import androidx.annotation.RestrictTo
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.utils.internal.geometryPoints
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.IdentityHashMap
 import kotlin.time.Duration
@@ -75,7 +75,7 @@ class SlowTrafficSegmentsFinder(
         firstGeometryIndex: Int = 0,
         legsLimit: Int = Int.MAX_VALUE,
         segmentsLimit: Int = Int.MAX_VALUE,
-    ): List<SlowTrafficSegment> = withContext(Dispatchers.Default) {
+    ): List<SlowTrafficSegment> = withContext(SdkDispatchers.Default) {
         val result = mutableListOf<SlowTrafficSegment>()
         val legs = route.legs().orEmpty()
 

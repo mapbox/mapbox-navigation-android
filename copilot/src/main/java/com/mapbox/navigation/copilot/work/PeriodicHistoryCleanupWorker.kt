@@ -7,6 +7,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.navigation.copilot.HistoryAttachmentsUtils.delete
 import com.mapbox.navigation.copilot.MapboxCopilotImpl.Companion.LOG_CATEGORY
 import com.mapbox.navigation.copilot.MapboxCopilotImpl.Companion.reportCopilotError
@@ -17,7 +18,6 @@ import com.mapbox.navigation.copilot.internal.listCopilotRecordingFiles
 import com.mapbox.navigation.copilot.internal.listCopilotSessionFiles
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.concurrent.TimeUnit
@@ -38,7 +38,7 @@ internal class PeriodicHistoryCleanupWorker(
 
     private val historyFilesDir by lazy { workerParams.inputData.getString(HISTORY_FILES_DIR)!! }
 
-    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
+    override suspend fun doWork(): Result = withContext(SdkDispatchers.IO) {
         val sessions = loadAllCopilotSessions()
         scheduleRecordingsUpload(nonActiveSessions = sessions.dropLast(1))
         deleteResidualRecordings(sessions)

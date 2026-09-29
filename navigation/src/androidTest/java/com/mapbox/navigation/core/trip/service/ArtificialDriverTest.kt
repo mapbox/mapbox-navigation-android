@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.trip.service
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.navigation.base.internal.route.testing.createNavigationRouteForTest
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -20,7 +21,6 @@ import com.mapbox.navigator.NavigatorObserver
 import com.mapbox.navigator.RouteState
 import com.mapbox.navigator.RoutesChangeInfo
 import com.mapbox.navigator.SetRoutesReason
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.awaitClose
@@ -43,7 +43,7 @@ class ArtificialDriverTest {
     @Test
     @Ignore("test sometimes fails because of https://mapbox.atlassian.net/browse/NN-418")
     fun nativeNavigatorFollowsArtificialDriverWithoutReroutes() =
-        runBlocking<Unit>(Dispatchers.Main) {
+        runBlocking<Unit>(SdkDispatchers.Main) {
             withNavigators { mapboxNavigation ->
                 mapboxNavigation.historyRecorder.startRecording()
                 val testRoute = getTestRoute()
