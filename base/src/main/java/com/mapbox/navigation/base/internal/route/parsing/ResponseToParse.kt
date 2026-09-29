@@ -14,9 +14,6 @@ data class ResponseToParse(
     val routeRequest: String,
     @RouterOrigin val routerOrigin: String,
     @ResponseOriginAPI val responseOriginAPI: String = ResponseOriginAPI.DIRECTIONS_API,
-    // Overrides the parsed route's index; needed when [responseBody] came from
-    // [RouteInterface.toJson], which always contains a single route at index 0.
-    val routeIndexOverride: Int? = null,
 ) {
     companion object {
 

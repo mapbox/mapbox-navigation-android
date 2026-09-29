@@ -28,8 +28,7 @@ private const val LOG_CATEGORY = "NroRouteInterfacesParser"
  *
  * The [RouteInterface]s handed to [parserContinuousAlternatives] are already fully parsed by NN,
  * so instead of re-parsing their [RouteInterface.getResponseJsonRef] JSON (as
- * [JsonResponseOptimizedRouteInterfaceParser] does via
- * [com.mapbox.navigation.base.internal.route.parsing.parser.directions.DirectionsRoutesParserNro])
+ * [JsonResponseOptimizedRouteInterfaceParser] does via a second, unrelated native parse)
  * this implementation builds the NRO route model directly off the
  * [com.mapbox.directions.route.DirectionsRouteContext] already held by each [RouteInterface]
  * ([RouteInterface.getDirectionsRouteContext]).

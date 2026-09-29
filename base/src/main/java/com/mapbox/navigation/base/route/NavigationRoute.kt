@@ -247,6 +247,13 @@ class NavigationRoute internal constructor(
             ).mapIndexed { index, routeInterface ->
                 val matchedData = parsingResult.routesParsingResult[index].data
                 val directionsData = matchedData.directionsData
+                check(
+                    directionsData.route.routeIndex()?.toIntOrNull() == routeInterface.routeIndex,
+                ) {
+                    "Parsed route index (${directionsData.route.routeIndex()}) doesn't match " +
+                        "RouteInterface's routeIndex (${routeInterface.routeIndex}) " +
+                        "for route ${routeInterface.routeId}"
+                }
                 val route = NavigationRoute(
                     directionsRoute = directionsData.route,
                     waypoints = directionsData.routesWaypoint,
@@ -285,6 +292,11 @@ class NavigationRoute internal constructor(
             ).mapIndexed { index, routeInterface ->
                 val parsingResult = directionsResponseParsingResult.routesParsingResult[index]
                 val data = parsingResult.data
+                check(data.route.routeIndex()?.toIntOrNull() == routeInterface.routeIndex) {
+                    "Parsed route index (${data.route.routeIndex()}) doesn't match " +
+                        "RouteInterface's routeIndex (${routeInterface.routeIndex}) " +
+                        "for route ${routeInterface.routeId}"
+                }
                 NavigationRoute(
                     directionsRoute = data.route,
                     waypoints = data.routesWaypoint,

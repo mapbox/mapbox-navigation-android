@@ -113,8 +113,8 @@ internal class JsonRouteInterfaceParser(
                         route.requestUri,
                         routerOrigin = route.routerOrigin.mapToSdkRouteOrigin(),
                         responseOriginAPI = route.mapboxAPI.mapToSDKResponseOriginAPI(),
-                        routeIndexOverride = route.routeIndex,
                     ),
+                    routeIndexOverride = route.routeIndex,
                 ).getOrThrow(),
             )
         }
@@ -132,12 +132,14 @@ private fun RouteInterface.toNavigationRoute(
     responseTimeElapsedSeconds: Long,
     parsedRoute: DirectionsResponseParsingResult,
 ): NavigationRoute {
-    // toJson() always yields a single route, so it's at index 0 regardless of this route's
-    // true index (restored via ResponseToParse.routeIndexOverride).
     val refreshTtl =
         parsedRoute.routesParsingResult.getOrNull(0)?.data?.route?.refreshTtl()
     val routeOptions = parsedRoute.routeOptions
     val data = parsedRoute.routesParsingResult[0].data
+    check(data.route.routeIndex()?.toIntOrNull() == routeIndex) {
+        "Parsed route index (${data.route.routeIndex()}) doesn't match RouteInterface's " +
+            "routeIndex ($routeIndex) for route $routeId"
+    }
     return NavigationRoute(
         routeOptions = routeOptions,
         // TODO: test that route options are the same as with direct parsing

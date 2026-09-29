@@ -30,13 +30,14 @@ internal class DirectionsRoutesParserJava(
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     override fun parse(
         response: ResponseToParse,
+        routeIndexOverride: Int?,
     ): Result<DirectionsResponseParsingResult> {
         return Result.runCatching {
             logger.logD(LOG_CATEGORY) { "parsing directions response" }
             PerformanceTracker.trackPerformanceSync(
                 "JavaRouteModelsParser#parseDirectionsResponseJava",
             ) {
-                parseDirectionsResponseJava(response)
+                parseDirectionsResponseJava(response, routeIndexOverride)
             }
         }
     }
@@ -45,6 +46,7 @@ internal class DirectionsRoutesParserJava(
 @WorkerThread
 private fun parseDirectionsResponseJava(
     responseToParse: ResponseToParse,
+    routeIndexOverride: Int?,
 ): DirectionsResponseParsingResult {
     val routeOptions = RouteOptions.fromUrl(URL(responseToParse.routeRequest))
     val response = responseToParse.responseBody.toReader().use { reader ->
@@ -54,7 +56,7 @@ private fun parseDirectionsResponseJava(
         response,
         routeOptions,
         responseToParse.routerOrigin,
-        responseToParse.routeIndexOverride,
+        routeIndexOverride,
     )
 }
 

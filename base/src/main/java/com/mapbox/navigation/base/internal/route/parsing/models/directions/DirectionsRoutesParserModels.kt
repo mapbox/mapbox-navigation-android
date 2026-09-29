@@ -7,14 +7,14 @@ import com.mapbox.navigation.base.internal.route.parsing.ResponseToParse
 import com.mapbox.navigation.base.internal.route.parsing.models.DirectionsParsedRouteData
 
 /**
- * Entry point for low level parsing, used as abstraction over the following parsing implementations:
- * - [com.mapbox.navigation.base.internal.route.parsing.parser.directions.DirectionsRoutesParserNro]
- * - [com.mapbox.navigation.base.internal.route.parsing.parser.directions.DirectionsRoutesParserJava]
+ * Entry point for low level parsing, used as abstraction over
+ * [com.mapbox.navigation.base.internal.route.parsing.parser.directions.DirectionsRoutesParserJava].
  */
 internal fun interface DirectionsRoutesParser {
     @WorkerThread
     fun parse(
         response: ResponseToParse,
+        routeIndexOverride: Int?,
     ): Result<DirectionsResponseParsingResult>
 }
 

@@ -33,9 +33,9 @@ private const val PERFORMANCE_SECTION_NAME =
  * ([com.mapbox.navigation.base.options.NavigationOptions.Builder.nativeRouteObject]) is enabled.
  *
  * Instead of independently parsing the response twice (once natively into [RouteInterface] via
- * [SDKRouteParser], once more via [DirectionsRoutesParserNro] into a [DirectionsRouteFBWrapper]
- * based on a second, unrelated native parse of the same JSON), this implementation parses the
- * response natively only once and builds the NRO route model directly from the
+ * [SDKRouteParser], once more into a [DirectionsRouteFBWrapper] based on a second, unrelated
+ * native parse of the same JSON), this implementation parses the response natively only once
+ * and builds the NRO route model directly from the
  * [com.mapbox.directions.route.DirectionsRouteContext] already held by the resulting
  * [com.mapbox.navigator.RouteInterface]
  * ([com.mapbox.navigator.RouteInterface.getDirectionsRouteContext]).

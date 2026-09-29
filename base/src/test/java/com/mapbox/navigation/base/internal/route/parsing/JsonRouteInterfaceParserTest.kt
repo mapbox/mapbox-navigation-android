@@ -197,7 +197,7 @@ class JsonRouteInterfaceParserTest {
         val routeLookup: (String) -> NavigationRoute? = { null }
 
         val parsingException = RuntimeException("Parsing failed")
-        val modelParser = DirectionsRoutesParser { _ ->
+        val modelParser = DirectionsRoutesParser { _, _ ->
             Result.failure(parsingException)
         }
 
@@ -304,8 +304,9 @@ internal class JavaParserWrapper : DirectionsRoutesParser {
 
     override fun parse(
         response: ResponseToParse,
+        routeIndexOverride: Int?,
     ): Result<DirectionsResponseParsingResult> {
-        return parser.parse(response).onSuccess {
+        return parser.parse(response, routeIndexOverride).onSuccess {
             parsedResponses.add(it.responseUUID!!)
         }
     }
