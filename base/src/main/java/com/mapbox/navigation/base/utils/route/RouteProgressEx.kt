@@ -5,6 +5,7 @@ package com.mapbox.navigation.base.utils.route
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -12,7 +13,6 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.utils.DecodeUtils.stepGeometryToPoints
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logD
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 
@@ -30,7 +30,7 @@ private const val LOG_CATEGORY = "NavigationRouteUtils"
  */
 @ExperimentalPreviewMapboxNavigationAPI
 suspend fun RouteProgress.hasUnexpectedUpcomingClosures(): Boolean =
-    withContext(Dispatchers.Default) {
+    withContext(SdkDispatchers.Default) {
         val snappingResultList = navigationRoute.directionsRoute.getSnappingResultList()
 
         val routeProgressData = ifNonNull(

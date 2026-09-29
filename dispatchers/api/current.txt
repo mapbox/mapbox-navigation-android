@@ -1,0 +1,35 @@
+// Signature format: 3.0
+package com.mapbox.common.dispatchers {
+
+  public final class SdkDispatchers {
+    method @com.mapbox.annotation.MapboxExperimental @kotlin.jvm.Synchronized public void configure(kotlin.jvm.functions.Function1<? super com.mapbox.common.dispatchers.SdkDispatchersConfig.Builder,kotlin.Unit> block);
+    method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public kotlinx.coroutines.CoroutineDispatcher getDefault();
+    method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public kotlinx.coroutines.CoroutineDispatcher getIO();
+    method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public kotlinx.coroutines.MainCoroutineDispatcher getMain();
+    property @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public final kotlinx.coroutines.CoroutineDispatcher Default;
+    property @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public final kotlinx.coroutines.CoroutineDispatcher IO;
+    property @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) public final kotlinx.coroutines.MainCoroutineDispatcher Main;
+    field public static final com.mapbox.common.dispatchers.SdkDispatchers INSTANCE;
+  }
+
+  @com.mapbox.annotation.MapboxExperimental public final class SdkDispatchersConfig {
+    method public kotlinx.coroutines.CoroutineDispatcher getDefaultDispatcher();
+    method public kotlinx.coroutines.CoroutineDispatcher getIoDispatcher();
+    property public final kotlinx.coroutines.CoroutineDispatcher defaultDispatcher;
+    property public final kotlinx.coroutines.CoroutineDispatcher ioDispatcher;
+    field public static final com.mapbox.common.dispatchers.SdkDispatchersConfig.Companion Companion;
+  }
+
+  public static final class SdkDispatchersConfig.Builder {
+    method public com.mapbox.common.dispatchers.SdkDispatchersConfig.Builder setDefault(kotlinx.coroutines.CoroutineDispatcher dispatcher);
+    method public com.mapbox.common.dispatchers.SdkDispatchersConfig.Builder setDefaultParallelism(int limit);
+    method public com.mapbox.common.dispatchers.SdkDispatchersConfig.Builder setIO(kotlinx.coroutines.CoroutineDispatcher dispatcher);
+    method public com.mapbox.common.dispatchers.SdkDispatchersConfig.Builder setIoParallelism(int limit);
+  }
+
+  public static final class SdkDispatchersConfig.Companion {
+    method public com.mapbox.common.dispatchers.SdkDispatchersConfig default();
+  }
+
+}
+

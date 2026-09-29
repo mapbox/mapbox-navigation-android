@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.maps.route.line
 
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
+import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
@@ -14,7 +15,6 @@ import com.mapbox.navigation.ui.maps.util.LimitedQueue
 import com.mapbox.navigation.ui.maps.util.MutexBasedScope
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
@@ -53,7 +53,7 @@ internal class DefaultHistoryRecorderChooserFactory : HistoryRecorderChooserFact
 
 @VisibleForTesting
 internal class RouteLineHistoryRecordingPusher(
-    private val serialisationDispatcher: CoroutineDispatcher = Dispatchers.Default,
+    private val serialisationDispatcher: CoroutineDispatcher = SdkDispatchers.Default,
     private val mutexBasedMainScope: MutexBasedScope = MutexBasedScope(
         InternalJobControlFactory.createImmediateMainScopeJobControl().scope,
     ),
