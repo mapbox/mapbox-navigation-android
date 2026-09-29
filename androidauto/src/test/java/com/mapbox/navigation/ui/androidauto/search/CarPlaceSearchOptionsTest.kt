@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.mapbox.navigation.ui.androidauto.search
 
 import com.mapbox.navigation.testing.BuilderTest

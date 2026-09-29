@@ -41,6 +41,19 @@ class MapboxCarOptionsSearchModeTest {
     }
 
     @Test
+    @Suppress("DEPRECATION")
+    fun `deprecated placeSearchOptions customization is still applied`() {
+        val options = MapboxCarOptions()
+        val searchOptions = CarPlaceSearchOptions.Builder().accessToken("token").build()
+
+        options.applyCustomization(
+            MapboxCarOptions.Customization().apply { placeSearchOptions = searchOptions },
+        )
+
+        assertSame(searchOptions, options.carPlaceSearchOptions)
+    }
+
+    @Test
     fun `searchMode is unchanged when customization does not set it`() {
         val options = MapboxCarOptions()
         options.applyCustomization(MapboxCarOptions.Customization())

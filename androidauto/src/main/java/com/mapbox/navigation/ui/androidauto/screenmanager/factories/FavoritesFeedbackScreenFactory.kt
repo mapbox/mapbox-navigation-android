@@ -16,6 +16,6 @@ class FavoritesFeedbackScreenFactory(
 
     override fun getCarFeedbackPoll(carContext: CarContext): CarFeedbackPoll {
         return mapboxCarContext.options.feedbackPollProvider
-            .getSearchFeedbackPoll(carContext)
+            .getPlaceFeedbackPoll(carContext)
     }
 }

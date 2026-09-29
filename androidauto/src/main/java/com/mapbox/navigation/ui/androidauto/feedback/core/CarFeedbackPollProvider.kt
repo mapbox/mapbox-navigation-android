@@ -84,7 +84,6 @@ open class CarFeedbackPollProvider {
     }
 
     // Pulled from FeedbackHelper.getActiveNavigationFeedbackTypes()
-    // This also mixes deep-link and search feedback. Poor routes may come from search!
     open fun getRoutePreviewFeedbackPoll(carContext: CarContext): CarFeedbackPoll {
         val options = listOf(
             CarFeedbackOption(
@@ -108,13 +107,6 @@ open class CarFeedbackPollProvider {
                 type = FeedbackEvent.ROUTE_NOT_ALLOWED,
             ),
             CarFeedbackOption(
-                title = carContext.getString(R.string.car_feedback_search_incorrect_location),
-                icon = carContext.getCarIcon(
-                    R.drawable.mapbox_search_sdk_ic_feedback_reason_incorrect_location,
-                ),
-                searchFeedbackReason = FeedbackReason.INCORRECT_LOCATION,
-            ),
-            CarFeedbackOption(
                 title = carContext.getString(R.string.car_feedback_negative_other_issue),
                 icon = carContext.getCarIcon(R.drawable.mapbox_car_ic_feedback_other_issue),
                 type = FeedbackEvent.OTHER_ISSUE,
@@ -123,14 +115,56 @@ open class CarFeedbackPollProvider {
         return CarFeedbackPoll(carContext.getString(R.string.car_feedback_title), options)
     }
 
-    // Pulled from @com.mapbox.search.analytics.FeedbackEvent.FeedbackReason
+    // Guards against getPlaceFeedbackPoll and an override of getSearchFeedbackPoll calling each
+    // other. Polls are built on the main thread, so a plain field is enough.
+    private var resolvingPlaceFeedbackPoll = false
+
+    /**
+     * Feedback about a place, shown from the search results, favorites and geo deeplink
+     * screens. Each default option is sent as navigation feedback with the
+     * [FeedbackEvent.OTHER_ISSUE] type and its title, and its [FeedbackReason] is recorded in the
+     * history file. The reason is not sent to Search SDK analytics: that requires the
+     * [com.mapbox.search.result.SearchResult] or [com.mapbox.search.result.SearchSuggestion] plus
+     * the [com.mapbox.search.ResponseInfo] that originated a search, and those don't reach the
+     * feedback screens.
+     *
+     * By default this returns [getSearchFeedbackPoll], so an existing override of that
+     * function keeps working. If that override calls back into this function, the default place
+     * options are returned instead of recursing.
+     */
+    @Suppress("DEPRECATION")
+    open fun getPlaceFeedbackPoll(carContext: CarContext): CarFeedbackPoll {
+        if (resolvingPlaceFeedbackPoll) {
+            return defaultPlaceFeedbackPoll(carContext)
+        }
+        resolvingPlaceFeedbackPoll = true
+        return try {
+            getSearchFeedbackPoll(carContext)
+        } finally {
+            resolvingPlaceFeedbackPoll = false
+        }
+    }
+
+    /**
+     * Feedback about a place. Replaced by [getPlaceFeedbackPoll], which returns this poll by
+     * default.
+     */
+    @Deprecated(
+        "Override getPlaceFeedbackPoll() instead.",
+        ReplaceWith("getPlaceFeedbackPoll(carContext)"),
+    )
     open fun getSearchFeedbackPoll(carContext: CarContext): CarFeedbackPoll {
+        return defaultPlaceFeedbackPoll(carContext)
+    }
+
+    private fun defaultPlaceFeedbackPoll(carContext: CarContext): CarFeedbackPoll {
         val options = listOf(
             CarFeedbackOption(
                 title = carContext.getString(R.string.car_feedback_search_incorrect_address),
                 icon = carContext.getCarIcon(
                     R.drawable.mapbox_search_sdk_ic_feedback_reason_incorrect_address,
                 ),
+                type = FeedbackEvent.OTHER_ISSUE,
                 searchFeedbackReason = FeedbackReason.INCORRECT_ADDRESS,
             ),
             CarFeedbackOption(
@@ -138,6 +172,7 @@ open class CarFeedbackPollProvider {
                 icon = carContext.getCarIcon(
                     R.drawable.mapbox_search_sdk_ic_feedback_reason_incorrect_location,
                 ),
+                type = FeedbackEvent.OTHER_ISSUE,
                 searchFeedbackReason = FeedbackReason.INCORRECT_LOCATION,
             ),
             CarFeedbackOption(
@@ -145,11 +180,13 @@ open class CarFeedbackPollProvider {
                 icon = carContext.getCarIcon(
                     R.drawable.mapbox_search_sdk_ic_feedback_reason_incorrect_name,
                 ),
+                type = FeedbackEvent.OTHER_ISSUE,
                 searchFeedbackReason = FeedbackReason.INCORRECT_NAME,
             ),
             CarFeedbackOption(
                 title = carContext.getString(R.string.car_feedback_search_other),
                 icon = carContext.getCarIcon(R.drawable.mapbox_search_sdk_ic_three_dots),
+                type = FeedbackEvent.OTHER_ISSUE,
                 searchFeedbackReason = FeedbackReason.OTHER,
             ),
         )

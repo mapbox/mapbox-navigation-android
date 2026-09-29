@@ -10,6 +10,13 @@ import com.mapbox.search.ApiType
  *
  * [SearchBox] is the recommended mode. [Legacy] (default) is retained only to avoid unexpected
  * billing changes for existing customers and should not be used for new integrations.
+ *
+ * The default will remain [Legacy] until a future major release documents a migration window
+ * in its changelog; it will not change silently in a minor or patch release. Integrators who
+ * want [SearchBox] behavior today should opt in explicitly via
+ * `MapboxCarContext.customize { searchMode = CarSearchMode.SearchBox }`. `searchMode` is
+ * experimental, so the calling code needs
+ * `@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)`.
  */
 abstract class CarSearchMode private constructor(
     @JvmSynthetic
