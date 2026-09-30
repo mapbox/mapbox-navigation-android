@@ -50,7 +50,7 @@ ext {
       androidXAnnotationVersion : '1.2.0',
       androidXFragmentVersion   : '1.4.0',
       androidXDataStore         : '1.0.0',
-      androidXWorkManager       : '2.7.1',
+      androidXWorkManager       : '2.10.5',
       androidXAsyncInflater     : '1.0.0',
       cardViewVersion           : '1.0.0',
       recyclerViewVersion       : '1.1.0',
