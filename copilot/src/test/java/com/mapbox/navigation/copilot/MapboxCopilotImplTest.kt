@@ -94,7 +94,7 @@ class MapboxCopilotImplTest {
             MapboxOptionsUtil.getTokenForService(MapboxServices.DIRECTIONS)
         } returns fakeAccessToken
 
-        mockkStatic(WorkManager::class)
+        mockkObject(WorkManager)
         every { WorkManager.getInstance(any()) } returns mockk(relaxed = true)
 
         mockkStatic("com.mapbox.navigation.core.internal.extensions.MapboxNavigationExtensions")
