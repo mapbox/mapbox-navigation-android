@@ -721,7 +721,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 }
             },
             scope = mainJobController.scope,
-            routeParser = parsing,
+            routeInterfacesParser = parsing,
         )
         rerouteController = defaultRerouteController
 

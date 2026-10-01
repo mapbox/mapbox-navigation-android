@@ -6,7 +6,7 @@ import com.mapbox.common.TileStore
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.accounts.SkuIdProvider
 import com.mapbox.navigation.base.internal.performance.PerformanceTracker
-import com.mapbox.navigation.base.internal.route.parsing.models.directions.NavigationRoutesParser
+import com.mapbox.navigation.base.internal.route.parsing.models.nn.RouteInterfacesParser
 import com.mapbox.navigation.base.options.EventsAppMetadata
 import com.mapbox.navigation.base.options.LocationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
@@ -176,13 +176,13 @@ internal object NavigationComponentProvider {
         getCurrentRoutes: () -> List<NavigationRoute>,
         updateRoutes: UpdateRoutes,
         scope: CoroutineScope,
-        routeParser: NavigationRoutesParser,
+        routeInterfacesParser: RouteInterfacesParser,
     ): InternalRerouteController = NativeMapboxRerouteController(
         rerouteInterface = rerouteInterface,
         getCurrentRoutes = getCurrentRoutes,
         updateRoutes = updateRoutes,
         scope = scope,
-        routeParser = routeParser,
+        routeInterfacesParser = routeInterfacesParser,
     )
 
     fun createForkPointPassedObserver(
