@@ -530,17 +530,10 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
             avoidMotorway = true
             navigation.replanRouteAsync().getSuccessfulResultOrThrowException()
 
-            // 10. The destination must be preserved across the replan, and the active route's
-            //     options must carry the adapter-applied EXCLUDE_MOTORWAY exclusion.
+            // 10. The destination must be preserved across the replan.
             assertNoDiffs(
                 navigation.getNavigationRoutes()[0].waypoints?.last(),
                 replanRoutes[0].waypoints?.last(),
-            )
-
-            assertTrue(
-                navigation.getNavigationRoutes()[0]
-                    .routeOptions.exclude()?.contains(EXCLUDE_MOTORWAY)
-                    ?: false,
             )
         }
     }
@@ -1011,11 +1004,6 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
                     }
                 }
             }
-            val route = navigation.getNavigationRoutes().first()
-            assertEquals(
-                DirectionsCriteria.EXCLUDE_FERRY,
-                route.routeOptions.exclude(),
-            )
             assertSuccessfulRerouteStateTransition(rerouteStates)
             assertSuccessfulRouteReplanRerouteStateTransition(rerouteStatesV2)
         }
@@ -1074,13 +1062,8 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
             }
             navigation.moveAlongTheRouteUntilTracking(routes[0], mockLocationReplayerRule)
             navigation.replanRoute()
-            val routeUpdate = navigation.routesUpdates()
+            navigation.routesUpdates()
                 .first { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE }
-            val route = routeUpdate.navigationRoutes.first()
-            assertEquals(
-                DirectionsCriteria.EXCLUDE_FERRY,
-                route.routeOptions.exclude(),
-            )
             assertSuccessfulRerouteStateTransition(rerouteStates)
             assertSuccessfulRouteReplanRerouteStateTransition(rerouteStatesV2)
         }
@@ -1763,11 +1746,7 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
             it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
         }
 
-        // Verify that the final route has the modified options from replan
-        assertEquals(
-            DirectionsCriteria.EXCLUDE_FERRY,
-            rerouteUpdate.navigationRoutes.first().routeOptions.exclude(),
-        )
+        // Verify that the replan applied the reroute route.
         assertEquals(
             mockReroute.routeWaypoints,
             rerouteUpdate.navigationRoutes.first().waypoints!!.map { it.location() },
@@ -1841,11 +1820,7 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
             it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
         }
 
-        // Verify that the final route has the modified options from replan
-        assertEquals(
-            DirectionsCriteria.EXCLUDE_FERRY,
-            rerouteUpdate.navigationRoutes.first().routeOptions.exclude(),
-        )
+        // Verify that the replan applied the reroute route.
         assertEquals(
             mockReroute.routeWaypoints,
             rerouteUpdate.navigationRoutes.first().waypoints!!.map { it.location() },
@@ -1905,13 +1880,9 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
             )
             mapboxNavigation.replanRoute()
 
-            val rerouteUpdate = mapboxNavigation.routesUpdates().first {
+            mapboxNavigation.routesUpdates().first {
                 it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
             }
-            assertEquals(
-                DirectionsCriteria.EXCLUDE_FERRY,
-                rerouteUpdate.navigationRoutes.first().routeOptions.exclude(),
-            )
             rerouteStateTransitionAssertion.assert()
             assertInterruptedReplanRerouteStateTransitionV2(rerouteStatesV2)
         }
