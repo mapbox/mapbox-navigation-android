@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.androidauto.navigation
 
 import android.graphics.Rect
 import androidx.annotation.UiThread
+import androidx.annotation.VisibleForTesting
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.ScreenCoordinate
@@ -54,7 +55,11 @@ class CarNavigationCamera(
 
     private var mapboxCarMapSurface: MapboxCarMapSurface? = null
     private lateinit var navigationCamera: NavigationCamera
-    private lateinit var viewportDataSource: MapboxNavigationViewportDataSource
+
+    @VisibleForTesting
+    internal lateinit var viewportDataSource: MapboxNavigationViewportDataSource
+        private set
+
     private var overviewPaddingPx by Delegates.notNull<Int>()
     private var followingPaddingPx by Delegates.notNull<Int>()
     private lateinit var coroutineScope: CoroutineScope
@@ -73,6 +78,23 @@ class CarNavigationCamera(
 
     private var isLocationInitialized = false
     private var requestedCameraMode: CarCameraMode? = null
+
+    // Kept outside the viewport data source, which is only created on attach, so the setting can
+    // be changed before the map surface is attached. It is reset on detach: attaching again
+    // resets the camera zoom, so automatic zoom must be back on to leave that zoom level.
+    private val zoomUpdatesAllowedMutable = MutableStateFlow(true)
+
+    /**
+     * Observes [followingZoomUpdatesAllowed], so the map action strip can refresh when automatic
+     * zoom is turned back on, for example after the map surface is re-attached.
+     */
+    internal val zoomUpdatesAllowedFlow: StateFlow<Boolean> = zoomUpdatesAllowedMutable
+
+    /**
+     * True while a map surface is attached, so camera actions such as zoom have an effect.
+     */
+    internal val isMapSurfaceAttached: Boolean
+        get() = mapboxCarMapSurface != null
 
     private val locationObserver = object : LocationObserver {
 
@@ -166,6 +188,7 @@ class CarNavigationCamera(
         viewportDataSource = MapboxNavigationViewportDataSource(
             mapboxCarMapSurface.mapSurface.getMapboxMap(),
         )
+        applyZoomUpdatesAllowed()
         navigationCamera = NavigationCamera(
             mapboxMap,
             mapboxCarMapSurface.mapSurface.camera,
@@ -238,19 +261,20 @@ class CarNavigationCamera(
      * the feature is disabled.
      */
     fun zoomUpdatesAllowed(allowed: Boolean) {
-        viewportDataSource.options.followingFrameOptions.zoomUpdatesAllowed = allowed
-        viewportDataSource.options.overviewFrameOptions.zoomUpdatesAllowed = allowed
+        zoomUpdatesAllowedMutable.value = allowed
+        applyZoomUpdatesAllowed()
     }
 
     /**
      * Indicates whether the following camera is configured to recalculate and update the zoom level.
      */
-    fun followingZoomUpdatesAllowed(): Boolean {
-        return if (this::viewportDataSource.isInitialized) {
-            viewportDataSource.options.followingFrameOptions.zoomUpdatesAllowed
-        } else {
-            true
-        }
+    fun followingZoomUpdatesAllowed(): Boolean = zoomUpdatesAllowedMutable.value
+
+    private fun applyZoomUpdatesAllowed() {
+        if (!this::viewportDataSource.isInitialized) return
+        val allowed = zoomUpdatesAllowedMutable.value
+        viewportDataSource.options.followingFrameOptions.zoomUpdatesAllowed = allowed
+        viewportDataSource.options.overviewFrameOptions.zoomUpdatesAllowed = allowed
     }
 
     private fun scaleEaseBy(delta: Double) {
@@ -265,6 +289,7 @@ class CarNavigationCamera(
         this.mapboxCarMapSurface = null
         MapboxNavigationApp.unregisterObserver(navigationObserver)
         isLocationInitialized = false
+        zoomUpdatesAllowedMutable.value = true
         coroutineScope.cancel()
     }
 

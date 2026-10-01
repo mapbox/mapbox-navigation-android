@@ -261,8 +261,8 @@ internal fun createRoutePreviewTemplate(
     title: CharSequence,
     navigateActionTitle: CharSequence,
     formatDistance: (Double) -> CharSequence,
-    onRouteSelected: (Int) -> Unit,
-    onNavigate: () -> Unit,
+    onRouteSelected: (routeId: String) -> Unit,
+    onNavigate: (routeId: String) -> Unit,
     navigateActionIcon: CarIcon? = null,
 ): ListTemplate {
     val templateBuilder = ListTemplate.Builder()
@@ -279,19 +279,21 @@ internal fun createRoutePreviewTemplate(
             .build()
     }
 
-    val navigateAction = Action.Builder()
-        .setTitle(navigateActionTitle)
-        .setOnClickListener(onNavigate)
-        .apply {
-            navigateActionIcon?.let(::setIcon)
-        }
-        .build()
-
     val listBuilder = ItemList.Builder()
 
-    routesPreview.originalRoutesList.forEach { navigationRoute ->
+    val routes = routesPreview.originalRoutesList
+    routes.forEach { navigationRoute ->
+        // Each row starts its own route, not the currently selected one. Routes are passed by id
+        // so a click from an outdated template can't start a route from a newer preview.
+        val navigateAction = Action.Builder()
+            .setTitle(navigateActionTitle)
+            .setOnClickListener { onNavigate(navigationRoute.id) }
+            .apply {
+                navigateActionIcon?.let(::setIcon)
+            }
+            .build()
         val route = navigationRoute.directionsRoute
-        val routeSummary = route.legs()?.first()?.summary().orEmpty()
+        val routeSummary = route.legs()?.firstOrNull()?.summary().orEmpty()
         val routeTitle = SpannableString("  $routeSummary").apply {
             setSpan(DurationSpan.create(route.duration().toLong()), 0, 1, 0)
         }
@@ -305,7 +307,9 @@ internal fun createRoutePreviewTemplate(
     }
 
     listBuilder.setSelectedIndex(routesPreview.primaryRouteIndex)
-    listBuilder.setOnSelectedListener(onRouteSelected)
+    listBuilder.setOnSelectedListener { index ->
+        routes.getOrNull(index)?.let { onRouteSelected(it.id) }
+    }
 
     return templateBuilder
         .setSingleList(listBuilder.build())

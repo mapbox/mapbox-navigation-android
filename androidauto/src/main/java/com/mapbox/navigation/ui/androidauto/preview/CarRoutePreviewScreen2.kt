@@ -20,7 +20,9 @@ import com.mapbox.navigation.core.preview.RoutesPreview
 import com.mapbox.navigation.ui.androidauto.MapboxCarContext
 import com.mapbox.navigation.ui.androidauto.R
 import com.mapbox.navigation.ui.androidauto.internal.extensions.addBackPressedHandler
+import com.mapbox.navigation.ui.androidauto.internal.extensions.startGuidanceOnPreviewedRoute
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAuto
+import com.mapbox.navigation.ui.androidauto.internal.logAndroidAutoFailure
 import com.mapbox.navigation.ui.androidauto.location.CarLocationRenderer
 import com.mapbox.navigation.ui.androidauto.navigation.CarActiveGuidanceMarkers
 import com.mapbox.navigation.ui.androidauto.navigation.CarCameraMode
@@ -48,9 +50,12 @@ internal class CarRoutePreviewScreen2 @UiThread constructor(
 
     private var routesPreview: RoutesPreview? = null
         set(value) {
+            routeSelection.onPreviewChanged(field, value)
             field = value
             invalidate()
         }
+
+    private val routeSelection = PreviewRouteSelection()
 
     private val carRoutesProvider = PreviewCarRoutesProvider2()
     private val carRouteLineRenderer = CarRouteLineRenderer(
@@ -71,7 +76,15 @@ internal class CarRoutePreviewScreen2 @UiThread constructor(
         addBackPressedHandler {
             logAndroidAuto("CarRoutePreviewScreen2 onBackPressed")
             mapboxCarContext.mapboxScreenManager.goBack()
-            MapboxNavigationApp.current()!!.setRoutesPreview(emptyList())
+            val mapboxNavigation = MapboxNavigationApp.current()
+            if (mapboxNavigation != null) {
+                mapboxNavigation.setRoutesPreview(emptyList())
+            } else {
+                logAndroidAutoFailure(
+                    "CarRoutePreviewScreen2 onBackPressed could not clear the preview, " +
+                        "MapboxNavigation is detached",
+                )
+            }
         }
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -113,7 +126,7 @@ internal class CarRoutePreviewScreen2 @UiThread constructor(
             val listBuilder = ItemList.Builder()
             for (navigationRoute in originalRoutesList) {
                 val route = navigationRoute.directionsRoute
-                val title = route.legs()?.first()?.summary()?.let { "  $it" } ?: " "
+                val title = route.legs()?.firstOrNull()?.summary()?.let { "  $it" } ?: " "
                 val routeSpannableString = SpannableString(title)
                 val span = DurationSpan.create(route.duration().toLong())
                 routeSpannableString.setSpan(span, 0, 1, 0)
@@ -124,17 +137,34 @@ internal class CarRoutePreviewScreen2 @UiThread constructor(
             }
             listBuilder.setSelectedIndex(routesPreview.primaryRouteIndex)
             listBuilder.setOnSelectedListener { index ->
-                carRoutesProvider.updateSelectedRoute(index)
+                val selectedRoute = originalRoutesList.getOrNull(index)
+                    ?: return@setOnSelectedListener
+                if (carRoutesProvider.selectRoute(selectedRoute.id)) {
+                    routeSelection.onRouteSelected(selectedRoute.id)
+                }
             }
             templateBuilder.setItemList(listBuilder.build())
             templateBuilder.setNavigateAction(
                 Action.Builder()
                     .setTitle(carContext.getString(R.string.car_action_preview_navigate_button))
                     .setOnClickListener {
-                        MapboxNavigationApp.current()!!.setNavigationRoutes(
-                            routesPreview.routesList,
-                        )
-                        MapboxScreenManager.replaceTop(MapboxScreen.ACTIVE_GUIDANCE)
+                        val mapboxNavigation = MapboxNavigationApp.current()
+                        if (mapboxNavigation == null) {
+                            logAndroidAutoFailure(
+                                "CarRoutePreviewScreen2 navigate ignored, " +
+                                    "MapboxNavigation is detached",
+                            )
+                            return@setOnClickListener
+                        }
+                        val routeId = routeSelection.routeIdToNavigate(routesPreview)
+                        if (mapboxNavigation.startGuidanceOnPreviewedRoute(routeId)) {
+                            MapboxScreenManager.replaceTop(MapboxScreen.ACTIVE_GUIDANCE)
+                        } else {
+                            logAndroidAutoFailure(
+                                "CarRoutePreviewScreen2 navigate ignored, " +
+                                    "route $routeId is not previewed",
+                            )
+                        }
                     }
                     .build(),
             )
@@ -149,4 +179,37 @@ internal class CarRoutePreviewScreen2 @UiThread constructor(
             .setHeaderAction(Action.BACK)
             .build()
     }
+}
+
+/**
+ * Tracks the route the driver picked on the route preview. A selection is applied to the preview
+ * asynchronously, so until the preview reflects it, Navigate must use the picked route rather than
+ * the preview's primary route.
+ */
+internal class PreviewRouteSelection {
+
+    private var pendingRouteId: String? = null
+
+    fun onRouteSelected(routeId: String) {
+        pendingRouteId = routeId
+    }
+
+    /**
+     * Drops the pending selection when the preview's routes or primary route change: either the
+     * selection was applied, or something else, such as the phone app sharing the same
+     * navigation, changed the preview and the highlighted row is the primary route again.
+     */
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    fun onPreviewChanged(oldPreview: RoutesPreview?, newPreview: RoutesPreview?) {
+        val routesChanged = oldPreview?.originalRoutesList != newPreview?.originalRoutesList
+        val primaryChanged = oldPreview?.routesList?.firstOrNull()?.id !=
+            newPreview?.routesList?.firstOrNull()?.id
+        if (routesChanged || primaryChanged) {
+            pendingRouteId = null
+        }
+    }
+
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    fun routeIdToNavigate(preview: RoutesPreview): String =
+        pendingRouteId ?: preview.routesList.first().id
 }

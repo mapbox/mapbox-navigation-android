@@ -24,7 +24,7 @@ import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen
  * @deprecated Use [MapboxScreen.NAVIGATION] instead.
  */
 @Deprecated("Use MapboxScreen.NAVIGATION instead.")
-internal class ActiveGuidanceScreen constructor(
+internal class ActiveGuidanceScreen(
     private val mapboxCarContext: MapboxCarContext,
 ) : Screen(mapboxCarContext.carContext) {
 

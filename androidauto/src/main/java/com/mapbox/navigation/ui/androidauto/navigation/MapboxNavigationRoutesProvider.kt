@@ -9,6 +9,9 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.preview.RoutesPreview
 import com.mapbox.navigation.core.preview.RoutesPreviewObserver
+import com.mapbox.navigation.ui.androidauto.internal.extensions.selectPreviewedRoute
+import com.mapbox.navigation.ui.androidauto.internal.extensions.startGuidanceOnPreviewedRoute
+import com.mapbox.navigation.ui.androidauto.internal.logAndroidAutoFailure
 import com.mapbox.navigation.ui.androidauto.routes.CarRoutesProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -58,15 +61,34 @@ internal class MapboxNavigationRoutesProvider : CarRoutesProvider, MapboxNavigat
         updateState()
     }
 
-    fun selectRoute(index: Int) {
-        val routesPreview = routesPreview ?: return
-        val route = routesPreview.originalRoutesList.getOrNull(index) ?: return
-        MapboxNavigationApp.current()?.changeRoutesPreviewPrimaryRoute(route)
+    /**
+     * Makes the previewed route with [routeId] the primary previewed route. A click from a
+     * template built for an older preview, whose route is no longer previewed, is ignored.
+     */
+    fun selectRoute(routeId: String) {
+        val mapboxNavigation = MapboxNavigationApp.current() ?: run {
+            logAndroidAutoFailure("$TAG selectRoute ignored, MapboxNavigation is detached")
+            return
+        }
+        if (!mapboxNavigation.selectPreviewedRoute(routeId)) {
+            logAndroidAutoFailure("$TAG selectRoute ignored, route $routeId is not previewed")
+        }
     }
 
-    fun startNavigation() {
-        if (routesPreview?.routesList.isNullOrEmpty()) return
-        MapboxNavigationApp.current()?.moveRoutesFromPreviewToNavigator()
+    /**
+     * Starts active guidance on the previewed route with [routeId], with the other previewed
+     * routes as alternatives. A click for a route that is no longer previewed is ignored.
+     */
+    fun startNavigation(routeId: String) {
+        val mapboxNavigation = MapboxNavigationApp.current() ?: run {
+            logAndroidAutoFailure("$TAG startNavigation ignored, MapboxNavigation is detached")
+            return
+        }
+        if (!mapboxNavigation.startGuidanceOnPreviewedRoute(routeId)) {
+            logAndroidAutoFailure(
+                "$TAG startNavigation ignored, route $routeId is not previewed",
+            )
+        }
     }
 
     fun clearPreview() {
@@ -87,6 +109,10 @@ internal class MapboxNavigationRoutesProvider : CarRoutesProvider, MapboxNavigat
             )
             else -> MapboxNavigationRoutesState()
         }
+    }
+
+    private companion object {
+        private const val TAG = "MapboxNavigationRoutesProvider"
     }
 }
 

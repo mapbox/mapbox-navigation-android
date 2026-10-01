@@ -74,7 +74,51 @@ class GeoDeeplinkParserTest(
                 placeQuery = "Cake & Bake",
             ),
 
+            // A "%" that is not valid URL encoding is kept as it is
+            "geo:0,0?q=50%off" to GeoDeeplink(
+                point = null,
+                placeQuery = "50%off",
+            ),
+            // Valid escapes and "+" are still decoded next to a stray "%"
+            "geo:0,0?q=Caf%C3%A9+50%off" to GeoDeeplink(
+                point = null,
+                placeQuery = "Café 50%off",
+            ),
+            // A trailing or truncated "%" is kept, lowercase escapes are decoded
+            "geo:0,0?q=100%" to GeoDeeplink(point = null, placeQuery = "100%"),
+            "geo:0,0?q=a%2" to GeoDeeplink(point = null, placeQuery = "a%2"),
+            "geo:0,0?q=Caf%c3%a9" to GeoDeeplink(point = null, placeQuery = "Café"),
+            // The coordinate range limits are inclusive
+            "geo:90,180" to GeoDeeplink(point = Point.fromLngLat(180.0, 90.0), placeQuery = null),
+            "geo:-90,-180" to GeoDeeplink(
+                point = Point.fromLngLat(-180.0, -90.0),
+                placeQuery = null,
+            ),
+            // RFC 5870 parameters before the query are ignored, the query is kept
+            "geo:37.788151,-122.407543;u=35?q=Cafe" to GeoDeeplink(
+                point = Point.fromLngLat(-122.407543, 37.788151),
+                placeQuery = "Cafe",
+            ),
+            // The scheme is case-insensitive
+            "GEO:37.788151,-122.407543" to GeoDeeplink(
+                point = Point.fromLngLat(-122.407543, 37.788151),
+                placeQuery = null,
+            ),
+            // RFC 5870 parameters after ';' are ignored
+            "geo:37.788151,-122.407543;u=35" to GeoDeeplink(
+                point = Point.fromLngLat(-122.407543, 37.788151),
+                placeQuery = null,
+            ),
+            // Out-of-range coordinates in the query are ignored, the place name is kept
+            "geo:0,0?q=Cafe@95,10" to GeoDeeplink(
+                point = null,
+                placeQuery = "Cafe",
+            ),
+
             // Failure cases return null
+            "geo:91,10" to null,
+            "geo:10,181" to null,
+            "geo:-90.5,10" to null,
             "geo:0,0" to null,
             "geo:," to null,
             "geo:,35.595404" to null,

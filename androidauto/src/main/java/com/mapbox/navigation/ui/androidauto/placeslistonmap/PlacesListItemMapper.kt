@@ -39,8 +39,11 @@ class PlacesListItemMapper(
                 distanceUnits.second,
             )
 
-            // fixme this was a copy/paste from a sample it should be improved for MB
-            val description = SpannableString("   \u00b7 " + placeRecord.description)
+            // The first character is replaced by the distance span.
+            val placeDescription = placeRecord.description
+            val description = SpannableString(
+                if (placeDescription.isNullOrEmpty()) " " else "   \u00b7 $placeDescription",
+            )
             description.setSpan(
                 DistanceSpan.create(Distance.create(distance, distanceUnits.first)),
                 0,

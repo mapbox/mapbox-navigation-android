@@ -9,6 +9,7 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.ui.androidauto.R
 import com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackAction
 import com.mapbox.navigation.ui.androidauto.freedrive.FreeDriveActionStrip
+import com.mapbox.navigation.ui.androidauto.internal.logAndroidAutoFailure
 import com.mapbox.navigation.ui.androidauto.navigation.CarArrivalTrigger
 import com.mapbox.navigation.ui.androidauto.navigation.audioguidance.CarAudioGuidanceAction
 import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen
@@ -103,14 +104,7 @@ open class MapboxScreenActionStripProvider {
      * Allows you to override the [MapboxScreen.ACTIVE_GUIDANCE] [ActionStrip]
      */
     protected open fun getActiveGuidance(screen: Screen): ActionStrip {
-        val arrivalOnClickListener = OnClickListener {
-            val carArrivalTrigger = MapboxNavigationApp.getObservers(CarArrivalTrigger::class)
-                .firstOrNull()
-            checkNotNull(carArrivalTrigger) {
-                "The CarArrivalTrigger must be attached while in active guidance."
-            }
-            carArrivalTrigger.triggerArrival()
-        }
+        val arrivalOnClickListener = OnClickListener { triggerArrivalOnStop() }
         return ActionStrip.Builder()
             .addAction(CarFeedbackAction(MapboxScreen.ACTIVE_GUIDANCE_FEEDBACK).getAction(screen))
             .addAction(CarAudioGuidanceAction().getAction(screen))
@@ -124,3 +118,32 @@ open class MapboxScreenActionStripProvider {
             .build()
     }
 }
+
+/**
+ * Shows the arrival screen when the driver presses Stop during active guidance.
+ *
+ * The [CarArrivalTrigger] is registered only while a guidance screen is resumed, so a click can
+ * arrive without one. If a guidance screen is still on top, the arrival screen is shown anyway,
+ * which is all the trigger does. Otherwise the click came from a guidance template that is no
+ * longer shown, and it is ignored so it doesn't replace the screen the driver moved to.
+ */
+internal fun triggerArrivalOnStop() {
+    val carArrivalTrigger = MapboxNavigationApp.getObservers(CarArrivalTrigger::class)
+        .firstOrNull()
+    val topScreen = MapboxScreenManager.current()?.key
+    when {
+        carArrivalTrigger != null -> carArrivalTrigger.triggerArrival()
+        topScreen in GUIDANCE_SCREENS -> {
+            logAndroidAutoFailure(
+                "Stop pressed without an attached CarArrivalTrigger, showing the arrival screen",
+            )
+            MapboxScreenManager.replaceTop(MapboxScreen.ARRIVAL)
+        }
+        else -> logAndroidAutoFailure(
+            "Stop ignored, the guidance screen is not on top (top screen: $topScreen)",
+        )
+    }
+}
+
+@Suppress("DEPRECATION")
+private val GUIDANCE_SCREENS = setOf(MapboxScreen.NAVIGATION, MapboxScreen.ACTIVE_GUIDANCE)

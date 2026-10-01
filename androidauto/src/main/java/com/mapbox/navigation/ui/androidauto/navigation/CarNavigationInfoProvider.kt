@@ -151,8 +151,10 @@ internal constructor(
 
         expectedManeuvers.onValue { maneuvers ->
             maneuverApi?.getRoadShields(
-                mapUserStyleObserver.userId,
-                mapUserStyleObserver.styleId,
+                // Empty ids mean the style has no Mapbox user and style ids to load designed
+                // shields from; the shield API skips them only when they are null.
+                mapUserStyleObserver.userId.ifEmpty { null },
+                mapUserStyleObserver.styleId.ifEmpty { null },
                 maneuvers,
             ) { shieldResult ->
                 val newShields = shieldResult.mapNotNull { it.value?.shield }

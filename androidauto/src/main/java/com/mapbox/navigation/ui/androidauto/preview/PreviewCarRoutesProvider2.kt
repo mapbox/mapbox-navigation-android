@@ -5,6 +5,8 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.preview.RoutesPreviewObserver
+import com.mapbox.navigation.ui.androidauto.internal.extensions.selectPreviewedRoute
+import com.mapbox.navigation.ui.androidauto.internal.logAndroidAutoFailure
 import com.mapbox.navigation.ui.androidauto.navigation.CarNavigationCamera
 import com.mapbox.navigation.ui.androidauto.routes.CarRoutesProvider
 import kotlinx.coroutines.channels.awaitClose
@@ -47,8 +49,46 @@ class PreviewCarRoutesProvider2 : CarRoutesProvider {
      * selection to other components.
      */
     fun updateSelectedRoute(index: Int) {
-        val mapboxNavigation = MapboxNavigationApp.current()!!
-        val routesPreview = mapboxNavigation.getRoutesPreview()!!
-        mapboxNavigation.changeRoutesPreviewPrimaryRoute(routesPreview.originalRoutesList[index])
+        val mapboxNavigation = MapboxNavigationApp.current() ?: run {
+            logAndroidAutoFailure(
+                "PreviewCarRoutesProvider2 updateSelectedRoute($index) ignored, " +
+                    "MapboxNavigation is detached",
+            )
+            return
+        }
+        // Resolve the index against the current preview: the template may have been built from
+        // a preview that was cleared or replaced before the selection arrived.
+        val route = mapboxNavigation.getRoutesPreview()?.originalRoutesList?.getOrNull(index)
+            ?: run {
+                logAndroidAutoFailure(
+                    "PreviewCarRoutesProvider2 updateSelectedRoute($index) ignored, " +
+                        "no such previewed route",
+                )
+                return
+            }
+        mapboxNavigation.changeRoutesPreviewPrimaryRoute(route)
+    }
+
+    /**
+     * Makes the previewed route with [routeId] the primary previewed route. Unlike
+     * [updateSelectedRoute], a selection made on a template built for an older preview can't pick
+     * a route from a newer preview.
+     *
+     * @return true when the selection was requested for a route in the current preview.
+     */
+    internal fun selectRoute(routeId: String): Boolean {
+        val mapboxNavigation = MapboxNavigationApp.current() ?: run {
+            logAndroidAutoFailure(
+                "PreviewCarRoutesProvider2 selectRoute ignored, MapboxNavigation is detached",
+            )
+            return false
+        }
+        val selected = mapboxNavigation.selectPreviewedRoute(routeId)
+        if (!selected) {
+            logAndroidAutoFailure(
+                "PreviewCarRoutesProvider2 selectRoute ignored, route $routeId is not previewed",
+            )
+        }
+        return selected
     }
 }

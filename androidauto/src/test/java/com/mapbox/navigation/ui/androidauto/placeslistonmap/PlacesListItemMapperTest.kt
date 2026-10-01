@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.androidauto.placeslistonmap
 
 import androidx.car.app.model.CarIcon
+import androidx.car.app.model.Row
 import androidx.core.graphics.drawable.IconCompat
 import com.mapbox.common.location.Location
 import com.mapbox.geojson.Point
@@ -10,6 +11,7 @@ import com.mapbox.navigation.ui.androidauto.testing.MapboxRobolectricTestRunner
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Test
 
 class PlacesListItemMapperTest : MapboxRobolectricTestRunner() {
@@ -47,5 +49,27 @@ class PlacesListItemMapperTest : MapboxRobolectricTestRunner() {
             "[title: name, text count: 1, image: null, isBrowsable: false, isEnabled: true]",
             result.items.first().toString(),
         )
+    }
+
+    @Test
+    fun `place without a description has no null text`() {
+        val location = Location.Builder().apply {
+            latitude(37.8031596290125)
+            longitude(-122.44783300404791)
+        }.build()
+        val places = listOf(
+            PlaceRecord(
+                "id",
+                "name",
+                Point.fromLngLat(-122.44783300404791, 37.8031596290125),
+                null,
+                listOf(),
+            ),
+        )
+
+        val result = mapper.mapToItemList(location, places, null)
+
+        val row = result.items.first() as Row
+        assertFalse(row.texts.single().toString().contains("null"))
     }
 }

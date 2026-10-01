@@ -3,14 +3,37 @@ package com.mapbox.navigation.ui.androidauto.action
 import androidx.car.app.Screen
 import androidx.car.app.model.ActionStrip
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
+import com.mapbox.navigation.ui.androidauto.navigation.CarArrivalTrigger
 import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen
+import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenEvent
+import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenManager
+import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenOperation
+import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.mockkStatic
+import io.mockk.runs
+import io.mockk.unmockkAll
+import io.mockk.verify
+import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 @Suppress("DEPRECATION")
 class MapboxScreenActionStripProviderTest {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
+
+    @After
+    fun tearDown() {
+        unmockkAll()
+    }
 
     @Test
     fun `getActionStrip maps to overridable functions`() {
@@ -61,5 +84,72 @@ class MapboxScreenActionStripProviderTest {
         val sut = MapboxScreenActionStripProvider()
 
         sut.getActionStrip(mockk(), "UnknownScreen")
+    }
+
+    @Test
+    fun `stop triggers arrival through the attached arrival trigger`() {
+        val carArrivalTrigger = mockk<CarArrivalTrigger>(relaxed = true)
+        mockkObject(MapboxNavigationApp)
+        every {
+            MapboxNavigationApp.getObservers(CarArrivalTrigger::class)
+        } returns listOf(carArrivalTrigger)
+        givenTopScreen(MapboxScreen.NAVIGATION)
+
+        triggerArrivalOnStop()
+
+        verify { carArrivalTrigger.triggerArrival() }
+        verify(exactly = 0) { MapboxScreenManager.replaceTop(any()) }
+    }
+
+    @Test
+    fun `stop without an attached arrival trigger shows arrival in legacy guidance`() {
+        mockkObject(MapboxNavigationApp)
+        every { MapboxNavigationApp.getObservers(CarArrivalTrigger::class) } returns emptyList()
+        givenTopScreen(MapboxScreen.ACTIVE_GUIDANCE)
+
+        triggerArrivalOnStop()
+
+        verify { MapboxScreenManager.replaceTop(MapboxScreen.ARRIVAL) }
+    }
+
+    @Test
+    fun `stop without an attached arrival trigger and without a screen is ignored`() {
+        mockkObject(MapboxNavigationApp)
+        every { MapboxNavigationApp.getObservers(CarArrivalTrigger::class) } returns emptyList()
+        givenTopScreen(null)
+
+        triggerArrivalOnStop()
+
+        verify(exactly = 0) { MapboxScreenManager.replaceTop(any()) }
+    }
+
+    @Test
+    fun `stop without an attached arrival trigger shows arrival when guidance is on top`() {
+        mockkObject(MapboxNavigationApp)
+        every { MapboxNavigationApp.getObservers(CarArrivalTrigger::class) } returns emptyList()
+        givenTopScreen(MapboxScreen.NAVIGATION)
+
+        triggerArrivalOnStop()
+
+        verify { MapboxScreenManager.replaceTop(MapboxScreen.ARRIVAL) }
+    }
+
+    @Test
+    fun `late stop from a guidance template does not replace another screen`() {
+        mockkObject(MapboxNavigationApp)
+        every { MapboxNavigationApp.getObservers(CarArrivalTrigger::class) } returns emptyList()
+        givenTopScreen(MapboxScreen.SEARCH)
+
+        triggerArrivalOnStop()
+
+        verify(exactly = 0) { MapboxScreenManager.replaceTop(any()) }
+    }
+
+    private fun givenTopScreen(key: String?) {
+        mockkObject(MapboxScreenManager)
+        mockkStatic(MapboxScreenManager::class)
+        every { MapboxScreenManager.current() } returns
+            key?.let { MapboxScreenEvent(it, MapboxScreenOperation.REPLACE_TOP) }
+        every { MapboxScreenManager.replaceTop(any()) } just runs
     }
 }
