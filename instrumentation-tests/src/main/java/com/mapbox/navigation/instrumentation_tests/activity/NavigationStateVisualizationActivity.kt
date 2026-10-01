@@ -1,3 +1,5 @@
+@file:Suppress("ForbiddenImport")
+
 package com.mapbox.navigation.instrumentation_tests.activity
 
 import android.content.res.Configuration

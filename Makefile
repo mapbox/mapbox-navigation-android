@@ -57,6 +57,10 @@ check-kotlin-lint:
 	$(call run-gradle-tasks,$(UI_MODULES),ktlint)
 	$(call run-gradle-tasks,$(APPLICATION_MODULES),ktlint)
 
+.PHONY: check-detekt
+check-detekt:
+	./gradlew detekt
+
 .PHONY: format-kotlin-lint
 format-kotlin-lint:
 	$(call run-gradle-tasks,$(CORE_MODULES),ktlintFormat)
