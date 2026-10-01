@@ -1,3 +1,18 @@
+## Navigation SDK Core Framework 3.32.0 - 01 October, 2026
+#### Features
+
+
+#### Bug fixes and improvements
+- Fixed Copilot history files not being uploaded in apps minified with R8 full mode.
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.32.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.32.0))
+- Mapbox Navigation Native `v324.32.0`
+- Mapbox Core Common `v24.32.0`
+- Mapbox Java `v7.10.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.1))
+
 ## Navigation SDK Core Framework 3.32.0-rc.1 - 21 September, 2026
 #### Features
 
