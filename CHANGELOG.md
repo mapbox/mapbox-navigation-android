@@ -7,6 +7,13 @@
 
 #### Other changes
 - Bumped `compileSdk` and `targetSdk` versions to 37. [#19362](https://github.com/mapbox/mapbox-sdk/pull/19362)
+## Navigation SDK Core Framework 3.30.4 - 01 October, 2026
+#### Features
+- Added `SdkDispatchers` (`@MapboxExperimental`) — a central coroutine dispatcher holder for the Navigation SDK. Call `SdkDispatchers.configure {}` in `Application.onCreate()` to limit SDK parallelism (e.g. `setDefaultParallelism`, `setIoParallelism`) and reduce contention with the host application's own thread pools. If `configure` is never called the SDK falls back to `Dispatchers.Default` and `Dispatchers.IO`. [#18548](https://github.com/mapbox/mapbox-sdk/pull/18548)
+
+
+#### Bug fixes and improvements
+- Fixed Copilot history files not being uploaded in apps minified with R8 full mode.
 
 
 ### Mapbox dependencies
@@ -66,6 +73,9 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Maps SDK `v11.31.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.31.0-rc.1))
 - Mapbox Navigation Native `v324.31.0-rc.1`
 - Mapbox Core Common `v24.31.0-rc.1`
+- Mapbox Maps SDK `v11.30.4` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.30.4))
+- Mapbox Navigation Native `v324.30.4`
+- Mapbox Core Common `v24.30.4`
 - Mapbox Java `v7.10.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.1))
 
 ## Navigation SDK Core Framework 3.30.3 - 23 September, 2026
