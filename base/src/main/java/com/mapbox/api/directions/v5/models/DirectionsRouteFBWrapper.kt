@@ -44,23 +44,11 @@ internal class DirectionsRouteFBWrapper private constructor(
                 Point.fromLngLat(coordinate.longitude, coordinate.latitude)
             }
 
-    @Volatile
-    private var contentHashCache: Long = NOT_HASHED
-
     /**
-     * Content based 64 bit hash of the whole route, walked in native code and cached lazily.
-     * Deliberately not synchronized - the worst a race costs is computing the same value twice.
-     * The cache is `@Volatile` because a non-volatile `Long` read can tear on `armeabi-v7a`.
+     * Content based 64 bit hash of the whole route. Native code computes it once, while building
+     * the buffer, and stores it in the table, so this is a plain field read.
      */
-    internal val contentHash: Long
-        get() {
-            var hash = contentHashCache
-            if (hash == NOT_HASHED) {
-                hash = fb.contentHash()
-                contentHashCache = hash
-            }
-            return hash
-        }
+    internal val contentHash: Long = fb.hash.toLong()
 
     override val unrecognized: ByteBuffer?
         get() = fb.unrecognizedPropertiesAsByteBuffer
@@ -178,12 +166,6 @@ internal class DirectionsRouteFBWrapper private constructor(
     }
 
     internal companion object {
-
-        /**
-         * "Not computed yet" marker. Cheaper than `by lazy`, which would add synchronization;
-         * the price is that a route whose real hash is 0 gets rehashed every time - 1 in 2^64.
-         */
-        private const val NOT_HASHED = 0L
 
         internal fun wrap(
             routeOptions: RouteOptions?,

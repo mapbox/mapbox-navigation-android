@@ -56,7 +56,7 @@ internal class StepManeuverFBWrapper private constructor(
         return fb.contentEquals(other.fb)
     }
 
-    override fun hashCode() = fb.contentHash().toHashCode()
+    override fun hashCode() = fb.hash.toHashCode()
 
     override fun toString(): String {
         return "StepManeuver(" +

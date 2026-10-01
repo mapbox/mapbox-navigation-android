@@ -17,6 +17,9 @@ import com.mapbox.geojson.Point
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 internal inline fun Long.toHashCode(): Int = (this xor (this ushr 32)).toInt()
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+internal inline fun ULong.toHashCode(): Int = this.toLong().toHashCode()
+
 /**
  * Thrown when native route object components are compared against an incompatible type.
  */
