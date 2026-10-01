@@ -78,6 +78,18 @@ class GeoDeeplinkNavigateActionTest {
         verify { MapboxScreenManager.push(MapboxScreen.GEO_DEEPLINK) }
     }
 
+    @Test
+    fun `onNewIntent recreates the GEO_DEEPLINK screen when it is already on top`() {
+        val mapboxCarContext = mockMapboxCarContext()
+        every {
+            mapboxCarContext.mapboxScreenManager.recreateTop(MapboxScreen.GEO_DEEPLINK)
+        } returns true
+
+        mockGeoDeeplinkNavigateAction(mapboxCarContext).onNewIntent(intent)
+
+        verify(exactly = 0) { MapboxScreenManager.push(any()) }
+    }
+
     private fun mockGeoDeeplinkNavigateAction(
         mapboxCarContext: MapboxCarContext,
         searchBoxProvider: PlacesListOnMapProvider = mockk(relaxed = true),

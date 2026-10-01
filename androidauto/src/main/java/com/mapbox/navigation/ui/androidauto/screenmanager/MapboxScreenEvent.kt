@@ -11,6 +11,11 @@ class MapboxScreenEvent internal constructor(
     val key: String,
     @MapboxScreenOperation.Type
     val operation: String,
+    /**
+     * Emission order of this event, used by [MapboxScreenManager] to tell events emitted before
+     * it was created from its own. Not part of [equals], [hashCode] or [toString].
+     */
+    internal val sequence: Long = 0,
 ) {
 
     /**

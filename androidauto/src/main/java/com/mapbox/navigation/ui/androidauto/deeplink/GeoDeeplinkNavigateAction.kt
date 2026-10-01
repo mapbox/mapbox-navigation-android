@@ -51,7 +51,10 @@ class GeoDeeplinkNavigateAction @VisibleForTesting internal constructor(
             is CarSearchMode.Legacy -> geocodingProviderFactory(geoDeeplink)
             else -> error("Unsupported search mode: ${mapboxCarContext.options.searchMode}")
         }
-        MapboxScreenManager.push(MapboxScreen.GEO_DEEPLINK)
+        // When the places of a previous deeplink are shown, show the new ones in their place.
+        if (!mapboxCarContext.mapboxScreenManager.recreateTop(MapboxScreen.GEO_DEEPLINK)) {
+            MapboxScreenManager.push(MapboxScreen.GEO_DEEPLINK)
+        }
         return true
     }
 }
