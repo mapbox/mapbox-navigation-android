@@ -370,6 +370,13 @@ package com.mapbox.navigation.ui.androidauto.navigation {
     property public final kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.androidauto.navigation.CarNavigationInfo> carNavigationInfo;
   }
 
+  @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class CarNavigationTemplates {
+    method public androidx.car.app.navigation.model.NavigationTemplate activeGuidance(com.mapbox.navigation.ui.androidauto.navigation.CarNavigationInfo navigationInfo, androidx.car.app.model.ActionStrip actionStrip, androidx.car.app.model.ActionStrip mapActionStrip);
+    method public androidx.car.app.navigation.model.NavigationTemplate freeDrive(androidx.car.app.model.ActionStrip actionStrip, androidx.car.app.model.ActionStrip mapActionStrip);
+    method public androidx.car.app.model.ListTemplate routePreview(com.mapbox.navigation.core.preview.RoutesPreview routesPreview, CharSequence title, CharSequence navigateActionTitle, kotlin.jvm.functions.Function1<? super java.lang.Double,? extends java.lang.CharSequence> formatDistance, kotlin.jvm.functions.Function1<? super java.lang.String,kotlin.Unit> onRouteSelected, kotlin.jvm.functions.Function1<? super java.lang.String,kotlin.Unit> onNavigate, androidx.car.app.model.CarIcon? navigateActionIcon = null);
+    field public static final com.mapbox.navigation.ui.androidauto.navigation.CarNavigationTemplates INSTANCE;
+  }
+
   public final class MapUserStyleObserver implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
     ctor public MapUserStyleObserver();
     method public String getStyleId();
@@ -381,6 +388,7 @@ package com.mapbox.navigation.ui.androidauto.navigation {
   }
 
   public final class MapboxCarNavigationManager implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+    ctor @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public MapboxCarNavigationManager(androidx.car.app.CarContext carContext, kotlin.jvm.functions.Function0<kotlin.Unit> onStopNavigation);
     method public kotlinx.coroutines.flow.StateFlow<java.lang.Boolean> getAutoDriveEnabledFlow();
     method public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
     method public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
@@ -530,6 +538,7 @@ package com.mapbox.navigation.ui.androidauto.navigation.speedlimit {
 
   public final class CarSpeedLimitRenderer implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
     ctor public CarSpeedLimitRenderer(com.mapbox.navigation.ui.androidauto.MapboxCarContext mapboxCarContext);
+    ctor @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public CarSpeedLimitRenderer(kotlinx.coroutines.flow.StateFlow<com.mapbox.navigation.ui.androidauto.navigation.speedlimit.SpeedLimitOptions> speedLimitOptions = MutableStateFlow(SpeedLimitOptions.<init>().build()));
   }
 
   public final class SpeedLimitOptions {
@@ -558,6 +567,7 @@ package com.mapbox.navigation.ui.androidauto.navigation.speedlimit {
 package com.mapbox.navigation.ui.androidauto.notification {
 
   public final class MapboxCarNotification implements com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver {
+    ctor @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public MapboxCarNotification(androidx.car.app.CarContext carContext, com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotificationOptions notificationOptions);
     method public void onAttached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
     method public void onDetached(com.mapbox.navigation.core.MapboxNavigation mapboxNavigation);
   }

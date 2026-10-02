@@ -4,6 +4,7 @@ import androidx.car.app.CarContext
 import androidx.car.app.model.CarColor
 import androidx.car.app.notification.CarAppExtender
 import androidx.core.app.NotificationCompat
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.formatter.TimeFormatter
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -14,7 +15,6 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.NavigationSessionState
 import com.mapbox.navigation.core.trip.session.NavigationSessionStateObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
-import com.mapbox.navigation.ui.androidauto.MapboxCarOptions
 
 /**
  * Register this observer using [MapboxNavigationApp.registerObserver]. As long as it is
@@ -22,12 +22,31 @@ import com.mapbox.navigation.ui.androidauto.MapboxCarOptions
  * [MapboxNavigation.setTripNotificationInterceptor].
  */
 class MapboxCarNotification internal constructor(
-    private val options: MapboxCarOptions,
+    private val notificationOptions: () -> MapboxCarNotificationOptions,
     private val carContext: CarContext,
     private val idleExtenderUpdater: IdleExtenderUpdater,
     private val freeDriveExtenderUpdater: FreeDriveExtenderUpdater,
     private val activeGuidanceExtenderUpdater: ActiveGuidanceExtenderUpdater,
 ) : MapboxNavigationObserver {
+
+    /**
+     * Creates the car trip notification for an app that does not use
+     * [com.mapbox.navigation.ui.androidauto.MapboxCarContext].
+     *
+     * @param carContext the car context of the session.
+     * @param notificationOptions options of the notification.
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    constructor(
+        carContext: CarContext,
+        notificationOptions: MapboxCarNotificationOptions,
+    ) : this(
+        { notificationOptions },
+        carContext,
+        IdleExtenderUpdater(carContext),
+        FreeDriveExtenderUpdater(carContext),
+        ActiveGuidanceExtenderUpdater(carContext),
+    )
     private var navigationSessionState: NavigationSessionState = NavigationSessionState.Idle
     private var routeProgress: RouteProgress? = null
 
@@ -74,7 +93,7 @@ class MapboxCarNotification internal constructor(
             .setColor(color)
             .setSmallIcon(com.mapbox.navigation.ui.base.R.drawable.mapbox_ic_navigation)
 
-        val carStartAppClass = options.notificationOptions.startAppService
+        val carStartAppClass = notificationOptions().startAppService
         if (carStartAppClass != null) {
             val pendingIntent = CarPendingIntentFactory.create(carContext, carStartAppClass)
             extenderBuilder.setContentIntent(pendingIntent)

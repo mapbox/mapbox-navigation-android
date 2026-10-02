@@ -6,6 +6,7 @@ import androidx.car.app.navigation.NavigationManagerCallback
 import androidx.car.app.navigation.model.Step
 import androidx.car.app.navigation.model.TravelEstimate
 import androidx.car.app.navigation.model.Trip
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.formatter.Rounding
 import com.mapbox.navigation.base.formatter.UnitType
@@ -22,8 +23,6 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.androidauto.internal.AndroidAutoLog
 import com.mapbox.navigation.ui.androidauto.navigation.maneuver.CarManeuverMapper
-import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen
-import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenManager
 import com.mapbox.navigation.ui.androidauto.testing.CarAppTestRule
 import io.mockk.Runs
 import io.mockk.clearAllMocks
@@ -31,7 +30,6 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
-import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkAll
 import io.mockk.verify
@@ -48,7 +46,7 @@ import org.junit.Rule
 import org.junit.Test
 import java.util.Locale
 
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, ExperimentalPreviewMapboxNavigationAPI::class)
 class MapboxCarNavigationManagerTest {
 
     @get:Rule
@@ -75,13 +73,11 @@ class MapboxCarNavigationManagerTest {
         every { getCarService(NavigationManager::class.java) } returns navigationManager
     }
 
-    private val sut = MapboxCarNavigationManager(carContext)
+    private val events = mutableListOf<String>()
+    private val sut = MapboxCarNavigationManager(carContext) { events.add(ON_STOP_NAVIGATION) }
 
     @Before
     fun setup() {
-        mockkStatic(MapboxScreenManager::class)
-        mockkObject(MapboxScreenManager)
-        every { MapboxScreenManager.current() } returns null
         mockkObject(CarManeuverMapper)
         every { CarManeuverMapper.from(any<RouteProgress>(), any()) } returns mockk(relaxed = true)
     }
@@ -221,17 +217,7 @@ class MapboxCarNavigationManagerTest {
     }
 
     @Test
-    fun `onStopNavigation should trigger clearing routes`() {
-        val mapboxNavigation: MapboxNavigation = mockk(relaxed = true)
-        sut.onAttached(mapboxNavigation)
-
-        navigationManagerCallbackSlot.captured.onStopNavigation()
-
-        verify { mapboxNavigation.setNavigationRoutes(emptyList()) }
-    }
-
-    @Test
-    fun `onStopNavigation ends host navigation before clearing routes`() {
+    fun `onStopNavigation ends host navigation before calling onStopNavigation`() {
         val routesObserverSlot = slot<RoutesObserver>()
         val mapboxNavigation: MapboxNavigation = mockk(relaxed = true) {
             every { registerRoutesObserver(capture(routesObserverSlot)) } just Runs
@@ -240,37 +226,21 @@ class MapboxCarNavigationManagerTest {
         routesObserverSlot.captured.onRoutesChanged(
             mockk { every { navigationRoutes } returns listOf(mockk()) },
         )
+        every { navigationManager.navigationEnded() } answers { events.add(NAVIGATION_ENDED) }
 
         navigationManagerCallbackSlot.captured.onStopNavigation()
 
-        verifyOrder {
-            navigationManager.navigationEnded()
-            mapboxNavigation.setNavigationRoutes(emptyList())
-        }
+        assertEquals(listOf(NAVIGATION_ENDED, ON_STOP_NAVIGATION), events)
     }
 
     @Test
-    fun `onStopNavigation should trigger entering FreeDrive`() {
+    fun `onStopNavigation leaves the routes to the app`() {
         val mapboxNavigation: MapboxNavigation = mockk(relaxed = true)
         sut.onAttached(mapboxNavigation)
 
         navigationManagerCallbackSlot.captured.onStopNavigation()
 
-        verify { MapboxScreenManager.replaceTop(MapboxScreen.FREE_DRIVE) }
-    }
-
-    @Test
-    fun `onStopNavigation should remain on unified navigation screen`() {
-        val mapboxNavigation: MapboxNavigation = mockk(relaxed = true)
-        every { MapboxScreenManager.current() } returns mockk {
-            every { key } returns MapboxScreen.NAVIGATION
-        }
-        sut.onAttached(mapboxNavigation)
-
-        navigationManagerCallbackSlot.captured.onStopNavigation()
-
-        verify { mapboxNavigation.setNavigationRoutes(emptyList()) }
-        verify(exactly = 0) { MapboxScreenManager.replaceTop(any()) }
+        verify(exactly = 0) { mapboxNavigation.setNavigationRoutes(any()) }
     }
 
     @Test
@@ -387,7 +357,7 @@ class MapboxCarNavigationManagerTest {
         val progressObservers = mutableListOf<RouteProgressObserver>()
         val mapboxNavigation = mapboxNavigationMock(routesSlot, progressObservers)
         var now = 0L
-        val manager = MapboxCarNavigationManager(carContext) { now }
+        val manager = MapboxCarNavigationManager(carContext, onHostStopNavigation = {}) { now }
         every { CarManeuverMapper.from(any<RouteProgress>(), any()) } returns trip(100)
         val routeProgresses = listOf(
             routeProgress(durationRemaining = 100.0),
@@ -413,7 +383,7 @@ class MapboxCarNavigationManagerTest {
         val progressObservers = mutableListOf<RouteProgressObserver>()
         val mapboxNavigation = mapboxNavigationMock(routesSlot, progressObservers)
         var now = 0L
-        val manager = MapboxCarNavigationManager(carContext) { now }
+        val manager = MapboxCarNavigationManager(carContext, onHostStopNavigation = {}) { now }
         every { CarManeuverMapper.from(any<RouteProgress>(), any()) } returns trip(100)
         val routeProgresses = listOf(
             routeProgress(durationRemaining = 100.0),
@@ -436,7 +406,7 @@ class MapboxCarNavigationManagerTest {
         val progressObservers = mutableListOf<RouteProgressObserver>()
         val mapboxNavigation = mapboxNavigationMock(routesSlot, progressObservers)
         var now = 0L
-        val manager = MapboxCarNavigationManager(carContext) { now }
+        val manager = MapboxCarNavigationManager(carContext, onHostStopNavigation = {}) { now }
         every { CarManeuverMapper.from(any<RouteProgress>(), any()) } returns trip(100)
         val routeProgresses = listOf(
             routeProgress(distanceRemaining = 200.0f),
@@ -465,7 +435,7 @@ class MapboxCarNavigationManagerTest {
         val progressObservers = mutableListOf<RouteProgressObserver>()
         val mapboxNavigation = mapboxNavigationMock(routesSlot, progressObservers)
         var now = 0L
-        val manager = MapboxCarNavigationManager(carContext) { now }
+        val manager = MapboxCarNavigationManager(carContext, onHostStopNavigation = {}) { now }
         every { CarManeuverMapper.from(any<RouteProgress>(), any()) } returns trip(100)
         val routeProgresses = listOf(
             routeProgress(stepIndex = 0),
@@ -586,5 +556,10 @@ class MapboxCarNavigationManagerTest {
             every { mapboxNavigation.getNavigationRoutes() } returns routes.navigationRoutes
         }
         return mapboxNavigation
+    }
+
+    private companion object {
+        const val NAVIGATION_ENDED = "navigationEnded"
+        const val ON_STOP_NAVIGATION = "onStopNavigation"
     }
 }

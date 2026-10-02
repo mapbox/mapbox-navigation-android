@@ -20,7 +20,7 @@ import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class MapboxNavigationScreenTest : MapboxRobolectricTestRunner() {
+class CarNavigationTemplatesTest : MapboxRobolectricTestRunner() {
 
     @Test
     fun `free drive uses navigation template without content card`() {
@@ -36,7 +36,7 @@ class MapboxNavigationScreenTest : MapboxRobolectricTestRunner() {
             .addAction(Action.PAN)
             .build()
 
-        val template = createFreeDriveTemplate(
+        val template = CarNavigationTemplates.freeDrive(
             actionStrip = actionStrip,
             mapActionStrip = mapActionStrip,
         )
@@ -65,7 +65,7 @@ class MapboxNavigationScreenTest : MapboxRobolectricTestRunner() {
             .addAction(Action.PAN)
             .build()
 
-        val template = createActiveGuidanceTemplate(
+        val template = CarNavigationTemplates.activeGuidance(
             navigationInfo = CarNavigationInfo(
                 navigationInfo = navigationInfo,
                 destinationTravelEstimate = travelEstimate,
@@ -86,7 +86,7 @@ class MapboxNavigationScreenTest : MapboxRobolectricTestRunner() {
             every { originalRoutesList } returns emptyList()
         }
 
-        val template = createRoutePreviewTemplate(
+        val template = CarNavigationTemplates.routePreview(
             routesPreview = routesPreview,
             title = "Route preview",
             navigateActionTitle = "Navigate",
@@ -118,7 +118,7 @@ class MapboxNavigationScreenTest : MapboxRobolectricTestRunner() {
         }
         val navigatedRouteIds = mutableListOf<String>()
 
-        val template = createRoutePreviewTemplate(
+        val template = CarNavigationTemplates.routePreview(
             routesPreview = routesPreview,
             title = "Route preview",
             navigateActionTitle = "Navigate",
@@ -149,7 +149,7 @@ class MapboxNavigationScreenTest : MapboxRobolectricTestRunner() {
         }
         val navigatedRouteIds = mutableListOf<String>()
 
-        val template = createRoutePreviewTemplate(
+        val template = CarNavigationTemplates.routePreview(
             routesPreview = routesPreview,
             title = "Route preview",
             navigateActionTitle = "Navigate",
@@ -178,7 +178,7 @@ class MapboxNavigationScreenTest : MapboxRobolectricTestRunner() {
         }
         val selectedRouteIds = mutableListOf<String>()
 
-        val template = createRoutePreviewTemplate(
+        val template = CarNavigationTemplates.routePreview(
             routesPreview = routesPreview,
             title = "Route preview",
             navigateActionTitle = "Navigate",
@@ -200,7 +200,7 @@ class MapboxNavigationScreenTest : MapboxRobolectricTestRunner() {
             every { primaryRouteIndex } returns 0
         }
 
-        val template = createRoutePreviewTemplate(
+        val template = CarNavigationTemplates.routePreview(
             routesPreview = routesPreview,
             title = "Route preview",
             navigateActionTitle = "Navigate",
@@ -210,6 +210,30 @@ class MapboxNavigationScreenTest : MapboxRobolectricTestRunner() {
         )
 
         assertEquals(1, template.singleList!!.items.size)
+    }
+
+    @Test
+    fun `route preview selects the primary route`() {
+        val routesPreview = mockk<RoutesPreview> {
+            every { originalRoutesList } returns listOf(
+                routeWithLegs("first", emptyList()),
+                routeWithLegs("second", emptyList()),
+            )
+            every { primaryRouteIndex } returns 1
+        }
+
+        val template = CarNavigationTemplates.routePreview(
+            routesPreview = routesPreview,
+            title = "Route preview",
+            navigateActionTitle = "Navigate",
+            formatDistance = { "1 km" },
+            onRouteSelected = {},
+            onNavigate = {},
+        )
+
+        val itemList = template.singleList!!
+        assertEquals(2, itemList.items.size)
+        assertEquals(1, itemList.selectedIndex)
     }
 
     private fun routeWithLegs(

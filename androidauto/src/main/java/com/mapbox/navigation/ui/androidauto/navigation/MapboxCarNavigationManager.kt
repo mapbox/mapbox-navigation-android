@@ -5,6 +5,7 @@ import androidx.car.app.CarContext
 import androidx.car.app.navigation.NavigationManager
 import androidx.car.app.navigation.NavigationManagerCallback
 import androidx.car.app.navigation.model.Trip
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -18,8 +19,6 @@ import com.mapbox.navigation.tripdata.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAuto
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAutoFailure
 import com.mapbox.navigation.ui.androidauto.navigation.maneuver.CarManeuverMapper
-import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen
-import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenManager
 import com.mapbox.navigation.ui.androidauto.telemetry.MapboxCarTelemetry
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,10 +28,28 @@ import kotlinx.coroutines.flow.StateFlow
  * registered, the trip status of [MapboxNavigation] will be sent to the [NavigationManager].
  * This is needed to keep the vehicle cluster display updated.
  */
-class MapboxCarNavigationManager @JvmOverloads internal constructor(
+class MapboxCarNavigationManager internal constructor(
     carContext: CarContext,
-    private val elapsedRealtimeMillis: () -> Long = SystemClock::elapsedRealtime,
+    private val onHostStopNavigation: () -> Unit,
+    private val elapsedRealtimeMillis: () -> Long,
 ) : MapboxNavigationObserver {
+
+    /**
+     * Creates a navigation manager for an app that owns its navigation state.
+     *
+     * When the car host stops navigation (e.g. the driver used the host's own stop affordance),
+     * the host is told that navigation ended and [onStopNavigation] is invoked. This class does
+     * not clear the routes of [MapboxNavigation] or change the screens in that case, the app is
+     * expected to stop navigation through its own state.
+     *
+     * @param carContext the car context of the session.
+     * @param onStopNavigation invoked when the car host requests navigation to stop.
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    constructor(
+        carContext: CarContext,
+        onStopNavigation: () -> Unit,
+    ) : this(carContext, onStopNavigation, SystemClock::elapsedRealtime)
 
     private val navigationManager: NavigationManager by lazy {
         carContext.getCarService(NavigationManager::class.java)
@@ -67,10 +84,7 @@ class MapboxCarNavigationManager @JvmOverloads internal constructor(
             logAndroidAuto("$LOG_CATEGORY onStopNavigation")
             super.onStopNavigation()
             endActiveNavigation()
-            mapboxNavigation?.setNavigationRoutes(emptyList())
-            if (MapboxScreenManager.current()?.key != MapboxScreen.NAVIGATION) {
-                MapboxScreenManager.replaceTop(MapboxScreen.FREE_DRIVE)
-            }
+            onHostStopNavigation()
         }
 
         override fun onAutoDriveEnabled() {

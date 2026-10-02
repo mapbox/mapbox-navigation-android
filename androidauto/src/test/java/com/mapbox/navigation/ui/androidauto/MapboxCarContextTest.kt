@@ -6,9 +6,16 @@ import androidx.car.app.Session
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleRegistry
 import com.mapbox.maps.extension.androidauto.MapboxCarMap
+import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen
+import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenManager
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Before
 import org.junit.Rule
@@ -110,5 +117,47 @@ class MapboxCarContextTest {
         val mapboxCarContext = MapboxCarContext(session.lifecycle, mapboxCarMap)
 
         mapboxCarContext.routePreviewRequest
+    }
+
+    @Test
+    fun `stopNavigationFromCarHost clears the routes`() {
+        val mapboxNavigation: MapboxNavigation = mockk(relaxed = true)
+        withMockedScreenManager {
+            MapboxCarContext(session.lifecycle, mapboxCarMap).stopNavigationFromCarHost(
+                mapboxNavigation,
+            )
+        }
+
+        verify { mapboxNavigation.setNavigationRoutes(emptyList()) }
+    }
+
+    @Test
+    fun `stopNavigationFromCarHost replaces a legacy guidance screen with free drive`() {
+        withMockedScreenManager {
+            MapboxCarContext(session.lifecycle, mapboxCarMap).stopNavigationFromCarHost(null)
+
+            verify { MapboxScreenManager.replaceTop(MapboxScreen.FREE_DRIVE) }
+        }
+    }
+
+    @Test
+    fun `stopNavigationFromCarHost stays on the unified navigation screen`() {
+        withMockedScreenManager {
+            every { MapboxScreenManager.current() } returns mockk {
+                every { key } returns MapboxScreen.NAVIGATION
+            }
+
+            MapboxCarContext(session.lifecycle, mapboxCarMap).stopNavigationFromCarHost(null)
+
+            verify(exactly = 0) { MapboxScreenManager.replaceTop(any()) }
+        }
+    }
+
+    private fun withMockedScreenManager(block: () -> Unit) {
+        mockkObject(MapboxScreenManager) {
+            every { MapboxScreenManager.current() } returns null
+            every { MapboxScreenManager.replaceTop(any()) } just Runs
+            block()
+        }
     }
 }

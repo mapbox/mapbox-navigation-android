@@ -6,6 +6,9 @@ import androidx.car.app.Session
 import androidx.car.app.navigation.NavigationManager
 import androidx.lifecycle.Lifecycle
 import com.mapbox.maps.extension.androidauto.MapboxCarMap
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.ui.androidauto.internal.context.MapboxCarContextOwner
 import com.mapbox.navigation.ui.androidauto.internal.context.mapboxCarNavigationService
 import com.mapbox.navigation.ui.androidauto.internal.context.mapboxCarService
@@ -17,6 +20,7 @@ import com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotification
 import com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotificationOptions
 import com.mapbox.navigation.ui.androidauto.placeslistonmap.PlacesListOnMapProvider
 import com.mapbox.navigation.ui.androidauto.preview.CarRoutePreviewRequest
+import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen
 import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenManager
 import com.mapbox.navigation.ui.androidauto.settings.MapboxCarStorage
 
@@ -73,8 +77,11 @@ class MapboxCarContext(
      * @see MapboxCarNavigationManager
      * @see NavigationManager
      */
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     val mapboxNavigationManager by mapboxCarNavigationService("MapboxCarNavigationManager") {
-        MapboxCarNavigationManager(carContext)
+        MapboxCarNavigationManager(carContext) {
+            stopNavigationFromCarHost(MapboxNavigationApp.current())
+        }
     }
 
     /**
@@ -84,7 +91,7 @@ class MapboxCarContext(
      */
     internal val mapboxNotification by mapboxCarNavigationService("MapboxCarNotification") {
         MapboxCarNotification(
-            options,
+            { options.notificationOptions },
             carContext,
             IdleExtenderUpdater(carContext),
             FreeDriveExtenderUpdater(carContext),
@@ -114,5 +121,12 @@ class MapboxCarContext(
     fun customize(action: MapboxCarOptions.Customization.() -> Unit) = apply {
         val customization = MapboxCarOptions.Customization().apply(action)
         options.applyCustomization(customization)
+    }
+
+    internal fun stopNavigationFromCarHost(mapboxNavigation: MapboxNavigation?) {
+        mapboxNavigation?.setNavigationRoutes(emptyList())
+        if (MapboxScreenManager.current()?.key != MapboxScreen.NAVIGATION) {
+            MapboxScreenManager.replaceTop(MapboxScreen.FREE_DRIVE)
+        }
     }
 }

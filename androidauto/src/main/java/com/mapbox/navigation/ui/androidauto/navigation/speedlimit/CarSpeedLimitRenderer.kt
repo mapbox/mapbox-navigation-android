@@ -6,6 +6,7 @@ import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.formatter.UnitType
 import com.mapbox.navigation.base.speed.model.SpeedLimitSign
@@ -15,12 +16,13 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.ui.androidauto.MapboxCarContext
-import com.mapbox.navigation.ui.androidauto.MapboxCarOptions
 import com.mapbox.navigation.ui.androidauto.internal.extensions.mapboxNavigationForward
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAuto
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlin.math.roundToInt
@@ -34,7 +36,7 @@ class CarSpeedLimitRenderer
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 internal constructor(
     private val services: CarSpeedLimitServices,
-    private val options: MapboxCarOptions,
+    private val speedLimitOptions: StateFlow<SpeedLimitOptions>,
 ) : MapboxCarMapObserver {
 
     /**
@@ -42,7 +44,21 @@ internal constructor(
      */
     constructor(mapboxCarContext: MapboxCarContext) : this(
         CarSpeedLimitServices(),
-        mapboxCarContext.options,
+        mapboxCarContext.options.speedLimitOptions,
+    )
+
+    /**
+     * Creates a speed limit renderer for an app that does not use [MapboxCarContext].
+     *
+     * @param speedLimitOptions options of the speed limit sign, changes are applied immediately.
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    constructor(
+        speedLimitOptions: StateFlow<SpeedLimitOptions> =
+            MutableStateFlow(SpeedLimitOptions.Builder().build()),
+    ) : this(
+        CarSpeedLimitServices(),
+        speedLimitOptions,
     )
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -79,7 +95,7 @@ internal constructor(
         // this can still fire with a location update queued before onDetached() unregistered it
         // and cleared distanceFormatterOptions.
         val distanceFormatterOptions = distanceFormatterOptions ?: return
-        val speedLimitOptions = options.speedLimitOptions.value
+        val speedLimitOptions = speedLimitOptions.value
         val signFormat = speedLimitOptions.forcedSignFormat
             ?: locationMatcherResult.speedLimitInfo.sign
         val threshold = speedLimitOptions.warningThreshold
@@ -132,13 +148,13 @@ internal constructor(
 
     override fun onAttached(mapboxCarMapSurface: MapboxCarMapSurface) {
         logAndroidAuto("CarSpeedLimitRenderer carMapSurface loaded")
-        val signFormat = options.speedLimitOptions.value.forcedSignFormat
+        val signFormat = speedLimitOptions.value.forcedSignFormat
             ?: SpeedLimitSign.MUTCD
         val speedLimitWidget = services.speedLimitWidget(signFormat).also { speedLimitWidget = it }
         mapboxCarMapSurface.mapSurface.addWidget(speedLimitWidget)
         MapboxNavigationApp.registerObserver(navigationObserver)
         scope = MainScope()
-        options.speedLimitOptions
+        speedLimitOptions
             .onEach { speedLimitWidget.update(it.forcedSignFormat, it.warningThreshold) }
             .launchIn(scope)
     }

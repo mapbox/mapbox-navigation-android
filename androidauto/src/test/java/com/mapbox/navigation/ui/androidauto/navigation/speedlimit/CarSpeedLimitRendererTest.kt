@@ -4,7 +4,6 @@ import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.ui.androidauto.MapboxCarOptions
 import com.mapbox.navigation.ui.androidauto.testing.CarAppTestRule
 import io.mockk.every
 import io.mockk.mockk
@@ -30,10 +29,7 @@ class CarSpeedLimitRendererTest {
         every { speedLimitWidget(any()) } returns speedLimitWidget
     }
     private val sutOptions = MutableStateFlow(SpeedLimitOptions.Builder().build())
-    private val options: MapboxCarOptions = mockk {
-        every { speedLimitOptions } returns sutOptions
-    }
-    private val sut = CarSpeedLimitRenderer(services, options)
+    private val sut = CarSpeedLimitRenderer(services, sutOptions)
 
     @Test
     fun `verify speed limit widget is created`() {

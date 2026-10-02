@@ -54,7 +54,7 @@ class MapboxCarNotificationTest {
 
     private val timeFormatter = mockk<TimeFormatter>(relaxed = true)
     private val mapboxCarNotification = MapboxCarNotification(
-        options,
+        { options.notificationOptions },
         carContext,
         idleExtenderUpdater,
         freeDriveExtenderUpdater,
