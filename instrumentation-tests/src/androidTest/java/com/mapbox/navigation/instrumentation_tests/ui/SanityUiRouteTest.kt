@@ -9,9 +9,11 @@ class SanityUiRouteTest : SimpleMapViewNavigationTest() {
 
     @Test
     fun route_completes() = sdkTest {
-        addRouteLine()
-        addLocationPuck()
-        addNavigationCamera()
-        mapboxNavigation.flowOnFinalDestinationArrival().first()
+        withSimpleMapViewNavigation { mapboxNavigation ->
+            addRouteLine(mapboxNavigation)
+            addLocationPuck(mapboxNavigation)
+            addNavigationCamera(mapboxNavigation)
+            mapboxNavigation.flowOnFinalDestinationArrival().first()
+        }
     }
 }

@@ -2,11 +2,10 @@ package com.mapbox.navigation.instrumentation_tests.core
 
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.history.MapboxHistoryReader
 import com.mapbox.navigation.core.history.model.HistoryEvent
@@ -34,6 +33,7 @@ import com.mapbox.navigation.testing.utils.readRawFileText
 import com.mapbox.navigation.testing.utils.routes.MockRoute
 import com.mapbox.navigation.testing.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.utils.routes.requestMockRoutes
+import com.mapbox.navigation.testing.utils.withMapboxNavigation
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.flow.filter
@@ -48,6 +48,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
 import kotlin.reflect.KClass
 
+@OptIn(ExperimentalMapboxNavigationAPI::class)
 class HistoryRecordingStateChangeObserverTest :
     BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
 
@@ -56,7 +57,6 @@ class HistoryRecordingStateChangeObserverTest :
 
     @get:Rule
     val mockLocationReplayerRule = MockLocationReplayerRule(mockLocationUpdatesRule)
-    private lateinit var mapboxNavigation: MapboxNavigation
 
     override fun setupMockLocation() = mockLocationUpdatesRule.generateLocationUpdate {
         latitude = 38.894721
@@ -65,296 +65,300 @@ class HistoryRecordingStateChangeObserverTest :
 
     @Test
     fun history_recording_observer_events() = sdkTest {
-        createMapboxNavigation()
-        val eventsChannel = Channel<HistoryRecordingStateChangeEvent>(Channel.UNLIMITED)
-        observeHistoryRecordingEvents(eventsChannel)
-        val nonEmptyRoutes = mapboxNavigation.requestMockRoutes(
-            mockWebServerRule,
-            RoutesProvider.dc_very_short(activity),
-        )
-        val otherNonEmptyRoutes = mapboxNavigation.requestMockRoutes(
-            mockWebServerRule,
-            RoutesProvider.dc_very_short_two_legs(activity),
-        )
+        withMapboxNavigation { mapboxNavigation ->
+            val eventsChannel = Channel<HistoryRecordingStateChangeEvent>(Channel.UNLIMITED)
+            observeHistoryRecordingEvents(mapboxNavigation, eventsChannel)
+            val nonEmptyRoutes = mapboxNavigation.requestMockRoutes(
+                mockWebServerRule,
+                RoutesProvider.dc_very_short(activity),
+            )
+            val otherNonEmptyRoutes = mapboxNavigation.requestMockRoutes(
+                mockWebServerRule,
+                RoutesProvider.dc_very_short_two_legs(activity),
+            )
 
-        checkHasNoNextElement(eventsChannel)
-        mapboxNavigation.startTripSession()
-        assertEquals(
-            HistoryRecordingStateChangeEvent(
-                HistoryRecordingStateChangeEventType.START,
-                HistoryRecordingSessionState.FreeDrive::class,
-            ),
-            eventsChannel.receive(),
-        )
-        mapboxNavigation.setNavigationRoutes(nonEmptyRoutes)
-        assertEquals(
-            listOf(
+            checkHasNoNextElement(eventsChannel)
+            mapboxNavigation.startTripSession()
+            assertEquals(
+                HistoryRecordingStateChangeEvent(
+                    HistoryRecordingStateChangeEventType.START,
+                    HistoryRecordingSessionState.FreeDrive::class,
+                ),
+                eventsChannel.receive(),
+            )
+            mapboxNavigation.setNavigationRoutes(nonEmptyRoutes)
+            assertEquals(
+                listOf(
+                    HistoryRecordingStateChangeEvent(
+                        HistoryRecordingStateChangeEventType.STOP,
+                        HistoryRecordingSessionState.FreeDrive::class,
+                    ),
+                    HistoryRecordingStateChangeEvent(
+                        HistoryRecordingStateChangeEventType.START,
+                        HistoryRecordingSessionState.ActiveGuidance::class,
+                    ),
+                ),
+                eventsChannel.receive(2),
+            )
+            // set other non-empty routes - no state transitions - do nothing
+            mapboxNavigation.setNavigationRoutesAndWaitForUpdate(otherNonEmptyRoutes)
+            checkHasNoNextElement(eventsChannel)
+            // set invalid routes, but has other non-empty routes - do nothing
+            mapboxNavigation.setNavigationRoutesAndAwaitError(nonEmptyRoutes, legIndex = 15)
+            checkHasNoNextElement(eventsChannel)
+            // alternatives - do nothing
+            mapboxNavigation.setNavigationRoutesAndWaitForAlternativesUpdate(
+                otherNonEmptyRoutes + nonEmptyRoutes,
+            )
+            checkHasNoNextElement(eventsChannel)
+            mapboxNavigation.setNavigationRoutes(emptyList())
+            assertEquals(
+                listOf(
+                    HistoryRecordingStateChangeEvent(
+                        HistoryRecordingStateChangeEventType.STOP,
+                        HistoryRecordingSessionState.ActiveGuidance::class,
+                    ),
+                    HistoryRecordingStateChangeEvent(
+                        HistoryRecordingStateChangeEventType.START,
+                        HistoryRecordingSessionState.FreeDrive::class,
+                    ),
+                ),
+                eventsChannel.receive(2),
+            )
+            mapboxNavigation.stopTripSession()
+            assertEquals(
                 HistoryRecordingStateChangeEvent(
                     HistoryRecordingStateChangeEventType.STOP,
                     HistoryRecordingSessionState.FreeDrive::class,
                 ),
+                eventsChannel.receive(),
+            )
+            // trip session is stopped - still Idle - do nothing
+            mapboxNavigation.setNavigationRoutesAndWaitForUpdate(nonEmptyRoutes)
+            checkHasNoNextElement(eventsChannel)
+            mapboxNavigation.startTripSession()
+            assertEquals(
                 HistoryRecordingStateChangeEvent(
                     HistoryRecordingStateChangeEventType.START,
                     HistoryRecordingSessionState.ActiveGuidance::class,
                 ),
-            ),
-            eventsChannel.receive(2),
-        )
-        // set other non-empty routes - no state transitions - do nothing
-        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(otherNonEmptyRoutes)
-        checkHasNoNextElement(eventsChannel)
-        // set invalid routes, but has other non-empty routes - do nothing
-        mapboxNavigation.setNavigationRoutesAndAwaitError(nonEmptyRoutes, legIndex = 15)
-        checkHasNoNextElement(eventsChannel)
-        // alternatives - do nothing
-        mapboxNavigation.setNavigationRoutesAndWaitForAlternativesUpdate(
-            otherNonEmptyRoutes + nonEmptyRoutes,
-        )
-        checkHasNoNextElement(eventsChannel)
-        mapboxNavigation.setNavigationRoutes(emptyList())
-        assertEquals(
-            listOf(
+                eventsChannel.receive(),
+            )
+            mapboxNavigation.stopTripSession()
+            assertEquals(
                 HistoryRecordingStateChangeEvent(
                     HistoryRecordingStateChangeEventType.STOP,
                     HistoryRecordingSessionState.ActiveGuidance::class,
                 ),
+                eventsChannel.receive(),
+            )
+            // trip session stopped - still Idle - do nothing
+            mapboxNavigation.clearNavigationRoutesAndWaitForUpdate()
+            checkHasNoNextElement(eventsChannel)
+            mapboxNavigation.startTripSession()
+            assertEquals(
                 HistoryRecordingStateChangeEvent(
                     HistoryRecordingStateChangeEventType.START,
                     HistoryRecordingSessionState.FreeDrive::class,
                 ),
-            ),
-            eventsChannel.receive(2),
-        )
-        mapboxNavigation.stopTripSession()
-        assertEquals(
-            HistoryRecordingStateChangeEvent(
-                HistoryRecordingStateChangeEventType.STOP,
-                HistoryRecordingSessionState.FreeDrive::class,
-            ),
-            eventsChannel.receive(),
-        )
-        // trip session is stopped - still Idle - do nothing
-        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(nonEmptyRoutes)
-        checkHasNoNextElement(eventsChannel)
-        mapboxNavigation.startTripSession()
-        assertEquals(
-            HistoryRecordingStateChangeEvent(
-                HistoryRecordingStateChangeEventType.START,
-                HistoryRecordingSessionState.ActiveGuidance::class,
-            ),
-            eventsChannel.receive(),
-        )
-        mapboxNavigation.stopTripSession()
-        assertEquals(
-            HistoryRecordingStateChangeEvent(
-                HistoryRecordingStateChangeEventType.STOP,
-                HistoryRecordingSessionState.ActiveGuidance::class,
-            ),
-            eventsChannel.receive(),
-        )
-        // trip session stopped - still Idle - do nothing
-        mapboxNavigation.clearNavigationRoutesAndWaitForUpdate()
-        checkHasNoNextElement(eventsChannel)
-        mapboxNavigation.startTripSession()
-        assertEquals(
-            HistoryRecordingStateChangeEvent(
-                HistoryRecordingStateChangeEventType.START,
-                HistoryRecordingSessionState.FreeDrive::class,
-            ),
-            eventsChannel.receive(),
-        )
-        // immediately cancel active guidance because of the invalid route
-        mapboxNavigation.setNavigationRoutes(otherNonEmptyRoutes, initialLegIndex = 16)
-        assertEquals(
-            listOf(
+                eventsChannel.receive(),
+            )
+            // immediately cancel active guidance because of the invalid route
+            mapboxNavigation.setNavigationRoutes(otherNonEmptyRoutes, initialLegIndex = 16)
+            assertEquals(
+                listOf(
+                    HistoryRecordingStateChangeEvent(
+                        HistoryRecordingStateChangeEventType.STOP,
+                        HistoryRecordingSessionState.FreeDrive::class,
+                    ),
+                    HistoryRecordingStateChangeEvent(
+                        HistoryRecordingStateChangeEventType.START,
+                        HistoryRecordingSessionState.ActiveGuidance::class,
+                    ),
+                    HistoryRecordingStateChangeEvent(
+                        HistoryRecordingStateChangeEventType.CANCEL,
+                        HistoryRecordingSessionState.ActiveGuidance::class,
+                    ),
+                    HistoryRecordingStateChangeEvent(
+                        HistoryRecordingStateChangeEventType.START,
+                        HistoryRecordingSessionState.FreeDrive::class,
+                    ),
+                ),
+                eventsChannel.receive(4),
+            )
+            mapboxNavigation.stopTripSession()
+            assertEquals(
                 HistoryRecordingStateChangeEvent(
                     HistoryRecordingStateChangeEventType.STOP,
                     HistoryRecordingSessionState.FreeDrive::class,
                 ),
-                HistoryRecordingStateChangeEvent(
-                    HistoryRecordingStateChangeEventType.START,
-                    HistoryRecordingSessionState.ActiveGuidance::class,
-                ),
-                HistoryRecordingStateChangeEvent(
-                    HistoryRecordingStateChangeEventType.CANCEL,
-                    HistoryRecordingSessionState.ActiveGuidance::class,
-                ),
-                HistoryRecordingStateChangeEvent(
-                    HistoryRecordingStateChangeEventType.START,
-                    HistoryRecordingSessionState.FreeDrive::class,
-                ),
-            ),
-            eventsChannel.receive(4),
-        )
-        mapboxNavigation.stopTripSession()
-        assertEquals(
-            HistoryRecordingStateChangeEvent(
-                HistoryRecordingStateChangeEventType.STOP,
-                HistoryRecordingSessionState.FreeDrive::class,
-            ),
-            eventsChannel.receive(),
-        )
-        checkHasNoNextElement(eventsChannel)
+                eventsChannel.receive(),
+            )
+            checkHasNoNextElement(eventsChannel)
+        }
     }
 
     @Test
     fun history_recording_observer_receives_current_state_event_for_active_sessions() = sdkTest {
-        createMapboxNavigation()
-        val nonEmptyRoutes = mapboxNavigation.requestMockRoutes(
-            mockWebServerRule,
-            RoutesProvider.dc_very_short(activity),
-        )
-        val eventsChannelIdle = Channel<HistoryRecordingStateChangeEvent>(Channel.UNLIMITED)
-        val eventsChannelFreeDrive = Channel<HistoryRecordingStateChangeEvent>(Channel.UNLIMITED)
-        val eventsChannelActiveGuidance =
-            Channel<HistoryRecordingStateChangeEvent>(Channel.UNLIMITED)
+        withMapboxNavigation { mapboxNavigation ->
+            val nonEmptyRoutes = mapboxNavigation.requestMockRoutes(
+                mockWebServerRule,
+                RoutesProvider.dc_very_short(activity),
+            )
+            val eventsChannelIdle = Channel<HistoryRecordingStateChangeEvent>(Channel.UNLIMITED)
+            val eventsChannelFreeDrive =
+                Channel<HistoryRecordingStateChangeEvent>(Channel.UNLIMITED)
+            val eventsChannelActiveGuidance =
+                Channel<HistoryRecordingStateChangeEvent>(Channel.UNLIMITED)
 
-        observeHistoryRecordingEvents(eventsChannelIdle)
-        checkHasNoNextElement(eventsChannelIdle)
+            observeHistoryRecordingEvents(mapboxNavigation, eventsChannelIdle)
+            checkHasNoNextElement(eventsChannelIdle)
 
-        mapboxNavigation.startTripSession()
-        observeHistoryRecordingEvents(eventsChannelFreeDrive)
+            mapboxNavigation.startTripSession()
+            observeHistoryRecordingEvents(mapboxNavigation, eventsChannelFreeDrive)
 
-        assertEquals(
-            HistoryRecordingStateChangeEvent(
-                HistoryRecordingStateChangeEventType.START,
-                HistoryRecordingSessionState.FreeDrive::class,
-            ),
-            eventsChannelFreeDrive.receive(),
-        )
+            assertEquals(
+                HistoryRecordingStateChangeEvent(
+                    HistoryRecordingStateChangeEventType.START,
+                    HistoryRecordingSessionState.FreeDrive::class,
+                ),
+                eventsChannelFreeDrive.receive(),
+            )
 
-        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(nonEmptyRoutes)
-        observeHistoryRecordingEvents(eventsChannelActiveGuidance)
+            mapboxNavigation.setNavigationRoutesAndWaitForUpdate(nonEmptyRoutes)
+            observeHistoryRecordingEvents(mapboxNavigation, eventsChannelActiveGuidance)
 
-        assertEquals(
-            HistoryRecordingStateChangeEvent(
-                HistoryRecordingStateChangeEventType.START,
-                HistoryRecordingSessionState.ActiveGuidance::class,
-            ),
-            eventsChannelActiveGuidance.receive(),
-        )
+            assertEquals(
+                HistoryRecordingStateChangeEvent(
+                    HistoryRecordingStateChangeEventType.START,
+                    HistoryRecordingSessionState.ActiveGuidance::class,
+                ),
+                eventsChannelActiveGuidance.receive(),
+            )
+        }
     }
 
     @Test
     fun history_recording_observer_route_refresh() = sdkTest {
         val mockRoute = RoutesProvider.dc_very_short(activity)
         setUpMockRequestHandlersForRefresh(mockRoute)
-        mapboxNavigation = MapboxNavigationProvider.create(
-            NavigationOptions.Builder(activity)
-                .routeRefreshOptions(generateRouteRefreshOptions())
-                .navigatorPredictionMillis(0L)
-                .build(),
-        )
-        val routes = mapboxNavigation.requestMockRoutes(
-            mockWebServerRule,
-            mockRoute,
-        )
+        withMapboxNavigation(
+            routeRefreshOptions = generateRouteRefreshOptions(),
+            navigatorPredictionMillis = 0L,
+        ) { mapboxNavigation ->
+            val routes = mapboxNavigation.requestMockRoutes(
+                mockWebServerRule,
+                mockRoute,
+            )
 
-        val eventsChannel = Channel<HistoryRecordingStateChangeEvent>(Channel.UNLIMITED)
-        observeHistoryRecordingEvents(eventsChannel)
+            val eventsChannel = Channel<HistoryRecordingStateChangeEvent>(Channel.UNLIMITED)
+            observeHistoryRecordingEvents(mapboxNavigation, eventsChannel)
 
-        mapboxNavigation.startTripSession()
-        stayOnPosition(mockRoute.routeWaypoints.first())
-        mapboxNavigation.setNavigationRoutes(routes)
-        assertEquals(
-            listOf(
-                HistoryRecordingStateChangeEvent(
-                    HistoryRecordingStateChangeEventType.START,
-                    HistoryRecordingSessionState.FreeDrive::class,
+            mapboxNavigation.startTripSession()
+            stayOnPosition(mockRoute.routeWaypoints.first())
+            mapboxNavigation.setNavigationRoutes(routes)
+            assertEquals(
+                listOf(
+                    HistoryRecordingStateChangeEvent(
+                        HistoryRecordingStateChangeEventType.START,
+                        HistoryRecordingSessionState.FreeDrive::class,
+                    ),
+                    HistoryRecordingStateChangeEvent(
+                        HistoryRecordingStateChangeEventType.STOP,
+                        HistoryRecordingSessionState.FreeDrive::class,
+                    ),
+                    HistoryRecordingStateChangeEvent(
+                        HistoryRecordingStateChangeEventType.START,
+                        HistoryRecordingSessionState.ActiveGuidance::class,
+                    ),
                 ),
+                eventsChannel.receive(3),
+            )
+            mapboxNavigation.routesUpdates()
+                .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
+                .first()
+            checkHasNoNextElement(eventsChannel)
+
+            mapboxNavigation.stopTripSession()
+            assertEquals(
                 HistoryRecordingStateChangeEvent(
                     HistoryRecordingStateChangeEventType.STOP,
-                    HistoryRecordingSessionState.FreeDrive::class,
-                ),
-                HistoryRecordingStateChangeEvent(
-                    HistoryRecordingStateChangeEventType.START,
                     HistoryRecordingSessionState.ActiveGuidance::class,
                 ),
-            ),
-            eventsChannel.receive(3),
-        )
-        mapboxNavigation.routesUpdates()
-            .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REFRESH }
-            .first()
-        checkHasNoNextElement(eventsChannel)
-
-        mapboxNavigation.stopTripSession()
-        assertEquals(
-            HistoryRecordingStateChangeEvent(
-                HistoryRecordingStateChangeEventType.STOP,
-                HistoryRecordingSessionState.ActiveGuidance::class,
-            ),
-            eventsChannel.receive(),
-        )
+                eventsChannel.receive(),
+            )
+        }
     }
 
     @Test
     fun history_recording_observer_reroute() = sdkTest {
-        createMapboxNavigation()
-        val mockRoute = RoutesProvider.dc_very_short(activity)
-        val routes = mapboxNavigation.requestMockRoutes(
-            mockWebServerRule,
-            mockRoute,
-        )
-        val offRouteLocationUpdate = getOffRouteLocation(mockRoute.routeWaypoints.first())
-        setUpMockRequestHandlersForReroute(mockRoute, offRouteLocationUpdate)
+        withMapboxNavigation { mapboxNavigation ->
+            val mockRoute = RoutesProvider.dc_very_short(activity)
+            val routes = mapboxNavigation.requestMockRoutes(
+                mockWebServerRule,
+                mockRoute,
+            )
+            val offRouteLocationUpdate = getOffRouteLocation(mockRoute.routeWaypoints.first())
+            setUpMockRequestHandlersForReroute(mockRoute, offRouteLocationUpdate)
 
-        val eventsChannel = Channel<HistoryRecordingStateChangeEvent>(Channel.UNLIMITED)
-        observeHistoryRecordingEvents(eventsChannel)
+            val eventsChannel = Channel<HistoryRecordingStateChangeEvent>(Channel.UNLIMITED)
+            observeHistoryRecordingEvents(mapboxNavigation, eventsChannel)
 
-        mapboxNavigation.startTripSession()
-        stayOnPosition(offRouteLocationUpdate)
-        mapboxNavigation.setNavigationRoutes(routes)
-        assertEquals(
-            listOf(
-                HistoryRecordingStateChangeEvent(
-                    HistoryRecordingStateChangeEventType.START,
-                    HistoryRecordingSessionState.FreeDrive::class,
+            mapboxNavigation.startTripSession()
+            stayOnPosition(offRouteLocationUpdate)
+            mapboxNavigation.setNavigationRoutes(routes)
+            assertEquals(
+                listOf(
+                    HistoryRecordingStateChangeEvent(
+                        HistoryRecordingStateChangeEventType.START,
+                        HistoryRecordingSessionState.FreeDrive::class,
+                    ),
+                    HistoryRecordingStateChangeEvent(
+                        HistoryRecordingStateChangeEventType.STOP,
+                        HistoryRecordingSessionState.FreeDrive::class,
+                    ),
+                    HistoryRecordingStateChangeEvent(
+                        HistoryRecordingStateChangeEventType.START,
+                        HistoryRecordingSessionState.ActiveGuidance::class,
+                    ),
                 ),
+                eventsChannel.receive(3),
+            )
+            mapboxNavigation.routesUpdates()
+                .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE }
+                .first()
+            checkHasNoNextElement(eventsChannel)
+
+            mapboxNavigation.stopTripSession()
+            assertEquals(
                 HistoryRecordingStateChangeEvent(
                     HistoryRecordingStateChangeEventType.STOP,
-                    HistoryRecordingSessionState.FreeDrive::class,
-                ),
-                HistoryRecordingStateChangeEvent(
-                    HistoryRecordingStateChangeEventType.START,
                     HistoryRecordingSessionState.ActiveGuidance::class,
                 ),
-            ),
-            eventsChannel.receive(3),
-        )
-        mapboxNavigation.routesUpdates()
-            .filter { it.reason == RoutesExtra.ROUTES_UPDATE_REASON_REROUTE }
-            .first()
-        checkHasNoNextElement(eventsChannel)
-
-        mapboxNavigation.stopTripSession()
-        assertEquals(
-            HistoryRecordingStateChangeEvent(
-                HistoryRecordingStateChangeEventType.STOP,
-                HistoryRecordingSessionState.ActiveGuidance::class,
-            ),
-            eventsChannel.receive(),
-        )
+                eventsChannel.receive(),
+            )
+        }
     }
 
     @Test
     fun history_recording_observer_ensures_first_set_route_event() = sdkTest {
-        createMapboxNavigation()
-        val routes = mapboxNavigation.requestMockRoutes(
-            mockWebServerRule,
-            RoutesProvider.dc_very_short(activity),
-        )
-        mapboxNavigation.startTripSession()
+        withMapboxNavigation { mapboxNavigation ->
+            val routes = mapboxNavigation.requestMockRoutes(
+                mockWebServerRule,
+                RoutesProvider.dc_very_short(activity),
+            )
+            mapboxNavigation.startTripSession()
 
-        val historyFilePath = awaitStopActiveGuidanceRecording(routes)
-        assertNotNull(historyFilePath)
-        val historyEvents = mutableListOf<HistoryEvent>()
-        val reader = MapboxHistoryReader(historyFilePath!!)
-        while (reader.hasNext()) {
-            historyEvents.add(reader.next())
+            val historyFilePath = awaitStopActiveGuidanceRecording(mapboxNavigation, routes)
+            assertNotNull(historyFilePath)
+            val historyEvents = mutableListOf<HistoryEvent>()
+            val reader = MapboxHistoryReader(historyFilePath!!)
+            while (reader.hasNext()) {
+                historyEvents.add(reader.next())
+            }
+            val setRouteEvents = historyEvents.filterIsInstance<HistoryEventSetRoute>()
+            assertEquals(routes[0].id, setRouteEvents.firstNotNullOf { it.navigationRoute }.id)
         }
-        val setRouteEvents = historyEvents.filterIsInstance<HistoryEventSetRoute>()
-        assertEquals(routes[0].id, setRouteEvents.firstNotNullOf { it.navigationRoute }.id)
     }
 
     private fun generateRouteRefreshOptions(): RouteRefreshOptions {
@@ -407,13 +411,6 @@ class HistoryRecordingStateChangeObserverTest :
     private fun getOffRouteLocation(originLocation: Point): Point =
         Point.fromLngLat(originLocation.longitude(), originLocation.latitude() + 0.002)
 
-    private fun createMapboxNavigation() {
-        mapboxNavigation = MapboxNavigationProvider.create(
-            NavigationOptions.Builder(activity)
-                .build(),
-        )
-    }
-
     private fun stayOnPosition(position: Point) {
         mockLocationReplayerRule.loopUpdate(
             mockLocationUpdatesRule.generateLocationUpdate {
@@ -425,6 +422,7 @@ class HistoryRecordingStateChangeObserverTest :
     }
 
     private fun observeHistoryRecordingEvents(
+        mapboxNavigation: MapboxNavigation,
         eventsChannel: Channel<HistoryRecordingStateChangeEvent>,
     ) {
         val observer = object : HistoryRecordingStateChangeObserver {
@@ -460,6 +458,7 @@ class HistoryRecordingStateChangeObserverTest :
     }
 
     private suspend fun awaitStopActiveGuidanceRecording(
+        mapboxNavigation: MapboxNavigation,
         routes: List<NavigationRoute>,
     ) = suspendCancellableCoroutine<String?> { continuation ->
         val observer = object : HistoryRecordingStateChangeObserver {

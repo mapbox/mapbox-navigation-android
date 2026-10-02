@@ -25,7 +25,7 @@ import org.junit.rules.RuleChain
  * `MapboxNavigationCreator.kt`) wires that provider in automatically.
  */
 abstract class BaseCoreNoCleanUpTest(
-    useFakeDeviceLocationProvider: Boolean = false,
+    useFakeDeviceLocationProvider: Boolean = true,
 ) {
 
     private val permissionsToGrant by lazy {

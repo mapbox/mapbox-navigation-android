@@ -12,6 +12,7 @@ import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.extensions.LocaleEx
 import com.mapbox.navigation.base.internal.time.TimeFormatter
+import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.testing.ui.utils.coroutines.awaitViewAnnotations
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
@@ -48,56 +49,58 @@ class RouteOverviewCalloutsTest : SimpleMapViewNavigationTest() {
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     @Test
     fun callouts_are_displayed_for_every_route_in_overview_state() = sdkTest(60_000) {
-        val testRoutes = mapboxNavigation.routesUpdates().first().navigationRoutes
-        assertTrue("test expects alternatives", testRoutes.size > 1)
+        withSimpleMapViewNavigation { mapboxNavigation ->
+            val testRoutes = mapboxNavigation.routesUpdates().first().navigationRoutes
+            assertTrue("test expects alternatives", testRoutes.size > 1)
 
-        // Pin the puck at the origin: otherwise the base class keeps replaying the route, which
-        // keeps re-evaluating (and shrinking) the OVERVIEW frame as progress advances.
-        val originLocation = mockLocationUpdatesRule.generateLocationUpdate {
-            latitude = mockRoute.routeWaypoints.first().latitude()
-            longitude = mockRoute.routeWaypoints.first().longitude()
-        }
-        mockLocationReplayerRule.loopUpdate(originLocation, times = 60)
+            // Pin the puck at the origin: otherwise the base class keeps replaying the route,
+            // which keeps re-evaluating (and shrinking) the OVERVIEW frame as progress advances.
+            val originLocation = mockLocationUpdatesRule.generateLocationUpdate {
+                latitude = mockRoute.routeWaypoints.first().latitude()
+                longitude = mockRoute.routeWaypoints.first().longitude()
+            }
+            mockLocationReplayerRule.loopUpdate(originLocation, times = 60)
 
-        addRouteLineWithCallouts()
-        addNavigationCamera()
+            addRouteLineWithCallouts(mapboxNavigation)
+            addNavigationCamera(mapboxNavigation)
 
-        val padding = 40.0 * Resources.getSystem().displayMetrics.density
-        mapboxNavigationViewportDataSource.overviewPadding =
-            EdgeInsets(padding, padding, padding, padding)
+            val padding = 40.0 * Resources.getSystem().displayMetrics.density
+            mapboxNavigationViewportDataSource.overviewPadding =
+                EdgeInsets(padding, padding, padding, padding)
 
-        awaitCameraOverview()
-        awaitCameraStable()
+            awaitCameraOverview()
+            awaitCameraStable()
 
-        val calloutViews = activity.binding.mapView.viewAnnotationManager
-            .awaitViewAnnotations(expectedCount = testRoutes.size)
-        assertEquals(testRoutes.size, calloutViews.size)
+            val calloutViews = activity.binding.mapView.viewAnnotationManager
+                .awaitViewAnnotations(expectedCount = testRoutes.size)
+            assertEquals(testRoutes.size, calloutViews.size)
 
-        // Text: compare against the same formatter production uses, not a hardcoded string, so
-        // the assertion stays correct regardless of the test device's locale.
-        val expectedEtaTexts = testRoutes.map { route ->
-            val locale = LocaleEx.getLocaleDirectionsRoute(route.directionsRoute, activity)
-            TimeFormatter.formatTimeRemaining(
-                activity,
-                route.directionsRoute.duration(),
-                locale,
-            ).toString()
-        }.sorted()
-        val actualEtaTexts = calloutViews.map { it.etaTextView().text.toString() }.sorted()
-        assertEquals(expectedEtaTexts, actualEtaTexts)
+            // Text: compare against the same formatter production uses, not a hardcoded string,
+            // so the assertion stays correct regardless of the test device's locale.
+            val expectedEtaTexts = testRoutes.map { route ->
+                val locale = LocaleEx.getLocaleDirectionsRoute(route.directionsRoute, activity)
+                TimeFormatter.formatTimeRemaining(
+                    activity,
+                    route.directionsRoute.duration(),
+                    locale,
+                ).toString()
+            }.sorted()
+            val actualEtaTexts = calloutViews.map { it.etaTextView().text.toString() }.sorted()
+            assertEquals(expectedEtaTexts, actualEtaTexts)
 
-        // Style: exactly one selected (primary) callout, correct text color per role.
-        val primaryViews = calloutViews.filter { it.isSelected }
-        assertEquals("expected exactly one primary callout", 1, primaryViews.size)
-        assertEquals(
-            ContextCompat.getColor(activity, R.color.mapbox_selected_route_callout_text),
-            primaryViews.single().etaTextView().currentTextColor,
-        )
-        calloutViews.filterNot { it.isSelected }.forEach { alternative ->
+            // Style: exactly one selected (primary) callout, correct text color per role.
+            val primaryViews = calloutViews.filter { it.isSelected }
+            assertEquals("expected exactly one primary callout", 1, primaryViews.size)
             assertEquals(
-                ContextCompat.getColor(activity, R.color.mapbox_route_callout_text),
-                alternative.etaTextView().currentTextColor,
+                ContextCompat.getColor(activity, R.color.mapbox_selected_route_callout_text),
+                primaryViews.single().etaTextView().currentTextColor,
             )
+            calloutViews.filterNot { it.isSelected }.forEach { alternative ->
+                assertEquals(
+                    ContextCompat.getColor(activity, R.color.mapbox_route_callout_text),
+                    alternative.etaTextView().currentTextColor,
+                )
+            }
         }
     }
 
@@ -105,7 +108,7 @@ class RouteOverviewCalloutsTest : SimpleMapViewNavigationTest() {
         (this as ViewGroup).findViewById(R.id.eta)
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-    private fun addRouteLineWithCallouts() {
+    private fun addRouteLineWithCallouts(mapboxNavigation: MapboxNavigation) {
         val apiOptions = MapboxRouteLineApiOptions.Builder()
             .isRouteCalloutsEnabled(true)
             .build()

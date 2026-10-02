@@ -10,6 +10,7 @@ import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.DeviceType
+import com.mapbox.navigation.base.options.DomainTilesOptions
 import com.mapbox.navigation.base.options.LocationOptions
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RerouteDisabled
@@ -30,12 +31,14 @@ suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigation(
     useRealTiles: Boolean = false,
     tileStore: TileStore? = null,
     tilesVersion: String? = null,
+    hdTilesVersion: String? = null,
     deviceType: DeviceType = DeviceType.HANDHELD,
     historyRecorderRule: MapboxHistoryTestRule? = null, // TODO: copy features to new infra
     customConfig: String? = null,
     routeRefreshOptions: RouteRefreshOptions? = null,
     rerouteStrategyForMapMatchedRoutes: RerouteStrategyForMapMatchedRoutes = RerouteDisabled,
     locationOptions: LocationOptions? = mockLocationUpdatesRule.locationOptions,
+    navigatorPredictionMillis: Long? = null,
     block: (navigation: MapboxNavigation) -> Unit,
 ) {
     if (!useRealTiles && tileStore == null && tilesVersion == null) {
@@ -56,6 +59,18 @@ suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigation(
                     if (tilesVersion != null) {
                         tilesVersion(tilesVersion)
                     }
+                    if (hdTilesVersion != null) {
+                        hdTilesOptions(
+                            DomainTilesOptions.defaultHdTilesOptionsBuilder()
+                                .apply {
+                                    if (!useRealTiles) {
+                                        tilesBaseUri(URI(mockWebServerRule.baseUrl))
+                                    }
+                                    tilesVersion(hdTilesVersion)
+                                }
+                                .build(),
+                        )
+                    }
                 }
                 .tileStore(tileStore)
                 .build()
@@ -75,6 +90,9 @@ suspend inline fun BaseCoreNoCleanUpTest.withMapboxNavigation(
             )
             if (routeRefreshOptions != null) {
                 routeRefreshOptions(routeRefreshOptions)
+            }
+            if (navigatorPredictionMillis != null) {
+                navigatorPredictionMillis(navigatorPredictionMillis)
             }
         }
             .build()

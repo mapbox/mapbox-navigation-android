@@ -4,7 +4,6 @@ package com.mapbox.navigation.instrumentation_tests.core
 
 import android.content.Context
 import android.location.Location
-import android.util.Log
 import androidx.annotation.IntegerRes
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.Closure
@@ -13,18 +12,15 @@ import com.mapbox.api.directions.v5.models.Incident
 import com.mapbox.api.directions.v5.models.Notification
 import com.mapbox.api.directions.v5.models.NotificationDetails
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
-import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouteRefreshOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_REASON_REFRESH
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.internal.extensions.flowOnFinalDestinationArrival
@@ -44,8 +40,6 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForAlternativesUpdate
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForUpdate
-import com.mapbox.navigation.testing.ui.utils.coroutines.stopRecording
-import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigation.testing.utils.assertNoDiffs
 import com.mapbox.navigation.testing.utils.assertions.compareIdWithIncidentId
 import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
@@ -61,6 +55,7 @@ import com.mapbox.navigation.testing.utils.readRawFileText
 import com.mapbox.navigation.testing.utils.routes.MockRoute
 import com.mapbox.navigation.testing.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.utils.routes.requestMockRoutes
+import com.mapbox.navigation.testing.utils.withMapboxNavigation
 import com.mapbox.navigation.testing.utils.withoutInternet
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
@@ -68,7 +63,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -95,7 +89,6 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
     @get:Rule
     val idlingPolicyRule = IdlingPolicyTimeoutRule(35, TimeUnit.SECONDS)
 
-    private lateinit var mapboxNavigation: MapboxNavigation
     private val twoCoordinates = listOf(
         Point.fromLngLat(-121.496066, 38.577764),
         Point.fromLngLat(-121.480279, 38.57674),
@@ -132,18 +125,6 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
             R.raw.route_response_route_refresh_annotations,
             "route_response_route_refresh",
         )
-
-        runOnMainSync {
-            mapboxNavigation = MapboxNavigationProvider.create(
-                NavigationOptions.Builder(activity)
-                    .routeRefreshOptions(createShortIntervalRouteRefreshOptions())
-                    .navigatorPredictionMillis(0L)
-                    .build(),
-            )
-            historyTestRule.historyRecorder = mapboxNavigation.historyRecorder.apply {
-                startRecording()
-            }
-        }
     }
 
     @After
@@ -151,303 +132,317 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         if (this::failByRequestRouteRefreshResponse.isInitialized) {
             failByRequestRouteRefreshResponse.failResponse = false
         }
-        runBlocking(SdkDispatchers.Main.immediate) {
-            val path = mapboxNavigation.historyRecorder.stopRecording()
-            Log.i("RouteRefreshTest", "history file recorder: $path")
+    }
+
+    private suspend fun withRouteRefreshNavigation(block: suspend (MapboxNavigation) -> Unit) {
+        withMapboxNavigation(
+            historyRecorderRule = historyTestRule,
+            routeRefreshOptions = createShortIntervalRouteRefreshOptions(),
+            navigatorPredictionMillis = 0L,
+        ) { mapboxNavigation ->
+            block(mapboxNavigation)
         }
     }
 
     @Test
     fun route_refresh_update_traffic_annotations_incidents_closures_notifications_all() = sdkTest {
-        val routeOptions = generateRouteOptions(twoCoordinates, isEv = true)
-        val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
-            .getSuccessfulResultOrThrowException()
-            .routes
-            .asReversed()
+        withRouteRefreshNavigation { mapboxNavigation ->
+            val routeOptions = generateRouteOptions(twoCoordinates, isEv = true)
+            val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
+                .getSuccessfulResultOrThrowException()
+                .routes
+                .asReversed()
 
-        mapboxNavigation.setNavigationRoutes(requestedRoutes)
-        mapboxNavigation.startTripSession()
-        stayOnInitialPosition()
-        val routeUpdates = mapboxNavigation.routesUpdates()
-            .take(2)
-            .map { it.navigationRoutes }
-            .toList()
-        val initialRoutes = routeUpdates[0]
-        val refreshedRoutes = routeUpdates[1]
+            mapboxNavigation.setNavigationRoutes(requestedRoutes)
+            mapboxNavigation.startTripSession()
+            stayOnInitialPosition()
+            val routeUpdates = mapboxNavigation.routesUpdates()
+                .take(2)
+                .map { it.navigationRoutes }
+                .toList()
+            val initialRoutes = routeUpdates[0]
+            val refreshedRoutes = routeUpdates[1]
 
-        val roadObjectsFromProgressAfterRefresh = mapboxNavigation.routeProgressUpdates()
-            .map { it.upcomingRoadObjects }
-            .filter { upcomingRoadObjects ->
-                upcomingRoadObjects.size == 2 &&
-                    listOf("11589180127444257", "14158569638505033").all { incidentId ->
-                        upcomingRoadObjects.any {
-                            it.roadObject.compareIdWithIncidentId(incidentId)
+            val roadObjectsFromProgressAfterRefresh = mapboxNavigation.routeProgressUpdates()
+                .map { it.upcomingRoadObjects }
+                .filter { upcomingRoadObjects ->
+                    upcomingRoadObjects.size == 2 &&
+                        listOf("11589180127444257", "14158569638505033").all { incidentId ->
+                            upcomingRoadObjects.any {
+                                it.roadObject.compareIdWithIncidentId(incidentId)
+                            }
                         }
-                    }
-            }
-            .first()
+                }
+                .first()
 
-        val roadObjectsFromRefreshedPrimaryRoute = refreshedRoutes.first().upcomingRoadObjects
-        assertEquals(
-            roadObjectsFromProgressAfterRefresh.map { it.roadObject },
-            roadObjectsFromRefreshedPrimaryRoute.map { it.roadObject },
-        )
-        roadObjectsFromProgressAfterRefresh.forEachIndexed { index, upcomingRoadObject ->
+            val roadObjectsFromRefreshedPrimaryRoute = refreshedRoutes.first().upcomingRoadObjects
             assertEquals(
-                upcomingRoadObject.distanceToStart!!,
-                roadObjectsFromRefreshedPrimaryRoute[index].distanceToStart!!,
-                0.1,
+                roadObjectsFromProgressAfterRefresh.map { it.roadObject },
+                roadObjectsFromRefreshedPrimaryRoute.map { it.roadObject },
             )
-        }
-        assertEquals(
-            "the test works only with 2 routes",
-            2,
-            requestedRoutes.size,
-        )
-        // incidents
-        assertEquals(
-            listOf("11589180127444257"),
-            initialRoutes[0].getIncidentsIdFromTheRoute(0),
-        )
-        assertEquals(
-            listOf("11589180127444257", "14158569638505033").sorted(),
-            refreshedRoutes[0].getIncidentsIdFromTheRoute(0)?.sorted(),
-        )
-        assertEquals(
-            listOf("11589180127444257"),
-            initialRoutes[1].getIncidentsIdFromTheRoute(0),
-        )
-        assertEquals(
-            listOf("11589180127444257", "14158569638505033").sorted(),
-            refreshedRoutes[1].getIncidentsIdFromTheRoute(0)?.sorted(),
-        )
-        // closures
-        assertEquals(
-            listOf(
-                Closure.builder()
-                    .geometryIndexStart(5)
-                    .geometryIndexEnd(6)
-                    .build(),
-            ),
-            initialRoutes[0].directionsRoute.legs()!![0].closures(),
-        )
-        assertEquals(
-            null,
-            initialRoutes[1].directionsRoute.legs()!![0].closures(),
-        )
-        assertEquals(
-            listOf(
-                Closure.builder()
-                    .geometryIndexStart(1)
-                    .geometryIndexEnd(3)
-                    .build(),
-            ),
-            refreshedRoutes[0].directionsRoute.legs()!![0].closures(),
-        )
-        assertEquals(
-            listOf(
-                Closure.builder()
-                    .geometryIndexStart(1)
-                    .geometryIndexEnd(3)
-                    .build(),
-            ),
-            refreshedRoutes[1].directionsRoute.legs()!![0].closures(),
-        )
-
-        assertEquals(
-            "initial should be the same as requested",
-            requestedRoutes[0].getDurationAnnotationsFromLeg(0),
-            initialRoutes[0].getDurationAnnotationsFromLeg(0),
-        )
-        assertEquals(
-            227.918,
-            initialRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
-            0.0001,
-        )
-        assertEquals(
-            287.063,
-            refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
-            0.0001,
-        )
-        assertEquals(
-            287.063,
-            refreshedRoutes[0].directionsRoute.duration(),
-            0.0001,
-        )
-        assertEquals(
-            287.063,
-            refreshedRoutes[0].directionsRoute.legs()!!.first().duration()!!,
-            0.0001,
-        )
-
-        assertEquals(
-            requestedRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
-            initialRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
-            0.0,
-        )
-        assertEquals(
-            224.2239,
-            initialRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
-            0.0001,
-        )
-        assertEquals(
-            258.767,
-            refreshedRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
-            0.0001,
-        )
-        assertEquals(258.767, refreshedRoutes[1].directionsRoute.duration(), 0.0001)
-        assertEquals(
-            258.767,
-            refreshedRoutes[1].directionsRoute.legs()!!.first().duration()!!,
-            0.0001,
-        )
-        // Verify notifications are properly refreshed and match expected content
-        val actualNotifications = refreshedRoutes[1].directionsRoute.legs()?.get(0)?.notifications()
-            ?.sortedBy { "${it.type()}_${it.subtype()}" }
-        val expectedNotifications = EXPECTED_NOTIFICATIONS_LIST
-            .sortedBy { "${it.type()}_${it.subtype()}" }
-
-        assertEquals(
-            expectedNotifications.size,
-            actualNotifications?.size,
-        )
-
-        // Compare key properties of each notification
-        expectedNotifications.zip(actualNotifications ?: emptyList())
-            .forEach { (expected, actual) ->
+            roadObjectsFromProgressAfterRefresh.forEachIndexed { index, upcomingRoadObject ->
                 assertEquals(
-                    "Notification type mismatch",
-                    expected.type(),
-                    actual.type(),
+                    upcomingRoadObject.distanceToStart!!,
+                    roadObjectsFromRefreshedPrimaryRoute[index].distanceToStart!!,
+                    0.1,
                 )
-                assertEquals(
-                    "Notification subtype mismatch",
-                    expected.subtype(),
-                    actual.subtype(),
-                )
-                assertEquals(
-                    "Notification refresh type mismatch",
-                    expected.refreshType(),
-                    actual.refreshType(),
-                )
+            }
+            assertEquals(
+                "the test works only with 2 routes",
+                2,
+                requestedRoutes.size,
+            )
+            // incidents
+            assertEquals(
+                listOf("11589180127444257"),
+                initialRoutes[0].getIncidentsIdFromTheRoute(0),
+            )
+            assertEquals(
+                listOf("11589180127444257", "14158569638505033").sorted(),
+                refreshedRoutes[0].getIncidentsIdFromTheRoute(0)?.sorted(),
+            )
+            assertEquals(
+                listOf("11589180127444257"),
+                initialRoutes[1].getIncidentsIdFromTheRoute(0),
+            )
+            assertEquals(
+                listOf("11589180127444257", "14158569638505033").sorted(),
+                refreshedRoutes[1].getIncidentsIdFromTheRoute(0)?.sorted(),
+            )
+            // closures
+            assertEquals(
+                listOf(
+                    Closure.builder()
+                        .geometryIndexStart(5)
+                        .geometryIndexEnd(6)
+                        .build(),
+                ),
+                initialRoutes[0].directionsRoute.legs()!![0].closures(),
+            )
+            assertEquals(
+                null,
+                initialRoutes[1].directionsRoute.legs()!![0].closures(),
+            )
+            assertEquals(
+                listOf(
+                    Closure.builder()
+                        .geometryIndexStart(1)
+                        .geometryIndexEnd(3)
+                        .build(),
+                ),
+                refreshedRoutes[0].directionsRoute.legs()!![0].closures(),
+            )
+            assertEquals(
+                listOf(
+                    Closure.builder()
+                        .geometryIndexStart(1)
+                        .geometryIndexEnd(3)
+                        .build(),
+                ),
+                refreshedRoutes[1].directionsRoute.legs()!![0].closures(),
+            )
 
-                // Compare details if present
-                if (expected.details() != null) {
-                    assertNotNull(
-                        "Expected details but got null",
-                        actual.details(),
+            assertEquals(
+                "initial should be the same as requested",
+                requestedRoutes[0].getDurationAnnotationsFromLeg(0),
+                initialRoutes[0].getDurationAnnotationsFromLeg(0),
+            )
+            assertEquals(
+                227.918,
+                initialRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
+                0.0001,
+            )
+            assertEquals(
+                287.063,
+                refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
+                0.0001,
+            )
+            assertEquals(
+                287.063,
+                refreshedRoutes[0].directionsRoute.duration(),
+                0.0001,
+            )
+            assertEquals(
+                287.063,
+                refreshedRoutes[0].directionsRoute.legs()!!.first().duration()!!,
+                0.0001,
+            )
+
+            assertEquals(
+                requestedRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
+                initialRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
+                0.0,
+            )
+            assertEquals(
+                224.2239,
+                initialRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
+                0.0001,
+            )
+            assertEquals(
+                258.767,
+                refreshedRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
+                0.0001,
+            )
+            assertEquals(258.767, refreshedRoutes[1].directionsRoute.duration(), 0.0001)
+            assertEquals(
+                258.767,
+                refreshedRoutes[1].directionsRoute.legs()!!.first().duration()!!,
+                0.0001,
+            )
+            // Verify notifications are properly refreshed and match expected content
+            val actualNotifications =
+                refreshedRoutes[1].directionsRoute.legs()?.get(0)?.notifications()
+                    ?.sortedBy { "${it.type()}_${it.subtype()}" }
+            val expectedNotifications = EXPECTED_NOTIFICATIONS_LIST
+                .sortedBy { "${it.type()}_${it.subtype()}" }
+
+            assertEquals(
+                expectedNotifications.size,
+                actualNotifications?.size,
+            )
+
+            // Compare key properties of each notification
+            expectedNotifications.zip(actualNotifications ?: emptyList())
+                .forEach { (expected, actual) ->
+                    assertEquals(
+                        "Notification type mismatch",
+                        expected.type(),
+                        actual.type(),
                     )
-                    assertNoDiffs(
-                        expected.details(),
-                        actual.details(),
+                    assertEquals(
+                        "Notification subtype mismatch",
+                        expected.subtype(),
+                        actual.subtype(),
+                    )
+                    assertEquals(
+                        "Notification refresh type mismatch",
+                        expected.refreshType(),
+                        actual.refreshType(),
+                    )
+
+                    // Compare details if present
+                    if (expected.details() != null) {
+                        assertNotNull(
+                            "Expected details but got null",
+                            actual.details(),
+                        )
+                        assertNoDiffs(
+                            expected.details(),
+                            actual.details(),
+                        )
+                    }
+
+                    // Compare geometry indices if present
+                    assertEquals(
+                        "Geometry index mismatch",
+                        expected.geometryIndex(),
+                        actual.geometryIndex(),
+                    )
+                    assertEquals(
+                        "Geometry index start mismatch",
+                        expected.geometryIndexStart(),
+                        actual.geometryIndexStart(),
+                    )
+                    assertEquals(
+                        "Geometry index end mismatch",
+                        expected.geometryIndexEnd(),
+                        actual.geometryIndexEnd(),
+                    )
+
+                    // Compare other properties
+                    assertEquals("Reason mismatch", expected.reason(), actual.reason())
+                    assertEquals(
+                        "Charging station ID mismatch",
+                        expected.chargingStationId(),
+                        actual.chargingStationId(),
                     )
                 }
-
-                // Compare geometry indices if present
-                assertEquals(
-                    "Geometry index mismatch",
-                    expected.geometryIndex(),
-                    actual.geometryIndex(),
-                )
-                assertEquals(
-                    "Geometry index start mismatch",
-                    expected.geometryIndexStart(),
-                    actual.geometryIndexStart(),
-                )
-                assertEquals(
-                    "Geometry index end mismatch",
-                    expected.geometryIndexEnd(),
-                    actual.geometryIndexEnd(),
-                )
-
-                // Compare other properties
-                assertEquals("Reason mismatch", expected.reason(), actual.reason())
-                assertEquals(
-                    "Charging station ID mismatch",
-                    expected.chargingStationId(),
-                    actual.chargingStationId(),
-                )
-            }
-        assertNoDiffs(
-            requestedRoutes[0].waypoints,
-            refreshedRoutes[0].waypoints,
-        )
-        assertNoDiffs(
-            requestedRoutes[1].waypoints,
-            refreshedRoutes[1].waypoints,
-        )
-        assertEquals(
-            listOf(true, true),
-            refreshedRoutes.map { it.routeRefreshMetadata?.isUpToDate },
-        )
+            assertNoDiffs(
+                requestedRoutes[0].waypoints,
+                refreshedRoutes[0].waypoints,
+            )
+            assertNoDiffs(
+                requestedRoutes[1].waypoints,
+                refreshedRoutes[1].waypoints,
+            )
+            assertEquals(
+                listOf(true, true),
+                refreshedRoutes.map { it.routeRefreshMetadata?.isUpToDate },
+            )
+        }
     }
 
     @Test
     fun routeRefreshesWorksAfterSettingsNewRoutes() = sdkTest {
-        val routeOptions = generateRouteOptions(twoCoordinates)
-        val routes = mapboxNavigation.requestRoutes(routeOptions)
-            .getSuccessfulResultOrThrowException()
-            .routes
-        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
-        mapboxNavigation.startTripSession()
-        stayOnInitialPosition()
+        withRouteRefreshNavigation { mapboxNavigation ->
+            val routeOptions = generateRouteOptions(twoCoordinates)
+            val routes = mapboxNavigation.requestRoutes(routeOptions)
+                .getSuccessfulResultOrThrowException()
+                .routes
+            mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
+            mapboxNavigation.startTripSession()
+            stayOnInitialPosition()
 
-        waitForRouteToSuccessfullyRefresh()
-        mapboxNavigation.clearNavigationRoutesAndWaitForUpdate()
-        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
-        waitForRouteToSuccessfullyRefresh()
+            waitForRouteToSuccessfullyRefresh(mapboxNavigation)
+            mapboxNavigation.clearNavigationRoutesAndWaitForUpdate()
+            mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
+            waitForRouteToSuccessfullyRefresh(mapboxNavigation)
+        }
     }
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     @Test
     fun routeSuccessfullyRefreshesAfterInvalidationOfExpiringData() = sdkTest {
-        assumeNotNROBecauseOfClientSideUpdate()
-        val routeOptions = generateRouteOptions(twoCoordinates)
-        val routes = mapboxNavigation.requestRoutes(routeOptions)
-            .getSuccessfulResultOrThrowException()
-            .routes
-        failByRequestRouteRefreshResponse.failResponse = true
-        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
-        mapboxNavigation.startTripSession()
-        stayOnInitialPosition()
-        val observer = TestObserver()
-        mapboxNavigation.routeRefreshController.registerRouteRefreshStateObserver(observer)
-        // act
-        val refreshedRoutes = mapboxNavigation.routesUpdates()
-            .filter { it.reason == ROUTES_UPDATE_REASON_REFRESH }
-            .map { it.navigationRoutes }
-            .first()
-        assertEquals(
-            listOf(false, false),
-            refreshedRoutes.map { it.routeRefreshMetadata?.isUpToDate },
-        )
-        val refreshedRouteCongestions = refreshedRoutes
-            .first()
-            .directionsRoute
-            .legs()
-            ?.firstOrNull()
-            ?.annotation()
-            ?.congestion()
-        assertTrue(
-            "expected unknown congestions, but they were $refreshedRouteCongestions",
-            refreshedRouteCongestions?.all { it == "unknown" } ?: false,
-        )
-        failByRequestRouteRefreshResponse.failResponse = false
-        waitForRouteToSuccessfullyRefresh()
-        assertEquals(
-            listOf(
-                RouteRefreshExtra.REFRESH_STATE_STARTED,
-                RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
-                RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED,
-                RouteRefreshExtra.REFRESH_STATE_STARTED,
-                RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS,
-            ),
-            observer.getStatesSnapshot(),
-        )
-        assertEquals(
-            listOf(true, true),
-            mapboxNavigation.getNavigationRoutes().map { it.routeRefreshMetadata?.isUpToDate },
-        )
+        withRouteRefreshNavigation { mapboxNavigation ->
+            assumeNotNROBecauseOfClientSideUpdate()
+            val routeOptions = generateRouteOptions(twoCoordinates)
+            val routes = mapboxNavigation.requestRoutes(routeOptions)
+                .getSuccessfulResultOrThrowException()
+                .routes
+            failByRequestRouteRefreshResponse.failResponse = true
+            mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
+            mapboxNavigation.startTripSession()
+            stayOnInitialPosition()
+            val observer = TestObserver()
+            mapboxNavigation.routeRefreshController.registerRouteRefreshStateObserver(observer)
+            // act
+            val refreshedRoutes = mapboxNavigation.routesUpdates()
+                .filter { it.reason == ROUTES_UPDATE_REASON_REFRESH }
+                .map { it.navigationRoutes }
+                .first()
+            assertEquals(
+                listOf(false, false),
+                refreshedRoutes.map { it.routeRefreshMetadata?.isUpToDate },
+            )
+            val refreshedRouteCongestions = refreshedRoutes
+                .first()
+                .directionsRoute
+                .legs()
+                ?.firstOrNull()
+                ?.annotation()
+                ?.congestion()
+            assertTrue(
+                "expected unknown congestions, but they were $refreshedRouteCongestions",
+                refreshedRouteCongestions?.all { it == "unknown" } ?: false,
+            )
+            failByRequestRouteRefreshResponse.failResponse = false
+            waitForRouteToSuccessfullyRefresh(mapboxNavigation)
+            assertEquals(
+                listOf(
+                    RouteRefreshExtra.REFRESH_STATE_STARTED,
+                    RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED,
+                    RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED,
+                    RouteRefreshExtra.REFRESH_STATE_STARTED,
+                    RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS,
+                ),
+                observer.getStatesSnapshot(),
+            )
+            assertEquals(
+                listOf(true, true),
+                mapboxNavigation.getNavigationRoutes()
+                    .map { it.routeRefreshMetadata?.isUpToDate },
+            )
+        }
     }
 
     /**
@@ -474,279 +469,657 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     @Test
     fun expiredDataCleanupWithNativeRouteObjectsDoesNotBlockArrival() = sdkTest(120_000) {
-        assumeNROBecauseExpiredDataCleanupIsNROSpecific()
-        val mockRoute = RoutesProvider.dc_very_short(context)
-        val origin = mockRoute.routeWaypoints.first()
+        withRouteRefreshNavigation { mapboxNavigation ->
+            assumeNROBecauseExpiredDataCleanupIsNROSpecific()
+            val mockRoute = RoutesProvider.dc_very_short(context)
+            val origin = mockRoute.routeWaypoints.first()
 
-        val refreshStatesObserver = TestObserver()
-        mapboxNavigation.routeRefreshController
-            .registerRouteRefreshStateObserver(refreshStatesObserver)
-        val refreshRouteUpdates = mutableListOf<RoutesUpdatedResult>()
-        val refreshRouteUpdatesJob = launch {
-            mapboxNavigation.routesUpdates()
-                .filter { it.reason == ROUTES_UPDATE_REASON_REFRESH }
-                .collect { refreshRouteUpdates.add(it) }
+            val refreshStatesObserver = TestObserver()
+            mapboxNavigation.routeRefreshController
+                .registerRouteRefreshStateObserver(refreshStatesObserver)
+            val refreshRouteUpdates = mutableListOf<RoutesUpdatedResult>()
+            val refreshRouteUpdatesJob = launch {
+                mapboxNavigation.routesUpdates()
+                    .filter { it.reason == ROUTES_UPDATE_REASON_REFRESH }
+                    .collect { refreshRouteUpdates.add(it) }
+            }
+
+            // 1. Start active guidance at the route origin. There is no refresh handler
+            // for this route, so refresh attempts have nothing to succeed against.
+            stayOnPosition(origin.latitude(), origin.longitude(), bearing = 0f)
+            mapboxNavigation.startTripSession()
+            val routes = mapboxNavigation.requestMockRoutes(mockWebServerRule, mockRoute)
+            mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
+            mapboxNavigation.routeProgressUpdates()
+                .first { it.currentState == RouteProgressState.TRACKING }
+
+            withoutInternet {
+                // 2-3. Refresh requests fail offline. Once they keep failing for longer than
+                // three refresh intervals, the expired-data cleanup runs; with NRO it can't
+                // update the routes and must give up without publishing a refresh.
+                mapboxNavigation.refreshStates()
+                    .first { it.state == RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED }
+
+                // 4. Drive to the destination while still offline. Before the fix the bogus
+                // cleanup publish gated route progress delivery off, so arrival never fired
+                // and this wait timed out.
+                mockLocationReplayerRule.playRoute(routes.first().directionsRoute)
+                mapboxNavigation.flowOnFinalDestinationArrival().first()
+            }
+
+            refreshRouteUpdatesJob.cancel()
+            val refreshStates = refreshStatesObserver.getStatesSnapshot()
+            assertTrue(
+                "expected only failed refreshes, but got $refreshStates",
+                refreshStates.contains(RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED) &&
+                    !refreshStates.contains(RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS),
+            )
+            assertEquals(
+                "expired-data cleanup must not be published as a refresh for native route objects",
+                emptyList<RoutesUpdatedResult>(),
+                refreshRouteUpdates,
+            )
         }
-
-        // 1. Start active guidance at the route origin. There is no refresh handler
-        // for this route, so refresh attempts have nothing to succeed against.
-        stayOnPosition(origin.latitude(), origin.longitude(), bearing = 0f)
-        mapboxNavigation.startTripSession()
-        val routes = mapboxNavigation.requestMockRoutes(mockWebServerRule, mockRoute)
-        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
-        mapboxNavigation.routeProgressUpdates()
-            .first { it.currentState == RouteProgressState.TRACKING }
-
-        withoutInternet {
-            // 2-3. Refresh requests fail offline. Once they keep failing for longer than
-            // three refresh intervals, the expired-data cleanup runs; with NRO it can't
-            // update the routes and must give up without publishing a refresh.
-            mapboxNavigation.refreshStates()
-                .first { it.state == RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED }
-
-            // 4. Drive to the destination while still offline. Before the fix the bogus
-            // cleanup publish gated route progress delivery off, so arrival never fired
-            // and this wait timed out.
-            mockLocationReplayerRule.playRoute(routes.first().directionsRoute)
-            mapboxNavigation.flowOnFinalDestinationArrival().first()
-        }
-
-        refreshRouteUpdatesJob.cancel()
-        val refreshStates = refreshStatesObserver.getStatesSnapshot()
-        assertTrue(
-            "expected only failed refreshes, but got $refreshStates",
-            refreshStates.contains(RouteRefreshExtra.REFRESH_STATE_FINISHED_FAILED) &&
-                !refreshStates.contains(RouteRefreshExtra.REFRESH_STATE_FINISHED_SUCCESS),
-        )
-        assertEquals(
-            "expired-data cleanup must not be published as a refresh for native route objects",
-            emptyList<RoutesUpdatedResult>(),
-            refreshRouteUpdates,
-        )
     }
 
     @Test
     fun routeAlternativeMetadataUpdatedAlongWithOnlyPrimaryRouteRefresh() = sdkTest {
-        val routeOptions = generateRouteOptions(twoCoordinates)
-        mockWebServerRule.requestHandlers.remove(failByRequestRouteRefreshResponse)
-        mockWebServerRule.requestHandlers.add(
-            FailByRequestMockRequestHandler(
-                MockDirectionsRefreshHandler(
-                    "route_response_route_refresh",
-                    readRawFileText(activity, R.raw.route_response_route_refresh_annotations),
-                    // it will fail for alternative refresh since index will be 1
-                    routeIndex = 0,
+        withRouteRefreshNavigation { mapboxNavigation ->
+            val routeOptions = generateRouteOptions(twoCoordinates)
+            mockWebServerRule.requestHandlers.remove(failByRequestRouteRefreshResponse)
+            mockWebServerRule.requestHandlers.add(
+                FailByRequestMockRequestHandler(
+                    MockDirectionsRefreshHandler(
+                        "route_response_route_refresh",
+                        readRawFileText(activity, R.raw.route_response_route_refresh_annotations),
+                        // it will fail for alternative refresh since index will be 1
+                        routeIndex = 0,
+                    ),
                 ),
-            ),
-        )
-        val routes = mapboxNavigation.requestRoutes(routeOptions)
-            .getSuccessfulResultOrThrowException()
-            .routes
-        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
-        val alternativesMetadataLegacy = mapboxNavigation.getAlternativeMetadataFor(routes).first()
-        mapboxNavigation.startTripSession()
-        stayOnInitialPosition()
-        mapboxNavigation.routesUpdates()
-            .first { it.reason == ROUTES_UPDATE_REASON_REFRESH }
+            )
+            val routes = mapboxNavigation.requestRoutes(routeOptions)
+                .getSuccessfulResultOrThrowException()
+                .routes
+            mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
+            val alternativesMetadataLegacy =
+                mapboxNavigation.getAlternativeMetadataFor(routes).first()
+            mapboxNavigation.startTripSession()
+            stayOnInitialPosition()
+            mapboxNavigation.routesUpdates()
+                .first { it.reason == ROUTES_UPDATE_REASON_REFRESH }
 
-        val alternativesMetadata = mapboxNavigation.getAlternativeMetadataFor(
-            mapboxNavigation.getNavigationRoutes(),
-        ).first()
+            val alternativesMetadata = mapboxNavigation.getAlternativeMetadataFor(
+                mapboxNavigation.getNavigationRoutes(),
+            ).first()
 
-        assertNotNull(alternativesMetadataLegacy)
-        assertNotNull(alternativesMetadata)
-        assertEquals(
-            alternativesMetadataLegacy.navigationRoute.id,
-            alternativesMetadata.navigationRoute.id,
-        )
-        assertNotEquals(alternativesMetadataLegacy, alternativesMetadata)
-        assertEquals(227.918, alternativesMetadataLegacy.infoFromStartOfPrimary.duration, 0.001)
-        // fork index is 4. So take 4 durations from primary refresh response
-        // and add missing durations from the original alternative response.
-        assertEquals(235.048, alternativesMetadata.infoFromStartOfPrimary.duration, 0.001)
+            assertNotNull(alternativesMetadataLegacy)
+            assertNotNull(alternativesMetadata)
+            assertEquals(
+                alternativesMetadataLegacy.navigationRoute.id,
+                alternativesMetadata.navigationRoute.id,
+            )
+            assertNotEquals(alternativesMetadataLegacy, alternativesMetadata)
+            assertEquals(
+                227.918,
+                alternativesMetadataLegacy.infoFromStartOfPrimary.duration,
+                0.001,
+            )
+            // fork index is 4. So take 4 durations from primary refresh response
+            // and add missing durations from the original alternative response.
+            assertEquals(235.048, alternativesMetadata.infoFromStartOfPrimary.duration, 0.001)
+        }
     }
 
     @Test
     fun routeAlternativeMetadataUpdatedAlongWithRouteRefresh() = sdkTest {
-        val routeOptions = generateRouteOptions(twoCoordinates)
-        setUpSeparateRefreshHandlersForPrimaryAndAlternative()
-        val routes = mapboxNavigation.requestRoutes(routeOptions)
-            .getSuccessfulResultOrThrowException()
-            .routes
-        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
-        val alternativesMetadataLegacy = mapboxNavigation.getAlternativeMetadataFor(routes).first()
-        mapboxNavigation.startTripSession()
-        stayOnInitialPosition()
-        mapboxNavigation.routesUpdates()
-            .first { it.reason == ROUTES_UPDATE_REASON_REFRESH }
+        withRouteRefreshNavigation { mapboxNavigation ->
+            val routeOptions = generateRouteOptions(twoCoordinates)
+            setUpSeparateRefreshHandlersForPrimaryAndAlternative()
+            val routes = mapboxNavigation.requestRoutes(routeOptions)
+                .getSuccessfulResultOrThrowException()
+                .routes
+            mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
+            val alternativesMetadataLegacy =
+                mapboxNavigation.getAlternativeMetadataFor(routes).first()
+            mapboxNavigation.startTripSession()
+            stayOnInitialPosition()
+            mapboxNavigation.routesUpdates()
+                .first { it.reason == ROUTES_UPDATE_REASON_REFRESH }
 
-        val alternativesMetadata = mapboxNavigation.getAlternativeMetadataFor(
-            mapboxNavigation.getNavigationRoutes(),
-        ).first()
+            val alternativesMetadata = mapboxNavigation.getAlternativeMetadataFor(
+                mapboxNavigation.getNavigationRoutes(),
+            ).first()
 
-        assertNotNull(alternativesMetadataLegacy)
-        assertNotNull(alternativesMetadata)
-        assertEquals(
-            alternativesMetadataLegacy.navigationRoute.id,
-            alternativesMetadata.navigationRoute.id,
-        )
-        assertNotEquals(alternativesMetadataLegacy, alternativesMetadata)
-        assertEquals(227.918, alternativesMetadataLegacy.infoFromStartOfPrimary.duration, 0.001)
-        // fork index is 4. So take 4 durations from primary refresh response
-        // (they should be the same as in alternative refresh response)
-        // and add missing durations from the alternative refresh response.
-        assertEquals(285.185, alternativesMetadata.infoFromStartOfPrimary.duration, 0.001)
+            assertNotNull(alternativesMetadataLegacy)
+            assertNotNull(alternativesMetadata)
+            assertEquals(
+                alternativesMetadataLegacy.navigationRoute.id,
+                alternativesMetadata.navigationRoute.id,
+            )
+            assertNotEquals(alternativesMetadataLegacy, alternativesMetadata)
+            assertEquals(
+                227.918,
+                alternativesMetadataLegacy.infoFromStartOfPrimary.duration,
+                0.001,
+            )
+            // fork index is 4. So take 4 durations from primary refresh response
+            // (they should be the same as in alternative refresh response)
+            // and add missing durations from the alternative refresh response.
+            assertEquals(285.185, alternativesMetadata.infoFromStartOfPrimary.duration, 0.001)
+        }
     }
 
     @Test
     fun expect_route_refresh_to_update_all_native_routes() = sdkTest {
-        val routeOptions = generateRouteOptions(twoCoordinates)
-        setUpSeparateRefreshHandlersForPrimaryAndAlternative()
-        val routes = mapboxNavigation.requestRoutes(routeOptions)
-            .getSuccessfulResultOrThrowException()
-            .routes
-        mapboxNavigation.startTripSession()
-        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
-        stayOnInitialPosition()
-        val oldAlternative = mapboxNavigation.getNavigationRoutes()[1]
-        val oldInfo = mapboxNavigation.getAlternativeMetadataFor(oldAlternative)!!.infoFromFork
-        mapboxNavigation.routesUpdates()
-            .first { it.reason == ROUTES_UPDATE_REASON_REFRESH }
-        val newAlternative = mapboxNavigation.getNavigationRoutes()[1]
+        withRouteRefreshNavigation { mapboxNavigation ->
+            val routeOptions = generateRouteOptions(twoCoordinates)
+            setUpSeparateRefreshHandlersForPrimaryAndAlternative()
+            val routes = mapboxNavigation.requestRoutes(routeOptions)
+                .getSuccessfulResultOrThrowException()
+                .routes
+            mapboxNavigation.startTripSession()
+            mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
+            stayOnInitialPosition()
+            val oldAlternative = mapboxNavigation.getNavigationRoutes()[1]
+            val oldInfo = mapboxNavigation.getAlternativeMetadataFor(oldAlternative)!!.infoFromFork
+            mapboxNavigation.routesUpdates()
+                .first { it.reason == ROUTES_UPDATE_REASON_REFRESH }
+            val newAlternative = mapboxNavigation.getNavigationRoutes()[1]
 
-        assertNotEquals(
-            oldInfo,
-            mapboxNavigation.getAlternativeMetadataFor(newAlternative)!!.infoFromFork,
-        )
+            assertNotEquals(
+                oldInfo,
+                mapboxNavigation.getAlternativeMetadataFor(newAlternative)!!.infoFromFork,
+            )
+        }
     }
 
     @Test
     fun route_refresh_updates_annotations_incidents_and_closures_for_truncated_current_leg() =
         sdkTest {
-            setupMockRequestHandlers(
-                twoCoordinates,
-                R.raw.route_response_route_refresh_with_objects_ahead,
-                R.raw.route_response_route_refresh_truncated_first_leg,
-                "route_response_route_refresh_with_objects_ahead",
-                acceptedGeometryIndex = 3,
-            )
-            val routeOptions = generateRouteOptions(twoCoordinates)
-            val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
-                .getSuccessfulResultOrThrowException()
-                .routes
+            withRouteRefreshNavigation { mapboxNavigation ->
+                setupMockRequestHandlers(
+                    twoCoordinates,
+                    R.raw.route_response_route_refresh_with_objects_ahead,
+                    R.raw.route_response_route_refresh_truncated_first_leg,
+                    "route_response_route_refresh_with_objects_ahead",
+                    acceptedGeometryIndex = 3,
+                )
+                val routeOptions = generateRouteOptions(twoCoordinates)
+                val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
+                    .getSuccessfulResultOrThrowException()
+                    .routes
 
-            mapboxNavigation.setNavigationRoutes(requestedRoutes)
-            mapboxNavigation.startTripSession()
-            // corresponds to currentRouteGeometryIndex = 3
-            stayOnPosition(38.577344, -121.496248, bearing = 190f)
-            mapboxNavigation.routeProgressUpdates()
-                .filter { it.currentRouteGeometryIndex == 3 }
-                .first()
-            val refreshedRoutes = mapboxNavigation.routesUpdates()
-                .filter {
-                    it.reason == ROUTES_UPDATE_REASON_REFRESH
-                }
-                .first()
-                .navigationRoutes
+                mapboxNavigation.setNavigationRoutes(requestedRoutes)
+                mapboxNavigation.startTripSession()
+                // corresponds to currentRouteGeometryIndex = 3
+                stayOnPosition(38.577344, -121.496248, bearing = 190f)
+                mapboxNavigation.routeProgressUpdates()
+                    .filter { it.currentRouteGeometryIndex == 3 }
+                    .first()
+                val refreshedRoutes = mapboxNavigation.routesUpdates()
+                    .filter {
+                        it.reason == ROUTES_UPDATE_REASON_REFRESH
+                    }
+                    .first()
+                    .navigationRoutes
 
-            assertEquals(224.224, requestedRoutes[0].getSumOfDurationAnnotationsFromLeg(0), 0.0001)
-            assertEquals(172.175, refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(0), 0.0001)
+                assertEquals(
+                    224.224,
+                    requestedRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
+                    0.0001,
+                )
+                assertEquals(
+                    172.175,
+                    refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
+                    0.0001,
+                )
 
-            assertEquals(227.918, requestedRoutes[1].getSumOfDurationAnnotationsFromLeg(0), 0.0001)
-            assertEquals(235.641, refreshedRoutes[1].getSumOfDurationAnnotationsFromLeg(0), 0.0001)
+                assertEquals(
+                    227.918,
+                    requestedRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
+                    0.0001,
+                )
+                assertEquals(
+                    235.641,
+                    refreshedRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
+                    0.0001,
+                )
 
-            assertEquals(
-                listOf(
-                    listOf("11589180127444256", 1, 1),
-                    listOf("11589180127444257", 3, 8),
-                    listOf("11589180127444258", 43, 48),
-                ),
-                requestedRoutes[0].directionsRoute.legs()!![0].incidents()!!
-                    .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() }),
-            )
-            assertEquals(
-                listOf(
-                    listOf("11589180127444256", 1, 1),
-                    listOf("11589180127444257", 3, 8),
-                    listOf("11589180127444258", 43, 48),
-                ),
-                requestedRoutes[1].directionsRoute.legs()!![0].incidents()!!
-                    .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() }),
-            )
+                assertEquals(
+                    listOf(
+                        listOf("11589180127444256", 1, 1),
+                        listOf("11589180127444257", 3, 8),
+                        listOf("11589180127444258", 43, 48),
+                    ),
+                    requestedRoutes[0].directionsRoute.legs()!![0].incidents()!!
+                        .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() }),
+                )
+                assertEquals(
+                    listOf(
+                        listOf("11589180127444256", 1, 1),
+                        listOf("11589180127444257", 3, 8),
+                        listOf("11589180127444258", 43, 48),
+                    ),
+                    requestedRoutes[1].directionsRoute.legs()!![0].incidents()!!
+                        .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() }),
+                )
 
-            assertEquals(
-                listOf(
-                    listOf("11589180127444256", 1, 1),
-                    listOf("14158569638505033", 13, 18),
-                    listOf("11589180127444257", 33, 41),
-                    listOf("11589180127444258", 43, 48),
-                ),
-                refreshedRoutes[0].directionsRoute.legs()!![0].incidents()!!
-                    .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() }),
-            )
-            assertEquals(
-                listOf(
-                    listOf("11589180127444256", 1, 1),
-                    listOf("14158569638505033", 13, 18),
-                    listOf("11589180127444257", 33, 41),
-                    listOf("11589180127444258", 43, 48),
-                ),
-                refreshedRoutes[1].directionsRoute.legs()!![0].incidents()!!
-                    .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() }),
-            )
+                assertEquals(
+                    listOf(
+                        listOf("11589180127444256", 1, 1),
+                        listOf("14158569638505033", 13, 18),
+                        listOf("11589180127444257", 33, 41),
+                        listOf("11589180127444258", 43, 48),
+                    ),
+                    refreshedRoutes[0].directionsRoute.legs()!![0].incidents()!!
+                        .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() }),
+                )
+                assertEquals(
+                    listOf(
+                        listOf("11589180127444256", 1, 1),
+                        listOf("14158569638505033", 13, 18),
+                        listOf("11589180127444257", 33, 41),
+                        listOf("11589180127444258", 43, 48),
+                    ),
+                    refreshedRoutes[1].directionsRoute.legs()!![0].incidents()!!
+                        .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() }),
+                )
 
-            assertNull(
-                requestedRoutes[0].directionsRoute.legs()!![0].closures(),
-            )
-            assertEquals(
-                listOf(
-                    Closure.builder()
-                        .geometryIndexStart(2)
-                        .geometryIndexEnd(2)
-                        .build(),
-                    Closure.builder()
-                        .geometryIndexStart(5)
-                        .geometryIndexEnd(6)
-                        .build(),
-                    Closure.builder()
-                        .geometryIndexStart(45)
-                        .geometryIndexEnd(50)
-                        .build(),
-                ),
-                requestedRoutes[1].directionsRoute.legs()!![0].closures(),
-            )
+                assertNull(
+                    requestedRoutes[0].directionsRoute.legs()!![0].closures(),
+                )
+                assertEquals(
+                    listOf(
+                        Closure.builder()
+                            .geometryIndexStart(2)
+                            .geometryIndexEnd(2)
+                            .build(),
+                        Closure.builder()
+                            .geometryIndexStart(5)
+                            .geometryIndexEnd(6)
+                            .build(),
+                        Closure.builder()
+                            .geometryIndexStart(45)
+                            .geometryIndexEnd(50)
+                            .build(),
+                    ),
+                    requestedRoutes[1].directionsRoute.legs()!![0].closures(),
+                )
 
-            assertEquals(
-                listOf(
-                    Closure.builder()
-                        .geometryIndexStart(10)
-                        .geometryIndexEnd(11)
-                        .build(),
-                ),
-                refreshedRoutes[0].directionsRoute.legs()!![0].closures(),
-            )
-            assertEquals(
-                listOf(
-                    Closure.builder()
-                        .geometryIndexStart(2)
-                        .geometryIndexEnd(2)
-                        .build(),
-                    Closure.builder()
-                        .geometryIndexStart(10)
-                        .geometryIndexEnd(11)
-                        .build(),
-                    Closure.builder()
-                        .geometryIndexStart(45)
-                        .geometryIndexEnd(50)
-                        .build(),
-                ),
-                refreshedRoutes[1].directionsRoute.legs()!![0].closures(),
-            )
+                assertEquals(
+                    listOf(
+                        Closure.builder()
+                            .geometryIndexStart(10)
+                            .geometryIndexEnd(11)
+                            .build(),
+                    ),
+                    refreshedRoutes[0].directionsRoute.legs()!![0].closures(),
+                )
+                assertEquals(
+                    listOf(
+                        Closure.builder()
+                            .geometryIndexStart(2)
+                            .geometryIndexEnd(2)
+                            .build(),
+                        Closure.builder()
+                            .geometryIndexStart(10)
+                            .geometryIndexEnd(11)
+                            .build(),
+                        Closure.builder()
+                            .geometryIndexStart(45)
+                            .geometryIndexEnd(50)
+                            .build(),
+                    ),
+                    refreshedRoutes[1].directionsRoute.legs()!![0].closures(),
+                )
+            }
         }
 
     @Test
     fun route_refresh_updates_annotations_for_new_alternative_with_different_number_of_legs() =
         sdkTest {
+            withRouteRefreshNavigation { mapboxNavigation ->
+                setupMockRequestHandlers(
+                    multilegCoordinates,
+                    R.raw.route_response_single_route_multileg,
+                    R.raw.route_response_single_route_multileg_refreshed,
+                    "route_response_single_route_multileg",
+                    acceptedGeometryIndex = 70,
+                )
+                mockWebServerRule.requestHandlers.add(
+                    FailByRequestMockRequestHandler(
+                        MockDirectionsRefreshHandler(
+                            "route_response_single_route_multileg_alternative",
+                            readRawFileText(
+                                activity,
+                                R.raw.route_response_single_route_multileg_alternative_refreshed,
+                            ),
+                            acceptedGeometryIndex = 11,
+                        ),
+                    ),
+                )
+                val routeOptions = generateRouteOptions(multilegCoordinates)
+                val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
+                    .getSuccessfulResultOrThrowException()
+                    .routes
+                // alternative which was requested on the second leg of the original route,
+                // so the alternative has only one leg while the original route has two
+                val alternativeRoute = mapboxNavigation.requestMockRoutes(
+                    mockWebServerRule,
+                    alternativeForMultileg(activity),
+                ).first()
+
+                mapboxNavigation.setNavigationRoutes(requestedRoutes, initialLegIndex = 1)
+                mapboxNavigation.startTripSession()
+
+                // corresponds to currentRouteGeometryIndex = 70 for primary route and 11 for alternative route
+                stayOnPosition(38.581798, -121.476146, bearing = 100f)
+                mapboxNavigation.routeProgressUpdates()
+                    .filter {
+                        it.currentRouteGeometryIndex == 70
+                    }
+                    .first()
+
+                mapboxNavigation.setNavigationRoutesAndWaitForAlternativesUpdate(
+                    requestedRoutes + alternativeRoute,
+                    initialLegIndex = 1,
+                )
+
+                val refreshedRoutes = mapboxNavigation.routesUpdates()
+                    .filter {
+                        it.reason == ROUTES_UPDATE_REASON_REFRESH
+                    }
+                    .first()
+                    .navigationRoutes
+
+                assertEquals(
+                    requestedRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
+                    refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
+                    0.0001,
+                )
+
+                assertEquals(
+                    201.673,
+                    requestedRoutes[0].getSumOfDurationAnnotationsFromLeg(1),
+                    0.0001,
+                )
+                assertEquals(
+                    202.881,
+                    refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(1),
+                    0.0001,
+                )
+
+                assertEquals(194.3, alternativeRoute.getSumOfDurationAnnotationsFromLeg(0), 0.0001)
+                assertEquals(
+                    187.126,
+                    refreshedRoutes[1].getSumOfDurationAnnotationsFromLeg(0),
+                    0.0001,
+                )
+            }
+        }
+
+    @Test
+    fun expect_route_refresh_to_update_annotations_incidents_and_closures_for_truncated_next_leg() =
+        sdkTest {
+            withRouteRefreshNavigation { mapboxNavigation ->
+                setupMockRequestHandlers(
+                    threeCoordinates,
+                    R.raw.route_response_route_refresh_multileg,
+                    R.raw.route_response_route_refresh_truncated_next_leg,
+                    "route_response_route_refresh_multileg",
+                    acceptedGeometryIndex = 5,
+                )
+                val routeOptions = generateRouteOptions(threeCoordinates)
+                val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
+                    .getSuccessfulResultOrThrowException()
+                    .routes
+                mapboxNavigation.setContinuousAlternativesEnabled(false)
+                mapboxNavigation.setNavigationRoutes(requestedRoutes)
+                mapboxNavigation.startTripSession()
+                // corresponds to currentRouteGeometryIndex = 5
+                stayOnPosition(38.57622, -121.496731, bearing = 190f)
+                mapboxNavigation.routeProgressUpdates()
+                    .filter { it.currentRouteGeometryIndex == 5 }
+                    .first()
+                val refreshedRoutes = mapboxNavigation.routesUpdates()
+                    .filter {
+                        it.reason == ROUTES_UPDATE_REASON_REFRESH
+                    }
+                    .first()
+                    .navigationRoutes
+
+                // annotations
+                assertEquals(
+                    201.673,
+                    requestedRoutes[0].getSumOfDurationAnnotationsFromLeg(1),
+                    0.0001,
+                )
+                assertEquals(
+                    189.086,
+                    refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(1),
+                    0.0001,
+                )
+
+                // incidents
+                assertEquals(
+                    listOf(
+                        listOf("9457146989091489", 1, 2),
+                        listOf("9457146989091490", 5, 8),
+                        listOf("9457146989091491", 56, 58),
+                    ),
+                    requestedRoutes[0].directionsRoute.legs()!![1].incidents()!!
+                        .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() }),
+                )
+                assertEquals(
+                    listOf(listOf("9457146989091490", 3, 7), listOf("9457146989091491", 56, 58)),
+                    refreshedRoutes[0].directionsRoute.legs()!![1].incidents()!!
+                        .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() }),
+                )
+
+                // closures
+                assertEquals(
+                    listOf(
+                        Closure.builder()
+                            .geometryIndexStart(3)
+                            .geometryIndexEnd(3)
+                            .build(),
+                        Closure.builder()
+                            .geometryIndexStart(4)
+                            .geometryIndexEnd(5)
+                            .build(),
+                        Closure.builder()
+                            .geometryIndexStart(60)
+                            .geometryIndexEnd(62)
+                            .build(),
+                    ),
+                    requestedRoutes[0].directionsRoute.legs()!![1].closures(),
+                )
+                assertEquals(
+                    listOf(
+                        Closure.builder()
+                            .geometryIndexStart(3)
+                            .geometryIndexEnd(5)
+                            .build(),
+                        Closure.builder()
+                            .geometryIndexStart(60)
+                            .geometryIndexEnd(62)
+                            .build(),
+                    ),
+                    refreshedRoutes[0].directionsRoute.legs()!![1].closures(),
+                )
+
+                // waypoints
+                assertNoDiffs(
+                    requestedRoutes[0].waypoints,
+                    refreshedRoutes[0].waypoints,
+                )
+                assertNoDiffs(
+                    requestedRoutes[1].waypoints,
+                    refreshedRoutes[1].waypoints,
+                )
+            }
+        }
+
+    @Test
+    fun expect_route_refresh_to_update_annotations_incidents_and_closures_for_second_leg() =
+        sdkTest {
+            withRouteRefreshNavigation { mapboxNavigation ->
+                val currentRouteGeometryIndex = 2000
+                // 437 points in leg #0, so currentLegGeometryIndex = 2000 - 437 + 1 (points are duplicated on the start and end of steps and legs) = 1564
+                setupMockRequestHandlers(
+                    threeCoordinatesWithIncidents,
+                    R.raw.route_response_multileg_with_incidents,
+                    R.raw.route_response_route_refresh_multileg_with_incidents,
+                    "route_response_multileg_with_incidents",
+                    acceptedGeometryIndex = currentRouteGeometryIndex,
+                )
+                val routeOptions = generateRouteOptions(threeCoordinatesWithIncidents)
+                val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
+                    .getSuccessfulResultOrThrowException()
+                    .routes
+
+                mapboxNavigation.setNavigationRoutes(requestedRoutes, initialLegIndex = 1)
+                mapboxNavigation.startTripSession()
+                // corresponds to currentRouteGeometryIndex = 2000, currentLeg = 1
+                stayOnPosition(39.80965, -75.281163, bearing = 190f)
+                mapboxNavigation.routeProgressUpdates()
+                    .filter {
+                        it.currentRouteGeometryIndex == currentRouteGeometryIndex
+                    }
+                    .first()
+                val refreshedRoutes = mapboxNavigation.routesUpdates()
+                    .filter {
+                        it.reason == ROUTES_UPDATE_REASON_REFRESH
+                    }
+                    .first()
+                    .navigationRoutes
+
+                // annotations
+                assertEquals(
+                    8595.694,
+                    requestedRoutes[0].getSumOfDurationAnnotationsFromLeg(1),
+                    0.0001,
+                )
+                assertEquals(
+                    8571.824,
+                    refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(1),
+                    0.0001,
+                )
+
+                // incidents
+                assertEquals(
+                    listOf(
+                        listOf("9457146989091490", 2019, 2024),
+                        listOf("5945491930714919", 2044, 2126),
+                    ),
+                    requestedRoutes[0].directionsRoute.legs()!![1].incidents()!!
+                        .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() }),
+                )
+                assertEquals(
+                    listOf(
+                        listOf("9457146989091490", 2019, 2024),
+                        listOf("5945491930714919", 2048, 2130),
+                    ),
+                    refreshedRoutes[0].directionsRoute.legs()!![1].incidents()!!
+                        .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() }),
+                )
+
+                // closures
+                assertEquals(
+                    listOf(
+                        Closure.builder()
+                            .geometryIndexStart(2001)
+                            .geometryIndexEnd(2020)
+                            .build(),
+                    ),
+                    requestedRoutes[0].directionsRoute.legs()!![1].closures(),
+                )
+                assertEquals(
+                    listOf(
+                        Closure.builder()
+                            .geometryIndexStart(2054)
+                            .geometryIndexEnd(2061)
+                            .build(),
+                    ),
+                    refreshedRoutes[0].directionsRoute.legs()!![1].closures(),
+                )
+                // waypoints
+                assertNoDiffs(
+                    requestedRoutes[0].waypoints,
+                    refreshedRoutes[0].waypoints,
+                )
+            }
+        }
+
+    @Test
+    fun refreshAlternativeWithMoreLegsUsesInitialLegIndexZeroForPrimaryRoute() = sdkTest {
+        withRouteRefreshNavigation { mapboxNavigation ->
+            setupMockRequestHandlers(
+                multilegCoordinates,
+                R.raw.route_response_single_route_multileg,
+                R.raw.route_response_single_route_multileg_refreshed,
+                "route_response_single_route_multileg",
+                acceptedGeometryIndex = 70,
+            )
+            mockWebServerRule.requestHandlers.add(
+                FailByRequestMockRequestHandler(
+                    MockDirectionsRefreshHandler(
+                        "route_response_single_route_multileg_alternative",
+                        readRawFileText(
+                            activity,
+                            R.raw.route_response_single_route_multileg_alternative_refreshed,
+                        ),
+                        acceptedGeometryIndex = 11,
+                    ),
+                ),
+            )
+            val routeOptions = generateRouteOptions(multilegCoordinates)
+            val alternativeRoutes = mapboxNavigation.requestRoutes(routeOptions)
+                .getSuccessfulResultOrThrowException()
+                .routes
+            // In this test setup we are considering a case where user was driving along the route,
+            // started the second leg and received an alternative, and selected it before the fork.
+            // This means that the primary route is shorter than the alternative route (former primary route).
+            val primaryRoute = mapboxNavigation.requestMockRoutes(
+                mockWebServerRule,
+                alternativeForMultileg(activity),
+            ).first()
+
+            // corresponds to currentRouteGeometryIndex = 70 for alternative route and 11 for the primary route
+            mockLocationUpdatesRule.pushLocationUpdate(
+                mockLocationUpdatesRule.generateLocationUpdate {
+                    latitude = 38.581798
+                    longitude = -121.476146
+                },
+            )
+
+            mapboxNavigation.setNavigationRoutes(
+                listOf(primaryRoute) + alternativeRoutes,
+                initialLegIndex = 0,
+            )
+            mapboxNavigation.startTripSession()
+
+            mapboxNavigation.routeProgressUpdates()
+                .filter {
+                    it.currentRouteGeometryIndex == 11
+                }
+                .first()
+
+            mapboxNavigation.routesUpdates()
+                .filter { result ->
+                    (result.reason == ROUTES_UPDATE_REASON_REFRESH).also {
+                        if (it) {
+                            assertEquals(0, mapboxNavigation.currentLegIndex())
+                        }
+                    }
+                }
+                .first()
+        }
+    }
+
+    @Test
+    fun refreshAlternativeWithLessLegsUsesInitialLegIndexOneForPrimaryRoute() = sdkTest {
+        withRouteRefreshNavigation { mapboxNavigation ->
             setupMockRequestHandlers(
                 multilegCoordinates,
                 R.raw.route_response_single_route_multileg,
@@ -793,320 +1166,16 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
                 initialLegIndex = 1,
             )
 
-            val refreshedRoutes = mapboxNavigation.routesUpdates()
-                .filter {
-                    it.reason == ROUTES_UPDATE_REASON_REFRESH
-                }
-                .first()
-                .navigationRoutes
-
-            assertEquals(
-                requestedRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
-                refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(0),
-                0.0001,
-            )
-
-            assertEquals(201.673, requestedRoutes[0].getSumOfDurationAnnotationsFromLeg(1), 0.0001)
-            assertEquals(202.881, refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(1), 0.0001)
-
-            assertEquals(194.3, alternativeRoute.getSumOfDurationAnnotationsFromLeg(0), 0.0001)
-            assertEquals(187.126, refreshedRoutes[1].getSumOfDurationAnnotationsFromLeg(0), 0.0001)
-        }
-
-    @Test
-    fun expect_route_refresh_to_update_annotations_incidents_and_closures_for_truncated_next_leg() =
-        sdkTest {
-            setupMockRequestHandlers(
-                threeCoordinates,
-                R.raw.route_response_route_refresh_multileg,
-                R.raw.route_response_route_refresh_truncated_next_leg,
-                "route_response_route_refresh_multileg",
-                acceptedGeometryIndex = 5,
-            )
-            val routeOptions = generateRouteOptions(threeCoordinates)
-            val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
-                .getSuccessfulResultOrThrowException()
-                .routes
-            mapboxNavigation.setContinuousAlternativesEnabled(false)
-            mapboxNavigation.setNavigationRoutes(requestedRoutes)
-            mapboxNavigation.startTripSession()
-            // corresponds to currentRouteGeometryIndex = 5
-            stayOnPosition(38.57622, -121.496731, bearing = 190f)
-            mapboxNavigation.routeProgressUpdates()
-                .filter { it.currentRouteGeometryIndex == 5 }
-                .first()
-            val refreshedRoutes = mapboxNavigation.routesUpdates()
-                .filter {
-                    it.reason == ROUTES_UPDATE_REASON_REFRESH
-                }
-                .first()
-                .navigationRoutes
-
-            // annotations
-            assertEquals(201.673, requestedRoutes[0].getSumOfDurationAnnotationsFromLeg(1), 0.0001)
-            assertEquals(189.086, refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(1), 0.0001)
-
-            // incidents
-            assertEquals(
-                listOf(
-                    listOf("9457146989091489", 1, 2),
-                    listOf("9457146989091490", 5, 8),
-                    listOf("9457146989091491", 56, 58),
-                ),
-                requestedRoutes[0].directionsRoute.legs()!![1].incidents()!!
-                    .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() }),
-            )
-            assertEquals(
-                listOf(listOf("9457146989091490", 3, 7), listOf("9457146989091491", 56, 58)),
-                refreshedRoutes[0].directionsRoute.legs()!![1].incidents()!!
-                    .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() }),
-            )
-
-            // closures
-            assertEquals(
-                listOf(
-                    Closure.builder()
-                        .geometryIndexStart(3)
-                        .geometryIndexEnd(3)
-                        .build(),
-                    Closure.builder()
-                        .geometryIndexStart(4)
-                        .geometryIndexEnd(5)
-                        .build(),
-                    Closure.builder()
-                        .geometryIndexStart(60)
-                        .geometryIndexEnd(62)
-                        .build(),
-                ),
-                requestedRoutes[0].directionsRoute.legs()!![1].closures(),
-            )
-            assertEquals(
-                listOf(
-                    Closure.builder()
-                        .geometryIndexStart(3)
-                        .geometryIndexEnd(5)
-                        .build(),
-                    Closure.builder()
-                        .geometryIndexStart(60)
-                        .geometryIndexEnd(62)
-                        .build(),
-                ),
-                refreshedRoutes[0].directionsRoute.legs()!![1].closures(),
-            )
-
-            // waypoints
-            assertNoDiffs(
-                requestedRoutes[0].waypoints,
-                refreshedRoutes[0].waypoints,
-            )
-            assertNoDiffs(
-                requestedRoutes[1].waypoints,
-                refreshedRoutes[1].waypoints,
-            )
-        }
-
-    @Test
-    fun expect_route_refresh_to_update_annotations_incidents_and_closures_for_second_leg() =
-        sdkTest {
-            val currentRouteGeometryIndex = 2000
-            // 437 points in leg #0, so currentLegGeometryIndex = 2000 - 437 + 1 (points are duplicated on the start and end of steps and legs) = 1564
-            setupMockRequestHandlers(
-                threeCoordinatesWithIncidents,
-                R.raw.route_response_multileg_with_incidents,
-                R.raw.route_response_route_refresh_multileg_with_incidents,
-                "route_response_multileg_with_incidents",
-                acceptedGeometryIndex = currentRouteGeometryIndex,
-            )
-            val routeOptions = generateRouteOptions(threeCoordinatesWithIncidents)
-            val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
-                .getSuccessfulResultOrThrowException()
-                .routes
-
-            mapboxNavigation.setNavigationRoutes(requestedRoutes, initialLegIndex = 1)
-            mapboxNavigation.startTripSession()
-            // corresponds to currentRouteGeometryIndex = 2000, currentLeg = 1
-            stayOnPosition(39.80965, -75.281163, bearing = 190f)
-            mapboxNavigation.routeProgressUpdates()
-                .filter {
-                    it.currentRouteGeometryIndex == currentRouteGeometryIndex
-                }
-                .first()
-            val refreshedRoutes = mapboxNavigation.routesUpdates()
-                .filter {
-                    it.reason == ROUTES_UPDATE_REASON_REFRESH
-                }
-                .first()
-                .navigationRoutes
-
-            // annotations
-            assertEquals(8595.694, requestedRoutes[0].getSumOfDurationAnnotationsFromLeg(1), 0.0001)
-            assertEquals(8571.824, refreshedRoutes[0].getSumOfDurationAnnotationsFromLeg(1), 0.0001)
-
-            // incidents
-            assertEquals(
-                listOf(
-                    listOf("9457146989091490", 2019, 2024),
-                    listOf("5945491930714919", 2044, 2126),
-                ),
-                requestedRoutes[0].directionsRoute.legs()!![1].incidents()!!
-                    .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() }),
-            )
-            assertEquals(
-                listOf(
-                    listOf("9457146989091490", 2019, 2024),
-                    listOf("5945491930714919", 2048, 2130),
-                ),
-                refreshedRoutes[0].directionsRoute.legs()!![1].incidents()!!
-                    .extract({ id() }, { geometryIndexStart() }, { geometryIndexEnd() }),
-            )
-
-            // closures
-            assertEquals(
-                listOf(
-                    Closure.builder()
-                        .geometryIndexStart(2001)
-                        .geometryIndexEnd(2020)
-                        .build(),
-                ),
-                requestedRoutes[0].directionsRoute.legs()!![1].closures(),
-            )
-            assertEquals(
-                listOf(
-                    Closure.builder()
-                        .geometryIndexStart(2054)
-                        .geometryIndexEnd(2061)
-                        .build(),
-                ),
-                refreshedRoutes[0].directionsRoute.legs()!![1].closures(),
-            )
-            // waypoints
-            assertNoDiffs(
-                requestedRoutes[0].waypoints,
-                refreshedRoutes[0].waypoints,
-            )
-        }
-
-    @Test
-    fun refreshAlternativeWithMoreLegsUsesInitialLegIndexZeroForPrimaryRoute() = sdkTest {
-        setupMockRequestHandlers(
-            multilegCoordinates,
-            R.raw.route_response_single_route_multileg,
-            R.raw.route_response_single_route_multileg_refreshed,
-            "route_response_single_route_multileg",
-            acceptedGeometryIndex = 70,
-        )
-        mockWebServerRule.requestHandlers.add(
-            FailByRequestMockRequestHandler(
-                MockDirectionsRefreshHandler(
-                    "route_response_single_route_multileg_alternative",
-                    readRawFileText(
-                        activity,
-                        R.raw.route_response_single_route_multileg_alternative_refreshed,
-                    ),
-                    acceptedGeometryIndex = 11,
-                ),
-            ),
-        )
-        val routeOptions = generateRouteOptions(multilegCoordinates)
-        val alternativeRoutes = mapboxNavigation.requestRoutes(routeOptions)
-            .getSuccessfulResultOrThrowException()
-            .routes
-        // In this test setup we are considering a case where user was driving along the route,
-        // started the second leg and received an alternative, and selected it before the fork.
-        // This means that the primary route is shorter than the alternative route (former primary route).
-        val primaryRoute = mapboxNavigation.requestMockRoutes(
-            mockWebServerRule,
-            alternativeForMultileg(activity),
-        ).first()
-
-        // corresponds to currentRouteGeometryIndex = 70 for alternative route and 11 for the primary route
-        mockLocationUpdatesRule.pushLocationUpdate(
-            mockLocationUpdatesRule.generateLocationUpdate {
-                latitude = 38.581798
-                longitude = -121.476146
-            },
-        )
-
-        mapboxNavigation.setNavigationRoutes(
-            listOf(primaryRoute) + alternativeRoutes,
-            initialLegIndex = 0,
-        )
-        mapboxNavigation.startTripSession()
-
-        mapboxNavigation.routeProgressUpdates()
-            .filter {
-                it.currentRouteGeometryIndex == 11
-            }
-            .first()
-
-        mapboxNavigation.routesUpdates()
-            .filter { result ->
-                (result.reason == ROUTES_UPDATE_REASON_REFRESH).also {
-                    if (it) {
-                        assertEquals(0, mapboxNavigation.currentLegIndex())
+            mapboxNavigation.routesUpdates()
+                .filter { result ->
+                    (result.reason == ROUTES_UPDATE_REASON_REFRESH).also {
+                        if (it) {
+                            assertEquals(1, mapboxNavigation.currentLegIndex())
+                        }
                     }
                 }
-            }
-            .first()
-    }
-
-    @Test
-    fun refreshAlternativeWithLessLegsUsesInitialLegIndexOneForPrimaryRoute() = sdkTest {
-        setupMockRequestHandlers(
-            multilegCoordinates,
-            R.raw.route_response_single_route_multileg,
-            R.raw.route_response_single_route_multileg_refreshed,
-            "route_response_single_route_multileg",
-            acceptedGeometryIndex = 70,
-        )
-        mockWebServerRule.requestHandlers.add(
-            FailByRequestMockRequestHandler(
-                MockDirectionsRefreshHandler(
-                    "route_response_single_route_multileg_alternative",
-                    readRawFileText(
-                        activity,
-                        R.raw.route_response_single_route_multileg_alternative_refreshed,
-                    ),
-                    acceptedGeometryIndex = 11,
-                ),
-            ),
-        )
-        val routeOptions = generateRouteOptions(multilegCoordinates)
-        val requestedRoutes = mapboxNavigation.requestRoutes(routeOptions)
-            .getSuccessfulResultOrThrowException()
-            .routes
-        // alternative which was requested on the second leg of the original route,
-        // so the alternative has only one leg while the original route has two
-        val alternativeRoute = mapboxNavigation.requestMockRoutes(
-            mockWebServerRule,
-            alternativeForMultileg(activity),
-        ).first()
-
-        mapboxNavigation.setNavigationRoutes(requestedRoutes, initialLegIndex = 1)
-        mapboxNavigation.startTripSession()
-
-        // corresponds to currentRouteGeometryIndex = 70 for primary route and 11 for alternative route
-        stayOnPosition(38.581798, -121.476146, bearing = 100f)
-        mapboxNavigation.routeProgressUpdates()
-            .filter {
-                it.currentRouteGeometryIndex == 70
-            }
-            .first()
-
-        mapboxNavigation.setNavigationRoutesAndWaitForAlternativesUpdate(
-            requestedRoutes + alternativeRoute,
-            initialLegIndex = 1,
-        )
-
-        mapboxNavigation.routesUpdates()
-            .filter { result ->
-                (result.reason == ROUTES_UPDATE_REASON_REFRESH).also {
-                    if (it) {
-                        assertEquals(1, mapboxNavigation.currentLegIndex())
-                    }
-                }
-            }
-            .first()
+                .first()
+        }
     }
 
     private fun List<Incident>.extract(vararg extractors: Incident.() -> Any?): List<List<Any?>> {
@@ -1154,7 +1223,9 @@ class RouteRefreshTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.ja
         return routeRefreshOptions
     }
 
-    private suspend fun waitForRouteToSuccessfullyRefresh(): RouteProgress =
+    private suspend fun waitForRouteToSuccessfullyRefresh(
+        mapboxNavigation: MapboxNavigation,
+    ): RouteProgress =
         mapboxNavigation.routeProgressUpdates()
             .filter { isRefreshedRouteDistance(it) }
             .first()

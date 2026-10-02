@@ -4,15 +4,13 @@ import android.location.Location
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
-import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.eh.EHorizonPosition
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectEnterExitInfo
 import com.mapbox.navigation.base.trip.model.roadobject.RoadObjectPassInfo
 import com.mapbox.navigation.base.trip.model.roadobject.distanceinfo.RoadObjectDistanceInfo
-import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
 import com.mapbox.navigation.instrumentation_tests.R
@@ -29,20 +27,19 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.ui.utils.coroutines.setNavigationRoutesAndWaitForUpdate
 import com.mapbox.navigation.testing.ui.utils.coroutines.startTripSessionAndWaitForFreeDriveState
 import com.mapbox.navigation.testing.ui.utils.coroutines.stopTripSessionAndWaitForIdleState
-import com.mapbox.navigation.testing.ui.utils.runOnMainSync
 import com.mapbox.navigation.testing.utils.http.MockDirectionsRequestHandler
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.testing.utils.readRawFileText
+import com.mapbox.navigation.testing.utils.withMapboxNavigation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import java.net.URI
 import java.util.concurrent.TimeUnit
 
+@OptIn(ExperimentalMapboxNavigationAPI::class)
 class MapboxNavigationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
 
     @get:Rule
@@ -57,165 +54,160 @@ class MapboxNavigationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::clas
         Point.fromLngLat(-77.1534183, 38.7708948),
     )
 
-    private lateinit var mapboxNavigation: MapboxNavigation
-
     override fun setupMockLocation(): Location = mockLocationUpdatesRule.generateLocationUpdate {
         latitude = coordinates.first().latitude()
         longitude = coordinates.first().longitude()
     }
 
-    @Before
-    fun setup() {
-        runOnMainSync {
-            mapboxNavigation = MapboxNavigationProvider.create(
-                NavigationOptions.Builder(activity)
-                    .routingTilesOptions(
-                        RoutingTilesOptions.Builder()
-                            .tilesBaseUri(URI(mockWebServerRule.baseUrl))
-                            .build(),
-                    )
-                    .build(),
-            )
+    @Test
+    fun trip_session_resets_successfully() = sdkTest {
+        withMapboxNavigation { mapboxNavigation ->
+            mapboxNavigation.resetTripSessionAndWaitForResult()
         }
     }
 
     @Test
-    fun trip_session_resets_successfully() = sdkTest {
-        mapboxNavigation.resetTripSessionAndWaitForResult()
-    }
-
-    @Test
     fun current_leg_index() = sdkTest {
-        mockWebServerRule.requestHandlers.clear()
-        mockWebServerRule.requestHandlers.add(
-            MockDirectionsRequestHandler(
-                DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
-                readRawFileText(activity, R.raw.multileg_route),
-                coordinates,
-            ),
-        )
+        withMapboxNavigation { mapboxNavigation ->
+            mockWebServerRule.requestHandlers.clear()
+            mockWebServerRule.requestHandlers.add(
+                MockDirectionsRequestHandler(
+                    DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    readRawFileText(activity, R.raw.multileg_route),
+                    coordinates,
+                ),
+            )
 
-        mapboxNavigation.startTripSession()
+            mapboxNavigation.startTripSession()
 
-        assertEquals(0, mapboxNavigation.currentLegIndex())
+            assertEquals(0, mapboxNavigation.currentLegIndex())
 
-        val routes = mapboxNavigation.requestRoutes(
-            RouteOptions.builder()
-                .baseUrl(mockWebServerRule.baseUrl)
-                .applyDefaultNavigationOptions(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                .coordinatesList(coordinates)
-                .build(),
-        ).getSuccessfulResultOrThrowException().routes
-        mapboxNavigation.setNavigationRoutes(routes)
+            val routes = mapboxNavigation.requestRoutes(
+                RouteOptions.builder()
+                    .baseUrl(mockWebServerRule.baseUrl)
+                    .applyDefaultNavigationOptions(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                    .coordinatesList(coordinates)
+                    .build(),
+            ).getSuccessfulResultOrThrowException().routes
+            mapboxNavigation.setNavigationRoutes(routes)
 
-        mapboxNavigation.routesUpdates().filter { it.navigationRoutes.isNotEmpty() }.first()
+            mapboxNavigation.routesUpdates().filter { it.navigationRoutes.isNotEmpty() }.first()
 
-        assertEquals(0, mapboxNavigation.currentLegIndex())
+            assertEquals(0, mapboxNavigation.currentLegIndex())
 
-        stayOnPosition(coordinates[1])
+            stayOnPosition(coordinates[1])
 
-        mapboxNavigation.routeProgressUpdates()
-            .filter { it.currentState == RouteProgressState.TRACKING }
-            .first()
+            mapboxNavigation.routeProgressUpdates()
+                .filter { it.currentState == RouteProgressState.TRACKING }
+                .first()
 
-        assertEquals(0, mapboxNavigation.currentLegIndex())
+            assertEquals(0, mapboxNavigation.currentLegIndex())
 
-        mapboxNavigation.navigateNextRouteLeg()
+            mapboxNavigation.navigateNextRouteLeg()
 
-        mapboxNavigation.routeProgressUpdates()
-            .filter { it.currentLegProgress?.legIndex == 1 }
-            .first()
+            mapboxNavigation.routeProgressUpdates()
+                .filter { it.currentLegProgress?.legIndex == 1 }
+                .first()
 
-        assertEquals(1, mapboxNavigation.currentLegIndex())
+            assertEquals(1, mapboxNavigation.currentLegIndex())
+        }
     }
 
     @Test
     fun current_leg_index_with_initial_leg_index_1() = sdkTest {
-        mockWebServerRule.requestHandlers.clear()
-        mockWebServerRule.requestHandlers.add(
-            MockDirectionsRequestHandler(
-                DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
-                readRawFileText(activity, R.raw.multileg_route),
-                coordinates,
-            ),
-        )
+        withMapboxNavigation { mapboxNavigation ->
+            mockWebServerRule.requestHandlers.clear()
+            mockWebServerRule.requestHandlers.add(
+                MockDirectionsRequestHandler(
+                    DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    readRawFileText(activity, R.raw.multileg_route),
+                    coordinates,
+                ),
+            )
 
-        mapboxNavigation.startTripSession()
+            mapboxNavigation.startTripSession()
 
-        assertEquals(0, mapboxNavigation.currentLegIndex())
+            assertEquals(0, mapboxNavigation.currentLegIndex())
 
-        val routes = mapboxNavigation.requestRoutes(
-            RouteOptions.builder()
-                .applyDefaultNavigationOptions(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                .coordinatesList(coordinates)
-                .baseUrl(mockWebServerRule.baseUrl)
-                .build(),
-        ).getSuccessfulResultOrThrowException().routes
-        stayOnPosition(coordinates[1])
-        mapboxNavigation.setNavigationRoutes(routes, initialLegIndex = 1)
+            val routes = mapboxNavigation.requestRoutes(
+                RouteOptions.builder()
+                    .applyDefaultNavigationOptions(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                    .coordinatesList(coordinates)
+                    .baseUrl(mockWebServerRule.baseUrl)
+                    .build(),
+            ).getSuccessfulResultOrThrowException().routes
+            stayOnPosition(coordinates[1])
+            mapboxNavigation.setNavigationRoutes(routes, initialLegIndex = 1)
 
-        mapboxNavigation.routesUpdates().filter { it.navigationRoutes.isNotEmpty() }.first()
+            mapboxNavigation.routesUpdates().filter { it.navigationRoutes.isNotEmpty() }.first()
 
-        assertEquals(1, mapboxNavigation.currentLegIndex())
+            assertEquals(1, mapboxNavigation.currentLegIndex())
 
-        mapboxNavigation.routeProgressUpdates()
-            .filter { it.currentState == RouteProgressState.TRACKING }
-            .first()
+            mapboxNavigation.routeProgressUpdates()
+                .filter { it.currentState == RouteProgressState.TRACKING }
+                .first()
 
-        assertEquals(1, mapboxNavigation.currentLegIndex())
+            assertEquals(1, mapboxNavigation.currentLegIndex())
+        }
     }
 
     @Test
     fun destroy_during_active_session() = sdkTest {
-        mockWebServerRule.requestHandlers.clear()
-        mockWebServerRule.requestHandlers.add(
-            MockDirectionsRequestHandler(
-                DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
-                readRawFileText(activity, R.raw.multileg_route),
-                coordinates,
-            ),
-        )
+        withMapboxNavigation { mapboxNavigation ->
+            mockWebServerRule.requestHandlers.clear()
+            mockWebServerRule.requestHandlers.add(
+                MockDirectionsRequestHandler(
+                    DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    readRawFileText(activity, R.raw.multileg_route),
+                    coordinates,
+                ),
+            )
 
-        mapboxNavigation.startTripSessionAndWaitForFreeDriveState()
+            mapboxNavigation.startTripSessionAndWaitForFreeDriveState()
 
-        val routes = mapboxNavigation.requestRoutes(
-            RouteOptions.builder()
-                .baseUrl(mockWebServerRule.baseUrl)
-                .applyDefaultNavigationOptions(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                .coordinatesList(coordinates)
-                .build(),
-        ).getSuccessfulResultOrThrowException().routes
+            val routes = mapboxNavigation.requestRoutes(
+                RouteOptions.builder()
+                    .baseUrl(mockWebServerRule.baseUrl)
+                    .applyDefaultNavigationOptions(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                    .coordinatesList(coordinates)
+                    .build(),
+            ).getSuccessfulResultOrThrowException().routes
 
-        mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
+            mapboxNavigation.setNavigationRoutesAndWaitForUpdate(routes)
 
-        MapboxNavigationProvider.destroy()
+            MapboxNavigationProvider.destroy()
 
-        // Brief delay so any async post-destroy crash can occur before the process exits
-        delay(TimeUnit.SECONDS.toMillis(5))
+            // Brief delay so any async post-destroy crash can occur before the process exits
+            delay(TimeUnit.SECONDS.toMillis(5))
+        }
     }
 
     @Test
     fun destroy_during_stopped_session() = sdkTest {
-        mapboxNavigation.startTripSessionAndWaitForFreeDriveState()
-        mapboxNavigation.stopTripSessionAndWaitForIdleState()
-        MapboxNavigationProvider.destroy()
+        withMapboxNavigation { mapboxNavigation ->
+            mapboxNavigation.startTripSessionAndWaitForFreeDriveState()
+            mapboxNavigation.stopTripSessionAndWaitForIdleState()
+            MapboxNavigationProvider.destroy()
 
-        // Brief delay so any async post-destroy crash can occur before the process exits
-        delay(TimeUnit.SECONDS.toMillis(5))
+            // Brief delay so any async post-destroy crash can occur before the process exits
+            delay(TimeUnit.SECONDS.toMillis(5))
+        }
     }
 
     @Test
     fun unregister_observers_after_destroy() = sdkTest {
-        mapboxNavigation.registerEHorizonObserver(EMPTY_EH_OBSERVER)
-        MapboxNavigationProvider.destroy()
+        withMapboxNavigation { mapboxNavigation ->
+            mapboxNavigation.registerEHorizonObserver(EMPTY_EH_OBSERVER)
+            MapboxNavigationProvider.destroy()
 
-        // Delay for the NN stuff to complete
-        delay(TimeUnit.SECONDS.toMillis(1))
+            // Delay for the NN stuff to complete
+            delay(TimeUnit.SECONDS.toMillis(1))
 
-        mapboxNavigation.unregisterEHorizonObserver(EMPTY_EH_OBSERVER)
+            mapboxNavigation.unregisterEHorizonObserver(EMPTY_EH_OBSERVER)
 
-        // Brief delay so any async post-destroy crash can occur before the process exits
-        delay(TimeUnit.SECONDS.toMillis(5))
+            // Brief delay so any async post-destroy crash can occur before the process exits
+            delay(TimeUnit.SECONDS.toMillis(5))
+        }
     }
 
     private fun stayOnPosition(position: Point) {

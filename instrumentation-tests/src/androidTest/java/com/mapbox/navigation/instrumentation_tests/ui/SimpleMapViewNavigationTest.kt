@@ -10,15 +10,14 @@ import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentConstants
 import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
 import com.mapbox.navigation.base.extensions.applyLanguageAndVoiceUnitOptions
-import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.instrumentation_tests.R
@@ -29,6 +28,7 @@ import com.mapbox.navigation.testing.ui.utils.coroutines.sdkTest
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.testing.utils.routes.MockRoute
 import com.mapbox.navigation.testing.utils.routes.RoutesProvider
+import com.mapbox.navigation.testing.utils.withMapboxNavigation
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
@@ -49,8 +49,6 @@ abstract class SimpleMapViewNavigationTest :
     val mockLocationReplayerRule = MockLocationReplayerRule(mockLocationUpdatesRule)
 
     protected lateinit var mockRoute: MockRoute
-
-    protected lateinit var mapboxNavigation: MapboxNavigation
 
     protected lateinit var routeLineApi: MapboxRouteLineApi
     protected lateinit var routeLineView: MapboxRouteLineView
@@ -73,45 +71,49 @@ abstract class SimpleMapViewNavigationTest :
 
         mockRoute = getRoute(activity)
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
-
-        mapboxNavigation = MapboxNavigationProvider.create(
-            NavigationOptions.Builder(activity)
-                .build(),
-        )
-        mapboxNavigation.startTripSession()
-        mapboxNavigation.requestRoutes(
-            RouteOptions.builder()
-                .applyDefaultNavigationOptions()
-                .applyLanguageAndVoiceUnitOptions(activity)
-                .baseUrl(mockWebServerRule.baseUrl)
-                .coordinatesList(mockRoute.routeWaypoints).build(),
-            object : NavigationRouterCallback {
-                override fun onRoutesReady(
-                    routes: List<NavigationRoute>,
-                    @RouterOrigin routerOrigin: String,
-                ) {
-                    mapboxNavigation.setNavigationRoutes(routes)
-                    mockLocationReplayerRule.playRoute(routes[0].directionsRoute)
-                }
-
-                override fun onFailure(
-                    reasons: List<RouterFailure>,
-                    routeOptions: RouteOptions,
-                ) {
-                    // no impl
-                }
-
-                override fun onCanceled(
-                    routeOptions: RouteOptions,
-                    @RouterOrigin routerOrigin: String,
-                ) {
-                    // no impl
-                }
-            },
-        )
     }
 
-    protected fun addRouteLine() {
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
+    protected suspend fun withSimpleMapViewNavigation(
+        block: suspend (mapboxNavigation: MapboxNavigation) -> Unit,
+    ) {
+        withMapboxNavigation { mapboxNavigation ->
+            mapboxNavigation.startTripSession()
+            mapboxNavigation.requestRoutes(
+                RouteOptions.builder()
+                    .applyDefaultNavigationOptions()
+                    .applyLanguageAndVoiceUnitOptions(activity)
+                    .baseUrl(mockWebServerRule.baseUrl)
+                    .coordinatesList(mockRoute.routeWaypoints).build(),
+                object : NavigationRouterCallback {
+                    override fun onRoutesReady(
+                        routes: List<NavigationRoute>,
+                        @RouterOrigin routerOrigin: String,
+                    ) {
+                        mapboxNavigation.setNavigationRoutes(routes)
+                        mockLocationReplayerRule.playRoute(routes[0].directionsRoute)
+                    }
+
+                    override fun onFailure(
+                        reasons: List<RouterFailure>,
+                        routeOptions: RouteOptions,
+                    ) {
+                        // no impl
+                    }
+
+                    override fun onCanceled(
+                        routeOptions: RouteOptions,
+                        @RouterOrigin routerOrigin: String,
+                    ) {
+                        // no impl
+                    }
+                },
+            )
+            block(mapboxNavigation)
+        }
+    }
+
+    protected fun addRouteLine(mapboxNavigation: MapboxNavigation) {
         val apiOptions = MapboxRouteLineApiOptions.Builder().build()
         val viewOptions = MapboxRouteLineViewOptions.Builder(activity)
             .routeLineBelowLayerId(LocationComponentConstants.LOCATION_INDICATOR_LAYER)
@@ -131,7 +133,7 @@ abstract class SimpleMapViewNavigationTest :
         }
     }
 
-    protected fun addNavigationCamera() {
+    protected fun addNavigationCamera(mapboxNavigation: MapboxNavigation) {
         mapboxNavigationViewportDataSource = MapboxNavigationViewportDataSource(
             activity.mapboxMap,
         )
@@ -169,7 +171,7 @@ abstract class SimpleMapViewNavigationTest :
         )
     }
 
-    protected fun addLocationPuck() {
+    protected fun addLocationPuck(mapboxNavigation: MapboxNavigation) {
         navigationLocationProvider = NavigationLocationProvider()
         locationPlugin = activity.binding.mapView.location
         locationPlugin.setLocationProvider(navigationLocationProvider)

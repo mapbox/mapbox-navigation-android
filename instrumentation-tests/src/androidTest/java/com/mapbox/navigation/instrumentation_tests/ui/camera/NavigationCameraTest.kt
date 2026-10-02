@@ -16,10 +16,12 @@ class NavigationCameraTest : SimpleMapViewNavigationTest() {
      */
     @Test
     fun navigation_camera_mode_changes_completes() = sdkTest {
-        addNavigationCamera()
+        withSimpleMapViewNavigation { mapboxNavigation ->
+            addNavigationCamera(mapboxNavigation)
 
-        navigationCamera.requestNavigationCameraToFollowing()
-        navigationCamera.requestNavigationCameraToOverview()
-        navigationCamera.requestNavigationCameraToFollowing()
+            navigationCamera.requestNavigationCameraToFollowing()
+            navigationCamera.requestNavigationCameraToOverview()
+            navigationCamera.requestNavigationCameraToFollowing()
+        }
     }
 }
