@@ -14,7 +14,7 @@ ktlint_function_naming_ignore_when_annotated_with=Composable, Test
 insert_final_newline=true
 
 # should be limit 100 or 120 symbols
-max_line_length=100
+max_line_length=120
 
 [**/qa_test_app/**.kt]
 ktlint_disabled_rules=package-name

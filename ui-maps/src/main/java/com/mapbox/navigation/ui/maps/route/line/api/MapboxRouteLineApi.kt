@@ -616,16 +616,31 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         point: Point,
     ): Expected<RouteLineError, RouteLineUpdateValue> {
         val currentNanoTime = System.nanoTime()
-        if (vanishingRouteLine?.vanishingPointState ==
-            VanishingPointState.DISABLED || currentNanoTime - lastIndexUpdateTimeNano >
-            RouteLayerConstants.MAX_ELAPSED_SINCE_INDEX_UPDATE_NANO ||
-            currentNanoTime - lastPointUpdateTimeNano <
+        val nanosSinceLastIndexUpdate = currentNanoTime - lastIndexUpdateTimeNano
+        if (vanishingRouteLine?.vanishingPointState == VanishingPointState.DISABLED) {
+            return ExpectedFactory.createError(
+                RouteLineError(
+                    "Vanishing point state is disabled.",
+                    null,
+                ),
+            )
+        }
+        if (nanosSinceLastIndexUpdate > RouteLayerConstants.MAX_ELAPSED_SINCE_INDEX_UPDATE_NANO) {
+            return ExpectedFactory.createError(
+                RouteLineError(
+                    "The update doesn't fall within the configured interval window: " +
+                        "the route progress-driven geometry index is stale.",
+                    null,
+                ),
+            )
+        }
+        if (currentNanoTime - lastPointUpdateTimeNano <
             routeLineOptions.vanishingRouteLineUpdateIntervalNano
         ) {
             return ExpectedFactory.createError(
                 RouteLineError(
-                    "Vanishing point state is disabled or the update doesn't fall " +
-                        "within the configured interval window.",
+                    "The update doesn't fall within the configured interval window: " +
+                        "called again too soon after the last point update.",
                     null,
                 ),
             )
@@ -1663,4 +1678,7 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
         runBlocking {
             map { scope.async(SdkDispatchers.Default) { f(it) } }.awaitAll()
         }
+
+    private fun Long.nanoToMs(): Long = this / 1_000_000
+    private fun Double.nanoToMs(): Long = (this / 1_000_000).toLong()
 }

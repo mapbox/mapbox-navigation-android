@@ -626,91 +626,105 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         update: Expected<RouteLineError, RouteLineUpdateValue>,
     ) {
         sender.sendRenderRouteLineUpdateEvent(style.getStyleId(), update)
-        update.onValue {
-            val optionsHolder = this.optionsHolder
-            scope.launchWithMutex {
-                val generationCommands = mutableListOf<Deferred<() -> Unit>>()
-                ifNonNull(it.primaryRouteLineDynamicData) { primaryRouteLineDynamicData ->
-                    primaryRouteLineLayerGroup.forEach { layerId ->
-                        val holder = chooseCommandHolder(layerId, primaryRouteLineDynamicData)
-                        holder?.let {
+        update
+            .onError {
+                logE(TAG) { "renderRouteLineUpdate error: ${it.errorMessage}" }
+            }
+            .onValue {
+                val optionsHolder = this.optionsHolder
+                scope.launchWithMutex {
+                    val generationCommands = mutableListOf<Deferred<() -> Unit>>()
+                    ifNonNull(it.primaryRouteLineDynamicData) { primaryRouteLineDynamicData ->
+                        primaryRouteLineLayerGroup.forEach { layerId ->
+                            val holder = chooseCommandHolder(layerId, primaryRouteLineDynamicData)
+                            holder?.let {
+                                generationCommands.addLaunched(
+                                    getGenerateCommand(it, style, layerId, optionsHolder.data),
+                                )
+                            }
+                        }
+                    }
+
+                    ifNonNull(it.routeLineMaskingLayerDynamicData) { overlayData ->
+                        overlayData.restrictedSectionExpressionCommandHolder?.let {
                             generationCommands.addLaunched(
-                                getGenerateCommand(it, style, layerId, optionsHolder.data),
+                                getGenerateCommand(
+                                    it,
+                                    style,
+                                    MASKING_LAYER_RESTRICTED,
+                                    optionsHolder.data,
+                                ),
+                            )
+                        }
+                        overlayData.trafficExpressionCommandHolder?.let {
+                            generationCommands.addLaunched(
+                                getGenerateCommand(
+                                    it,
+                                    style,
+                                    MASKING_LAYER_TRAFFIC,
+                                    optionsHolder.data,
+                                ),
+                            )
+                        }
+                        overlayData.baseExpressionCommandHolder.let {
+                            generationCommands.addLaunched(
+                                getGenerateCommand(
+                                    it,
+                                    style,
+                                    MASKING_LAYER_MAIN,
+                                    optionsHolder.data,
+                                ),
+                            )
+                        }
+                        overlayData.casingExpressionCommandHolder.let {
+                            generationCommands.addLaunched(
+                                getGenerateCommand(
+                                    it,
+                                    style,
+                                    MASKING_LAYER_CASING,
+                                    optionsHolder.data,
+                                ),
+                            )
+                        }
+                        overlayData.trailExpressionCommandHolder?.let {
+                            generationCommands.addLaunched(
+                                getGenerateCommand(
+                                    it,
+                                    style,
+                                    MASKING_LAYER_TRAIL,
+                                    optionsHolder.data,
+                                ),
+                            )
+                        }
+                        overlayData.trailCasingExpressionCommandHolder?.let {
+                            generationCommands.addLaunched(
+                                getGenerateCommand(
+                                    it,
+                                    style,
+                                    MASKING_LAYER_TRAIL_CASING,
+                                    optionsHolder.data,
+                                ),
                             )
                         }
                     }
-                }
+                    val applyCommands = generationCommands.awaitAll()
+                    applyCommands.forEach { it() }
 
-                ifNonNull(it.routeLineMaskingLayerDynamicData) { overlayData ->
-                    overlayData.restrictedSectionExpressionCommandHolder?.let {
-                        generationCommands.addLaunched(
-                            getGenerateCommand(
-                                it,
-                                style,
-                                MASKING_LAYER_RESTRICTED,
-                                optionsHolder.data,
-                            ),
-                        )
-                    }
-                    overlayData.trafficExpressionCommandHolder?.let {
-                        generationCommands.addLaunched(
-                            getGenerateCommand(
-                                it,
-                                style,
-                                MASKING_LAYER_TRAFFIC,
-                                optionsHolder.data,
-                            ),
-                        )
-                    }
-                    overlayData.baseExpressionCommandHolder.let {
-                        generationCommands.addLaunched(
-                            getGenerateCommand(it, style, MASKING_LAYER_MAIN, optionsHolder.data),
-                        )
-                    }
-                    overlayData.casingExpressionCommandHolder.let {
-                        generationCommands.addLaunched(
-                            getGenerateCommand(
-                                it,
-                                style,
-                                MASKING_LAYER_CASING,
-                                optionsHolder.data,
-                            ),
-                        )
-                    }
-                    overlayData.trailExpressionCommandHolder?.let {
-                        generationCommands.addLaunched(
-                            getGenerateCommand(it, style, MASKING_LAYER_TRAIL, optionsHolder.data),
-                        )
-                    }
-                    overlayData.trailCasingExpressionCommandHolder?.let {
-                        generationCommands.addLaunched(
-                            getGenerateCommand(
-                                it,
-                                style,
-                                MASKING_LAYER_TRAIL_CASING,
-                                optionsHolder.data,
-                            ),
-                        )
-                    }
-                }
-                val applyCommands = generationCommands.awaitAll()
-                applyCommands.forEach { it() }
-
-                ifNonNull(it.primaryRouteLineDynamicData) { overlayData ->
-                    // This method (renderRouteLineUpdate) is called every time the puck movement is updated and
-                    // on route progress updates.  It's not necessary to move the layers
-                    // on trim offset updates. Checking the kind of update that has come in
-                    // saves resources.
-                    if (
-                        overlayData.baseExpressionCommandHolder.applier !is LineTrimCommandApplier
-                    ) {
-                        getMaskingLayerMoveCommands(style).forEach { mutationCommand ->
-                            mutationCommand()
+                    ifNonNull(it.primaryRouteLineDynamicData) { overlayData ->
+                        // This method (renderRouteLineUpdate) is called every time the puck movement is updated and
+                        // on route progress updates.  It's not necessary to move the layers
+                        // on trim offset updates. Checking the kind of update that has come in
+                        // saves resources.
+                        if (
+                            overlayData.baseExpressionCommandHolder.applier !is LineTrimCommandApplier
+                        ) {
+                            getMaskingLayerMoveCommands(style).forEach { mutationCommand ->
+                                mutationCommand()
+                            }
                         }
                     }
                 }
             }
-        }
     }
 
     /**

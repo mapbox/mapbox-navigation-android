@@ -82,6 +82,13 @@ internal class VanishingRouteLine() {
                 distanceToLine >
                 RouteLayerConstants.ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS
             ) {
+                logD(
+                    "Skipping vanishing point update: puck is ${distanceToLine}m from " +
+                        "the nearest point around geometry index $upcomingGeoIndex " +
+                        "(max allowed " +
+                        "${RouteLayerConstants.ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS}m).",
+                    "VanishingRouteLine",
+                )
                 return null
             }
         }
