@@ -35,4 +35,7 @@
   <string name="car_feedback_search_other">Інша проблема</string>
   <string name="car_feedback_arrival_positive">Добре</string>
   <string name="car_feedback_arrival_negative">Не добре</string>
+  <string name="car_search_error">Щось пішло не так. Спробуйте знову.</string>
+  <string name="car_navigation_destination_default_name">Пункт призначення</string>
+  <string name="car_maneuver_exit_number">З\'їзд %1$s</string>
 </resources>

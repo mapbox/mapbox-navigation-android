@@ -35,4 +35,7 @@
   <string name="car_feedback_search_other">Altă problemă</string>
   <string name="car_feedback_arrival_positive">Bun</string>
   <string name="car_feedback_arrival_negative">Nu este bine</string>
+  <string name="car_search_error">A apărut o eroare. Încercați din nou.</string>
+  <string name="car_navigation_destination_default_name">Destinație</string>
+  <string name="car_maneuver_exit_number">Ieșirea %1$s</string>
 </resources>

@@ -7,7 +7,6 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.tripdata.progress.api.MapboxTripProgressApi
 import com.mapbox.navigation.tripdata.progress.model.TripProgressUpdateValue
 import java.util.TimeZone
-import java.util.concurrent.TimeUnit
 
 class CarNavigationEtaMapper(private val tripProgressApi: MapboxTripProgressApi) {
 
@@ -22,8 +21,13 @@ class CarNavigationEtaMapper(private val tripProgressApi: MapboxTripProgressApi)
             .build()
     }
 
+    // The destination estimate covers the whole route, like its distance and arrival time.
     private fun remainingTimeSeconds(tripProgressUpdateValue: TripProgressUpdateValue): Long {
-        val halfSecond = TimeUnit.MINUTES.toSeconds(1) / 2
-        return tripProgressUpdateValue.currentLegTimeRemaining.toLong() + halfSecond
+        val secondsRemaining = tripProgressUpdateValue.totalTimeRemaining
+        return if (secondsRemaining.isFinite() && secondsRemaining >= 0.0) {
+            secondsRemaining.toLong()
+        } else {
+            TravelEstimate.REMAINING_TIME_UNKNOWN
+        }
     }
 }

@@ -35,4 +35,7 @@
   <string name="car_feedback_search_other">Друг проблем</string>
   <string name="car_feedback_arrival_positive">Добре</string>
   <string name="car_feedback_arrival_negative">Не е добре</string>
+  <string name="car_search_error">Нещо се обърка. Опитайте отново.</string>
+  <string name="car_navigation_destination_default_name">Дестинация</string>
+  <string name="car_maneuver_exit_number">Изход %1$s</string>
 </resources>

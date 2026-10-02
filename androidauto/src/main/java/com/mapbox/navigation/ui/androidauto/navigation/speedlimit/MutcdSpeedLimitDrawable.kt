@@ -91,7 +91,7 @@ internal class MutcdSpeedLimitDrawable : SpeedLimitDrawable() {
             speedLimitRect,
         )
         val speedLimitY = signBackgroundRect.top + 41.5f - speedLimitRect.exactCenterY()
-        canvas.drawText(speedLimitText, WIDTH / 2f, speedLimitY, speedLimitPaintVienna)
+        canvas.drawText(speedLimitText, WIDTH / 2f, speedLimitY, speedLimitTextPaint)
     }
 
     private fun drawCurrentSpeedText(canvas: Canvas) {

@@ -35,4 +35,7 @@
   <string name="car_feedback_search_other">Druga težava</string>
   <string name="car_feedback_arrival_positive">Dobro</string>
   <string name="car_feedback_arrival_negative">Ni dobro</string>
+  <string name="car_search_error">Prišlo je do napake. Poskusite znova.</string>
+  <string name="car_navigation_destination_default_name">Cilj</string>
+  <string name="car_maneuver_exit_number">Izvoz %1$s</string>
 </resources>

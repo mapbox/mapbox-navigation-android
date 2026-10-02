@@ -54,7 +54,11 @@ object CarDistanceFormatter {
         val distanceFormatterOptions = mapboxNavigation.navigationOptions.distanceFormatterOptions
         val unitType = distanceFormatterOptions.unitType
         val roundingIncrement = distanceFormatterOptions.roundingIncrement
-        delegate = CarDistanceFormatterDelegate(unitType, roundingIncrement)
+        delegate = CarDistanceFormatterDelegate(
+            unitType,
+            roundingIncrement,
+            distanceFormatterOptions.locale,
+        )
         mapboxDistanceFormatter = MapboxDistanceFormatter(distanceFormatterOptions)
     }
 }

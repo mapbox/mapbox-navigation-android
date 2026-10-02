@@ -53,6 +53,8 @@ internal constructor(
     private val navigationObserver = mapboxNavigationForward(this::onAttached, this::onDetached)
     private val _carNavigationInfo = MutableStateFlow(CarNavigationInfo())
     private var currentShields = emptyList<RouteShield>()
+    private var latestRouteProgress: RouteProgress? = null
+    private var latestManeuvers: Expected<ManeuverError, List<Maneuver>>? = null
     private var currentJunctionValue: JunctionValue? = null
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -140,6 +142,9 @@ internal constructor(
         maneuverApi = null
         junctionApi = null
         currentJunctionValue = null
+        currentShields = emptyList()
+        latestRouteProgress = null
+        latestManeuvers = null
         navigationEtaMapper = null
         navigationInfoMapper = null
         _carNavigationInfo.value = CarNavigationInfo()
@@ -147,6 +152,8 @@ internal constructor(
 
     private fun onRouteProgress(routeProgress: RouteProgress) {
         val expectedManeuvers = maneuverApi?.getManeuvers(routeProgress) ?: return
+        latestRouteProgress = routeProgress
+        latestManeuvers = expectedManeuvers
         updateNavigationInfo(expectedManeuvers, routeProgress)
 
         expectedManeuvers.onValue { maneuvers ->
@@ -158,9 +165,15 @@ internal constructor(
                 maneuvers,
             ) { shieldResult ->
                 val newShields = shieldResult.mapNotNull { it.value?.shield }
+                // Shields can arrive after newer route progress, or after detaching. Render the
+                // latest progress so a late callback never brings back an older distance, ETA or
+                // maneuver. Shields of an older request can still replace newer ones until the
+                // next route progress requests them again.
+                val latestProgress = latestRouteProgress ?: return@getRoadShields
+                val latestExpectedManeuvers = latestManeuvers ?: return@getRoadShields
                 if (currentShields != newShields) {
                     currentShields = newShields
-                    updateNavigationInfo(expectedManeuvers, routeProgress)
+                    updateNavigationInfo(latestExpectedManeuvers, latestProgress)
                 }
             }
         }

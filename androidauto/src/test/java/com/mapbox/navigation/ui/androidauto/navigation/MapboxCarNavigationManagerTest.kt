@@ -6,6 +6,7 @@ import androidx.car.app.navigation.NavigationManagerCallback
 import androidx.car.app.navigation.model.Step
 import androidx.car.app.navigation.model.TravelEstimate
 import androidx.car.app.navigation.model.Trip
+import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.formatter.Rounding
@@ -21,6 +22,7 @@ import com.mapbox.navigation.core.internal.telemetry.AndroidAutoEvent
 import com.mapbox.navigation.core.internal.telemetry.postAndroidAutoEvent
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.androidauto.R
 import com.mapbox.navigation.ui.androidauto.internal.AndroidAutoLog
 import com.mapbox.navigation.ui.androidauto.navigation.maneuver.CarManeuverMapper
 import com.mapbox.navigation.ui.androidauto.testing.CarAppTestRule
@@ -71,6 +73,7 @@ class MapboxCarNavigationManagerTest {
     }
     private val carContext: CarContext = mockk {
         every { getCarService(NavigationManager::class.java) } returns navigationManager
+        every { getString(any()) } returns "Destination"
     }
 
     private val events = mutableListOf<String>()
@@ -79,7 +82,10 @@ class MapboxCarNavigationManagerTest {
     @Before
     fun setup() {
         mockkObject(CarManeuverMapper)
-        every { CarManeuverMapper.from(any<RouteProgress>(), any()) } returns mockk(relaxed = true)
+        every { CarManeuverMapper.destinationName(any()) } returns null
+        every {
+            CarManeuverMapper.from(any<RouteProgress>(), any(), any<String>())
+        } returns mockk(relaxed = true)
     }
 
     @After
@@ -334,13 +340,48 @@ class MapboxCarNavigationManagerTest {
     }
 
     @Test
+    fun `trip destination is named after the final waypoint`() {
+        every { CarManeuverMapper.destinationName(any()) } answers { callOriginal() }
+        val routesSlot = mutableListOf<RoutesObserver>()
+        val progressObservers = mutableListOf<RouteProgressObserver>()
+        val mapboxNavigation = mapboxNavigationMock(routesSlot, progressObservers)
+
+        sut.onAttached(mapboxNavigation)
+        mapboxNavigation.setNavigationRoutes(listOf(mockk()))
+        progressObservers.forEach {
+            it.onRouteProgressChanged(routeProgress(destinationName = "Market Street"))
+        }
+
+        verify { CarManeuverMapper.from(any<RouteProgress>(), any(), "Market Street") }
+    }
+
+    @Test
+    fun `trip destination falls back to the localized default name`() {
+        every { CarManeuverMapper.destinationName(any()) } answers { callOriginal() }
+        val routesSlot = mutableListOf<RoutesObserver>()
+        val progressObservers = mutableListOf<RouteProgressObserver>()
+        val mapboxNavigation = mapboxNavigationMock(routesSlot, progressObservers)
+        every {
+            carContext.getString(R.string.car_navigation_destination_default_name)
+        } returns "Ziel"
+
+        sut.onAttached(mapboxNavigation)
+        mapboxNavigation.setNavigationRoutes(listOf(mockk()))
+        progressObservers.forEach {
+            it.onRouteProgressChanged(routeProgress(destinationName = " "))
+        }
+
+        verify { CarManeuverMapper.from(any<RouteProgress>(), any(), "Ziel") }
+    }
+
+    @Test
     fun `identical trips do not trigger redundant updates`() {
         val routesSlot = mutableListOf<RoutesObserver>()
         val progressObservers = mutableListOf<RouteProgressObserver>()
         val mapboxNavigation = mapboxNavigationMock(routesSlot, progressObservers)
         val trip = trip(100)
         val routeProgress = routeProgress()
-        every { CarManeuverMapper.from(any<RouteProgress>(), any()) } returns trip
+        every { CarManeuverMapper.from(any<RouteProgress>(), any(), any<String>()) } returns trip
 
         sut.onAttached(mapboxNavigation)
         mapboxNavigation.setNavigationRoutes(listOf(mockk()))
@@ -348,7 +389,9 @@ class MapboxCarNavigationManagerTest {
         progressObservers.forEach { it.onRouteProgressChanged(routeProgress) }
 
         verify(exactly = 1) { navigationManager.updateTrip(trip) }
-        verify(exactly = 1) { CarManeuverMapper.from(any<RouteProgress>(), any()) }
+        verify(exactly = 1) {
+            CarManeuverMapper.from(any<RouteProgress>(), any(), any<String>())
+        }
     }
 
     @Test
@@ -358,7 +401,9 @@ class MapboxCarNavigationManagerTest {
         val mapboxNavigation = mapboxNavigationMock(routesSlot, progressObservers)
         var now = 0L
         val manager = MapboxCarNavigationManager(carContext, onHostStopNavigation = {}) { now }
-        every { CarManeuverMapper.from(any<RouteProgress>(), any()) } returns trip(100)
+        every {
+            CarManeuverMapper.from(any<RouteProgress>(), any(), any<String>())
+        } returns trip(100)
         val routeProgresses = listOf(
             routeProgress(durationRemaining = 100.0),
             routeProgress(durationRemaining = 99.0),
@@ -374,7 +419,9 @@ class MapboxCarNavigationManagerTest {
         progressObservers.forEach { it.onRouteProgressChanged(routeProgresses[2]) }
 
         verify(exactly = 2) { navigationManager.updateTrip(any()) }
-        verify(exactly = 2) { CarManeuverMapper.from(any<RouteProgress>(), any()) }
+        verify(exactly = 2) {
+            CarManeuverMapper.from(any<RouteProgress>(), any(), any<String>())
+        }
     }
 
     @Test
@@ -384,7 +431,9 @@ class MapboxCarNavigationManagerTest {
         val mapboxNavigation = mapboxNavigationMock(routesSlot, progressObservers)
         var now = 0L
         val manager = MapboxCarNavigationManager(carContext, onHostStopNavigation = {}) { now }
-        every { CarManeuverMapper.from(any<RouteProgress>(), any()) } returns trip(100)
+        every {
+            CarManeuverMapper.from(any<RouteProgress>(), any(), any<String>())
+        } returns trip(100)
         val routeProgresses = listOf(
             routeProgress(durationRemaining = 100.0),
             routeProgress(durationRemaining = 90.0),
@@ -397,7 +446,9 @@ class MapboxCarNavigationManagerTest {
         progressObservers.forEach { it.onRouteProgressChanged(routeProgresses[1]) }
 
         verify(exactly = 2) { navigationManager.updateTrip(any()) }
-        verify(exactly = 2) { CarManeuverMapper.from(any<RouteProgress>(), any()) }
+        verify(exactly = 2) {
+            CarManeuverMapper.from(any<RouteProgress>(), any(), any<String>())
+        }
     }
 
     @Test
@@ -407,7 +458,9 @@ class MapboxCarNavigationManagerTest {
         val mapboxNavigation = mapboxNavigationMock(routesSlot, progressObservers)
         var now = 0L
         val manager = MapboxCarNavigationManager(carContext, onHostStopNavigation = {}) { now }
-        every { CarManeuverMapper.from(any<RouteProgress>(), any()) } returns trip(100)
+        every {
+            CarManeuverMapper.from(any<RouteProgress>(), any(), any<String>())
+        } returns trip(100)
         val routeProgresses = listOf(
             routeProgress(distanceRemaining = 200.0f),
             routeProgress(distanceRemaining = 199.0f),
@@ -426,7 +479,7 @@ class MapboxCarNavigationManagerTest {
         progressObservers.forEach { it.onRouteProgressChanged(routeProgresses[3]) }
 
         verify(exactly = 3) { navigationManager.updateTrip(any()) }
-        verify(exactly = 3) { CarManeuverMapper.from(any<RouteProgress>(), any()) }
+        verify(exactly = 3) { CarManeuverMapper.from(any<RouteProgress>(), any(), any<String>()) }
     }
 
     @Test
@@ -436,7 +489,9 @@ class MapboxCarNavigationManagerTest {
         val mapboxNavigation = mapboxNavigationMock(routesSlot, progressObservers)
         var now = 0L
         val manager = MapboxCarNavigationManager(carContext, onHostStopNavigation = {}) { now }
-        every { CarManeuverMapper.from(any<RouteProgress>(), any()) } returns trip(100)
+        every {
+            CarManeuverMapper.from(any<RouteProgress>(), any(), any<String>())
+        } returns trip(100)
         val routeProgresses = listOf(
             routeProgress(stepIndex = 0),
             routeProgress(stepIndex = 1),
@@ -449,7 +504,9 @@ class MapboxCarNavigationManagerTest {
         progressObservers.forEach { it.onRouteProgressChanged(routeProgresses[1]) }
 
         verify(exactly = 2) { navigationManager.updateTrip(any()) }
-        verify(exactly = 2) { CarManeuverMapper.from(any<RouteProgress>(), any()) }
+        verify(exactly = 2) {
+            CarManeuverMapper.from(any<RouteProgress>(), any(), any<String>())
+        }
     }
 
     @Test
@@ -488,6 +545,7 @@ class MapboxCarNavigationManagerTest {
         distanceRemaining: Float = 200.0f,
         durationRemaining: Double = 100.0,
         stepIndex: Int = 0,
+        destinationName: String? = null,
     ): RouteProgress {
         val stepProgress = mockk<RouteStepProgress> {
             every { this@mockk.stepIndex } returns stepIndex
@@ -502,6 +560,15 @@ class MapboxCarNavigationManagerTest {
         return mockk {
             every { navigationRoute } returns mockk<NavigationRoute> {
                 every { id } returns "route"
+                every { directionsRoute.routeOptions() } returns null
+                every { waypoints } returns listOfNotNull(
+                    DirectionsWaypoint.builder().name("Origin").rawLocation(doubleArrayOf(0.0, 0.0))
+                        .build(),
+                    destinationName?.let {
+                        DirectionsWaypoint.builder().name(it).rawLocation(doubleArrayOf(1.0, 1.0))
+                            .build()
+                    },
+                )
             }
             every { currentLegProgress } returns legProgress
             every { bannerInstructions } returns null

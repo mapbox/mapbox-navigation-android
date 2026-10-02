@@ -35,4 +35,7 @@
   <string name="car_feedback_search_other">其他問題</string>
   <string name="car_feedback_arrival_positive">好</string>
   <string name="car_feedback_arrival_negative">不好</string>
+  <string name="car_search_error">發生錯誤。請再試一次。</string>
+  <string name="car_navigation_destination_default_name">目的地</string>
+  <string name="car_maneuver_exit_number">%1$s 號出口</string>
 </resources>

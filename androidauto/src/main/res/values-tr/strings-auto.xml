@@ -35,4 +35,7 @@
   <string name="car_feedback_search_other">Diğer sorun</string>
   <string name="car_feedback_arrival_positive">İyi</string>
   <string name="car_feedback_arrival_negative">İyi değil</string>
+  <string name="car_search_error">Bir sorun oluştu. Tekrar deneyin.</string>
+  <string name="car_navigation_destination_default_name">Varış noktası</string>
+  <string name="car_maneuver_exit_number">Çıkış %1$s</string>
 </resources>

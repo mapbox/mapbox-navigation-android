@@ -1,0 +1,11 @@
+- Fixed Android Auto showing a destination flag for end-of-road turns. End-of-road maneuvers now map to turn maneuvers.
+- Fixed Android Auto mapping a U-turn without a maneuver type to a destination, and an arrival without a modifier to an unknown maneuver.
+- Android Auto U-turns, U-turn lanes, and forks and off-ramps without a side now follow the driving side, so left-hand traffic shows right-hand U-turns.
+- Fixed the Android Auto roundabout exit number, which usually fell back to the first exit. It now comes from the route step of the roundabout. Leaving a roundabout or rotary now maps to a roundabout exit maneuver, including when the banner announcing it says "roundabout".
+- Android Auto lane guidance now recommends only the direction of an active lane that the route takes, instead of every direction of that lane.
+- Fixed `MapboxExitText` drawing the right exit arrow for slight-left and sharp-left exits.
+- The Android Auto destination travel estimate now reports the remaining time of the whole route, which matches its distance and arrival time, without the added 30 seconds.
+- Android Auto distances now use the same values and units as `MapboxDistanceUtil`, including yards for British English. Fixed the car showing meters labelled as feet when the rounding increment is not positive.
+- Fixed `CarNavigationInfoProvider` publishing the route progress of an older road-shield request when the shields arrive late.
+- Fixed the MUTCD speed limit number on Android Auto being drawn too small and off-centre.
+- The Android Auto speed limit warning now shows only above the speed limit plus the warning threshold. The Android Auto trip destination is named after the final waypoint, preferring the name given in the route request, and the fallback destination name and the `MapboxExitText` exit text are now localized string resources.

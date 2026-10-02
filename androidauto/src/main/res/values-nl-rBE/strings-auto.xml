@@ -35,4 +35,7 @@
   <string name="car_feedback_search_other">Andere kwestie</string>
   <string name="car_feedback_arrival_positive">Goed</string>
   <string name="car_feedback_arrival_negative">Niet goed</string>
+  <string name="car_search_error">Er is iets misgegaan. Probeer het opnieuw.</string>
+  <string name="car_navigation_destination_default_name">Bestemming</string>
+  <string name="car_maneuver_exit_number">Afrit %1$s</string>
 </resources>

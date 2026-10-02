@@ -35,4 +35,7 @@
   <string name="car_feedback_search_other">Muu ongelma</string>
   <string name="car_feedback_arrival_positive">Hyvä</string>
   <string name="car_feedback_arrival_negative">Ei hyvä</string>
+  <string name="car_search_error">Jokin meni vikaan. Yritä uudelleen.</string>
+  <string name="car_navigation_destination_default_name">Määränpää</string>
+  <string name="car_maneuver_exit_number">Liittymä %1$s</string>
 </resources>

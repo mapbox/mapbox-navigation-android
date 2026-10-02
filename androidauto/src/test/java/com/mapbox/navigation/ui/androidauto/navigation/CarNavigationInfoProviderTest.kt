@@ -12,6 +12,10 @@ import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.tripdata.maneuver.api.MapboxManeuverApi
+import com.mapbox.navigation.tripdata.shield.model.RouteShield
+import com.mapbox.navigation.tripdata.shield.model.RouteShieldCallback
+import com.mapbox.navigation.tripdata.shield.model.RouteShieldError
+import com.mapbox.navigation.tripdata.shield.model.RouteShieldResult
 import com.mapbox.navigation.ui.androidauto.testing.CarAppTestRule
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.guidance.junction.api.MapboxJunctionApi
@@ -125,6 +129,102 @@ class CarNavigationInfoProviderTest {
         }
         assertNotNull(sut.carNavigationInfo.value.navigationInfo)
     }
+
+    @Test
+    fun `late road shields render the latest route progress`() {
+        val observerSlot = slot<RouteProgressObserver>()
+        val shieldCallbacks = mutableListOf<RouteShieldCallback>()
+        val mapboxNavigation: MapboxNavigation = mockk {
+            every { registerRouteProgressObserver(capture(observerSlot)) } just runs
+            every { registerBannerInstructionsObserver(any()) } just runs
+        }
+        every { maneuverApi.getManeuvers(any<RouteProgress>()) } returns
+            ExpectedFactory.createValue(listOf(mockk(relaxed = true)))
+        every {
+            maneuverApi.getRoadShields(any(), any(), any(), capture(shieldCallbacks))
+        } just runs
+        val firstProgress = mockk<RouteProgress>(relaxed = true)
+        val secondProgress = mockk<RouteProgress>(relaxed = true)
+
+        carAppTestRule.onAttached(mapboxNavigation)
+        sut.onAttached(mockk(relaxed = true))
+        observerSlot.captured.onRouteProgressChanged(firstProgress)
+        observerSlot.captured.onRouteProgressChanged(secondProgress)
+        shieldCallbacks.first().onRoadShields(listOf(shieldResult()))
+
+        verify(exactly = 2) {
+            carNavigationInfoMapper.mapNavigationInfo(any(), any(), secondProgress, any())
+        }
+        verify(exactly = 1) {
+            carNavigationInfoMapper.mapNavigationInfo(any(), any(), firstProgress, any())
+        }
+    }
+
+    @Test
+    fun `road shields requested before detaching do not render the old route progress`() {
+        val observerSlot = slot<RouteProgressObserver>()
+        val shieldCallbacks = mutableListOf<RouteShieldCallback>()
+        val mapboxNavigation: MapboxNavigation = mockk(relaxed = true) {
+            every { registerRouteProgressObserver(capture(observerSlot)) } just runs
+        }
+        every { maneuverApi.getManeuvers(any<RouteProgress>()) } returns
+            ExpectedFactory.createValue(listOf(mockk(relaxed = true)))
+        every {
+            maneuverApi.getRoadShields(any(), any(), any(), capture(shieldCallbacks))
+        } just runs
+        val progressBeforeDetach = mockk<RouteProgress>(relaxed = true)
+
+        carAppTestRule.onAttached(mapboxNavigation)
+        sut.onAttached(mockk(relaxed = true))
+        observerSlot.captured.onRouteProgressChanged(progressBeforeDetach)
+        carAppTestRule.onDetached(mapboxNavigation)
+        carAppTestRule.onAttached(mapboxNavigation)
+        // The request made before detaching completes once navigation is attached again.
+        shieldCallbacks.first().onRoadShields(listOf(shieldResult()))
+
+        verify(exactly = 1) {
+            carNavigationInfoMapper.mapNavigationInfo(any(), any(), progressBeforeDetach, any())
+        }
+        assertNull(sut.carNavigationInfo.value.navigationInfo)
+    }
+
+    @Test
+    fun `road shields are cleared when navigation is detached`() {
+        val observerSlot = slot<RouteProgressObserver>()
+        val shieldCallback = slot<RouteShieldCallback>()
+        val shield = mockk<RouteShield>()
+        val mapboxNavigation: MapboxNavigation = mockk(relaxed = true) {
+            every { registerRouteProgressObserver(capture(observerSlot)) } just runs
+        }
+        every { maneuverApi.getManeuvers(any<RouteProgress>()) } returns
+            ExpectedFactory.createValue(listOf(mockk(relaxed = true)))
+        every {
+            maneuverApi.getRoadShields(any(), any(), any(), capture(shieldCallback))
+        } just runs
+
+        carAppTestRule.onAttached(mapboxNavigation)
+        sut.onAttached(mockk(relaxed = true))
+        observerSlot.captured.onRouteProgressChanged(mockk(relaxed = true))
+        shieldCallback.captured.onRoadShields(listOf(shieldResult(shield)))
+        carAppTestRule.onDetached(mapboxNavigation)
+        carAppTestRule.onAttached(mapboxNavigation)
+        val progressAfterReattach = mockk<RouteProgress>(relaxed = true)
+        observerSlot.captured.onRouteProgressChanged(progressAfterReattach)
+
+        verify {
+            carNavigationInfoMapper.mapNavigationInfo(
+                any(),
+                emptyList(),
+                progressAfterReattach,
+                any(),
+            )
+        }
+    }
+
+    private fun shieldResult(
+        shield: RouteShield = mockk(),
+    ): Expected<RouteShieldError, RouteShieldResult> =
+        ExpectedFactory.createValue(mockk { every { this@mockk.shield } returns shield })
 
     @Test
     fun `travelEstimate is available after route progress`() {

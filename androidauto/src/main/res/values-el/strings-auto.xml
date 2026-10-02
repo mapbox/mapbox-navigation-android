@@ -35,4 +35,7 @@
   <string name="car_feedback_search_other">Άλλο ζήτημα</string>
   <string name="car_feedback_arrival_positive">Καλό</string>
   <string name="car_feedback_arrival_negative">Όχι καλό</string>
+  <string name="car_search_error">Κάτι πήγε στραβά. Δοκιμάστε ξανά.</string>
+  <string name="car_navigation_destination_default_name">Προορισμός</string>
+  <string name="car_maneuver_exit_number">Έξοδος %1$s</string>
 </resources>

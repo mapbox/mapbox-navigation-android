@@ -36,11 +36,15 @@ class SpeedLimitWidget private constructor(
     internal companion object {
         internal const val MARGIN_X = 14f
         internal const val MARGIN_Y = 30f
+
+        // Driving at exactly the speed limit plus the threshold is still allowed.
+        internal fun shouldWarn(speedLimit: Int?, speed: Int, threshold: Int): Boolean =
+            speedLimit != null && speed - threshold > speedLimit
     }
 
     fun update(speedLimit: Int?, speed: Int, signFormat: SpeedLimitSign?, threshold: Int) {
         val newSignFormat = signFormat ?: lastSignFormat
-        val warn = speedLimit != null && speed - threshold >= speedLimit
+        val warn = shouldWarn(speedLimit, speed, threshold)
         if (lastSpeedLimit == speedLimit &&
             lastSpeed == speed &&
             lastSignFormat == newSignFormat &&
@@ -60,7 +64,7 @@ class SpeedLimitWidget private constructor(
         val speedLimit = lastSpeedLimit
         val speed = lastSpeed
         val newSignFormat = signFormat ?: lastSignFormat
-        val warn = speedLimit != null && speed - threshold >= speedLimit
+        val warn = shouldWarn(speedLimit, speed, threshold)
         if (lastSignFormat == newSignFormat && lastWarn == warn) return
         lastSignFormat = newSignFormat
         lastWarn = warn

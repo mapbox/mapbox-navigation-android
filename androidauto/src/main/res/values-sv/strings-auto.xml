@@ -35,4 +35,7 @@
   <string name="car_feedback_search_other">Annat problem</string>
   <string name="car_feedback_arrival_positive">Bra</string>
   <string name="car_feedback_arrival_negative">Inte bra</string>
+  <string name="car_search_error">Något gick fel. Försök igen.</string>
+  <string name="car_navigation_destination_default_name">Destination</string>
+  <string name="car_maneuver_exit_number">Avfart %1$s</string>
 </resources>

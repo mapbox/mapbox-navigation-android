@@ -35,4 +35,7 @@
   <string name="car_feedback_search_other">기타 문제</string>
   <string name="car_feedback_arrival_positive">좋아요</string>
   <string name="car_feedback_arrival_negative">좋지 않음</string>
+  <string name="car_search_error">문제가 발생했습니다. 다시 시도하세요.</string>
+  <string name="car_navigation_destination_default_name">목적지</string>
+  <string name="car_maneuver_exit_number">출구 %1$s</string>
 </resources>

@@ -35,4 +35,7 @@
   <string name="car_feedback_search_other">Muu probleem</string>
   <string name="car_feedback_arrival_positive">Hea</string>
   <string name="car_feedback_arrival_negative">Pole hea</string>
+  <string name="car_search_error">Midagi läks valesti. Proovi uuesti.</string>
+  <string name="car_navigation_destination_default_name">Sihtkoht</string>
+  <string name="car_maneuver_exit_number">Väljasõit %1$s</string>
 </resources>

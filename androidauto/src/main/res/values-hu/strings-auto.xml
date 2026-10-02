@@ -35,4 +35,7 @@
   <string name="car_feedback_search_other">Egyéb probléma</string>
   <string name="car_feedback_arrival_positive">Jó</string>
   <string name="car_feedback_arrival_negative">Nem jó</string>
+  <string name="car_search_error">Hiba történt. Próbálja újra.</string>
+  <string name="car_navigation_destination_default_name">Úti cél</string>
+  <string name="car_maneuver_exit_number">%1$s. kijárat</string>
 </resources>

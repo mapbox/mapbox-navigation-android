@@ -35,4 +35,7 @@
   <string name="car_feedback_search_other">Çështje tjetër</string>
   <string name="car_feedback_arrival_positive">Mirë</string>
   <string name="car_feedback_arrival_negative">Jo mirë</string>
+  <string name="car_search_error">Diçka shkoi keq. Provoni përsëri.</string>
+  <string name="car_navigation_destination_default_name">Destinacioni</string>
+  <string name="car_maneuver_exit_number">Dalja %1$s</string>
 </resources>

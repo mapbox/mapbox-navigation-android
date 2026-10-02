@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.mapbox.navigation.ui.androidauto.internal
 
 import com.mapbox.navigation.utils.internal.logE

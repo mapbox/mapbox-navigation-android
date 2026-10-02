@@ -35,4 +35,7 @@
   <string name="car_feedback_search_other">Vấn đề khác</string>
   <string name="car_feedback_arrival_positive">Tốt</string>
   <string name="car_feedback_arrival_negative">Không tốt</string>
+  <string name="car_search_error">Đã xảy ra lỗi. Hãy thử lại.</string>
+  <string name="car_navigation_destination_default_name">Điểm đến</string>
+  <string name="car_maneuver_exit_number">Lối ra %1$s</string>
 </resources>

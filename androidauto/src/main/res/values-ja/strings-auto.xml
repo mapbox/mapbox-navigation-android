@@ -35,4 +35,7 @@
   <string name="car_feedback_search_other">その他の問題</string>
   <string name="car_feedback_arrival_positive">良い</string>
   <string name="car_feedback_arrival_negative">良くない</string>
+  <string name="car_search_error">問題が発生しました。もう一度お試しください。</string>
+  <string name="car_navigation_destination_default_name">目的地</string>
+  <string name="car_maneuver_exit_number">出口 %1$s</string>
 </resources>

@@ -35,4 +35,7 @@
   <string name="car_feedback_search_other">Iný problém</string>
   <string name="car_feedback_arrival_positive">Dobrý</string>
   <string name="car_feedback_arrival_negative">Nie dobré</string>
+  <string name="car_search_error">Niečo sa pokazilo. Skúste to znova.</string>
+  <string name="car_navigation_destination_default_name">Cieľ</string>
+  <string name="car_maneuver_exit_number">Výjazd %1$s</string>
 </resources>

@@ -35,4 +35,7 @@
   <string name="car_feedback_search_other">Cits jautājums</string>
   <string name="car_feedback_arrival_positive">Labi</string>
   <string name="car_feedback_arrival_negative">Nav labi</string>
+  <string name="car_search_error">Radās kļūda. Mēģiniet vēlreiz.</string>
+  <string name="car_navigation_destination_default_name">Galamērķis</string>
+  <string name="car_maneuver_exit_number">Izbrauktuve %1$s</string>
 </resources>

@@ -11,6 +11,7 @@ import androidx.car.app.navigation.model.RoutingInfo
 import androidx.core.graphics.drawable.IconCompat
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.BannerComponents
+import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.bindgen.ExpectedFactory
@@ -268,6 +269,108 @@ class CarNavigationInfoMapperTest {
         assertEquals(2, nextCarManeuver.roundaboutExitNumber)
     }
 
+    @Test
+    fun `mapNavigationInfo - should take roundabout exit numbers from the announced steps`() {
+        every { imageGenerator.renderLanesImage(any()) } returns null
+        // The current step announces the roundabout of the next step as the primary maneuver,
+        // and the roundabout of the step after it as the sub-maneuver.
+        val routeProgress = routeProgressWithSteps(
+            stepManeuver(StepManeuver.TURN, exit = null),
+            stepManeuver(StepManeuver.ROUNDABOUT, exit = 4),
+            stepManeuver(StepManeuver.ROTARY, exit = 5),
+        )
+        val maneuver = ManeuverFactory.buildManeuver(
+            primary = PrimaryManeuverFactory.buildPrimaryManeuver(
+                id = "primary_roundabout",
+                text = "Take the 4th exit",
+                type = StepManeuver.ROUNDABOUT,
+                degrees = null,
+                modifier = ManeuverModifier.RIGHT,
+                drivingSide = "right",
+                componentList = emptyList(),
+            ),
+            stepDistance = mockk(),
+            secondary = null,
+            sub = SubManeuverFactory.buildSubManeuver(
+                id = "sub_rotary",
+                text = "Then take the 5th exit",
+                type = StepManeuver.ROTARY,
+                degrees = null,
+                modifier = ManeuverModifier.RIGHT,
+                drivingSide = "right",
+                componentList = emptyList(),
+            ),
+            lane = null,
+            point = Point.fromLngLat(10.0, 20.0),
+        )
+
+        val result = sut.mapNavigationInfo(
+            expectedManeuvers = ExpectedFactory.createValue(listOf(maneuver)),
+            routeShields = emptyList(),
+            routeProgress = routeProgress,
+            junctionValue = null,
+        ) as RoutingInfo
+
+        assertEquals(4, result.currentStep!!.maneuver!!.roundaboutExitNumber)
+        assertEquals(5, result.nextStep!!.maneuver!!.roundaboutExitNumber)
+    }
+
+    @Test
+    fun `mapNavigationInfo - should map a roundabout banner announcing a roundabout exit`() {
+        every { imageGenerator.renderLanesImage(any()) } returns null
+        val routeProgress = routeProgressWithSteps(
+            stepManeuver(StepManeuver.ROUNDABOUT, exit = 2),
+            stepManeuver(StepManeuver.EXIT_ROUNDABOUT, exit = null),
+        )
+        val maneuver = ManeuverFactory.buildManeuver(
+            primary = PrimaryManeuverFactory.buildPrimaryManeuver(
+                id = "primary_roundabout_exit",
+                text = "Exit the roundabout",
+                type = StepManeuver.ROUNDABOUT,
+                degrees = 90.0,
+                modifier = ManeuverModifier.RIGHT,
+                drivingSide = "left",
+                componentList = emptyList(),
+            ),
+            stepDistance = mockk(),
+            secondary = null,
+            sub = null,
+            lane = null,
+            point = Point.fromLngLat(10.0, 20.0),
+        )
+
+        val result = sut.mapNavigationInfo(
+            expectedManeuvers = ExpectedFactory.createValue(listOf(maneuver)),
+            routeShields = emptyList(),
+            routeProgress = routeProgress,
+            junctionValue = null,
+        ) as RoutingInfo
+
+        assertEquals(
+            androidx.car.app.navigation.model.Maneuver.TYPE_ROUNDABOUT_EXIT_CW,
+            result.currentStep!!.maneuver!!.type,
+        )
+    }
+
+    private fun stepManeuver(type: String, exit: Int?): LegStep = mockk {
+        every { maneuver() } returns mockk {
+            every { type() } returns type
+            every { exit() } returns exit
+        }
+    }
+
+    private fun routeProgressWithSteps(vararg steps: LegStep): RouteProgress = mockk {
+        every { currentLegProgress } returns mockk {
+            every { routeLeg } returns mockk {
+                every { steps() } returns steps.toList()
+            }
+            every { currentStepProgress } returns mockk {
+                every { stepIndex } returns 0
+                every { distanceRemaining } returns 1000f
+            }
+        }
+    }
+
     private fun given(
         renderedPrimaryInstruction: String,
         renderedSecondaryInstruction: String,
@@ -299,7 +402,9 @@ class CarNavigationInfoMapperTest {
     @Suppress("PrivatePropertyName")
     private val TEST_ROUTE_PROGRESS = mockk<RouteProgress> {
         every { currentLegProgress } returns mockk {
+            every { routeLeg } returns null
             every { currentStepProgress } returns mockk {
+                every { stepIndex } returns 0
                 every { distanceRemaining } returns 1000f
             }
         }

@@ -35,4 +35,7 @@
   <string name="car_feedback_search_other">Masalah lain</string>
   <string name="car_feedback_arrival_positive">Baik</string>
   <string name="car_feedback_arrival_negative">Tidak baik</string>
+  <string name="car_search_error">Terjadi kesalahan. Coba lagi.</string>
+  <string name="car_navigation_destination_default_name">Tujuan</string>
+  <string name="car_maneuver_exit_number">Keluar %1$s</string>
 </resources>

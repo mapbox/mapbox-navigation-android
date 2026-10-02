@@ -53,12 +53,14 @@ class CarNavigationInfoMapper(
         val maneuver = expectedManeuvers.value?.firstOrNull()
         return maneuver?.primary?.let { primary ->
             val carManeuver =
-                CarManeuverMapper.from(
+                CarManeuverMapper.fromAnnouncedStep(
                     primary.type,
                     primary.modifier,
                     primary.degrees,
                     primary.drivingSide,
-                    CarManeuverMapper.roundaboutExitNumber(primary.componentList),
+                    primary.componentList,
+                    routeProgress,
+                    CarManeuverMapper.PRIMARY_MANEUVER_STEP_OFFSET,
                 )
             carManeuverIconRenderer.renderManeuverIcon(primary)?.let { carManeuver.setIcon(it) }
             val primaryInstruction =
@@ -88,7 +90,7 @@ class CarNavigationInfoMapper(
             val stepDistance = CarDistanceFormatter.carDistance(distanceRemaining.toDouble())
             RoutingInfo.Builder()
                 .setCurrentStep(step, stepDistance)
-                .withOptionalNextStep(maneuver, routeShields)
+                .withOptionalNextStep(maneuver, routeShields, routeProgress)
                 .withOptionalJunctionImage(junctionValue)
                 .build()
         }
@@ -108,15 +110,18 @@ class CarNavigationInfoMapper(
     private fun RoutingInfo.Builder.withOptionalNextStep(
         maneuver: Maneuver,
         routeShields: List<RouteShield>,
+        routeProgress: RouteProgress,
     ) = apply {
         maneuver.sub?.let { subManeuver ->
             val nextCarManeuver =
-                CarManeuverMapper.from(
+                CarManeuverMapper.fromAnnouncedStep(
                     subManeuver.type,
                     subManeuver.modifier,
                     subManeuver.degrees,
                     subManeuver.drivingSide,
-                    CarManeuverMapper.roundaboutExitNumber(subManeuver.componentList),
+                    subManeuver.componentList,
+                    routeProgress,
+                    CarManeuverMapper.SUB_MANEUVER_STEP_OFFSET,
                 )
             carManeuverIconRenderer.renderManeuverIcon(subManeuver)
                 ?.let { nextCarManeuver.setIcon(it) }

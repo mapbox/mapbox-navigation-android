@@ -35,4 +35,7 @@
   <string name="car_feedback_search_other">נושא אחר</string>
   <string name="car_feedback_arrival_positive">טוב</string>
   <string name="car_feedback_arrival_negative">לא טוב</string>
+  <string name="car_search_error">משהו השתבש. נסה שוב.</string>
+  <string name="car_navigation_destination_default_name">יעד</string>
+  <string name="car_maneuver_exit_number">יציאה %1$s</string>
 </resources>

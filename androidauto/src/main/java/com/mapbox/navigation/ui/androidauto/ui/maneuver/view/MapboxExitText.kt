@@ -16,11 +16,12 @@ import androidx.core.graphics.drawable.toDrawable
 import androidx.core.widget.TextViewCompat
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.ManeuverModifier
-import com.mapbox.navigation.tripdata.R
 import com.mapbox.navigation.tripdata.maneuver.model.ComponentNode
 import com.mapbox.navigation.tripdata.maneuver.model.ExitNumberComponentNode
+import com.mapbox.navigation.ui.androidauto.R
 import com.mapbox.navigation.ui.androidauto.ui.maneuver.model.MapboxExitProperties
 import com.mapbox.navigation.ui.utils.internal.ifNonNull
+import com.mapbox.navigation.tripdata.R as TripDataR
 
 /**
  * Default Exit View that renders exit number in a specific style.
@@ -61,15 +62,15 @@ class MapboxExitText : AppCompatTextView {
 
     private var leftDrawable = ContextCompat.getDrawable(
         context,
-        R.drawable.mapbox_ic_exit_arrow_left_mutcd,
+        TripDataR.drawable.mapbox_ic_exit_arrow_left_mutcd,
     )
     private var rightDrawable = ContextCompat.getDrawable(
         context,
-        R.drawable.mapbox_ic_exit_arrow_right_mutcd,
+        TripDataR.drawable.mapbox_ic_exit_arrow_right_mutcd,
     )
     private var exitBackground = ContextCompat.getDrawable(
         context,
-        R.drawable.mapbox_exit_board_background,
+        TripDataR.drawable.mapbox_exit_board_background,
     )
     private var exitProperties: MapboxExitProperties? = null
 
@@ -99,13 +100,18 @@ class MapboxExitText : AppCompatTextView {
 
     /**
      * Invoke the method to set the exit number to the view.
-     * @param modifier String? represents either [ManeuverModifier.LEFT] or [ManeuverModifier.RIGHT].
-     * Default value is [ManeuverModifier.LEFT]
+     * @param modifier String? the side of the exit. [ManeuverModifier.LEFT],
+     * [ManeuverModifier.SLIGHT_LEFT] and [ManeuverModifier.SHARP_LEFT] draw the left exit arrow,
+     * and [ManeuverModifier.RIGHT], [ManeuverModifier.SLIGHT_RIGHT] and
+     * [ManeuverModifier.SHARP_RIGHT] draw the right one. Any other value uses the fallback.
      * @param exit ExitNumberComponentNode [ComponentNode] of the type [BannerComponents.EXIT_NUMBER]
      */
     fun setExit(modifier: String?, exit: ExitNumberComponentNode) {
         val exitText = when (modifier) {
-            ManeuverModifier.LEFT -> {
+            ManeuverModifier.LEFT,
+            ManeuverModifier.SLIGHT_LEFT,
+            ManeuverModifier.SHARP_LEFT,
+            -> {
                 val drawable = ifNonNull(this.exitProperties?.exitLeftDrawable) { leftDrawable ->
                     ContextCompat.getDrawable(context, leftDrawable).adjustDrawableHeight()
                 } ?: leftDrawable.adjustDrawableHeight()
@@ -117,7 +123,10 @@ class MapboxExitText : AppCompatTextView {
                 )
                 exit.text
             }
-            ManeuverModifier.RIGHT -> {
+            ManeuverModifier.RIGHT,
+            ManeuverModifier.SLIGHT_RIGHT,
+            ManeuverModifier.SHARP_RIGHT,
+            -> {
                 val drawable = ifNonNull(this.exitProperties?.exitRightDrawable) { rightDrawable ->
                     ContextCompat.getDrawable(context, rightDrawable).adjustDrawableHeight()
                 } ?: rightDrawable.adjustDrawableHeight()
@@ -195,7 +204,7 @@ class MapboxExitText : AppCompatTextView {
                         exit.text
                     }
                     exitProperties.shouldFallbackWithText -> {
-                        "Exit ".plus(exit.text)
+                        context.getString(R.string.car_maneuver_exit_number, exit.text)
                     }
                     else -> {
                         exit.text
@@ -217,7 +226,7 @@ class MapboxExitText : AppCompatTextView {
                         exit.text
                     }
                     exitProperties.shouldFallbackWithText -> {
-                        "Exit ".plus(exit.text)
+                        context.getString(R.string.car_maneuver_exit_number, exit.text)
                     }
                     else -> {
                         exit.text

@@ -35,4 +35,7 @@
   <string name="car_feedback_search_other">Kita problema</string>
   <string name="car_feedback_arrival_positive">Geras</string>
   <string name="car_feedback_arrival_negative">Nėra gerai</string>
+  <string name="car_search_error">Kažkas nepavyko. Bandykite dar kartą.</string>
+  <string name="car_navigation_destination_default_name">Kelionės tikslas</string>
+  <string name="car_maneuver_exit_number">Išvažiavimas %1$s</string>
 </resources>

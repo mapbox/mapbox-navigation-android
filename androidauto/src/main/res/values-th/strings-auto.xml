@@ -35,4 +35,7 @@
   <string name="car_feedback_search_other">ปัญหาอื่น</string>
   <string name="car_feedback_arrival_positive">ดี</string>
   <string name="car_feedback_arrival_negative">ไม่ดี</string>
+  <string name="car_search_error">เกิดข้อผิดพลาด ลองอีกครั้ง</string>
+  <string name="car_navigation_destination_default_name">จุดหมาย</string>
+  <string name="car_maneuver_exit_number">ทางออก %1$s</string>
 </resources>

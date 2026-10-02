@@ -35,4 +35,7 @@
   <string name="car_feedback_search_other">مشكلة أخرى</string>
   <string name="car_feedback_arrival_positive">جيد</string>
   <string name="car_feedback_arrival_negative">ليس جيدًا</string>
+  <string name="car_search_error">حدث خطأ ما. حاول مرة أخرى.</string>
+  <string name="car_navigation_destination_default_name">الوجهة</string>
+  <string name="car_maneuver_exit_number">المخرج %1$s</string>
 </resources>

@@ -16,6 +16,7 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.tripdata.maneuver.api.MapboxManeuverApi
+import com.mapbox.navigation.ui.androidauto.R
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAuto
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAutoFailure
 import com.mapbox.navigation.ui.androidauto.navigation.maneuver.CarManeuverMapper
@@ -54,6 +55,9 @@ class MapboxCarNavigationManager internal constructor(
     private val navigationManager: NavigationManager by lazy {
         carContext.getCarService(NavigationManager::class.java)
     }
+    private val defaultDestinationName: String by lazy {
+        carContext.getString(R.string.car_navigation_destination_default_name)
+    }
 
     private var maneuverApi: MapboxManeuverApi? = null
     private var mapboxNavigation: MapboxNavigation? = null
@@ -63,7 +67,9 @@ class MapboxCarNavigationManager internal constructor(
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
         val maneuverApi = maneuverApi ?: return@RouteProgressObserver
         if (!routeProgress.shouldUpdateTrip()) return@RouteProgressObserver
-        val trip = CarManeuverMapper.from(routeProgress, maneuverApi)
+        val destinationName = CarManeuverMapper.destinationName(routeProgress)
+            ?: defaultDestinationName
+        val trip = CarManeuverMapper.from(routeProgress, maneuverApi, destinationName)
         onUpdateTrip(routeProgress, trip)
     }
 

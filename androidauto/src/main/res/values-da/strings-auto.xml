@@ -35,4 +35,7 @@
   <string name="car_feedback_search_other">Andet problem</string>
   <string name="car_feedback_arrival_positive">Godt</string>
   <string name="car_feedback_arrival_negative">Ikke godt</string>
+  <string name="car_search_error">Noget gik galt. Prøv igen.</string>
+  <string name="car_navigation_destination_default_name">Destination</string>
+  <string name="car_maneuver_exit_number">Afkørsel %1$s</string>
 </resources>

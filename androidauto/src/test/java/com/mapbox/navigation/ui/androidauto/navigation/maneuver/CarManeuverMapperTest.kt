@@ -4,12 +4,16 @@ import androidx.car.app.model.Distance
 import androidx.car.app.navigation.model.Maneuver
 import androidx.car.app.navigation.model.TravelEstimate
 import com.mapbox.api.directions.v5.models.BannerComponents
+import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.api.directions.v5.models.ManeuverModifier
+import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
+import com.mapbox.navigation.testing.FileUtils
 import com.mapbox.navigation.tripdata.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.tripdata.maneuver.model.Component
 import com.mapbox.navigation.tripdata.maneuver.model.ExitNumberComponentNode
@@ -21,6 +25,7 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -42,10 +47,12 @@ class CarManeuverMapperTest {
     private val currentStepDistanceMeters = 250f
     private val currentStepDurationSeconds = 45.0
     private val mockCurrentStepProgress = mockk<RouteStepProgress> {
+        every { stepIndex } returns 0
         every { distanceRemaining } returns currentStepDistanceMeters
         every { durationRemaining } returns currentStepDurationSeconds
     }
     private val mockCurrentLegProgress = mockk<RouteLegProgress> {
+        every { routeLeg } returns null
         every { currentStepProgress } returns mockCurrentStepProgress
     }
 
@@ -99,15 +106,6 @@ class CarManeuverMapperTest {
         assertEquals(Maneuver.TYPE_STRAIGHT, actual.type)
     }
 
-    // TODO identify left and right
-//    @Test
-//    fun `generate turn icon with null type and uturn modifier`() {
-//        val actual = maneuverMapper.from(null, ManeuverModifier.UTURN)
-//
-//        assertEquals(Maneuver.TYPE_U_TURN_LEFT, actual.type)
-//        assertEquals(Maneuver.TYPE_U_TURN_RIGHT, actual.type)
-//    }F
-
     @Test
     fun `generate turn icon with null type and sight right modifier`() {
         val actual = CarManeuverMapper.from(null, ManeuverModifier.SLIGHT_RIGHT).build()
@@ -143,61 +141,12 @@ class CarManeuverMapperTest {
         assertEquals(Maneuver.TYPE_STRAIGHT, actual.type)
     }
 
-    // TODO needs verification
-//    @Test
-//    fun `generate turn icon with arrive type and null modifier`() {
-//        val actual = maneuverMapper.from(StepManeuver.ARRIVE, " ")
-//
-//        assertEquals(Maneuver.TYPE_DESTINATION, actual.type)
-//    }
-
-    // TODO idenfity left and right
-//    @Test
-//    fun `generate turn icon with on ramp type and null modifier`() {
-//        val actual = maneuverMapper.from(null, StepManeuver.ON_RAMP)
-//
-//        assertEquals(Maneuver.TYPE_OFF_RAMP_NORMAL_LEFT, actual.type)
-//    }
-
-    // TODO idenfity left and right
-//    @Test
-//    fun `generate turn icon with off ramp type and null modifier`() {
-//        val actual = maneuverMapper.from(null, StepManeuver.OFF_RAMP)
-//
-//        assertEquals(Maneuver.TYPE_OFF_RAMP_NORMAL_LEFT, actual.type)
-//    }
-
-    // TODO idenfity left and right
-//    @Test
-//    fun `generate turn icon with fork type and null modifier`() {
-//        val actual = maneuverMapper.from(null, StepManeuver.FORK)
-//
-//        assertEquals(Maneuver.TYPE_FORK_LEFT, actual.type)
-//    }
-
-    // TODO needs verification
-//    @Test
-//    fun `generate turn icon with turn type and null modifier`() {
-//        val actual = maneuverMapper.from(StepManeuver.TURN, null)
-//
-//        assertEquals(Maneuver.TYPE_STRAIGHT, actual.type)
-//    }
-
-    // TODO idenfity left and right
     @Test
     fun `generate turn icon with merge type and null modifier`() {
         val actual = CarManeuverMapper.from(StepManeuver.MERGE, null).build()
 
         assertEquals(Maneuver.TYPE_MERGE_SIDE_UNSPECIFIED, actual.type)
     }
-
-    // TODO needs verification
-//    @Test
-//    fun `generate turn icon with end road type and null modifier`() {
-//        val actual = maneuverMapper.from(StepManeuver.END_OF_ROAD, null)
-//
-//        assertEquals(Maneuver.TYPE_DESTINATION, actual.type)
-//    }
 
     @Test
     fun `generate turn icon with invalid type and null modifier`() {
@@ -248,21 +197,12 @@ class CarManeuverMapperTest {
         assertEquals(Maneuver.TYPE_DEPART, actual.type)
     }
 
-    // TODO needs verification
-//    @Test
-//    fun `generate turn icon with end of road type and left modifier`() {
-//        val actual = maneuverMapper.from(StepManeuver.END_OF_ROAD, ManeuverModifier.LEFT)
-//
-//        assertEquals(Maneuver.TYPE_DESTINATION_LEFT, actual.type)
-//    }
-
-    // TODO needs verification
     @Test
     fun `generate turn icon with end of road type and right modifier`() {
         val actual =
             CarManeuverMapper.from(StepManeuver.END_OF_ROAD, ManeuverModifier.RIGHT).build()
 
-        assertEquals(Maneuver.TYPE_DESTINATION_RIGHT, actual.type)
+        assertEquals(Maneuver.TYPE_TURN_NORMAL_RIGHT, actual.type)
     }
 
     @Test
@@ -278,14 +218,6 @@ class CarManeuverMapperTest {
 
         assertEquals(Maneuver.TYPE_FORK_LEFT, actual.type)
     }
-
-    // TODO needs verification
-//    @Test
-//    fun `generate turn icon with fork type and straight modifier`() {
-//        val actual = maneuverMapper.from(StepManeuver.FORK, ManeuverModifier.STRAIGHT)
-//
-//        assertEquals(Maneuver.TYPE_FORK_LEFT, actual.type)
-//    }
 
     @Test
     fun `generate turn icon with fork type and slight left modifier`() {
@@ -315,14 +247,6 @@ class CarManeuverMapperTest {
 
         assertEquals(Maneuver.TYPE_MERGE_LEFT, actual.type)
     }
-
-    // TODO needs verification
-//    @Test
-//    fun `generate turn icon with merge type and straight modifier`() {
-//        val actual = maneuverMapper.from(StepManeuver.MERGE, ManeuverModifier.STRAIGHT)
-//
-//        assertEquals(Maneuver.TYPE_MERGE_SIDE_UNSPECIFIED, actual.type)
-//    }
 
     @Test
     fun `generate turn icon with merge type and slight left modifier`() {
@@ -616,7 +540,7 @@ class CarManeuverMapperTest {
     @Test
     fun `generate roundabout maneuver for left driving side with angle`() {
         val actual = CarManeuverMapper.from(
-            StepManeuver.EXIT_ROUNDABOUT,
+            StepManeuver.ROUNDABOUT,
             ManeuverModifier.STRAIGHT,
             degrees = 270.0,
             drivingSide = "left",
@@ -658,7 +582,7 @@ class CarManeuverMapperTest {
     @Test
     fun `generate roundabout maneuver falls back to default exit number when missing`() {
         val actual = CarManeuverMapper.from(
-            StepManeuver.EXIT_ROTARY,
+            StepManeuver.ROTARY,
             ManeuverModifier.LEFT,
             degrees = null,
             drivingSide = "left",
@@ -834,4 +758,245 @@ class CarManeuverMapperTest {
 
         assertEquals(1, actual.roundaboutExitNumber)
     }
+
+    @Test
+    fun `roundabout exit number comes from the step the banner announces`() {
+        // The first step's banner announces the roundabout that starts the second step, which
+        // takes the 3rd exit. The banner itself has no exit number component.
+        val route = DirectionsRoute.fromJson(
+            FileUtils.loadJsonFixture("directions_route_with_roundabout_exits.json"),
+        )
+        val routeProgress = routeProgressOn(route.legs()!![0], stepIndex = 0)
+        val banner = route.legs()!![0].steps()!![0].bannerInstructions()!!.first().primary()
+
+        val exitNumber = CarManeuverMapper.roundaboutExitNumber(
+            routeProgress,
+            CarManeuverMapper.PRIMARY_MANEUVER_STEP_OFFSET,
+            componentList = emptyList(),
+        )
+        val actual = CarManeuverMapper.from(
+            banner.type(),
+            banner.modifier(),
+            banner.degrees(),
+            banner.drivingSide(),
+            exitNumber,
+        ).build()
+
+        assertEquals(3, exitNumber)
+        assertEquals(Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CCW_WITH_ANGLE, actual.type)
+        assertEquals(3, actual.roundaboutExitNumber)
+        assertEquals(173, actual.roundaboutExitAngle)
+    }
+
+    @Test
+    fun `trip uses the roundabout exit number of the announced step`() {
+        val route = DirectionsRoute.fromJson(
+            FileUtils.loadJsonFixture("directions_route_with_roundabout_exits.json"),
+        )
+        val routeProgress = routeProgressOn(route.legs()!![0], stepIndex = 0)
+        val roundaboutManeuver = mockk<com.mapbox.navigation.tripdata.maneuver.model.Maneuver> {
+            every { primary } returns mockk {
+                every { type } returns StepManeuver.ROUNDABOUT
+                every { modifier } returns ManeuverModifier.RIGHT
+                every { degrees } returns null
+                every { drivingSide } returns "right"
+                every { componentList } returns emptyList()
+            }
+        }
+        val maneuverApi = mockk<MapboxManeuverApi> {
+            every { getManeuvers(routeProgress) } returns
+                ExpectedFactory.createValue(listOf(roundaboutManeuver))
+        }
+        every { CarDistanceFormatter.carDistance(any()) } returns mockk()
+
+        val trip = CarManeuverMapper.from(routeProgress, maneuverApi, "Destination")
+
+        val maneuver = trip.steps.first().maneuver!!
+        assertEquals(Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CCW, maneuver.type)
+        assertEquals(3, maneuver.roundaboutExitNumber)
+    }
+
+    @Test
+    fun `roundabout exit number ignores a step that is not a roundabout`() {
+        val route = DirectionsRoute.fromJson(
+            FileUtils.loadJsonFixture("directions_route_with_roundabout_exits.json"),
+        )
+        // The step after the roundabout is the arrival, which has no exit to take.
+        val routeProgress = routeProgressOn(route.legs()!![0], stepIndex = 1)
+
+        val exitNumber = CarManeuverMapper.roundaboutExitNumber(
+            routeProgress,
+            CarManeuverMapper.PRIMARY_MANEUVER_STEP_OFFSET,
+            componentList = listOf(exitNumberComponent("2")),
+        )
+
+        assertEquals(2, exitNumber)
+    }
+
+    @Test
+    fun `sub-maneuver roundabout exit number comes from two steps ahead`() {
+        val route = DirectionsRoute.fromJson(
+            FileUtils.loadJsonFixture("directions_route_with_roundabout_exits.json"),
+        )
+        // Two steps before the roundabout: the sub-maneuver of the first one announces it.
+        val leg = route.legs()!![0]
+        val steps = leg.steps()!!
+        val legWithExtraStep = leg.toBuilder()
+            .steps(listOf(steps[0], steps[0], steps[1], steps[2]))
+            .build()
+        val routeProgress = routeProgressOn(legWithExtraStep, stepIndex = 0)
+
+        val exitNumber = CarManeuverMapper.roundaboutExitNumber(
+            routeProgress,
+            CarManeuverMapper.SUB_MANEUVER_STEP_OFFSET,
+            componentList = emptyList(),
+        )
+
+        assertEquals(3, exitNumber)
+    }
+
+    @Test
+    fun `roundabout exit number falls back to the banner component without route progress`() {
+        val exitNumber = CarManeuverMapper.roundaboutExitNumber(
+            routeProgress = null,
+            CarManeuverMapper.PRIMARY_MANEUVER_STEP_OFFSET,
+            componentList = listOf(exitNumberComponent("4")),
+        )
+
+        assertEquals(4, exitNumber)
+    }
+
+    @Test
+    fun `exit roundabout maps to a counter-clockwise roundabout exit in right-hand traffic`() {
+        val actual = CarManeuverMapper.from(
+            StepManeuver.EXIT_ROUNDABOUT,
+            ManeuverModifier.SLIGHT_RIGHT,
+            degrees = 90.0,
+            drivingSide = "right",
+            roundaboutExitNumber = 2,
+        ).build()
+
+        assertEquals(Maneuver.TYPE_ROUNDABOUT_EXIT_CCW, actual.type)
+    }
+
+    @Test
+    fun `exit rotary maps to a clockwise roundabout exit in left-hand traffic`() {
+        val actual = CarManeuverMapper.from(
+            StepManeuver.EXIT_ROTARY,
+            ManeuverModifier.SLIGHT_LEFT,
+            drivingSide = "left",
+        ).build()
+
+        assertEquals(Maneuver.TYPE_ROUNDABOUT_EXIT_CW, actual.type)
+    }
+
+    @Test
+    fun `destination name prefers the requested name of the final waypoint`() {
+        val routeProgress = routeProgressTo(
+            waypointNames = listOf("Home", "Coffee shop", "Office"),
+            waypoints = listOf(waypoint("Origin Road"), waypoint("Final Avenue")),
+        )
+
+        assertEquals("Office", CarManeuverMapper.destinationName(routeProgress))
+    }
+
+    @Test
+    fun `destination name falls back to the snapped waypoint name`() {
+        val withoutRequestedNames = routeProgressTo(
+            waypointNames = null,
+            waypoints = listOf(waypoint("Origin Road"), waypoint("Final Avenue")),
+        )
+        // A list that leaves the destination unnamed ends with an empty name.
+        val withUnnamedDestination = routeProgressTo(
+            waypointNames = listOf("Home", ""),
+            waypoints = listOf(waypoint("Origin Road"), waypoint("Final Avenue")),
+        )
+
+        assertEquals("Final Avenue", CarManeuverMapper.destinationName(withoutRequestedNames))
+        assertEquals("Final Avenue", CarManeuverMapper.destinationName(withUnnamedDestination))
+    }
+
+    @Test
+    fun `destination name is null without a named final waypoint`() {
+        val withoutWaypoints = routeProgressTo(waypointNames = null, waypoints = null)
+        val withBlankName = routeProgressTo(waypointNames = null, waypoints = listOf(waypoint("")))
+
+        assertNull(CarManeuverMapper.destinationName(withoutWaypoints))
+        assertNull(CarManeuverMapper.destinationName(withBlankName))
+    }
+
+    @Test
+    fun `roundabout banner announcing a roundabout exit maps to a roundabout exit`() {
+        // The second leg's first banner says "roundabout", but the step it announces only
+        // leaves the roundabout, so there is no exit number to take.
+        val route = DirectionsRoute.fromJson(
+            FileUtils.loadJsonFixture("directions_route_with_roundabout_exits.json"),
+        )
+        val routeProgress = routeProgressOn(route.legs()!![1], stepIndex = 0)
+        val banner = route.legs()!![1].steps()!![0].bannerInstructions()!!.first().primary()
+
+        val actual = CarManeuverMapper.fromAnnouncedStep(
+            banner.type(),
+            banner.modifier(),
+            banner.degrees(),
+            banner.drivingSide(),
+            componentList = emptyList(),
+            routeProgress,
+            CarManeuverMapper.PRIMARY_MANEUVER_STEP_OFFSET,
+        ).build()
+
+        assertEquals(StepManeuver.ROUNDABOUT, banner.type())
+        assertEquals(Maneuver.TYPE_ROUNDABOUT_EXIT_CCW, actual.type)
+    }
+
+    @Test
+    fun `roundabout banner keeps its type without route progress`() {
+        val actual = CarManeuverMapper.fromAnnouncedStep(
+            StepManeuver.ROUNDABOUT,
+            ManeuverModifier.RIGHT,
+            degrees = null,
+            drivingSide = "right",
+            componentList = listOf(exitNumberComponent("3")),
+            routeProgress = null,
+            CarManeuverMapper.PRIMARY_MANEUVER_STEP_OFFSET,
+        ).build()
+
+        assertEquals(Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CCW, actual.type)
+        assertEquals(3, actual.roundaboutExitNumber)
+    }
+
+    private fun routeProgressTo(
+        waypointNames: List<String>?,
+        waypoints: List<DirectionsWaypoint>?,
+    ): RouteProgress = mockk {
+        every { navigationRoute } returns mockk {
+            every { directionsRoute.routeOptions() } returns mockk {
+                every { waypointNamesList() } returns waypointNames
+            }
+            every { this@mockk.waypoints } returns waypoints
+        }
+    }
+
+    private fun routeProgressOn(leg: RouteLeg, stepIndex: Int): RouteProgress {
+        val stepProgress = mockk<RouteStepProgress>(relaxed = true) {
+            every { this@mockk.stepIndex } returns stepIndex
+        }
+        val legProgress = mockk<RouteLegProgress>(relaxed = true) {
+            every { routeLeg } returns leg
+            every { currentStepProgress } returns stepProgress
+        }
+        return mockk(relaxed = true) {
+            every { currentLegProgress } returns legProgress
+        }
+    }
+
+    private fun exitNumberComponent(text: String) = Component(
+        BannerComponents.EXIT_NUMBER,
+        ExitNumberComponentNode.Builder().text(text).build(),
+    )
+
+    private fun waypoint(name: String) = DirectionsWaypoint.builder()
+        .name(name)
+        .rawLocation(doubleArrayOf(0.0, 0.0))
+        .build()
 }

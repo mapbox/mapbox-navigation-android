@@ -35,4 +35,7 @@
   <string name="car_feedback_search_other">Inny problem</string>
   <string name="car_feedback_arrival_positive">Dobrze</string>
   <string name="car_feedback_arrival_negative">Nie dobrze</string>
+  <string name="car_search_error">Coś poszło nie tak. Spróbuj ponownie.</string>
+  <string name="car_navigation_destination_default_name">Cel</string>
+  <string name="car_maneuver_exit_number">Zjazd %1$s</string>
 </resources>
