@@ -23,6 +23,23 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Core Common `v24.32.0-rc.1`
 - Mapbox Java `v7.10.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.1))
 
+
+## Navigation SDK Core Framework 3.21.13 - 01 October, 2026
+
+#### Bug fixes and improvements
+- Improved ADASIS: metadata messages (country, speed unit, map version) are now always emitted, including while off-road or before the first map match, so ADASIS consumers no longer miss them when the position is invalid.
+- Improved ADAS data availability: ADAS tiles are now downloaded with higher priority than other background tile loads, so ADASIS and the electronic horizon recover faster after a cold start or a tile-coverage gap. Priority for ambient and predictive ADAS tile loading is configurable.
+- Improved offline tile fallback: when the latest tiles version cannot be resolved, navigation now falls back to local routing tiles that cover the current location, and returns to the latest (or pinned) version once it becomes available. The fallback is delayed briefly before being applied while the device is online.
+- Offline fallback now prefers tile versions that also have ADAS coverage and is triggered when ADAS tiles are missing around the current position.
+- Fixed speed limit handling for older ADAS tile formats so precise speed limits are read correctly.
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.21.11` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.21.11))
+- Mapbox Navigation Native `v324.21.11`
+- Mapbox Core Common `v24.21.11`
+- Mapbox Java `v7.10.0` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.0))
+
 ## Navigation SDK Core Framework 3.31.1 - 25 September, 2026
 #### Features
 
