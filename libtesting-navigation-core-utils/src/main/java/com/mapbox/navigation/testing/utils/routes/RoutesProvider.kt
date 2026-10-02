@@ -756,6 +756,56 @@ object RoutesProvider {
             coordinates,
         )
     }
+
+    /**
+     * Southbound drive across the Golden Gate Bridge, from the north end to the south end.
+     */
+    fun golden_gate_bridge_hd_sd(context: Context): MockRoute {
+        val jsonResponse = readRawFileText(context, R.raw.golden_gate_bridge_hd_sd_route_response)
+        val coordinates = listOf(
+            Point.fromLngLat(-122.4818209, 37.8329155),
+            Point.fromLngLat(-122.4780231, 37.8142819),
+        )
+        return MockRoute(
+            jsonResponse,
+            DirectionsResponse.fromJson(jsonResponse),
+            listOf(
+                MockDirectionsRequestHandler(
+                    profile = PROFILE_DRIVING_TRAFFIC,
+                    jsonResponse = jsonResponse,
+                    expectedCoordinates = coordinates,
+                ),
+            ),
+            coordinates,
+        )
+    }
+
+    /**
+     * Eastbound drive through the Presidio Parkway tunnel, starting before its western portal and
+     * ending after its eastern portal.
+     */
+    fun presidio_parkway_tunnel_hd_sd(context: Context): MockRoute {
+        val jsonResponse = readRawFileText(
+            context,
+            R.raw.presidio_parkway_tunnel_hd_sd_route_response,
+        )
+        val coordinates = listOf(
+            Point.fromLngLat(-122.472363, 37.804313),
+            Point.fromLngLat(-122.453026, 37.803204),
+        )
+        return MockRoute(
+            jsonResponse,
+            DirectionsResponse.fromJson(jsonResponse),
+            listOf(
+                MockDirectionsRequestHandler(
+                    profile = PROFILE_DRIVING_TRAFFIC,
+                    jsonResponse = jsonResponse,
+                    expectedCoordinates = coordinates,
+                ),
+            ),
+            coordinates,
+        )
+    }
 }
 
 suspend fun MapboxNavigation.requestMockRoutes(

@@ -46,6 +46,16 @@ enum class Tileset(
         listOf(TileDataDomain.NAVIGATION, TileDataDomain.NAVIGATION_HD),
         "persistent_config_helsinki"
     ),
+    /**
+     * Golden Gate Bridge and Presidio Parkway including its tunnels, with Maps (incl. HD roads),
+     * Navigation (2026_09_20-06_15_51) and Navigation HD (2026-09-27-v2) data.
+     * See libtesting-resources/tiles-downloading/configs/ggb_tunnel_2026-09-27.
+     */
+    GoldenGateBridgeTunnelHdSd(
+        "tileset_ggb_tunnel_2026-09-27",
+        listOf(TileDataDomain.NAVIGATION, TileDataDomain.NAVIGATION_HD),
+        "tileset_ggb_tunnel_2026_09_27_nav_config"
+    ),
 }
 
 /**

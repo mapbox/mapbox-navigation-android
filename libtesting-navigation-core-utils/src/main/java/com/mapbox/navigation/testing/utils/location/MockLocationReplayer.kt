@@ -37,11 +37,15 @@ class MockLocationReplayerRule(mockLocationUpdatesRule: MockLocationUpdatesRule)
     }
     private fun mapper(
         maxSpeedMps: Double? = null,
+        frequency: Double? = null,
     ) = ReplayRouteMapper(
         ReplayRouteOptions.Builder()
             .apply {
                 if (maxSpeedMps != null) {
                     this.maxSpeedMps(maxSpeedMps)
+                }
+                if (frequency != null) {
+                    this.frequency(frequency)
                 }
             }
             .build()
@@ -59,13 +63,22 @@ class MockLocationReplayerRule(mockLocationUpdatesRule: MockLocationUpdatesRule)
         mapboxReplayer = null
     }
 
+    /**
+     * Replays [directionsRoute] from its first point.
+     *
+     * @param frequency number of location updates per second, 1 by default. A higher frequency
+     * makes the location stream tolerate delivery delays on a loaded device: e.g. HD animators
+     * reset their render timeline (and the ego elevation) on a gap over 1.2 s between locations.
+     */
     fun playRoute(
         directionsRoute: DirectionsRoute,
         eventsToDrop: Int = 0,
         maxSpeedMps: Double? = null,
+        frequency: Double? = null,
     ) {
         val replayEvents = mapper(
             maxSpeedMps = maxSpeedMps,
+            frequency = frequency,
         ).mapDirectionsRouteGeometry(directionsRoute)
             .drop(eventsToDrop)
         mapboxReplayer?.clearEvents()

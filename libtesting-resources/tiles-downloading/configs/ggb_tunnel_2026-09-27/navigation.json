@@ -1,0 +1,44 @@
+{
+  "name": "ggb-tunnel-navigation",
+  "estimate-only": false,
+  "accept-expired": true,
+  "tilesets": [
+    {
+      "domain": "nav",
+      "name": "mapbox/driving-traffic",
+      "version": "2026_09_20-06_15_51"
+    },
+    {
+      "domain": "nav-hd",
+      "name": "mapbox",
+      "version": "2026-09-27-v2"
+    }
+  ],
+  "tilestore-options": {
+    "navigationhd": {
+      "mapbox-api-url": "https://api.mapbox.com",
+      "tile-url-template": "{mapbox_api_url}/3dln-tiles/v2/{dataset}/{version}/{x}-{y}?access_token={mapbox_access_token}&sku={mapbox_sku_token}"
+    }
+  },
+  "geojson": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "coordinates": [
+            [
+              [-122.62, 37.94],
+              [-122.62, 37.69],
+              [-122.31, 37.69],
+              [-122.31, 37.94],
+              [-122.62, 37.94]
+            ]
+          ],
+          "type": "Polygon"
+        }
+      }
+    ]
+  }
+}
