@@ -41,6 +41,13 @@ android.libraryVariants.all { variant ->
                 args += '--hide'
                 args += hideId
             }
+            if (project.hasProperty('hideAnnotation')) {
+                def annotations = hideAnnotation.split(',')
+                annotations.each { annotation ->
+                    args += '--hide-annotation'
+                    args += annotation
+                }
+            }
         }
     }
 
@@ -73,6 +80,13 @@ android.libraryVariants.all { variant ->
             if (project.hasProperty('hideId')) {
                 args += '--hide'
                 args += hideId
+            }
+            if (project.hasProperty('hideAnnotation')) {
+                def annotations = hideAnnotation.split(',')
+                annotations.each { annotation ->
+                    args += '--hide-annotation'
+                    args += annotation
+                }
             }
         }
     }
