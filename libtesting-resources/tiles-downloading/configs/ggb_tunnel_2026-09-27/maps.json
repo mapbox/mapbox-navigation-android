@@ -1,0 +1,97 @@
+{
+  "includes": [
+    "includes/hd_road_z17_z18.json"
+  ],
+  "name": "ggb-tunnel-maps",
+  "estimate-only": false,
+  "accept-expired": true,
+  "styles": [
+    "mapbox://styles/mapbox-3dln/hd-roads-3dln-style"
+  ],
+  "tilesets": [
+    {
+      "domain": "maps",
+      "name": "mapbox.mapbox-bathymetry-v2",
+      "max-zoom": 7
+    },
+    {
+      "domain": "maps",
+      "name": "mapbox.mapbox-streets-v8-lite"
+    },
+    {
+      "domain": "maps",
+      "name": "mapbox.mapbox-terrain-v2",
+      "max-zoom": 15
+    },
+    {
+      "domain": "maps",
+      "name": "mapbox.mapbox-models-v1",
+      "min-zoom": 13
+    },
+    {
+      "domain": "maps",
+      "name": "mapbox.hd-road-v1-bounded",
+      "levels": [[11, 11, 14], [12, 15, 16]]
+    },
+    {
+      "domain": "maps",
+      "name": "mapbox.hd-road-v1-bounded-demo",
+      "levels": [[11, 11, 14], [12, 15, 16]]
+    },
+    {
+      "domain": "maps",
+      "name": "mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod",
+      "min-zoom": 14,
+      "max-zoom": 14
+    },
+    {
+      "domain": "maps",
+      "name": "mapbox.mapbox-3dbridges-v1",
+      "min-zoom": 14,
+      "max-zoom": 14
+    },
+    {
+      "domain": "maps",
+      "name": "mapbox.mapbox-landmark-pois-v1",
+      "min-zoom": 10
+    },
+    {
+      "domain": "maps",
+      "name": "mapbox.mapbox-landmark-icons-v1",
+      "min-zoom": 10,
+      "max-zoom": 10
+    },
+    {
+      "domain": "maps",
+      "name": "mapbox.procedural-buildings-v1",
+      "min-zoom": 15,
+      "max-zoom": 15
+    },
+    {
+      "domain": "maps",
+      "name": "mapbox-3dln.cmh1tk1tz0mox1no2e5mry4i5-8py3f",
+      "max-zoom": 10
+    }
+  ],
+  "geojson": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "coordinates": [
+            [
+              [-122.4860, 37.8360],
+              [-122.4860, 37.7975],
+              [-122.4470, 37.7975],
+              [-122.4470, 37.8360],
+              [-122.4860, 37.8360]
+            ]
+          ],
+          "type": "Polygon"
+        }
+      }
+    ]
+  }
+}

@@ -26,8 +26,9 @@ abstract class BeforeLaunchRule : ExternalResource() {
 }
 
 abstract class BaseActionBeforeLaunchTest<A : AppCompatActivity>(
-    activityClass: Class<A>
-) : BaseCoreNoCleanUpTest() {
+    activityClass: Class<A>,
+    useFakeDeviceLocationProvider: Boolean = true,
+) : BaseCoreNoCleanUpTest(useFakeDeviceLocationProvider) {
 
     abstract fun executeBeforeLaunch()
 
