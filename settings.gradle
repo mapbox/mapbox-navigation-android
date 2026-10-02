@@ -25,6 +25,6 @@ include ':app-tests-wrapper',
         ':libtesting-navigation-core-utils',
         ':libtesting-resources',
         ':search',
-        ':androidauto',
+        ':android-auto-components',
         ':ui-components',
         ':driver-notification'
