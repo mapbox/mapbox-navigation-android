@@ -12,6 +12,8 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigator.ADASISv2MessageCallback
 import com.mapbox.navigator.AdasisConfig
 import com.mapbox.navigator.CacheHandle
+import com.mapbox.navigator.ChangeLegCallback
+import com.mapbox.navigator.ChargingState
 import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.ElectronicHorizonObserver
 import com.mapbox.navigator.EventsMetadataInterface
@@ -149,6 +151,25 @@ interface MapboxNativeNavigator : MapboxNativeRerouteInterface {
      * @param retained true when the user keeps the station, false to release it
      */
     fun retainUserChargingStation(routeId: String, stationId: String, retained: Boolean)
+
+    /**
+     * Reports that the driver has started charging at the current charging station,
+     * transitioning the native charging FSM from `AwaitCharging` to `Charging`.
+     */
+    fun startCharging()
+
+    /**
+     * Reports that charging has stopped, transitioning the native charging FSM back
+     * to `NotCharging` and, if applicable, automatically advancing the route leg.
+     *
+     * @param callback invoked with the result of the leg change triggered by stopping charging
+     */
+    fun stopCharging(callback: ChangeLegCallback)
+
+    /**
+     * Returns the current state of the native charging FSM.
+     */
+    fun getChargingState(): ChargingState
 
     // EH
 

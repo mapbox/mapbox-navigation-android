@@ -10,6 +10,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.navigator.internal.utils.calculateRemainingWaypoints
 import com.mapbox.navigation.navigator.internal.utils.getCurrentLegDestination
+import com.mapbox.navigator.RouteState
 import io.mockk.every
 import io.mockk.mockk
 import junit.framework.Assert.assertEquals
@@ -24,6 +25,7 @@ class TripStatusExTest {
         val description: String,
         val routeWithWaypoints: NavigationRoute?,
         val nextWaypointIndex: Int,
+        val routeState: RouteState,
         val expectedResult: Int,
     ) {
         companion object {
@@ -34,6 +36,7 @@ class TripStatusExTest {
                     "null route returns 0",
                     null,
                     Int.MIN_VALUE,
+                    RouteState.TRACKING,
                     0,
                 ),
                 arrayOf(
@@ -47,6 +50,7 @@ class TripStatusExTest {
                         )
                     },
                     0,
+                    RouteState.TRACKING,
                     1,
                 ),
                 arrayOf(
@@ -69,7 +73,68 @@ class TripStatusExTest {
                         )
                     },
                     8,
+                    RouteState.TRACKING,
                     3,
+                ),
+                arrayOf(
+                    "charging at origin: index 0 is kept when INITIALIZED and waypoint 0 is a " +
+                        "server CPOI",
+                    mockk<NavigationRoute> {
+                        every {
+                            internalWaypoints()
+                        } returns provideMockListOfWaypoints(
+                            Waypoint.EV_CHARGING_SERVER,
+                            Waypoint.REGULAR,
+                        )
+                    },
+                    0,
+                    RouteState.INITIALIZED,
+                    2,
+                ),
+                arrayOf(
+                    "charging at origin: index 0 is kept when INITIALIZED and waypoint 0 is a " +
+                        "user-provided CPOI",
+                    mockk<NavigationRoute> {
+                        every {
+                            internalWaypoints()
+                        } returns provideMockListOfWaypoints(
+                            Waypoint.EV_CHARGING_USER,
+                            Waypoint.REGULAR,
+                        )
+                    },
+                    0,
+                    RouteState.INITIALIZED,
+                    2,
+                ),
+                arrayOf(
+                    "not charging at origin: waypoint 0 is regular, so index 0 is still " +
+                        "normalized to 1",
+                    mockk<NavigationRoute> {
+                        every {
+                            internalWaypoints()
+                        } returns provideMockListOfWaypoints(
+                            Waypoint.REGULAR,
+                            Waypoint.REGULAR,
+                        )
+                    },
+                    0,
+                    RouteState.INITIALIZED,
+                    1,
+                ),
+                arrayOf(
+                    "not charging at origin: state is TRACKING despite waypoint 0 being a " +
+                        "CPOI, so index 0 is still normalized to 1",
+                    mockk<NavigationRoute> {
+                        every {
+                            internalWaypoints()
+                        } returns provideMockListOfWaypoints(
+                            Waypoint.EV_CHARGING_SERVER,
+                            Waypoint.REGULAR,
+                        )
+                    },
+                    0,
+                    RouteState.TRACKING,
+                    1,
                 ),
             )
 
@@ -95,6 +160,7 @@ class TripStatusExTest {
                     every {
                         nextWaypointIndex
                     } returns this@CalculateRemainingWaypointsTest.nextWaypointIndex
+                    every { routeState } returns this@CalculateRemainingWaypointsTest.routeState
                 },
             )
 
@@ -257,6 +323,7 @@ class TripStatusExTest {
                     every {
                         nextWaypointIndex
                     } returns this@CalculateNextLegWaypointTest.nextWaypointIndex
+                    every { routeState } returns RouteState.TRACKING
                 },
             )
 

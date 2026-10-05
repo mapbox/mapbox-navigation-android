@@ -8,6 +8,7 @@ import com.mapbox.navigator.ActiveGuidanceInfo
 import com.mapbox.navigator.AlternativeRouteInfo
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.BannerSection
+import com.mapbox.navigator.ChargingState
 import com.mapbox.navigator.CorrectedLocationData
 import com.mapbox.navigator.FallbackReason
 import com.mapbox.navigator.FixLocation
@@ -43,6 +44,7 @@ import java.util.Date
 
 fun createNavigationStatus(
     routeState: RouteState = RouteState.TRACKING,
+    chargingState: ChargingState = ChargingState.NOT_CHARGING,
     locatedAlternativeId: String? = null,
     primaryRouteId: String? = null,
     stale: Boolean = false,
@@ -83,6 +85,7 @@ fun createNavigationStatus(
 ): NavigationStatus {
     return NavigationStatus(
         routeState,
+        chargingState,
         stale,
         location,
         isFallback,

@@ -12,6 +12,8 @@ import com.mapbox.navigation.testing.toDataRef
 import com.mapbox.navigation.utils.internal.LoggerFrontend
 import com.mapbox.navigator.AdasisFacadeHandleInterface
 import com.mapbox.navigator.CacheHandle
+import com.mapbox.navigator.ChangeLegCallback
+import com.mapbox.navigator.ChargingState
 import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.EventsMetadataInterface
 import com.mapbox.navigator.InputsServiceHandle
@@ -377,6 +379,70 @@ class MapboxNativeNavigatorImplTest {
                 )
             }
         }
+
+    @Test
+    fun `when navigator is not shut down, startCharging delegates to native navigator`() {
+        navigatorImpl.startCharging()
+
+        verify(exactly = 0) { loggingFrontend.logW(any(), any()) }
+        verify(exactly = 1) { mockNavigator.startCharging() }
+    }
+
+    @Test
+    fun `when navigator is shut down, startCharging logs warning and skips native call`() {
+        navigatorImpl.shutdown()
+        clearMocks(mockNavigator, answers = false)
+
+        navigatorImpl.startCharging()
+
+        verify(exactly = 1) { loggingFrontend.logW(any(), LOG_CATEGORY) }
+        verify(exactly = 0) { mockNavigator.startCharging() }
+    }
+
+    @Test
+    fun `when navigator is not shut down, stopCharging delegates to native navigator`() {
+        val callback = mockk<ChangeLegCallback>(relaxed = true)
+
+        navigatorImpl.stopCharging(callback)
+
+        verify(exactly = 0) { loggingFrontend.logW(any(), any()) }
+        verify(exactly = 1) { mockNavigator.stopCharging(callback) }
+    }
+
+    @Test
+    fun `when navigator is shut down, stopCharging logs warning and skips native call`() {
+        val callback = mockk<ChangeLegCallback>(relaxed = true)
+        navigatorImpl.shutdown()
+        clearMocks(mockNavigator, answers = false)
+
+        navigatorImpl.stopCharging(callback)
+
+        verify(exactly = 1) { loggingFrontend.logW(any(), LOG_CATEGORY) }
+        verify(exactly = 0) { mockNavigator.stopCharging(any()) }
+    }
+
+    @Test
+    fun `when navigator is not shut down, getChargingState delegates to native navigator`() {
+        every { mockNavigator.stateOfCharging() } returns ChargingState.CHARGING
+
+        val result = navigatorImpl.getChargingState()
+
+        assertTrue(result == ChargingState.CHARGING)
+        verify(exactly = 0) { loggingFrontend.logW(any(), any()) }
+        verify(exactly = 1) { mockNavigator.stateOfCharging() }
+    }
+
+    @Test
+    fun `when navigator is shut down, getChargingState logs warning and returns NOT_CHARGING`() {
+        navigatorImpl.shutdown()
+        clearMocks(mockNavigator, answers = false)
+
+        val result = navigatorImpl.getChargingState()
+
+        assertTrue(result == ChargingState.NOT_CHARGING)
+        verify(exactly = 1) { loggingFrontend.logW(any(), LOG_CATEGORY) }
+        verify(exactly = 0) { mockNavigator.stateOfCharging() }
+    }
 
     private companion object {
         const val LOG_CATEGORY = "MapboxNativeNavigatorImpl"

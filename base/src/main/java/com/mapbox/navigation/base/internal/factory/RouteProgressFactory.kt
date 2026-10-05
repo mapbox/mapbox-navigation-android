@@ -10,6 +10,7 @@ import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.trip.model.RouteIndices
 import com.mapbox.navigation.base.route.NavigationRoute
+import com.mapbox.navigation.base.trip.model.ChargingState
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
@@ -54,6 +55,7 @@ object RouteProgressFactory {
      * (see [DirectionsRoute.geometry] or [DecodeUtils.completeGeometryToPoints] if [RouteOptions.overview] is [DirectionsCriteria.OVERVIEW_FULL]).
      * @param inParkingAisle whether the current location belongs to a parking aisle.
      * @param alternativeRoutesIndices map of alternative route id to route indices for specified route (see [RouteIndices]). No primary route indices data is available here.
+     * @param chargingState the current state of the EV charging state machine (see [RouteProgress.chargingState]).
      */
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     fun buildRouteProgressObject(
@@ -75,6 +77,7 @@ object RouteProgressFactory {
         currentRouteGeometryIndex: Int,
         inParkingAisle: Boolean,
         alternativeRoutesIndices: Map<String, RouteIndices>,
+        chargingState: ChargingState,
     ): RouteProgress {
         return RouteProgress(
             navigationRoute = route,
@@ -95,6 +98,7 @@ object RouteProgressFactory {
             currentRouteGeometryIndex = currentRouteGeometryIndex,
             inParkingAisle = inParkingAisle,
             alternativeRoutesIndices = alternativeRoutesIndices,
+            chargingState = chargingState,
         )
     }
 }

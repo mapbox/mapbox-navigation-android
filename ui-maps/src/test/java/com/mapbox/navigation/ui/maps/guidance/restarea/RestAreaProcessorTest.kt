@@ -16,6 +16,7 @@ import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.buildRoadOb
 import com.mapbox.navigation.base.internal.factory.RoadObjectFactory.buildUpcomingRoadObject
 import com.mapbox.navigation.base.internal.factory.RouteProgressFactory.buildRouteProgressObject
 import com.mapbox.navigation.base.internal.utils.toByteArray
+import com.mapbox.navigation.base.trip.model.ChargingState
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
@@ -344,6 +345,7 @@ class RestAreaProcessorTest {
         currentRouteGeometryIndex = 0,
         inParkingAisle = false,
         alternativeRoutesIndices = emptyMap(),
+        chargingState = ChargingState.NOT_CHARGING,
     )
 
     private fun nativeRestAreaObjectWith(name: String, location: Point, mapUri: String) =

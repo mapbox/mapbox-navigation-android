@@ -6,6 +6,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.trip.model.RouteIndices
 import com.mapbox.navigation.base.route.NavigationRoute
@@ -53,8 +54,10 @@ import com.mapbox.navigation.base.utils.DecodeUtils.completeGeometryToPoints
  * (see [DirectionsRoute.geometry] or [DecodeUtils.completeGeometryToPoints] if [RouteOptions.overview] is [DirectionsCriteria.OVERVIEW_FULL]).
  * @param inParkingAisle whether the current location belongs to a parking aisle.
  * @param alternativeRoutesIndices map of alternative route id to route indices for specified route (see [RouteIndices]). No primary route indices data is available here.
+ * @param chargingState the current EV charging state at a charging station on the route, at the
+ * origin or an intermediate stop. See [isChargingExpected].
  */
-@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+@OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalMapboxNavigationAPI::class)
 class RouteProgress internal constructor(
     val navigationRoute: NavigationRoute,
     val bannerInstructions: BannerInstructions?,
@@ -74,6 +77,8 @@ class RouteProgress internal constructor(
     val currentRouteGeometryIndex: Int,
     @ExperimentalPreviewMapboxNavigationAPI
     val inParkingAisle: Boolean,
+    @ExperimentalMapboxNavigationAPI
+    val chargingState: ChargingState,
     internal val alternativeRoutesIndices: Map<String, RouteIndices>,
 ) {
 
@@ -84,6 +89,21 @@ class RouteProgress internal constructor(
      */
     val route: DirectionsRoute
         get() = navigationRoute.directionsRoute
+
+    /**
+     * `true` while a charging session is in play at a charging station on the route, at the
+     * origin or at an intermediate stop. Shorthand for
+     * `chargingState != ChargingState.NOT_CHARGING`; see [chargingState] for the exact phase.
+     *
+     * Use it to switch between a charging experience (start charging, charging progress, resume
+     * navigation via `MapboxNavigation.stopCharging()`) and regular turn-by-turn guidance.
+     * It is independent of [currentState]: driving away without unplugging moves
+     * [currentState] to [RouteProgressState.TRACKING] while this stays `true` until
+     * `MapboxNavigation.stopCharging()` is called.
+     */
+    @ExperimentalMapboxNavigationAPI
+    val isChargingExpected: Boolean
+        get() = chargingState != ChargingState.NOT_CHARGING
 
     /**
      * Indicates whether some other object is "equal to" this one.
@@ -111,6 +131,7 @@ class RouteProgress internal constructor(
         if (routeAlternativeId != other.routeAlternativeId) return false
         if (currentRouteGeometryIndex != other.currentRouteGeometryIndex) return false
         if (inParkingAisle != other.inParkingAisle) return false
+        if (chargingState != other.chargingState) return false
         if (alternativeRoutesIndices != other.alternativeRoutesIndices) return false
 
         return true
@@ -137,6 +158,7 @@ class RouteProgress internal constructor(
         result = 31 * result + routeAlternativeId.hashCode()
         result = 31 * result + currentRouteGeometryIndex.hashCode()
         result = 31 * result + inParkingAisle.hashCode()
+        result = 31 * result + chargingState.hashCode()
         result = 31 * result + alternativeRoutesIndices.hashCode()
         return result
     }
@@ -161,8 +183,9 @@ class RouteProgress internal constructor(
             "voiceInstructions=$voiceInstructions, " +
             "upcomingStepPoints=$upcomingStepPoints, " +
             "remainingWaypoints=$remainingWaypoints, " +
-            "upcomingRoadObjects=$upcomingRoadObjects" +
-            "isParkingAisle=$inParkingAisle" +
+            "upcomingRoadObjects=$upcomingRoadObjects, " +
+            "isParkingAisle=$inParkingAisle, " +
+            "chargingState=$chargingState, " +
             "alternativeRoutesIndices=$alternativeRoutesIndices" +
             ")"
     }
