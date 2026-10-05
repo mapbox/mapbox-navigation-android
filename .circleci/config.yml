@@ -29,6 +29,7 @@ executors:
       MBX_CI_DOMAIN: o619qyc20d.execute-api.us-east-1.amazonaws.com
       FORCE_MAPBOX_NAVIGATION_NATIVE_VERSION: << pipeline.parameters.mapbox_navigation_native_snapshot >>
       ALLOW_SNAPSHOT_REPOSITORY: << pipeline.parameters.mapbox_navigation_native_upstream >>
+      GRADLE_OPTS: -Dorg.gradle.workers.max=2
 
 #-------------------------------
 #---------- WORKFLOWS ----------
@@ -771,6 +772,7 @@ jobs:
 
   assemble:
     executor: ndk-r22-latest-executor
+    resource_class: medium+
     steps:
       - checkout
       - restore-gradle-cache
@@ -790,7 +792,7 @@ jobs:
 
   assemble-instrumentation-test:
     executor: ndk-r22-latest-executor
-    resource_class: medium+
+    resource_class: large
     steps:
       - checkout
       - restore-gradle-cache
@@ -831,7 +833,7 @@ jobs:
 
   assemble-instrumentation-test-internal:
     executor: ndk-r22-latest-executor
-    resource_class: medium+
+    resource_class: large
     steps:
       - checkout
       - restore-gradle-cache
@@ -910,6 +912,7 @@ jobs:
 
   unit-tests-androidauto:
     executor: ndk-r22-latest-executor
+    resource_class: medium+
     steps:
       - when:
           condition:
@@ -950,6 +953,7 @@ jobs:
 
   check-api-core:
     executor: ndk-r22-latest-executor
+    resource_class: medium+
     steps:
       - read-workspace
       - check-api-core
@@ -975,7 +979,7 @@ jobs:
 
   run-android-lint:
     executor: ndk-r22-latest-executor
-    resource_class: medium+
+    resource_class: large
     steps:
       - read-workspace
       - run-android-lint
@@ -1010,10 +1014,11 @@ jobs:
 
   ui-robo-tests:
     executor: ndk-r22-latest-executor
+    resource_class: medium+
     environment:
       JVM_OPTS: -Xmx3200m
       BUILDTYPE: Debug
-      GRADLE_OPTS: -Xmx4096m -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy=in-process
+      GRADLE_OPTS: -Xmx4096m -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy=in-process -Dorg.gradle.workers.max=2
     steps:
       - when:
           condition:
