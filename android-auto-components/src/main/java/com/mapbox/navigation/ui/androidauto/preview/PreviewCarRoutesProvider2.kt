@@ -1,25 +1,17 @@
 package com.mapbox.navigation.ui.androidauto.preview
 
-import com.mapbox.annotation.MapboxExperimental
-import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
-import com.mapbox.navigation.core.preview.RoutesPreview
 import com.mapbox.navigation.core.preview.RoutesPreviewObserver
 import com.mapbox.navigation.ui.androidauto.internal.extensions.selectPreviewedRoute
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAutoFailure
 import com.mapbox.navigation.ui.androidauto.navigation.CarNavigationCamera
 import com.mapbox.navigation.ui.androidauto.routes.CarRoutesProvider
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.shareIn
 
 /**
  * Gives the [CarRoutePreviewScreen] the ability to control the selected route rendered
@@ -28,17 +20,10 @@ import kotlinx.coroutines.flow.shareIn
 @ExperimentalPreviewMapboxNavigationAPI
 class PreviewCarRoutesProvider2 : CarRoutesProvider {
 
-    // Upstream runs only while there are collectors, so this scope never runs work on its own.
-    @OptIn(MapboxExperimental::class)
-    private val sharingScope = CoroutineScope(SupervisorJob() + SdkDispatchers.Main.immediate)
-
     /**
      * Provides navigation routes and selected route index for route preview.
-     *
-     * All collectors share one routes preview observer. The latest preview is replayed to new
-     * collectors while the flow is collected, and dropped when the last collector stops.
      */
-    val routesPreview: Flow<RoutesPreview?> = callbackFlow {
+    val routesPreview = callbackFlow {
         val routesObserver = RoutesPreviewObserver { trySend(it.routesPreview) }
         val observer = object : MapboxNavigationObserver {
 
@@ -55,11 +40,7 @@ class PreviewCarRoutesProvider2 : CarRoutesProvider {
         awaitClose {
             MapboxNavigationApp.unregisterObserver(observer)
         }
-    }.shareIn(
-        sharingScope,
-        SharingStarted.WhileSubscribed(replayExpirationMillis = 0),
-        replay = 1,
-    )
+    }
 
     override val navigationRoutes = routesPreview.map { it?.routesList.orEmpty() }
 

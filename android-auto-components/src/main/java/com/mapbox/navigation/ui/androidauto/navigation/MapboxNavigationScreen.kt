@@ -3,7 +3,6 @@ package com.mapbox.navigation.ui.androidauto.navigation
 import androidx.annotation.UiThread
 import androidx.car.app.Screen
 import androidx.car.app.annotations.RequiresCarApi
-import androidx.car.app.constraints.ConstraintManager
 import androidx.car.app.model.CarIcon
 import androidx.car.app.model.ListTemplate
 import androidx.car.app.model.Template
@@ -18,23 +17,19 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.ui.androidauto.MapboxCarContext
 import com.mapbox.navigation.ui.androidauto.R
 import com.mapbox.navigation.ui.androidauto.action.MapboxMapActionStrip
 import com.mapbox.navigation.ui.androidauto.internal.extensions.addBackPressedHandler
-import com.mapbox.navigation.ui.androidauto.internal.extensions.contentLimit
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAuto
 import com.mapbox.navigation.ui.androidauto.location.CarLocationRenderer
 import com.mapbox.navigation.ui.androidauto.navigation.roadlabel.CarRoadLabelRenderer
 import com.mapbox.navigation.ui.androidauto.navigation.speedlimit.CarSpeedLimitRenderer
 import com.mapbox.navigation.ui.androidauto.preview.CarRouteLineRenderer
 import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -56,7 +51,6 @@ internal class MapboxNavigationScreen @UiThread constructor(
     private val carRouteLineRenderer = CarRouteLineRenderer(
         carRoutesProvider = routesProvider,
         options = mapboxCarContext.options.routeLineRendererOptions,
-        onRouteClick = ::onRouteClicked,
     )
     private val carLocationRenderer = CarLocationRenderer()
     private val carSpeedLimitRenderer = CarSpeedLimitRenderer(mapboxCarContext)
@@ -81,7 +75,6 @@ internal class MapboxNavigationScreen @UiThread constructor(
         navigationInfoProvider,
     )
     private var isResumed = false
-    private var routeClickRefresh: Job? = null
 
     init {
         logAndroidAuto("MapboxNavigationScreen constructor")
@@ -152,20 +145,6 @@ internal class MapboxNavigationScreen @UiThread constructor(
         )
     }
 
-    private fun onRouteClicked(route: NavigationRoute) {
-        val state = routesProvider.state.value
-        if (state.screenState != MapboxNavigationScreenState.ROUTE_PREVIEW) return
-        val routesPreview = state.routesPreview ?: return
-        if (routesPreview.originalRoutesList.none { it.id == route.id }) return
-        if (routesPreview.primaryRoute.id == route.id) return
-        routesProvider.selectRoute(route.id)
-        routeClickRefresh?.cancel()
-        routeClickRefresh = lifecycleScope.launch {
-            routesProvider.state.first { it.routesPreview?.primaryRoute?.id == route.id }
-            invalidate()
-        }
-    }
-
     override fun onGetTemplate(): Template {
         val state = routesProvider.state.value
         logAndroidAuto("MapboxNavigationScreen onGetTemplate ${state.screenState}")
@@ -222,7 +201,6 @@ internal class MapboxNavigationScreen @UiThread constructor(
                     R.drawable.ic_recenter_right_24,
                 ),
             ).build(),
-            maxRoutes = carContext.contentLimit(ConstraintManager.CONTENT_LIMIT_TYPE_ROUTE_LIST),
         )
     }
 

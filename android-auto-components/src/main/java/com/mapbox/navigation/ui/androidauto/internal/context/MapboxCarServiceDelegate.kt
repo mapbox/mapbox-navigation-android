@@ -12,7 +12,7 @@ import kotlin.reflect.KProperty
 /**
  * Delegate function for the [MapboxCarServiceDelegate]. This gives you the ability to scope a
  * service to the [CarContext] lifecycle. If the service is accessed when the [CarContext]
- * is not available, it throws an [IllegalStateException].
+ * is not available, it throw an [IllegalStateException].
  */
 fun <T> MapboxCarContext.mapboxCarService(
     name: String,
@@ -44,27 +44,6 @@ fun <T : MapboxNavigationObserver> MapboxCarContext.mapboxCarNavigationService(
             MapboxNavigationApp.unregisterObserver(it)
         },
     )
-}
-
-/**
- * Attaches [observer] to [MapboxNavigationApp] while the [MapboxCarContext.lifecycle] is
- * CREATED, and returns it. Unlike [mapboxCarNavigationService], the value is created once and
- * stays accessible at any time, before CREATED and after DESTROYED included; only its
- * attachment follows the lifecycle.
- */
-fun <T : MapboxNavigationObserver> MapboxCarContext.attachWhileCreated(observer: T): T {
-    lifecycle.addObserver(
-        object : DefaultLifecycleObserver {
-            override fun onCreate(owner: LifecycleOwner) {
-                MapboxNavigationApp.registerObserver(observer)
-            }
-
-            override fun onDestroy(owner: LifecycleOwner) {
-                MapboxNavigationApp.unregisterObserver(observer)
-            }
-        },
-    )
-    return observer
 }
 
 class MapboxCarServiceDelegate<T>(

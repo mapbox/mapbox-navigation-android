@@ -7,10 +7,10 @@ import com.mapbox.maps.extension.androidauto.MapboxCarMap
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.maps.extension.observable.eventdata.MapLoadingErrorEventData
-import com.mapbox.maps.extension.observable.model.MapLoadErrorType
 import com.mapbox.maps.extension.style.StyleContract
 import com.mapbox.maps.extension.style.style
 import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadErrorListener
+import com.mapbox.navigation.ui.androidauto.internal.extensions.getStyle
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAuto
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAutoFailure
 import com.mapbox.navigation.ui.maps.NavigationStyles
@@ -29,17 +29,11 @@ class MapboxCarMapLoader : MapboxCarMapObserver {
     private var mapboxMap: MapboxMap? = null
     private var lightStyleOverride: StyleContract.StyleExtension? = null
     private var darkStyleOverride: StyleContract.StyleExtension? = null
-    private var loadedStyle: StyleContract.StyleExtension? = null
 
     private val logMapError = object : OnMapLoadErrorListener {
         override fun onMapLoadError(eventData: MapLoadingErrorEventData) {
             val errorData = "${eventData.type} ${eventData.message}"
             logAndroidAutoFailure("onMapLoadError $errorData")
-            // Let the next configuration change try to load the style again. Tile, source,
-            // sprite and glyph errors leave the style loaded, so they must not cause a reload.
-            if (eventData.type == MapLoadErrorType.STYLE) {
-                loadedStyle = null
-            }
         }
     }
 
@@ -47,10 +41,8 @@ class MapboxCarMapLoader : MapboxCarMapObserver {
         mapboxMap = mapboxCarMapSurface.mapSurface.getMapboxMap()
         with(mapboxCarMapSurface) {
             logAndroidAuto("onAttached load style")
-            val styleExtension = getStyleExtension(carContext.isDarkMode)
-            loadedStyle = styleExtension
             mapSurface.getMapboxMap().loadStyle(
-                styleExtension,
+                getStyleExtension(carContext.isDarkMode),
                 onStyleLoaded = { logAndroidAuto("onAttached style loaded") },
                 onMapLoadErrorListener = logMapError,
             )
@@ -58,8 +50,8 @@ class MapboxCarMapLoader : MapboxCarMapObserver {
     }
 
     override fun onDetached(mapboxCarMapSurface: MapboxCarMapSurface) {
+        mapboxCarMapSurface.getStyle()?.removeStyleLayer(EMPTY_LAYER_ID)
         mapboxMap = null
-        loadedStyle = null
     }
 
     /**
@@ -95,9 +87,7 @@ class MapboxCarMapLoader : MapboxCarMapObserver {
 
     /**
      * This will use [CarContext.isDarkMode] to determine if the dark or light style should be
-     * loaded. The style is loaded only when it differs from the loaded one, which happens when
-     * [CarContext.isDarkMode] or the override for it changed. Other configuration changes do not
-     * reload the style. If this is called while the map is detached, there is no operation.
+     * loaded. If this is called while the map is detached, there is no operation.
      *
      * @see setLightStyleOverride
      * @see setDarkStyleOverride
@@ -105,29 +95,20 @@ class MapboxCarMapLoader : MapboxCarMapObserver {
      * @param carContext forwarded from [Session.onCarConfigurationChanged]
      */
     fun onCarConfigurationChanged(carContext: CarContext) = apply {
-        val mapboxMap = mapboxMap ?: run {
-            logAndroidAuto(
-                "onCarConfigurationChanged did not load the map because the map is not attached",
-            )
-            return@apply
-        }
-        val styleExtension = getStyleExtension(carContext.isDarkMode)
-        if (styleExtension === loadedStyle) {
-            logAndroidAuto("onCarConfigurationChanged keeps the loaded map style")
-            return@apply
-        }
-        loadedStyle = styleExtension
-        mapboxMap.loadStyle(
-            styleExtension,
+        mapboxMap?.loadStyle(
+            getStyleExtension(carContext.isDarkMode),
             onStyleLoaded = { style ->
                 logAndroidAuto("updateMapStyle styleAvailable ${style.styleURI}")
             },
             onMapLoadErrorListener = logMapError,
+        ) ?: logAndroidAuto(
+            "onCarConfigurationChanged did not load the map because the map is not attached",
         )
     }
 
     private companion object {
         private val DEFAULT_DAY_STYLE = style(NavigationStyles.NAVIGATION_DAY_STYLE) { }
         private val DEFAULT_NIGHT_STYLE = style(NavigationStyles.NAVIGATION_NIGHT_STYLE) { }
+        private const val EMPTY_LAYER_ID = "empty_layer_id"
     }
 }

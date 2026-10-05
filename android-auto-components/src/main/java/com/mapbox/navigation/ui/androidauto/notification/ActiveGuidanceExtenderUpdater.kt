@@ -10,7 +10,6 @@ import android.text.SpannableStringBuilder
 import android.text.TextUtils
 import androidx.car.app.notification.CarAppExtender
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.createBitmap
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver
@@ -25,8 +24,7 @@ import kotlin.math.roundToInt
 
 internal class ActiveGuidanceExtenderUpdater(private val context: Context) {
 
-    @StepManeuver.StepManeuverType
-    private var currentManeuverType: String? = null
+    @StepManeuver.StepManeuverType private var currentManeuverType: String? = null
     private var currentManeuverModifier: String? = null
     private var currentRoundaboutAngle: Float? = null
     private var currentManeuverImage: Bitmap? = null
@@ -56,25 +54,17 @@ internal class ActiveGuidanceExtenderUpdater(private val context: Context) {
         val titleBuilder = SpannableStringBuilder()
         currentFormattedDistance?.let { titleBuilder.append(it) }
         titleBuilder.append(" • ")
-        currentFormattedTime?.let { titleBuilder.append(it) }
         extenderBuilder.setContentTitle(titleBuilder)
+        currentFormattedTime?.let { titleBuilder.append(it) }
 
         updateInstructionText(bannerInstructions, extenderBuilder)
         updateManeuverImage(bannerInstructions, drivingSide, extenderBuilder)
     }
 
-    /**
-     * Forgets everything shown for the current trip, so none of it shows on the next one.
-     */
-    fun reset() {
+    fun updateCurrentManeuverToDefault() {
         currentManeuverType = null
         currentManeuverModifier = null
         currentRoundaboutAngle = null
-        currentManeuverImage = null
-        currentInstructionText = null
-        currentDistanceText = null
-        currentFormattedDistance = null
-        currentFormattedTime = null
     }
 
     private fun updateDistanceText(
@@ -160,7 +150,11 @@ internal class ActiveGuidanceExtenderUpdater(private val context: Context) {
     }
 
     private fun getManeuverBitmap(drawable: Drawable, shouldFlipIcon: Boolean): Bitmap? {
-        val maneuverImageBitmap = createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight)
+        val maneuverImageBitmap = Bitmap.createBitmap(
+            drawable.intrinsicWidth,
+            drawable.intrinsicHeight,
+            Bitmap.Config.ARGB_8888,
+        )
         val maneuverCanvas = Canvas(maneuverImageBitmap)
         drawable.setBounds(0, 0, maneuverCanvas.width, maneuverCanvas.height)
         drawable.draw(maneuverCanvas)

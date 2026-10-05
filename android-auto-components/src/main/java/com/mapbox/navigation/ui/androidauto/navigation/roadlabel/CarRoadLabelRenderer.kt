@@ -1,10 +1,10 @@
 package com.mapbox.navigation.ui.androidauto.navigation.roadlabel
 
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Rect
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
-import androidx.core.graphics.createBitmap
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMap
@@ -16,7 +16,6 @@ import com.mapbox.navigation.base.road.model.RoadComponent
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.tripdata.shield.api.MapboxRouteShieldApi
 import com.mapbox.navigation.tripdata.shield.model.RouteShield
-import com.mapbox.navigation.ui.androidauto.internal.RendererUtils.dpScale
 import com.mapbox.navigation.ui.androidauto.internal.extensions.styleFlow
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAuto
 import com.mapbox.navigation.ui.androidauto.navigation.MapUserStyleObserver
@@ -42,18 +41,16 @@ class CarRoadLabelRenderer : MapboxCarMapObserver {
     private lateinit var scope: CoroutineScope
     private var roadNameObserver: CarRoadNameObserver? = null
     private var roadLabelWidget: BitmapWidget? = null
-    private var marginYPx = 0f
 
     override fun onAttached(mapboxCarMapSurface: MapboxCarMapSurface) {
         logAndroidAuto("RoadLabelSurfaceLayer carMapSurface loaded")
         super.onAttached(mapboxCarMapSurface)
-        marginYPx = MARGIN_Y_DP * mapboxCarMapSurface.carContext.dpScale()
         val roadLabelWidget = BitmapWidget(
             EMPTY_BITMAP,
             WidgetPosition {
                 horizontalAlignment = WidgetPosition.Horizontal.CENTER
                 verticalAlignment = WidgetPosition.Vertical.BOTTOM
-                offsetY = -marginYPx
+                offsetY = -MARGIN_Y
             },
         ).also { roadLabelWidget = it }
         mapboxCarMapSurface.mapSurface.addWidget(roadLabelWidget)
@@ -100,7 +97,7 @@ class CarRoadLabelRenderer : MapboxCarMapObserver {
             currentPosition.toBuilder()
                 .apply {
                     offsetX = transitOffsetX.toFloat()
-                    offsetY = -marginYPx - edgeInsets.bottom.toFloat()
+                    offsetY = -MARGIN_Y - edgeInsets.bottom.toFloat()
                 }
                 .build(),
         )
@@ -114,7 +111,7 @@ class CarRoadLabelRenderer : MapboxCarMapObserver {
         }
 
     private companion object {
-        private const val MARGIN_Y_DP = 10f
+        private const val MARGIN_Y = 10f
 
         private val DARK_OPTIONS = CarRoadLabelOptions.Builder()
             .shadowColor(null)
@@ -127,7 +124,7 @@ class CarRoadLabelRenderer : MapboxCarMapObserver {
             .textColor(Color.BLACK)
             .build()
 
-        private val EMPTY_BITMAP = createBitmap(1, 1).apply {
+        private val EMPTY_BITMAP = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888).apply {
             eraseColor(Color.TRANSPARENT)
         }
     }

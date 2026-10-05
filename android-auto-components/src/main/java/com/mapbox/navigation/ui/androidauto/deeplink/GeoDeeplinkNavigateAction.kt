@@ -6,7 +6,6 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.geodeeplink.GeoDeeplink
 import com.mapbox.navigation.core.geodeeplink.GeoDeeplinkParser
 import com.mapbox.navigation.ui.androidauto.MapboxCarContext
-import com.mapbox.navigation.ui.androidauto.internal.AndroidAutoLog.logAndroidAutoWarning
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAuto
 import com.mapbox.navigation.ui.androidauto.placeslistonmap.PlacesListOnMapProvider
 import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen
@@ -50,14 +49,7 @@ class GeoDeeplinkNavigateAction @VisibleForTesting internal constructor(
         mapboxCarContext.geoDeeplinkPlacesProvider = when (mapboxCarContext.options.searchMode) {
             is CarSearchMode.SearchBox -> searchBoxProviderFactory(geoDeeplink)
             is CarSearchMode.Legacy -> geocodingProviderFactory(geoDeeplink)
-            // CarSearchMode has a private constructor, so only the two modes above exist. It is
-            // not sealed, so the compiler still needs this branch; it must not crash the session.
-            else -> {
-                logAndroidAutoWarning(
-                    "Unknown search mode ${mapboxCarContext.options.searchMode}, using SearchBox",
-                )
-                searchBoxProviderFactory(geoDeeplink)
-            }
+            else -> error("Unsupported search mode: ${mapboxCarContext.options.searchMode}")
         }
         // When the places of a previous deeplink are shown, show the new ones in their place.
         if (!mapboxCarContext.mapboxScreenManager.recreateTop(MapboxScreen.GEO_DEEPLINK)) {

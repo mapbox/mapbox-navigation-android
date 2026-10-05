@@ -5,22 +5,21 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import androidx.car.app.notification.CarAppExtender
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.createBitmap
 import com.mapbox.navigation.ui.androidauto.R
 
 internal class FreeDriveExtenderUpdater(private val context: Context) {
 
-    private val largeIcon: Bitmap by lazy {
+    fun update(extenderBuilder: CarAppExtender.Builder) {
+        extenderBuilder.setContentTitle(context.getString(R.string.mapbox_free_drive_session))
         val drawable = ContextCompat.getDrawable(context, R.drawable.mapbox_ic_navigation)!!
-        val bitmap = createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight)
+        val bitmap = Bitmap.createBitmap(
+            drawable.intrinsicWidth,
+            drawable.intrinsicHeight,
+            Bitmap.Config.ARGB_8888,
+        )
         val canvas = Canvas(bitmap)
         drawable.setBounds(0, 0, canvas.width, canvas.height)
         drawable.draw(canvas)
-        bitmap
-    }
-
-    fun update(extenderBuilder: CarAppExtender.Builder) {
-        extenderBuilder.setContentTitle(context.getString(R.string.mapbox_free_drive_session))
-        extenderBuilder.setLargeIcon(largeIcon)
+        extenderBuilder.setLargeIcon(bitmap)
     }
 }

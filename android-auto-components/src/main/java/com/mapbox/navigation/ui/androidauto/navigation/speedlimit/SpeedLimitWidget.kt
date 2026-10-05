@@ -12,26 +12,20 @@ import com.mapbox.navigation.base.speed.model.SpeedLimitSign
 class SpeedLimitWidget private constructor(
     initialSignFormat: SpeedLimitSign,
     private val bitmapRenderer: SpeedLimitBitmapRenderer,
-    @get:JvmSynthetic internal val marginXPx: Float,
-    @get:JvmSynthetic internal val marginYPx: Float,
+    position: WidgetPosition,
 ) : BitmapWidget(
     bitmap = bitmapRenderer.getBitmap(initialSignFormat),
-    originalPosition = WidgetPosition {
-        horizontalAlignment = WidgetPosition.Horizontal.RIGHT
-        verticalAlignment = WidgetPosition.Vertical.BOTTOM
-        offsetX = -marginXPx
-        offsetY = -marginYPx
-    },
+    originalPosition = position,
 ) {
-    /**
-     * The sign and its margins are drawn at their size in pixels. The SDK's own speed limit
-     * renderer scales them to the head unit density.
-     */
     constructor(initialSignFormat: SpeedLimitSign = SpeedLimitSign.MUTCD) : this(
         initialSignFormat = initialSignFormat,
         bitmapRenderer = SpeedLimitBitmapRenderer(),
-        marginXPx = MARGIN_X_DP,
-        marginYPx = MARGIN_Y_DP,
+        position = WidgetPosition {
+            horizontalAlignment = WidgetPosition.Horizontal.RIGHT
+            verticalAlignment = WidgetPosition.Vertical.BOTTOM
+            offsetX = -MARGIN_X
+            offsetY = -MARGIN_Y
+        },
     )
 
     private var lastSpeedLimit: Int? = null
@@ -40,20 +34,8 @@ class SpeedLimitWidget private constructor(
     private var lastWarn = false
 
     internal companion object {
-        private const val MARGIN_X_DP = 14f
-        private const val MARGIN_Y_DP = 30f
-
-        /**
-         * @param scale the number of pixels in one dp on the map surface. The sign and its
-         * margins are designed in dp.
-         */
-        @JvmSynthetic
-        internal fun scaled(initialSignFormat: SpeedLimitSign, scale: Float) = SpeedLimitWidget(
-            initialSignFormat = initialSignFormat,
-            bitmapRenderer = SpeedLimitBitmapRenderer(scale),
-            marginXPx = MARGIN_X_DP * scale,
-            marginYPx = MARGIN_Y_DP * scale,
-        )
+        internal const val MARGIN_X = 14f
+        internal const val MARGIN_Y = 30f
 
         // Driving at exactly the speed limit plus the threshold is still allowed.
         internal fun shouldWarn(speedLimit: Int?, speed: Int, threshold: Int): Boolean =

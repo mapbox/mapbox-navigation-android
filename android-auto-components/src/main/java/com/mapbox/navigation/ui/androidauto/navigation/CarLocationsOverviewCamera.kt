@@ -14,7 +14,6 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
-import com.mapbox.navigation.ui.androidauto.internal.RendererUtils.dpToPx
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAuto
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
@@ -35,7 +34,6 @@ class CarLocationsOverviewCamera(
     internal var isLocationInitialized = false
         private set
     private var latestLocation: Location? = null
-    private var overviewPaddingPx = 0
 
     private val locationObserver = object : LocationObserver {
 
@@ -75,7 +73,6 @@ class CarLocationsOverviewCamera(
     override fun onAttached(mapboxCarMapSurface: MapboxCarMapSurface) {
         super.onAttached(mapboxCarMapSurface)
         this.mapboxCarMapSurface = mapboxCarMapSurface
-        overviewPaddingPx = mapboxCarMapSurface.carContext.dpToPx(OVERVIEW_PADDING_DP)
         logAndroidAuto("LocationsOverviewCamera loaded $mapboxCarMapSurface")
 
         val mapboxMap = mapboxCarMapSurface.mapSurface.getMapboxMap().also {
@@ -98,10 +95,10 @@ class CarLocationsOverviewCamera(
         logAndroidAuto("LocationsOverviewCamera visibleAreaChanged $visibleArea $edgeInsets")
 
         viewportDataSource.overviewPadding = EdgeInsets(
-            edgeInsets.top + overviewPaddingPx,
-            edgeInsets.left + overviewPaddingPx,
-            edgeInsets.bottom + overviewPaddingPx,
-            edgeInsets.right + overviewPaddingPx,
+            edgeInsets.top + OVERVIEW_PADDING,
+            edgeInsets.left + OVERVIEW_PADDING,
+            edgeInsets.bottom + OVERVIEW_PADDING,
+            edgeInsets.right + OVERVIEW_PADDING,
         )
 
         viewportDataSource.evaluate()
@@ -127,7 +124,7 @@ class CarLocationsOverviewCamera(
     }
 
     private companion object {
-        private const val OVERVIEW_PADDING_DP = 15
+        private const val OVERVIEW_PADDING = 15
         const val DEFAULT_INITIAL_ZOOM = 15.0
     }
 }

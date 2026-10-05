@@ -5,7 +5,6 @@ import android.graphics.Canvas
 import androidx.annotation.DrawableRes
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.car.app.model.CarIcon
-import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.IconCompat
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.mapbox.navigation.tripdata.maneuver.api.MapboxTurnIconsApi
@@ -69,7 +68,7 @@ class CarManeuverIconRenderer(
         )!!
 
         val px = options.context.dpToPx(CAR_ICON_DIMEN_DP)
-        val bitmap: Bitmap = createBitmap(px, px)
+        val bitmap: Bitmap = Bitmap.createBitmap(px, px, Bitmap.Config.ARGB_8888)
         bitmap.eraseColor(options.background)
         val canvas = Canvas(bitmap)
         if (shouldFlip) {

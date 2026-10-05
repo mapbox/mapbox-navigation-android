@@ -1,0 +1,11 @@
+- Fixed Android Auto route preview: tapping Navigate on an alternative route row now starts guidance on that route instead of the currently selected one. A click from a route list that was replaced before the click arrived no longer starts a route from the new list.
+- Fixed Android Auto crashes on unexpected state in user actions and observers:
+  - a car map style URI that is not a `mapbox://styles/{user}/{style}` URI no longer crashes `MapUserStyleObserver`, and such styles no longer trigger failing designed-shield downloads;
+  - an unknown lane indication is shown as an unknown lane shape instead of crashing lane guidance;
+  - route preview selection, Navigate and Back no longer crash when the preview was cleared or `MapboxNavigation` is detached;
+  - `CarNavigationCamera.zoomUpdatesAllowed` no longer crashes before the map surface is attached;
+  - Stop during active guidance no longer crashes when the arrival trigger is not attached.
+- Fixed the legacy Android Auto route preview screen starting the previously selected route when Navigate is tapped right after selecting another route, starting guidance without routes, or showing an endless loading state when `MapboxNavigation` is detached (it now shows free drive).
+- Fixed the Android Auto map zoom buttons turning off automatic zoom before the map surface is attached, and the Recenter button now updates when automatic zoom is turned back on.
+- Fixed Android Auto place rows showing the text "null" when a place has no description.
+- `GeoDeeplinkParser` no longer throws on a query with a `%` that is not a valid escape (for example `geo:0,0?q=50%off`), matches the `geo:` scheme case-insensitively, ignores RFC 5870 `;` parameters, and ignores coordinates outside the valid latitude and longitude ranges.

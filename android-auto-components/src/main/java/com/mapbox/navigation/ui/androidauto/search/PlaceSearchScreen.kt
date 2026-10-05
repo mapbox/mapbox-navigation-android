@@ -13,20 +13,21 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.ui.androidauto.R
 import com.mapbox.navigation.ui.androidauto.internal.extensions.addBackPressedHandler
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAuto
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAutoFailure
 import com.mapbox.navigation.ui.androidauto.navigation.CarDistanceFormatter
+import com.mapbox.navigation.ui.androidauto.preview.CarRoutePreviewRequestCallback
 import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen
-import com.mapbox.search.result.SearchResult
+import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenManager
 import com.mapbox.search.result.SearchSuggestion
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * This screen allows the user to search for a destination.
@@ -45,13 +46,31 @@ internal class PlaceSearchScreen @UiThread constructor(
         }
 
     private var searchJob: Job? = null
-    private var selectJob: Job? = null
 
-    private val carRouteRequestCallback = ResumedRoutePreviewCallback(
-        lifecycle,
-        searchCarContext.mapboxScreenManager,
-        searchCarContext.routePreviewRequest,
-    ) { messageRes -> carContext.showSearchToast(messageRes) }
+    private val carRouteRequestCallback = object : CarRoutePreviewRequestCallback {
+
+        override fun onRoutesReady(placeRecord: PlaceRecord, routes: List<NavigationRoute>) {
+            val screenManager = searchCarContext.mapboxScreenManager
+            if (
+                !screenManager.isScreenBelowTop(MapboxScreen.NAVIGATION) ||
+                !screenManager.goBack()
+            ) {
+                MapboxScreenManager.push(MapboxScreen.ROUTE_PREVIEW)
+            }
+        }
+
+        override fun onUnknownCurrentLocation() {
+            uiState = SearchUiState.NoItems(R.string.car_search_unknown_current_location)
+        }
+
+        override fun onDestinationLocationUnknown() {
+            uiState = SearchUiState.NoItems(R.string.car_search_unknown_search_location)
+        }
+
+        override fun onNoRoutesFound() {
+            uiState = SearchUiState.NoItems(R.string.car_search_no_results)
+        }
+    }
 
     init {
         addBackPressedHandler {
@@ -60,10 +79,12 @@ internal class PlaceSearchScreen @UiThread constructor(
         lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onCreate(owner: LifecycleOwner) {
+                    MapboxNavigationApp.registerObserver(searchCarContext.routePreviewRequest)
                     MapboxNavigationApp.registerObserver(searchCarContext.carPlaceSearch)
                 }
 
                 override fun onDestroy(owner: LifecycleOwner) {
+                    MapboxNavigationApp.unregisterObserver(searchCarContext.routePreviewRequest)
                     MapboxNavigationApp.unregisterObserver(searchCarContext.carPlaceSearch)
                 }
             },
@@ -95,7 +116,7 @@ internal class PlaceSearchScreen @UiThread constructor(
             }.build()
             is SearchUiState.NoItems -> buildNoItemsList(state.messageRes)
             is SearchUiState.Error -> buildNoItemsList(R.string.car_search_error)
-            SearchUiState.Loading, is SearchUiState.Selecting -> null
+            SearchUiState.Loading -> null
         }
         // SearchTemplate.Builder throws if both loading and an item list are set, so isLoading is
         // derived from itemList being null rather than tracked as a second, separately-set flag.
@@ -109,18 +130,11 @@ internal class PlaceSearchScreen @UiThread constructor(
     @VisibleForTesting
     internal fun doSearch(searchText: String, debounce: Boolean) {
         searchJob?.cancel()
-        selectJob?.cancel()
-        // A route requested for the previous results must not open a preview over new ones.
-        searchCarContext.routePreviewRequest.cancelRequest(carRouteRequestCallback)
-        if (searchText.isBlank()) {
-            uiState = SearchUiState.NoItems(R.string.car_search_no_results)
-            return
-        }
         uiState = SearchUiState.Loading
         searchJob = lifecycleScope.launch {
             try {
                 if (debounce) {
-                    delay(TYPING_DEBOUNCE_MILLIS.milliseconds)
+                    delay(TYPING_DEBOUNCE_MILLIS)
                 }
                 val result = searchCarContext.carPlaceSearch.search(searchText)
                 uiState = result.fold(
@@ -159,50 +173,17 @@ internal class PlaceSearchScreen @UiThread constructor(
 
     private fun onClickSearch(searchSuggestion: SearchSuggestion) {
         logAndroidAuto("onClickSearch $searchSuggestion")
-        val content = when (val state = uiState) {
-            is SearchUiState.Content -> state
-            is SearchUiState.Selecting -> state.content
-            else -> return
-        }
-        selectJob?.cancel()
-        uiState = SearchUiState.Selecting(content)
-        selectJob = lifecycleScope.launch {
-            val errorRes = try {
-                searchCarContext.carPlaceSearch.select(searchSuggestion).fold(
-                    onSuccess = { searchResults -> requestRoute(searchResults) },
-                    onFailure = { e -> selectFailed(e) },
+        lifecycleScope.launch {
+            val searchResults = searchCarContext.carPlaceSearch.select(searchSuggestion)
+                .getOrDefault(emptyList())
+            logAndroidAuto("onClickSearch select ${searchResults.joinToString()}")
+            if (searchResults.isNotEmpty()) {
+                searchCarContext.routePreviewRequest.request(
+                    PlaceRecordMapper.fromSearchResult(searchResults.first()),
+                    carRouteRequestCallback,
                 )
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                selectFailed(e)
             }
-            uiState = content
-            // Through the route callback, so it is held while the screen is hidden.
-            errorRes?.let { carRouteRequestCallback.showError(it) }
         }
-    }
-
-    /**
-     * Requests a route to the first resolved result, or returns the message to show when the
-     * suggestion did not resolve to any place.
-     */
-    @StringRes
-    private fun requestRoute(searchResults: List<SearchResult>): Int? {
-        logAndroidAuto("onClickSearch select ${searchResults.joinToString()}")
-        val searchResult = searchResults.firstOrNull()
-            ?: return R.string.car_search_unknown_search_location
-        searchCarContext.routePreviewRequest.request(
-            PlaceRecordMapper.fromSearchResult(searchResult),
-            carRouteRequestCallback,
-        )
-        return null
-    }
-
-    @StringRes
-    private fun selectFailed(e: Throwable): Int {
-        logAndroidAutoFailure("onClickSearch select failed: ${e.message}", e)
-        return R.string.car_search_error
     }
 
     private fun buildNoItemsList(@StringRes stringRes: Int) = ItemList.Builder()
@@ -219,19 +200,12 @@ internal class PlaceSearchScreen @UiThread constructor(
 
 /**
  * Represents what [PlaceSearchScreen] should render for the current search query: a request in
- * flight, a non-empty suggestion list, a suggestion being resolved to a place, a successfully
- * resolved but empty result, or a failure. A superseded (canceled) search never reaches any of
- * these states.
+ * flight, a non-empty suggestion list, a successfully resolved but empty result, or a failure.
+ * A superseded (cancelled) search never reaches any of these states.
  */
 internal sealed class SearchUiState {
     object Loading : SearchUiState()
     data class Content(val suggestions: List<SearchSuggestion>) : SearchUiState()
-
-    /**
-     * A suggestion from [content] is being resolved to a place. Rendered as loading, and
-     * [content] is shown again once the selection finishes.
-     */
-    data class Selecting(val content: Content) : SearchUiState()
-    data class NoItems(@param:StringRes val messageRes: Int) : SearchUiState()
+    data class NoItems(@StringRes val messageRes: Int) : SearchUiState()
     data class Error(val throwable: Throwable) : SearchUiState()
 }

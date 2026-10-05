@@ -1,0 +1,1 @@
+- Android Auto: fixed a crash and wrong road shields when the car map uses a style that is not a `mapbox://styles/<user>/<id>` style.

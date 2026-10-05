@@ -30,8 +30,8 @@ class PlaceRecord(
     override fun hashCode(): Int {
         var result = id.hashCode()
         result = 31 * result + name.hashCode()
-        result = 31 * result + coordinate.hashCode()
-        result = 31 * result + description.hashCode()
+        result = 31 * result + (coordinate?.hashCode() ?: 0)
+        result = 31 * result + (description?.hashCode() ?: 0)
         result = 31 * result + categories.hashCode()
         return result
     }

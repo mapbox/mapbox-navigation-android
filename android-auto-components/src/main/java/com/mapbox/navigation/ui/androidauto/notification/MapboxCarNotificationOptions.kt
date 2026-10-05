@@ -28,7 +28,9 @@ class MapboxCarNotificationOptions private constructor(
 
         other as MapboxCarNotificationOptions
 
-        return startAppService == other.startAppService
+        if (startAppService != other.startAppService) return false
+
+        return true
     }
 
     /**

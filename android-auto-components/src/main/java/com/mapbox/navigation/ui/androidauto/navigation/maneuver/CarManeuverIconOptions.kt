@@ -11,9 +11,9 @@ import com.mapbox.navigation.ui.androidauto.R
  */
 class CarManeuverIconOptions private constructor(
     val context: Context,
-    @param:ColorInt
+    @ColorInt
     val background: Int = Color.TRANSPARENT,
-    @param:StyleRes
+    @StyleRes
     val styleRes: Int,
 ) {
 

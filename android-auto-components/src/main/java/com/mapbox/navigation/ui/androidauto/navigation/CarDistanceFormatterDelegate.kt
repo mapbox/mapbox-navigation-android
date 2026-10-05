@@ -17,7 +17,7 @@ import java.util.Locale
  */
 internal class CarDistanceFormatterDelegate(
     val unitType: UnitType,
-    @param:Rounding.Increment val roundingIncrement: Int,
+    @Rounding.Increment val roundingIncrement: Int,
     val locale: Locale,
 ) {
 

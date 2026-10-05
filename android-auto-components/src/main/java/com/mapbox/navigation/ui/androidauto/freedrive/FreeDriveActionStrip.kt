@@ -16,7 +16,7 @@ class FreeDriveActionStrip(
     /**
      * Build an action strip for free drive
      */
-    fun builder(): ActionStrip.Builder = ActionStrip.Builder()
+    fun builder() = ActionStrip.Builder()
         .addAction(buildSettingsAction())
         .addAction(buildFeedbackAction())
         .addAction(buildSearchAction())
@@ -25,7 +25,7 @@ class FreeDriveActionStrip(
     /**
      * Action to open settings screen.
      */
-    fun buildSettingsAction(): Action = Action.Builder()
+    fun buildSettingsAction() = Action.Builder()
         .setIcon(
             CarIcon.Builder(
                 IconCompat.createWithResource(

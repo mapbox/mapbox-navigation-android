@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.androidauto.deeplink
 
-import com.mapbox.annotation.MapboxExperimental
 import com.mapbox.api.geocoding.v5.GeocodingCriteria
 import com.mapbox.api.geocoding.v5.MapboxGeocoding
 import com.mapbox.api.geocoding.v5.models.GeocodingResponse
@@ -30,7 +29,6 @@ class GeoDeeplinkGeocoding private constructor(
 
     constructor() : this(AccessTokenWrapper.Default)
 
-    @OptIn(MapboxExperimental::class)
     suspend fun requestPlaces(
         geoDeeplink: GeoDeeplink,
         origin: Point?,
@@ -40,7 +38,7 @@ class GeoDeeplinkGeocoding private constructor(
         currentMapboxGeocoding?.cancelCall()
         val point = geoDeeplink.point
         val placeQuery = geoDeeplink.placeQuery
-        val request = when {
+        currentMapboxGeocoding = when {
             point != null -> {
                 MapboxGeocoding.builder()
                     .accessToken(accessTokenWrapper.getLatestToken())
@@ -68,11 +66,8 @@ class GeoDeeplinkGeocoding private constructor(
                 error("GeoDeepLink must have a point or query")
             }
         }
-        currentMapboxGeocoding = request
-        // Use the local request, not the field: another call can replace the field before this
-        // block runs, and would then execute that other call's request a second time.
         return withContext(SdkDispatchers.IO) {
-            request.asFlow().first()
+            currentMapboxGeocoding?.asFlow()?.first()
         }
     }
 

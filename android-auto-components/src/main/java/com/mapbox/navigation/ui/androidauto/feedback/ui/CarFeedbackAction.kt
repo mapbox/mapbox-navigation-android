@@ -15,7 +15,7 @@ import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenManager
  * @param carFeedbackScreen [MapboxScreen.Key] used when the action is selected.
  */
 class CarFeedbackAction(
-    @param:MapboxScreen.Key
+    @MapboxScreen.Key
     private val carFeedbackScreen: String,
 ) {
 

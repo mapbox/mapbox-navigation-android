@@ -12,7 +12,7 @@ import com.mapbox.navigation.ui.androidauto.R
  * @param exitOptions options to style [MapboxExitText] in [MapboxPrimaryManeuver]
  */
 class ManeuverPrimaryOptions private constructor(
-    @param:StyleRes val textAppearance: Int,
+    @StyleRes val textAppearance: Int,
     val exitOptions: ManeuverExitOptions,
 ) {
 

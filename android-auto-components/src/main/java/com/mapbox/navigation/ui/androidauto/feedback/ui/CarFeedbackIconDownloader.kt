@@ -1,11 +1,11 @@
 package com.mapbox.navigation.ui.androidauto.feedback.ui
 
-import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import androidx.car.app.Screen
 import androidx.car.app.model.CarIcon
 import androidx.core.graphics.drawable.IconCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestManager
@@ -15,74 +15,49 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.coroutines.resume
-import kotlin.math.roundToInt
-import kotlin.time.Duration.Companion.milliseconds
 
 internal class CarFeedbackIconDownloader(private val screen: Screen) {
 
-    private val icons = hashMapOf<Uri, IconState>()
+    // null means the image is currently being downloaded
+    private val downloadedImages = hashMapOf<Uri, CarIcon?>()
 
-    /**
-     * @return the icon, `null` while it is being downloaded, or [CarIcon.ERROR] once every
-     * download attempt has failed
-     */
     fun getOrDownload(icon: CarFeedbackIcon): CarIcon? {
         return when (icon) {
             is CarFeedbackIcon.Local -> icon.icon
-            is CarFeedbackIcon.Remote -> when (val state = icons[icon.uri]) {
-                null -> {
-                    download(icon.uri, attempt = 1)
-                    null
-                }
-                IconState.Loading -> null
-                is IconState.Loaded -> state.icon
-                is IconState.Failed -> if (state.attempts < MAX_ATTEMPTS) {
-                    download(icon.uri, attempt = state.attempts + 1)
-                    null
-                } else {
-                    CarIcon.ERROR
-                }
+            is CarFeedbackIcon.Remote -> {
+                screen.lifecycleScope.launch { downloadImage(icon.uri) }
+                downloadedImages[icon.uri]
             }
         }
     }
 
-    private fun download(uri: Uri, attempt: Int) {
-        icons[uri] = IconState.Loading
-        screen.lifecycleScope.launch {
-            // Glide decodes and downscales to the grid icon size on its own executors.
-            val bitmap = withTimeoutOrNull(IMAGE_DOWNLOAD_TIMEOUT.milliseconds) {
-                Glide.with(screen.carContext).requestBitmap(uri, iconSizePx())
-            }
-            icons[uri] = if (bitmap != null) {
-                IconState.Loaded(CarIcon.Builder(IconCompat.createWithBitmap(bitmap)).build())
-            } else {
-                // Retried on the next template build, up to MAX_ATTEMPTS.
-                IconState.Failed(attempt)
-            }
-            screen.invalidate()
+    private suspend fun downloadImage(uri: Uri) {
+        if (uri in downloadedImages) return
+        downloadedImages[uri] = null
+        val resource = withTimeoutOrNull(IMAGE_DOWNLOAD_TIMEOUT) {
+            Glide.with(screen.carContext).request(uri)
         }
+        downloadedImages[uri] = if (resource != null) {
+            CarIcon.Builder(IconCompat.createWithBitmap(resource.toBitmap())).build()
+        } else {
+            CarIcon.ERROR
+        }
+        screen.invalidate()
     }
 
-    private fun iconSizePx(): Int {
-        val density = screen.carContext.resources.displayMetrics.density
-        return (GRID_ICON_SIZE_DP * density).roundToInt()
-    }
-
-    private suspend fun RequestManager.requestBitmap(uri: Uri, sizePx: Int): Bitmap? {
+    private suspend inline fun RequestManager.request(uri: Uri): Drawable? {
         return suspendCancellableCoroutine { continuation ->
-            val target = object : CustomTarget<Bitmap>() {
+            val target = object : CustomTarget<Drawable>() {
 
-                // Glide restarts failed requests when connectivity returns, so a target can be
-                // called again after the continuation has already resumed.
                 override fun onLoadFailed(errorDrawable: Drawable?) {
-                    if (continuation.isActive) continuation.resume(value = null)
+                    continuation.resume(value = null)
                 }
 
                 override fun onResourceReady(
-                    resource: Bitmap,
-                    transition: Transition<in Bitmap>?,
+                    resource: Drawable,
+                    transition: Transition<in Drawable>?,
                 ) {
-                    if (continuation.isActive) continuation.resume(resource)
+                    continuation.resume(resource)
                 }
 
                 override fun onLoadCleared(placeholder: Drawable?) {
@@ -90,21 +65,11 @@ internal class CarFeedbackIconDownloader(private val screen: Screen) {
                 }
             }
             continuation.invokeOnCancellation { clear(target) }
-            asBitmap().load(uri).override(sizePx).into(target)
+            load(uri).into(target)
         }
-    }
-
-    private sealed class IconState {
-        object Loading : IconState()
-        class Loaded(val icon: CarIcon) : IconState()
-        class Failed(val attempts: Int) : IconState()
     }
 
     private companion object {
         private const val IMAGE_DOWNLOAD_TIMEOUT = 3000L
-        private const val MAX_ATTEMPTS = 3
-
-        // The size of a grid item icon in the car app templates.
-        private const val GRID_ICON_SIZE_DP = 64
     }
 }

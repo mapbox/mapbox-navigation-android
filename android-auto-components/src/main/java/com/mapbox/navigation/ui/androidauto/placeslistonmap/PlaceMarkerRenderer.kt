@@ -7,7 +7,6 @@ import android.graphics.Color
 import androidx.annotation.ColorInt
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.car.app.model.CarIcon
-import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.IconCompat
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.mapbox.navigation.ui.androidauto.R
@@ -18,26 +17,17 @@ import com.mapbox.navigation.ui.androidauto.internal.RendererUtils.dpToPx
  */
 class PlaceMarkerRenderer(
     private val context: Context,
-    @param:ColorInt
+    @ColorInt
     private val background: Int = Color.TRANSPARENT,
 ) {
     var bitmap: Bitmap? = null
-        set(value) {
-            field = value
-            marker = null
-        }
 
-    private var marker: CarIcon? = null
-
-    /**
-     * Returns the marker icon. The bitmap is rendered once and the icon is shared by every call.
-     */
-    fun renderMarker(): CarIcon = marker ?: CarIcon.Builder(
+    fun renderMarker() = CarIcon.Builder(
         IconCompat.createWithBitmap(bitmap()),
-    ).build().also { marker = it }
+    ).build()
 
     private fun bitmap(): Bitmap {
-        return bitmap ?: renderBitmap().also { bitmap = it }
+        return bitmap ?: renderBitmap()
     }
 
     private fun renderBitmap(): Bitmap {
@@ -48,7 +38,7 @@ class PlaceMarkerRenderer(
         )!!
 
         val px = context.dpToPx(MARKER_ICON_DIMEN_DP)
-        val bitmap: Bitmap = createBitmap(px, px)
+        val bitmap: Bitmap = Bitmap.createBitmap(px, px, Bitmap.Config.ARGB_8888)
         bitmap.eraseColor(background)
         val canvas = Canvas(bitmap)
         vectorDrawable.setBounds(0, 0, canvas.width, canvas.height)

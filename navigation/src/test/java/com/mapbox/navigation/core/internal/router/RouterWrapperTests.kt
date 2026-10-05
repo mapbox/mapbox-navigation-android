@@ -61,7 +61,6 @@ import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.runTest
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
@@ -69,7 +68,6 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -678,59 +676,6 @@ class RouterWrapperTests {
         verify(exactly = 0) { navigationRouterCallback.onRoutesReady(any(), any()) }
         verify(exactly = 0) { navigationRouterCallback.onFailure(any(), any()) }
     }
-
-    @Test
-    fun `native response delivered before getRoute returns reaches the callback`() =
-        coroutineRule.runBlockingTest {
-            every { router.getRoute(any(), any(), any(), any()) } answers {
-                // a fast response: the native router completes the request while the caller
-                // is still inside getRoute
-                arg<RouterDataRefCallback>(3).run(
-                    ExpectedFactory.createValue(testRouteFixtures.loadTwoLegRoute().toDataRef()),
-                    nativeOriginOnline,
-                )
-                mockk(relaxed = true)
-            }
-
-            routerWrapper.getRoute(routerOptions, signature, navigationRouterCallback)
-
-            verify(exactly = 1) { navigationRouterCallback.onRoutesReady(any(), any()) }
-        }
-
-    @Test
-    fun `failed native getRoute call leaves no request to cancel`() {
-        val failure = IllegalStateException("native call failed")
-        every { router.getRoute(any(), any(), any(), any()) } throws failure
-
-        val thrown = assertThrows(IllegalStateException::class.java) {
-            routerWrapper.getRoute(routerOptions, signature, navigationRouterCallback)
-        }
-        routerWrapper.cancelAll()
-
-        assertEquals(failure, thrown)
-        verify(exactly = 0) { navigationRouterCallback.onCanceled(any(), any()) }
-    }
-
-    @Test
-    fun `cancel while the result is being processed does not cancel the native request`() =
-        coroutineRule.runBlockingTest {
-            val handle = mockk<Cancelable>(relaxed = true)
-            every { router.getRoute(any(), any(), any(), capture(getRouteSlot)) } returns handle
-            val wrapper = RouterWrapper(
-                router,
-                ThreadController(),
-                createTestNavigationRoutesParsing(parsingDispatcher = pausedDispatcher()),
-                createTestNavigationRoutesParsing(parsingDispatcher = coroutineRule.testDispatcher),
-            )
-
-            val requestId = wrapper.getRoute(routerOptions, signature, navigationRouterCallback)
-            // the result is delivered, parsing stays suspended
-            getRouteSlot.captured.run(routerResultSuccess, nativeOriginOnline)
-            wrapper.cancelRouteRequest(requestId)
-
-            verify(exactly = 1) { navigationRouterCallback.onCanceled(routerOptions, OFFLINE) }
-            verify(exactly = 0) { handle.cancel() }
-        }
 
     @Test
     fun `check callback called on cancelAll`() = coroutineRule.runBlockingTest {
@@ -1396,85 +1341,6 @@ class RouterWrapperTests {
     }
 
     @Test
-    fun `native refresh response delivered before getRouteRefresh returns reaches the callback`() =
-        runBlockingTest {
-            val route = createNavigationRoute(
-                DirectionsRoute.builder()
-                    .requestUuid(UUID)
-                    .distance(100.0)
-                    .duration(100.0)
-                    .routeIndex("0")
-                    .routeOptions(routerOptions)
-                    .build(),
-            )
-            every { router.getRouteRefresh(any(), any()) } answers {
-                // a fast response: the native router completes the request while the caller
-                // is still inside getRouteRefresh
-                arg<RouterRefreshCallback>(1).run(
-                    ExpectedFactory.createError<List<RouterError>, DataRef>(
-                        listOf(createRouterError(FAILURE_MESSAGE, FAILURE_TYPE, REQUEST_ID, null)),
-                    ),
-                    nativeOriginOnboard,
-                    hashMapOf(),
-                )
-                mockk(relaxed = true)
-            }
-
-            routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
-
-            verify(exactly = 1) { routerRefreshCallback.onFailure(any()) }
-        }
-
-    @Test
-    fun `failed native getRouteRefresh call leaves no request to cancel`() {
-        val route = createNavigationRoute(
-            DirectionsRoute.builder()
-                .requestUuid(UUID)
-                .distance(100.0)
-                .duration(100.0)
-                .routeIndex("0")
-                .routeOptions(routerOptions)
-                .build(),
-        )
-        val failure = IllegalStateException("native call failed")
-        every { router.getRouteRefresh(any(), any()) } throws failure
-
-        val thrown = assertThrows(IllegalStateException::class.java) {
-            routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
-        }
-        routerWrapper.cancelAll()
-
-        assertEquals(failure, thrown)
-        verify(exactly = 0) { routerRefreshCallback.onFailure(any()) }
-    }
-
-    @Test
-    fun `cancel refresh while the result is being processed does not cancel the native request`() =
-        coroutineRule.runBlockingTest {
-            val route = createNavigationRoute(
-                DirectionsRoute.builder()
-                    .requestUuid(UUID)
-                    .distance(100.0)
-                    .duration(100.0)
-                    .routeIndex("0")
-                    .routeOptions(routerOptions)
-                    .build(),
-            )
-            val handle = mockk<Cancelable>(relaxed = true)
-            every { router.getRouteRefresh(any(), capture(refreshRouteSlot)) } returns handle
-            every { ThreadController.DefaultDispatcher } returns pausedDispatcher()
-
-            val requestId =
-                routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
-            // the result is delivered, refreshing the route stays suspended
-            refreshRouteSlot.captured.run(routerRefreshSuccess, nativeOriginOnboard, hashMapOf())
-            routerWrapper.cancelRouteRefreshRequest(requestId)
-
-            verify(exactly = 1) { routerRefreshCallback.onFailure(any()) }
-            verify(exactly = 0) { handle.cancel() }
-        }
-
-    @Test
     fun `route refresh successful with refresh ttl updates route expiration data`() =
         runBlockingTest {
             val options = RouteOptions.builder()
@@ -1760,9 +1626,6 @@ class RouterWrapperTests {
         verify(exactly = 1) { routerRefreshCallback.onFailure(capture(errorSlot)) }
         assertEquals("Failed to refresh a route", errorSlot.captured.message)
     }
-
-    // Work dispatched to it stays suspended, which keeps a request active after its result arrives.
-    private fun pausedDispatcher() = TestCoroutineDispatcher().apply { pauseDispatcher() }
 
     private fun provideDefaultRouteOptions(): RouteOptions {
         return RouteOptions.builder()

@@ -16,7 +16,6 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.ui.androidauto.MapboxCarContext
-import com.mapbox.navigation.ui.androidauto.internal.RendererUtils.dpScale
 import com.mapbox.navigation.ui.androidauto.internal.extensions.mapboxNavigationForward
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAuto
 import kotlinx.coroutines.CoroutineScope
@@ -151,9 +150,7 @@ internal constructor(
         logAndroidAuto("CarSpeedLimitRenderer carMapSurface loaded")
         val signFormat = speedLimitOptions.value.forcedSignFormat
             ?: SpeedLimitSign.MUTCD
-        val scale = mapboxCarMapSurface.carContext.dpScale()
-        val speedLimitWidget = services.speedLimitWidget(signFormat, scale)
-            .also { speedLimitWidget = it }
+        val speedLimitWidget = services.speedLimitWidget(signFormat).also { speedLimitWidget = it }
         mapboxCarMapSurface.mapSurface.addWidget(speedLimitWidget)
         MapboxNavigationApp.registerObserver(navigationObserver)
         scope = MainScope()
@@ -171,13 +168,12 @@ internal constructor(
     }
 
     override fun onVisibleAreaChanged(visibleArea: Rect, edgeInsets: EdgeInsets) {
-        val speedLimitWidget = speedLimitWidget ?: return
-        val currentPosition = speedLimitWidget.getPosition()
-        speedLimitWidget.setPosition(
+        val currentPosition = speedLimitWidget?.getPosition() ?: return
+        speedLimitWidget?.setPosition(
             currentPosition.toBuilder()
                 .apply {
-                    offsetX = -speedLimitWidget.marginXPx - edgeInsets.right.toFloat()
-                    offsetY = -speedLimitWidget.marginYPx - edgeInsets.bottom.toFloat()
+                    offsetX = -SpeedLimitWidget.MARGIN_X - edgeInsets.right.toFloat()
+                    offsetY = -SpeedLimitWidget.MARGIN_Y - edgeInsets.bottom.toFloat()
                 }.build(),
         )
     }

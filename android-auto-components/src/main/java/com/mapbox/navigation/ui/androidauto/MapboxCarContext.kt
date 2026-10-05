@@ -10,7 +10,6 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.ui.androidauto.internal.context.MapboxCarContextOwner
-import com.mapbox.navigation.ui.androidauto.internal.context.attachWhileCreated
 import com.mapbox.navigation.ui.androidauto.internal.context.mapboxCarNavigationService
 import com.mapbox.navigation.ui.androidauto.internal.context.mapboxCarService
 import com.mapbox.navigation.ui.androidauto.navigation.MapboxCarNavigationManager
@@ -26,7 +25,7 @@ import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenManager
 import com.mapbox.navigation.ui.androidauto.settings.MapboxCarStorage
 
 /**
- * This is the entry point for Mapbox Navigation in Android Auto. Create this object, and then you
+ * This is the entry point for Mapbox Navigation in Android Auto. Create this object and then you
  * have access to services and options for customization.
  *
  * The [lifecycle] must come from a [Session.getLifecycle] or [Screen.getLifecycle] at this time.
@@ -109,12 +108,9 @@ class MapboxCarContext(
     }
 
     /**
-     * Control and access the route preview. It can be read at any time, and it is attached to
-     * [MapboxNavigationApp] while the [lifecycle] is [Lifecycle.State.CREATED], so every screen
-     * that requests a route preview shares one attachment. Do not register or unregister it with
-     * [MapboxNavigationApp] yourself: unregistering it detaches it for every screen.
+     * Control and access the route preview.
      */
-    val routePreviewRequest = attachWhileCreated(CarRoutePreviewRequest(options))
+    val routePreviewRequest = CarRoutePreviewRequest(options)
 
     // This is internal because it surfaces search objects which will likely change.
     internal var geoDeeplinkPlacesProvider: PlacesListOnMapProvider? = null

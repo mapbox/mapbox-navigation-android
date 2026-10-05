@@ -2,8 +2,9 @@ package com.mapbox.navigation.ui.androidauto.ui
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.net.Uri
-import android.util.DisplayMetrics
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import androidx.car.app.model.CarIcon
@@ -37,11 +38,7 @@ import org.junit.Test
 class CarFeedbackIconDownloaderTest {
 
     @get:Rule val coroutineRule = MainCoroutineRule()
-    private val carContext = mockk<CarContext> {
-        every { resources } returns mockk {
-            every { displayMetrics } returns DisplayMetrics().apply { density = DENSITY }
-        }
-    }
+    private val carContext = mockk<CarContext>()
     private val screen = mockk<Screen>(relaxUnitFun = true) {
         every { carContext } returns this@CarFeedbackIconDownloaderTest.carContext
         every { lifecycle } returns LifecycleRegistry.createUnsafe(this).apply {
@@ -50,12 +47,9 @@ class CarFeedbackIconDownloaderTest {
     }
     private val downloader = CarFeedbackIconDownloader(screen)
     private val uri = mockk<Uri>()
-    private val requestBuilder = mockk<RequestBuilder<Bitmap>> {
-        every { load(uri) } returns this
-        every { override(any<Int>()) } returns this
-    }
+    private val requestBuilder = mockk<RequestBuilder<Drawable>>()
     private val requestManager = mockk<RequestManager>(relaxUnitFun = true) {
-        every { asBitmap() } returns requestBuilder
+        every { load(uri) } returns requestBuilder
     }
     private val carIcon = mockk<CarIcon>()
     private val localIcon = CarFeedbackIcon.Local(carIcon)
@@ -63,6 +57,11 @@ class CarFeedbackIconDownloaderTest {
     private val downloadedBitmap = mockk<Bitmap> {
         every { width } returns WIDTH
         every { height } returns HEIGHT
+    }
+    private val downloadedDrawable = mockk<BitmapDrawable> {
+        every { intrinsicWidth } returns WIDTH
+        every { intrinsicHeight } returns HEIGHT
+        every { bitmap } returns downloadedBitmap
     }
 
     @Before
@@ -81,7 +80,7 @@ class CarFeedbackIconDownloaderTest {
         val actualIcon = downloader.getOrDownload(localIcon)
 
         assertEquals(carIcon, actualIcon)
-        verify(exactly = 0) { requestManager.asBitmap() }
+        verify(exactly = 0) { requestManager.load(any<Uri>()) }
         verify(exactly = 0) { screen.invalidate() }
     }
 
@@ -93,7 +92,7 @@ class CarFeedbackIconDownloaderTest {
             val actualIcon = downloader.getOrDownload(remoteIcon)
 
             assertNull(actualIcon)
-            verify(exactly = 1) { requestBuilder.load(uri) }
+            verify(exactly = 1) { requestManager.load(uri) }
             verify(exactly = 0) { screen.invalidate() }
         }
     }
@@ -108,7 +107,7 @@ class CarFeedbackIconDownloaderTest {
             val actualIcon = downloader.getOrDownload(remoteIcon)
 
             assertNull(actualIcon)
-            verify(exactly = 1) { requestBuilder.load(uri) }
+            verify(exactly = 1) { requestManager.load(uri) }
             verify(exactly = 0) { screen.invalidate() }
         }
     }
@@ -121,7 +120,7 @@ class CarFeedbackIconDownloaderTest {
             downloader.getOrDownload(remoteIcon)
             testScheduler.advanceTimeBy(LONG_DELAY)
 
-            verify(exactly = 1) { requestBuilder.load(uri) }
+            verify(exactly = 1) { requestManager.load(uri) }
             verify(exactly = 1) { screen.invalidate() }
         }
     }
@@ -137,137 +136,52 @@ class CarFeedbackIconDownloaderTest {
 
             val expectedIcon = IconCompat.createWithBitmap(downloadedBitmap)
             assertEquals(CarIcon.Builder(expectedIcon).build(), actualIcon)
-            verify(exactly = 1) { requestBuilder.load(uri) }
+            verify(exactly = 1) { requestManager.load(uri) }
             verify(exactly = 1) { screen.invalidate() }
         }
     }
 
     @Test
-    fun `remote icon is decoded at the grid icon size`() {
-        coroutineRule.runBlockingTest {
-            mockSuccessfulRequest(SHORT_DELAY)
-
-            downloader.getOrDownload(remoteIcon)
-
-            verify(exactly = 1) { requestBuilder.override(GRID_ICON_SIZE_PX) }
-        }
-    }
-
-    @Test
-    fun `cached icon does not start another download`() {
-        coroutineRule.runBlockingTest {
-            mockSuccessfulRequest(SHORT_DELAY)
-
-            downloader.getOrDownload(remoteIcon)
-            testScheduler.advanceTimeBy(LONG_DELAY)
-            downloader.getOrDownload(remoteIcon)
-            downloader.getOrDownload(remoteIcon)
-
-            verify(exactly = 1) { requestBuilder.load(uri) }
-        }
-    }
-
-    @Test
-    fun `download that took too much time is retried`() {
+    fun `error icon is returned, if download took too much time`() {
         coroutineRule.runBlockingTest {
             mockSuccessfulRequest(LONG_DELAY)
 
             downloader.getOrDownload(remoteIcon)
             testScheduler.advanceTimeBy(LONG_DELAY)
-            val actualIcon = downloader.getOrDownload(remoteIcon)
-
-            assertNull(actualIcon)
-            verify(exactly = 2) { requestBuilder.load(uri) }
-            verify(exactly = 1) { screen.invalidate() }
-        }
-    }
-
-    @Test
-    fun `failed download is retried`() {
-        coroutineRule.runBlockingTest {
-            mockFailedRequest()
-
-            downloader.getOrDownload(remoteIcon)
-            testScheduler.advanceTimeBy(LONG_DELAY)
-            val actualIcon = downloader.getOrDownload(remoteIcon)
-
-            assertNull(actualIcon)
-            verify(exactly = 2) { requestBuilder.load(uri) }
-            verify(exactly = 1) { screen.invalidate() }
-        }
-    }
-
-    @Test
-    fun `error icon is returned once every attempt failed`() {
-        coroutineRule.runBlockingTest {
-            mockFailedRequest()
-
-            repeat(MAX_ATTEMPTS) {
-                downloader.getOrDownload(remoteIcon)
-                testScheduler.advanceTimeBy(LONG_DELAY)
-            }
             val actualIcon = downloader.getOrDownload(remoteIcon)
 
             assertEquals(CarIcon.ERROR, actualIcon)
-            verify(exactly = MAX_ATTEMPTS) { requestBuilder.load(uri) }
-            verify(exactly = MAX_ATTEMPTS) { screen.invalidate() }
-        }
-    }
-
-    @Test
-    fun `download that took too much time is cleared from glide`() {
-        coroutineRule.runBlockingTest {
-            mockSuccessfulRequest(LONG_DELAY)
-
-            downloader.getOrDownload(remoteIcon)
-            testScheduler.advanceTimeBy(LONG_DELAY)
-
-            verify(exactly = 1) { requestManager.clear(any<Target<Bitmap>>()) }
-        }
-    }
-
-    @Test
-    fun `late result after a timeout is ignored`() {
-        coroutineRule.runBlockingTest {
-            mockSuccessfulRequest(LONG_DELAY)
-
-            downloader.getOrDownload(remoteIcon)
-            testScheduler.advanceTimeBy(LONG_DELAY + SHORT_DELAY)
-
+            verify(exactly = 1) { requestManager.load(uri) }
             verify(exactly = 1) { screen.invalidate() }
         }
     }
 
     @Test
-    fun `failed request restarted by glide does not resume the download twice`() {
+    fun `error icon is returned, if download failed`() {
         coroutineRule.runBlockingTest {
-            // Glide restarts failed requests into the same target when connectivity returns.
-            mockRequest(SHORT_DELAY) {
-                onLoadFailed(null)
-                onLoadFailed(null)
-                onResourceReady(downloadedBitmap, null)
-            }
+            mockFailedRequest()
 
             downloader.getOrDownload(remoteIcon)
             testScheduler.advanceTimeBy(LONG_DELAY)
             val actualIcon = downloader.getOrDownload(remoteIcon)
 
-            assertNull(actualIcon)
+            assertEquals(CarIcon.ERROR, actualIcon)
+            verify(exactly = 1) { requestManager.load(uri) }
             verify(exactly = 1) { screen.invalidate() }
         }
     }
 
     private fun mockSuccessfulRequest(time: Long) {
-        mockRequest(time) { onResourceReady(downloadedBitmap, null) }
+        mockRequest(time) { onResourceReady(downloadedDrawable, null) }
     }
 
     private fun mockFailedRequest() {
         mockRequest(SHORT_DELAY) { onLoadFailed(null) }
     }
 
-    private fun mockRequest(time: Long, block: Target<Bitmap>.() -> Unit) {
-        every { requestBuilder.into(any<Target<Bitmap>>()) } answers {
-            val target = firstArg<Target<Bitmap>>()
+    private fun mockRequest(time: Long, block: Target<Drawable>.() -> Unit) {
+        every { requestBuilder.into(any<Target<Drawable>>()) } answers {
+            val target = firstArg<Target<Drawable>>()
             coroutineRule.coroutineScope.launch {
                 delay(time)
                 target.block()
@@ -279,9 +193,6 @@ class CarFeedbackIconDownloaderTest {
     private companion object {
         private const val WIDTH = 16
         private const val HEIGHT = 10
-        private const val DENSITY = 2f
-        private const val GRID_ICON_SIZE_PX = 128
-        private const val MAX_ATTEMPTS = 3
         private const val SHORT_DELAY = 2000L
         private const val LONG_DELAY = 4000L
     }

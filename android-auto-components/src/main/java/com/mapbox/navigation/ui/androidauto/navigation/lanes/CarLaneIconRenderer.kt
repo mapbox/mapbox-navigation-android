@@ -1,12 +1,12 @@
 package com.mapbox.navigation.ui.androidauto.navigation.lanes
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Rect
 import androidx.annotation.ColorInt
 import androidx.car.app.model.CarIcon
 import androidx.car.app.navigation.model.Step
-import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.IconCompat
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.mapbox.navigation.ui.androidauto.internal.RendererUtils.dpToPx
@@ -21,19 +21,19 @@ internal class CarLaneIconRenderer(
 ) {
     private val widthPx by lazy { context.dpToPx(LANE_IMAGE_WIDTH) }
     private val heightPx by lazy { context.dpToPx(LANE_IMAGE_HEIGHT) }
+    private val carLaneBitmap by lazy {
+        Bitmap.createBitmap(widthPx, heightPx, Bitmap.Config.ARGB_8888)
+    }
 
     /**
-     * Generate the [CarIcon] from a list of [CarLaneIcon].
-     *
-     * Every call draws into a new bitmap: an icon built earlier may still be cached or waiting
-     * to be sent to the host, so its bitmap must never be redrawn.
+     * Generate the [CarIcon] from a list of [CarLaneIcon]
+     * This class
      */
     fun renderLanesIcons(
         carLaneIcons: List<CarLaneIcon>,
         @ColorInt background: Int,
         options: CarLaneIconOptions,
     ): CarIcon {
-        val carLaneBitmap = createBitmap(widthPx, heightPx)
         carLaneBitmap.eraseColor(background)
 
         carLaneIcons.forEachIndexed { index, laneIcon ->

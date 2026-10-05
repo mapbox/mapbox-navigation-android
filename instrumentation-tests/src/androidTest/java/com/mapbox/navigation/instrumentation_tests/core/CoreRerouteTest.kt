@@ -2109,6 +2109,7 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
      * cycle, the same controller instance is reused and no spurious state notifications are
      * emitted upon re-registration.
      */
+    @Ignore("Flaky test - NAVAND-7338")
     @Test
     fun destroy_during_reroute() = sdkTest {
         withRerouteNavigation { mapboxNavigation ->

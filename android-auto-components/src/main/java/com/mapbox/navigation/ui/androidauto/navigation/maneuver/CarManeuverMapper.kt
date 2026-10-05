@@ -180,7 +180,7 @@ object CarManeuverMapper {
     private fun isLeftHandTraffic(drivingSide: String?): Boolean =
         drivingSide == DRIVING_SIDE_LEFT
 
-    // U-turns are made towards the center of the road: to the left in right-hand traffic
+    // U-turns are made towards the centre of the road: to the left in right-hand traffic
     // and to the right in left-hand traffic.
     private fun uTurn(drivingSide: String?): Maneuver.Builder = Maneuver.Builder(
         if (isLeftHandTraffic(drivingSide)) {

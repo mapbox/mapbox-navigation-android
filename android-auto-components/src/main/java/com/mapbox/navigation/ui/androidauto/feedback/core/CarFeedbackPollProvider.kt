@@ -128,7 +128,7 @@ open class CarFeedbackPollProvider {
      * the [com.mapbox.search.ResponseInfo] that originated a search, and those don't reach the
      * feedback screens.
      *
-     * By default, this returns [getSearchFeedbackPoll], so an existing override of that
+     * By default this returns [getSearchFeedbackPoll], so an existing override of that
      * function keeps working. If that override calls back into this function, the default place
      * options are returned instead of recursing.
      */

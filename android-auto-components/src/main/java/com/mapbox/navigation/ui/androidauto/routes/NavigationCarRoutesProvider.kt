@@ -5,6 +5,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -12,6 +13,7 @@ import kotlinx.coroutines.flow.callbackFlow
 /**
  * A version of the [CarRoutesProvider] that uses the routes from [MapboxNavigation].
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class NavigationCarRoutesProvider : CarRoutesProvider {
 
     /**

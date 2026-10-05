@@ -8,9 +8,7 @@ import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.utils.internal.logI
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
-import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * This class lets you manage route refreshes.
@@ -75,13 +73,6 @@ class RouteRefreshController internal constructor(
             return
         }
         plannedRouteRefreshController.pause()
-
-        val delivered = AtomicBoolean(false)
-        val notifyOnce: (ImmediateRouteRefreshResult) -> Unit = { result ->
-            if (delivered.compareAndSet(false, true)) {
-                callback.onRefreshFinished(result)
-            }
-        }
         val refreshJob = immediateRouteRefreshController.requestRoutesRefresh(
             routes,
             callback = { result ->
@@ -98,15 +89,16 @@ class RouteRefreshController internal constructor(
                         ImmediateRouteRefreshResult.Cancelled()
                     }
                 }
-                notifyOnce(callbackResult)
+                callback.onRefreshFinished(callbackResult)
+            },
+            onCancellation = {
+                plannedRouteRefreshController.resume()
+                callback.onRefreshFinished(ImmediateRouteRefreshResult.Cancelled())
             },
         )
         refreshJob.invokeOnCompletion { cause ->
             if (cause != null) {
                 plannedRouteRefreshController.resume()
-            }
-            if (cause is CancellationException) {
-                notifyOnce(ImmediateRouteRefreshResult.Cancelled())
             }
         }
     }

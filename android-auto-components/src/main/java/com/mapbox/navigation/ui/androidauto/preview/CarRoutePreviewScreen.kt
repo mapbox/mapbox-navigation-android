@@ -3,7 +3,6 @@ package com.mapbox.navigation.ui.androidauto.preview
 import android.text.SpannableString
 import androidx.annotation.UiThread
 import androidx.car.app.Screen
-import androidx.car.app.constraints.ConstraintManager
 import androidx.car.app.model.Action
 import androidx.car.app.model.DurationSpan
 import androidx.car.app.model.ItemList
@@ -18,7 +17,6 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.ui.androidauto.MapboxCarContext
 import com.mapbox.navigation.ui.androidauto.R
 import com.mapbox.navigation.ui.androidauto.internal.extensions.addBackPressedHandler
-import com.mapbox.navigation.ui.androidauto.internal.extensions.contentLimit
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAuto
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAutoFailure
 import com.mapbox.navigation.ui.androidauto.location.CarLocationRenderer
@@ -94,8 +92,7 @@ internal class CarRoutePreviewScreen @UiThread constructor(
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     override fun onGetTemplate(): Template {
         val listBuilder = ItemList.Builder()
-        val routeLimit = carContext.contentLimit(ConstraintManager.CONTENT_LIMIT_TYPE_ROUTE_LIST)
-        navigationRoutes.take(routeLimit).forEach { navigationRoute ->
+        navigationRoutes.forEach { navigationRoute ->
             val route = navigationRoute.directionsRoute
             val title = route.legs()?.firstOrNull()?.summary() ?: placeRecord.name
             val routeSpannableString = SpannableString("  $title")
@@ -107,9 +104,7 @@ internal class CarRoutePreviewScreen @UiThread constructor(
             listBuilder.addItem(item)
         }
         if (navigationRoutes.isNotEmpty()) {
-            listBuilder.setSelectedIndex(
-                selectedIndex.coerceAtMost(minOf(routeLimit, navigationRoutes.size) - 1),
-            )
+            listBuilder.setSelectedIndex(selectedIndex)
             listBuilder.setOnSelectedListener { index ->
                 val newRouteOrder = navigationRoutes.toMutableList()
                 selectedIndex = index

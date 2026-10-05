@@ -2,10 +2,7 @@ package com.mapbox.navigation.ui.androidauto.feedback.core
 
 import android.graphics.Bitmap
 import androidx.car.app.CarContext
-import androidx.car.app.constraints.ConstraintManager
 import androidx.car.app.model.GridTemplate
-import com.mapbox.maps.MapSurface
-import com.mapbox.maps.MapView
 import com.mapbox.maps.extension.androidauto.MapboxCarMap
 import com.mapbox.navigation.core.telemetry.events.BitmapEncodeOptions
 import com.mapbox.navigation.core.telemetry.events.FeedbackHelper
@@ -35,23 +32,13 @@ import org.junit.Test
 
 class CarFeedbackScreenFactoryTest : MapboxRobolectricTestRunner() {
 
-    private val carContext: CarContext = mockk {
-        every { getCarService(ConstraintManager::class.java) } returns mockk {
-            every { getContentLimit(any()) } returns CONTENT_LIMIT
-        }
-    }
-    private val bitmap: Bitmap = mockk(relaxUnitFun = true)
-
-    // Delivered only by the tests that check encoding, so no other test starts background work.
-    private var snapshotListener: MapView.OnSnapshotReady? = null
-    private val mapSurface: MapSurface = mockk {
-        every { snapshot(any<MapView.OnSnapshotReady>()) } answers {
-            snapshotListener = firstArg()
-        }
-    }
+    private val carContext: CarContext = mockk()
+    private val bitmap: Bitmap = mockk()
     private val mapboxCarMap: MapboxCarMap = mockk {
         every { carMapSurface } returns mockk {
-            every { mapSurface } returns this@CarFeedbackScreenFactoryTest.mapSurface
+            every { mapSurface } returns mockk {
+                every { snapshot() } returns bitmap
+            }
         }
     }
     private val poll = CarFeedbackPoll("Title", emptyList())
@@ -87,19 +74,10 @@ class CarFeedbackScreenFactoryTest : MapboxRobolectricTestRunner() {
     }
 
     @Test
-    fun `create requests the map snapshot asynchronously`() {
-        FreeDriveFeedbackScreenFactory(mapboxCarContext).create(carContext)
-
-        verify(exactly = 1) { mapSurface.snapshot(any<MapView.OnSnapshotReady>()) }
-        verify(exactly = 0) { mapSurface.snapshot() }
-    }
-
-    @Test
     fun `create encodes the map snapshot with the default options`() {
         FreeDriveFeedbackScreenFactory(mapboxCarContext).create(carContext)
-        snapshotListener!!.onSnapshotReady(bitmap)
 
-        verify(exactly = 1, timeout = TIMEOUT_MS) {
+        verify(exactly = 1) {
             FeedbackHelper.encodeScreenshot(
                 bitmap,
                 CarFeedbackOptions.Builder().build().bitmapEncodeOptions,
@@ -119,11 +97,8 @@ class CarFeedbackScreenFactoryTest : MapboxRobolectricTestRunner() {
         )
 
         FreeDriveFeedbackScreenFactory(mapboxCarContext).create(carContext)
-        snapshotListener!!.onSnapshotReady(bitmap)
 
-        verify(exactly = 1, timeout = TIMEOUT_MS) {
-            FeedbackHelper.encodeScreenshot(bitmap, encodeOptions)
-        }
+        verify(exactly = 1) { FeedbackHelper.encodeScreenshot(bitmap, encodeOptions) }
     }
 
     @Test
@@ -137,6 +112,15 @@ class CarFeedbackScreenFactoryTest : MapboxRobolectricTestRunner() {
     }
 
     @Test
+    fun `create skips encoding when the map snapshot is unavailable`() {
+        every { mapboxCarMap.carMapSurface!!.mapSurface.snapshot() } returns null
+
+        FreeDriveFeedbackScreenFactory(mapboxCarContext).create(carContext)
+
+        verify(exactly = 0) { FeedbackHelper.encodeScreenshot(any(), any()) }
+    }
+
+    @Test
     fun `create does not take a snapshot when screenshots are disabled`() {
         carOptions.applyCustomization(
             MapboxCarOptions.Customization().apply {
@@ -146,8 +130,7 @@ class CarFeedbackScreenFactoryTest : MapboxRobolectricTestRunner() {
 
         FreeDriveFeedbackScreenFactory(mapboxCarContext).create(carContext)
 
-        verify(exactly = 0) { mapSurface.snapshot(any<MapView.OnSnapshotReady>()) }
-        verify(exactly = 0) { mapSurface.snapshot() }
+        verify(exactly = 0) { mapboxCarMap.carMapSurface!!.mapSurface.snapshot() }
         verify(exactly = 0) { FeedbackHelper.encodeScreenshot(any(), any()) }
     }
 
@@ -198,10 +181,5 @@ class CarFeedbackScreenFactoryTest : MapboxRobolectricTestRunner() {
             assertEquals(sourceName, factory.getSourceName())
         }
         verify(exactly = 3) { pollProvider.getPlaceFeedbackPoll(carContext) }
-    }
-
-    private companion object {
-        private const val TIMEOUT_MS = 2000L
-        private const val CONTENT_LIMIT = 100
     }
 }

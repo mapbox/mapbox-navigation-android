@@ -13,8 +13,6 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -77,6 +75,25 @@ class FavoritesApiTest {
     }
 
     @Test
+    fun getFavorites_cancelsAsyncTask() = coroutineRule.runBlockingTest {
+        val expectedAsyncOperationTask = mockk<AsyncOperationTask>(relaxed = true)
+        val expectedItemList = listOf<FavoriteRecord>()
+        val callbackSlot = slot<CompletionCallback<List<FavoriteRecord>>>()
+        val mockFavoritesProvider = mockk<FavoritesDataProvider>(relaxed = true) {
+            every { getAll(capture(callbackSlot)) } coAnswers {
+                callbackSlot.captured.onComplete(expectedItemList)
+                expectedAsyncOperationTask
+            }
+        }
+        val api = FavoritesApi(mockFavoritesProvider)
+
+        api.getFavorites()
+        api.getFavorites()
+
+        verify { expectedAsyncOperationTask.cancel() }
+    }
+
+    @Test
     fun getFavorites_onError() = coroutineRule.runBlockingTest {
         val callbackSlot = slot<CompletionCallback<List<FavoriteRecord>>>()
         val mockFavoritesProvider = mockk<FavoritesDataProvider>(relaxed = true) {
@@ -110,6 +127,26 @@ class FavoritesApiTest {
     }
 
     @Test
+    fun addFavorite_cancelsAsyncTask() = coroutineRule.runBlockingTest {
+        val favoriteRecord = mockk<FavoriteRecord>(relaxed = true)
+        val expectedAsyncOperationTask = mockk<AsyncOperationTask>(relaxed = true)
+        val callbackSlot = slot<CompletionCallback<Unit>>()
+
+        val mockFavoritesProvider = mockk<FavoritesDataProvider>(relaxed = true) {
+            every { upsert(favoriteRecord, capture(callbackSlot)) } answers {
+                callbackSlot.captured.onComplete(Unit)
+                expectedAsyncOperationTask
+            }
+        }
+        val api = FavoritesApi(mockFavoritesProvider)
+
+        api.addFavorite(favoriteRecord)
+        api.addFavorite(favoriteRecord)
+
+        verify { expectedAsyncOperationTask.cancel() }
+    }
+
+    @Test
     fun removeFavorite() = coroutineRule.runBlockingTest {
         val callbackSlot = slot<CompletionCallback<Boolean>>()
         val mockFavoritesProvider = mockk<FavoritesDataProvider>(relaxed = true) {
@@ -126,108 +163,58 @@ class FavoritesApiTest {
     }
 
     @Test
-    fun removeFavorite_onError() = coroutineRule.runBlockingTest {
+    fun removeFavorite_cancelsAsyncTask() = coroutineRule.runBlockingTest {
+        val expectedAsyncOperationTask = mockk<AsyncOperationTask>(relaxed = true)
         val callbackSlot = slot<CompletionCallback<Boolean>>()
         val mockFavoritesProvider = mockk<FavoritesDataProvider>(relaxed = true) {
             every { remove("foobar", capture(callbackSlot)) } answers {
-                callbackSlot.captured.onError(RuntimeException())
-                mockk()
+                callbackSlot.captured.onComplete(true)
+                expectedAsyncOperationTask
             }
         }
+        val api = FavoritesApi(mockFavoritesProvider)
 
-        val result = FavoritesApi(mockFavoritesProvider).removeFavorite("foobar").error
+        api.removeFavorite("foobar")
+        api.removeFavorite("foobar")
 
-        assertEquals("Error removing favorite.", result!!.errorMessage)
+        verify { expectedAsyncOperationTask.cancel() }
     }
 
     @Test
-    fun `cancelling the caller cancels its task`() = coroutineRule.runBlockingTest {
+    fun cancelRequests() = coroutineRule.runBlockingTest {
+        val favoriteRecord = mockk<FavoriteRecord>(relaxed = true)
         val getAllTask = mockk<AsyncOperationTask>(relaxed = true)
-        val upsertTask = mockk<AsyncOperationTask>(relaxed = true)
-        val removeTask = mockk<AsyncOperationTask>(relaxed = true)
+        val addFavoriteTask = mockk<AsyncOperationTask>(relaxed = true)
+        val removeFavoriteTask = mockk<AsyncOperationTask>(relaxed = true)
+        val removeCallbackSlot = slot<CompletionCallback<Boolean>>()
+        val addCallbackSlot = slot<CompletionCallback<Unit>>()
+        val getAllCallbackSlot = slot<CompletionCallback<List<FavoriteRecord>>>()
         val mockFavoritesProvider = mockk<FavoritesDataProvider>(relaxed = true) {
-            every { getAll(any()) } returns getAllTask
-            every { upsert(any(), any()) } returns upsertTask
-            every { remove(any(), any()) } returns removeTask
-        }
-        val api = FavoritesApi(mockFavoritesProvider)
-
-        val getJob = launch { api.getFavorites() }
-        val addJob = launch { api.addFavorite(mockk(relaxed = true)) }
-        val removeJob = launch { api.removeFavorite("foobar") }
-        getJob.cancel()
-        addJob.cancel()
-        removeJob.cancel()
-
-        verify(exactly = 1) { getAllTask.cancel() }
-        verify(exactly = 1) { upsertTask.cancel() }
-        verify(exactly = 1) { removeTask.cancel() }
-    }
-
-    @Test
-    fun `concurrent callers each get their own result`() = coroutineRule.runBlockingTest {
-        val callbacks = mutableListOf<CompletionCallback<List<FavoriteRecord>>>()
-        val tasks = mutableListOf<AsyncOperationTask>()
-        val mockFavoritesProvider = mockk<FavoritesDataProvider>(relaxed = true) {
-            every { getAll(capture(callbacks)) } answers {
-                mockk<AsyncOperationTask>(relaxed = true).also { tasks.add(it) }
+            every { remove("foobar", capture(removeCallbackSlot)) } coAnswers {
+                removeCallbackSlot.captured.onComplete(true)
+                removeFavoriteTask
+            }
+            every { upsert(any(), capture(addCallbackSlot)) } coAnswers {
+                addCallbackSlot.captured.onComplete(Unit)
+                getAllTask
+            }
+            every { getAll(capture(getAllCallbackSlot)) } coAnswers {
+                getAllCallbackSlot.captured.onComplete(listOf())
+                addFavoriteTask
             }
         }
         val api = FavoritesApi(mockFavoritesProvider)
+        api.removeFavorite("foobar")
+        api.removeFavorite("foobar")
+        api.addFavorite(favoriteRecord)
+        api.addFavorite(favoriteRecord)
+        api.getFavorites()
+        api.getFavorites()
 
-        val first = async { api.getFavorites() }
-        val second = async { api.getFavorites() }
-        callbacks[1].onComplete(listOf())
-        callbacks[0].onError(RuntimeException("first failed"))
+        api.cancel()
 
-        assertEquals("first failed", first.await().error!!.errorMessage)
-        assertEquals(listOf<FavoriteRecord>(), second.await().value)
-        tasks.forEach { verify(exactly = 0) { it.cancel() } }
+        verify { removeFavoriteTask.cancel() }
+        verify { addFavoriteTask.cancel() }
+        verify { getAllTask.cancel() }
     }
-
-    @Test
-    fun `deprecated cancel cancels every pending caller and its task`() =
-        coroutineRule.runBlockingTest {
-            val getAllTask = mockk<AsyncOperationTask>(relaxed = true)
-            val removeTask = mockk<AsyncOperationTask>(relaxed = true)
-            val mockFavoritesProvider = mockk<FavoritesDataProvider>(relaxed = true) {
-                every { getAll(any()) } returns getAllTask
-                every { remove(any(), any()) } returns removeTask
-            }
-            val api = FavoritesApi(mockFavoritesProvider)
-            val getJob = launch { api.getFavorites() }
-            val removeJob = launch { api.removeFavorite("foobar") }
-
-            @Suppress("DEPRECATION")
-            api.cancel()
-
-            assertTrue(getJob.isCancelled)
-            assertTrue(removeJob.isCancelled)
-            verify(exactly = 1) { getAllTask.cancel() }
-            verify(exactly = 1) { removeTask.cancel() }
-        }
-
-    @Test
-    fun `a provider that throws fails the caller and leaves later calls working`() =
-        coroutineRule.runBlockingTest {
-            val callbackSlot = slot<CompletionCallback<List<FavoriteRecord>>>()
-            var throwOnCall = true
-            val mockFavoritesProvider = mockk<FavoritesDataProvider>(relaxed = true) {
-                every { getAll(capture(callbackSlot)) } answers {
-                    if (throwOnCall) throw IllegalStateException("not initialized")
-                    callbackSlot.captured.onComplete(listOf())
-                    mockk()
-                }
-            }
-            val api = FavoritesApi(mockFavoritesProvider)
-
-            val failure = runCatching { api.getFavorites() }.exceptionOrNull()
-            throwOnCall = false
-            @Suppress("DEPRECATION")
-            api.cancel()
-            val result = api.getFavorites()
-
-            assertTrue(failure is IllegalStateException)
-            assertEquals(listOf<FavoriteRecord>(), result.value)
-        }
 }
