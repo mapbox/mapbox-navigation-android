@@ -1,1 +1,0 @@
-- Fixed `CarFeedbackOptions.Builder` not exposing a way to set `bitmapEncodeOptions`, which meant `MapboxCarContext.customize { carFeedbackOptions = ... }` had no effect. `CarFeedbackOptions` now also provides `toBuilder()`, `equals()`, `hashCode()` and `toString()`.
