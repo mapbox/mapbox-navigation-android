@@ -833,7 +833,7 @@ jobs:
 
   assemble-instrumentation-test-internal:
     executor: ndk-r22-latest-executor
-    resource_class: medium+
+    resource_class: large
     steps:
       - checkout
       - restore-gradle-cache
