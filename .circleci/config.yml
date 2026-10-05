@@ -772,6 +772,7 @@ jobs:
 
   assemble:
     executor: ndk-r22-latest-executor
+    resource_class: medium+
     steps:
       - checkout
       - restore-gradle-cache
@@ -791,7 +792,7 @@ jobs:
 
   assemble-instrumentation-test:
     executor: ndk-r22-latest-executor
-    resource_class: medium+
+    resource_class: large
     steps:
       - checkout
       - restore-gradle-cache
@@ -911,6 +912,7 @@ jobs:
 
   unit-tests-androidauto:
     executor: ndk-r22-latest-executor
+    resource_class: medium+
     steps:
       - when:
           condition:
@@ -951,6 +953,7 @@ jobs:
 
   check-api-core:
     executor: ndk-r22-latest-executor
+    resource_class: medium+
     steps:
       - read-workspace
       - check-api-core
@@ -1011,6 +1014,7 @@ jobs:
 
   ui-robo-tests:
     executor: ndk-r22-latest-executor
+    resource_class: medium+
     environment:
       JVM_OPTS: -Xmx3200m
       BUILDTYPE: Debug
