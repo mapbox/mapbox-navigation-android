@@ -9,6 +9,7 @@ import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.common.location.Location
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
+import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.factory.RouteIndicesFactory
 import com.mapbox.navigation.base.internal.factory.RouteLegProgressFactory.buildRouteLegProgressObject
 import com.mapbox.navigation.base.internal.factory.RouteProgressFactory.buildRouteProgressObject
@@ -19,6 +20,7 @@ import com.mapbox.navigation.base.road.model.Road
 import com.mapbox.navigation.base.route.LegWaypoint
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.speed.model.SpeedLimitInfo
+import com.mapbox.navigation.base.trip.model.ChargingState
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
@@ -37,6 +39,7 @@ import com.mapbox.navigator.SpeedLimitSign
 import com.mapbox.navigator.SpeedLimitUnit
 import com.mapbox.navigator.VoiceInstruction
 import kotlin.math.roundToInt
+import com.mapbox.navigator.ChargingState as NativeChargingState
 
 private const val ONE_INDEX = 1
 private const val ONE_SECOND_IN_MILLISECONDS = 1000.0
@@ -54,6 +57,7 @@ internal fun getRouteProgressFrom(
     lastVoiceInstruction: VoiceInstructions?,
     upcomingRoadObjects: List<UpcomingRoadObject>,
     currentLegDestination: LegWaypoint?,
+    chargingState: NativeChargingState = NativeChargingState.NOT_CHARGING,
 ): RouteProgress? {
     return status.getRouteProgress(
         route,
@@ -63,6 +67,7 @@ internal fun getRouteProgressFrom(
         lastVoiceInstruction,
         upcomingRoadObjects,
         currentLegDestination,
+        chargingState,
     )
 }
 
@@ -74,7 +79,7 @@ internal fun NavigationStatus.getTripStatusFrom(
         this,
     )
 
-@OptIn(ExperimentalMapboxNavigationAPI::class)
+@OptIn(ExperimentalMapboxNavigationAPI::class, ExperimentalPreviewMapboxNavigationAPI::class)
 private fun NavigationStatus.getRouteProgress(
     route: NavigationRoute,
     remainingWaypoints: Int,
@@ -83,6 +88,7 @@ private fun NavigationStatus.getRouteProgress(
     lastVoiceInstruction: VoiceInstructions?,
     upcomingRoadObjects: List<UpcomingRoadObject>,
     currentLegDestination: LegWaypoint?,
+    chargingState: NativeChargingState,
 ): RouteProgress? {
     if (routeState == RouteState.INVALID) {
         return null
@@ -220,6 +226,7 @@ private fun NavigationStatus.getRouteProgress(
         primaryRouteIndices.geometryIndex,
         inParkingAisle,
         alternativeRouteIndicesMap,
+        chargingState.convertState(),
     )
 }
 
@@ -310,6 +317,16 @@ internal fun RouteState.convertState(): RouteProgressState {
         RouteState.COMPLETE -> RouteProgressState.COMPLETE
         RouteState.OFF_ROUTE -> RouteProgressState.OFF_ROUTE
         RouteState.UNCERTAIN -> RouteProgressState.UNCERTAIN
+    }
+}
+
+@OptIn(ExperimentalMapboxNavigationAPI::class)
+internal fun NativeChargingState.convertState(): ChargingState {
+    return when (this) {
+        NativeChargingState.NOT_CHARGING -> ChargingState.NOT_CHARGING
+        NativeChargingState.AWAIT_CHARGING -> ChargingState.AWAIT_CHARGING
+        NativeChargingState.CHARGING -> ChargingState.CHARGING
+        NativeChargingState.EXTRA_CHARGING -> ChargingState.EXTRA_CHARGING
     }
 }
 

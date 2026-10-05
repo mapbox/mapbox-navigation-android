@@ -926,6 +926,7 @@ internal class MapboxTripSession(
                         lastVoiceInstruction,
                         upcomingRoadObjects,
                         currentLegDestination,
+                        status.stateOfCharging,
                     ).also { routeProgress ->
                         if (routeProgress == null) {
                             logD(
