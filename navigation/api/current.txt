@@ -1,6 +1,11 @@
 // Signature format: 3.0
 package com.mapbox.navigation.core {
 
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public final class ChargingFinishedData {
+    method public boolean getLegChanged();
+    property public final boolean legChanged;
+  }
+
   @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public final class DeveloperMetadata {
     method public String getCopilotSessionId();
     property public final String copilotSessionId;
@@ -98,12 +103,15 @@ package com.mapbox.navigation.core {
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void setTestingContext(com.mapbox.navigation.core.history.TestingContext testingContext);
     method public void setTripNotificationInterceptor(com.mapbox.navigation.base.trip.notification.TripNotificationInterceptor? interceptor);
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void setUserLanguagesOverride(java.util.List<java.util.Locale>? locales);
+    method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public void startCharging();
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void startReplayTripSession(boolean withForegroundService = true);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void startReplayTripSessionWithPermissionCheck(boolean withForegroundService = true);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void startTripSession(boolean withForegroundService = true);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void startTripSession();
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void startTripSessionWithPermissionCheck(boolean withForegroundService = true);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void startTripSessionWithPermissionCheck();
+    method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public void stopCharging(com.mapbox.navigation.core.StopChargingCallback callback = StopChargingCallback({ var it: com.mapbox.navigation.core.ChargingFinishedData ->  }));
+    method @RestrictTo(androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP_PREFIX) @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public void stopCharging();
     method public void stopTripSession();
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public void switchToAlternativeRoute(com.mapbox.navigation.base.route.NavigationRoute alternativeRoute, com.mapbox.navigation.core.RoutesSetCallback? callback = null);
     method public void unregisterArrivalObserver(com.mapbox.navigation.core.arrival.ArrivalObserver arrivalObserver);
@@ -218,6 +226,10 @@ package com.mapbox.navigation.core {
   public final class RoutesSetSuccess {
     method public java.util.Map<java.lang.String,com.mapbox.navigation.core.RoutesSetError> getIgnoredAlternatives();
     property public final java.util.Map<java.lang.String,com.mapbox.navigation.core.RoutesSetError> ignoredAlternatives;
+  }
+
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public fun interface StopChargingCallback {
+    method public void onFinished(com.mapbox.navigation.core.ChargingFinishedData data);
   }
 
   public fun interface TripSessionResetCallback {
