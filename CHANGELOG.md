@@ -1,3 +1,71 @@
+## Navigation SDK Core Framework 3.33.0-rc.1 - 05 October, 2026
+#### Features
+- Android Auto: added experimental public constructors so apps that own their navigation state can use the components without `MapboxCarContext`: `MapboxCarNavigationManager(carContext, onStopNavigation)`, `MapboxCarNotification(carContext, notificationOptions)` and `CarSpeedLimitRenderer(speedLimitOptions)`. Added `CarNavigationTemplates` with the free drive, active guidance and route preview templates of the Mapbox navigation screen.
+- Added support for the `INITIALIZED` route state during EV charging at the departure waypoint. Added `ChargingState`, `RouteProgress#chargingState`, and `RouteProgress#isChargingExpected` to expose the current charging phase, and `MapboxNavigation#startCharging`/`MapboxNavigation#stopCharging` to control charging transitions.
+
+#### Bug fixes and improvements
+- Fixed native navigator instances not being released after `MapboxNavigationProvider.destroy()`, causing background threads to accumulate across create/destroy cycles. [#19726](https://github.com/mapbox/mapbox-sdk/pull/19726)
+- - Fixed incorrect projected distance calculation in the navigation camera: the zoom scale was passed as a raw zoom level instead of `2^zoom`, and a mistake made the Y-axis delta always zero. [#20277](https://github.com/mapbox/mapbox-sdk/pull/20277)
+- Fixed `CarFeedbackOptions.Builder` not exposing a way to set `bitmapEncodeOptions`, which meant `MapboxCarContext.customize { carFeedbackOptions = ... }` had no effect. `CarFeedbackOptions` now also provides `toBuilder()`, `equals()`, `hashCode()` and `toString()`.
+- Fixed Android Auto route preview: tapping Navigate on an alternative route row now starts guidance on that route instead of the currently selected one. A click from a route list that was replaced before the click arrived no longer starts a route from the new list.
+- Fixed Android Auto crashes on unexpected state in user actions and observers:
+- a car map style URI that is not a `mapbox://styles/{user}/{style}` URI no longer crashes `MapUserStyleObserver`, and such styles no longer trigger failing designed-shield downloads;
+- an unknown lane indication is shown as an unknown lane shape instead of crashing lane guidance;
+- route preview selection, Navigate and Back no longer crash when the preview was cleared or `MapboxNavigation` is detached;
+- `CarNavigationCamera.zoomUpdatesAllowed` no longer crashes before the map surface is attached;
+- Stop during active guidance no longer crashes when the arrival trigger is not attached.
+- Fixed the legacy Android Auto route preview screen starting the previously selected route when Navigate is tapped right after selecting another route, starting guidance without routes, or showing an endless loading state when `MapboxNavigation` is detached (it now shows free drive).
+- Fixed the Android Auto map zoom buttons turning off automatic zoom before the map surface is attached, and the Recenter button now updates when automatic zoom is turned back on.
+- Fixed Android Auto place rows showing the text "null" when a place has no description.
+- `GeoDeeplinkParser` no longer throws on a query with a `%` that is not a valid escape (for example `geo:0,0?q=50%off`), matches the `geo:` scheme case-insensitively, ignores RFC 5870 `;` parameters, and ignores coordinates outside the valid latitude and longitude ranges.
+- Fixed an Android Auto crash when the car app reconnects after a geo deeplink was shown. `GeoDeeplinkPlacesCarScreenFactory` now shows the default map screen when `MapboxCarContext.geoDeeplinkPlacesProvider` is not set and it creates the first screen. Otherwise a `MapboxScreenManager.push` or `MapboxScreenManager.replaceTop` to it is logged and ignored, and `MapboxScreenManager.createScreen` throws as before.
+- A new Android Auto car session no longer executes the `MapboxScreenManager.replaceTop` and `MapboxScreenManager.push` commands emitted before it was created. `MapboxScreenManager.current()` still returns the last event. A screen factory that throws while handling a screen event is now logged and ignored instead of crashing the app.
+- Fixed `MapboxScreenManager` keeping screens removed by `replaceTop` in its back-stack, which leaked them and made back navigation decisions unreliable.
+- Fixed Android Auto screen events being dropped when more than 4 were emitted before a `MapboxScreenManager.screenEvent` collector handled them, for example from inside a collector. A dropped event is now logged.
+- On Car API 7 and above, the Android Auto arrival screen now always returns to `MapboxScreen.NAVIGATION` when it is registered, even when other screens were opened during guidance.
+- Fixed a second voice destination on Android Auto still showing the places of the first one.
+- Fixed Android Auto showing a destination flag for end-of-road turns. End-of-road maneuvers now map to turn maneuvers.
+- Fixed Android Auto mapping a U-turn without a maneuver type to a destination, and an arrival without a modifier to an unknown maneuver.
+- Android Auto U-turns, U-turn lanes, and forks and off-ramps without a side now follow the driving side, so left-hand traffic shows right-hand U-turns.
+- Fixed the Android Auto roundabout exit number, which usually fell back to the first exit. It now comes from the route step of the roundabout. Leaving a roundabout or rotary now maps to a roundabout exit maneuver, including when the banner announcing it says "roundabout".
+- Android Auto lane guidance now recommends only the direction of an active lane that the route takes, instead of every direction of that lane.
+- Fixed `MapboxExitText` drawing the right exit arrow for slight-left and sharp-left exits.
+- The Android Auto destination travel estimate now reports the remaining time of the whole route, which matches its distance and arrival time, without the added 30 seconds.
+- Android Auto distances now use the same values and units as `MapboxDistanceUtil`, including yards for British English. Fixed the car showing meters labelled as feet when the rounding increment is not positive.
+- Fixed `CarNavigationInfoProvider` publishing the route progress of an older road-shield request when the shields arrive late.
+- Fixed the MUTCD speed limit number on Android Auto being drawn too small and off-centre.
+- The Android Auto speed limit warning now shows only above the speed limit plus the warning threshold. The Android Auto trip destination is named after the final waypoint, preferring the name given in the route request, and the fallback destination name and the `MapboxExitText` exit text are now localized string resources.
+- Android Auto: fixed a crash and wrong road shields when the car map uses a style that is not a `mapbox://styles/<user>/<id>` style.
+- Fixed Android Auto `MapboxScreen.NAVIGATION` (Car API 7+) ignoring
+- `MapboxCarOptions.routeLineRendererOptions`: the route line and arrow on that screen now use the
+- configured options instead of the defaults, matching the other car screens.
+- Fixed Android Auto `MapboxScreenManager` crashing with `CarScreenFactory was not found` when a
+- `MapboxCarContext` is created after the car `Session` is already created (for example, lazily in
+- `Session.onCreateScreen`) while a previous session's screen transition is still replayed. Screen
+- transitions to a key without a registered `MapboxScreenFactory` are now logged and ignored.
+- Fixed Android Auto search: submitting a query now runs the search immediately, and starting a
+- new search now cancels any still-running previous one instead of racing it, so an older, slower
+- response can no longer overwrite newer results.
+
+#### Known issues
+
+#### Other changes
+- Deprecated `CarPlaceSearchOptions`, `MapboxCarOptions.carPlaceSearchOptions` and `MapboxCarOptions.Customization.placeSearchOptions`: the class's only field, `accessToken`, has had no effect since search started reading `MapboxOptions.accessToken` directly; the type will be removed in a future major release.
+- Documented the Android Auto search-mode policy in `CarSearchMode`. Two modes are supported: `CarSearchMode.Legacy` (the default, deprecated) uses the legacy SBS API for place search and Geocoding V5 for geo deeplinks, which no longer returns POI data; `CarSearchMode.SearchBox` (recommended) uses the Search Box API for both and is billed under [Search Box API pricing](https://docs.mapbox.com/api/search/search-box/#search-box-api-pricing). The default stays `Legacy` so that existing apps are not moved to a different billed API without opting in; it will not change in a minor or patch release, and a future major release will announce the switch and its migration window in this changelog. To use Search Box today, set `MapboxCarContext.customize { searchMode = CarSearchMode.SearchBox }` (requires `@OptIn(ExperimentalPreviewMapboxNavigationAPI::class)`).
+- Added `CarFeedbackPollProvider.getPlaceFeedbackPoll()` for the search, favorites and geo deeplink feedback screens, and deprecated `getSearchFeedbackPoll()` in its favor. By default `getPlaceFeedbackPoll()` returns `getSearchFeedbackPoll()`, so existing overrides keep working.
+- The default place feedback options (incorrect address, incorrect location, incorrect name, other) on the search, favorites and geo deeplink feedback screens are now sent as navigation feedback with the `OTHER_ISSUE` type, together with the map screenshot. Previously they had no feedback type and were only recorded in the history file. Their `searchFeedbackReason` is still recorded in the history file; it is not sent to Search SDK analytics. Use `CarFeedbackOptions.Builder.attachScreenshot(false)` to submit feedback without a screenshot.
+- Added `CarFeedbackOptions.attachScreenshot` (default `true`). When `false`, feedback screens don't take a map screenshot, and feedback is sent and recorded in the history file without one.
+- A `getSearchFeedbackPoll()` override that calls `getPlaceFeedbackPoll()` now gets the default place options instead of recursing.
+- Removed the "Incorrect location" option from the default `CarFeedbackPollProvider.getRoutePreviewFeedbackPoll()`: it had no feedback type, so selecting it sent nothing. Removed the dead, non-functional search-feedback send path from `CarFeedbackSender`.
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.33.0-rc.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.33.0-rc.1))
+- Mapbox Navigation Native `v324.33.0-rc.1`
+- Mapbox Core Common `v24.33.0-rc.1`
+- Mapbox Java `v7.10.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.1))
+
 ## Navigation SDK Core Framework 3.32.0 - 01 October, 2026
 #### Features
 
