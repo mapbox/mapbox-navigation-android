@@ -979,7 +979,7 @@ jobs:
 
   run-android-lint:
     executor: ndk-r22-latest-executor
-    resource_class: medium+
+    resource_class: large
     steps:
       - read-workspace
       - run-android-lint
