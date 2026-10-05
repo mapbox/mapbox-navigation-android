@@ -2,6 +2,8 @@ package com.mapbox.navigation.testing.utils.routes
 
 import android.content.Context
 import com.google.gson.JsonElement
+import com.google.gson.JsonNull
+import com.google.gson.JsonParser
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.Bearing
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -35,6 +37,29 @@ object EvRoutesProvider {
     fun getBerlinEvRoute(context: Context, baseUrl: String? = null): MockedEvRoutes {
         val routeOptions = berlinEvRouteOptions(baseUrl)
         val jsonResponse = readRawFileText(context, R.raw.ev_routes_berlin)
+        val evRouteRequestHandler = MockDirectionsRequestHandler(
+            profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+            jsonResponse = jsonResponse,
+            expectedCoordinates = routeOptions.coordinatesList(),
+        )
+        return MockedEvRoutes(
+            routeOptions,
+            evRouteRequestHandler,
+        )
+    }
+
+    /***
+     * Same route as [getBerlinEvRoute], but the charging-station metadata sits on the origin
+     * waypoint (index 0) instead of the via-waypoint - i.e. charging is expected right at
+     * departure, before the vehicle starts moving, rather than at a stop mid-route.
+     */
+    fun getBerlinEvRouteWithChargingAtDeparture(
+        context: Context,
+        baseUrl: String? = null,
+    ): MockedEvRoutes {
+        val routeOptions = berlinEvRouteOptions(baseUrl)
+        val jsonResponse = readRawFileText(context, R.raw.ev_routes_berlin)
+            .moveChargingMetadataToOrigin()
         val evRouteRequestHandler = MockDirectionsRequestHandler(
             profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
             jsonResponse = jsonResponse,
@@ -165,6 +190,77 @@ object EvRoutesProvider {
         )
     }
 
+    /***
+     * Same route as [getBerlinEvRouteWithUserProvidedChargingStation], but the user-provided
+     * charging station sits on the origin waypoint instead of the via one - i.e. the driver
+     * charges at their own charger before departing, rather than at a stop mid-route.
+     */
+    fun getBerlinEvRouteWithUserProvidedChargingStationAtDeparture(
+        context: Context,
+        baseUrl: String?,
+    ): MockedEvRouteWithSingleUserProvidedChargingStation {
+        val chargingStationId = "home-charger-test"
+        val chargingStationCurrentType = "ac"
+        val chargingStationPower = 11_000
+        // The origin is the charging station: the driver is plugged in at home.
+        val origin = Point.fromLngLat(13.361378213031003, 52.49813341962201)
+        val userProvidedChargingStationRequestParams = mapOf(
+            "waypoints.charging_station_power" to "$chargingStationPower;;",
+            "waypoints.charging_station_current_type" to "$chargingStationCurrentType;;",
+            "waypoints.charging_station_id" to "$chargingStationId;;",
+        )
+        val routeOptions = RouteOptions.builder()
+            .applyDefaultNavigationOptions()
+            .coordinatesList(
+                listOf(
+                    origin,
+                    Point.fromLngLat(13.366152, 52.503602),
+                    Point.fromLngLat(13.393450988895268, 52.50913924804004),
+                ),
+            )
+            .annotations("state_of_charge")
+            .alternatives(true)
+            .waypointsPerRoute(true)
+            .unrecognizedProperties(
+                mapOf(
+                    "engine" to "electric",
+                    "ev_initial_charge" to "1000",
+                    "ev_max_charge" to "50000",
+                    "ev_connector_types" to "ccs_combo_type1,ccs_combo_type2",
+                    "energy_consumption_curve" to "0,300;20,160;80,140;120,180",
+                    "ev_charging_curve" to "0,100000;40000,70000;60000,30000;80000,10000",
+                    "ev_min_charge_at_charging_station" to "1",
+                ) + userProvidedChargingStationRequestParams,
+            )
+            .apply {
+                if (baseUrl != null) {
+                    baseUrl(baseUrl)
+                }
+            }
+            .build()
+        return MockedEvRouteWithSingleUserProvidedChargingStation(
+            routeOptions,
+            MockDirectionsRequestHandler(
+                profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                jsonResponse = readRawFileText(
+                    context,
+                    R.raw.ev_routes_berlin_user_provided_charging_station,
+                ).moveChargingMetadataToOrigin(),
+                expectedCoordinates = routeOptions.coordinatesList(),
+                routeOptionsFilter = {
+                    it.unrecognizedJsonProperties
+                        .orEmpty()
+                        .containsParameters(userProvidedChargingStationRequestParams)
+                },
+            ),
+            chargingStationId,
+            chargingStationPower,
+            chargingStationCurrentType,
+            originBearing = 0f,
+            origin = origin,
+        )
+    }
+
     private fun berlinEvRouteOptions(
         baseUrl: String?,
         origin: String = "13.361378213031003,52.49813341962201",
@@ -197,4 +293,20 @@ private fun Map<String, JsonElement>.containsParameters(params: Map<String, Stri
     return params.all {
         this[it.key]?.asString == it.value
     }
+}
+
+/**
+ * Moves the charging-station `metadata` from the via-waypoint (index 1) to the origin
+ * waypoint (index 0) of every route in a Directions response, so charging is expected right
+ * at departure instead of at a stop mid-route.
+ */
+private fun String.moveChargingMetadataToOrigin(): String {
+    val json = JsonParser.parseString(this).asJsonObject
+    json.getAsJsonArray("routes").forEach { route ->
+        val waypoints = route.asJsonObject.getAsJsonArray("waypoints")
+        val chargingMetadata = waypoints[1].asJsonObject.get("metadata")
+        waypoints[0].asJsonObject.add("metadata", chargingMetadata)
+        waypoints[1].asJsonObject.add("metadata", JsonNull.INSTANCE)
+    }
+    return json.toString()
 }
