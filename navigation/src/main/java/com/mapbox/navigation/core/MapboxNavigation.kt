@@ -44,6 +44,7 @@ import com.mapbox.navigation.base.route.MapMatchingMatch
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.base.trip.model.ChargingState
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.eh.EHorizonEdge
 import com.mapbox.navigation.base.trip.model.eh.EHorizonEdgeMetadata
@@ -2398,6 +2399,40 @@ class MapboxNavigation @VisibleForTesting internal constructor(
                 stationId,
                 retain,
             )
+        }
+    }
+
+    /**
+     * Reports that the driver has started charging at the current EV charging station,
+     * transitioning the charging phase from [ChargingState.AWAIT_CHARGING] to
+     * [ChargingState.CHARGING].
+     *
+     * Call this when your application detects, from vehicle telemetry, that the charger has
+     * been connected. This does not affect the navigation state; see [stopCharging] to resume
+     * navigation once charging finishes.
+     *
+     * @see ChargingState
+     */
+    @ExperimentalMapboxNavigationAPI
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    fun startCharging() {
+        navigator.startCharging()
+    }
+
+    /**
+     * Exits the charging state entered via [startCharging], resuming navigation and
+     * automatically advancing to the next route leg if applicable. Must be called only while
+     * the current waypoint is an EV charging station.
+     *
+     * @param callback invoked with whether the next leg was started, once changing leg is
+     * resolved (or immediately if changing leg isn't possible)
+     */
+    @ExperimentalMapboxNavigationAPI
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    @JvmOverloads
+    fun stopCharging(callback: StopChargingCallback = StopChargingCallback {}) {
+        navigator.stopCharging { legChanged ->
+            callback.onFinished(ChargingFinishedData(legChanged))
         }
     }
 

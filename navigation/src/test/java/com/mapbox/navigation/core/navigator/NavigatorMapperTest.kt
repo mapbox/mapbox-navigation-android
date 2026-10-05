@@ -1,3 +1,5 @@
+@file:OptIn(com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI::class)
+
 package com.mapbox.navigation.core.navigator
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -14,6 +16,7 @@ import com.mapbox.navigation.base.road.model.Road
 import com.mapbox.navigation.base.route.LegWaypoint
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.speed.model.SpeedUnit
+import com.mapbox.navigation.base.trip.model.ChargingState
 import com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.location.CorrectedLocationData
@@ -50,6 +53,7 @@ import org.junit.Before
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
+import com.mapbox.navigator.ChargingState as NativeChargingState
 
 class NavigatorMapperTest {
 
@@ -123,6 +127,7 @@ class NavigatorMapperTest {
                 "id#2" to RouteIndicesFactory.buildRouteIndices(2, 4, 6, 8, 10, false),
                 "id#3" to RouteIndicesFactory.buildRouteIndices(3, 7, 5, 11, 9, false),
             ),
+            chargingState = ChargingState.NOT_CHARGING,
         )
 
         val result = getRouteProgressFrom(
@@ -1112,6 +1117,21 @@ class NavigatorMapperTest {
     private fun RoadObject.toUpcomingRouteAlert(
         distanceToStart: Double = DISTANCE_TO_START,
     ) = UpcomingRouteAlert(this, distanceToStart)
+
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
+    @Test
+    fun convertStateMapsEveryNativeChargingStateToItsSdkEquivalent() {
+        val expectedStates = mapOf(
+            NativeChargingState.NOT_CHARGING to ChargingState.NOT_CHARGING,
+            NativeChargingState.AWAIT_CHARGING to ChargingState.AWAIT_CHARGING,
+            NativeChargingState.CHARGING to ChargingState.CHARGING,
+            NativeChargingState.EXTRA_CHARGING to ChargingState.EXTRA_CHARGING,
+        )
+
+        expectedStates.forEach { (nativeState, expected) ->
+            assertEquals(expected, nativeState.convertState())
+        }
+    }
 
     companion object {
         private const val ID = "roadObjectId"

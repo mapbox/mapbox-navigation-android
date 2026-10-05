@@ -1498,6 +1498,13 @@ package com.mapbox.navigation.base.time.span {
 
 package com.mapbox.navigation.base.trip.model {
 
+  @com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI public enum ChargingState {
+    enum_constant public static final com.mapbox.navigation.base.trip.model.ChargingState AWAIT_CHARGING;
+    enum_constant public static final com.mapbox.navigation.base.trip.model.ChargingState CHARGING;
+    enum_constant public static final com.mapbox.navigation.base.trip.model.ChargingState EXTRA_CHARGING;
+    enum_constant public static final com.mapbox.navigation.base.trip.model.ChargingState NOT_CHARGING;
+  }
+
   public final class RouteLegProgress {
     method public com.mapbox.navigation.base.trip.model.RouteStepProgress? getCurrentStepProgress();
     method public float getDistanceRemaining();
@@ -1523,6 +1530,7 @@ package com.mapbox.navigation.base.trip.model {
 
   public final class RouteProgress {
     method public com.mapbox.api.directions.v5.models.BannerInstructions? getBannerInstructions();
+    method public com.mapbox.navigation.base.trip.model.ChargingState getChargingState();
     method public com.mapbox.navigation.base.trip.model.RouteLegProgress? getCurrentLegProgress();
     method public int getCurrentRouteGeometryIndex();
     method public com.mapbox.navigation.base.trip.model.RouteProgressState getCurrentState();
@@ -1540,7 +1548,9 @@ package com.mapbox.navigation.base.trip.model {
     method public java.util.List<com.mapbox.navigation.base.trip.model.roadobject.UpcomingRoadObject> getUpcomingRoadObjects();
     method public java.util.List<com.mapbox.geojson.Point>? getUpcomingStepPoints();
     method public com.mapbox.api.directions.v5.models.VoiceInstructions? getVoiceInstructions();
+    method public boolean isChargingExpected();
     property public final com.mapbox.api.directions.v5.models.BannerInstructions? bannerInstructions;
+    property public final com.mapbox.navigation.base.trip.model.ChargingState chargingState;
     property public final com.mapbox.navigation.base.trip.model.RouteLegProgress? currentLegProgress;
     property public final int currentRouteGeometryIndex;
     property public final com.mapbox.navigation.base.trip.model.RouteProgressState currentState;
@@ -1550,6 +1560,7 @@ package com.mapbox.navigation.base.trip.model {
     property public final float fractionTraveled;
     property public final boolean inParkingAisle;
     property public final boolean inTunnel;
+    property public final boolean isChargingExpected;
     property public final com.mapbox.navigation.base.route.NavigationRoute navigationRoute;
     property public final int remainingWaypoints;
     property public final com.mapbox.api.directions.v5.models.DirectionsRoute route;
