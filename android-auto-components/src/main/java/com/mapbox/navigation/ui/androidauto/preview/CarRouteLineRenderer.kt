@@ -1,5 +1,8 @@
 package com.mapbox.navigation.ui.androidauto.preview
 
+import com.mapbox.common.Cancelable
+import com.mapbox.maps.ClickInteraction
+import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
@@ -9,6 +12,7 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
+import com.mapbox.navigation.ui.androidauto.internal.RendererUtils.dpToPx
 import com.mapbox.navigation.ui.androidauto.internal.extensions.mapboxNavigationForward
 import com.mapbox.navigation.ui.androidauto.internal.extensions.styleFlow
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAuto
@@ -34,15 +38,19 @@ import kotlinx.coroutines.launch
  *
  * @param options customizes the route line and maneuver arrow rendering components, see
  * [CarRouteLineRendererOptions].
+ * @param carRoutesProvider provides the routes to draw.
+ * @param onRouteClick invoked with the route the driver tapped on the map.
  */
 class CarRouteLineRenderer(
     private val options: CarRouteLineRendererOptions = CarRouteLineRendererOptions.Builder()
         .build(),
     private val carRoutesProvider: CarRoutesProvider = NavigationCarRoutesProvider(),
+    private val onRouteClick: ((NavigationRoute) -> Unit)? = null,
 ) : MapboxCarMapObserver {
 
     private var routeLineResources: RouteLineResources? = null
     private var coroutineScope: CoroutineScope? = null
+    private var routeClickInteraction: Cancelable? = null
 
     private val onPositionChangedListener = OnIndicatorPositionChangedListener { point ->
         val resources = routeLineResources ?: return@OnIndicatorPositionChangedListener
@@ -101,6 +109,9 @@ class CarRouteLineRenderer(
         val locationPlugin = mapboxCarMapSurface.mapSurface.location
         locationPlugin.addOnIndicatorPositionChangedListener(onPositionChangedListener)
         MapboxNavigationApp.registerObserver(navigationObserver)
+        if (onRouteClick != null) {
+            routeClickInteraction = addRouteClickInteraction(mapboxCarMapSurface, onRouteClick)
+        }
     }
 
     override fun onDetached(mapboxCarMapSurface: MapboxCarMapSurface) {
@@ -108,9 +119,38 @@ class CarRouteLineRenderer(
         val mapSurface = mapboxCarMapSurface.mapSurface
         mapSurface.location.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
         MapboxNavigationApp.unregisterObserver(navigationObserver)
+        routeClickInteraction?.cancel()
+        routeClickInteraction = null
         coroutineScope?.cancel()
         coroutineScope = null
         clearRouteLineResources()
+    }
+
+    @OptIn(MapboxExperimental::class)
+    private fun addRouteClickInteraction(
+        mapboxCarMapSurface: MapboxCarMapSurface,
+        onRouteClick: (NavigationRoute) -> Unit,
+    ): Cancelable {
+        val mapboxMap = mapboxCarMapSurface.mapSurface.mapboxMap
+        val padding = mapboxCarMapSurface.carContext.dpToPx(ROUTE_CLICK_PADDING_DP).toFloat()
+        return mapboxMap.addInteraction(
+            ClickInteraction { context ->
+                val coordinate = context.coordinateInfo.coordinate
+                val routeLineApi = routeLineResources?.routeLineApi
+                logAndroidAuto("CarRouteLine click at $coordinate, ready: ${routeLineApi != null}")
+                routeLineApi?.findClosestRoute(coordinate, mapboxMap, padding) { result ->
+                    result.fold(
+                        { logAndroidAuto("CarRouteLine no route clicked: ${it.errorMessage}") },
+                        {
+                            logAndroidAuto("CarRouteLine route clicked: ${it.navigationRoute.id}")
+                            onRouteClick(it.navigationRoute)
+                        },
+                    )
+                }
+                // The closest route is found asynchronously, so the click is not consumed.
+                false
+            },
+        )
     }
 
     private fun onAttached(mapboxNavigation: MapboxNavigation) {
@@ -146,6 +186,10 @@ class CarRouteLineRenderer(
             val clearArrowValue = resources.routeArrowApi.clearArrows()
             resources.routeArrowView.render(resources.style, clearArrowValue)
         }
+    }
+
+    private companion object {
+        const val ROUTE_CLICK_PADDING_DP = 30
     }
 
     private data class RouteLineResources(

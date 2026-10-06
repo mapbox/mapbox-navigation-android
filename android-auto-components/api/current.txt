@@ -636,7 +636,7 @@ package com.mapbox.navigation.ui.androidauto.placeslistonmap {
 package com.mapbox.navigation.ui.androidauto.preview {
 
   public final class CarRouteLineRenderer implements com.mapbox.maps.extension.androidauto.MapboxCarMapObserver {
-    ctor public CarRouteLineRenderer(optional com.mapbox.navigation.ui.androidauto.preview.CarRouteLineRendererOptions options, optional com.mapbox.navigation.ui.androidauto.routes.CarRoutesProvider carRoutesProvider);
+    ctor public CarRouteLineRenderer(optional com.mapbox.navigation.ui.androidauto.preview.CarRouteLineRendererOptions options, optional com.mapbox.navigation.ui.androidauto.routes.CarRoutesProvider carRoutesProvider, optional kotlin.jvm.functions.Function1<? super com.mapbox.navigation.base.route.NavigationRoute,kotlin.Unit>? onRouteClick);
   }
 
   public final class CarRouteLineRendererOptions {

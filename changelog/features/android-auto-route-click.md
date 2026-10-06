@@ -1,0 +1,2 @@
+- Android Auto: `CarRouteLineRenderer` takes an optional `onRouteClick` callback that receives the route the driver tapped on the car map.
+- Android Auto: in the route preview of the navigation screen, tapping a route on the car map selects it.

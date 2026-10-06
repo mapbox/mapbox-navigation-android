@@ -2,7 +2,9 @@ package com.mapbox.navigation.ui.androidauto.preview
 
 import androidx.car.app.CarContext
 import androidx.car.app.SurfaceContainer
+import com.mapbox.common.Cancelable
 import com.mapbox.maps.MapSurface
+import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
@@ -17,12 +19,13 @@ import com.mapbox.navigation.ui.androidauto.testing.MapboxRobolectricTestRunner
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import io.mockk.verifyOrder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
 import org.junit.Rule
 import org.junit.Test
 
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, MapboxExperimental::class)
 class CarRouteLineRendererTest : MapboxRobolectricTestRunner() {
 
     @get:Rule
@@ -86,5 +89,29 @@ class CarRouteLineRendererTest : MapboxRobolectricTestRunner() {
         // With no successfully-built style, the position/route-progress observers guard on a
         // null style and must not reach the (never-initialized) route line/arrow renderers.
         sut.onDetached(mapboxCarMapSurface)
+    }
+
+    @Test
+    fun `route clicks are received from the map while attached`() {
+        val interaction: Cancelable = mockk(relaxed = true)
+        every { mapboxMapMock.addInteraction(any()) } returns interaction
+        val sut = CarRouteLineRenderer(carRoutesProvider = noRoutesProvider, onRouteClick = {})
+        sut.onAttached(mapboxCarMapSurface)
+
+        sut.onDetached(mapboxCarMapSurface)
+
+        verifyOrder {
+            mapboxMapMock.addInteraction(any())
+            interaction.cancel()
+        }
+    }
+
+    @Test
+    fun `no map click interaction is added without a route click callback`() {
+        val sut = CarRouteLineRenderer(carRoutesProvider = noRoutesProvider)
+
+        sut.onAttached(mapboxCarMapSurface)
+
+        verify(exactly = 0) { mapboxMapMock.addInteraction(any()) }
     }
 }
