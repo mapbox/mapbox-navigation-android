@@ -1,0 +1,339 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>MapboxRouteLineView</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>code</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageids="UI Maps::com.mapbox.navigation.ui.maps.route.line.api/MapboxRouteLineView///PointingToDeclaration//-1725360525">
+  <div class="breadcrumbs"><a href="../../index.html">UI Maps</a><span class="delimiter">/</span><a href="../index.html">com.mapbox.navigation.ui.maps.route.line.api</a><span class="delimiter">/</span><a href="index.html">MapboxRouteLineView</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Mapbox</span><wbr><span>Route</span><wbr><span>Line</span><wbr><span><span>View</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/UiThread.html"><span class="token annotation">UiThread</span></a></div></div><span class="token keyword">class </span><a href="index.html">MapboxRouteLineView</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">options<span class="token operator">: </span><a href="../../com.mapbox.navigation.ui.maps.route.line.model/-mapbox-route-line-options/index.html">MapboxRouteLineOptions</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Responsible for rendering side effects produced by the <a href="../-mapbox-route-line-api/index.html">MapboxRouteLineApi</a>. The <a href="../-mapbox-route-line-api/index.html">MapboxRouteLineApi</a> class consumes route data from the Navigation SDK and produces the data necessary to visualize one or more routes on the map. This class renders the data from the <a href="../-mapbox-route-line-api/index.html">MapboxRouteLineApi</a> by calling the appropriate map related commands so that the map can have an appearance that is consistent with the state of the navigation SDK and the application.</p><p class="paragraph">Each <span data-unresolved-link="com.mapbox.maps.extension.style.layers/Layer///PointingToDeclaration/">Layer</span> added to the map by this class is a persistent layer - it will survive style changes. This means that if the data has not changed, it does not have to be manually redrawn after a style change. See <span data-unresolved-link="com.mapbox.maps/Style/addPersistentStyleLayer/#com.mapbox.bindgen.Value#com.mapbox.maps.LayerPosition?/PointingToDeclaration/">Style.addPersistentStyleLayer</span>.</p><p class="paragraph">Many of the method calls execute tasks on a background thread. A cancel method is provided in this class which will cancel the background tasks.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Constructors">Constructors</button><button class="section-tab" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button><button class="section-tab" data-togglable="Parameters">Parameters</button></div>
+    <div class="tabs-section-body">
+      <h2 class="">Parameters</h2>
+      <div data-togglable="Parameters">
+        <div class="platform-hinted WithExtraAttributes" data-platform-hinted="data-platform-hinted" data-togglable="Parameters"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div data-togglable="Parameters"><div class="table" data-togglable="Parameters"><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span><span>options</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">resource options used rendering the route line on the map</p></div></div></div></div></div></div></div></div></div>
+      </div>
+      <h2 class="tabbedcontent">Constructors</h2>
+      <div class="table" data-togglable="Constructors"><a data-name="1517299186%2FConstructors%2F-1725360525" anchor-label="MapboxRouteLineView" id="1517299186%2FConstructors%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue TabbedContent">
+            <div class=""><span class="inline-flex">
+                <div><a href="-mapbox-route-line-view.html"><span>Mapbox</span><wbr><span>Route</span><wbr><span>Line</span><wbr><span><span>View</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1517299186%2FConstructors%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="-mapbox-route-line-view.html"><span class="token function">MapboxRouteLineView</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">options<span class="token operator">: </span><a href="../../com.mapbox.navigation.ui.maps.route.line.model/-mapbox-route-line-options/index.html">MapboxRouteLineOptions</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="1402725090%2FFunctions%2F-1725360525" anchor-label="cancel" id="1402725090%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="cancel.html"><span><span>cancel</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1402725090%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="cancel.html"><span class="token function">cancel</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Cancels any/all background tasks that may be running.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-806897395%2FFunctions%2F-1725360525" anchor-label="getAlternativeRoutesVisibility" id="-806897395%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="get-alternative-routes-visibility.html"><span>get</span><wbr><span>Alternative</span><wbr><span>Routes</span><wbr><span><span>Visibility</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-806897395%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-alternative-routes-visibility.html"><span class="token function">getAlternativeRoutesVisibility</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">style<span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps/Style///PointingToDeclaration/">Style</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps.extension.style.layers.properties.generated/Visibility///PointingToDeclaration/">Visibility</span><span class="token operator">?</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Returns the visibility of the alternative route(s) map layer.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="422057895%2FFunctions%2F-1725360525" anchor-label="getPrimaryRouteVisibility" id="422057895%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="get-primary-route-visibility.html"><span>get</span><wbr><span>Primary</span><wbr><span>Route</span><wbr><span><span>Visibility</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="422057895%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-primary-route-visibility.html"><span class="token function">getPrimaryRouteVisibility</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">style<span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps/Style///PointingToDeclaration/">Style</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps.extension.style.layers.properties.generated/Visibility///PointingToDeclaration/">Visibility</span><span class="token operator">?</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Returns the visibility of the primary route map layer.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1466355059%2FFunctions%2F-1725360525" anchor-label="getTrafficVisibility" id="1466355059%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="get-traffic-visibility.html"><span>get</span><wbr><span>Traffic</span><wbr><span><span>Visibility</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1466355059%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-traffic-visibility.html"><span class="token function">getTrafficVisibility</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">style<span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps/Style///PointingToDeclaration/">Style</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps.extension.style.layers.properties.generated/Visibility///PointingToDeclaration/">Visibility</span><span class="token operator">?</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Returns the visibility of the primary route map traffic layer.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="592075277%2FFunctions%2F-1725360525" anchor-label="hideAlternativeRoutes" id="592075277%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="hide-alternative-routes.html"><span>hide</span><wbr><span>Alternative</span><wbr><span><span>Routes</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="592075277%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="hide-alternative-routes.html"><span class="token function">hideAlternativeRoutes</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">style<span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps/Style///PointingToDeclaration/">Style</span></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Hides the layers used for the alternative route line(s).</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="564971740%2FFunctions%2F-1725360525" anchor-label="hideOriginAndDestinationPoints" id="564971740%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="hide-origin-and-destination-points.html"><span>hide</span><wbr><span>Origin</span><wbr><span>And</span><wbr><span>Destination</span><wbr><span><span>Points</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="564971740%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="hide-origin-and-destination-points.html"><span class="token function">hideOriginAndDestinationPoints</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">style<span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps/Style///PointingToDeclaration/">Style</span></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Sets the layer containing the origin and destination icons to not visible.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-864809597%2FFunctions%2F-1725360525" anchor-label="hidePrimaryRoute" id="-864809597%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="hide-primary-route.html"><span>hide</span><wbr><span>Primary</span><wbr><span><span>Route</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-864809597%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="hide-primary-route.html"><span class="token function">hidePrimaryRoute</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">style<span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps/Style///PointingToDeclaration/">Style</span></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Hides the layers used for the primary route line.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-780579725%2FFunctions%2F-1725360525" anchor-label="hideTraffic" id="-780579725%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="hide-traffic.html"><span>hide</span><wbr><span><span>Traffic</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-780579725%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="hide-traffic.html"><span class="token function">hideTraffic</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">style<span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps/Style///PointingToDeclaration/">Style</span></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Hides the layers used for the traffic line(s).</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="2017757932%2FFunctions%2F-1725360525" anchor-label="initializeLayers" id="2017757932%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="initialize-layers.html"><span>initialize</span><wbr><span><span>Layers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2017757932%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="initialize-layers.html"><span class="token function">initializeLayers</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">style<span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps/Style///PointingToDeclaration/">Style</span></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Initializes the route line related layers. Other calls in this class will initialize the layers if they have not yet been initialized. If you have a use case for initializing the layers in advance of any API calls this method may be used.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1743447479%2FFunctions%2F-1725360525" anchor-label="renderClearRouteLineValue" id="1743447479%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="render-clear-route-line-value.html"><span>render</span><wbr><span>Clear</span><wbr><span>Route</span><wbr><span>Line</span><wbr><span><span>Value</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1743447479%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="render-clear-route-line-value.html"><span class="token function">renderClearRouteLineValue</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">style<span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps/Style///PointingToDeclaration/">Style</span><span class="token punctuation">, </span></span><span class="parameter ">clearRouteLineValue<span class="token operator">: </span><span data-unresolved-link="com.mapbox.bindgen/Expected///PointingToDeclaration/">Expected</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.mapbox.navigation.ui.maps.route.line.model/-route-line-error/index.html">RouteLineError</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../com.mapbox.navigation.ui.maps.route.line.model/-route-line-clear-value/index.html">RouteLineClearValue</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Applies side effects related to clearing the route(s) from the map.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="2074312292%2FFunctions%2F-1725360525" anchor-label="renderRouteDrawData" id="2074312292%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="render-route-draw-data.html"><span>render</span><wbr><span>Route</span><wbr><span>Draw</span><wbr><span><span>Data</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2074312292%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="render-route-draw-data.html"><span class="token function">renderRouteDrawData</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">style<span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps/Style///PointingToDeclaration/">Style</span><span class="token punctuation">, </span></span><span class="parameter ">routeDrawData<span class="token operator">: </span><span data-unresolved-link="com.mapbox.bindgen/Expected///PointingToDeclaration/">Expected</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.mapbox.navigation.ui.maps.route.line.model/-route-line-error/index.html">RouteLineError</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../com.mapbox.navigation.ui.maps.route.line.model/-route-set-value/index.html">RouteSetValue</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Applies drawing related side effects.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1378392712%2FFunctions%2F-1725360525" anchor-label="renderRouteLineUpdate" id="-1378392712%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="render-route-line-update.html"><span>render</span><wbr><span>Route</span><wbr><span>Line</span><wbr><span><span>Update</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1378392712%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="render-route-line-update.html"><span class="token function">renderRouteLineUpdate</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">style<span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps/Style///PointingToDeclaration/">Style</span><span class="token punctuation">, </span></span><span class="parameter ">update<span class="token operator">: </span><span data-unresolved-link="com.mapbox.bindgen/Expected///PointingToDeclaration/">Expected</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.mapbox.navigation.ui.maps.route.line.model/-route-line-error/index.html">RouteLineError</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../com.mapbox.navigation.ui.maps.route.line.model/-route-line-update-value/index.html">RouteLineUpdateValue</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Applies side effects related to the vanishing route line feature.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1685557490%2FFunctions%2F-1725360525" anchor-label="showAlternativeRoutes" id="1685557490%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="show-alternative-routes.html"><span>show</span><wbr><span>Alternative</span><wbr><span><span>Routes</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1685557490%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="show-alternative-routes.html"><span class="token function">showAlternativeRoutes</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">style<span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps/Style///PointingToDeclaration/">Style</span></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Shows the layers used for the alternative route line(s).</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-424770665%2FFunctions%2F-1725360525" anchor-label="showOriginAndDestinationPoints" id="-424770665%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="show-origin-and-destination-points.html"><span>show</span><wbr><span>Origin</span><wbr><span>And</span><wbr><span>Destination</span><wbr><span><span>Points</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-424770665%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="show-origin-and-destination-points.html"><span class="token function">showOriginAndDestinationPoints</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">style<span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps/Style///PointingToDeclaration/">Style</span></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Sets the layer containing the origin and destination icons to visible.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-543204482%2FFunctions%2F-1725360525" anchor-label="showPrimaryRoute" id="-543204482%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="show-primary-route.html"><span>show</span><wbr><span>Primary</span><wbr><span><span>Route</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-543204482%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="show-primary-route.html"><span class="token function">showPrimaryRoute</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">style<span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps/Style///PointingToDeclaration/">Style</span></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Shows the layers used for the primary route line.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="170782104%2FFunctions%2F-1725360525" anchor-label="showTraffic" id="170782104%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="show-traffic.html"><span>show</span><wbr><span><span>Traffic</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="170782104%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="show-traffic.html"><span class="token function">showTraffic</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">style<span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps/Style///PointingToDeclaration/">Style</span></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Shows the layers used for the traffic line(s).</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Properties</h2>
+      <div class="table" data-togglable="Properties"><a data-name="-270916000%2FProperties%2F-1725360525" anchor-label="options" id="-270916000%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="options.html">options</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-270916000%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="-270916000%2FProperties%2F-1725360525" anchor-label="options" id="-270916000%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">var </span><a href="options.html">options</a><span class="token operator">: </span><a href="../../com.mapbox.navigation.ui.maps.route.line.model/-mapbox-route-line-options/index.html">MapboxRouteLineOptions</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-270916000%2FProperties%2F-1725360525" anchor-label="options" id="-270916000%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><p class="paragraph">Resource options used rendering the route line on the map</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        </div>
+    </div>
+</div>
+
+</body></html>
+

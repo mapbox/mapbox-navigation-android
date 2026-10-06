@@ -1,0 +1,639 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>RouteLineColorResources</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>code</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageids="UI Maps::com.mapbox.navigation.ui.maps.route.line.model/RouteLineColorResources///PointingToDeclaration//-1725360525">
+  <div class="breadcrumbs"><a href="../../index.html">UI Maps</a><span class="delimiter">/</span><a href="../index.html">com.mapbox.navigation.ui.maps.route.line.model</a><span class="delimiter">/</span><a href="index.html">RouteLineColorResources</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Route</span><wbr><span>Line</span><wbr><span>Color</span><wbr><span><span>Resources</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">RouteLineColorResources</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Contains colors an other values used to determine the appearance of the route line.</p><p class="paragraph">The congestion range is to be used if when making a route request you use <code class="lang-kotlin">DirectionCriteria.ANNOTATION_CONGESTION_NUMERIC</code> annotation. The congestion values obtained with this annotation in the route response would be in the range 0..100, 0 being the minimum and 100 being the maximum congestion values. <code class="lang-kotlin">Unknown</code> congestion values will be represented as <code class="lang-kotlin">null</code><a href="index.html">RouteLineColorResources</a> defines 4 ranges:</p><ul><li><p class="paragraph">lowCongestionRange: default value spans from 0..39</p></li><li><p class="paragraph">moderateCongestionRange: default value spans from 40..59</p></li><li><p class="paragraph">heavyCongestionRange: default value spans from 60..79</p></li><li><p class="paragraph">severeCongestionRange: default value spans from 80..100 You can specify your own ranges for all of the above using the <a href="-builder/index.html">RouteLineColorResources.Builder</a>. If the ranges overlap, the <a href="-builder/build.html">RouteLineColorResources.Builder.build</a> would fail and throw <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-illegal-state-exception/index.html">IllegalStateException</a>. You also need to make sure that all values from 0..100 are covered using these four ranges, else any missing number would be treated as unknown congestion. For ex, if you define the range as follows:</p></li><li><p class="paragraph">lowCongestionRange:       0..39</p></li><li><p class="paragraph">moderateCongestionRange: 50..59</p></li><li><p class="paragraph">heavyCongestionRange:    60..79</p></li><li><p class="paragraph">severeCongestionRange:   80..100 If the route response contains a congestion number 45, it would be treated as <code class="lang-kotlin">unknown</code> because it doesn't exist in any of the ranges specified.</p></li></ul><p class="paragraph">A note on visualizing route line colors: The route line is made up of several stacked line layers. The top most line layer is the traffic line followed by the main route line beneath it. By default both lines have the same width so the traffic line obscures the main line. Also the default route line color and the color used for unknown and low traffic congestion is the same.</p><p class="paragraph">Be mindful of this if you change the default route line color because if the traffic data in the route is unknown the route line will appear as having the unknown traffic color rather than the default route line color. In this case consider also changing the unknown/low traffic color to match the default route line color or setting the traffic congestion color(s) to something like Color.Transparent if it fits your use case.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Types">Types</button><button class="section-tab" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button><button class="section-tab" data-togglable="Parameters">Parameters</button></div>
+    <div class="tabs-section-body">
+      <h2 class="">Parameters</h2>
+      <div data-togglable="Parameters">
+        <div class="platform-hinted WithExtraAttributes" data-platform-hinted="data-platform-hinted" data-togglable="Parameters"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div data-togglable="Parameters"><div class="table" data-togglable="Parameters"><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>low</span><wbr><span>Congestion</span><wbr><span><span>Range</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the range for low congestion traffic.</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>moderate</span><wbr><span>Congestion</span><wbr><span><span>Range</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the range for low congestion traffic.</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>heavy</span><wbr><span>Congestion</span><wbr><span><span>Range</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the range for low congestion traffic.</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>severe</span><wbr><span>Congestion</span><wbr><span><span>Range</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the range for low congestion traffic.</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>route</span><wbr><span>Default</span><wbr><span><span>Color</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the default color of the route line</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>route</span><wbr><span>Low</span><wbr><span>Congestion</span><wbr><span><span>Color</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the color used for representing low traffic congestion</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>route</span><wbr><span>Moderate</span><wbr><span>Congestion</span><wbr><span><span>Color</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the color used for representing moderate traffic congestion</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>route</span><wbr><span>Heavy</span><wbr><span>Congestion</span><wbr><span><span>Color</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the color used for representing heavy traffic congestion</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>route</span><wbr><span>Severe</span><wbr><span>Congestion</span><wbr><span><span>Color</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the color used for representing severe traffic congestion</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>route</span><wbr><span>Unknown</span><wbr><span>Congestion</span><wbr><span><span>Color</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the color used for representing unknown traffic congestion</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>route</span><wbr><span>Closure</span><wbr><span><span>Color</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the color used for the route closure line</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>inactive</span><wbr><span>Route</span><wbr><span>Leg</span><wbr><span>Low</span><wbr><span>Congestion</span><wbr><span><span>Color</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the color used for representing low traffic congestion on inactive legs of the route</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>inactive</span><wbr><span>Route</span><wbr><span>Leg</span><wbr><span>Moderate</span><wbr><span>Congestion</span><wbr><span><span>Color</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the color used for representing moderate traffic congestion on inactive legs of the route</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>inactive</span><wbr><span>Route</span><wbr><span>Leg</span><wbr><span>Heavy</span><wbr><span>Congestion</span><wbr><span><span>Color</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the color used for representing heavy traffic congestion on inactive legs of the route</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>inactive</span><wbr><span>Route</span><wbr><span>Leg</span><wbr><span>Severe</span><wbr><span>Congestion</span><wbr><span><span>Color</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the color used for representing severe traffic congestion on inactive legs of the route</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>inactive</span><wbr><span>Route</span><wbr><span>Leg</span><wbr><span>Unknown</span><wbr><span>Congestion</span><wbr><span><span>Color</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the color used for representing unknown traffic congestion on inactive legs of the route</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>inactive</span><wbr><span>Route</span><wbr><span>Leg</span><wbr><span>Closure</span><wbr><span><span>Color</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the color used for the route closure line on inactive legs of the route</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>restricted</span><wbr><span>Road</span><wbr><span><span>Color</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the color for the restricted road indicator(s)</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>inactive</span><wbr><span>Route</span><wbr><span>Leg</span><wbr><span>Restricted</span><wbr><span>Road</span><wbr><span><span>Color</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the color for the restricted road indicator(s) on inactive legs of the route</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>alternative</span><wbr><span>Route</span><wbr><span>Default</span><wbr><span><span>Color</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the default color used for alternative route lines</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>alternative</span><wbr><span>Route</span><wbr><span>Low</span><wbr><span>Congestion</span><wbr><span><span>Color</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the color used for representing low traffic congestion on alternative routes</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>alternative</span><wbr><span>Route</span><wbr><span>Moderate</span><wbr><span>Congestion</span><wbr><span><span>Color</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the color used for representing moderate traffic congestion on alternative routes</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>alternative</span><wbr><span>Route</span><wbr><span>Heavy</span><wbr><span>Congestion</span><wbr><span><span>Color</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the color used for representing heavy traffic congestion on alternative routes</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>alternative</span><wbr><span>Route</span><wbr><span>Severe</span><wbr><span>Congestion</span><wbr><span><span>Color</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the color used for representing severe traffic congestion on alternative routes</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>alternative</span><wbr><span>Route</span><wbr><span>Unknown</span><wbr><span>Congestion</span><wbr><span><span>Color</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the color used for representing unknown traffic congestion on alternative routes</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>alternative</span><wbr><span>Route</span><wbr><span>Restricted</span><wbr><span>Road</span><wbr><span><span>Color</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the color for the restricted road indicator(s) for alternative routes.</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>alternative</span><wbr><span>Route</span><wbr><span>Closure</span><wbr><span><span>Color</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the color used for the alternative route closure line(s)</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>route</span><wbr><span>Line</span><wbr><span>Traveled</span><wbr><span><span>Color</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the color of the section of route line behind the puck representing the section of the route traveled</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>route</span><wbr><span>Line</span><wbr><span>Traveled</span><wbr><span>Casing</span><wbr><span><span>Color</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the color of the casing section of route line behind the puck representing the section of the route traveled. By default the casing line is beneath the route line and gives the appearance of a border</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>route</span><wbr><span>Casing</span><wbr><span><span>Color</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the color used for the route casing line which is positioned below the route line giving the line the appearance of a boarder</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>alternative</span><wbr><span>Route</span><wbr><span>Casing</span><wbr><span><span>Color</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the color used for the alternative route casing line(s) which is positioned below the route line giving the line the appearance of a boarder</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>inactive</span><wbr><span>Route</span><wbr><span>Leg</span><wbr><span>Casing</span><wbr><span><span>Color</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the color used for casing of route legs hat aren't currently being navigated.</p></div></div></div></div></div><div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>in</span><wbr><span>Active</span><wbr><span>Route</span><wbr><span>Legs</span><wbr><span><span>Color</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the color used for route legs that aren't currently being navigated.</p></div></div></div></div></div></div></div></div></div>
+      </div>
+      <h2 class="">Types</h2>
+      <div class="table" data-togglable="Types"><a data-name="432992667%2FClasslikes%2F-1725360525" anchor-label="Builder" id="432992667%2FClasslikes%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-builder/index.html"><span><span>Builder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="432992667%2FClasslikes%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="-builder/index.html">Builder</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">A builder for instantiating the RouteLineResources class</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="-718877846%2FFunctions%2F-1725360525" anchor-label="equals" id="-718877846%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="equals.html"><span><span>equals</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-718877846%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">operator override </span><span class="token keyword">fun </span><a href="equals.html"><span class="token function">equals</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">other<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Indicates whether some other object is "equal to" this one.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="964230716%2FFunctions%2F-1725360525" anchor-label="hashCode" id="964230716%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="hash-code.html"><span>hash</span><wbr><span><span>Code</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="964230716%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="hash-code.html"><span class="token function">hashCode</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Returns a hash code value for the object.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1397107677%2FFunctions%2F-1725360525" anchor-label="toBuilder" id="-1397107677%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="to-builder.html"><span>to</span><wbr><span><span>Builder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1397107677%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="to-builder.html"><span class="token function">toBuilder</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-builder/index.html">RouteLineColorResources.Builder</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="786064651%2FFunctions%2F-1725360525" anchor-label="toString" id="786064651%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="to-string.html"><span>to</span><wbr><span><span>String</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="786064651%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="to-string.html"><span class="token function">toString</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Returns a string representation of the object.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Properties</h2>
+      <div class="table" data-togglable="Properties"><a data-name="1128757577%2FProperties%2F-1725360525" anchor-label="alternativeRouteCasingColor" id="1128757577%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="alternative-route-casing-color.html">alternativeRouteCasingColor</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1128757577%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="1128757577%2FProperties%2F-1725360525" anchor-label="alternativeRouteCasingColor" id="1128757577%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="alternative-route-casing-color.html">alternativeRouteCasingColor</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="964360915%2FProperties%2F-1725360525" anchor-label="alternativeRouteClosureColor" id="964360915%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="alternative-route-closure-color.html">alternativeRouteClosureColor</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="964360915%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="964360915%2FProperties%2F-1725360525" anchor-label="alternativeRouteClosureColor" id="964360915%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="alternative-route-closure-color.html">alternativeRouteClosureColor</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1041234009%2FProperties%2F-1725360525" anchor-label="alternativeRouteDefaultColor" id="1041234009%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="alternative-route-default-color.html">alternativeRouteDefaultColor</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1041234009%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="1041234009%2FProperties%2F-1725360525" anchor-label="alternativeRouteDefaultColor" id="1041234009%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="alternative-route-default-color.html">alternativeRouteDefaultColor</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-682489946%2FProperties%2F-1725360525" anchor-label="alternativeRouteHeavyCongestionColor" id="-682489946%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="alternative-route-heavy-congestion-color.html">alternativeRouteHeavyCongestionColor</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-682489946%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="-682489946%2FProperties%2F-1725360525" anchor-label="alternativeRouteHeavyCongestionColor" id="-682489946%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="alternative-route-heavy-congestion-color.html">alternativeRouteHeavyCongestionColor</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1596313779%2FProperties%2F-1725360525" anchor-label="alternativeRouteLowCongestionColor" id="1596313779%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="alternative-route-low-congestion-color.html">alternativeRouteLowCongestionColor</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1596313779%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="1596313779%2FProperties%2F-1725360525" anchor-label="alternativeRouteLowCongestionColor" id="1596313779%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="alternative-route-low-congestion-color.html">alternativeRouteLowCongestionColor</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1001763622%2FProperties%2F-1725360525" anchor-label="alternativeRouteModerateCongestionColor" id="1001763622%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="alternative-route-moderate-congestion-color.html">alternativeRouteModerateCongestionColor</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1001763622%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="1001763622%2FProperties%2F-1725360525" anchor-label="alternativeRouteModerateCongestionColor" id="1001763622%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="alternative-route-moderate-congestion-color.html">alternativeRouteModerateCongestionColor</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1704221943%2FProperties%2F-1725360525" anchor-label="alternativeRouteRestrictedRoadColor" id="1704221943%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="alternative-route-restricted-road-color.html">alternativeRouteRestrictedRoadColor</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1704221943%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="1704221943%2FProperties%2F-1725360525" anchor-label="alternativeRouteRestrictedRoadColor" id="1704221943%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="alternative-route-restricted-road-color.html">alternativeRouteRestrictedRoadColor</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="448125975%2FProperties%2F-1725360525" anchor-label="alternativeRouteSevereCongestionColor" id="448125975%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="alternative-route-severe-congestion-color.html">alternativeRouteSevereCongestionColor</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="448125975%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="448125975%2FProperties%2F-1725360525" anchor-label="alternativeRouteSevereCongestionColor" id="448125975%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="alternative-route-severe-congestion-color.html">alternativeRouteSevereCongestionColor</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="669793449%2FProperties%2F-1725360525" anchor-label="alternativeRouteUnknownCongestionColor" id="669793449%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="alternative-route-unknown-congestion-color.html">alternativeRouteUnknownCongestionColor</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="669793449%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="669793449%2FProperties%2F-1725360525" anchor-label="alternativeRouteUnknownCongestionColor" id="669793449%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="alternative-route-unknown-congestion-color.html">alternativeRouteUnknownCongestionColor</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1142801336%2FProperties%2F-1725360525" anchor-label="heavyCongestionRange" id="-1142801336%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="heavy-congestion-range.html">heavyCongestionRange</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1142801336%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="-1142801336%2FProperties%2F-1725360525" anchor-label="heavyCongestionRange" id="-1142801336%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="heavy-congestion-range.html">heavyCongestionRange</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.ranges/-int-range/index.html">IntRange</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-792412867%2FProperties%2F-1725360525" anchor-label="inactiveRouteLegCasingColor" id="-792412867%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="inactive-route-leg-casing-color.html">inactiveRouteLegCasingColor</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-792412867%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="-792412867%2FProperties%2F-1725360525" anchor-label="inactiveRouteLegCasingColor" id="-792412867%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="inactive-route-leg-casing-color.html">inactiveRouteLegCasingColor</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1537619295%2FProperties%2F-1725360525" anchor-label="inactiveRouteLegClosureColor" id="1537619295%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="inactive-route-leg-closure-color.html">inactiveRouteLegClosureColor</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1537619295%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="1537619295%2FProperties%2F-1725360525" anchor-label="inactiveRouteLegClosureColor" id="1537619295%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="inactive-route-leg-closure-color.html">inactiveRouteLegClosureColor</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="890238514%2FProperties%2F-1725360525" anchor-label="inactiveRouteLegHeavyCongestionColor" id="890238514%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="inactive-route-leg-heavy-congestion-color.html">inactiveRouteLegHeavyCongestionColor</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="890238514%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="890238514%2FProperties%2F-1725360525" anchor-label="inactiveRouteLegHeavyCongestionColor" id="890238514%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="inactive-route-leg-heavy-congestion-color.html">inactiveRouteLegHeavyCongestionColor</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="208007743%2FProperties%2F-1725360525" anchor-label="inactiveRouteLegLowCongestionColor" id="208007743%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="inactive-route-leg-low-congestion-color.html">inactiveRouteLegLowCongestionColor</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="208007743%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="208007743%2FProperties%2F-1725360525" anchor-label="inactiveRouteLegLowCongestionColor" id="208007743%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="inactive-route-leg-low-congestion-color.html">inactiveRouteLegLowCongestionColor</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="357083418%2FProperties%2F-1725360525" anchor-label="inactiveRouteLegModerateCongestionColor" id="357083418%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="inactive-route-leg-moderate-congestion-color.html">inactiveRouteLegModerateCongestionColor</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="357083418%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="357083418%2FProperties%2F-1725360525" anchor-label="inactiveRouteLegModerateCongestionColor" id="357083418%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="inactive-route-leg-moderate-congestion-color.html">inactiveRouteLegModerateCongestionColor</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1616407787%2FProperties%2F-1725360525" anchor-label="inactiveRouteLegRestrictedRoadColor" id="1616407787%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="inactive-route-leg-restricted-road-color.html">inactiveRouteLegRestrictedRoadColor</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1616407787%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="1616407787%2FProperties%2F-1725360525" anchor-label="inactiveRouteLegRestrictedRoadColor" id="1616407787%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="inactive-route-leg-restricted-road-color.html">inactiveRouteLegRestrictedRoadColor</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="576053527%2FProperties%2F-1725360525" anchor-label="inActiveRouteLegsColor" id="576053527%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="in-active-route-legs-color.html">inActiveRouteLegsColor</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="576053527%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="576053527%2FProperties%2F-1725360525" anchor-label="inActiveRouteLegsColor" id="576053527%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="in-active-route-legs-color.html">inActiveRouteLegsColor</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1958067979%2FProperties%2F-1725360525" anchor-label="inactiveRouteLegSevereCongestionColor" id="1958067979%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="inactive-route-leg-severe-congestion-color.html">inactiveRouteLegSevereCongestionColor</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1958067979%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="1958067979%2FProperties%2F-1725360525" anchor-label="inactiveRouteLegSevereCongestionColor" id="1958067979%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="inactive-route-leg-severe-congestion-color.html">inactiveRouteLegSevereCongestionColor</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="233355317%2FProperties%2F-1725360525" anchor-label="inactiveRouteLegUnknownCongestionColor" id="233355317%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="inactive-route-leg-unknown-congestion-color.html">inactiveRouteLegUnknownCongestionColor</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="233355317%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="233355317%2FProperties%2F-1725360525" anchor-label="inactiveRouteLegUnknownCongestionColor" id="233355317%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="inactive-route-leg-unknown-congestion-color.html">inactiveRouteLegUnknownCongestionColor</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-721279915%2FProperties%2F-1725360525" anchor-label="lowCongestionRange" id="-721279915%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="low-congestion-range.html">lowCongestionRange</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-721279915%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="-721279915%2FProperties%2F-1725360525" anchor-label="lowCongestionRange" id="-721279915%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="low-congestion-range.html">lowCongestionRange</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.ranges/-int-range/index.html">IntRange</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="864314320%2FProperties%2F-1725360525" anchor-label="moderateCongestionRange" id="864314320%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="moderate-congestion-range.html">moderateCongestionRange</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="864314320%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="864314320%2FProperties%2F-1725360525" anchor-label="moderateCongestionRange" id="864314320%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="moderate-congestion-range.html">moderateCongestionRange</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.ranges/-int-range/index.html">IntRange</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1743359941%2FProperties%2F-1725360525" anchor-label="restrictedRoadColor" id="-1743359941%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="restricted-road-color.html">restrictedRoadColor</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1743359941%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="-1743359941%2FProperties%2F-1725360525" anchor-label="restrictedRoadColor" id="-1743359941%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="restricted-road-color.html">restrictedRoadColor</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1247243478%2FProperties%2F-1725360525" anchor-label="routeCasingColor" id="-1247243478%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="route-casing-color.html">routeCasingColor</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1247243478%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="-1247243478%2FProperties%2F-1725360525" anchor-label="routeCasingColor" id="-1247243478%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="route-casing-color.html">routeCasingColor</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="322772242%2FProperties%2F-1725360525" anchor-label="routeClosureColor" id="322772242%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="route-closure-color.html">routeClosureColor</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="322772242%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="322772242%2FProperties%2F-1725360525" anchor-label="routeClosureColor" id="322772242%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="route-closure-color.html">routeClosureColor</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="399645336%2FProperties%2F-1725360525" anchor-label="routeDefaultColor" id="399645336%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="route-default-color.html">routeDefaultColor</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="399645336%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="399645336%2FProperties%2F-1725360525" anchor-label="routeDefaultColor" id="399645336%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="route-default-color.html">routeDefaultColor</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1655274213%2FProperties%2F-1725360525" anchor-label="routeHeavyCongestionColor" id="1655274213%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="route-heavy-congestion-color.html">routeHeavyCongestionColor</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1655274213%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="1655274213%2FProperties%2F-1725360525" anchor-label="routeHeavyCongestionColor" id="1655274213%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="route-heavy-congestion-color.html">routeHeavyCongestionColor</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1913547369%2FProperties%2F-1725360525" anchor-label="routeLineTraveledCasingColor" id="-1913547369%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="route-line-traveled-casing-color.html">routeLineTraveledCasingColor</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1913547369%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="-1913547369%2FProperties%2F-1725360525" anchor-label="routeLineTraveledCasingColor" id="-1913547369%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="route-line-traveled-casing-color.html">routeLineTraveledCasingColor</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1121581494%2FProperties%2F-1725360525" anchor-label="routeLineTraveledColor" id="-1121581494%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="route-line-traveled-color.html">routeLineTraveledColor</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1121581494%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="-1121581494%2FProperties%2F-1725360525" anchor-label="routeLineTraveledColor" id="-1121581494%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="route-line-traveled-color.html">routeLineTraveledColor</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-135329870%2FProperties%2F-1725360525" anchor-label="routeLowCongestionColor" id="-135329870%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="route-low-congestion-color.html">routeLowCongestionColor</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-135329870%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="-135329870%2FProperties%2F-1725360525" anchor-label="routeLowCongestionColor" id="-135329870%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="route-low-congestion-color.html">routeLowCongestionColor</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1855847545%2FProperties%2F-1725360525" anchor-label="routeModerateCongestionColor" id="-1855847545%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="route-moderate-congestion-color.html">routeModerateCongestionColor</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1855847545%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="-1855847545%2FProperties%2F-1725360525" anchor-label="routeModerateCongestionColor" id="-1855847545%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="route-moderate-congestion-color.html">routeModerateCongestionColor</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-95629128%2FProperties%2F-1725360525" anchor-label="routeSevereCongestionColor" id="-95629128%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="route-severe-congestion-color.html">routeSevereCongestionColor</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-95629128%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="-95629128%2FProperties%2F-1725360525" anchor-label="routeSevereCongestionColor" id="-95629128%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="route-severe-congestion-color.html">routeSevereCongestionColor</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="993254440%2FProperties%2F-1725360525" anchor-label="routeUnknownCongestionColor" id="993254440%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="route-unknown-congestion-color.html">routeUnknownCongestionColor</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="993254440%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="993254440%2FProperties%2F-1725360525" anchor-label="routeUnknownCongestionColor" id="993254440%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="route-unknown-congestion-color.html">routeUnknownCongestionColor</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="2077232577%2FProperties%2F-1725360525" anchor-label="severeCongestionRange" id="2077232577%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="severe-congestion-range.html">severeCongestionRange</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2077232577%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="2077232577%2FProperties%2F-1725360525" anchor-label="severeCongestionRange" id="2077232577%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="severe-congestion-range.html">severeCongestionRange</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.ranges/-int-range/index.html">IntRange</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        </div>
+    </div>
+</div>
+
+</body></html>
+
