@@ -10,13 +10,17 @@ import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.route.Waypoint
 import com.mapbox.navigation.base.internal.utils.internalWaypoints
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.trip.model.ChargingState
 import com.mapbox.navigation.base.trip.model.RouteProgressState
+import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesExtra.ROUTES_UPDATE_REASON_REROUTE
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
+import com.mapbox.navigation.testing.ui.http.MockRequestHandler
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
 import com.mapbox.navigation.testing.ui.utils.coroutines.offRouteUpdates
+import com.mapbox.navigation.testing.ui.utils.coroutines.replanRouteAsync
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestRoutes
 import com.mapbox.navigation.testing.ui.utils.coroutines.routeProgressUpdates
 import com.mapbox.navigation.testing.ui.utils.coroutines.routesUpdates
@@ -37,17 +41,19 @@ import com.mapbox.navigation.testing.utils.withoutInternet
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeout
 import okhttp3.HttpUrl
+import okhttp3.mockwebserver.RecordedRequest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.time.Duration.Companion.milliseconds
 import com.mapbox.navigation.testing.R as TestResourcesR
 
@@ -55,7 +61,8 @@ import com.mapbox.navigation.testing.R as TestResourcesR
  * Rerouting and replanning while charging at a departure charging station: charging being
  * expected must not suppress a real reroute once the vehicle drives away, the rerouted-to route
  * must carry its own charging state from its first progress, and a replan or back-online
- * request made while plugged in must keep describing the charger at the origin.
+ * request must describe the charger at the origin exactly as long as the vehicle is charging
+ * there.
  */
 class ChargingAtDepartureRerouteTest : BaseCoreNoCleanUpTest() {
 
@@ -71,7 +78,6 @@ class ChargingAtDepartureRerouteTest : BaseCoreNoCleanUpTest() {
 
         private const val KEY_REASON = "reason"
         private const val VALUE_PARAMETERS_CHANGE = "parameters_change"
-        private const val POLLING_INTERVAL_MILLIS = 100L
         private const val KEY_EV_INITIAL_CHARGE = "ev_initial_charge"
         private const val KEY_WAYPOINTS_STATION_ID = "waypoints.charging_station_id"
         private const val KEY_WAYPOINTS_POWER = "waypoints.charging_station_power"
@@ -86,6 +92,20 @@ class ChargingAtDepartureRerouteTest : BaseCoreNoCleanUpTest() {
 
         /** Coordinates in a Directions request URL are rounded, so compare with a tolerance. */
         private const val COORDINATE_TOLERANCE = 1e-4
+
+        /**
+         * How far below the station's target charge the battery is reported while still plugged
+         * in: reaching the target would mean charging beyond what the route needs rather than
+         * still charging towards it.
+         */
+        private const val CHARGE_BELOW_TARGET_WHILE_CHARGING_DELTA = 1
+
+        /**
+         * How far below the station's target charge the battery is reported once unplugged.
+         * Distinct from every other value the session has seen, so that a request can carry it
+         * only by taking it from that report.
+         */
+        private const val CHARGE_BELOW_TARGET_AFTER_UNPLUGGING_DELTA = 200
     }
 
     @get:Rule
@@ -143,18 +163,8 @@ class ChargingAtDepartureRerouteTest : BaseCoreNoCleanUpTest() {
             val originalRouteId = routes.first().id
             navigation.startTripSession()
 
-            val initialProgressDeferred = async {
-                navigation.routeProgressUpdates()
-                    .first { it.currentState == RouteProgressState.INITIALIZED }
-            }
             stayOnPosition(evRoute.origin.latitude(), evRoute.origin.longitude(), bearing = 0f) {
-                navigation.setNavigationRoutesAsync(routes)
-                initialProgressDeferred.await()
-                navigation.routeProgressUpdates()
-                    .first { it.chargingState == ChargingState.AWAIT_CHARGING }
-                navigation.startCharging()
-                navigation.routeProgressUpdates()
-                    .first { it.chargingState == ChargingState.CHARGING }
+                navigation.plugInAtDepartureCharger(routes)
             }
 
             // Subscribed before the deviation, so the first progress under the new route can't be
@@ -226,35 +236,52 @@ class ChargingAtDepartureRerouteTest : BaseCoreNoCleanUpTest() {
      * The driver charges at their own charger at the origin - a user-provided charging station,
      * which the server would never insert on its own - and changes a route option while plugged
      * in, which replans the route. The replan request must still describe that charging station,
-     * pinned to the origin coordinate, and must carry the state of charge accumulated since the
-     * original request. Losing either would send the driver a route computed as if they were
-     * neither charging nor charged.
+     * pinned to the origin coordinate, and must be computed as leaving that station at its target
+     * charge, since the vehicle is still charging there. Losing either would send the driver a
+     * route computed as if they were neither charging nor charged.
+     *
+     * Once the driver unplugs before the target charge is reached - leaving earlier than planned -
+     * the target charge no longer applies: a replan made then must be computed from the state of
+     * charge the vehicle actually reports, although it is below the target, and no longer as
+     * charging at the origin station. This second phase is what proves the first one is not a
+     * coincidence - that the target charge and the station came from the vehicle charging there,
+     * not from being applied at the origin station regardless of charging. Note that it pins the
+     * engine's current rule of keeping the origin station only while charging is in progress, not
+     * until the vehicle drives off.
      */
     @Test
-    @Ignore("blocked by NN-5489")
-    fun replanWhileChargingAtDepartureKeepsUserProvidedChargingStationAtOrigin() =
+    fun replanAtDepartureChargerKeepsUserProvidedChargingStationOnlyWhileCharging() =
         sdkTest {
             val evRoute = EvRoutesProvider
                 .getBerlinEvRouteWithUserProvidedChargingStationAtDeparture(
                     context,
                     mockWebServerRule.baseUrl,
                 )
-            mockWebServerRule.requestHandlers.add(evRoute.mockWebServerHandler)
-            // Serves every request the session makes beyond the original one - the replan
-            // coordinates are derived from where the vehicle is matched, so they can't be spelled
-            // out up front. Registered after the strict handler, which keeps serving the original
-            // request; continuous alternatives land here too, hence the reason-based filtering of
-            // the captured requests below.
-            val requestHandler = MockDirectionsRequestHandler(
-                profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
-                jsonResponse = readRawFileText(
-                    context,
-                    TestResourcesR.raw.ev_routes_berlin_user_provided_charging_station,
-                ),
-                expectedCoordinates = null,
-                relaxedExpectedCoordinates = true,
+            // Sees every request first and serves none, so the requests are captured in the order
+            // they arrive whichever handler below ends up serving them.
+            val recordedRequests = CopyOnWriteArrayList<RecordedRequest>()
+            mockWebServerRule.requestHandlers.add(
+                MockRequestHandler { request ->
+                    recordedRequests.add(request)
+                    null
+                },
             )
-            mockWebServerRule.requestHandlers.add(requestHandler)
+            mockWebServerRule.requestHandlers.add(evRoute.mockWebServerHandler)
+            // Serves the requests that don't match the original coordinates and charging station
+            // exactly - those are handled by the strict handler registered above, which a replan
+            // made while still parked at the origin charger matches too. Continuous alternatives
+            // land in either one, hence the reason-based filtering of the captured requests below.
+            mockWebServerRule.requestHandlers.add(
+                MockDirectionsRequestHandler(
+                    profile = DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                    jsonResponse = readRawFileText(
+                        context,
+                        TestResourcesR.raw.ev_routes_berlin_user_provided_charging_station,
+                    ),
+                    expectedCoordinates = null,
+                    relaxedExpectedCoordinates = true,
+                ),
+            )
 
             withMapboxNavigation(
                 historyRecorderRule = mapboxHistoryTestRule,
@@ -263,52 +290,73 @@ class ChargingAtDepartureRerouteTest : BaseCoreNoCleanUpTest() {
                 val routes = navigation.requestRoutes(evRoute.routeOptions)
                     .getSuccessfulResultOrThrowException()
                     .routes
+                val chargeTo = routes.first().originChargeTo()
                 navigation.startTripSession()
 
-                var replanUrl: HttpUrl? = null
-                val initialProgressDeferred = async {
-                    navigation.routeProgressUpdates()
-                        .first { it.currentState == RouteProgressState.INITIALIZED }
-                }
-                stayOnPosition(
+                val (whileChargingUrl, afterUnpluggingUrl) = stayOnPosition(
                     evRoute.origin.latitude(),
                     evRoute.origin.longitude(),
                     bearing = evRoute.originBearing,
                 ) {
-                    navigation.setNavigationRoutesAsync(routes)
-                    initialProgressDeferred.await()
-                    navigation.routeProgressUpdates()
-                        .first { it.chargingState == ChargingState.AWAIT_CHARGING }
-                    navigation.startCharging()
-                    navigation.routeProgressUpdates()
-                        .first { it.chargingState == ChargingState.CHARGING }
+                    navigation.plugInAtDepartureCharger(routes)
 
-                    // The battery has been filling up since the route was requested. Reporting it
-                    // before the replan is what makes the assertion below specific to the replan
-                    // request rather than to the original one.
+                    // The battery has been filling up since the route was requested.
                     navigation.onEVDataUpdated(
-                        mapOf(KEY_EV_INITIAL_CHARGE to CHARGED_STATE_OF_CHARGE),
+                        mapOf(
+                            KEY_EV_INITIAL_CHARGE to
+                                (chargeTo - CHARGE_BELOW_TARGET_WHILE_CHARGING_DELTA).toString(),
+                        ),
                     )
-
                     // Stands for any route option the driver can change mid-session (language,
                     // exclusions, ...): what matters here is that it goes through the replan path.
-                    navigation.replanRoute()
-                    replanUrl = requestHandler.awaitReplanRequestUrl()
+                    // Awaited until the replanned route is set, so that the second replan below
+                    // can't interrupt this one and the two phases don't overlap.
+                    navigation.replanRouteAwaitingRoutes()
+                    val whileChargingUrl = replanRequestUrl(recordedRequests, ordinal = 1)
+
+                    // Unplugged short of the target charge: still at the station, but no longer
+                    // charging there.
+                    navigation.stopCharging()
+                    navigation.routeProgressUpdates()
+                        .first { it.chargingState == ChargingState.AWAIT_CHARGING }
+
+                    // Below the target on purpose: above it, the request would carry the reported
+                    // value whether or not the target charge were still being applied.
+                    navigation.onEVDataUpdated(
+                        mapOf(
+                            KEY_EV_INITIAL_CHARGE to
+                                (chargeTo - CHARGE_BELOW_TARGET_AFTER_UNPLUGGING_DELTA).toString(),
+                        ),
+                    )
+                    navigation.replanRouteAwaitingRoutes()
+                    val afterUnpluggingUrl = replanRequestUrl(recordedRequests, ordinal = 2)
+
+                    whileChargingUrl to afterUnpluggingUrl
                 }
-                val url = replanUrl!!
-                assertNotEquals(
-                    "the replan must report the charge accumulated while plugged in, " +
-                        "url: $url",
-                    evRoute.routeOptions.unrecognizedJsonProperties
-                        ?.get(KEY_EV_INITIAL_CHARGE)?.asString,
-                    url.queryParameter(KEY_EV_INITIAL_CHARGE),
-                )
+
                 assertEquals(
-                    "unexpected state of charge in the replan request, url: $url",
-                    CHARGED_STATE_OF_CHARGE,
-                    url.queryParameter(KEY_EV_INITIAL_CHARGE),
+                    "the replan must be computed as leaving the origin station at its target " +
+                        "charge, url: $whileChargingUrl",
+                    chargeTo.toString(),
+                    whileChargingUrl.queryParameter(KEY_EV_INITIAL_CHARGE),
                 )
-                assertUserProvidedChargingStationRequestedAtOrigin(url, evRoute)
+                assertUserProvidedChargingStationRequestedAtOrigin(whileChargingUrl, evRoute)
+
+                assertEquals(
+                    "once unplugged, the replan must be computed from the reported state of " +
+                        "charge, not from the station's target charge, url: $afterUnpluggingUrl",
+                    (chargeTo - CHARGE_BELOW_TARGET_AFTER_UNPLUGGING_DELTA).toString(),
+                    afterUnpluggingUrl.queryParameter(KEY_EV_INITIAL_CHARGE),
+                )
+                val stationIdsAfterUnplugging = afterUnpluggingUrl
+                    .queryParameter(KEY_WAYPOINTS_STATION_ID)
+                    ?.split(";")
+                    .orEmpty()
+                assertFalse(
+                    "once unplugged, the replan must no longer be computed as charging at the " +
+                        "origin station, url: $afterUnpluggingUrl",
+                    evRoute.chargingStationId in stationIdsAfterUnplugging,
+                )
             }
         }
 
@@ -371,18 +419,8 @@ class ChargingAtDepartureRerouteTest : BaseCoreNoCleanUpTest() {
                             routes.first().origin,
                         )
 
-                        val initialProgressDeferred = async {
-                            navigation.routeProgressUpdates()
-                                .first { it.currentState == RouteProgressState.INITIALIZED }
-                        }
-                        navigation.setNavigationRoutesAsync(routes)
                         navigation.startTripSession()
-                        initialProgressDeferred.await()
-                        navigation.routeProgressUpdates()
-                            .first { it.chargingState == ChargingState.AWAIT_CHARGING }
-                        navigation.startCharging()
-                        navigation.routeProgressUpdates()
-                            .first { it.chargingState == ChargingState.CHARGING }
+                        navigation.plugInAtDepartureCharger(routes)
 
                         // The battery has been filling up while offline. Reporting it before
                         // connectivity returns is what makes the assertion below specific to the
@@ -417,24 +455,59 @@ class ChargingAtDepartureRerouteTest : BaseCoreNoCleanUpTest() {
         }
 
     /**
+     * Sets [routes] while the vehicle is parked at the charging station at their origin and plugs
+     * it in, returning once the engine reports charging there. Requires a started trip session
+     * and the mock location fixed at the origin.
+     */
+    private suspend fun MapboxNavigation.plugInAtDepartureCharger(routes: List<NavigationRoute>) {
+        coroutineScope {
+            // Subscribed before the routes are set, so the initial progress can't be missed.
+            val initialProgress = async {
+                routeProgressUpdates()
+                    .first { it.currentState == RouteProgressState.INITIALIZED }
+            }
+            setNavigationRoutesAsync(routes)
+            initialProgress.await()
+        }
+        routeProgressUpdates().first { it.chargingState == ChargingState.AWAIT_CHARGING }
+        startCharging()
+        routeProgressUpdates().first { it.chargingState == ChargingState.CHARGING }
+    }
+
+    /** Replans the route and returns once the replanned routes are set, failing otherwise. */
+    private suspend fun MapboxNavigation.replanRouteAwaitingRoutes() {
+        withTimeout(REROUTE_TIMEOUT_MILLIS.milliseconds) {
+            replanRouteAsync().getSuccessfulResultOrThrowException()
+        }
+    }
+
+    /** Target state of charge (`charge_to`) of the charging station at this route's origin. */
+    private fun NavigationRoute.originChargeTo(): Int {
+        val originWaypoint = requireNotNull(internalWaypoints().firstOrNull()) {
+            "expected the mocked EV route to have waypoints"
+        }
+        return requireNotNull(originWaypoint.metadata?.get("charge_to")?.asInt) {
+            "expected the origin waypoint to carry charge_to metadata"
+        }
+    }
+
+    /**
      * A replan is not the only request the session makes while parked - continuous alternatives
      * are also fetched - so requests are told apart by the reroute reason both controllers tag
-     * them with, rather than by arrival order.
+     * them with. [requests] must hold every request in arrival order, whichever handler served
+     * it: a replan that still describes the charging station is served by a different handler
+     * than one that doesn't.
+     *
+     * Returns the [ordinal]-th (1-based) replan request of the session. The replan must have
+     * completed already, so the request is expected to be recorded by now.
      */
-    private suspend fun MockDirectionsRequestHandler.awaitReplanRequestUrl(): HttpUrl {
-        val deadline = System.currentTimeMillis() + REROUTE_TIMEOUT_MILLIS
-        while (System.currentTimeMillis() < deadline) {
-            val replanUrl = handledRequests
-                .mapNotNull { it.requestUrl }
-                .lastOrNull { it.queryParameter(KEY_REASON) == VALUE_PARAMETERS_CHANGE }
-            if (replanUrl != null) {
-                return replanUrl
-            }
-            delay(POLLING_INTERVAL_MILLIS.milliseconds)
-        }
-        throw AssertionError(
-            "no replan request observed, requests made: " +
-                handledRequests.map { it.requestUrl },
+    private fun replanRequestUrl(requests: List<RecordedRequest>, ordinal: Int): HttpUrl {
+        val replanUrls = requests
+            .mapNotNull { it.requestUrl }
+            .filter { it.queryParameter(KEY_REASON) == VALUE_PARAMETERS_CHANGE }
+        return replanUrls.getOrNull(ordinal - 1) ?: throw AssertionError(
+            "replan request #$ordinal not observed, requests made: " +
+                requests.map { it.requestUrl },
         )
     }
 

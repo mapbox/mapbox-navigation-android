@@ -245,7 +245,11 @@ object EvRoutesProvider {
                 jsonResponse = readRawFileText(
                     context,
                     R.raw.ev_routes_berlin_user_provided_charging_station,
-                ).moveChargingMetadataToOrigin(),
+                ).moveChargingMetadataToOrigin(
+                    stationId = chargingStationId,
+                    powerKw = chargingStationPower / 1000,
+                    currentType = chargingStationCurrentType,
+                ),
                 expectedCoordinates = routeOptions.coordinatesList(),
                 routeOptionsFilter = {
                     it.unrecognizedJsonProperties
@@ -299,12 +303,23 @@ private fun Map<String, JsonElement>.containsParameters(params: Map<String, Stri
  * Moves the charging-station `metadata` from the via-waypoint (index 1) to the origin
  * waypoint (index 0) of every route in a Directions response, so charging is expected right
  * at departure instead of at a stop mid-route.
+ * [stationId], [powerKw] and [currentType], when set, replace the corresponding metadata fields,
+ * so that the response describes the same station the request declared.
  */
-private fun String.moveChargingMetadataToOrigin(): String {
+private fun String.moveChargingMetadataToOrigin(
+    stationId: String? = null,
+    powerKw: Int? = null,
+    currentType: String? = null,
+): String {
     val json = JsonParser.parseString(this).asJsonObject
     json.getAsJsonArray("routes").forEach { route ->
         val waypoints = route.asJsonObject.getAsJsonArray("waypoints")
         val chargingMetadata = waypoints[1].asJsonObject.get("metadata")
+        chargingMetadata.asJsonObject.apply {
+            stationId?.let { addProperty("station_id", it) }
+            powerKw?.let { addProperty("power_kw", it) }
+            currentType?.let { addProperty("current_type", it) }
+        }
         waypoints[0].asJsonObject.add("metadata", chargingMetadata)
         waypoints[1].asJsonObject.add("metadata", JsonNull.INSTANCE)
     }
