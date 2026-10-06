@@ -10,16 +10,20 @@ import com.mapbox.search.common.AsyncOperationTask
 import com.mapbox.search.common.CompletionCallback
 import com.mapbox.search.record.FavoriteRecord
 import com.mapbox.search.record.FavoritesDataProvider
+import kotlinx.coroutines.CancellableContinuation
+import kotlinx.coroutines.suspendCancellableCoroutine
+import java.util.Collections
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 class FavoritesApi(
     private val favoritesProvider: FavoritesDataProvider,
 ) : PlacesListOnMapProvider {
 
-    private var getAllTask: AsyncOperationTask? = null
-    private var addFavoriteTask: AsyncOperationTask? = null
-    private var removeFavoriteTask: AsyncOperationTask? = null
+    // Callers that are still waiting for a result, so the deprecated cancel() can reach them.
+    // Synchronized because callers may start a call on a background dispatcher while Search SDK
+    // callbacks and cancellation arrive on the main thread.
+    private val pendingContinuations: MutableSet<CancellableContinuation<*>> =
+        Collections.synchronizedSet(mutableSetOf())
 
     override suspend fun getPlaces(): Expected<GetPlacesError, List<PlaceRecord>> {
         val favorites = getFavorites()
@@ -32,80 +36,63 @@ class FavoritesApi(
 
     @Deprecated("Use coroutine scope cancellation instead.")
     override fun cancel() {
-        cancelRequests()
+        val pending = synchronized(pendingContinuations) { pendingContinuations.toList() }
+        pending.forEach { it.cancel() }
     }
 
-    suspend fun getFavorites(): Expected<GetPlacesError, List<FavoriteRecord>> {
-        getAllTask?.cancel()
-        return suspendCoroutine { continuation ->
-            getAllTask = favoritesProvider.getAll(
-                object : CompletionCallback<List<FavoriteRecord>> {
-
-                    override fun onComplete(result: List<FavoriteRecord>) {
-                        continuation.resume(ExpectedFactory.createValue(result))
-                    }
-
-                    override fun onError(e: Exception) {
-                        continuation.resume(
-                            ExpectedFactory.createError(
-                                GetPlacesError(e.message ?: "Error getting favorites.", e),
-                            ),
-                        )
-                    }
-                },
-            )
+    suspend fun getFavorites(): Expected<GetPlacesError, List<FavoriteRecord>> =
+        awaitTask("Error getting favorites.") { callback ->
+            favoritesProvider.getAll(callback)
         }
-    }
 
     suspend fun addFavorite(
         favoriteRecord: FavoriteRecord,
     ): Expected<GetPlacesError, FavoriteRecord> {
-        addFavoriteTask?.cancel()
-        return suspendCoroutine { continuation ->
-            addFavoriteTask = favoritesProvider.upsert(
-                favoriteRecord,
-                object : CompletionCallback<Unit> {
-                    override fun onComplete(result: Unit) {
-                        continuation.resume(ExpectedFactory.createValue(favoriteRecord))
-                    }
-
-                    override fun onError(e: Exception) {
-                        continuation.resume(
-                            ExpectedFactory.createError(
-                                GetPlacesError(e.message ?: "Error adding favorite.", e),
-                            ),
-                        )
-                    }
-                },
-            )
+        val result: Expected<GetPlacesError, Unit> = awaitTask("Error adding favorite.") {
+            favoritesProvider.upsert(favoriteRecord, it)
         }
+        return result.mapValue { favoriteRecord }
     }
 
-    suspend fun removeFavorite(favoriteId: String): Expected<GetPlacesError, Boolean> {
-        removeFavoriteTask?.cancel()
-        return suspendCoroutine { continuation ->
-            removeFavoriteTask = favoritesProvider.remove(
-                favoriteId,
-                object : CompletionCallback<Boolean> {
-                    override fun onComplete(result: Boolean) {
-                        continuation.resume(ExpectedFactory.createValue(result))
-                    }
-
-                    override fun onError(e: Exception) {
-                        continuation.resume(
-                            ExpectedFactory.createError(
-                                GetPlacesError(e.message ?: "Error adding favorite.", e),
-                            ),
-                        )
-                    }
-                },
-            )
+    suspend fun removeFavorite(favoriteId: String): Expected<GetPlacesError, Boolean> =
+        awaitTask("Error removing favorite.") { callback ->
+            favoritesProvider.remove(favoriteId, callback)
         }
-    }
 
-    private fun cancelRequests() {
-        getAllTask?.cancel()
-        addFavoriteTask?.cancel()
-        removeFavoriteTask?.cancel()
+    /**
+     * Runs the task started by [start] and suspends until it completes. Cancelling the caller
+     * cancels the task. Every caller gets its own task, so concurrent callers each get a result.
+     */
+    private suspend fun <T : Any> awaitTask(
+        defaultErrorMessage: String,
+        start: (CompletionCallback<T>) -> AsyncOperationTask,
+    ): Expected<GetPlacesError, T> = suspendCancellableCoroutine { continuation ->
+        val task = start(
+            object : CompletionCallback<T> {
+                override fun onComplete(result: T) {
+                    pendingContinuations.remove(continuation)
+                    continuation.resume(ExpectedFactory.createValue(result))
+                }
+
+                override fun onError(e: Exception) {
+                    pendingContinuations.remove(continuation)
+                    continuation.resume(
+                        ExpectedFactory.createError(
+                            GetPlacesError(e.message ?: defaultErrorMessage, e),
+                        ),
+                    )
+                }
+            },
+        )
+        // Registered only once the task started, so a provider that throws leaves nothing behind.
+        pendingContinuations.add(continuation)
+        // The callback may already have run, synchronously or on another thread, before the add.
+        if (!continuation.isActive) {
+            pendingContinuations.remove(continuation)
+        }
+        continuation.invokeOnCancellation {
+            pendingContinuations.remove(continuation)
+            task.cancel()
+        }
     }
 }

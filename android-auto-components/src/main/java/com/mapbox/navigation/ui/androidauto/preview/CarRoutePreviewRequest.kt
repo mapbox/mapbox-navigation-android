@@ -57,6 +57,7 @@ class CarRoutePreviewRequest internal constructor(
     private var requestGeneration = 0L
     private var activeRequestGeneration = 0L
     private var currentRequestId: Long? = null
+    private var activeCallback: CarRoutePreviewRequestCallback? = null
     private var mapboxNavigation: MapboxNavigation? = null
 
     var repository: CarRoutePreviewRepository? = null
@@ -104,6 +105,7 @@ class CarRoutePreviewRequest internal constructor(
                 cancelRequest()
                 val generation = ++requestGeneration
                 activeRequestGeneration = generation
+                activeCallback = callback
                 currentRequestId = mapboxNavigation.requestRoutes(
                     mapboxNavigation.carRouteOptions(origin, placeRecord.coordinate),
                     carCallbackTransformer(generation, placeRecord, callback),
@@ -117,6 +119,18 @@ class CarRoutePreviewRequest internal constructor(
         currentRequestId?.let { mapboxNavigation?.cancelRouteRequest(it) }
         currentRequestId = null
         activeRequestGeneration = 0L
+        activeCallback = null
+    }
+
+    /**
+     * Cancels the in-flight request only when it was made with [callback]. A screen uses this
+     * when it goes away, so it never cancels a request that another screen made after it.
+     */
+    @UiThread
+    internal fun cancelRequest(callback: CarRoutePreviewRequestCallback) {
+        if (activeCallback === callback) {
+            cancelRequest()
+        }
     }
 
     /**
@@ -157,6 +171,7 @@ class CarRoutePreviewRequest internal constructor(
                 if (activeRequestGeneration != generation) return
                 currentRequestId = null
                 activeRequestGeneration = 0L
+                activeCallback = null
 
                 // Cancellation is always either an internal supersession by a newer
                 // request or an explicit cancelRequest() call, neither of which is a
@@ -168,6 +183,7 @@ class CarRoutePreviewRequest internal constructor(
                 if (activeRequestGeneration != generation) return
                 currentRequestId = null
                 activeRequestGeneration = 0L
+                activeCallback = null
 
                 logAndroidAutoFailure("CarRoutePreview.onFailure $routeOptions $reasons")
                 when {
@@ -185,6 +201,7 @@ class CarRoutePreviewRequest internal constructor(
                 if (activeRequestGeneration != generation) return
                 currentRequestId = null
                 activeRequestGeneration = 0L
+                activeCallback = null
 
                 logAndroidAuto("CarRoutePreview.onRoutesReady ${routes.size}")
                 mapboxNavigation?.setRoutesPreview(routes)

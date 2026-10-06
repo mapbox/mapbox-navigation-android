@@ -63,6 +63,7 @@ dependencies {
 
     testImplementation(project(':libtesting-utils'))
     testImplementation project(':libtesting-navigation-util')
+    testImplementation project(':libtesting-dispatchers')
     testImplementation dependenciesList.androidXLifecycleTesting
     apply from: "$rootDir/gradle/unit-testing-dependencies.gradle"
     // instrumentation tests

@@ -38,7 +38,7 @@ class GeoDeeplinkGeocoding private constructor(
         currentMapboxGeocoding?.cancelCall()
         val point = geoDeeplink.point
         val placeQuery = geoDeeplink.placeQuery
-        currentMapboxGeocoding = when {
+        val request = when {
             point != null -> {
                 MapboxGeocoding.builder()
                     .accessToken(accessTokenWrapper.getLatestToken())
@@ -66,8 +66,11 @@ class GeoDeeplinkGeocoding private constructor(
                 error("GeoDeepLink must have a point or query")
             }
         }
+        currentMapboxGeocoding = request
+        // Use the local request, not the field: another call can replace the field before this
+        // block runs, and would then execute that other call's request a second time.
         return withContext(SdkDispatchers.IO) {
-            currentMapboxGeocoding?.asFlow()?.first()
+            request.asFlow().first()
         }
     }
 

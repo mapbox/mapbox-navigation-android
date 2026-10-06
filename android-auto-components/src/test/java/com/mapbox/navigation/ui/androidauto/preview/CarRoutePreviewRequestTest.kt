@@ -15,6 +15,7 @@ import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.MapboxJavaObjectsFactory
 import com.mapbox.navigation.ui.androidauto.MapboxCarOptions
 import com.mapbox.navigation.ui.androidauto.location.CarLocationProvider
+import com.mapbox.navigation.ui.androidauto.search.PlaceRecord
 import io.mockk.Called
 import io.mockk.Runs
 import io.mockk.every
@@ -361,6 +362,76 @@ class CarRoutePreviewRequestTest {
 
         verify { callback wasNot Called }
         verify(exactly = 0) { mapboxNavigation.setRoutesPreview(any()) }
+    }
+
+    @Test
+    fun `cancelRequest with the requesting callback cancels the active request`() {
+        mockLastLocation()
+        val callback: CarRoutePreviewRequestCallback = mockk(relaxUnitFun = true)
+        carRouteRequest.onAttached(mapboxNavigation)
+        carRouteRequest.request(mockPlaceRecord(), callback)
+
+        carRouteRequest.cancelRequest(callback)
+        routerCallbackList.last().onRoutesReady(listOf(mockk()), RouterOrigin.ONLINE)
+
+        verify(exactly = 1) { mapboxNavigation.cancelRouteRequest(any()) }
+        verify { callback wasNot Called }
+    }
+
+    @Test
+    fun `cancelRequest with another callback keeps the active request`() {
+        mockLastLocation()
+        val callback: CarRoutePreviewRequestCallback = mockk(relaxUnitFun = true)
+        val otherCallback: CarRoutePreviewRequestCallback = mockk(relaxUnitFun = true)
+        carRouteRequest.onAttached(mapboxNavigation)
+        carRouteRequest.request(mockPlaceRecord(), callback)
+
+        carRouteRequest.cancelRequest(otherCallback)
+        routerCallbackList.last().onRoutesReady(listOf(mockk()), RouterOrigin.ONLINE)
+
+        verify(exactly = 0) { mapboxNavigation.cancelRouteRequest(any()) }
+        verify(exactly = 1) { callback.onRoutesReady(any(), any()) }
+    }
+
+    @Test
+    fun `cancelRequest with the callback of a completed request does nothing`() {
+        mockLastLocation()
+        val callback: CarRoutePreviewRequestCallback = mockk(relaxUnitFun = true)
+        carRouteRequest.onAttached(mapboxNavigation)
+        carRouteRequest.request(mockPlaceRecord(), callback)
+        routerCallbackList.last().onRoutesReady(listOf(mockk()), RouterOrigin.ONLINE)
+
+        carRouteRequest.cancelRequest(callback)
+
+        verify(exactly = 0) { mapboxNavigation.cancelRouteRequest(any()) }
+    }
+
+    @Test
+    fun `cancelRequest with a superseded callback keeps the newer request`() {
+        mockLastLocation()
+        val firstCallback: CarRoutePreviewRequestCallback = mockk(relaxUnitFun = true)
+        val secondCallback: CarRoutePreviewRequestCallback = mockk(relaxUnitFun = true)
+        carRouteRequest.onAttached(mapboxNavigation)
+        carRouteRequest.request(mockPlaceRecord(), firstCallback)
+        carRouteRequest.request(mockPlaceRecord(), secondCallback)
+
+        carRouteRequest.cancelRequest(firstCallback)
+        routerCallbackList.last().onRoutesReady(listOf(mockk()), RouterOrigin.ONLINE)
+
+        verify(exactly = 1) { secondCallback.onRoutesReady(any(), any()) }
+    }
+
+    private fun mockLastLocation() {
+        every {
+            locationProvider.lastLocation()
+        } returns mockk {
+            every { longitude } returns -121.4670161
+            every { latitude } returns 38.5630514
+        }
+    }
+
+    private fun mockPlaceRecord(): PlaceRecord = mockk {
+        every { coordinate } returns Point.fromLngLat(-121.467001, 38.568105)
     }
 
     @Test

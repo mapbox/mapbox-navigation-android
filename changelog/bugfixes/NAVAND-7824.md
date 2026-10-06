@@ -1,0 +1,8 @@
+- Fixed Android Auto opening the route preview again after pressing Back from it on the Favorites and geo deeplink screens. Tapping the same place again now requests a new route.
+- Fixed Android Auto Favorites and geo deeplink screens failing to request routes with "No results" after a search screen opened on top of them was closed.
+- Android Auto route request errors on the Favorites, geo deeplink and search screens are now shown to the driver, and the places stay on screen so they can be tapped again.
+- The Android Auto search screen now shows a loading state while a result is selected, cancels the previous selection, shows a message when the selection fails, and no longer sends blank queries.
+- Android Auto route request results no longer change the screen when they arrive after another screen was opened on top. The result is applied when the driver returns.
+- Fixed the Android Auto Favorites and geo deeplink lists staying empty when the places loaded before the first location fix. The lists now show a loading state until a location is known, and an error when the places fail to load.
+- Fixed Android Auto Favorites requests that could stay pending forever when a newer request started. Closing the Favorites screen now also cancels its pending request.
+- Fixed `GeoDeeplinkGeocoding` running the newer of two back-to-back requests twice, which failed with "Already executed" or returned the newer places to the older request. The newer request now cancels the older one.

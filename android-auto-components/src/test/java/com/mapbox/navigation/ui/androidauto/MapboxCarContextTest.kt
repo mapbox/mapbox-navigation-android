@@ -7,7 +7,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleRegistry
 import com.mapbox.maps.extension.androidauto.MapboxCarMap
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.androidauto.preview.CarRoutePreviewRequest
 import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen
 import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenManager
 import io.mockk.Runs
@@ -17,6 +19,9 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.junit.After
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -39,6 +44,15 @@ class MapboxCarContextTest {
     fun setup() {
         every { session.lifecycle } returns lifecycleRegistry
         every { session.carContext } returns carContext
+    }
+
+    @After
+    fun teardown() {
+        // MapboxCarContext registers observers with the global MapboxNavigationApp while CREATED.
+        // Destroy the lifecycle so they do not leak into later tests.
+        if (lifecycleRegistry.currentState.isAtLeast(Lifecycle.State.CREATED)) {
+            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        }
     }
 
     @Test
@@ -160,4 +174,21 @@ class MapboxCarContextTest {
             block()
         }
     }
+
+    @Test
+    fun `CarRoutePreviewRequest is attached to MapboxNavigationApp while the lifecycle is CREATED`() {
+        val mapboxCarContext = MapboxCarContext(session.lifecycle, mapboxCarMap)
+        val routePreviewRequest = mapboxCarContext.routePreviewRequest
+        assertFalse(isRegistered(routePreviewRequest))
+
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+        assertTrue(isRegistered(routePreviewRequest))
+
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        assertFalse(isRegistered(routePreviewRequest))
+    }
+
+    private fun isRegistered(routePreviewRequest: CarRoutePreviewRequest) = MapboxNavigationApp
+        .getObservers(CarRoutePreviewRequest::class)
+        .any { it === routePreviewRequest }
 }
