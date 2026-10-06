@@ -5,6 +5,7 @@ package com.mapbox.navigation.instrumentation_tests.core
 import android.location.Location
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.utils.internalWaypoints
 import com.mapbox.navigation.base.route.LegWaypoint
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.ChargingState
@@ -42,6 +43,10 @@ import org.junit.Test
  * Verifies the native charging FSM propagates into [RouteProgress.chargingState] /
  * [RouteProgress.isChargingExpected] at an EV route's departure point, end to end
  * through [MapboxTripSession] rather than mocked as in unit tests.
+ *
+ * At departure, the origin charging station also counts in [RouteProgress.remainingWaypoints]
+ * for as long as the route is INITIALIZED, whatever the charging state, and stops counting once
+ * it is TRACKING - whether the vehicle drove off or the charge simply reached its target.
  */
 class ChargingAtDepartureTest : BaseCoreNoCleanUpTest() {
 
@@ -113,6 +118,8 @@ class ChargingAtDepartureTest : BaseCoreNoCleanUpTest() {
                 val chargingProgress = chargingProgressDeferred.await()
                 assertEquals(RouteProgressState.INITIALIZED, chargingProgress.currentState)
                 assertTrue(chargingProgress.isChargingExpected)
+                val waypointsCount = routes.first().internalWaypoints().size
+                assertEquals(waypointsCount, chargingProgress.remainingWaypoints)
 
                 // Still under the charge threshold, so stopCharging() here goes back to
                 // AWAIT_CHARGING, not NOT_CHARGING.
@@ -126,6 +133,9 @@ class ChargingAtDepartureTest : BaseCoreNoCleanUpTest() {
                 val afterStopProgress = afterStopProgressDeferred.await()
                 assertTrue(afterStopProgress.isChargingExpected)
                 assertNotNull(chargingFinishedData!!.legChanged)
+                // Unplugged, but still parked: the origin charger hasn't been left yet.
+                assertEquals(RouteProgressState.INITIALIZED, afterStopProgress.currentState)
+                assertEquals(waypointsCount, afterStopProgress.remainingWaypoints)
 
                 // Report a charge at/above target so the FSM falls through to EXTRA_CHARGING
                 // on its own; read the target from waypoint metadata instead of hardcoding it.
@@ -144,6 +154,7 @@ class ChargingAtDepartureTest : BaseCoreNoCleanUpTest() {
                 // currentState to TRACKING even though the vehicle never moves.
                 assertEquals(RouteProgressState.TRACKING, extraChargingProgress.currentState)
                 assertTrue(extraChargingProgress.isChargingExpected)
+                assertEquals(waypointsCount - 1, extraChargingProgress.remainingWaypoints)
             }
         }
 
@@ -189,6 +200,8 @@ class ChargingAtDepartureTest : BaseCoreNoCleanUpTest() {
                 }
                 navigation.startCharging()
                 val chargingProgress = chargingProgressDeferred.await()
+                val waypointsCount = routes.first().internalWaypoints().size
+                assertEquals(waypointsCount, chargingProgress.remainingWaypoints)
 
                 // Drive away from the departure point while still "plugged in".
                 val whileDrivingAwayProgressDeferred = async {
@@ -202,6 +215,7 @@ class ChargingAtDepartureTest : BaseCoreNoCleanUpTest() {
                 assertTrue(
                     whileDrivingAwayProgress.distanceTraveled > chargingProgress.distanceTraveled,
                 )
+                assertEquals(waypointsCount - 1, whileDrivingAwayProgress.remainingWaypoints)
                 // No longer "at" the charging waypoint, so the native FSM has already moved on
                 // from CHARGING to EXTRA_CHARGING, even though the charger is still connected.
                 val currentChargingState = navigation.routeProgressUpdates().first().chargingState
