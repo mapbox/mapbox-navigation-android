@@ -1,0 +1,215 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>NavigationScaleGestureHandler</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>code</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageids="UI Maps::com.mapbox.navigation.ui.maps.camera.lifecycle/NavigationScaleGestureHandler///PointingToDeclaration//-1725360525">
+  <div class="breadcrumbs"><a href="../../index.html">UI Maps</a><span class="delimiter">/</span><a href="../index.html">com.mapbox.navigation.ui.maps.camera.lifecycle</a><span class="delimiter">/</span><a href="index.html">NavigationScaleGestureHandler</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Navigation</span><wbr><span>Scale</span><wbr><span>Gesture</span><wbr><span><span>Handler</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">NavigationScaleGestureHandler</a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;navigationCamera<span class="token operator">: </span><a href="../../com.mapbox.navigation.ui.maps.camera/-navigation-camera/index.html">NavigationCamera</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;mapboxMap<span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps/MapboxMap///PointingToDeclaration/">MapboxMap</span><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;gesturesPlugin<span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps.plugin.gestures/GesturesPlugin///PointingToDeclaration/">GesturesPlugin</span><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;locationPlugin<span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps.plugin.locationcomponent/LocationComponentPlugin///PointingToDeclaration/">LocationComponentPlugin</span><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;scaleActionListener<span class="token operator">: </span><a href="../-navigation-scale-gesture-action-listener/index.html">NavigationScaleGestureActionListener</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;options<span class="token operator">: </span><a href="../-navigation-scale-gesture-handler-options/index.html">NavigationScaleGestureHandlerOptions</a><span class="token operator"> = </span>NavigationScaleGestureHandlerOptions.Builder(context).build()</span></span><span class="token punctuation">)</span> : <span data-unresolved-link="com.mapbox.maps.plugin.animation/CameraAnimationsLifecycleListener///PointingToDeclaration/">CameraAnimationsLifecycleListener</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Provides support in reacting to map gesture interaction and other animations scheduled outside of the <a href="../../com.mapbox.navigation.ui.maps.camera/-navigation-camera/index.html">NavigationCamera</a> context.</p><h3 class=""> Gestures recognition</h3><p class="paragraph">When enabled, the handler listens for all map gestures interactions, and if that interaction is changing the zoom level of the camera, it can be freely continued. This allows users to change the zoom level of the camera by executing well-known gestures like:</p><ul><li><p class="paragraph">double-tapping to zoom in</p></li><li><p class="paragraph">two-finger-tapping to zoom out</p></li><li><p class="paragraph">quick-scaling by double-tapping and holding the finger down while moving it up and down</p></li><li><p class="paragraph">pinching to zoom in and out (depends on <a href="../-navigation-scale-gesture-handler-options/index.html">NavigationScaleGestureHandlerOptions</a>)</p></li></ul><p class="paragraph">without the camera stopping to track the current user's puck and upcoming maneuver context.</p><p class="paragraph">You can configure which gestures should be recognized with <span data-unresolved-link="com.mapbox.maps.plugin.gestures.generated/GesturesSettings///PointingToDeclaration/">GesturesSettings</span>.</p><h3 class=""> Interruptions</h3><p class="paragraph">Any other camera change request outside of the <a href="../../com.mapbox.navigation.ui.maps.camera/-navigation-camera/-companion/-n-a-v-i-g-a-t-i-o-n_-c-a-m-e-r-a_-o-w-n-e-r.html">NAVIGATION_CAMERA_OWNER</a> and scale gestures (<span data-unresolved-link="com.mapbox.maps.plugin.animation/MapAnimationOwnerRegistry/GESTURES/#/PointingToDeclaration/">MapAnimationOwnerRegistry.GESTURES</span>) will immediately make <a href="../../com.mapbox.navigation.ui.maps.camera/-navigation-camera/index.html">NavigationCamera</a> fallback to <a href="../../com.mapbox.navigation.ui.maps.camera.state/-navigation-camera-state/-i-d-l-e/index.html">NavigationCameraState.IDLE</a> state to avoid running competing animations.</p><h3 class=""> Interop with the <a href="../../com.mapbox.navigation.ui.maps.camera.data/-viewport-data-source/index.html">ViewportDataSource</a></h3><p class="paragraph">Allowing to execute scale gestures means allowing the Maps gesture recognizer to change the camera's zoom level. Those zoom level updates, can interfere with camera updates that the <a href="../../com.mapbox.navigation.ui.maps.camera.data/-viewport-data-source/index.html">ViewportDataSource</a> produces and passes to <a href="../../com.mapbox.navigation.ui.maps.camera/-navigation-camera/index.html">NavigationCamera</a>. It's a good practice to stop the data source from producing zoom level updates during and after scale gesture interaction.</p><p class="paragraph">This handler exposes an <a href="../-navigation-scale-gesture-action-listener/index.html">NavigationScaleGestureActionListener</a> which is triggered whenever zoom level changes due to the gesture interaction that was allowed. This callback can be used to notify the <a href="../../com.mapbox.navigation.ui.maps.camera.data/-viewport-data-source/index.html">ViewportDataSource</a> implementation to stop producing zoom level for a certain period of time.</p><p class="paragraph">For example, when using the <a href="../../com.mapbox.navigation.ui.maps.camera.data/-mapbox-navigation-viewport-data-source/index.html">MapboxNavigationViewportDataSource</a>, you can call <a href="../../com.mapbox.navigation.ui.maps.camera.data/-following-frame-options/zoom-updates-allowed.html">FollowingFrameOptions.zoomUpdatesAllowed</a> with <code class="lang-kotlin">false</code> to stop producing zoom level updates. You can later reset the value to <code class="lang-kotlin">true</code> (after a button click, or after a certain period of time). Use <a href="../../com.mapbox.navigation.ui.maps.camera.data/-mapbox-navigation-viewport-data-source/options.html">MapboxNavigationViewportDataSource.options</a> to mutate this state.</p><h3 class=""> Integration</h3><p class="paragraph">To enable the handler, register it via <span data-unresolved-link="com.mapbox.maps.plugin.animation/CameraAnimationsPlugin/addCameraAnimationsLifecycleListener/#com.mapbox.maps.plugin.animation.CameraAnimationsLifecycleListener/PointingToDeclaration/">CameraAnimationsPlugin.addCameraAnimationsLifecycleListener</span> and call <a href="initialize.html">initialize</a>. To deinitialize, call <span data-unresolved-link="com.mapbox.maps.plugin.animation/CameraAnimationsPlugin/removeCameraAnimationsLifecycleListener/#com.mapbox.maps.plugin.animation.CameraAnimationsLifecycleListener/PointingToDeclaration/">CameraAnimationsPlugin.removeCameraAnimationsLifecycleListener</span> and <a href="cleanup.html">cleanup</a>.</p><p class="paragraph">When the handler is initialized, it sets a custom <span data-unresolved-link="com.mapbox.android.gestures/AndroidGesturesManager///PointingToDeclaration/">AndroidGesturesManager</span> to the Maps SDK and starts manipulating the gesture thresholds to make the execution of scale gestures possible without impacting other camera transitions. It's important to clean up afterwards to go back to the initial behavior if navigation gesture handling features are not required anymore.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Constructors">Constructors</button><button class="section-tab" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button></div>
+    <div class="tabs-section-body">
+      <h2 class="tabbedcontent">Constructors</h2>
+      <div class="table" data-togglable="Constructors"><a data-name="-1195298036%2FConstructors%2F-1725360525" anchor-label="NavigationScaleGestureHandler" id="-1195298036%2FConstructors%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue TabbedContent">
+            <div class=""><span class="inline-flex">
+                <div><a href="-navigation-scale-gesture-handler.html"><span>Navigation</span><wbr><span>Scale</span><wbr><span>Gesture</span><wbr><span><span>Handler</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1195298036%2FConstructors%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="-navigation-scale-gesture-handler.html"><span class="token function">NavigationScaleGestureHandler</span></a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;navigationCamera<span class="token operator">: </span><a href="../../com.mapbox.navigation.ui.maps.camera/-navigation-camera/index.html">NavigationCamera</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;mapboxMap<span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps/MapboxMap///PointingToDeclaration/">MapboxMap</span><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;gesturesPlugin<span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps.plugin.gestures/GesturesPlugin///PointingToDeclaration/">GesturesPlugin</span><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;locationPlugin<span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps.plugin.locationcomponent/LocationComponentPlugin///PointingToDeclaration/">LocationComponentPlugin</span><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;scaleActionListener<span class="token operator">: </span><a href="../-navigation-scale-gesture-action-listener/index.html">NavigationScaleGestureActionListener</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;options<span class="token operator">: </span><a href="../-navigation-scale-gesture-handler-options/index.html">NavigationScaleGestureHandlerOptions</a><span class="token operator"> = </span>NavigationScaleGestureHandlerOptions.Builder(context).build()</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="-251846438%2FFunctions%2F-1725360525" anchor-label="cleanup" id="-251846438%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="cleanup.html"><span><span>cleanup</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-251846438%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/UiThread.html"><span class="token annotation">UiThread</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="cleanup.html"><span class="token function">cleanup</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Cleans up the custom <span data-unresolved-link="com.mapbox.android.gestures/AndroidGesturesManager///PointingToDeclaration/">AndroidGesturesManager</span> and other listeners.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="697094988%2FFunctions%2F-1725360525" anchor-label="initialize" id="697094988%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="initialize.html"><span><span>initialize</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="697094988%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/UiThread.html"><span class="token annotation">UiThread</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="initialize.html"><span class="token function">initialize</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Sets a custom <span data-unresolved-link="com.mapbox.android.gestures/AndroidGesturesManager///PointingToDeclaration/">AndroidGesturesManager</span> and other listeners to the Maps SDK and starts manipulating the gesture thresholds to make the execution of scale gestures possible without impacting other camera transitions.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1515624948%2FFunctions%2F-1725360525" anchor-label="onAnimatorCancelling" id="1515624948%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="on-animator-cancelling.html"><span>on</span><wbr><span>Animator</span><wbr><span><span>Cancelling</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1515624948%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-animator-cancelling.html"><span class="token function">onAnimatorCancelling</span></a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;type<span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps.plugin.animation/CameraAnimatorType///PointingToDeclaration/">CameraAnimatorType</span><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;animator<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/animation/ValueAnimator.html">ValueAnimator</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;owner<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Called when animator is about to start.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1738744739%2FFunctions%2F-1725360525" anchor-label="onAnimatorEnding" id="-1738744739%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="on-animator-ending.html"><span>on</span><wbr><span>Animator</span><wbr><span><span>Ending</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1738744739%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-animator-ending.html"><span class="token function">onAnimatorEnding</span></a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;type<span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps.plugin.animation/CameraAnimatorType///PointingToDeclaration/">CameraAnimatorType</span><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;animator<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/animation/ValueAnimator.html">ValueAnimator</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;owner<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Called when animator is about to cancel already running animator of same <span data-unresolved-link="com.mapbox.maps.plugin.animation/CameraAnimatorType///PointingToDeclaration/">CameraAnimatorType</span>.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="2002113861%2FFunctions%2F-1725360525" anchor-label="onAnimatorInterrupting" id="2002113861%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="on-animator-interrupting.html"><span>on</span><wbr><span>Animator</span><wbr><span><span>Interrupting</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2002113861%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-animator-interrupting.html"><span class="token function">onAnimatorInterrupting</span></a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;type<span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps.plugin.animation/CameraAnimatorType///PointingToDeclaration/">CameraAnimatorType</span><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;runningAnimator<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/animation/ValueAnimator.html">ValueAnimator</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;runningAnimatorOwner<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;newAnimator<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/animation/ValueAnimator.html">ValueAnimator</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;newAnimatorOwner<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Called when animator is about to end.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1394865308%2FFunctions%2F-1725360525" anchor-label="onAnimatorStarting" id="-1394865308%2FFunctions%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="on-animator-starting.html"><span>on</span><wbr><span>Animator</span><wbr><span><span>Starting</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1394865308%2FFunctions%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="on-animator-starting.html"><span class="token function">onAnimatorStarting</span></a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;type<span class="token operator">: </span><span data-unresolved-link="com.mapbox.maps.plugin.animation/CameraAnimatorType///PointingToDeclaration/">CameraAnimatorType</span><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;animator<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/animation/ValueAnimator.html">ValueAnimator</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;owner<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Called when <a href="https://developer.android.com/reference/kotlin/android/animation/ValueAnimator.html">ValueAnimator</a> is about to cancel.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Properties</h2>
+      <div class="table" data-togglable="Properties"><a data-name="-797818580%2FProperties%2F-1725360525" anchor-label="customGesturesManager" id="-797818580%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="custom-gestures-manager.html">customGesturesManager</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-797818580%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="-797818580%2FProperties%2F-1725360525" anchor-label="customGesturesManager" id="-797818580%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="custom-gestures-manager.html">customGesturesManager</a><span class="token operator">: </span><span data-unresolved-link="com.mapbox.android.gestures/AndroidGesturesManager///PointingToDeclaration/">AndroidGesturesManager</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-797818580%2FProperties%2F-1725360525" anchor-label="customGesturesManager" id="-797818580%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><p class="paragraph"><span data-unresolved-link="com.mapbox.android.gestures/AndroidGesturesManager///PointingToDeclaration/">AndroidGesturesManager</span> that Maps SDK is using when the handler is initialized.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1909986077%2FProperties%2F-1725360525" anchor-label="initialGesturesManager" id="1909986077%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="initial-gestures-manager.html">initialGesturesManager</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1909986077%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="1909986077%2FProperties%2F-1725360525" anchor-label="initialGesturesManager" id="1909986077%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="initial-gestures-manager.html">initialGesturesManager</a><span class="token operator">: </span><span data-unresolved-link="com.mapbox.android.gestures/AndroidGesturesManager///PointingToDeclaration/">AndroidGesturesManager</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="1909986077%2FProperties%2F-1725360525" anchor-label="initialGesturesManager" id="1909986077%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><p class="paragraph"><span data-unresolved-link="com.mapbox.android.gestures/AndroidGesturesManager///PointingToDeclaration/">AndroidGesturesManager</span> that Maps SDK was using before the handler was initialized.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-714840524%2FProperties%2F-1725360525" anchor-label="isInitialized" id="-714840524%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":libnavui-maps:dokkaHtmlPartial/release" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="is-initialized.html">isInitialized</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-714840524%2FProperties%2F-1725360525"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":libnavui-maps:dokkaHtmlPartial/release"><a data-name="-714840524%2FProperties%2F-1725360525" anchor-label="isInitialized" id="-714840524%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="is-initialized.html">isInitialized</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-714840524%2FProperties%2F-1725360525" anchor-label="isInitialized" id="-714840524%2FProperties%2F-1725360525" data-filterable-set=":libnavui-maps:dokkaHtmlPartial/release"></a><p class="paragraph">Indicates whether the handler is initialized.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2024 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        </div>
+    </div>
+</div>
+
+</body></html>
+
