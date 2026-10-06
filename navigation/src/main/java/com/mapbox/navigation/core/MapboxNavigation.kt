@@ -2421,7 +2421,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * @see ChargingState
      */
     @ExperimentalMapboxNavigationAPI
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     fun startCharging() {
         navigator.startCharging()
     }
@@ -2435,7 +2434,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * resolved (or immediately if changing leg isn't possible)
      */
     @ExperimentalMapboxNavigationAPI
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @JvmOverloads
     fun stopCharging(callback: StopChargingCallback = StopChargingCallback {}) {
         navigator.stopCharging { legChanged ->
