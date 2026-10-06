@@ -1,0 +1,5 @@
+- Fixed Android Auto feedback crashing when the feedback could not be serialized for the history recorder or feedback metadata was unavailable.
+- Android Auto feedback screen no longer stalls the car UI when it opens: the map screenshot is captured and encoded in the background, and the history recorder no longer stores the encoded screenshot.
+- Android Auto feedback toast now reports whether the feedback was sent.
+- Android Auto remote feedback icons are decoded at grid size off the main thread and retried after a failure.
+- Back from a nested Android Auto feedback poll now returns to the previous poll.

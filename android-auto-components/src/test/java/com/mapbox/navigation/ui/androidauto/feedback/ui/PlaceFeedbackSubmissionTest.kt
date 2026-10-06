@@ -10,6 +10,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.core.telemetry.UserFeedback
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
 import com.mapbox.navigation.ui.androidauto.MapboxCarContext
@@ -23,7 +24,9 @@ import com.mapbox.navigation.ui.androidauto.testing.TestOnDoneCallback
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import io.mockk.slot
 import io.mockk.verify
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -69,22 +72,20 @@ class PlaceFeedbackSubmissionTest : MapboxRobolectricTestRunner() {
             SOURCE_SCREEN,
             CarFeedbackSender(),
             poll,
-            SNAPSHOT,
+            { SNAPSHOT },
         ) {
             override fun onFinish() = Unit
         }
 
         clickItem(screen, poll.options.indexOfFirst { it.title == title })
 
-        verify(exactly = 1) {
-            mapboxNavigation.postUserFeedback(
-                feedbackType = FeedbackEvent.OTHER_ISSUE,
-                description = "Android Auto selection: $title",
-                feedbackSource = FeedbackEvent.UI,
-                screenshot = SNAPSHOT,
-                feedbackSubType = null,
-                feedbackMetadata = feedbackMetadata,
-            )
+        val userFeedback = slot<UserFeedback>()
+        verify(exactly = 1) { mapboxNavigation.postUserFeedback(capture(userFeedback)) }
+        with(userFeedback.captured) {
+            assertEquals(FeedbackEvent.OTHER_ISSUE, feedbackType)
+            assertEquals("Android Auto selection: $title", description)
+            assertEquals(SNAPSHOT, screenshot)
+            assertEquals(feedbackMetadata, this.feedbackMetadata)
         }
     }
 

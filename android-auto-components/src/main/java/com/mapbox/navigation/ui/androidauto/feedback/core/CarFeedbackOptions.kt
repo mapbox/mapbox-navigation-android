@@ -8,9 +8,10 @@ import com.mapbox.navigation.core.telemetry.events.BitmapEncodeOptions
  * @param bitmapEncodeOptions controls how a feedback screenshot is compressed before it's
  * attached to a submitted feedback item.
  * @param attachScreenshot whether a screenshot of the car map is taken when a feedback screen
- * opens and attached to the submitted feedback. The screenshot is sent with the navigation
- * feedback event and recorded in the history file. When `false`, no screenshot is taken and
- * feedback is submitted without one. Defaults to `true`.
+ * opens and attached to the submitted feedback. The screenshot is captured and encoded in the
+ * background and sent with the navigation feedback event; the history file only records whether
+ * one was attached. When `false`, no screenshot is taken and feedback is submitted without one.
+ * Defaults to `true`.
  */
 class CarFeedbackOptions private constructor(
     val bitmapEncodeOptions: BitmapEncodeOptions,
