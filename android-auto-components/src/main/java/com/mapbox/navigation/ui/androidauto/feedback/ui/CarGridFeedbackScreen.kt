@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.androidauto.feedback.ui
 import androidx.annotation.UiThread
 import androidx.car.app.CarToast
 import androidx.car.app.Screen
+import androidx.car.app.constraints.ConstraintManager
 import androidx.car.app.model.Action
 import androidx.car.app.model.GridItem
 import androidx.car.app.model.GridTemplate
@@ -13,6 +14,7 @@ import com.mapbox.navigation.ui.androidauto.MapboxCarContext
 import com.mapbox.navigation.ui.androidauto.R
 import com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackSender
 import com.mapbox.navigation.ui.androidauto.internal.extensions.addBackPressedHandler
+import com.mapbox.navigation.ui.androidauto.internal.extensions.contentLimit
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAutoFailure
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
@@ -75,7 +77,8 @@ internal abstract class CarGridFeedbackScreen @UiThread constructor(
 
     private fun buildItemList(options: List<CarFeedbackOption>): ItemList {
         val itemListBuilder = ItemList.Builder()
-        for (option in options) {
+        val gridLimit = carContext.contentLimit(ConstraintManager.CONTENT_LIMIT_TYPE_GRID)
+        for (option in options.take(gridLimit)) {
             val itemBuilder = GridItem.Builder().setTitle(option.title)
             val image = iconDownloader.getOrDownload(option.icon)
             if (image != null && !submitting) {

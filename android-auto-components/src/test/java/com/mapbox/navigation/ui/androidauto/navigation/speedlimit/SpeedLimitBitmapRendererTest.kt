@@ -33,11 +33,34 @@ class SpeedLimitBitmapRendererTest {
     }
 
     @Test
-    fun `getBitmap - should return same bitmap for the same SpeedLimitSign`() {
-        val bmp1 = sut.getBitmap(SpeedLimitSign.VIENNA)
-        val bmp2 = sut.getBitmap(SpeedLimitSign.VIENNA)
+    fun `getBitmap - never draws into the bitmap returned by the previous call`() {
+        val bmp1 = sut.getBitmap(SpeedLimitSign.VIENNA, speedLimit = 50)
+        val bmp2 = sut.getBitmap(SpeedLimitSign.VIENNA, speedLimit = 60)
 
-        assertSame(bmp1, bmp2)
+        assertNotSame(bmp1, bmp2)
+    }
+
+    @Test
+    fun `getBitmap - alternates between two bitmaps for the same SpeedLimitSign`() {
+        val bmp1 = sut.getBitmap(SpeedLimitSign.MUTCD)
+        val bmp2 = sut.getBitmap(SpeedLimitSign.MUTCD)
+        val bmp3 = sut.getBitmap(SpeedLimitSign.MUTCD)
+        val bmp4 = sut.getBitmap(SpeedLimitSign.MUTCD)
+
+        assertSame(bmp1, bmp3)
+        assertSame(bmp2, bmp4)
+    }
+
+    @Test
+    fun `getBitmap - a different SpeedLimitSign does not advance the other sign buffers`() {
+        val mutcd1 = sut.getBitmap(SpeedLimitSign.MUTCD)
+        sut.getBitmap(SpeedLimitSign.VIENNA)
+        val mutcd2 = sut.getBitmap(SpeedLimitSign.MUTCD)
+        sut.getBitmap(SpeedLimitSign.VIENNA)
+        val mutcd3 = sut.getBitmap(SpeedLimitSign.MUTCD)
+
+        assertNotSame(mutcd1, mutcd2)
+        assertSame(mutcd1, mutcd3)
     }
 
     @Test

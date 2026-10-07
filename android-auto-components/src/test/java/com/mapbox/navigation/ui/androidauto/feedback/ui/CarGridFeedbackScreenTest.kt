@@ -5,6 +5,7 @@ import android.os.Looper
 import androidx.activity.OnBackPressedDispatcher
 import androidx.car.app.AppManager
 import androidx.car.app.CarContext
+import androidx.car.app.constraints.ConstraintManager
 import androidx.car.app.model.CarIcon
 import androidx.car.app.model.GridItem
 import androidx.car.app.model.GridTemplate
@@ -39,10 +40,16 @@ class CarGridFeedbackScreenTest : MapboxRobolectricTestRunner() {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val appManager: AppManager = mockk(relaxed = true)
     private val backPressedDispatcher = OnBackPressedDispatcher()
+    private var gridLimit = 100
     private val carContext: CarContext = mockk {
         every { getString(any()) } answers { context.getString(firstArg()) }
         every { getCarService(AppManager::class.java) } returns appManager
         every { onBackPressedDispatcher } returns backPressedDispatcher
+        every { getCarService(ConstraintManager::class.java) } returns mockk {
+            every { getContentLimit(ConstraintManager.CONTENT_LIMIT_TYPE_GRID) } answers {
+                gridLimit
+            }
+        }
     }
     private val mapboxCarContext: MapboxCarContext = mockk {
         every { carContext } returns this@CarGridFeedbackScreenTest.carContext
@@ -62,6 +69,19 @@ class CarGridFeedbackScreenTest : MapboxRobolectricTestRunner() {
         val template = screen.onGetTemplate() as GridTemplate
 
         assertEquals("Title", template.title.toString())
+        assertEquals(
+            listOf("First", "Second"),
+            template.singleList!!.items.map { (it as GridItem).title.toString() },
+        )
+    }
+
+    @Test
+    fun `template shows no more grid items than the host grid limit`() {
+        gridLimit = 2
+        val screen = createScreen(poll("Title", option("First"), option("Second"), option("Third")))
+
+        val template = screen.onGetTemplate() as GridTemplate
+
         assertEquals(
             listOf("First", "Second"),
             template.singleList!!.items.map { (it as GridItem).title.toString() },

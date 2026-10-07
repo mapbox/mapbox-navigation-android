@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.androidauto.placeslistonmap
 
+import androidx.car.app.constraints.ConstraintManager
 import androidx.car.app.model.CarIcon
 import androidx.core.graphics.drawable.IconCompat
 import com.mapbox.bindgen.ExpectedFactory
@@ -49,7 +50,16 @@ class PlacesListOnMapManagerTest : MapboxRobolectricTestRunner() {
     private val placesProvider: PlacesListOnMapProvider = mockk(relaxed = true)
     private val locationProvider: CarLocationProvider = mockk()
     private val validLocation = CompletableDeferred<Location>()
-    private val carMapSurface: MapboxCarMapSurface = mockk(relaxed = true)
+    private var placeLimit = 100
+    private val carMapSurface: MapboxCarMapSurface = mockk(relaxed = true) {
+        every {
+            carContext.getCarService(ConstraintManager::class.java)
+        } returns mockk {
+            every {
+                getContentLimit(ConstraintManager.CONTENT_LIMIT_TYPE_PLACE_LIST)
+            } answers { placeLimit }
+        }
+    }
     private val mapboxNavigation: MapboxNavigation = mockk {
         every { navigationOptions } returns mockk {
             every { distanceFormatterOptions } returns mockk {
@@ -62,10 +72,13 @@ class PlacesListOnMapManagerTest : MapboxRobolectricTestRunner() {
 
     private val place = place()
 
-    private fun place() = PlaceRecord(
-        id = "id",
+    private fun place(
+        id: String = "id",
+        coordinate: Point? = Point.fromLngLat(-122.4, 37.8),
+    ) = PlaceRecord(
+        id = id,
         name = "name",
-        coordinate = Point.fromLngLat(-122.4, 37.8),
+        coordinate = coordinate,
     )
 
     private val location = Location.Builder().apply {
@@ -106,6 +119,26 @@ class PlacesListOnMapManagerTest : MapboxRobolectricTestRunner() {
         assertTrue(state is PlacesListState.Loaded)
         assertEquals(1, (state as PlacesListState.Loaded).itemList.items.size)
         assertEquals(state.itemList, manager.itemList.value)
+        manager.onDetached(carMapSurface)
+    }
+
+    @Test
+    fun `the list and the map get the same places within the host place limit`() {
+        placeLimit = 2
+        every { locationProvider.lastLocation() } returns location
+        coEvery { placesProvider.getPlaces() } returns ExpectedFactory.createValue(
+            listOf(
+                place(id = "no coordinate", coordinate = null),
+                place(id = "first"),
+                place(id = "second"),
+                place(id = "third"),
+            ),
+        )
+
+        manager.onAttached(carMapSurface)
+
+        assertEquals(listOf("first", "second"), manager.placeRecords.value.map { it.id })
+        assertEquals(2, manager.itemList.value.items.size)
         manager.onDetached(carMapSurface)
     }
 

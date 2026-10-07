@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.androidauto.preview
 import android.text.SpannableString
 import androidx.annotation.UiThread
 import androidx.car.app.Screen
+import androidx.car.app.constraints.ConstraintManager
 import androidx.car.app.model.Action
 import androidx.car.app.model.DurationSpan
 import androidx.car.app.model.ItemList
@@ -20,7 +21,10 @@ import com.mapbox.navigation.core.preview.RoutesPreview
 import com.mapbox.navigation.ui.androidauto.MapboxCarContext
 import com.mapbox.navigation.ui.androidauto.R
 import com.mapbox.navigation.ui.androidauto.internal.extensions.addBackPressedHandler
+import com.mapbox.navigation.ui.androidauto.internal.extensions.contentLimit
+import com.mapbox.navigation.ui.androidauto.internal.extensions.keptIndex
 import com.mapbox.navigation.ui.androidauto.internal.extensions.startGuidanceOnPreviewedRoute
+import com.mapbox.navigation.ui.androidauto.internal.extensions.takeKeeping
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAuto
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAutoFailure
 import com.mapbox.navigation.ui.androidauto.location.CarLocationRenderer
@@ -50,6 +54,7 @@ internal class CarRoutePreviewScreen2 @UiThread constructor(
 
     private var routesPreview: RoutesPreview? = null
         set(value) {
+            if (field == value) return
             routeSelection.onPreviewChanged(field, value)
             field = value
             invalidate()
@@ -124,7 +129,14 @@ internal class CarRoutePreviewScreen2 @UiThread constructor(
             templateBuilder.setLoading(true)
         } else {
             val listBuilder = ItemList.Builder()
-            for (navigationRoute in originalRoutesList) {
+            // The primary route is drawn on the map and started by Navigate, so it stays in the
+            // list even beyond the limit.
+            val primaryRouteIndex = routesPreview.primaryRouteIndex
+            val shownRoutes = originalRoutesList.takeKeeping(
+                carContext.contentLimit(ConstraintManager.CONTENT_LIMIT_TYPE_ROUTE_LIST),
+                primaryRouteIndex,
+            )
+            for (navigationRoute in shownRoutes) {
                 val route = navigationRoute.directionsRoute
                 val title = route.legs()?.firstOrNull()?.summary()?.let { "  $it" } ?: " "
                 val routeSpannableString = SpannableString(title)
@@ -135,9 +147,9 @@ internal class CarRoutePreviewScreen2 @UiThread constructor(
                 val item = Row.Builder().setTitle(routeSpannableString).addText(distance).build()
                 listBuilder.addItem(item)
             }
-            listBuilder.setSelectedIndex(routesPreview.primaryRouteIndex)
+            listBuilder.setSelectedIndex(keptIndex(primaryRouteIndex, shownRoutes.size))
             listBuilder.setOnSelectedListener { index ->
-                val selectedRoute = originalRoutesList.getOrNull(index)
+                val selectedRoute = shownRoutes.getOrNull(index)
                     ?: return@setOnSelectedListener
                 if (carRoutesProvider.selectRoute(selectedRoute.id)) {
                     routeSelection.onRouteSelected(selectedRoute.id)

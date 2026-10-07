@@ -21,13 +21,22 @@ class PlaceMarkerRenderer(
     private val background: Int = Color.TRANSPARENT,
 ) {
     var bitmap: Bitmap? = null
+        set(value) {
+            field = value
+            marker = null
+        }
 
-    fun renderMarker() = CarIcon.Builder(
+    private var marker: CarIcon? = null
+
+    /**
+     * Returns the marker icon. The bitmap is rendered once and the icon is shared by every call.
+     */
+    fun renderMarker(): CarIcon = marker ?: CarIcon.Builder(
         IconCompat.createWithBitmap(bitmap()),
-    ).build()
+    ).build().also { marker = it }
 
     private fun bitmap(): Bitmap {
-        return bitmap ?: renderBitmap()
+        return bitmap ?: renderBitmap().also { bitmap = it }
     }
 
     private fun renderBitmap(): Bitmap {

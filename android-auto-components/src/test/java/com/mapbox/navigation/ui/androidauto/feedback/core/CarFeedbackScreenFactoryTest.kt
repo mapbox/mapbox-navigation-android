@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.androidauto.feedback.core
 
 import android.graphics.Bitmap
 import androidx.car.app.CarContext
+import androidx.car.app.constraints.ConstraintManager
 import androidx.car.app.model.GridTemplate
 import com.mapbox.maps.MapSurface
 import com.mapbox.maps.MapView
@@ -34,7 +35,11 @@ import org.junit.Test
 
 class CarFeedbackScreenFactoryTest : MapboxRobolectricTestRunner() {
 
-    private val carContext: CarContext = mockk()
+    private val carContext: CarContext = mockk {
+        every { getCarService(ConstraintManager::class.java) } returns mockk {
+            every { getContentLimit(any()) } returns CONTENT_LIMIT
+        }
+    }
     private val bitmap: Bitmap = mockk(relaxUnitFun = true)
 
     // Delivered only by the tests that check encoding, so no other test starts background work.
@@ -197,5 +202,6 @@ class CarFeedbackScreenFactoryTest : MapboxRobolectricTestRunner() {
 
     private companion object {
         private const val TIMEOUT_MS = 2000L
+        private const val CONTENT_LIMIT = 100
     }
 }

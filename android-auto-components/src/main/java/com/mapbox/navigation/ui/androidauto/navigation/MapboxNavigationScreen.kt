@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.androidauto.navigation
 import androidx.annotation.UiThread
 import androidx.car.app.Screen
 import androidx.car.app.annotations.RequiresCarApi
+import androidx.car.app.constraints.ConstraintManager
 import androidx.car.app.model.CarIcon
 import androidx.car.app.model.ListTemplate
 import androidx.car.app.model.Template
@@ -23,6 +24,7 @@ import com.mapbox.navigation.ui.androidauto.MapboxCarContext
 import com.mapbox.navigation.ui.androidauto.R
 import com.mapbox.navigation.ui.androidauto.action.MapboxMapActionStrip
 import com.mapbox.navigation.ui.androidauto.internal.extensions.addBackPressedHandler
+import com.mapbox.navigation.ui.androidauto.internal.extensions.contentLimit
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAuto
 import com.mapbox.navigation.ui.androidauto.location.CarLocationRenderer
 import com.mapbox.navigation.ui.androidauto.navigation.roadlabel.CarRoadLabelRenderer
@@ -220,6 +222,7 @@ internal class MapboxNavigationScreen @UiThread constructor(
                     R.drawable.ic_recenter_right_24,
                 ),
             ).build(),
+            maxRoutes = carContext.contentLimit(ConstraintManager.CONTENT_LIMIT_TYPE_ROUTE_LIST),
         )
     }
 

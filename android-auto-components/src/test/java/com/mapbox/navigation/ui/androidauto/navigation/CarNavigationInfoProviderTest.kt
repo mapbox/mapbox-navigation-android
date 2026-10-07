@@ -1,7 +1,11 @@
 package com.mapbox.navigation.ui.androidauto.navigation
 
 import androidx.car.app.Screen
+import androidx.car.app.model.DateTimeWithZone
+import androidx.car.app.model.Distance
 import androidx.car.app.navigation.model.NavigationTemplate
+import androidx.car.app.navigation.model.RoutingInfo
+import androidx.car.app.navigation.model.TravelEstimate
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
@@ -30,9 +34,12 @@ import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
 import org.junit.Rule
 import org.junit.Test
+import java.util.TimeZone
 
 /**
  * Observe [MapboxCarMapSurface] and [MapboxNavigation] properties that create the
@@ -49,7 +56,10 @@ class CarNavigationInfoProviderTest {
 
     private val carNavigationEtaMapper: CarNavigationEtaMapper = mockk(relaxed = true)
     private val carNavigationInfoMapper: CarNavigationInfoMapper = mockk(relaxed = true)
-    private val maneuverApi: MapboxManeuverApi = mockk(relaxed = true)
+    private val maneuverApi: MapboxManeuverApi = mockk(relaxed = true) {
+        every { getManeuvers(any<RouteProgress>()) } returns
+            ExpectedFactory.createValue(emptyList())
+    }
     private val junctionApi: MapboxJunctionApi = mockk(relaxed = true)
     private val serviceProvider: CarNavigationInfoServices = mockk {
         every { carNavigationEtaMapper(any()) } returns carNavigationEtaMapper
@@ -219,6 +229,185 @@ class CarNavigationInfoProviderTest {
                 any(),
             )
         }
+    }
+
+    @Test
+    fun `route progress without a visible change does not publish new navigation info`() {
+        val progressObserver = attachForDisplayChecks()
+
+        displayTick(progressObserver, stepMeters = 100.0, remainingSeconds = 600, arrivalMs = 0)
+        val published = sut.carNavigationInfo.value
+        // 590 s still shows as 10 min, and the arrival time is in the same minute.
+        displayTick(progressObserver, stepMeters = 100.0, remainingSeconds = 590, arrivalMs = 10_000)
+
+        assertSame(published, sut.carNavigationInfo.value)
+    }
+
+    @Test
+    fun `a new maneuver distance publishes new navigation info`() {
+        val progressObserver = attachForDisplayChecks()
+
+        displayTick(progressObserver, stepMeters = 100.0, remainingSeconds = 600, arrivalMs = 0)
+        val published = sut.carNavigationInfo.value
+        displayTick(progressObserver, stepMeters = 50.0, remainingSeconds = 600, arrivalMs = 0)
+
+        assertNotSame(published, sut.carNavigationInfo.value)
+    }
+
+    @Test
+    fun `a new remaining minute publishes new navigation info`() {
+        val progressObserver = attachForDisplayChecks()
+
+        displayTick(progressObserver, stepMeters = 100.0, remainingSeconds = 600, arrivalMs = 0)
+        val published = sut.carNavigationInfo.value
+        displayTick(progressObserver, stepMeters = 100.0, remainingSeconds = 540, arrivalMs = 0)
+
+        assertNotSame(published, sut.carNavigationInfo.value)
+    }
+
+    @Test
+    fun `a new arrival minute publishes new navigation info`() {
+        val progressObserver = attachForDisplayChecks()
+
+        displayTick(progressObserver, stepMeters = 100.0, remainingSeconds = 600, arrivalMs = 0)
+        val published = sut.carNavigationInfo.value
+        displayTick(progressObserver, stepMeters = 100.0, remainingSeconds = 600, arrivalMs = 60_000)
+
+        assertNotSame(published, sut.carNavigationInfo.value)
+    }
+
+    @Test
+    fun `a new step publishes new navigation info`() {
+        val progressObserver = attachForDisplayChecks()
+
+        displayTick(progressObserver, stepMeters = 100.0, remainingSeconds = 600, arrivalMs = 0)
+        val published = sut.carNavigationInfo.value
+        displayTick(
+            progressObserver,
+            stepMeters = 100.0,
+            remainingSeconds = 600,
+            arrivalMs = 0,
+            stepIndex = 1,
+        )
+
+        assertNotSame(published, sut.carNavigationInfo.value)
+    }
+
+    @Test
+    fun `navigation info is published again after navigation is attached again`() {
+        val progressObserver = slot<RouteProgressObserver>()
+        val mapboxNavigation: MapboxNavigation = mockk(relaxed = true) {
+            every { registerRouteProgressObserver(capture(progressObserver)) } just runs
+        }
+        carAppTestRule.onAttached(mapboxNavigation)
+        sut.onAttached(mockk(relaxed = true))
+
+        displayTick(progressObserver.captured, 100.0, remainingSeconds = 600, arrivalMs = 0)
+        carAppTestRule.onDetached(mapboxNavigation)
+        carAppTestRule.onAttached(mapboxNavigation)
+        displayTick(progressObserver.captured, 100.0, remainingSeconds = 600, arrivalMs = 0)
+
+        assertNotNull(sut.carNavigationInfo.value.navigationInfo)
+    }
+
+    @Test
+    fun `invalidateOnChange does not invalidate the screen without a visible change`() {
+        val testLifecycleOwner = TestLifecycleOwner()
+        val screen: Screen = mockk {
+            every { invalidate() } just runs
+            every { lifecycle } returns testLifecycleOwner.lifecycle
+        }
+        sut.invalidateOnChange(screen)
+        val progressObserver = attachForDisplayChecks()
+
+        repeat(10) { second ->
+            displayTick(
+                progressObserver,
+                stepMeters = 100.0,
+                remainingSeconds = 600L - second,
+                arrivalMs = second * 1_000L,
+            )
+        }
+
+        verify(exactly = 1) { screen.invalidate() }
+    }
+
+    @Test
+    fun `a new junction view publishes new navigation info`() {
+        val progressObserver = slot<RouteProgressObserver>()
+        val bannerObserver = slot<BannerInstructionsObserver>()
+        val mapboxNavigation: MapboxNavigation = mockk(relaxed = true) {
+            every { registerRouteProgressObserver(capture(progressObserver)) } just runs
+            every { registerBannerInstructionsObserver(capture(bannerObserver)) } just runs
+        }
+        every { junctionApi.generateJunction(any(), any()) } answers {
+            secondArg<MapboxNavigationConsumer<Expected<JunctionError, JunctionValue>>>()
+                .accept(ExpectedFactory.createValue(mockk(relaxed = true)))
+        }
+        carAppTestRule.onAttached(mapboxNavigation)
+        sut.onAttached(mockk(relaxed = true))
+
+        displayTick(progressObserver.captured, 100.0, remainingSeconds = 600, arrivalMs = 0)
+        val published = sut.carNavigationInfo.value
+        bannerObserver.captured.onNewBannerInstructions(mockk(relaxed = true))
+        displayTick(progressObserver.captured, 100.0, remainingSeconds = 600, arrivalMs = 0)
+
+        assertNotSame(published, sut.carNavigationInfo.value)
+    }
+
+    @Test
+    fun `new road shields publish new navigation info`() {
+        val shieldCallback = slot<RouteShieldCallback>()
+        every { maneuverApi.getManeuvers(any<RouteProgress>()) } returns
+            ExpectedFactory.createValue(listOf(mockk(relaxed = true)))
+        every {
+            maneuverApi.getRoadShields(any(), any(), any(), capture(shieldCallback))
+        } just runs
+        val progressObserver = attachForDisplayChecks()
+
+        displayTick(progressObserver, stepMeters = 100.0, remainingSeconds = 600, arrivalMs = 0)
+        val published = sut.carNavigationInfo.value
+        shieldCallback.captured.onRoadShields(listOf(shieldResult()))
+
+        assertNotSame(published, sut.carNavigationInfo.value)
+    }
+
+    private fun attachForDisplayChecks(): RouteProgressObserver {
+        val progressObserver = slot<RouteProgressObserver>()
+        val mapboxNavigation: MapboxNavigation = mockk(relaxed = true) {
+            every { registerRouteProgressObserver(capture(progressObserver)) } just runs
+        }
+        carAppTestRule.onAttached(mapboxNavigation)
+        sut.onAttached(mockk(relaxed = true))
+        return progressObserver.captured
+    }
+
+    private fun displayTick(
+        progressObserver: RouteProgressObserver,
+        stepMeters: Double,
+        remainingSeconds: Long,
+        arrivalMs: Long,
+        stepIndex: Int = 0,
+    ) {
+        val routeProgress = mockk<RouteProgress>(relaxed = true) {
+            every { currentLegProgress } returns mockk(relaxed = true) {
+                every { legIndex } returns 0
+                every { currentStepProgress } returns mockk(relaxed = true) {
+                    every { this@mockk.stepIndex } returns stepIndex
+                }
+            }
+        }
+        every {
+            carNavigationInfoMapper.mapNavigationInfo(any(), any(), routeProgress, any())
+        } returns mockk<RoutingInfo> {
+            every { currentDistance } returns Distance.create(stepMeters, Distance.UNIT_METERS)
+        }
+        every { carNavigationEtaMapper.getDestinationTravelEstimate(routeProgress) } returns
+            TravelEstimate.Builder(
+                Distance.create(10.0, Distance.UNIT_KILOMETERS),
+                DateTimeWithZone.create(arrivalMs, TimeZone.getTimeZone("UTC")),
+            ).setRemainingTimeSeconds(remainingSeconds).build()
+        progressObserver.onRouteProgressChanged(routeProgress)
     }
 
     private fun shieldResult(

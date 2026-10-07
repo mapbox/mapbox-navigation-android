@@ -13,6 +13,8 @@ import androidx.car.app.model.Row
 import androidx.car.app.navigation.model.NavigationTemplate
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.preview.RoutesPreview
+import com.mapbox.navigation.ui.androidauto.internal.extensions.keptIndex
+import com.mapbox.navigation.ui.androidauto.internal.extensions.takeKeeping
 
 /**
  * Builds the templates of the Mapbox navigation screen. The builders have no state and no side
@@ -85,6 +87,30 @@ object CarNavigationTemplates {
         onRouteSelected: (routeId: String) -> Unit,
         onNavigate: (routeId: String) -> Unit,
         navigateActionIcon: CarIcon? = null,
+    ): ListTemplate = routePreview(
+        routesPreview,
+        title,
+        navigateActionTitle,
+        formatDistance,
+        onRouteSelected,
+        onNavigate,
+        navigateActionIcon,
+        maxRoutes = Int.MAX_VALUE,
+    )
+
+    /**
+     * Same as the public [routePreview], showing at most [maxRoutes] routes, such as the host's
+     * route list content limit.
+     */
+    internal fun routePreview(
+        routesPreview: RoutesPreview,
+        title: CharSequence,
+        navigateActionTitle: CharSequence,
+        formatDistance: (Double) -> CharSequence,
+        onRouteSelected: (routeId: String) -> Unit,
+        onNavigate: (routeId: String) -> Unit,
+        navigateActionIcon: CarIcon?,
+        maxRoutes: Int,
     ): ListTemplate {
         val templateBuilder = ListTemplate.Builder()
             .setHeader(
@@ -102,7 +128,9 @@ object CarNavigationTemplates {
 
         val listBuilder = ItemList.Builder()
 
-        val routes = routesPreview.originalRoutesList
+        // The primary route is drawn on the map, so it stays in the list even beyond the limit.
+        val primaryRouteIndex = routesPreview.primaryRouteIndex
+        val routes = routesPreview.originalRoutesList.takeKeeping(maxRoutes, primaryRouteIndex)
         routes.forEach { navigationRoute ->
             // Each row starts its own route, not the currently selected one. Routes are passed by id
             // so a click from an outdated template can't start a route from a newer preview.
@@ -127,7 +155,7 @@ object CarNavigationTemplates {
             )
         }
 
-        listBuilder.setSelectedIndex(routesPreview.primaryRouteIndex)
+        listBuilder.setSelectedIndex(keptIndex(primaryRouteIndex, routes.size))
         listBuilder.setOnSelectedListener { index ->
             routes.getOrNull(index)?.let { onRouteSelected(it.id) }
         }

@@ -12,6 +12,9 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.tripdata.maneuver.model.Component
 import com.mapbox.navigation.tripdata.maneuver.model.Maneuver
 import com.mapbox.navigation.tripdata.maneuver.model.ManeuverError
+import com.mapbox.navigation.tripdata.maneuver.model.PrimaryManeuver
+import com.mapbox.navigation.tripdata.maneuver.model.SecondaryManeuver
+import com.mapbox.navigation.tripdata.maneuver.model.SubManeuver
 import com.mapbox.navigation.tripdata.shield.model.RouteShield
 import com.mapbox.navigation.ui.androidauto.navigation.lanes.CarLanesImageRenderer
 import com.mapbox.navigation.ui.androidauto.navigation.lanes.useMapboxLaneGuidance
@@ -41,6 +44,10 @@ class CarNavigationInfoMapper(
     private val secondaryExitOptions = ManeuverSecondaryOptions.Builder().build().exitOptions
     private val subExitOptions = ManeuverSubOptions.Builder().build().exitOptions
 
+    // Maneuver icons and instructions are rendered into bitmaps. They change only with the
+    // maneuver or its shields, so they are rendered once and reused on every route progress.
+    private var renderedSteps: RenderedSteps? = null
+
     @JvmOverloads
     fun mapNavigationInfo(
         expectedManeuvers: Expected<ManeuverError, List<Maneuver>>,
@@ -52,6 +59,7 @@ class CarNavigationInfoMapper(
         val distanceRemaining = currentStepProgress?.distanceRemaining ?: return null
         val maneuver = expectedManeuvers.value?.firstOrNull()
         return maneuver?.primary?.let { primary ->
+            val rendered = renderSteps(maneuver, routeShields)
             val carManeuver =
                 CarManeuverMapper.fromAnnouncedStep(
                     primary.type,
@@ -62,27 +70,8 @@ class CarNavigationInfoMapper(
                     routeProgress,
                     CarManeuverMapper.PRIMARY_MANEUVER_STEP_OFFSET,
                 )
-            carManeuverIconRenderer.renderManeuverIcon(primary)?.let { carManeuver.setIcon(it) }
-            val primaryInstruction =
-                renderManeuver(
-                    primary.componentList,
-                    routeShields,
-                    primaryExitOptions,
-                    primary.modifier,
-                )
-            val instruction = SpannableStringBuilder.valueOf(primaryInstruction)
-            maneuver.secondary?.let { secondary ->
-                val secondaryInstruction =
-                    renderManeuver(
-                        secondary.componentList,
-                        routeShields,
-                        secondaryExitOptions,
-                        secondary.modifier,
-                    )
-                instruction.append(System.lineSeparator())
-                instruction.append(secondaryInstruction)
-            }
-            val step = Step.Builder(instruction)
+            rendered.primaryIcon?.let { carManeuver.setIcon(it) }
+            val step = Step.Builder(rendered.instruction)
                 .setManeuver(carManeuver.build())
                 .useMapboxLaneGuidance(carLanesImageGenerator, maneuver.laneGuidance)
                 .build()
@@ -90,10 +79,46 @@ class CarNavigationInfoMapper(
             val stepDistance = CarDistanceFormatter.carDistance(distanceRemaining.toDouble())
             RoutingInfo.Builder()
                 .setCurrentStep(step, stepDistance)
-                .withOptionalNextStep(maneuver, routeShields, routeProgress)
+                .withOptionalNextStep(maneuver.sub, rendered, routeProgress)
                 .withOptionalJunctionImage(junctionValue)
                 .build()
         }
+    }
+
+    private fun renderSteps(maneuver: Maneuver, routeShields: List<RouteShield>): RenderedSteps {
+        val key = RenderKey(maneuver.primary, maneuver.secondary, maneuver.sub, routeShields)
+        renderedSteps?.takeIf { it.key == key }?.let { return it }
+
+        val primary = maneuver.primary
+        val instruction = SpannableStringBuilder.valueOf(
+            renderManeuver(
+                primary.componentList,
+                routeShields,
+                primaryExitOptions,
+                primary.modifier,
+            ),
+        )
+        maneuver.secondary?.let { secondary ->
+            val secondaryInstruction =
+                renderManeuver(
+                    secondary.componentList,
+                    routeShields,
+                    secondaryExitOptions,
+                    secondary.modifier,
+                )
+            instruction.append(System.lineSeparator())
+            instruction.append(secondaryInstruction)
+        }
+        val sub = maneuver.sub
+        return RenderedSteps(
+            key = key,
+            primaryIcon = carManeuverIconRenderer.renderManeuverIcon(primary),
+            instruction = instruction,
+            subIcon = sub?.let { carManeuverIconRenderer.renderManeuverIcon(it) },
+            subInstruction = sub?.let {
+                renderManeuver(it.componentList, routeShields, subExitOptions, it.modifier)
+            },
+        ).also { renderedSteps = it }
     }
 
     private fun RoutingInfo.Builder.withOptionalJunctionImage(
@@ -108,11 +133,12 @@ class CarNavigationInfoMapper(
     }
 
     private fun RoutingInfo.Builder.withOptionalNextStep(
-        maneuver: Maneuver,
-        routeShields: List<RouteShield>,
+        subManeuver: SubManeuver?,
+        rendered: RenderedSteps,
         routeProgress: RouteProgress,
     ) = apply {
-        maneuver.sub?.let { subManeuver ->
+        val instruction = rendered.subInstruction
+        if (subManeuver != null && instruction != null) {
             val nextCarManeuver =
                 CarManeuverMapper.fromAnnouncedStep(
                     subManeuver.type,
@@ -123,15 +149,7 @@ class CarNavigationInfoMapper(
                     routeProgress,
                     CarManeuverMapper.SUB_MANEUVER_STEP_OFFSET,
                 )
-            carManeuverIconRenderer.renderManeuverIcon(subManeuver)
-                ?.let { nextCarManeuver.setIcon(it) }
-            val instruction =
-                renderManeuver(
-                    subManeuver.componentList,
-                    routeShields,
-                    subExitOptions,
-                    subManeuver.modifier,
-                )
+            rendered.subIcon?.let { nextCarManeuver.setIcon(it) }
             val nextStep = Step.Builder(instruction)
                 .setManeuver(nextCarManeuver.build())
                 .build()
@@ -157,6 +175,22 @@ class CarNavigationInfoMapper(
             IMAGE_HEIGHT,
         )
     }
+
+    private data class RenderKey(
+        val primary: PrimaryManeuver,
+        val secondary: SecondaryManeuver?,
+        val sub: SubManeuver?,
+        val routeShields: List<RouteShield>,
+    )
+
+    // The rendered values are never changed after they are created, so templates can share them.
+    private class RenderedSteps(
+        val key: RenderKey,
+        val primaryIcon: CarIcon?,
+        val instruction: CharSequence,
+        val subIcon: CarIcon?,
+        val subInstruction: CharSequence?,
+    )
 
     private companion object {
         private const val IMAGE_HEIGHT = 72

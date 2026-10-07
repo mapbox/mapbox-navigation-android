@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.androidauto.placeslistonmap
 
 import androidx.annotation.VisibleForTesting
+import androidx.car.app.constraints.ConstraintManager
 import androidx.car.app.model.ItemList
 import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.geojson.Feature
@@ -11,6 +12,7 @@ import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
+import com.mapbox.navigation.ui.androidauto.internal.extensions.contentLimit
 import com.mapbox.navigation.ui.androidauto.internal.extensions.getStyle
 import com.mapbox.navigation.ui.androidauto.internal.extensions.mapboxNavigationForward
 import com.mapbox.navigation.ui.androidauto.internal.extensions.styleFlow
@@ -101,7 +103,10 @@ class PlacesListOnMapManager(
         coroutineScope = MainScope()
         MapboxNavigationApp.registerObserver(navigationObserver)
 
-        loadPlaceRecords()
+        loadPlaceRecords(
+            mapboxCarMapSurface.carContext
+                .contentLimit(ConstraintManager.CONTENT_LIMIT_TYPE_PLACE_LIST),
+        )
         coroutineScope.launch {
             mapboxCarMapSurface.styleFlow().collectLatest { style ->
                 val resources = mapboxCarMapSurface.carContext.resources
@@ -150,7 +155,9 @@ class PlacesListOnMapManager(
         }
     }
 
-    private fun loadPlaceRecords() {
+    // The list, the map markers and the camera all use these records. Only places that can be
+    // shown on the map are kept, and no more than the host shows in the list.
+    private fun loadPlaceRecords(placeLimit: Int) {
         coroutineScope.launch {
             val expectedPlaceRecords = withContext(SdkDispatchers.IO) {
                 placesListOnMapProvider.getPlaces()
@@ -165,7 +172,7 @@ class PlacesListOnMapManager(
                         _state.value = PlacesListState.Failed
                     }
                 },
-                { placeRecords -> publishPlaces(placeRecords) },
+                { placeRecords -> publishPlaces(placeRecords.placesToShow(placeLimit)) },
             )
         }
     }
@@ -199,3 +206,10 @@ internal sealed interface PlacesListState {
     data class Loaded(val itemList: ItemList) : PlacesListState
     object Failed : PlacesListState
 }
+
+/**
+ * The places shown in the list and on the map: only places with a coordinate, and no more than
+ * the host shows in the list.
+ */
+internal fun List<PlaceRecord>.placesToShow(placeLimit: Int): List<PlaceRecord> =
+    filter { it.coordinate != null }.take(placeLimit)

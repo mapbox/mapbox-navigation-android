@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.androidauto.feedback.ui
 import android.content.Context
 import androidx.car.app.AppManager
 import androidx.car.app.CarContext
+import androidx.car.app.constraints.ConstraintManager
 import androidx.car.app.model.CarIcon
 import androidx.car.app.model.GridItem
 import androidx.car.app.model.GridTemplate
@@ -45,6 +46,9 @@ class PlaceFeedbackSubmissionTest : MapboxRobolectricTestRunner() {
     private val carContext: CarContext = mockk {
         every { getString(any()) } answers { context.getString(firstArg()) }
         every { getCarService(AppManager::class.java) } returns mockk(relaxed = true)
+        every { getCarService(ConstraintManager::class.java) } returns mockk {
+            every { getContentLimit(any()) } returns CONTENT_LIMIT
+        }
     }
     private val mapboxCarContext: MapboxCarContext = mockk {
         every { carContext } returns this@PlaceFeedbackSubmissionTest.carContext
@@ -100,5 +104,6 @@ class PlaceFeedbackSubmissionTest : MapboxRobolectricTestRunner() {
     private companion object {
         private const val SOURCE_SCREEN = "SEARCH"
         private const val SNAPSHOT = "snapshot"
+        private const val CONTENT_LIMIT = 100
     }
 }

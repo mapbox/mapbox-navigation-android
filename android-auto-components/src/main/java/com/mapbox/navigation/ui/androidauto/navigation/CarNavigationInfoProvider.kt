@@ -56,6 +56,7 @@ internal constructor(
     private var latestRouteProgress: RouteProgress? = null
     private var latestManeuvers: Expected<ManeuverError, List<Maneuver>>? = null
     private var currentJunctionValue: JunctionValue? = null
+    private var publishedDisplayKey: CarNavigationInfoDisplayKey? = null
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal var carContext: CarContext? = null
@@ -147,6 +148,7 @@ internal constructor(
         latestManeuvers = null
         navigationEtaMapper = null
         navigationInfoMapper = null
+        publishedDisplayKey = null
         _carNavigationInfo.value = CarNavigationInfo()
     }
 
@@ -185,15 +187,30 @@ internal constructor(
         }
     }
 
+    // Route progress arrives about once a second, but the host shows rounded distances and
+    // times. Publishing only when something the host shows changes avoids invalidating the
+    // screen, and sending a new template, on every route progress.
     private fun updateNavigationInfo(
         maneuvers: Expected<ManeuverError, List<Maneuver>>,
         routeProgress: RouteProgress,
     ) {
+        val junctionValue = currentJunctionValue
+        val navigationInfo = navigationInfoMapper
+            ?.mapNavigationInfo(maneuvers, currentShields, routeProgress, junctionValue)
+        val travelEstimate = navigationEtaMapper?.getDestinationTravelEstimate(routeProgress)
+        val displayKey = CarNavigationInfoDisplayKey.create(
+            maneuver = maneuvers.value?.firstOrNull(),
+            shields = currentShields,
+            junctionValue = junctionValue,
+            routeProgress = routeProgress,
+            navigationInfo = navigationInfo,
+            travelEstimate = travelEstimate,
+        )
+        if (displayKey == publishedDisplayKey) return
+        publishedDisplayKey = displayKey
         _carNavigationInfo.value = CarNavigationInfo(
-            navigationInfo = navigationInfoMapper
-                ?.mapNavigationInfo(maneuvers, currentShields, routeProgress, currentJunctionValue),
-            destinationTravelEstimate = navigationEtaMapper
-                ?.getDestinationTravelEstimate(routeProgress),
+            navigationInfo = navigationInfo,
+            destinationTravelEstimate = travelEstimate,
         )
     }
 }

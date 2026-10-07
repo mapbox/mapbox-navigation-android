@@ -236,6 +236,71 @@ class CarNavigationTemplatesTest : MapboxRobolectricTestRunner() {
         assertEquals(1, itemList.selectedIndex)
     }
 
+    @Test
+    fun `route preview shows no more routes than the route list limit`() {
+        val routesPreview = mockk<RoutesPreview> {
+            every { originalRoutesList } returns listOf(
+                routeWithLegs("first", emptyList()),
+                routeWithLegs("second", emptyList()),
+                routeWithLegs("third", emptyList()),
+            )
+            every { primaryRouteIndex } returns 0
+        }
+        var navigatedRouteId: String? = null
+
+        val template = CarNavigationTemplates.routePreview(
+            routesPreview = routesPreview,
+            title = "Route preview",
+            navigateActionTitle = "Navigate",
+            formatDistance = { "1 km" },
+            onRouteSelected = {},
+            onNavigate = { navigatedRouteId = it },
+            navigateActionIcon = null,
+            maxRoutes = 2,
+        )
+
+        val rows = template.singleList!!.items.map { it as Row }
+        assertEquals(2, rows.size)
+        val callback = TestOnDoneCallback()
+        rows.last().actions.single().onClickDelegate!!.sendClick(callback)
+        callback.assertSuccess()
+        assertEquals("second", navigatedRouteId)
+    }
+
+    @Test
+    fun `route preview keeps a primary route beyond the limit in the list`() {
+        val routesPreview = mockk<RoutesPreview> {
+            every { originalRoutesList } returns listOf(
+                routeWithLegs("first", emptyList()),
+                routeWithLegs("second", emptyList()),
+                routeWithLegs("third", emptyList()),
+            )
+            every { primaryRouteIndex } returns 2
+        }
+        val navigatedRouteIds = mutableListOf<String>()
+
+        val template = CarNavigationTemplates.routePreview(
+            routesPreview = routesPreview,
+            title = "Route preview",
+            navigateActionTitle = "Navigate",
+            formatDistance = { "1 km" },
+            onRouteSelected = {},
+            onNavigate = { navigatedRouteIds.add(it) },
+            navigateActionIcon = null,
+            maxRoutes = 2,
+        )
+
+        val itemList = template.singleList!!
+        val rows = itemList.items.map { it as Row }
+        rows.forEach { row ->
+            val callback = TestOnDoneCallback()
+            row.actions.single().onClickDelegate!!.sendClick(callback)
+            callback.assertSuccess()
+        }
+        assertEquals(listOf("first", "third"), navigatedRouteIds)
+        assertEquals(1, itemList.selectedIndex)
+    }
+
     private fun routeWithLegs(
         routeId: String,
         routeLegs: List<RouteLeg>,

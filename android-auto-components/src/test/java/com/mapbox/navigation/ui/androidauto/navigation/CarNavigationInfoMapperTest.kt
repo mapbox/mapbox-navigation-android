@@ -28,6 +28,7 @@ import com.mapbox.navigation.tripdata.maneuver.model.PrimaryManeuverFactory
 import com.mapbox.navigation.tripdata.maneuver.model.RoadShieldComponentNode
 import com.mapbox.navigation.tripdata.maneuver.model.SecondaryManeuverFactory
 import com.mapbox.navigation.tripdata.maneuver.model.SubManeuverFactory
+import com.mapbox.navigation.tripdata.shield.model.RouteShield
 import com.mapbox.navigation.ui.androidauto.navigation.lanes.CarLanesImage
 import com.mapbox.navigation.ui.androidauto.navigation.lanes.CarLanesImageRenderer
 import com.mapbox.navigation.ui.androidauto.navigation.maneuver.CarManeuverIconRenderer
@@ -37,6 +38,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
+import io.mockk.verify
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -350,6 +352,105 @@ class CarNavigationInfoMapperTest {
             androidx.car.app.navigation.model.Maneuver.TYPE_ROUNDABOUT_EXIT_CW,
             result.currentStep!!.maneuver!!.type,
         )
+    }
+
+    @Test
+    fun `mapNavigationInfo - renders the maneuver once for repeated route progress`() {
+        given(
+            renderedPrimaryInstruction = "rendered primary maneuver instruction",
+            renderedSecondaryInstruction = "rendered secondary maneuver instruction",
+        )
+
+        repeat(3) {
+            sut.mapNavigationInfo(
+                expectedManeuvers = ExpectedFactory.createValue(listOf(TEST_MANEUVER)),
+                routeShields = emptyList(),
+                routeProgress = TEST_ROUTE_PROGRESS,
+            )
+        }
+
+        verify(exactly = 1) { iconRenderer.renderManeuverIcon(TEST_MANEUVER.primary) }
+        verify(exactly = 1) {
+            instructionRenderer.renderInstruction(
+                TEST_MANEUVER.primary.componentList,
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        }
+    }
+
+    @Test
+    fun `mapNavigationInfo - renders the maneuver again when road shields arrive`() {
+        given(
+            renderedPrimaryInstruction = "rendered primary maneuver instruction",
+            renderedSecondaryInstruction = "rendered secondary maneuver instruction",
+        )
+        val shields = listOf(mockk<RouteShield>())
+
+        listOf(emptyList(), shields, shields).forEach { routeShields ->
+            sut.mapNavigationInfo(
+                expectedManeuvers = ExpectedFactory.createValue(listOf(TEST_MANEUVER)),
+                routeShields = routeShields,
+                routeProgress = TEST_ROUTE_PROGRESS,
+            )
+        }
+
+        verify(exactly = 1) {
+            instructionRenderer.renderInstruction(
+                TEST_MANEUVER.primary.componentList,
+                emptyList(),
+                any(),
+                any(),
+                any(),
+            )
+        }
+        verify(exactly = 1) {
+            instructionRenderer.renderInstruction(
+                TEST_MANEUVER.primary.componentList,
+                shields,
+                any(),
+                any(),
+                any(),
+            )
+        }
+    }
+
+    @Test
+    fun `mapNavigationInfo - renders a new maneuver`() {
+        given(
+            renderedPrimaryInstruction = "rendered primary maneuver instruction",
+            renderedSecondaryInstruction = "rendered secondary maneuver instruction",
+        )
+        val nextPrimary = PrimaryManeuverFactory.buildPrimaryManeuver(
+            id = "primary_1",
+            text = "Turn Left",
+            type = StepManeuver.TURN,
+            degrees = 0.0,
+            modifier = ManeuverModifier.LEFT,
+            drivingSide = "right",
+            componentList = emptyList(),
+        )
+        val nextManeuver = ManeuverFactory.buildManeuver(
+            primary = nextPrimary,
+            stepDistance = mockk(),
+            secondary = null,
+            sub = null,
+            lane = null,
+            point = Point.fromLngLat(10.0, 20.0),
+        )
+
+        listOf(TEST_MANEUVER, nextManeuver, nextManeuver).forEach { maneuver ->
+            sut.mapNavigationInfo(
+                expectedManeuvers = ExpectedFactory.createValue(listOf(maneuver)),
+                routeShields = emptyList(),
+                routeProgress = TEST_ROUTE_PROGRESS,
+            )
+        }
+
+        verify(exactly = 1) { iconRenderer.renderManeuverIcon(TEST_MANEUVER.primary) }
+        verify(exactly = 1) { iconRenderer.renderManeuverIcon(nextPrimary) }
     }
 
     private fun stepManeuver(type: String, exit: Int?): LegStep = mockk {

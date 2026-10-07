@@ -1,0 +1,7 @@
+- Android Auto active guidance no longer re-renders maneuver icons, exits and road shields on every route progress, and refreshes the navigation template only when the shown maneuver, distance, arrival time or remaining minutes change.
+- Fixed the Android Auto speed limit sign and lane guidance images being redrawn while they were still shown.
+- Android Auto place markers are rendered once per list.
+- Fixed the Android Auto audio guidance button not refreshing on one screen after another screen was shown.
+- Android Auto route preview registers one routes preview observer and refreshes only when the preview changes.
+- `MapboxCarMapLoader.onCarConfigurationChanged` reloads the map style only when the dark mode or the style override changed.
+- Android Auto place, route and feedback lists, and the place markers on the map, respect the host's content limits.
