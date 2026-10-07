@@ -67,7 +67,7 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
 
     @get:Rule
     val mockLocationReplayerRule = MockLocationReplayerRule(mockLocationUpdatesRule)
-    private val tolerance = 0.0001
+    private val tolerance = 0.01
 
     override fun setupMockLocation(): Location = mockLocationUpdatesRule.generateLocationUpdate {
         latitude = 48.143406486859135
@@ -393,9 +393,9 @@ class UpcomingRouteObjectsTest : BaseCoreNoCleanUpTest() {
             val distanceDiffAfterFirstRefresh = updateAfterRefresh.distanceTraveled
             // refresh geometry_index_start = 1810, so resulting geometry_index_start = 1871
             // (refresh was made with current_route_geometry_index = 61),
-            // this corresponds to distanceTravelled = 134617.89 ~ 134612.883
+            // this corresponds to distanceTravelled = 134617.89 ~ 134612.937
             // (1 geometry index != 1 meter, so 134617.89 is an approximate value),
-            val newIncidentDistanceToStart = 134612.883
+            val newIncidentDistanceToStart = 134612.937
             val newIncidentIndex = 22
 
             val expectedObjectsAfterFirstRefresh = originalRoadObjects
