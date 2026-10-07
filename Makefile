@@ -19,6 +19,7 @@ libnavui-tripprogress \
 libnavui-maneuver \
 libnavui-resources \
 libnavui-voice \
+libnavui-voicefeedback \
 libnavigation-android \
 libnavui-speedlimit \
 libnavui-shield \
@@ -223,6 +224,7 @@ ui-check-api: assemble-ui-release
 	./gradlew :libnavui-maneuver:checkApi -PhidePackage=com.mapbox.navigation.ui.maneuver.internal -PhideId=ReferencesHidden
 	./gradlew :libnavui-tripprogress:checkApi -PhidePackage=com.mapbox.navigation.ui.tripprogress.internal -PhideId=ReferencesHidden
 	./gradlew :libnavui-voice:checkApi -PhidePackage=com.mapbox.navigation.ui.voice.internal -PhideId=ReferencesHidden
+	./gradlew :libnavui-voicefeedback:checkApi -PhidePackage=com.mapbox.navigation.ui.voicefeedback.internal -PhideId=ReferencesHidden
 	./gradlew :libnavui-shield:checkApi -PhidePackage=com.mapbox.navigation.ui.shield.internal
 	./gradlew :libnavui-speedlimit:checkApi -PhidePackage=com.mapbox.navigation.ui.speedlimit.internal -PhideId=ReferencesHidden
 	./gradlew :libnavui-status:checkApi -PhidePackage=com.mapbox.navigation.ui.status.internal
@@ -237,6 +239,7 @@ ui-update-api: assemble-ui-release
 	./gradlew :libnavui-maneuver:updateApi -PhidePackage=com.mapbox.navigation.ui.maneuver.internal
 	./gradlew :libnavui-tripprogress:updateApi -PhidePackage=com.mapbox.navigation.ui.tripprogress.internal
 	./gradlew :libnavui-voice:updateApi -PhidePackage=com.mapbox.navigation.ui.voice.internal
+	./gradlew :libnavui-voicefeedback:updateApi -PhidePackage=com.mapbox.navigation.ui.voicefeedback.internal
 	./gradlew :libnavui-shield:updateApi -PhidePackage=com.mapbox.navigation.ui.shield.internal
 	./gradlew :libnavui-speedlimit:updateApi -PhidePackage=com.mapbox.navigation.ui.speedlimit.internal
 	./gradlew :libnavui-status:updateApi -PhidePackage=com.mapbox.navigation.ui.status.internal

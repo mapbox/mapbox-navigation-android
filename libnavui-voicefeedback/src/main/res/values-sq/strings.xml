@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mapbox_voice_feedback__share_your_feedback">Ndani mendimet tuaja</string>
+    <string name="mapbox_voice_feedback__listening">Duke dëgjuar…</string>
+    <string name="mapbox_voice_feedback__processing">Duke përpunuar…</string>
+    <string name="mapbox_voice_feedback__success_title">Faleminderit që e ndave</string>
+    <string name="mapbox_voice_feedback__success_description">Mendimet tuaja na ndihmojnë të përmirësohemi</string>
+    <string name="mapbox_voice_feedback__error_title">Ups! Diçka shkoi keq</string>
+    <string name="mapbox_voice_feedback__error_description">Ju lutemi provoni përsëri</string>
+    <string name="mapbox_voice_feedback__speech_not_recognized_title">Ups! Nuk e kapa atë</string>
+    <string name="mapbox_voice_feedback__connecting">Pa lidhje</string>
+</resources>

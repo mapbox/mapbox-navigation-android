@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mapbox_voice_feedback__share_your_feedback">Ossza meg visszajelzését</string>
+    <string name="mapbox_voice_feedback__listening">Hallgatás…</string>
+    <string name="mapbox_voice_feedback__processing">Feldolgozás…</string>
+    <string name="mapbox_voice_feedback__success_title">Köszönöm, hogy megosztottad</string>
+    <string name="mapbox_voice_feedback__success_description">Az Ön visszajelzése segít nekünk a fejlődésben</string>
+    <string name="mapbox_voice_feedback__error_title">Hoppá! Valami hiba történt</string>
+    <string name="mapbox_voice_feedback__error_description">Kérjük, próbálja meg újra</string>
+    <string name="mapbox_voice_feedback__speech_not_recognized_title">Hoppá! Ezt nem értettem.</string>
+    <string name="mapbox_voice_feedback__connecting">Nincs kapcsolat</string>
+</resources>

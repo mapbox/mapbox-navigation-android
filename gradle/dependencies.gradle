@@ -141,6 +141,7 @@ ext {
       androidStartup            : "androidx.startup:startup-runtime:${version.androidStartup}",
       androidXFragment          : "androidx.fragment:fragment-ktx:${version.androidXFragmentVersion}",
       androidXArchCoreTesting   : "androidx.arch.core:core-testing:${version.androidXArchCoreVersion}",
+      androidXFragmentTesting    : "androidx.fragment:fragment-testing:${version.androidXFragmentVersion}",
       androidXDataStore         : "androidx.datastore:datastore-preferences:${version.androidXDataStore}",
       androidXWorkManager       : "androidx.work:work-runtime-ktx:${version.androidXWorkManager}",
 

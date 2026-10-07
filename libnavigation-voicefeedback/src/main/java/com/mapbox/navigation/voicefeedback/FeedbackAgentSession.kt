@@ -197,7 +197,12 @@ class FeedbackAgentSession private constructor(
         engine.disconnect()
     }
 
-    private companion object {
+    companion object {
         private const val TAG = "FeedbackAgentSession"
+
+        @JvmStatic
+        fun getRegisteredInstance(): FeedbackAgentSession = MapboxNavigationApp
+            .getObservers(FeedbackAgentSession::class)
+            .firstOrNull() ?: Builder().build().also { MapboxNavigationApp.registerObserver(it) }
     }
 }

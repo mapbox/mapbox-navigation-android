@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mapbox_voice_feedback__share_your_feedback">Podeľte sa o svoju spätnú väzbu</string>
+    <string name="mapbox_voice_feedback__listening">Počúvam…</string>
+    <string name="mapbox_voice_feedback__processing">Spracováva sa…</string>
+    <string name="mapbox_voice_feedback__success_title">Ďakujeme za zdieľanie</string>
+    <string name="mapbox_voice_feedback__success_description">Vaša spätná väzba nám pomáha zlepšovať sa</string>
+    <string name="mapbox_voice_feedback__error_title">Ups! Niečo sa pokazilo</string>
+    <string name="mapbox_voice_feedback__error_description">Skúste to prosím znova</string>
+    <string name="mapbox_voice_feedback__speech_not_recognized_title">Ups! Nezachytil som to</string>
+    <string name="mapbox_voice_feedback__connecting">Žiadne pripojenie</string>
+</resources>

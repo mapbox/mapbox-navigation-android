@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mapbox_voice_feedback__share_your_feedback">Trimiteți feedback-ul dvs.</string>
+    <string name="mapbox_voice_feedback__listening">Ascultare…</string>
+    <string name="mapbox_voice_feedback__processing">Se procesează…</string>
+    <string name="mapbox_voice_feedback__success_title">Mulțumesc că ai împărtășit</string>
+    <string name="mapbox_voice_feedback__success_description">Feedback-ul dumneavoastră ne ajută să ne îmbunătățim</string>
+    <string name="mapbox_voice_feedback__error_title">Ups! Ceva nu a mers bine</string>
+    <string name="mapbox_voice_feedback__error_description">Vă rugăm să încercați din nou</string>
+    <string name="mapbox_voice_feedback__speech_not_recognized_title">Ups! Nu am prins asta</string>
+    <string name="mapbox_voice_feedback__connecting">Fără conexiune</string>
+</resources>

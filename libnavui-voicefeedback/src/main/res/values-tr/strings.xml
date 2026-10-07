@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mapbox_voice_feedback__share_your_feedback">Görüşlerinizi paylaşın</string>
+    <string name="mapbox_voice_feedback__listening">Dinleniyor…</string>
+    <string name="mapbox_voice_feedback__processing">İşleniyor…</string>
+    <string name="mapbox_voice_feedback__success_title">Paylaştığınız için teşekkürler</string>
+    <string name="mapbox_voice_feedback__success_description">Geri bildiriminiz bize gelişmemizde yardımcı oluyor</string>
+    <string name="mapbox_voice_feedback__error_title">Hata! Bir şeyler ters gitti</string>
+    <string name="mapbox_voice_feedback__error_description">Lütfen tekrar deneyin</string>
+    <string name="mapbox_voice_feedback__speech_not_recognized_title">Hata! Bunu anlayamadım</string>
+    <string name="mapbox_voice_feedback__connecting">Bağlantı Yok</string>
+</resources>
