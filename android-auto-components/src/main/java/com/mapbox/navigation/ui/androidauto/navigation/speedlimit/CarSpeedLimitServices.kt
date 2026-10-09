@@ -8,6 +8,6 @@ import com.mapbox.navigation.base.speed.model.SpeedLimitSign
  */
 internal class CarSpeedLimitServices {
     @OptIn(MapboxExperimental::class)
-    fun speedLimitWidget(signFormat: SpeedLimitSign): SpeedLimitWidget =
-        SpeedLimitWidget(signFormat)
+    fun speedLimitWidget(signFormat: SpeedLimitSign, scale: Float): SpeedLimitWidget =
+        SpeedLimitWidget.scaled(signFormat, scale)
 }

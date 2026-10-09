@@ -10,9 +10,14 @@ import androidx.car.app.model.Toggle
 import com.mapbox.navigation.ui.androidauto.MapboxCarContext
 import com.mapbox.navigation.ui.androidauto.R
 import com.mapbox.navigation.ui.androidauto.internal.extensions.addBackPressedHandler
+import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen
 
 /**
  * Handle the android auto car app settings.
+ *
+ * The default app has no settings yet, so the single toggle below is a sample slot that shows
+ * how a setting is stored. It is kept on purpose: the free drive action strip opens this screen,
+ * and integrators replace it by registering their own factory for [MapboxScreen.SETTINGS].
  */
 internal class CarSettingsScreen(
     private val mapboxCarContext: MapboxCarContext,

@@ -9,6 +9,7 @@ import androidx.car.app.notification.CarAppExtender
 import androidx.car.app.validation.HostValidator
 import androidx.core.app.NotificationCompat
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.base.formatter.TimeFormatter
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -32,6 +33,7 @@ import io.mockk.verifyOrder
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -177,6 +179,151 @@ class MapboxCarNotificationTest {
         assertEquals(TestCarAppService::class.java, startAppServiceSlot.captured)
     }
 
+    @Test
+    fun `route progress of a finished trip is not shown on the next trip`() {
+        mapboxCarNotification.onAttached(mapboxNavigation)
+        setNavigationSessionState(mockk<NavigationSessionState.ActiveGuidance>())
+        routeProgressObserverSlot.captured.onRouteProgressChanged(routeProgress)
+        setNavigationSessionState(mockk<NavigationSessionState.FreeDrive>())
+
+        setNavigationSessionState(mockk<NavigationSessionState.ActiveGuidance>())
+        tripNotificationInterceptorSlot.captured.intercept(notificationBuilder)
+
+        verify(exactly = 0) {
+            activeGuidanceExtenderUpdater.update(any(), any(), any(), any())
+        }
+        verify { idleExtenderUpdater.update(any()) }
+    }
+
+    @Test
+    fun `updater is reset before the first update of the next trip`() {
+        val nextRouteProgress = mockk<RouteProgress>()
+        mapboxCarNotification.onAttached(mapboxNavigation)
+        setNavigationSessionState(mockk<NavigationSessionState.ActiveGuidance>())
+        routeProgressObserverSlot.captured.onRouteProgressChanged(routeProgress)
+        tripNotificationInterceptorSlot.captured.intercept(notificationBuilder)
+
+        setNavigationSessionState(mockk<NavigationSessionState.FreeDrive>())
+        setNavigationSessionState(mockk<NavigationSessionState.ActiveGuidance>())
+        routeProgressObserverSlot.captured.onRouteProgressChanged(nextRouteProgress)
+        tripNotificationInterceptorSlot.captured.intercept(notificationBuilder)
+
+        verifyOrder {
+            activeGuidanceExtenderUpdater.update(any(), routeProgress, any(), any())
+            activeGuidanceExtenderUpdater.reset()
+            activeGuidanceExtenderUpdater.update(any(), nextRouteProgress, any(), any())
+        }
+    }
+
+    @Test
+    fun `route progress that arrives after the trip ended is ignored`() {
+        mapboxCarNotification.onAttached(mapboxNavigation)
+        setNavigationSessionState(mockk<NavigationSessionState.ActiveGuidance>())
+        setNavigationSessionState(mockk<NavigationSessionState.FreeDrive>())
+        routeProgressObserverSlot.captured.onRouteProgressChanged(routeProgress)
+
+        setNavigationSessionState(mockk<NavigationSessionState.ActiveGuidance>())
+        tripNotificationInterceptorSlot.captured.intercept(notificationBuilder)
+
+        verify(exactly = 0) {
+            activeGuidanceExtenderUpdater.update(any(), any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `active guidance state is reset on detach`() {
+        mapboxCarNotification.onAttached(mapboxNavigation)
+        setNavigationSessionState(mockk<NavigationSessionState.ActiveGuidance>())
+        routeProgressObserverSlot.captured.onRouteProgressChanged(routeProgress)
+        tripNotificationInterceptorSlot.captured.intercept(notificationBuilder)
+
+        mapboxCarNotification.onDetached(mapboxNavigation)
+        mapboxCarNotification.onAttached(mapboxNavigation)
+        setNavigationSessionState(mockk<NavigationSessionState.ActiveGuidance>())
+        tripNotificationInterceptorSlot.captured.intercept(notificationBuilder)
+
+        verifyOrder {
+            activeGuidanceExtenderUpdater.update(any(), routeProgress, any(), any())
+            activeGuidanceExtenderUpdater.reset()
+        }
+        verify(exactly = 1) {
+            activeGuidanceExtenderUpdater.update(any(), any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `formatters are created for the attached navigation`() {
+        val otherFormatterOptions = mockk<DistanceFormatterOptions>()
+        val otherNavigation = mockk<MapboxNavigation>(relaxUnitFun = true) {
+            every { navigationOptions } returns mockk {
+                every { distanceFormatterOptions } returns otherFormatterOptions
+                every { timeFormatter } returns mockk()
+            }
+            every {
+                setTripNotificationInterceptor(capture(tripNotificationInterceptorSlot))
+            } just Runs
+            every {
+                registerNavigationSessionStateObserver(capture(navigationSessionStateObserverSlot))
+            } just Runs
+            every {
+                registerRouteProgressObserver(capture(routeProgressObserverSlot))
+            } just Runs
+        }
+        mapboxCarNotification.onAttached(mapboxNavigation)
+        mapboxCarNotification.onDetached(mapboxNavigation)
+
+        mapboxCarNotification.onAttached(otherNavigation)
+        setNavigationSessionState(mockk<NavigationSessionState.ActiveGuidance>())
+        routeProgressObserverSlot.captured.onRouteProgressChanged(routeProgress)
+        tripNotificationInterceptorSlot.captured.intercept(notificationBuilder)
+
+        verify {
+            activeGuidanceExtenderUpdater.update(
+                any(),
+                routeProgress,
+                match { it is MapboxDistanceFormatter && it.options == otherFormatterOptions },
+                any(),
+            )
+        }
+    }
+
+    @Test
+    fun `content intent is rebuilt when the start app service changes`() {
+        val startAppService = options.notificationOptions
+        every { startAppService.startAppService } returns TestCarAppService::class.java
+        mapboxCarNotification.onAttached(mapboxNavigation)
+        tripNotificationInterceptorSlot.captured.intercept(notificationBuilder)
+
+        every { startAppService.startAppService } returns OtherCarAppService::class.java
+        tripNotificationInterceptorSlot.captured.intercept(notificationBuilder)
+        tripNotificationInterceptorSlot.captured.intercept(notificationBuilder)
+
+        verifyOrder {
+            CarPendingIntentFactory.create(any(), TestCarAppService::class.java)
+            CarPendingIntentFactory.create(any(), OtherCarAppService::class.java)
+        }
+        verify(exactly = 2) { CarPendingIntentFactory.create(any(), any()) }
+    }
+
+    @Test
+    fun `formatter and content intent are reused across notification updates`() {
+        every { options.notificationOptions.startAppService } returns TestCarAppService::class.java
+        val distanceFormatters = mutableListOf<DistanceFormatter>()
+        every {
+            activeGuidanceExtenderUpdater.update(any(), any(), capture(distanceFormatters), any())
+        } just Runs
+        mapboxCarNotification.onAttached(mapboxNavigation)
+        setNavigationSessionState(mockk<NavigationSessionState.ActiveGuidance>())
+        routeProgressObserverSlot.captured.onRouteProgressChanged(routeProgress)
+
+        tripNotificationInterceptorSlot.captured.intercept(notificationBuilder)
+        tripNotificationInterceptorSlot.captured.intercept(notificationBuilder)
+
+        assertEquals(2, distanceFormatters.size)
+        assertSame(distanceFormatters[0], distanceFormatters[1])
+        verify(exactly = 1) { CarPendingIntentFactory.create(any(), any()) }
+    }
+
     private fun verifyCommonProperties() {
         verifyOrder {
             notificationBuilder.setOngoing(true)
@@ -192,7 +339,7 @@ class MapboxCarNotificationTest {
     private fun verifyIdleProperties() {
         verify {
             idleExtenderUpdater.update(match { checkExtender(it) })
-            activeGuidanceExtenderUpdater.updateCurrentManeuverToDefault()
+            activeGuidanceExtenderUpdater.reset()
         }
         verify(exactly = 0) {
             freeDriveExtenderUpdater.update(any())
@@ -203,7 +350,7 @@ class MapboxCarNotificationTest {
     private fun verifyFreeDriveProperties() {
         verify {
             freeDriveExtenderUpdater.update(match { checkExtender(it) })
-            activeGuidanceExtenderUpdater.updateCurrentManeuverToDefault()
+            activeGuidanceExtenderUpdater.reset()
         }
         verify(exactly = 0) {
             idleExtenderUpdater.update(any())
@@ -223,7 +370,7 @@ class MapboxCarNotificationTest {
         verify(exactly = 0) {
             idleExtenderUpdater.update(any())
             freeDriveExtenderUpdater.update(any())
-            activeGuidanceExtenderUpdater.updateCurrentManeuverToDefault()
+            activeGuidanceExtenderUpdater.reset()
         }
     }
 
@@ -244,6 +391,12 @@ class MapboxCarNotificationTest {
             expectedExtender.importance == actualExtender.importance &&
             expectedExtender.color == actualExtender.color &&
             expectedExtender.channelId == actualExtender.channelId
+    }
+
+    class OtherCarAppService : CarAppService() {
+        override fun createHostValidator(): HostValidator = mockk()
+
+        override fun onCreateSession(): Session = mockk()
     }
 
     class TestCarAppService : CarAppService() {

@@ -8,8 +8,6 @@ internal class MutcdSpeedLimitDrawable : SpeedLimitDrawable() {
     companion object {
         const val WIDTH = 77
         const val HEIGHT = 115
-        const val BITMAP_BYTE_SIZE: Long =
-            (WIDTH * HEIGHT * BYTES_PER_ARGB_8888_PIXEL).toLong()
         const val HEIGHT_SIGN = 67f
         const val RADIUS = 9f
         const val STROKE_SIGN = 2f

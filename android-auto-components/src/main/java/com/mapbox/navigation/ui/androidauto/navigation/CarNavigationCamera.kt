@@ -166,8 +166,8 @@ class CarNavigationCamera(
             updateCameraMode(CarCameraMode.IDLE)
             val fromZoom = mapboxCarMapSurface.mapSurface.getMapboxMap().cameraState.zoom
             val toZoom = fromZoom - (1.0 - scaleFactor.toDouble())
-            val inBounds = toZoom.coerceIn(MIN_ZOOM_OUT, MAX_ZOOM_IN) != toZoom
-            if (!inBounds) {
+            val outOfBounds = toZoom.coerceIn(MIN_ZOOM_OUT, MAX_ZOOM_IN) != toZoom
+            if (!outOfBounds) {
                 super.onScale(mapboxCarMapSurface, focusX, focusY, scaleFactor)
             }
         }

@@ -70,4 +70,30 @@ class SpeedLimitBitmapRendererTest {
 
         assertNotSame(bmp1, bmp2)
     }
+
+    @Test
+    fun `getBitmap - should scale the bitmap with the density`() {
+        val sut = SpeedLimitBitmapRenderer(scale = 2f)
+
+        val mutcd = sut.getBitmap(SpeedLimitSign.MUTCD)
+        assertEquals(MutcdSpeedLimitDrawable.WIDTH * 2, mutcd.width)
+        assertEquals(MutcdSpeedLimitDrawable.HEIGHT * 2, mutcd.height)
+
+        val vienna = sut.getBitmap(SpeedLimitSign.VIENNA)
+        assertEquals(ViennaSpeedLimitDrawable.WIDTH * 2, vienna.width)
+        assertEquals(ViennaSpeedLimitDrawable.HEIGHT * 2, vienna.height)
+    }
+
+    @Test
+    fun `getBitmap - alternates between two scaled bitmaps at a scale above 1`() {
+        val sut = SpeedLimitBitmapRenderer(scale = 2f)
+
+        val bmp1 = sut.getBitmap(SpeedLimitSign.MUTCD)
+        val bmp2 = sut.getBitmap(SpeedLimitSign.MUTCD)
+        val bmp3 = sut.getBitmap(SpeedLimitSign.MUTCD)
+
+        assertNotSame(bmp1, bmp2)
+        assertSame(bmp1, bmp3)
+        assertEquals(MutcdSpeedLimitDrawable.WIDTH * 2, bmp2.width)
+    }
 }

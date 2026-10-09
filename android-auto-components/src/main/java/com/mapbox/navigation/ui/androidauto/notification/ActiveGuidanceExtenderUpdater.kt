@@ -54,17 +54,25 @@ internal class ActiveGuidanceExtenderUpdater(private val context: Context) {
         val titleBuilder = SpannableStringBuilder()
         currentFormattedDistance?.let { titleBuilder.append(it) }
         titleBuilder.append(" • ")
-        extenderBuilder.setContentTitle(titleBuilder)
         currentFormattedTime?.let { titleBuilder.append(it) }
+        extenderBuilder.setContentTitle(titleBuilder)
 
         updateInstructionText(bannerInstructions, extenderBuilder)
         updateManeuverImage(bannerInstructions, drivingSide, extenderBuilder)
     }
 
-    fun updateCurrentManeuverToDefault() {
+    /**
+     * Forgets everything shown for the current trip, so none of it shows on the next one.
+     */
+    fun reset() {
         currentManeuverType = null
         currentManeuverModifier = null
         currentRoundaboutAngle = null
+        currentManeuverImage = null
+        currentInstructionText = null
+        currentDistanceText = null
+        currentFormattedDistance = null
+        currentFormattedTime = null
     }
 
     private fun updateDistanceText(

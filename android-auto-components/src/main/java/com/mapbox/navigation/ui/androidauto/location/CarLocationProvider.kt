@@ -9,11 +9,11 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
-import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
+import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.TimeUnit
 
 /**
@@ -21,7 +21,12 @@ import java.util.concurrent.TimeUnit
  */
 class CarLocationProvider private constructor() : MapboxNavigationObserver, LocationProvider {
 
-    private val navigationLocationProvider = NavigationLocationProvider()
+    // Replaced on detach, so a new drive never starts from the previous drive's location:
+    // NavigationLocationProvider replays its last location to every new consumer, and its last
+    // location cannot be cleared.
+    @Volatile
+    private var navigationLocationProvider = NavigationLocationProvider()
+    private val locationConsumers = CopyOnWriteArraySet<LocationConsumer>()
     private val mutableLocation = MutableSharedFlow<Location>(
         replay = 1,
         onBufferOverflow = BufferOverflow.DROP_OLDEST,
@@ -29,7 +34,6 @@ class CarLocationProvider private constructor() : MapboxNavigationObserver, Loca
 
     private val locationObserver = object : LocationObserver {
         override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
-            logD("YURY") { "onNewLocationMatcherResult: $locationMatcherResult" }
             navigationLocationProvider.changePosition(
                 locationMatcherResult.enhancedLocation,
                 locationMatcherResult.keyPoints,
@@ -48,13 +52,22 @@ class CarLocationProvider private constructor() : MapboxNavigationObserver, Loca
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         mapboxNavigation.unregisterLocationObserver(locationObserver)
+        mutableLocation.resetReplayCache()
+        val previousProvider = navigationLocationProvider
+        navigationLocationProvider = NavigationLocationProvider()
+        locationConsumers.forEach {
+            previousProvider.unRegisterLocationConsumer(it)
+            navigationLocationProvider.registerLocationConsumer(it)
+        }
     }
 
     override fun registerLocationConsumer(locationConsumer: LocationConsumer) {
+        locationConsumers.add(locationConsumer)
         navigationLocationProvider.registerLocationConsumer(locationConsumer)
     }
 
     override fun unRegisterLocationConsumer(locationConsumer: LocationConsumer) {
+        locationConsumers.remove(locationConsumer)
         navigationLocationProvider.unRegisterLocationConsumer(locationConsumer)
     }
 

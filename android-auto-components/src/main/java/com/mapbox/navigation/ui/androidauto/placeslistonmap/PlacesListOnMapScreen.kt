@@ -28,11 +28,12 @@ internal class PlacesListOnMapScreen @UiThread constructor(
     private val searchCarContext: SearchCarContext,
     placesProvider: PlacesListOnMapProvider,
     @MapboxScreen.Key private val mapboxScreenKey: String,
+    private val placesListOnMapManager: PlacesListOnMapManager =
+        PlacesListOnMapManager(placesProvider),
 ) : Screen(searchCarContext.carContext) {
 
     private val carNavigationCamera = CarLocationsOverviewCamera()
-    private var carLocationRenderer = CarLocationRenderer()
-    private val placesListOnMapManager = PlacesListOnMapManager(placesProvider)
+    private val carLocationRenderer = CarLocationRenderer()
 
     private val carRouteRequestCallback = ResumedRoutePreviewCallback(
         lifecycle,

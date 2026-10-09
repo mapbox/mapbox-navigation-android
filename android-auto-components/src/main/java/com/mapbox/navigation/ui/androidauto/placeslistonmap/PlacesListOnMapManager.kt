@@ -17,6 +17,7 @@ import com.mapbox.navigation.ui.androidauto.internal.extensions.getStyle
 import com.mapbox.navigation.ui.androidauto.internal.extensions.mapboxNavigationForward
 import com.mapbox.navigation.ui.androidauto.internal.extensions.styleFlow
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAuto
+import com.mapbox.navigation.ui.androidauto.internal.logAndroidAutoFailure
 import com.mapbox.navigation.ui.androidauto.location.CarLocationProvider
 import com.mapbox.navigation.ui.androidauto.search.PlaceRecord
 import kotlinx.coroutines.CoroutineScope
@@ -164,8 +165,9 @@ class PlacesListOnMapManager(
             }
             expectedPlaceRecords.fold(
                 {
-                    logAndroidAuto(
-                        "PlacesListOnMapScreen ${it.errorMessage}, ${it.throwable?.stackTrace}",
+                    logAndroidAutoFailure(
+                        "PlacesListOnMapScreen ${it.errorMessage}\n" +
+                            it.throwable?.stackTraceToString().orEmpty(),
                     )
                     // Places loaded earlier stay on screen when reloading them fails.
                     if (loadedPlaceRecords.value == null) {

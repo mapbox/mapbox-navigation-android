@@ -141,6 +141,9 @@ class CarRoutePreviewRequest internal constructor(
         destination: Point,
     ) = RouteOptions.builder()
         .applyDefaultNavigationOptions()
+        // Only the language code, without the region, the same as the SDK's
+        // applyLanguageAndVoiceUnitOptions. Directions, voice instructions and the maneuver
+        // cache all key on this value, so a full language tag would change all of them.
         .language(navigationOptions.distanceFormatterOptions.locale.language)
         .voiceUnits(
             when (navigationOptions.distanceFormatterOptions.unitType) {

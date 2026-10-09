@@ -193,6 +193,8 @@ class CarNavigationInfoMapper(
     )
 
     private companion object {
+        // Render resolution of the shields in the instruction text, in pixels. The host scales
+        // CarIconSpan images to the text height, so this does not set their on-screen size.
         private const val IMAGE_HEIGHT = 72
     }
 }

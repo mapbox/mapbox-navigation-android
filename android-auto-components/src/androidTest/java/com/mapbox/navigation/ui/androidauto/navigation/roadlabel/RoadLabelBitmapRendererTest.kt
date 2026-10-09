@@ -1,7 +1,9 @@
 package com.mapbox.navigation.ui.androidauto.navigation.roadlabel
 
 import android.Manifest
+import android.content.res.Configuration
 import android.graphics.Color
+import android.util.DisplayMetrics
 import androidx.test.filters.SmallTest
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
@@ -39,7 +41,15 @@ class RoadLabelBitmapRendererTest {
     )
 
     private val roadLabelBitmapRenderer = CarRoadLabelBitmapRenderer()
-    private val resources = InstrumentationRegistry.getInstrumentation().context.resources
+
+    // The label scales with the density. The expected images are drawn at the baseline density,
+    // so it is pinned here and the test does not depend on the device.
+    private val resources = InstrumentationRegistry.getInstrumentation().context.let { context ->
+        val configuration = Configuration(context.resources.configuration).apply {
+            densityDpi = DisplayMetrics.DENSITY_DEFAULT
+        }
+        context.createConfigurationContext(configuration).resources
+    }
 
     @Test
     fun street_with_name() {

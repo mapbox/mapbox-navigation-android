@@ -6,8 +6,6 @@ internal class ViennaSpeedLimitDrawable : SpeedLimitDrawable() {
     companion object {
         const val WIDTH = 74
         const val HEIGHT = 108
-        const val BITMAP_BYTE_SIZE: Long =
-            (WIDTH * HEIGHT * BYTES_PER_ARGB_8888_PIXEL).toLong()
 
         const val RADIUS = 25f
         const val STROKE_SIGN = 4f

@@ -1,0 +1,4 @@
+- Fixed the Android Auto trip notification showing the instruction, distance, arrival time or maneuver icon of a finished trip at the start of the next one.
+- Fixed `CarLocationProvider` returning, and replaying to the location puck, the last location of a previous drive after `MapboxNavigation` was detached.
+- Fixed the Android Auto places list not telling the user when a route to the selected place could not be requested, and not allowing the same place to be selected again.
+- The Android Auto speed limit sign, the road label and the place overview padding now scale with the head unit display density.
