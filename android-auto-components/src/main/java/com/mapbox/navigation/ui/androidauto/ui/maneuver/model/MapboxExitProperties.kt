@@ -27,10 +27,10 @@ import com.mapbox.navigation.tripdata.R
 sealed class MapboxExitProperties(
     val shouldFallbackWithText: Boolean,
     val shouldFallbackWithDrawable: Boolean,
-    @DrawableRes val exitBackground: Int,
-    @DrawableRes val fallbackDrawable: Int,
-    @DrawableRes val exitLeftDrawable: Int,
-    @DrawableRes val exitRightDrawable: Int,
+    @param:DrawableRes val exitBackground: Int,
+    @param:DrawableRes val fallbackDrawable: Int,
+    @param:DrawableRes val exitLeftDrawable: Int,
+    @param:DrawableRes val exitRightDrawable: Int,
 ) {
 
     /**

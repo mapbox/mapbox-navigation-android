@@ -35,9 +35,7 @@ class CarPlaceSearchOptions private constructor(
 
         other as CarPlaceSearchOptions
 
-        if (accessToken != other.accessToken) return false
-
-        return true
+        return accessToken == other.accessToken
     }
 
     /**
@@ -45,7 +43,7 @@ class CarPlaceSearchOptions private constructor(
      */
     @Suppress("DEPRECATION")
     override fun hashCode(): Int {
-        return accessToken?.hashCode() ?: 0
+        return accessToken.hashCode()
     }
 
     /**

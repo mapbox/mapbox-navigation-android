@@ -5,6 +5,7 @@ import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.maps.extension.observable.eventdata.MapLoadingErrorEventData
+import com.mapbox.maps.extension.observable.model.MapLoadErrorType
 import com.mapbox.maps.extension.style.StyleContract
 import com.mapbox.maps.module.TelemetryEvent
 import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadErrorListener
@@ -183,7 +184,7 @@ class MapboxCarMapLoaderTest {
         val carContext = carContext(isDarkMode = false)
 
         sut.onAttached(mapSurface(mapboxMap, carContext))
-        errorListener.captured.onMapLoadError(mockk<MapLoadingErrorEventData>(relaxed = true))
+        errorListener.captured.onMapLoadError(mapLoadError(MapLoadErrorType.STYLE))
         sut.onCarConfigurationChanged(carContext)
 
         verify(exactly = 2) {
@@ -194,6 +195,34 @@ class MapboxCarMapLoaderTest {
             )
         }
     }
+
+    @Test
+    fun `configuration change keeps the style after a non-style load error`() {
+        val nonStyleErrors = MapLoadErrorType.values().filter { it != MapLoadErrorType.STYLE }
+        nonStyleErrors.forEach { type ->
+            val errorListener = slot<OnMapLoadErrorListener>()
+            val mapboxMap = mockMapboxMap(errorListener = errorListener)
+            val carContext = carContext(isDarkMode = false)
+            val loader = MapboxCarMapLoader()
+
+            loader.onAttached(mapSurface(mapboxMap, carContext))
+            errorListener.captured.onMapLoadError(mapLoadError(type))
+            loader.onCarConfigurationChanged(carContext)
+
+            verify(exactly = 1) {
+                mapboxMap.loadStyle(
+                    any<StyleContract.StyleExtension>(),
+                    any<Style.OnStyleLoaded>(),
+                    any<OnMapLoadErrorListener>(),
+                )
+            }
+        }
+    }
+
+    private fun mapLoadError(type: MapLoadErrorType): MapLoadingErrorEventData =
+        mockk(relaxed = true) {
+            every { this@mockk.type } returns type
+        }
 
     @Test
     fun `attaching again loads the style`() {

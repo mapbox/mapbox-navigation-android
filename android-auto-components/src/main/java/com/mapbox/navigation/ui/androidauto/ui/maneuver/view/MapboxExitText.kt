@@ -4,13 +4,13 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import androidx.annotation.StyleRes
 import androidx.annotation.UiThread
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.widget.TextViewCompat
@@ -123,6 +123,7 @@ class MapboxExitText : AppCompatTextView {
                 )
                 exit.text
             }
+
             ManeuverModifier.RIGHT,
             ManeuverModifier.SLIGHT_RIGHT,
             ManeuverModifier.SHARP_RIGHT,
@@ -138,6 +139,7 @@ class MapboxExitText : AppCompatTextView {
                 )
                 exit.text
             }
+
             else -> {
                 if (exitProperties == null) {
                     setCompoundDrawablesWithIntrinsicBounds(
@@ -164,7 +166,7 @@ class MapboxExitText : AppCompatTextView {
         val measureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED)
         measure(measureSpec, measureSpec)
         layout(0, 0, measuredWidth, measuredHeight)
-        val bitmap = Bitmap.createBitmap(measuredWidth, measuredHeight, Bitmap.Config.ARGB_8888)
+        val bitmap = createBitmap(measuredWidth, measuredHeight)
         bitmap.eraseColor(Color.TRANSPARENT)
         val canvas = Canvas(bitmap)
         draw(canvas)
@@ -178,7 +180,7 @@ class MapboxExitText : AppCompatTextView {
      * @return Drawable
      */
     fun styleExitWith(bitmap: Bitmap, drawableHeight: Int): Drawable {
-        val drawable: Drawable = BitmapDrawable(context.resources, bitmap)
+        val drawable: Drawable = bitmap.toDrawable(context.resources)
         val right = (drawableHeight * bitmap.width.toDouble() / bitmap.height.toDouble()).toInt()
         drawable.setBounds(0, 0, right, drawableHeight)
         return drawable
@@ -203,14 +205,17 @@ class MapboxExitText : AppCompatTextView {
                         )
                         exit.text
                     }
+
                     exitProperties.shouldFallbackWithText -> {
                         context.getString(R.string.car_maneuver_exit_number, exit.text)
                     }
+
                     else -> {
                         exit.text
                     }
                 }
             }
+
             is MapboxExitProperties.PropertiesVienna -> {
                 return when {
                     exitProperties.shouldFallbackWithDrawable -> {
@@ -225,9 +230,11 @@ class MapboxExitText : AppCompatTextView {
                         )
                         exit.text
                     }
+
                     exitProperties.shouldFallbackWithText -> {
                         context.getString(R.string.car_maneuver_exit_number, exit.text)
                     }
+
                     else -> {
                         exit.text
                     }

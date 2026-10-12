@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.androidauto.placeslistonmap
 import androidx.annotation.VisibleForTesting
 import androidx.car.app.constraints.ConstraintManager
 import androidx.car.app.model.ItemList
+import com.mapbox.annotation.MapboxExperimental
 import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
@@ -158,6 +159,7 @@ class PlacesListOnMapManager(
 
     // The list, the map markers and the camera all use these records. Only places that can be
     // shown on the map are kept, and no more than the host shows in the list.
+    @OptIn(MapboxExperimental::class)
     private fun loadPlaceRecords(placeLimit: Int) {
         coroutineScope.launch {
             val expectedPlaceRecords = withContext(SdkDispatchers.IO) {

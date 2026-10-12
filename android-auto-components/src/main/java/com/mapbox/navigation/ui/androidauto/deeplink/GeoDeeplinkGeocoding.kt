@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.androidauto.deeplink
 
+import com.mapbox.annotation.MapboxExperimental
 import com.mapbox.api.geocoding.v5.GeocodingCriteria
 import com.mapbox.api.geocoding.v5.MapboxGeocoding
 import com.mapbox.api.geocoding.v5.models.GeocodingResponse
@@ -29,6 +30,7 @@ class GeoDeeplinkGeocoding private constructor(
 
     constructor() : this(AccessTokenWrapper.Default)
 
+    @OptIn(MapboxExperimental::class)
     suspend fun requestPlaces(
         geoDeeplink: GeoDeeplink,
         origin: Point?,

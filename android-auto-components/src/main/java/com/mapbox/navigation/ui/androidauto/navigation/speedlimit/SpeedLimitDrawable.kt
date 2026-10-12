@@ -8,6 +8,7 @@ import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.drawable.Drawable
 import androidx.annotation.ColorInt
+import androidx.core.graphics.toColorInt
 
 internal abstract class SpeedLimitDrawable : Drawable() {
     var speedLimit: Int? = null
@@ -39,9 +40,9 @@ internal abstract class SpeedLimitDrawable : Drawable() {
         const val OFFSET_SHADOW_SMALL = 2f
         const val BYTES_PER_ARGB_8888_PIXEL = 4
         const val SPEED_LIMIT_NO_DATA = "--"
-        val COLOR_BORDER = Color.parseColor("#CDD0D0")
-        val COLOR_RED = Color.parseColor("#BE3C30")
-        val COLOR_SHADOW = Color.parseColor("#1A000000")
+        val COLOR_BORDER = "#CDD0D0".toColorInt()
+        val COLOR_RED = "#BE3C30".toColorInt()
+        val COLOR_SHADOW = "#1A000000".toColorInt()
 
         fun createBackgroundPaint(@ColorInt color: Int): Paint {
             return createPaint(color).apply {

@@ -91,7 +91,7 @@ class MapboxCarNotification internal constructor(
 
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
         synchronized(lock) {
-            // A progress of the previous route can still arrive after its trip has ended.
+            // Progress of the previous route can still arrive after its trip has ended.
             if (navigationSessionState is NavigationSessionState.ActiveGuidance) {
                 this.routeProgress = routeProgress
             }

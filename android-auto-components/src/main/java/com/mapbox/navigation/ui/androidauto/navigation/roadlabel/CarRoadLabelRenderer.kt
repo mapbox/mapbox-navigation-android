@@ -1,10 +1,10 @@
 package com.mapbox.navigation.ui.androidauto.navigation.roadlabel
 
-import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Rect
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
+import androidx.core.graphics.createBitmap
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.MapboxCarMap
@@ -127,7 +127,7 @@ class CarRoadLabelRenderer : MapboxCarMapObserver {
             .textColor(Color.BLACK)
             .build()
 
-        private val EMPTY_BITMAP = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888).apply {
+        private val EMPTY_BITMAP = createBitmap(1, 1).apply {
             eraseColor(Color.TRANSPARENT)
         }
     }

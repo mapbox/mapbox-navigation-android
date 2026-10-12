@@ -7,6 +7,7 @@ import android.graphics.Color
 import androidx.annotation.ColorInt
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.car.app.model.CarIcon
+import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.IconCompat
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.mapbox.navigation.ui.androidauto.R
@@ -17,7 +18,7 @@ import com.mapbox.navigation.ui.androidauto.internal.RendererUtils.dpToPx
  */
 class PlaceMarkerRenderer(
     private val context: Context,
-    @ColorInt
+    @param:ColorInt
     private val background: Int = Color.TRANSPARENT,
 ) {
     var bitmap: Bitmap? = null
@@ -47,7 +48,7 @@ class PlaceMarkerRenderer(
         )!!
 
         val px = context.dpToPx(MARKER_ICON_DIMEN_DP)
-        val bitmap: Bitmap = Bitmap.createBitmap(px, px, Bitmap.Config.ARGB_8888)
+        val bitmap: Bitmap = createBitmap(px, px)
         bitmap.eraseColor(background)
         val canvas = Canvas(bitmap)
         vectorDrawable.setBounds(0, 0, canvas.width, canvas.height)

@@ -7,6 +7,7 @@ import com.mapbox.maps.extension.androidauto.MapboxCarMap
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
 import com.mapbox.maps.extension.observable.eventdata.MapLoadingErrorEventData
+import com.mapbox.maps.extension.observable.model.MapLoadErrorType
 import com.mapbox.maps.extension.style.StyleContract
 import com.mapbox.maps.extension.style.style
 import com.mapbox.maps.plugin.delegates.listeners.OnMapLoadErrorListener
@@ -34,8 +35,11 @@ class MapboxCarMapLoader : MapboxCarMapObserver {
         override fun onMapLoadError(eventData: MapLoadingErrorEventData) {
             val errorData = "${eventData.type} ${eventData.message}"
             logAndroidAutoFailure("onMapLoadError $errorData")
-            // Let the next configuration change try to load the style again.
-            loadedStyle = null
+            // Let the next configuration change try to load the style again. Tile, source,
+            // sprite and glyph errors leave the style loaded, so they must not cause a reload.
+            if (eventData.type == MapLoadErrorType.STYLE) {
+                loadedStyle = null
+            }
         }
     }
 

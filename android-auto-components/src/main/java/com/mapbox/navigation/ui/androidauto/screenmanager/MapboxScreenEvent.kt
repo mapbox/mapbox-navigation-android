@@ -7,9 +7,9 @@ package com.mapbox.navigation.ui.androidauto.screenmanager
  * This can be used to observe and control the car screen from the mobile device.
  */
 class MapboxScreenEvent internal constructor(
-    @MapboxScreen.Key
+    @param:MapboxScreen.Key
     val key: String,
-    @MapboxScreenOperation.Type
+    @param:MapboxScreenOperation.Type
     val operation: String,
     /**
      * Emission order of this event, used by [MapboxScreenManager] to tell events emitted before

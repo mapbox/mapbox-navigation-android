@@ -10,6 +10,7 @@ import android.text.SpannableStringBuilder
 import android.text.TextUtils
 import androidx.car.app.notification.CarAppExtender
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.createBitmap
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver
@@ -24,7 +25,8 @@ import kotlin.math.roundToInt
 
 internal class ActiveGuidanceExtenderUpdater(private val context: Context) {
 
-    @StepManeuver.StepManeuverType private var currentManeuverType: String? = null
+    @StepManeuver.StepManeuverType
+    private var currentManeuverType: String? = null
     private var currentManeuverModifier: String? = null
     private var currentRoundaboutAngle: Float? = null
     private var currentManeuverImage: Bitmap? = null
@@ -158,11 +160,7 @@ internal class ActiveGuidanceExtenderUpdater(private val context: Context) {
     }
 
     private fun getManeuverBitmap(drawable: Drawable, shouldFlipIcon: Boolean): Bitmap? {
-        val maneuverImageBitmap = Bitmap.createBitmap(
-            drawable.intrinsicWidth,
-            drawable.intrinsicHeight,
-            Bitmap.Config.ARGB_8888,
-        )
+        val maneuverImageBitmap = createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight)
         val maneuverCanvas = Canvas(maneuverImageBitmap)
         drawable.setBounds(0, 0, maneuverCanvas.width, maneuverCanvas.height)
         drawable.draw(maneuverCanvas)

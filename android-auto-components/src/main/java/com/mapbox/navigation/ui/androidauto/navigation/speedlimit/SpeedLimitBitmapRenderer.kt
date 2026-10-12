@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.androidauto.navigation.speedlimit
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import androidx.core.graphics.createBitmap
 import com.mapbox.navigation.base.speed.model.SpeedLimitSign
 import kotlin.math.ceil
 
@@ -55,7 +56,7 @@ internal class SpeedLimitBitmapRenderer(private val scale: Float = 1f) {
         fun next(): Bitmap {
             frontIndex = 1 - frontIndex
             return bitmaps[frontIndex]
-                ?: Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+                ?: createBitmap(width, height)
                     .also { bitmaps[frontIndex] = it }
         }
     }

@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
 internal class PlacesListOnMapScreen @UiThread constructor(
     private val searchCarContext: SearchCarContext,
     placesProvider: PlacesListOnMapProvider,
-    @MapboxScreen.Key private val mapboxScreenKey: String,
+    @param:MapboxScreen.Key private val mapboxScreenKey: String,
     private val placesListOnMapManager: PlacesListOnMapManager =
         PlacesListOnMapManager(placesProvider),
 ) : Screen(searchCarContext.carContext) {

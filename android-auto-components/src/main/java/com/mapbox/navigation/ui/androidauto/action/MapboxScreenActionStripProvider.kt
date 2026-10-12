@@ -124,7 +124,7 @@ open class MapboxScreenActionStripProvider {
  *
  * The [CarArrivalTrigger] is registered only while a guidance screen is resumed, so a click can
  * arrive without one. If a guidance screen is still on top, the arrival screen is shown anyway,
- * which is all the trigger does. Otherwise the click came from a guidance template that is no
+ * which is all the trigger does. Otherwise, the click came from a guidance template that is no
  * longer shown, and it is ignored so it doesn't replace the screen the driver moved to.
  */
 internal fun triggerArrivalOnStop() {

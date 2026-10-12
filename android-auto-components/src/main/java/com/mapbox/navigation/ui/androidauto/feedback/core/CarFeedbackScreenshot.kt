@@ -1,15 +1,18 @@
 package com.mapbox.navigation.ui.androidauto.feedback.core
 
 import android.graphics.Bitmap
+import com.mapbox.annotation.MapboxExperimental
 import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.maps.MapSurface
 import com.mapbox.navigation.core.telemetry.events.BitmapEncodeOptions
 import com.mapbox.navigation.core.telemetry.events.FeedbackHelper
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAutoFailure
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Captures the map without blocking the calling thread and encodes it on [encodeDispatcher].
@@ -20,12 +23,13 @@ import kotlinx.coroutines.withTimeoutOrNull
  *
  * @return the Base64-encoded screenshot, or `null` when the map could not be captured or encoded
  */
+@OptIn(MapboxExperimental::class, ExperimentalCoroutinesApi::class)
 internal suspend fun MapSurface.captureEncodedScreenshot(
     options: BitmapEncodeOptions,
     timeoutMs: Long = SNAPSHOT_TIMEOUT_MS,
     encodeDispatcher: CoroutineDispatcher = SdkDispatchers.Default,
 ): String? {
-    val bitmap = withTimeoutOrNull(timeoutMs) {
+    val bitmap = withTimeoutOrNull(timeoutMs.milliseconds) {
         suspendCancellableCoroutine<Bitmap?> { continuation ->
             snapshot { bitmap ->
                 continuation.resume(bitmap) { bitmap?.recycle() }

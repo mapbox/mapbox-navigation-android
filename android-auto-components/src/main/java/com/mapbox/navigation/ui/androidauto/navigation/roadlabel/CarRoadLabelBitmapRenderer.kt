@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
+import androidx.core.graphics.createBitmap
 import com.mapbox.navigation.base.road.model.RoadComponent
 import com.mapbox.navigation.tripdata.shield.model.RouteShield
 import com.mapbox.navigation.ui.androidauto.internal.RendererUtils.dpScale
@@ -53,11 +54,7 @@ internal class CarRoadLabelBitmapRenderer {
                 is Component.Shield -> component.bitmap.height
             }
         }
-        val bitmap = Bitmap.createBitmap(
-            width + dimens.textPadding * 2,
-            height + dimens.textPadding * 2,
-            Bitmap.Config.ARGB_8888,
-        )
+        val bitmap = createBitmap(width + dimens.textPadding * 2, height + dimens.textPadding * 2)
         val textBaselineY =
             dimens.textPadding + (height - textPaint.descent() - textPaint.ascent()) / 2
         val shieldCenterY = dimens.textPadding + height / 2f

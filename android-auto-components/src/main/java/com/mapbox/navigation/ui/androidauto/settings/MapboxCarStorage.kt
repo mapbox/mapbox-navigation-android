@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.androidauto.settings
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.car.app.CarContext
+import androidx.core.content.edit
 
 class MapboxCarStorage internal constructor(
     val carContext: CarContext,
@@ -14,9 +15,9 @@ class MapboxCarStorage internal constructor(
         sharedPreferences.getBoolean(key, defaultValue)
 
     fun writeSharedPref(key: String, value: Boolean) {
-        val editor = sharedPreferences.edit()
-        editor.putBoolean(key, value)
-        editor.apply()
+        sharedPreferences.edit {
+            putBoolean(key, value)
+        }
     }
 
     private companion object {

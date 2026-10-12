@@ -128,7 +128,7 @@ class MapboxCarNavigationManager internal constructor(
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
 
-        // Tell android auto navigation stopped. Navigation can continue with mapbox navigation
+        // Tell android auto navigation stopped. Navigation can continue with Mapbox navigation
         // on another device.
         endActiveNavigation()
         navigationManager.clearNavigationManagerCallback()

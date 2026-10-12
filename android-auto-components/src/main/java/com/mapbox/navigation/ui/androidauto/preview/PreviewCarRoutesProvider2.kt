@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.androidauto.preview
 
+import com.mapbox.annotation.MapboxExperimental
 import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
@@ -28,6 +29,7 @@ import kotlinx.coroutines.flow.shareIn
 class PreviewCarRoutesProvider2 : CarRoutesProvider {
 
     // Upstream runs only while there are collectors, so this scope never runs work on its own.
+    @OptIn(MapboxExperimental::class)
     private val sharingScope = CoroutineScope(SupervisorJob() + SdkDispatchers.Main.immediate)
 
     /**

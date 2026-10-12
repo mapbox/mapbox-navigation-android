@@ -26,7 +26,7 @@ import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenManager
 import com.mapbox.navigation.ui.androidauto.settings.MapboxCarStorage
 
 /**
- * This is the entry point for Mapbox Navigation in Android Auto. Create this object and then you
+ * This is the entry point for Mapbox Navigation in Android Auto. Create this object, and then you
  * have access to services and options for customization.
  *
  * The [lifecycle] must come from a [Session.getLifecycle] or [Screen.getLifecycle] at this time.

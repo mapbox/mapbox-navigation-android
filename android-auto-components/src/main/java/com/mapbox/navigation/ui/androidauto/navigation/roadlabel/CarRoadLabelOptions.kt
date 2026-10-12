@@ -7,13 +7,13 @@ import androidx.annotation.ColorInt
  * Modify the look and feel of the road label.
  */
 class CarRoadLabelOptions private constructor(
-    @ColorInt
+    @param:ColorInt
     val backgroundColor: Int,
-    @ColorInt
+    @param:ColorInt
     val roundedLabelColor: Int,
-    @ColorInt
+    @param:ColorInt
     val shadowColor: Int?,
-    @ColorInt
+    @param:ColorInt
     val textColor: Int,
 ) {
 

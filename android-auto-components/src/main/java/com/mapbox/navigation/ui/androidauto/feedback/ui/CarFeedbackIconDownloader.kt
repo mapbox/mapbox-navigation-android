@@ -16,6 +16,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.coroutines.resume
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.milliseconds
 
 internal class CarFeedbackIconDownloader(private val screen: Screen) {
 
@@ -49,7 +50,7 @@ internal class CarFeedbackIconDownloader(private val screen: Screen) {
         icons[uri] = IconState.Loading
         screen.lifecycleScope.launch {
             // Glide decodes and downscales to the grid icon size on its own executors.
-            val bitmap = withTimeoutOrNull(IMAGE_DOWNLOAD_TIMEOUT) {
+            val bitmap = withTimeoutOrNull(IMAGE_DOWNLOAD_TIMEOUT.milliseconds) {
                 Glide.with(screen.carContext).requestBitmap(uri, iconSizePx())
             }
             icons[uri] = if (bitmap != null) {

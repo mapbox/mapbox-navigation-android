@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicLong
  *
  * [MapboxScreenManager] can be observed and controlled by the car or app. Observe the screen
  * changes with [MapboxScreenManager.screenEvent], change the screen with operations like
- * [MapboxScreenManager.replaceTop]. See the [MapboxScreenOperation] for all of the available
+ * [MapboxScreenManager.replaceTop]. See the [MapboxScreenOperation] for all the available
  * operations, each operation is applied through [MapboxScreenManager] functions.
  *
  * ### Set up

@@ -14,7 +14,7 @@ import androidx.core.widget.TextViewCompat
  * VIENNA convention
  */
 class ManeuverExitOptions private constructor(
-    @StyleRes val textAppearance: Int,
+    @param:StyleRes val textAppearance: Int,
     val mutcdExitProperties: MapboxExitProperties.PropertiesMutcd,
     val viennaExitProperties: MapboxExitProperties.PropertiesVienna,
 ) {

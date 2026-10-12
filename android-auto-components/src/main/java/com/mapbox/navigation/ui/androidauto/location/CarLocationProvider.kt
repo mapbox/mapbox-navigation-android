@@ -9,12 +9,14 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Automatically attaches and detaches from [MapboxNavigationApp] to provide map matched locations.
@@ -50,6 +52,7 @@ class CarLocationProvider private constructor() : MapboxNavigationObserver, Loca
         mapboxNavigation.registerLocationObserver(locationObserver)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mutableLocation.resetReplayCache()
@@ -85,7 +88,7 @@ class CarLocationProvider private constructor() : MapboxNavigationObserver, Loca
     internal suspend fun waitForLocationOrNull(
         timeoutMillis: Long = TimeUnit.SECONDS.toMillis(3),
     ): Location? {
-        return withTimeoutOrNull(timeoutMillis) {
+        return withTimeoutOrNull(timeoutMillis.milliseconds) {
             validLocation()
         } ?: lastLocation()
     }

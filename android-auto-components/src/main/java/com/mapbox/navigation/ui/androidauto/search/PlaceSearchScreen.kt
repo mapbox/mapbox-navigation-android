@@ -26,6 +26,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * This screen allows the user to search for a destination.
@@ -119,7 +120,7 @@ internal class PlaceSearchScreen @UiThread constructor(
         searchJob = lifecycleScope.launch {
             try {
                 if (debounce) {
-                    delay(TYPING_DEBOUNCE_MILLIS)
+                    delay(TYPING_DEBOUNCE_MILLIS.milliseconds)
                 }
                 val result = searchCarContext.carPlaceSearch.search(searchText)
                 uiState = result.fold(
@@ -219,7 +220,7 @@ internal class PlaceSearchScreen @UiThread constructor(
 /**
  * Represents what [PlaceSearchScreen] should render for the current search query: a request in
  * flight, a non-empty suggestion list, a suggestion being resolved to a place, a successfully
- * resolved but empty result, or a failure. A superseded (cancelled) search never reaches any of
+ * resolved but empty result, or a failure. A superseded (canceled) search never reaches any of
  * these states.
  */
 internal sealed class SearchUiState {
@@ -231,6 +232,6 @@ internal sealed class SearchUiState {
      * [content] is shown again once the selection finishes.
      */
     data class Selecting(val content: Content) : SearchUiState()
-    data class NoItems(@StringRes val messageRes: Int) : SearchUiState()
+    data class NoItems(@param:StringRes val messageRes: Int) : SearchUiState()
     data class Error(val throwable: Throwable) : SearchUiState()
 }

@@ -58,6 +58,9 @@ internal abstract class CarGridFeedbackScreen @UiThread constructor(
 
     abstract fun onFinish()
 
+    // The header setters are deprecated from Car API 7 in favour of setHeader(Header), which
+    // older hosts do not support.
+    @Suppress("DEPRECATION")
     override fun onGetTemplate(): Template {
         return GridTemplate.Builder()
             .setHeaderAction(Action.BACK)
@@ -68,7 +71,7 @@ internal abstract class CarGridFeedbackScreen @UiThread constructor(
 
     private fun onBack() {
         if (parentPolls.isNotEmpty() && !submitting) {
-            currentPoll = parentPolls.removeLast()
+            currentPoll = parentPolls.removeAt(parentPolls.lastIndex)
             invalidate()
         } else {
             onFinish()
@@ -105,7 +108,7 @@ internal abstract class CarGridFeedbackScreen @UiThread constructor(
                 ),
             )
         } else {
-            parentPolls.addLast(currentPoll)
+            parentPolls.add(currentPoll)
             currentPoll = option.nextPoll
             invalidate()
         }

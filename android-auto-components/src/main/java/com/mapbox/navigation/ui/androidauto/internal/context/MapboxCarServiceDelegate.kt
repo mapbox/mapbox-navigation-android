@@ -12,7 +12,7 @@ import kotlin.reflect.KProperty
 /**
  * Delegate function for the [MapboxCarServiceDelegate]. This gives you the ability to scope a
  * service to the [CarContext] lifecycle. If the service is accessed when the [CarContext]
- * is not available, it throw an [IllegalStateException].
+ * is not available, it throws an [IllegalStateException].
  */
 fun <T> MapboxCarContext.mapboxCarService(
     name: String,

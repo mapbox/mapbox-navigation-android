@@ -1,12 +1,12 @@
 package com.mapbox.navigation.ui.androidauto.navigation.lanes
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Rect
 import androidx.annotation.ColorInt
 import androidx.car.app.model.CarIcon
 import androidx.car.app.navigation.model.Step
+import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.IconCompat
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.mapbox.navigation.ui.androidauto.internal.RendererUtils.dpToPx
@@ -33,7 +33,7 @@ internal class CarLaneIconRenderer(
         @ColorInt background: Int,
         options: CarLaneIconOptions,
     ): CarIcon {
-        val carLaneBitmap = Bitmap.createBitmap(widthPx, heightPx, Bitmap.Config.ARGB_8888)
+        val carLaneBitmap = createBitmap(widthPx, heightPx)
         carLaneBitmap.eraseColor(background)
 
         carLaneIcons.forEachIndexed { index, laneIcon ->

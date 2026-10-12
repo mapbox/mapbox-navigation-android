@@ -22,14 +22,12 @@ class GeoDeeplinkPlacesCarScreenFactory(
     private val mapboxCarContext: MapboxCarContext,
 ) : MapboxScreenFactory {
     override fun create(carContext: CarContext): Screen {
+        // Shows the map when this is the first screen, otherwise throws.
         val placesProvider = mapboxCarContext.geoDeeplinkPlacesProvider
-        if (placesProvider == null) {
-            // Shows the map when this is the first screen, otherwise throws.
-            return mapboxCarContext.mapboxScreenManager.createDefaultMapScreenInstead(
+            ?: return mapboxCarContext.mapboxScreenManager.createDefaultMapScreenInstead(
                 carContext,
                 "GeoDeeplinkPlacesCarScreenFactory the geoDeeplinkPlacesProvider is not set",
             )
-        }
         return PlacesListOnMapScreen(
             SearchCarContext(mapboxCarContext),
             placesProvider,

@@ -14,7 +14,7 @@ import com.mapbox.navigation.tripdata.maneuver.model.Lane
  */
 class CarLanesImageRenderer(
     context: Context,
-    @ColorInt
+    @param:ColorInt
     val background: Int = Color.TRANSPARENT,
     val options: CarLaneIconOptions = CarLaneIconOptions.Builder().build(context),
 ) {

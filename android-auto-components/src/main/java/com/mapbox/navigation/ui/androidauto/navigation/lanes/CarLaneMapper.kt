@@ -29,7 +29,7 @@ internal class CarLaneMapper {
     }
 
     private fun shapeFor(indicator: String, drivingSide: String): Int {
-        // U-turns are made towards the centre of the road.
+        // U-turns are made towards the center of the road.
         if (indicator == U_TURN && drivingSide == DRIVING_SIDE_LEFT) {
             return LaneDirection.SHAPE_U_TURN_RIGHT
         }

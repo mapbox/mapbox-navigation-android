@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
  * [Lifecycle.State.RESUMED]. A result that arrives earlier is kept, with the latest one winning,
  * and applied after the screen is resumed again. It is dropped if the shared route preview shows
  * a different place by then, because another request finished in the meantime. When the screen
- * is destroyed, the kept result is dropped and the request made with this callback is cancelled.
+ * is destroyed, the kept result is dropped and the request made with this callback is canceled.
  *
  * @param onError shows the given message to the driver.
  */
