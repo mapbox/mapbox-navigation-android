@@ -12,6 +12,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import io.mockk.verifyOrder
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -47,7 +48,7 @@ class RouteRefreshControllerTest {
 
     init {
         every {
-            immediateRouteRefreshController.requestRoutesRefresh(any(), any(), any())
+            immediateRouteRefreshController.requestRoutesRefresh(any(), any())
         } returns immediateRefreshJob
     }
 
@@ -184,7 +185,7 @@ class RouteRefreshControllerTest {
             plannedRouteRefreshController.resume()
         }
         verify(exactly = 1) {
-            immediateRouteRefreshController.requestRoutesRefresh(routes, any(), any())
+            immediateRouteRefreshController.requestRoutesRefresh(routes, any())
         }
         verify(exactly = 1) {
             immediateRefreshJob.invokeOnCompletion(any())
@@ -215,6 +216,53 @@ class RouteRefreshControllerTest {
     }
 
     @Test
+    fun requestImmediateRouteRefreshCancelledBeforeStartNotifiesCallback() {
+        val routes = listOf<NavigationRoute>(mockk())
+        val completionCallback = slot<(Throwable?) -> Unit>()
+        val callbackResults = mutableListOf<ImmediateRouteRefreshResult>()
+        every { plannedRouteRefreshController.routesToRefresh } returns routes
+        every { immediateRefreshJob.invokeOnCompletion(capture(completionCallback)) } returns mockk()
+
+        sut.requestImmediateRouteRefresh { result ->
+            callbackResults.add(result)
+        }
+        completionCallback.captured.invoke(CancellationException("expected"))
+
+        verify(exactly = 1) { plannedRouteRefreshController.resume() }
+        assertEquals(1, callbackResults.size)
+        assertTrue(callbackResults.first() is ImmediateRouteRefreshResult.Cancelled)
+    }
+
+    @Test
+    fun requestImmediateRouteRefreshCancelledAfterExecutorFinishedNotifiesCallbackOnce() {
+        val routes = listOf<NavigationRoute>(mockk())
+        val internalCallback = slot<(RoutesRefresherExecutorResult) -> Unit>()
+        val completionCallback = slot<(Throwable?) -> Unit>()
+        val callbackResults = mutableListOf<ImmediateRouteRefreshResult>()
+        every { plannedRouteRefreshController.routesToRefresh } returns routes
+        every { immediateRefreshJob.invokeOnCompletion(capture(completionCallback)) } returns mockk()
+
+        sut.requestImmediateRouteRefresh { result ->
+            callbackResults.add(result)
+        }
+        verify(exactly = 1) {
+            immediateRouteRefreshController.requestRoutesRefresh(
+                routes,
+                capture(internalCallback),
+            )
+        }
+        internalCallback.captured(
+            RoutesRefresherExecutorResult.Finished(
+                mockk { every { anySuccess() } returns true },
+            ),
+        )
+        completionCallback.captured.invoke(CancellationException("expected"))
+
+        assertEquals(1, callbackResults.size)
+        assertTrue(callbackResults.first() is ImmediateRouteRefreshResult.Success)
+    }
+
+    @Test
     fun requestImmediateRouteRefreshWithNonEmptySuccess() {
         val routes = listOf<NavigationRoute>(mockk())
         val internalCallback = slot<(RoutesRefresherExecutorResult) -> Unit>()
@@ -229,7 +277,6 @@ class RouteRefreshControllerTest {
             immediateRouteRefreshController.requestRoutesRefresh(
                 routes,
                 capture(internalCallback),
-                any(),
             )
         }
         internalCallback.captured(
@@ -258,7 +305,6 @@ class RouteRefreshControllerTest {
             immediateRouteRefreshController.requestRoutesRefresh(
                 routes,
                 capture(internalCallback),
-                any(),
             )
         }
         internalCallback.captured(
@@ -278,25 +324,31 @@ class RouteRefreshControllerTest {
     fun requestImmediateRouteRefreshCancelled() {
         val routes = listOf<NavigationRoute>(mockk())
         val internalCallback = slot<(RoutesRefresherExecutorResult) -> Unit>()
-        var callbackResult: ImmediateRouteRefreshResult? = null
+        val completionCallback = slot<(Throwable?) -> Unit>()
+        val callbackResults = mutableListOf<ImmediateRouteRefreshResult>()
         every { plannedRouteRefreshController.routesToRefresh } returns routes
+        every { immediateRefreshJob.invokeOnCompletion(capture(completionCallback)) } returns mockk()
 
         sut.requestImmediateRouteRefresh { result ->
-            callbackResult = result
+            callbackResults.add(result)
         }
 
         verify(exactly = 1) {
             immediateRouteRefreshController.requestRoutesRefresh(
                 routes,
                 capture(internalCallback),
-                any(),
             )
         }
         internalCallback.captured(RoutesRefresherExecutorResult.ReplacedByNewer)
         verify(exactly = 0) {
             plannedRouteRefreshController.resume()
         }
-        assertTrue(callbackResult is ImmediateRouteRefreshResult.Cancelled)
+        assertEquals(1, callbackResults.size)
+        assertTrue(callbackResults.first() is ImmediateRouteRefreshResult.Cancelled)
+
+        // the canceled job must not produce a second notification
+        completionCallback.captured.invoke(CancellationException("expected"))
+        assertEquals(1, callbackResults.size)
     }
 
     @Test
@@ -310,7 +362,7 @@ class RouteRefreshControllerTest {
 
         verify(exactly = 0) {
             plannedRouteRefreshController.pause()
-            immediateRouteRefreshController.requestRoutesRefresh(any(), any(), any())
+            immediateRouteRefreshController.requestRoutesRefresh(any(), any())
             resultProcessor.reset()
         }
         verifyOrder {
@@ -334,7 +386,7 @@ class RouteRefreshControllerTest {
 
         verify(exactly = 0) {
             plannedRouteRefreshController.pause()
-            immediateRouteRefreshController.requestRoutesRefresh(any(), any(), any())
+            immediateRouteRefreshController.requestRoutesRefresh(any(), any())
             resultProcessor.reset()
         }
         assertTrue(callbackResult is ImmediateRouteRefreshResult.NotStarted)
