@@ -1,7 +1,13 @@
 android {
     publishing {
-        singleVariant("debug")
-        singleVariant("release")
+        singleVariant("debug") {
+            withSourcesJar()
+            withJavadocJar()
+        }
+        singleVariant("release") {
+            withSourcesJar()
+            withJavadocJar()
+        }
     }
 }
 
@@ -19,9 +25,6 @@ afterEvaluate {
                 groupId project.ext.mapboxArtifactGroupId
                 artifactId project.ext.navSdkArtifactSettings[project.name].getV1()
                 version project.ext.versionName
-
-                artifact(androidSourcesJar)
-                artifact(androidKdocJar)
 
                 pom.withXml {
                     final mainNode = asNode()
@@ -51,9 +54,6 @@ afterEvaluate {
                 groupId project.ext.mapboxArtifactGroupId
                 artifactId project.ext.navSdkArtifactSettings[project.name].getV1()
                 version project.ext.versionName
-
-                artifact(androidSourcesJar)
-                artifact(androidKdocJar)
             }
         }
     }
@@ -72,16 +72,6 @@ registry {
     publications = ["release"]
     additionalPackageSuffixes = ["-ndk27"]
     sbom = true
-}
-
-task androidSourcesJar(type: Jar) {
-    archiveClassifier.set('sources')
-    from android.sourceSets.main.kotlin.srcDirs
-}
-
-task androidKdocJar(type: Jar) {
-    archiveClassifier.set('javadoc')
-    from kdocPath
 }
 
 tasks.register("patchArtifactMetadataFileTask") {
