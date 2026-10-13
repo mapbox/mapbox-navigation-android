@@ -54,14 +54,11 @@ abstract class BaseOverviewViewportDataSource(
 
     private var active = true
 
-    var cameraOptions: CameraOptions =
-        CameraOptions.Builder()
-            .center(centerProperty.get())
-            .zoom(zoomProperty.get())
-            .bearing(bearingProperty.get())
-            .pitch(pitchProperty.get())
-            .padding(padding)
-            .build()
+    /**
+     * The frame the overview camera moves to. It is empty until [evaluate] has overrides or points
+     * to frame, and an empty frame does not move the camera.
+     */
+    var cameraOptions: CameraOptions = CameraOptions.Builder().build()
         private set
 
     fun setActive(active: Boolean) {
@@ -119,14 +116,10 @@ abstract class BaseOverviewViewportDataSource(
                 val pointsForOverview = getPointsToFrame().toMutableList()
                 pointsForOverview.addAll(additionalPointsToFrame)
 
-                if (pointsForOverview.isEmpty()) {
+                // Whether the properties were computed from points to frame.
+                val hasData = if (pointsForOverview.isEmpty()) {
                     // nothing to frame
-                    options.run {
-                        bearingProperty.fallback = cameraState.bearing
-                        pitchProperty.fallback = cameraState.pitch
-                        centerProperty.fallback = cameraState.center
-                        zoomProperty.fallback = min(cameraState.zoom, maxZoom)
-                    }
+                    false
                 } else {
                     pitchProperty.fallback = ZERO_PITCH
                     bearingProperty.fallback = normalizeBearing(
@@ -148,6 +141,7 @@ abstract class BaseOverviewViewportDataSource(
 
                     if (cameraFrame.isEmpty) {
                         logW(LOG_CATEGORY) { "CameraOptions is empty" }
+                        false
                     } else {
                         // TODO should be non-null (reproducible with Camera test)
                         centerProperty.fallback = cameraFrame.center!!
@@ -155,30 +149,26 @@ abstract class BaseOverviewViewportDataSource(
                             cameraFrame.zoom!!,
                             options.maxZoom,
                         )
+                        true
                     }
                 }
 
                 updateDebugger(pointsForOverview)
 
-                options.run {
-                    cameraOptions =
-                        CameraOptions.Builder().apply {
-                            if (centerUpdatesAllowed) {
-                                center(centerProperty.get())
-                            }
-                            if (zoomUpdatesAllowed) {
-                                zoom(zoomProperty.get())
-                            }
-                            if (bearingUpdatesAllowed) {
-                                bearing(bearingProperty.get())
-                            }
-                            if (pitchUpdatesAllowed) {
-                                pitch(pitchProperty.get())
-                            }
-                            if (paddingUpdatesAllowed) {
-                                padding(padding)
-                            }
-                        }.build()
+                cameraOptions = with(options) {
+                    fun <T> resolveValue(property: ViewportProperty<T>): T? =
+                        if (hasData) property.get() else property.override
+
+                    CameraOptions.Builder().apply {
+                        if (centerUpdatesAllowed) resolveValue(centerProperty)?.let { center(it) }
+                        if (zoomUpdatesAllowed) resolveValue(zoomProperty)?.let { zoom(it) }
+                        if (bearingUpdatesAllowed) resolveValue(bearingProperty)?.let { bearing(it) }
+                        if (pitchUpdatesAllowed) resolveValue(pitchProperty)?.let { pitch(it) }
+
+                        if (hasData && paddingUpdatesAllowed) {
+                            padding(padding)
+                        }
+                    }.build()
                 }
             }
         }
