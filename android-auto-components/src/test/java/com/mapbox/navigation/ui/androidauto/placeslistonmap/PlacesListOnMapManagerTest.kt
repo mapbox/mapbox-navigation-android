@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.androidauto.placeslistonmap
 
 import androidx.car.app.constraints.ConstraintManager
 import androidx.car.app.model.CarIcon
+import androidx.car.app.model.Row
 import androidx.core.graphics.drawable.IconCompat
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.dispatchers.SdkDispatchersTestRule
@@ -30,6 +31,8 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -51,13 +54,19 @@ class PlacesListOnMapManagerTest : MapboxRobolectricTestRunner() {
     private val locationProvider: CarLocationProvider = mockk()
     private val validLocation = CompletableDeferred<Location>()
     private var placeLimit = 100
+    private var listLimit = 100
     private val carMapSurface: MapboxCarMapSurface = mockk(relaxed = true) {
+        // The limit follows the template that shows the list, never the host API level.
+        every { carContext.carAppApiLevel } returns 7
         every {
             carContext.getCarService(ConstraintManager::class.java)
         } returns mockk {
             every {
                 getContentLimit(ConstraintManager.CONTENT_LIMIT_TYPE_PLACE_LIST)
             } answers { placeLimit }
+            every {
+                getContentLimit(ConstraintManager.CONTENT_LIMIT_TYPE_LIST)
+            } answers { listLimit }
         }
     }
     private val mapboxNavigation: MapboxNavigation = mockk {
@@ -123,8 +132,9 @@ class PlacesListOnMapManagerTest : MapboxRobolectricTestRunner() {
     }
 
     @Test
-    fun `the list and the map get the same places within the host place limit`() {
+    fun `the list and the map get the same places within the host place limit by default`() {
         placeLimit = 2
+        listLimit = 1
         every { locationProvider.lastLocation() } returns location
         coEvery { placesProvider.getPlaces() } returns ExpectedFactory.createValue(
             listOf(
@@ -139,6 +149,40 @@ class PlacesListOnMapManagerTest : MapboxRobolectricTestRunner() {
 
         assertEquals(listOf("first", "second"), manager.placeRecords.value.map { it.id })
         assertEquals(2, manager.itemList.value.items.size)
+        manager.onDetached(carMapSurface)
+    }
+
+    @Test
+    fun `places shown in a list template are limited by the host list limit`() {
+        manager.showsInListTemplate = true
+        placeLimit = 1
+        listLimit = 2
+        every { locationProvider.lastLocation() } returns location
+        coEvery { placesProvider.getPlaces() } returns ExpectedFactory.createValue(
+            listOf(place(id = "first"), place(id = "second"), place(id = "third")),
+        )
+
+        manager.onAttached(carMapSurface)
+
+        assertEquals(listOf("first", "second"), manager.placeRecords.value.map { it.id })
+        assertEquals(2, manager.itemList.value.items.size)
+        manager.onDetached(carMapSurface)
+    }
+
+    @Test
+    fun `rows show the marker icon as their image only in a list template`() {
+        every { locationProvider.lastLocation() } returns location
+        coEvery { placesProvider.getPlaces() } returns ExpectedFactory.createValue(
+            listOf(place(id = "first")),
+        )
+
+        manager.onAttached(carMapSurface)
+        assertNull((manager.itemList.value.items.single() as Row).image)
+        manager.onDetached(carMapSurface)
+
+        manager.showsInListTemplate = true
+        manager.onAttached(carMapSurface)
+        assertNotNull((manager.itemList.value.items.single() as Row).image)
         manager.onDetached(carMapSurface)
     }
 

@@ -16,6 +16,7 @@ import com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackSender
 import com.mapbox.navigation.ui.androidauto.internal.extensions.addBackPressedHandler
 import com.mapbox.navigation.ui.androidauto.internal.extensions.contentLimit
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAutoFailure
+import com.mapbox.navigation.ui.androidauto.internal.setHeaderCompat
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineStart
@@ -58,13 +59,9 @@ internal abstract class CarGridFeedbackScreen @UiThread constructor(
 
     abstract fun onFinish()
 
-    // The header setters are deprecated from Car API 7 in favour of setHeader(Header), which
-    // older hosts do not support.
-    @Suppress("DEPRECATION")
     override fun onGetTemplate(): Template {
         return GridTemplate.Builder()
-            .setHeaderAction(Action.BACK)
-            .setTitle(currentPoll.title)
+            .setHeaderCompat(carContext, title = currentPoll.title, startAction = Action.BACK)
             .setSingleList(buildItemList(currentPoll.options))
             .build()
     }

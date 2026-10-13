@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.androidauto.settings
 
 import android.content.Context
+import androidx.car.app.model.Action
 import androidx.car.app.model.ListTemplate
 import androidx.car.app.model.Row
 import androidx.test.core.app.ApplicationProvider
@@ -11,18 +12,21 @@ import com.mapbox.navigation.ui.androidauto.testing.TestOnDoneCallback
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class CarSettingsScreenTest : MapboxRobolectricTestRunner() {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
+    private var apiLevel = 7
     private val mockCarSettingsStorage: MapboxCarStorage = mockk(relaxUnitFun = true)
     private val mapboxCarContext: MapboxCarContext = mockk {
         every { carContext } returns mockk {
             every { getString(any()) } answers {
                 context.getString(args[0].toString().toInt())
             }
+            every { carAppApiLevel } answers { apiLevel }
         }
         every { mapboxCarStorage } returns mockCarSettingsStorage
     }
@@ -54,5 +58,23 @@ class CarSettingsScreenTest : MapboxRobolectricTestRunner() {
             ?.sendCheckedChange(true, testOnDoneCallback)
         testOnDoneCallback.assertSuccess()
         verify { mockCarSettingsStorage.writeSharedPref(replayKey, true) }
+    }
+
+    // Which setters are used on each Car API level is covered by CarTemplateHeadersTest. The
+    // library returns the same header and legacy fields from either, so this pins the result.
+    @Suppress("DEPRECATION")
+    @Test
+    fun `template shows the title and back on every Car API level`() {
+        every { mockCarSettingsStorage.readSharedPref(any(), false) } returns false
+        listOf(3, 6, 7).forEach { level ->
+            apiLevel = level
+
+            val template = searchScreen.onGetTemplate() as ListTemplate
+
+            assertEquals("Settings", template.header!!.title.toString())
+            assertEquals(Action.BACK, template.header!!.startHeaderAction)
+            assertEquals("Settings", template.title.toString())
+            assertEquals(Action.BACK, template.headerAction)
+        }
     }
 }

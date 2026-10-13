@@ -9,7 +9,6 @@ import androidx.car.app.model.DurationSpan
 import androidx.car.app.model.ItemList
 import androidx.car.app.model.Row
 import androidx.car.app.model.Template
-import androidx.car.app.navigation.model.RoutePreviewNavigationTemplate
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -27,6 +26,7 @@ import com.mapbox.navigation.ui.androidauto.internal.extensions.startGuidanceOnP
 import com.mapbox.navigation.ui.androidauto.internal.extensions.takeKeeping
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAuto
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAutoFailure
+import com.mapbox.navigation.ui.androidauto.internal.setHeaderCompat
 import com.mapbox.navigation.ui.androidauto.location.CarLocationRenderer
 import com.mapbox.navigation.ui.androidauto.navigation.CarActiveGuidanceMarkers
 import com.mapbox.navigation.ui.androidauto.navigation.CarCameraMode
@@ -121,8 +121,13 @@ internal class CarRoutePreviewScreen2 @UiThread constructor(
         )
     }
 
+    // RoutePreviewNavigationTemplate is deprecated with Car API 7. This legacy ROUTE_PREVIEW screen
+    // is the default below Car API 7, and is still shown on newer hosts when a route preview is
+    // requested outside the NAVIGATION screen.
+    @Suppress("DEPRECATION")
     override fun onGetTemplate(): Template {
-        val templateBuilder = RoutePreviewNavigationTemplate.Builder()
+        val templateBuilder =
+            androidx.car.app.navigation.model.RoutePreviewNavigationTemplate.Builder()
         val routesPreview = routesPreview
         val originalRoutesList = routesPreview?.originalRoutesList
         if (originalRoutesList.isNullOrEmpty()) {
@@ -183,12 +188,15 @@ internal class CarRoutePreviewScreen2 @UiThread constructor(
         }
 
         return templateBuilder
-            .setTitle(carContext.getString(R.string.car_action_preview_title))
+            .setHeaderCompat(
+                carContext,
+                title = carContext.getString(R.string.car_action_preview_title),
+                startAction = Action.BACK,
+            )
             .setActionStrip(
                 mapboxCarContext.options.actionStripProvider
                     .getActionStrip(screen = this, MapboxScreen.ROUTE_PREVIEW),
             )
-            .setHeaderAction(Action.BACK)
             .build()
     }
 }

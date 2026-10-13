@@ -44,6 +44,7 @@ class PlaceFeedbackSubmissionTest : MapboxRobolectricTestRunner() {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val carContext: CarContext = mockk {
+        every { carAppApiLevel } returns 7
         every { getString(any()) } answers { context.getString(firstArg()) }
         every { getCarService(AppManager::class.java) } returns mockk(relaxed = true)
         every { getCarService(ConstraintManager::class.java) } returns mockk {

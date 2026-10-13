@@ -29,6 +29,18 @@ class PlacesListItemMapper(
         anchorLocation: Location,
         places: List<PlaceRecord>,
         itemClickListener: PlacesListItemClickListener?,
+    ): ItemList = mapToItemList(anchorLocation, places, itemClickListener, withRowImages = false)
+
+    /**
+     * Only place list templates draw the place marker of a row. With [withRowImages], each row
+     * also shows the marker icon as its image, for the other list templates. Place list templates
+     * reject rows with both.
+     */
+    internal fun mapToItemList(
+        anchorLocation: Location,
+        places: List<PlaceRecord>,
+        itemClickListener: PlacesListItemClickListener?,
+        withRowImages: Boolean,
     ): ItemList {
         val listBuilder = ItemList.Builder()
         places.filter { it.coordinate != null }.forEach { placeRecord ->
@@ -57,6 +69,7 @@ class PlacesListItemMapper(
                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
             )
             val isBrowsable = false
+            val icon = getCarIcon()
 
             listBuilder.addItem(
                 Row.Builder()
@@ -74,12 +87,13 @@ class PlacesListItemMapper(
                                     ),
                                 ).setMarker(
                                     PlaceMarker.Builder()
-                                        .setIcon(getCarIcon(), PlaceMarker.TYPE_IMAGE)
+                                        .setIcon(icon, PlaceMarker.TYPE_IMAGE)
                                         .build(),
                                 ).build(),
                             )
                             .build(),
                     )
+                    .apply { if (withRowImages) setImage(icon) }
                     .setOnClickListener { itemClickListener?.onItemClick(placeRecord) }
                     .setBrowsable(isBrowsable)
                     .build(),

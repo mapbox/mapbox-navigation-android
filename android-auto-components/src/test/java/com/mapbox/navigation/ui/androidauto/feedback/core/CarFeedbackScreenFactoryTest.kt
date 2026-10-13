@@ -36,6 +36,7 @@ import org.junit.Test
 class CarFeedbackScreenFactoryTest : MapboxRobolectricTestRunner() {
 
     private val carContext: CarContext = mockk {
+        every { carAppApiLevel } returns 7
         every { getCarService(ConstraintManager::class.java) } returns mockk {
             every { getContentLimit(any()) } returns CONTENT_LIMIT
         }

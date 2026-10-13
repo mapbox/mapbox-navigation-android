@@ -46,7 +46,7 @@ internal suspend fun MapSurface.captureEncodedScreenshot(
             }
         }
     } finally {
-        // Also reached when cancelled before the encoding block starts.
+        // Also reached when canceled before the encoding block starts.
         bitmap.recycle()
     }
 }

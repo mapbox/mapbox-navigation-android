@@ -10,6 +10,7 @@ import androidx.car.app.model.Toggle
 import com.mapbox.navigation.ui.androidauto.MapboxCarContext
 import com.mapbox.navigation.ui.androidauto.R
 import com.mapbox.navigation.ui.androidauto.internal.extensions.addBackPressedHandler
+import com.mapbox.navigation.ui.androidauto.internal.setHeaderCompat
 import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen
 
 /**
@@ -41,8 +42,11 @@ internal class CarSettingsScreen(
                 .build(),
         )
         return templateBuilder
-            .setHeaderAction(Action.BACK)
-            .setTitle(carContext.getString(R.string.car_settings_title))
+            .setHeaderCompat(
+                carContext,
+                title = carContext.getString(R.string.car_settings_title),
+                startAction = Action.BACK,
+            )
             .build()
     }
 

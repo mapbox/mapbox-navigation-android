@@ -40,6 +40,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -55,6 +57,7 @@ class CarRoutePreviewScreen2Test : MapboxRobolectricTestRunner() {
     val mainCoroutineRule = MainCoroutineRule()
 
     private var routeLimit = 100
+    private var carApiLevel = 6
     private val appManager: AppManager = mockk(relaxed = true)
     private val carContext: CarContext = mockk(relaxed = true) {
         every { getString(any()) } returns "text"
@@ -65,6 +68,7 @@ class CarRoutePreviewScreen2Test : MapboxRobolectricTestRunner() {
             } answers { routeLimit }
         }
         every { onBackPressedDispatcher } returns OnBackPressedDispatcher()
+        every { carAppApiLevel } answers { carApiLevel }
     }
     private val mapboxCarContext: MapboxCarContext = mockk(relaxed = true) {
         every { carContext } returns this@CarRoutePreviewScreen2Test.carContext
@@ -137,6 +141,61 @@ class CarRoutePreviewScreen2Test : MapboxRobolectricTestRunner() {
         assertEquals(2, itemList.items.size)
         assertEquals(1, itemList.selectedIndex)
         verify { mapboxNavigation.setNavigationRoutes(match { it.first() == routes[2] }) }
+    }
+
+    @Test
+    fun `header uses only the legacy setters below Car API 5`() {
+        listOf(3, 4).forEach { level ->
+            carApiLevel = level
+
+            val template = previewTemplateWithRoutes()
+
+            assertNull(template.header)
+            assertEquals("text", template.title.toString())
+            assertEquals(Action.BACK, template.headerAction)
+            assertRoutesAndActions(template)
+        }
+    }
+
+    // The template is deprecated as a whole, so hosts may read its legacy fields on any level.
+    @Test
+    fun `header uses the header and the legacy setters from Car API 5`() {
+        listOf(5, 6, 7, 8).forEach { level ->
+            carApiLevel = level
+
+            val template = previewTemplateWithRoutes()
+
+            assertEquals("text", template.header!!.title.toString())
+            assertEquals(Action.BACK, template.header!!.startHeaderAction)
+            assertEquals("text", template.title.toString())
+            assertEquals(Action.BACK, template.headerAction)
+            assertRoutesAndActions(template)
+        }
+    }
+
+    @Test
+    fun `a loading preview keeps its header`() {
+        carApiLevel = 7
+
+        val template = resumedScreen().onGetTemplate() as RoutePreviewNavigationTemplate
+
+        assertTrue(template.isLoading)
+        assertEquals("text", template.header!!.title.toString())
+        assertEquals(Action.BACK, template.headerAction)
+    }
+
+    private fun previewTemplateWithRoutes(): RoutePreviewNavigationTemplate {
+        val screen = resumedScreen()
+        val preview = routesPreview(routes("first", "second"), primaryRouteIndex = 0)
+        every { mapboxNavigation.getRoutesPreview() } returns preview
+        emit(preview)
+        return screen.onGetTemplate() as RoutePreviewNavigationTemplate
+    }
+
+    private fun assertRoutesAndActions(template: RoutePreviewNavigationTemplate) {
+        assertEquals(2, template.itemList!!.items.size)
+        assertEquals("text", template.navigateAction!!.title.toString())
+        assertEquals("action", template.actionStrip!!.actions.single().title.toString())
     }
 
     private fun resumedScreen(): CarRoutePreviewScreen2 {

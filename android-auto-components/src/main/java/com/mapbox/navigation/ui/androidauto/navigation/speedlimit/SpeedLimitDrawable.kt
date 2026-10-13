@@ -38,7 +38,6 @@ internal abstract class SpeedLimitDrawable : Drawable() {
         const val OFFSET_SHADOW = 8f
         const val RADIUS_SHADOW_SMALL = 4f
         const val OFFSET_SHADOW_SMALL = 2f
-        const val BYTES_PER_ARGB_8888_PIXEL = 4
         const val SPEED_LIMIT_NO_DATA = "--"
         val COLOR_BORDER = "#CDD0D0".toColorInt()
         val COLOR_RED = "#BE3C30".toColorInt()

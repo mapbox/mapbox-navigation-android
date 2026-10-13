@@ -90,6 +90,14 @@ class PlacesListOnMapManager(
     private val _itemList = MutableStateFlow(ItemList.Builder().build())
     val itemList: StateFlow<ItemList> = _itemList.asStateFlow()
 
+    /**
+     * Whether [itemList] is shown in a generic list template instead of a place list template.
+     * A list template is limited as a generic list, and does not draw the place markers of its
+     * rows, so its rows carry the marker icon as their image. Set before the manager is attached.
+     * Defaults to a place list template.
+     */
+    internal var showsInListTemplate: Boolean = false
+
     @VisibleForTesting
     internal val placeClickListener = object : PlacesListItemClickListener {
         override fun onItemClick(placeRecord: PlaceRecord) {
@@ -106,8 +114,13 @@ class PlacesListOnMapManager(
         MapboxNavigationApp.registerObserver(navigationObserver)
 
         loadPlaceRecords(
-            mapboxCarMapSurface.carContext
-                .contentLimit(ConstraintManager.CONTENT_LIMIT_TYPE_PLACE_LIST),
+            mapboxCarMapSurface.carContext.contentLimit(
+                if (showsInListTemplate) {
+                    ConstraintManager.CONTENT_LIMIT_TYPE_LIST
+                } else {
+                    ConstraintManager.CONTENT_LIMIT_TYPE_PLACE_LIST
+                },
+            ),
         )
         coroutineScope.launch {
             mapboxCarMapSurface.styleFlow().collectLatest { style ->
@@ -150,6 +163,7 @@ class PlacesListOnMapManager(
                         currentLocation,
                         placeRecords,
                         placeClickListener,
+                        withRowImages = showsInListTemplate,
                     )
                 }
                 publishItemList(itemList)

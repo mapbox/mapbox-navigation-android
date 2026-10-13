@@ -6,6 +6,7 @@ import androidx.activity.OnBackPressedDispatcher
 import androidx.car.app.AppManager
 import androidx.car.app.CarContext
 import androidx.car.app.constraints.ConstraintManager
+import androidx.car.app.model.Action
 import androidx.car.app.model.CarIcon
 import androidx.car.app.model.GridItem
 import androidx.car.app.model.GridTemplate
@@ -41,10 +42,12 @@ class CarGridFeedbackScreenTest : MapboxRobolectricTestRunner() {
     private val appManager: AppManager = mockk(relaxed = true)
     private val backPressedDispatcher = OnBackPressedDispatcher()
     private var gridLimit = 100
+    private var apiLevel = 7
     private val carContext: CarContext = mockk {
         every { getString(any()) } answers { context.getString(firstArg()) }
         every { getCarService(AppManager::class.java) } returns appManager
         every { onBackPressedDispatcher } returns backPressedDispatcher
+        every { carAppApiLevel } answers { apiLevel }
         every { getCarService(ConstraintManager::class.java) } returns mockk {
             every { getContentLimit(ConstraintManager.CONTENT_LIMIT_TYPE_GRID) } answers {
                 gridLimit
@@ -68,11 +71,30 @@ class CarGridFeedbackScreenTest : MapboxRobolectricTestRunner() {
 
         val template = screen.onGetTemplate() as GridTemplate
 
-        assertEquals("Title", template.title.toString())
+        assertEquals("Title", template.header!!.title.toString())
+        assertEquals(Action.BACK, template.header!!.startHeaderAction)
         assertEquals(
             listOf("First", "Second"),
             template.singleList!!.items.map { (it as GridItem).title.toString() },
         )
+    }
+
+    // Which setters are used on each Car API level is covered by CarTemplateHeadersTest. The
+    // library returns the same header and legacy fields from either, so this pins the result.
+    @Suppress("DEPRECATION")
+    @Test
+    fun `template shows the poll title and back on every Car API level`() {
+        val screen = createScreen(poll("Title", option("First")))
+        listOf(3, 6, 7).forEach { level ->
+            apiLevel = level
+
+            val template = screen.onGetTemplate() as GridTemplate
+
+            assertEquals("Title", template.header!!.title.toString())
+            assertEquals(Action.BACK, template.header!!.startHeaderAction)
+            assertEquals("Title", template.title.toString())
+            assertEquals(Action.BACK, template.headerAction)
+        }
     }
 
     @Test
@@ -252,7 +274,10 @@ class CarGridFeedbackScreenTest : MapboxRobolectricTestRunner() {
         backPressedDispatcher.onBackPressed()
 
         assertEquals(0, finishCount)
-        assertEquals("Title", (screen.onGetTemplate() as GridTemplate).title.toString())
+        assertEquals(
+            "Title",
+            (screen.onGetTemplate() as GridTemplate).header!!.title.toString(),
+        )
     }
 
     @Test
