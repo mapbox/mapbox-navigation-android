@@ -9,7 +9,6 @@ import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.CameraState
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapboxMap
-import com.mapbox.maps.toCameraOptions
 import com.mapbox.navigation.base.internal.extensions.internalAlternativeRouteIndices
 import com.mapbox.navigation.base.internal.route.routeOptions
 import com.mapbox.navigation.base.internal.utils.isSameRoute
@@ -294,18 +293,28 @@ class RouteOverviewViewportDataSourceTest {
     }
 
     @Test
-    fun `empty source initializes at null island`() {
-        val data = viewportDataSource.cameraOptions
+    fun `empty source has no frame to move the camera to`() {
+        assertEquals(CameraOptions.Builder().build(), viewportDataSource.cameraOptions)
+    }
+
+    @Test
+    fun `overrides are used when there are no points to frame`() {
+        val overrideCenter = Point.fromLngLat(11.0, 12.0)
+        viewportDataSource.centerPropertyOverride(overrideCenter)
+        viewportDataSource.zoomPropertyOverride(12.0)
+        viewportDataSource.bearingPropertyOverride(90.0)
+        viewportDataSource.pitchPropertyOverride(30.0)
+
+        viewportDataSource.evaluate()
 
         assertEquals(
-            createCameraOptions {
-                center(NULL_ISLAND_POINT)
-                bearing(BEARING_NORTH)
-                pitch(ZERO_PITCH)
-                zoom(viewportDataSource.options.maxZoom)
-                padding(EMPTY_EDGE_INSETS)
-            },
-            data,
+            CameraOptions.Builder()
+                .center(overrideCenter)
+                .zoom(12.0)
+                .bearing(90.0)
+                .pitch(30.0)
+                .build(),
+            viewportDataSource.cameraOptions,
         )
     }
 
@@ -389,17 +398,8 @@ class RouteOverviewViewportDataSourceTest {
         viewportDataSource.evaluate()
         val data = viewportDataSource.cameraOptions
 
-        assertEquals(
-            createCameraOptions {
-                center(NULL_ISLAND_POINT)
-                bearing(BEARING_NORTH)
-                pitch(ZERO_PITCH)
-                zoom(0.0)
-                padding(EMPTY_EDGE_INSETS)
-                anchor(null)
-            },
-            data,
-        )
+        // no frame was computed from data, so the frame stays empty
+        assertEquals(CameraOptions.Builder().build(), data)
     }
 
     @Test
@@ -435,6 +435,43 @@ class RouteOverviewViewportDataSourceTest {
             overviewCameraOptions,
             data,
         )
+    }
+
+    @Test
+    fun `without points center and zoom overrides stay out when their updates are not allowed`() {
+        viewportDataSource.centerPropertyOverride(Point.fromLngLat(11.0, 12.0))
+        viewportDataSource.zoomPropertyOverride(12.0)
+        viewportDataSource.bearingPropertyOverride(90.0)
+        viewportDataSource.pitchPropertyOverride(30.0)
+        viewportDataSource.options.apply {
+            centerUpdatesAllowed = false
+            zoomUpdatesAllowed = false
+        }
+
+        viewportDataSource.evaluate()
+
+        assertEquals(
+            CameraOptions.Builder().bearing(90.0).pitch(30.0).build(),
+            viewportDataSource.cameraOptions,
+        )
+    }
+
+    @Test
+    fun `a route the map cannot frame leaves the frame empty`() {
+        every {
+            mapboxMap.cameraForCoordinates(
+                completeRoutePointsFlat,
+                any<CameraOptions>(),
+                null,
+                null,
+                null,
+            )
+        } returns CameraOptions.Builder().build()
+
+        viewportDataSource.onRoutesChanged(listOf(navigationRoute))
+        viewportDataSource.evaluate()
+
+        assertEquals(CameraOptions.Builder().build(), viewportDataSource.cameraOptions)
     }
 
     @Test
@@ -1107,48 +1144,26 @@ class RouteOverviewViewportDataSourceTest {
 
     @Test
     fun clearRoutesDataClearsData() {
-        val currentCameraState = CameraState(
-            Point.fromLngLat(32.4, 56.7),
-            EdgeInsets(1.0, 1.0, 2.0, 2.0),
-            15.0,
-            33.0,
-            55.0,
-        )
-
         viewportDataSource.onRoutesChanged(listOf(navigationRoute))
         viewportDataSource.onRouteProgressChanged(routeProgress)
         viewportDataSource.evaluate()
-
-        every { mapboxMap.cameraState } returns currentCameraState
 
         viewportDataSource.clearRouteData()
         viewportDataSource.evaluate()
 
-        val options = viewportDataSource.cameraOptions
-        assertEquals(currentCameraState.center, options.center)
+        assertEquals(CameraOptions.Builder().build(), viewportDataSource.cameraOptions)
     }
 
     @Test
     fun onRoutesChangedEmptyClearsViewport() {
-        val currentCameraState = CameraState(
-            Point.fromLngLat(32.4, 56.7),
-            EdgeInsets(1.0, 1.0, 2.0, 2.0),
-            15.0,
-            33.0,
-            55.0,
-        )
-
         viewportDataSource.onRoutesChanged(listOf(navigationRoute))
         viewportDataSource.onRouteProgressChanged(routeProgress)
         viewportDataSource.evaluate()
 
-        every { mapboxMap.cameraState } returns currentCameraState
-
         viewportDataSource.onRoutesChanged(emptyList())
         viewportDataSource.evaluate()
 
-        val options = viewportDataSource.cameraOptions
-        assertEquals(currentCameraState.toCameraOptions().center, options.center)
+        assertEquals(CameraOptions.Builder().build(), viewportDataSource.cameraOptions)
     }
 
     @Test

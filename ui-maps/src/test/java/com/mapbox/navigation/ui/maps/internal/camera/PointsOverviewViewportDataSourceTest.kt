@@ -3,8 +3,8 @@ package com.mapbox.navigation.ui.maps.internal.camera
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.CameraState
-import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapboxMap
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource.Companion.BEARING_NORTH
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource.Companion.EMPTY_EDGE_INSETS
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource.Companion.NULL_ISLAND_POINT
@@ -13,9 +13,13 @@ import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 class PointsOverviewViewportDataSourceTest {
+
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
 
     private val mapboxMap: MapboxMap = mockk(relaxed = true)
 
@@ -35,19 +39,8 @@ class PointsOverviewViewportDataSourceTest {
     }
 
     @Test
-    fun `empty source initializes at null island`() {
-        val data = viewportDataSource.cameraOptions
-
-        assertEquals(
-            createCameraOptions {
-                center(NULL_ISLAND_POINT)
-                bearing(BEARING_NORTH)
-                pitch(ZERO_PITCH)
-                zoom(viewportDataSource.options.maxZoom)
-                padding(EMPTY_EDGE_INSETS)
-            },
-            data,
-        )
+    fun `empty source has no frame to move the camera to`() {
+        assertEquals(CameraOptions.Builder().build(), viewportDataSource.cameraOptions)
     }
 
     @Test
@@ -84,19 +77,56 @@ class PointsOverviewViewportDataSourceTest {
     }
 
     @Test
-    fun `no points falls back to the current camera state`() {
-        val currentCameraState = CameraState(
-            Point.fromLngLat(32.4, 56.7),
-            EdgeInsets(1.0, 1.0, 2.0, 2.0),
-            15.0,
-            33.0,
-            55.0,
-        )
-        every { mapboxMap.cameraState } returns currentCameraState
+    fun `points the map cannot frame leave the frame empty`() {
+        every {
+            mapboxMap.cameraForCoordinates(any<List<Point>>(), any<CameraOptions>(), null, null, null)
+        } returns CameraOptions.Builder().build()
+
+        viewportDataSource.additionalPointsToFrame(listOf(Point.fromLngLat(-30.0, -40.0)))
+        viewportDataSource.evaluate()
+
+        assertEquals(CameraOptions.Builder().build(), viewportDataSource.cameraOptions)
+    }
+
+    @Test
+    fun `overrides are used when there are no points to frame`() {
+        val overrideCenter = Point.fromLngLat(11.0, 12.0)
+        viewportDataSource.centerPropertyOverride(overrideCenter)
+        viewportDataSource.zoomPropertyOverride(12.0)
 
         viewportDataSource.evaluate()
 
-        assertEquals(currentCameraState.center, viewportDataSource.cameraOptions.center)
+        assertEquals(
+            CameraOptions.Builder().center(overrideCenter).zoom(12.0).build(),
+            viewportDataSource.cameraOptions,
+        )
+    }
+
+    @Test
+    fun `without points bearing and pitch overrides stay out when their updates are not allowed`() {
+        val overrideCenter = Point.fromLngLat(11.0, 12.0)
+        viewportDataSource.centerPropertyOverride(overrideCenter)
+        viewportDataSource.zoomPropertyOverride(12.0)
+        viewportDataSource.bearingPropertyOverride(90.0)
+        viewportDataSource.pitchPropertyOverride(30.0)
+        viewportDataSource.options.apply {
+            bearingUpdatesAllowed = false
+            pitchUpdatesAllowed = false
+        }
+
+        viewportDataSource.evaluate()
+
+        assertEquals(
+            CameraOptions.Builder().center(overrideCenter).zoom(12.0).build(),
+            viewportDataSource.cameraOptions,
+        )
+    }
+
+    @Test
+    fun `no points leaves the frame empty`() {
+        viewportDataSource.evaluate()
+
+        assertEquals(CameraOptions.Builder().build(), viewportDataSource.cameraOptions)
     }
 
     @Test
