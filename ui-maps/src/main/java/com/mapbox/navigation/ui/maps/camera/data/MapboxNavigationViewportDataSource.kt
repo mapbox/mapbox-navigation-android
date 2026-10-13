@@ -341,10 +341,11 @@ class MapboxNavigationViewportDataSource private constructor(
     private var additionalPointsToFrameForFollowing: List<Point> = emptyList()
 
     /**
-     * Whether [evaluateImpl] has run at least once. Until it has, [viewportData] holds only the
-     * seed built at construction time, so [getViewportData] recomputes instead.
+     * Whether the following frame has been computed from data. Until then it holds only what is
+     * known (see [provisionalFollowingFrame]), and [getViewportData] rebuilds it on every call.
+     * Once set, it stays set. It is about following only: the overviews decide this on their own.
      */
-    private var hasEvaluated = false
+    private var hasEvaluatedForFollowing = false
 
     private var viewportData: ViewportData = buildViewportData()
         set(value) {
@@ -363,17 +364,20 @@ class MapboxNavigationViewportDataSource private constructor(
     private var isMapSizeReadyCallbackPending = false
 
     /**
-     * Recomputes the frame until the first [evaluate] has run, and returns the cached
-     * [viewportData] after that.
+     * Returns the frames the camera should move to.
      *
-     * The cached value starts as a seed built at construction time. Overrides and options set
-     * later reach it only through [evaluate], which waits for the map to report its size. For a
-     * freshly shown [MapView] that can take several frames. Without the recompute, a camera
-     * transitioning in that window gets a frame that ignores everything configured since
-     * construction.
+     * Until a frame has been computed from data, the frames hold only what is known: the overrides
+     * and, for following, the position of the latest location. What they leave out stays with the
+     * camera, so nothing is picked from placeholder values.
+     *
+     * Overrides and options set after construction reach the cached [viewportData] only through
+     * [evaluate], which waits for the map to report its size. For a freshly shown [MapView] that
+     * can take several frames. Until the first [evaluate] that had something to frame has run, the
+     * frames are therefore rebuilt on every call, so a camera transitioning in that window sees
+     * everything configured so far. After that the cached [viewportData] is returned.
      */
     override fun getViewportData(): ViewportData =
-        if (hasEvaluated) viewportData else buildViewportData()
+        if (hasEvaluatedForFollowing) viewportData else buildViewportData()
 
     override fun registerUpdateObserver(
         viewportDataSourceUpdateObserver: ViewportDataSourceUpdateObserver,
@@ -415,44 +419,70 @@ class MapboxNavigationViewportDataSource private constructor(
 
     private fun evaluateImpl() {
         val cameraState = mapboxMap.cameraState
-        updateFollowingData(cameraState)
+        val framed = updateFollowingData(cameraState)
         routeOverviewViewportDataSource.evaluate()
         pointsOverviewViewportDataSource.evaluate()
 
-        hasEvaluated = true
+        if (framed) hasEvaluatedForFollowing = true
         viewportData = buildViewportData()
     }
 
     /**
-     * Assembles [ViewportData] from the current property values. Reads only and mutates nothing,
-     * so it is safe to call outside an evaluation.
+     * Assembles [ViewportData] from the following frame and the frames of the two overviews. Reads
+     * only and mutates nothing, so it is safe to call outside an evaluation.
      */
-    private fun buildViewportData(): ViewportData {
-        val followingCameraOptions = options.followingFrameOptions.run {
-            CameraOptions.Builder().apply {
-                if (centerUpdatesAllowed) {
-                    center(followingCenterProperty.get())
-                }
-                if (zoomUpdatesAllowed) {
-                    zoom(followingZoomProperty.get())
-                }
-                if (bearingUpdatesAllowed) {
-                    bearing(followingBearingProperty.get())
-                }
-                if (pitchUpdatesAllowed) {
-                    pitch(followingPitchProperty.get())
-                }
-                if (paddingUpdatesAllowed) {
-                    padding(appliedFollowingPadding)
-                }
-            }.build()
-        }
+    private fun buildViewportData(): ViewportData = ViewportData(
+        cameraForFollowing = if (hasEvaluatedForFollowing) {
+            computedFollowingFrame()
+        } else {
+            provisionalFollowingFrame()
+        },
+        cameraForOverview = routeOverviewViewportDataSource.cameraOptions,
+        cameraForPointsOverview = pointsOverviewViewportDataSource.cameraOptions,
+    )
 
-        return ViewportData(
-            cameraForFollowing = followingCameraOptions,
-            cameraForOverview = routeOverviewViewportDataSource.cameraOptions,
-            cameraForPointsOverview = pointsOverviewViewportDataSource.cameraOptions,
-        )
+    /** The following frame computed from data by [updateFollowingData]. */
+    private fun computedFollowingFrame(): CameraOptions = options.followingFrameOptions.run {
+        CameraOptions.Builder().apply {
+            if (centerUpdatesAllowed) {
+                center(followingCenterProperty.get())
+            }
+            if (zoomUpdatesAllowed) {
+                zoom(followingZoomProperty.get())
+            }
+            if (bearingUpdatesAllowed) {
+                bearing(followingBearingProperty.get())
+            }
+            if (pitchUpdatesAllowed) {
+                pitch(followingPitchProperty.get())
+            }
+            if (paddingUpdatesAllowed) {
+                padding(appliedFollowingPadding)
+            }
+        }.build()
+    }
+
+    /**
+     * Until a frame has been computed from data the fallbacks are placeholders, and moving the
+     * camera to them would send it to the wrong place. The frame holds only what has been set so
+     * far: the overrides and the position of the latest location. What it leaves out the camera
+     * keeps.
+     */
+    private fun provisionalFollowingFrame(): CameraOptions = options.followingFrameOptions.run {
+        CameraOptions.Builder().apply {
+            if (centerUpdatesAllowed) {
+                (followingCenterProperty.override ?: targetLocation?.toPoint())?.let { center(it) }
+            }
+            if (zoomUpdatesAllowed) {
+                followingZoomProperty.override?.let { zoom(it) }
+            }
+            if (bearingUpdatesAllowed) {
+                followingBearingProperty.override?.let { bearing(it) }
+            }
+            if (pitchUpdatesAllowed) {
+                followingPitchProperty.override?.let { pitch(it) }
+            }
+        }.build()
     }
 
     /**
@@ -811,7 +841,13 @@ class MapboxNavigationViewportDataSource private constructor(
         routeOverviewViewportDataSource.clearOverrides()
     }
 
-    private fun updateFollowingData(cameraState: CameraState) {
+    /**
+     * Computes the fallbacks of the following properties.
+     *
+     * @return whether they were computed from points to frame. Otherwise they only mirror the map
+     * camera, which is no frame to move the camera to.
+     */
+    private fun updateFollowingData(cameraState: CameraState): Boolean {
         val pointsForFollowing: MutableList<Point> = pointsToFrameOnCurrentStep.toMutableList()
         val localTargetLocation = targetLocation
 
@@ -836,7 +872,7 @@ class MapboxNavigationViewportDataSource private constructor(
                 followingZoomProperty.fallback = max(min(cameraState.zoom, maxZoom), minZoom)
             }
             // nothing to frame
-            return
+            return false
         }
 
         options.followingFrameOptions.bearingSmoothing.run {
@@ -912,7 +948,7 @@ class MapboxNavigationViewportDataSource private constructor(
 
         if (cameraFrame.isEmpty) {
             logW(LOG_CATEGORY) { "CameraOptions is empty" }
-            return
+            return false
         }
 
         followingCenterProperty.fallback = cameraFrame.center!!
@@ -931,6 +967,7 @@ class MapboxNavigationViewportDataSource private constructor(
         appliedFollowingPadding = cameraFrame.padding
 
         updateDebuggerForFollowing(pointsForFollowing)
+        return true
     }
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)

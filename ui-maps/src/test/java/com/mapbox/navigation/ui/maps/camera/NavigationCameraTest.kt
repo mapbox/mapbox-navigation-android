@@ -80,9 +80,10 @@ class NavigationCameraTest {
     }
 
     private val internalDataSourceObserverSlot = slot<ViewportDataSourceUpdateObserver>()
-    private val followingCameraOptions: CameraOptions = mockk()
-    private val overviewCameraOptions: CameraOptions = mockk()
-    private val pointsOverviewCameraOptions: CameraOptions = mockk()
+    private val followingCameraOptions: CameraOptions = CameraOptions.Builder().zoom(1.0).build()
+    private val overviewCameraOptions: CameraOptions = CameraOptions.Builder().zoom(2.0).build()
+    private val pointsOverviewCameraOptions: CameraOptions =
+        CameraOptions.Builder().zoom(3.0).build()
     private val viewportData: ViewportData = mockk {
         every { cameraForFollowing } returns followingCameraOptions
         every { cameraForOverview } returns overviewCameraOptions
@@ -977,7 +978,7 @@ class NavigationCameraTest {
     private fun mockFrameTransitionForFollowing(
         transitionOptions: NavigationCameraTransitionOptions,
     ): MockFrameTransition {
-        val frameCamera = mockk<CameraOptions>()
+        val frameCamera = CameraOptions.Builder().zoom(4.0).build()
         val frameAnimatorSet = mockk(
             relaxUnitFun = true,
             block = frameBlock,
@@ -993,7 +994,7 @@ class NavigationCameraTest {
     private fun mockFrameTransitionForOverview(
         transitionOptions: NavigationCameraTransitionOptions,
     ): MockFrameTransition {
-        val frameCamera = mockk<CameraOptions>()
+        val frameCamera = CameraOptions.Builder().zoom(5.0).build()
         val frameAnimatorSet = mockk(
             relaxUnitFun = true,
             block = frameBlock,
