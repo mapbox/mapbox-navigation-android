@@ -1,7 +1,6 @@
 package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.bindgen.DataRef
-import com.mapbox.common.LoggingLevel
 import com.mapbox.common.dispatchers.SdkDispatchers
 import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.internal.route.isExpired
@@ -15,12 +14,9 @@ import com.mapbox.navigation.core.internal.RouteProgressData
 import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshCallback
 import com.mapbox.navigation.core.internal.router.NavigationRouterRefreshError
 import com.mapbox.navigation.core.internal.utils.CoroutineUtils.withTimeoutOrDefault
-import com.mapbox.navigation.utils.internal.LoggerProvider
-import com.mapbox.navigation.utils.internal.accepts
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.logW
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
@@ -28,7 +24,6 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 
 internal sealed class RouteRefresherStatus {
@@ -76,10 +71,8 @@ internal data class RoutesRefresherResult(
 internal class RouteRefresher(
     private val routesRefreshDataProvider: RoutesRefreshDataProvider,
     private val evRefreshDataProvider: EVRefreshDataProvider,
-    private val routeDiffProvider: DirectionsRouteDiffProvider,
     private val routeRefresh: RouteRefresh,
     private val globalScope: CoroutineScope = GlobalScope,
-    private val computationDispatcher: CoroutineDispatcher = SdkDispatchers.Default,
 ) {
 
     /**
@@ -207,11 +200,6 @@ internal class RouteRefresher(
                     "Received refreshed route ${result.route.id}",
                     RouteRefreshLog.LOG_CATEGORY,
                 )
-                logRoutesDiff(
-                    newRoute = result.route,
-                    oldRoute = route,
-                    currentLegIndex = routeRefreshRequestData.legIndex,
-                )
                 RouteRefresherResult(
                     result.route,
                     routeProgressData,
@@ -253,33 +241,6 @@ internal class RouteRefresher(
                 }
             }
         }
-
-    private suspend fun logRoutesDiff(
-        newRoute: NavigationRoute,
-        oldRoute: NavigationRoute,
-        currentLegIndex: Int,
-    ) {
-        if (!LoggerProvider.getLoggerFrontend().getLogLevel().accepts(LoggingLevel.INFO)) {
-            return
-        }
-        withContext(computationDispatcher) {
-            val routeDiffs = routeDiffProvider.buildRouteDiffs(
-                oldRoute,
-                newRoute,
-                currentLegIndex,
-            )
-            if (routeDiffs.isEmpty()) {
-                logI(
-                    "No changes in annotations for route ${newRoute.id}",
-                    RouteRefreshLog.LOG_CATEGORY,
-                )
-            } else {
-                for (diff in routeDiffs) {
-                    logI(diff, RouteRefreshLog.LOG_CATEGORY)
-                }
-            }
-        }
-    }
 
     private sealed class RouteRefreshResult {
         data class Success(
