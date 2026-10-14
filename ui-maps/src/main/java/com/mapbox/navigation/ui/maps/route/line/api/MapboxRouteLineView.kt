@@ -823,7 +823,9 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
             viewAnnotationManager,
             adapter,
             map,
-        )
+        ).apply {
+            setWaypointPinsLayerIds(setOf(RouteLayerConstants.WAYPOINT_LAYER_ID))
+        }
 
         lastRouteCalloutData?.let { data -> routeCalloutView?.renderCallouts(data) }
     }

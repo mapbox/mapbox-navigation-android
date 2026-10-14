@@ -1,0 +1,1 @@
+- Route callouts attached with `MapboxRouteLineView.setCalloutAdapter` no longer cover the origin, waypoint and destination icons drawn by `MapboxRouteLineView`.

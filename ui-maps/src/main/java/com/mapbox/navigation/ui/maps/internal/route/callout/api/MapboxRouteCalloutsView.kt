@@ -50,6 +50,12 @@ class MapboxRouteCalloutsView(
 
     private val currentLayersToAttach = mutableSetOf<String>()
 
+    private var waypointPinsLayerIds: Set<String> = emptySet()
+
+    // Only the waypoint pins layers that were not already avoided, so that clear() keeps the ones
+    // the app added to the avoid list on its own.
+    private val addedWaypointPinsLayers = mutableSetOf<String>()
+
     private val onViewAnnotationUpdatedListener = object : OnViewAnnotationUpdatedListener {
         override fun onViewAnnotationAnchorUpdated(
             view: View,
@@ -107,10 +113,36 @@ class MapboxRouteCalloutsView(
             // first set viewAnnotationAvoidLayers, then execute the jobs to avoid flickering
             addViewAnnotationJobs.add({ addViewAnnotation(calloutRoute, viewHolder) })
         }
+        val avoidLayers = viewAnnotationManager.viewAnnotationAvoidLayers
+        if (currentLayersToAttach.isNotEmpty()) {
+            addedWaypointPinsLayers.addAll(waypointPinsLayerIds - avoidLayers)
+        }
         viewAnnotationManager.viewAnnotationAvoidLayers = HashSet(
-            viewAnnotationManager.viewAnnotationAvoidLayers + currentLayersToAttach,
+            avoidLayers + currentLayersToAttach + addedWaypointPinsLayers,
         )
         addViewAnnotationJobs.forEach { it() }
+    }
+
+    /**
+     * Sets the ids of the symbol layers that draw the origin, stop and destination pins, so that
+     * callouts do not cover them. The layers are added to
+     * [ViewAnnotationManager.viewAnnotationAvoidLayers] only while callouts are shown. Callouts
+     * that are already shown are re-placed by the map without being re-created.
+     */
+    fun setWaypointPinsLayerIds(layerIds: Set<String>) {
+        if (layerIds == waypointPinsLayerIds) {
+            return
+        }
+        logD(TAG) { "setWaypointPinsLayerIds: $layerIds" }
+        waypointPinsLayerIds = layerIds
+        if (currentLayersToAttach.isEmpty()) {
+            return
+        }
+        val avoidLayers = viewAnnotationManager.viewAnnotationAvoidLayers - addedWaypointPinsLayers
+        addedWaypointPinsLayers.clear()
+        addedWaypointPinsLayers.addAll(waypointPinsLayerIds - avoidLayers)
+        viewAnnotationManager.viewAnnotationAvoidLayers =
+            HashSet(avoidLayers + addedWaypointPinsLayers)
     }
 
     fun release() {
@@ -159,9 +191,12 @@ class MapboxRouteCalloutsView(
 
     private fun clear() {
         getAllCalloutViews().forEach { viewAnnotationManager.removeViewAnnotation(it) }
-        viewAnnotationManager.viewAnnotationAvoidLayers =
-            HashSet(viewAnnotationManager.viewAnnotationAvoidLayers - currentLayersToAttach)
+        viewAnnotationManager.viewAnnotationAvoidLayers = HashSet(
+            viewAnnotationManager.viewAnnotationAvoidLayers - currentLayersToAttach -
+                addedWaypointPinsLayers,
+        )
         currentLayersToAttach.clear()
+        addedWaypointPinsLayers.clear()
         pendingCallouts.clear()
     }
 

@@ -304,6 +304,89 @@ class MapboxRouteCalloutViewTest {
         verify(exactly = 1) { mockViewAnnotationManager.addViewAnnotation(any<View>(), any()) }
     }
 
+    @Test
+    fun `callouts avoid the route lines and the waypoint pins layers`() {
+        val avoidLayers = givenStatefulAvoidLayers()
+        val calloutView = calloutViewWithWaypointPins(WAYPOINT_PINS_LAYER)
+
+        calloutView.renderCallouts(singleCalloutData())
+
+        assertEquals(setOf(LAYER_1, WAYPOINT_PINS_LAYER), avoidLayers())
+    }
+
+    @Test
+    fun `waypoint pins layers are not avoided when there are no callouts`() {
+        val avoidLayers = givenStatefulAvoidLayers()
+        val calloutView = calloutViewWithWaypointPins(WAYPOINT_PINS_LAYER)
+
+        calloutView.renderCallouts(singleCalloutData())
+        calloutView.renderCallouts(RouteCalloutUiStateData(emptyList()))
+
+        assertEquals(emptySet<String>(), avoidLayers())
+    }
+
+    @Test
+    fun `release keeps the avoid layers added by the app`() {
+        val avoidLayers = givenStatefulAvoidLayers(setOf(WAYPOINT_PINS_LAYER, CUSTOM_LAYER))
+        val calloutView = calloutViewWithWaypointPins(WAYPOINT_PINS_LAYER)
+
+        calloutView.renderCallouts(singleCalloutData())
+        calloutView.release()
+
+        assertEquals(setOf(WAYPOINT_PINS_LAYER, CUSTOM_LAYER), avoidLayers())
+    }
+
+    @Test
+    fun `changed waypoint pins layer replaces the previous one while callouts are shown`() {
+        val avoidLayers = givenStatefulAvoidLayers()
+        val calloutView = calloutViewWithWaypointPins(WAYPOINT_PINS_LAYER)
+        calloutView.renderCallouts(singleCalloutData())
+
+        calloutView.setWaypointPinsLayerIds(setOf(OTHER_WAYPOINT_PINS_LAYER))
+
+        assertEquals(setOf(LAYER_1, OTHER_WAYPOINT_PINS_LAYER), avoidLayers())
+    }
+
+    @Test
+    fun `waypoint pins layer set without callouts is avoided once callouts are rendered`() {
+        val avoidLayers = givenStatefulAvoidLayers()
+        val calloutView = MapboxRouteCalloutsView(mockViewAnnotationManager, mockAdapter())
+
+        calloutView.setWaypointPinsLayerIds(setOf(WAYPOINT_PINS_LAYER))
+        val avoidLayersBeforeCallouts = avoidLayers()
+        calloutView.renderCallouts(singleCalloutData())
+
+        assertEquals(
+            listOf(emptySet(), setOf(LAYER_1, WAYPOINT_PINS_LAYER)),
+            listOf(avoidLayersBeforeCallouts, avoidLayers()),
+        )
+    }
+
+    @Test
+    fun `changing waypoint pins layers keeps the avoid layers added by the app`() {
+        val avoidLayers = givenStatefulAvoidLayers(setOf(CUSTOM_LAYER))
+        val calloutView = calloutViewWithWaypointPins(WAYPOINT_PINS_LAYER)
+        calloutView.renderCallouts(singleCalloutData())
+
+        calloutView.setWaypointPinsLayerIds(emptySet())
+
+        assertEquals(setOf(CUSTOM_LAYER, LAYER_1), avoidLayers())
+    }
+
+    private fun calloutViewWithWaypointPins(layerId: String) =
+        MapboxRouteCalloutsView(mockViewAnnotationManager, mockAdapter()).apply {
+            setWaypointPinsLayerIds(setOf(layerId))
+        }
+
+    private fun givenStatefulAvoidLayers(initial: Set<String> = emptySet()): () -> Set<String> {
+        var avoidLayers = HashSet(initial)
+        every { mockViewAnnotationManager.viewAnnotationAvoidLayers } answers { avoidLayers }
+        every { mockViewAnnotationManager.viewAnnotationAvoidLayers = any() } answers {
+            avoidLayers = firstArg()
+        }
+        return { avoidLayers }
+    }
+
     private fun calloutViewWithMap():
         Pair<MapboxRouteCalloutsView, CapturingSlot<SourceDataLoadedCallback>> {
         val map = mockk<MapboxMap>(relaxed = true)
@@ -371,6 +454,8 @@ class MapboxRouteCalloutViewTest {
         private val SOURCE_1 = RouteLayerConstants.LAYER_GROUP_1_SOURCE_ID
         private val SOURCE_2 = RouteLayerConstants.LAYER_GROUP_2_SOURCE_ID
         private const val CUSTOM_LAYER = "custom-layer"
+        private const val WAYPOINT_PINS_LAYER = "waypoint-pins-layer"
+        private const val OTHER_WAYPOINT_PINS_LAYER = "other-waypoint-pins-layer"
         private const val CUSTOM_SOURCE = "custom-source"
         private const val OTHER_SOURCE = "some-other-source"
     }
