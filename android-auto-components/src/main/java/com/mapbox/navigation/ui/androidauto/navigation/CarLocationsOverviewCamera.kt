@@ -34,8 +34,11 @@ class CarLocationsOverviewCamera(
         private set
     internal var isLocationInitialized = false
         private set
-    private var latestLocation: Location? = null
     private var overviewPaddingPx = 0
+
+    // The points to frame. Kept while detached, so a call before the map is attached is applied
+    // when it is.
+    private var pointsToFrame: List<Point> = emptyList()
 
     private val locationObserver = object : LocationObserver {
 
@@ -46,7 +49,6 @@ class CarLocationsOverviewCamera(
         override fun onNewLocationMatcherResult(locationMatcherResult: LocationMatcherResult) {
             // Initialize the camera at the current location. The next location will
             // transition into the overview mode.
-            latestLocation = locationMatcherResult.enhancedLocation
             viewportDataSource.onLocationChanged(locationMatcherResult.enhancedLocation)
             viewportDataSource.evaluate()
             if (!isLocationInitialized) {
@@ -91,6 +93,7 @@ class CarLocationsOverviewCamera(
         )
 
         MapboxNavigationApp.registerObserver(navigationObserver)
+        framePoints()
     }
 
     override fun onVisibleAreaChanged(visibleArea: Rect, edgeInsets: EdgeInsets) {
@@ -116,14 +119,23 @@ class CarLocationsOverviewCamera(
         isLocationInitialized = false
     }
 
+    /**
+     * Frames [points] in the overview. A call before the map is attached is applied once it is.
+     */
     @UiThread
     fun updateWithLocations(points: List<Point>) {
         if (points.isNotEmpty()) {
             logAndroidAuto("LocationsOverviewCamera updateWithLocations")
-            viewportDataSource.additionalPointsToFrameForOverview(points)
-            viewportDataSource.clearRouteData()
-            viewportDataSource.evaluate()
+            pointsToFrame = points
+            framePoints()
         }
+    }
+
+    private fun framePoints() {
+        if (mapboxCarMapSurface == null || pointsToFrame.isEmpty()) return
+        viewportDataSource.additionalPointsToFrameForOverview(pointsToFrame)
+        viewportDataSource.clearRouteData()
+        viewportDataSource.evaluate()
     }
 
     private companion object {

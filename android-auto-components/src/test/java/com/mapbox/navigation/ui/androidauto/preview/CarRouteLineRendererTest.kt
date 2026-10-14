@@ -95,7 +95,11 @@ class CarRouteLineRendererTest : MapboxRobolectricTestRunner() {
     fun `route clicks are received from the map while attached`() {
         val interaction: Cancelable = mockk(relaxed = true)
         every { mapboxMapMock.addInteraction(any()) } returns interaction
-        val sut = CarRouteLineRenderer(carRoutesProvider = noRoutesProvider, onRouteClick = {})
+        val sut = CarRouteLineRenderer(
+            CarRouteLineRendererOptions.Builder().build(),
+            noRoutesProvider,
+            onRouteClick = {},
+        )
         sut.onAttached(mapboxCarMapSurface)
 
         sut.onDetached(mapboxCarMapSurface)
@@ -113,5 +117,37 @@ class CarRouteLineRendererTest : MapboxRobolectricTestRunner() {
         sut.onAttached(mapboxCarMapSurface)
 
         verify(exactly = 0) { mapboxMapMock.addInteraction(any()) }
+    }
+
+    @Test
+    fun `the constructors of the previous release are kept for Java and Kotlin callers`() {
+        val rendererClass = CarRouteLineRenderer::class.java
+
+        rendererClass.getConstructor()
+        rendererClass.getConstructor(
+            CarRouteLineRendererOptions::class.java,
+            CarRoutesProvider::class.java,
+        )
+        // Kotlin callers that rely on default arguments call this synthetic constructor.
+        rendererClass.getConstructor(
+            CarRouteLineRendererOptions::class.java,
+            CarRoutesProvider::class.java,
+            Int::class.javaPrimitiveType,
+            Class.forName("kotlin.jvm.internal.DefaultConstructorMarker"),
+        )
+    }
+
+    @Test
+    fun `a null route click callback adds no map click interaction`() {
+        val sut = CarRouteLineRenderer(
+            CarRouteLineRendererOptions.Builder().build(),
+            noRoutesProvider,
+            onRouteClick = null,
+        )
+
+        sut.onAttached(mapboxCarMapSurface)
+
+        verify(exactly = 0) { mapboxMapMock.addInteraction(any()) }
+        sut.onDetached(mapboxCarMapSurface)
     }
 }

@@ -134,7 +134,7 @@ internal class ActiveGuidanceExtenderUpdater(private val context: Context) {
         timeFormatter: TimeFormatter,
     ): String? {
         val time = Calendar.getInstance()
-        return durationRemaining?.let {
+        return durationRemaining?.takeIf { it.isFinite() }?.let {
             time.add(Calendar.SECOND, it.roundToInt())
             val arrivalTime = timeFormatter.formatTime(time)
             context.getString(R.string.mapbox_eta_format, arrivalTime)

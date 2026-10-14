@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.androidauto.navigation
 import android.content.res.Configuration
 import android.graphics.Rect
 import androidx.car.app.CarContext
+import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapSurface
@@ -13,8 +14,11 @@ import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.androidauto.testing.CarAppTestRule
 import com.mapbox.navigation.ui.androidauto.testing.MapboxRobolectricTestRunner
+import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkConstructor
+import io.mockk.unmockkConstructor
 import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -94,6 +98,40 @@ class CarLocationsOverviewCameraTest : MapboxRobolectricTestRunner() {
             EdgeInsets(40.0, 50.0, 60.0, 70.0),
             camera.viewportDataSource.overviewPadding,
         )
+    }
+
+    @Test
+    fun `locations set before the map is attached are framed once it is`() {
+        mockkConstructor(MapboxNavigationViewportDataSource::class)
+        every {
+            anyConstructed<MapboxNavigationViewportDataSource>()
+                .additionalPointsToFrameForOverview(any())
+        } returns Unit
+        every { anyConstructed<MapboxNavigationViewportDataSource>().clearRouteData() } returns Unit
+        every { anyConstructed<MapboxNavigationViewportDataSource>().evaluate() } returns Unit
+        val mapboxMap = mockk<MapboxMap>(relaxUnitFun = true)
+        every { mapboxMap.isValid() } returns true
+        every { mapboxMap.subscribeStyleLoaded(any()) } returns mockk(relaxed = true)
+        val aMapSurface = mockk<MapSurface> {
+            every { getMapboxMap() } returns mapboxMap
+            every { camera } returns mockk<CameraAnimationsPlugin>(relaxed = true)
+        }
+        val mapboxCarMapSurface = mockk<MapboxCarMapSurface> {
+            every { mapSurface } returns aMapSurface
+            every { carContext } returns aCarContext(densityDpi = 160)
+        }
+        val points = listOf(Point.fromLngLat(-122.4, 37.8))
+        val camera = CarLocationsOverviewCamera()
+
+        camera.updateWithLocations(points)
+        camera.onAttached(mapboxCarMapSurface)
+
+        verify {
+            anyConstructed<MapboxNavigationViewportDataSource>()
+                .additionalPointsToFrameForOverview(points)
+        }
+        camera.onDetached(mapboxCarMapSurface)
+        unmockkConstructor(MapboxNavigationViewportDataSource::class)
     }
 
     private fun aCarContext(densityDpi: Int): CarContext = mockk {

@@ -17,6 +17,7 @@ import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.ui.androidauto.MapboxCarContext
 import com.mapbox.navigation.ui.androidauto.R
 import com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackSender
+import com.mapbox.navigation.ui.androidauto.internal.AndroidAutoLog
 import com.mapbox.navigation.ui.androidauto.testing.CarAppTestRule
 import com.mapbox.navigation.ui.androidauto.testing.MapboxRobolectricTestRunner
 import com.mapbox.navigation.ui.androidauto.testing.TestOnDoneCallback
@@ -108,6 +109,33 @@ class CarGridFeedbackScreenTest : MapboxRobolectricTestRunner() {
             listOf("First", "Second"),
             template.singleList!!.items.map { (it as GridItem).title.toString() },
         )
+    }
+
+    @Test
+    fun `options without a title are not shown`() {
+        val screen = createScreen(poll("Title", option(" "), option("Second")))
+
+        val template = screen.onGetTemplate() as GridTemplate
+
+        assertEquals(
+            listOf("Second"),
+            template.singleList!!.items.map { (it as GridItem).title.toString() },
+        )
+    }
+
+    @Test
+    fun `options without a title are logged once per poll, not per template`() {
+        val screen = createScreen(poll("Title", option(""), option("Second")))
+
+        screen.onGetTemplate()
+        screen.onGetTemplate()
+
+        verify(exactly = 1) {
+            AndroidAutoLog.logAndroidAutoFailure(
+                match { it.startsWith("Feedback options without a title") },
+                any(),
+            )
+        }
     }
 
     @Test

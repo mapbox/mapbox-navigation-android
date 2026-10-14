@@ -187,6 +187,60 @@ class MapboxCarNavigationManagerTest {
     }
 
     @Test
+    fun `a host failure when navigation ends doesn't crash`() {
+        every { navigationManager.navigationEnded() } throws RuntimeException("host failure")
+        val mapboxNavigation: MapboxNavigation = mockk(relaxed = true)
+        val routesObserverSlot = slot<RoutesObserver>()
+        every {
+            mapboxNavigation.registerRoutesObserver(capture(routesObserverSlot))
+        } just Runs
+        sut.onAttached(mapboxNavigation)
+
+        routesObserverSlot.captured.onRoutesChanged(
+            mockk { every { navigationRoutes } returns listOf(mockk()) },
+        )
+        routesObserverSlot.captured.onRoutesChanged(
+            mockk { every { navigationRoutes } returns emptyList() },
+        )
+
+        verify { navigationManager.navigationEnded() }
+    }
+
+    @Test
+    fun `after a failed navigation start no trips are sent, and the next routes start again`() {
+        every { navigationManager.navigationStarted() } throws RuntimeException("host failure")
+        val routes = mutableListOf<RoutesObserver>()
+        val routeProgressObserverSlot = mutableListOf<RouteProgressObserver>()
+        val mapboxNavigation: MapboxNavigation = mapboxNavigationMock(
+            routes,
+            routeProgressObserverSlot,
+        )
+        sut.onAttached(mapboxNavigation)
+
+        mapboxNavigation.setNavigationRoutes(listOf(mockk()))
+        routeProgressObserverSlot.forEach { it.onRouteProgressChanged(mockk()) }
+
+        verify(exactly = 0) { navigationManager.updateTrip(any()) }
+
+        every { navigationManager.navigationStarted() } just Runs
+        mapboxNavigation.setNavigationRoutes(listOf(mockk()))
+
+        verify(exactly = 2) { navigationManager.navigationStarted() }
+    }
+
+    @Test
+    fun `a failure to clear the callback on detach doesn't crash`() {
+        every {
+            navigationManager.clearNavigationManagerCallback()
+        } throws IllegalStateException("Removing callback while navigating")
+        val mapboxNavigation: MapboxNavigation = mockk(relaxed = true)
+
+        sut.onDetached(mapboxNavigation)
+
+        verify { navigationManager.clearNavigationManagerCallback() }
+    }
+
+    @Test
     fun `empty routes should not trigger navigationEnded if not in active navigation`() {
         val mapboxNavigation: MapboxNavigation = mockk(relaxed = true)
         val routesObserverSlot = slot<RoutesObserver>()
@@ -301,6 +355,31 @@ class MapboxCarNavigationManagerTest {
         }
         verify(exactly = 1) { navigationManager.navigationStarted() }
         verify(exactly = 1) { navigationManager.updateTrip(any()) }
+    }
+
+    @Test
+    fun `a trip that fails to serialize is logged, not thrown`() {
+        val routes = mutableListOf<RoutesObserver>()
+        val routeProgressObserverSlot = mutableListOf<RouteProgressObserver>()
+        val mapboxNavigation: MapboxNavigation = mapboxNavigationMock(
+            routes,
+            routeProgressObserverSlot,
+        )
+
+        mapboxNavigation.setNavigationRoutes(listOf(mockk()))
+        sut.onAttached(mapboxNavigation)
+        every {
+            navigationManager.updateTrip(any())
+        } throws IllegalArgumentException("Serialization failure")
+        routeProgressObserverSlot.forEach { it.onRouteProgressChanged(mockk()) }
+        sut.onDetached(mapboxNavigation)
+
+        verify {
+            AndroidAutoLog.logAndroidAutoFailure(
+                "MapboxCarNavigationManager updateTrip failed",
+                any(),
+            )
+        }
     }
 
     @Test

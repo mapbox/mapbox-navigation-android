@@ -66,13 +66,24 @@ class ActiveGuidanceExtenderUpdaterTest : MapboxRobolectricTestRunner() {
         assertFalse(title, title.contains("10:00"))
     }
 
+    @Test
+    fun `an unknown remaining duration shows no arrival time`() {
+        val extender = update(routeProgress(instruction = "Turn left", duration = Double.NaN))
+
+        val title = extender.contentTitle.toString()
+        assertFalse(title, title.contains("10:00"))
+    }
+
     private fun update(routeProgress: RouteProgress): CarAppExtender {
         val builder = CarAppExtender.Builder()
         sut.update(builder, routeProgress, distanceFormatter, timeFormatter)
         return builder.build()
     }
 
-    private fun routeProgress(instruction: String? = null): RouteProgress = mockk {
+    private fun routeProgress(
+        instruction: String? = null,
+        duration: Double = 600.0,
+    ): RouteProgress = mockk {
         every { bannerInstructions } returns instruction?.let { text ->
             mockk<BannerInstructions> {
                 every { primary() } returns mockk(relaxed = true) {
@@ -84,7 +95,7 @@ class ActiveGuidanceExtenderUpdaterTest : MapboxRobolectricTestRunner() {
             }
         }
         every { currentLegProgress } returns mockk {
-            every { durationRemaining } returns 600.0
+            every { durationRemaining } returns duration
             every { currentStepProgress } returns mockk {
                 every { distanceRemaining } returns 1000f
                 every { step } returns null

@@ -78,8 +78,10 @@ class PlaceSearchScreenTest : MapboxRobolectricTestRunner() {
 
     @Before
     fun setup() {
-        mockkStatic(CarDistanceFormatter::class)
-        every { CarDistanceFormatter.formatDistance(any()) } returns SpannableString.valueOf("")
+        mockkObject(CarDistanceFormatter)
+        every {
+            CarDistanceFormatter.formatDistanceOrNull(any())
+        } returns SpannableString.valueOf("")
         mockkStatic(CarToast::class)
         every { CarToast.makeText(any(), any<CharSequence>(), any()) } returns toast
         mockkObject(PlaceRecordMapper)
@@ -99,10 +101,54 @@ class PlaceSearchScreenTest : MapboxRobolectricTestRunner() {
         (placeSearchScreen.lifecycle as LifecycleRegistry).currentState = state
     }
 
-    private fun mockSuggestion(suggestionName: String, distance: Double) = mockk<SearchSuggestion> {
+    private fun mockSuggestion(
+        suggestionName: String,
+        distance: Double,
+        address: String? = null,
+        description: String? = null,
+    ) = mockk<SearchSuggestion> {
         every { name } returns suggestionName
         every { distanceMeters } returns distance
+        every { fullAddress } returns address
+        every { descriptionText } returns description
     }
+
+    @Test
+    fun `a suggestion without a name is titled by its address, or skipped`() =
+        coroutineRule.runBlockingTest {
+            coEvery {
+                carPlaceSearch.search("main")
+            } returns Result.success(
+                listOf(
+                    mockSuggestion("", 10.0, address = "1 Main St"),
+                    mockSuggestion(" ", 20.0),
+                ),
+            )
+
+            placeSearchScreen.doSearch("main", debounce = false)
+
+            val template = placeSearchScreen.onGetTemplate() as SearchTemplate
+            assertEquals(
+                listOf("1 Main St"),
+                template.itemList.items.map { (it as Row).title.toString() },
+            )
+        }
+
+    @Test
+    fun `suggestions show no distance before navigation is set up`() =
+        coroutineRule.runBlockingTest {
+            coEvery {
+                carPlaceSearch.search("starbucks")
+            } returns Result.success(listOf(mockSuggestion("Starbucks", 559.39)))
+            every { CarDistanceFormatter.formatDistanceOrNull(any()) } returns null
+
+            placeSearchScreen.doSearch("starbucks", debounce = false)
+
+            val template = placeSearchScreen.onGetTemplate() as SearchTemplate
+            val row = template.itemList.items.single() as Row
+            assertEquals("Starbucks", row.title.toString())
+            assertEquals("", row.texts[0].toString())
+        }
 
     @Test
     fun `initial state is empty`() {
@@ -119,7 +165,7 @@ class PlaceSearchScreenTest : MapboxRobolectricTestRunner() {
         } returns Result.success(listOf(mockSuggestion("Starbucks", 559.39)))
 
         every {
-            CarDistanceFormatter.formatDistance(559.39)
+            CarDistanceFormatter.formatDistanceOrNull(559.39)
         } returns SpannableString.valueOf("0.3 mi")
 
         placeSearchScreen.doSearch("starbucks", debounce = false)

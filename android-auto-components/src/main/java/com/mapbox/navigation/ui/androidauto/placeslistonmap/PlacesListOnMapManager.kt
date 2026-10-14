@@ -5,12 +5,14 @@ import androidx.car.app.constraints.ConstraintManager
 import androidx.car.app.model.ItemList
 import com.mapbox.annotation.MapboxExperimental
 import com.mapbox.common.dispatchers.SdkDispatchers
+import com.mapbox.common.location.Location
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.androidauto.MapboxCarMapObserver
 import com.mapbox.maps.extension.androidauto.MapboxCarMapSurface
+import com.mapbox.navigation.base.formatter.DistanceFormatterOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.ui.androidauto.internal.extensions.contentLimit
@@ -19,13 +21,16 @@ import com.mapbox.navigation.ui.androidauto.internal.extensions.mapboxNavigation
 import com.mapbox.navigation.ui.androidauto.internal.extensions.styleFlow
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAuto
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAutoFailure
+import com.mapbox.navigation.ui.androidauto.internal.rowTitle
 import com.mapbox.navigation.ui.androidauto.location.CarLocationProvider
 import com.mapbox.navigation.ui.androidauto.search.PlaceRecord
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -45,10 +50,10 @@ class PlacesListOnMapManager(
     private lateinit var coroutineScope: CoroutineScope
     private val placesLayerUtil: PlacesListOnMapLayerUtil = PlacesListOnMapLayerUtil()
     private var itemListJob: Job? = null
-    private val navigationObserver = mapboxNavigationForward(this::onAttached) {
-        itemListJob?.cancel()
-        itemListJob = null
-    }
+    private val navigationObserver = mapboxNavigationForward(
+        { mapboxNavigation -> startItemList(mapboxNavigation) },
+        { onNavigationDetached() },
+    )
 
     // The public placeRecords and itemList flows need a value before anything is loaded, so they
     // start empty. Their internal counterparts, loadedPlaceRecords (null until the first load)
@@ -56,6 +61,12 @@ class PlacesListOnMapManager(
     // empty". Loaded data reaches both members of a pair together, through publishPlaces() and
     // publishItemList(); only Failed is set on state alone, as it has no public counterpart.
     private val _placeRecords = MutableStateFlow(listOf<PlaceRecord>())
+
+    /**
+     * The places shown in the list, as markers on the map, and framed by the camera. Only places
+     * with a coordinate and a name or description are kept, and no more than the host shows in
+     * its list (its content limit). Empty until the places are loaded.
+     */
     val placeRecords: StateFlow<List<PlaceRecord>> = _placeRecords.asStateFlow()
 
     private val loadedPlaceRecords = MutableStateFlow<List<PlaceRecord>?>(null)
@@ -64,7 +75,8 @@ class PlacesListOnMapManager(
 
     /**
      * What the places list should render. Starts as [PlacesListState.Loading] and stays there
-     * until the places are loaded and a location is known to measure their distance from.
+     * until the places are loaded. A list is shown even without a location, then without
+     * distances, and it is rebuilt with distances when the first location arrives.
      */
     internal val state: StateFlow<PlacesListState> = _state.asStateFlow()
 
@@ -111,7 +123,12 @@ class PlacesListOnMapManager(
         super.onAttached(mapboxCarMapSurface)
         carMapSurface = mapboxCarMapSurface
         coroutineScope = MainScope()
+        // Registering starts the list right away when a MapboxNavigation is attached. Without
+        // one the list is built too, with the distance units of the device locale.
         MapboxNavigationApp.registerObserver(navigationObserver)
+        if (itemListJob == null) {
+            startItemList(mapboxNavigation = null)
+        }
 
         loadPlaceRecords(
             mapboxCarMapSurface.carContext.contentLimit(
@@ -134,39 +151,64 @@ class PlacesListOnMapManager(
     override fun onDetached(mapboxCarMapSurface: MapboxCarMapSurface) {
         super.onDetached(mapboxCarMapSurface)
         mapboxCarMapSurface.getStyle()?.let { placesLayerUtil.removePlacesListOnMapLayer(it) }
-        MapboxNavigationApp.unregisterObserver(navigationObserver)
+        // Cleared first, so the navigation detach below doesn't start a new list.
         carMapSurface = null
+        MapboxNavigationApp.unregisterObserver(navigationObserver)
         coroutineScope.cancel()
+        itemListJob = null
     }
 
-    private fun onAttached(mapboxNavigation: MapboxNavigation) {
-        val placesListItemMapper = PlacesListItemMapper(
-            PlaceMarkerRenderer(carMapSurface?.carContext!!),
-            mapboxNavigation
-                .navigationOptions
-                .distanceFormatterOptions
-                .unitType,
-        )
-
+    private fun startItemList(mapboxNavigation: MapboxNavigation?) {
         itemListJob?.cancel()
+        itemListJob = null
+        val carContext = carMapSurface?.carContext ?: return
+        val unitType = mapboxNavigation?.navigationOptions?.distanceFormatterOptions?.unitType
+            ?: DistanceFormatterOptions.Builder(carContext).build().unitType
         itemListJob = coroutineScope.launch {
-            loadedPlaceRecords.filterNotNull().collectLatest { placeRecords ->
-                val itemList = if (placeRecords.isEmpty()) {
-                    ItemList.Builder().build()
+            collectItemList(PlacesListItemMapper(PlaceMarkerRenderer(carContext), unitType))
+        }
+    }
+
+    private fun onNavigationDetached() {
+        // A list on screen stays as it is: rebuilding it without navigation would drop its
+        // distances and the units of the navigation options. A list still loading is built
+        // without navigation, so it never stays loading.
+        if (_state.value is PlacesListState.Loaded) {
+            itemListJob?.cancel()
+            itemListJob = null
+        } else {
+            startItemList(mapboxNavigation = null)
+        }
+    }
+
+    private suspend fun collectItemList(placesListItemMapper: PlacesListItemMapper) {
+        loadedPlaceRecords.filterNotNull().collectLatest { placeRecords ->
+            if (placeRecords.isEmpty()) {
+                publishItemList(ItemList.Builder().build())
+                return@collectLatest
+            }
+            fun itemList(location: Location?) = placesListItemMapper.mapToItemList(
+                location,
+                placeRecords,
+                placeClickListener,
+                withRowImages = showsInListTemplate,
+            )
+            // Places can load before the first location fix, and a fix may never come (no
+            // signal, or no trip session). Show the places without distances after a short
+            // wait, and add the distances when the first location arrives. A place list
+            // template rejects rows without a distance, so it gets an empty list until then.
+            val locationProvider = CarLocationProvider.getRegisteredInstance()
+            val location = locationProvider.lastLocation()
+                ?: locationProvider.waitForLocationOrNull()
+            publishItemList(
+                if (location != null || showsInListTemplate) {
+                    itemList(location)
                 } else {
-                    // Places can load before the first location fix. Wait for it rather than
-                    // building a list without distances that would never be rebuilt.
-                    val locationProvider = CarLocationProvider.getRegisteredInstance()
-                    val currentLocation = locationProvider.lastLocation()
-                        ?: locationProvider.validLocation()
-                    placesListItemMapper.mapToItemList(
-                        currentLocation,
-                        placeRecords,
-                        placeClickListener,
-                        withRowImages = showsInListTemplate,
-                    )
-                }
-                publishItemList(itemList)
+                    ItemList.Builder().build()
+                },
+            )
+            if (location == null) {
+                publishItemList(itemList(locationProvider.validLocation()))
             }
         }
     }
@@ -176,8 +218,19 @@ class PlacesListOnMapManager(
     @OptIn(MapboxExperimental::class)
     private fun loadPlaceRecords(placeLimit: Int) {
         coroutineScope.launch {
-            val expectedPlaceRecords = withContext(SdkDispatchers.IO) {
-                placesListOnMapProvider.getPlaces()
+            // The provider can be implemented by the integrator, so a failure in it must not
+            // crash the app.
+            val expectedPlaceRecords = try {
+                withContext(SdkDispatchers.IO) {
+                    placesListOnMapProvider.getPlaces()
+                }
+            } catch (e: Throwable) {
+                // Rethrows only when this manager was cancelled. A cancellation from inside the
+                // provider, such as its own timeout, is a failed load.
+                if (e is CancellationException) ensureActive()
+                logAndroidAutoFailure("PlacesListOnMapScreen getPlaces failed", e)
+                onLoadFailed()
+                return@launch
             }
             expectedPlaceRecords.fold(
                 {
@@ -185,13 +238,17 @@ class PlacesListOnMapManager(
                         "PlacesListOnMapScreen ${it.errorMessage}\n" +
                             it.throwable?.stackTraceToString().orEmpty(),
                     )
-                    // Places loaded earlier stay on screen when reloading them fails.
-                    if (loadedPlaceRecords.value == null) {
-                        _state.value = PlacesListState.Failed
-                    }
+                    onLoadFailed()
                 },
                 { placeRecords -> publishPlaces(placeRecords.placesToShow(placeLimit)) },
             )
+        }
+    }
+
+    private fun onLoadFailed() {
+        // Places loaded earlier stay on screen when reloading them fails.
+        if (loadedPlaceRecords.value == null) {
+            _state.value = PlacesListState.Failed
         }
     }
 
@@ -226,8 +283,9 @@ internal sealed interface PlacesListState {
 }
 
 /**
- * The places shown in the list and on the map: only places with a coordinate, and no more than
- * the host shows in the list.
+ * The places shown in the list and on the map: only places with a coordinate and something to
+ * title their row with, and no more than the host shows in the list.
  */
 internal fun List<PlaceRecord>.placesToShow(placeLimit: Int): List<PlaceRecord> =
-    filter { it.coordinate != null }.take(placeLimit)
+    filter { it.coordinate != null && rowTitle(it.name, it.description) != null }
+        .take(placeLimit)

@@ -27,10 +27,12 @@ class CarLanesImageRenderer(
      * Create the images needed to show lane guidance.
      *
      * @param lane retrieve the lane guidance through the [MapboxManeuverApi]
-     * @return the lanes image, null when there is no lange guidance
+     * @return the lanes image, null when there is no lane guidance
      */
     fun renderLanesImage(lane: Lane?): CarLanesImage? {
-        return lane?.let {
+        // Lanes without indications are dropped, so a lanes array can leave no lanes at all.
+        // A step can't have a lanes image without lanes.
+        return lane?.takeIf { it.allLanes.isNotEmpty() }?.let {
             cache.get(lane)?.also {
                 return it
             }

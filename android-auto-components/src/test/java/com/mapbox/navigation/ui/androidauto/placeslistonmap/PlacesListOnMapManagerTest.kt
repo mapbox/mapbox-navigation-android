@@ -2,8 +2,13 @@ package com.mapbox.navigation.ui.androidauto.placeslistonmap
 
 import androidx.car.app.constraints.ConstraintManager
 import androidx.car.app.model.CarIcon
+import androidx.car.app.model.Distance
+import androidx.car.app.model.DistanceSpan
+import androidx.car.app.model.ItemList
 import androidx.car.app.model.Row
+import androidx.car.app.navigation.model.PlaceListNavigationTemplate
 import androidx.core.graphics.drawable.IconCompat
+import androidx.test.core.app.ApplicationProvider
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.dispatchers.SdkDispatchersTestRule
 import com.mapbox.common.location.Location
@@ -25,14 +30,17 @@ import io.mockk.mockk
 import io.mockk.mockkConstructor
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -53,11 +61,16 @@ class PlacesListOnMapManagerTest : MapboxRobolectricTestRunner() {
     private val placesProvider: PlacesListOnMapProvider = mockk(relaxed = true)
     private val locationProvider: CarLocationProvider = mockk()
     private val validLocation = CompletableDeferred<Location>()
+    private val locationWithinTimeout = CompletableDeferred<Location?>()
     private var placeLimit = 100
     private var listLimit = 100
     private val carMapSurface: MapboxCarMapSurface = mockk(relaxed = true) {
         // The limit follows the template that shows the list, never the host API level.
         every { carContext.carAppApiLevel } returns 7
+        // The distance units without a MapboxNavigation come from the device locale.
+        every { carContext.applicationContext } returns ApplicationProvider.getApplicationContext()
+        every { carContext.resources } returns
+            ApplicationProvider.getApplicationContext<android.content.Context>().resources
         every {
             carContext.getCarService(ConstraintManager::class.java)
         } returns mockk {
@@ -83,11 +96,14 @@ class PlacesListOnMapManagerTest : MapboxRobolectricTestRunner() {
 
     private fun place(
         id: String = "id",
+        name: String = "name",
+        description: String? = null,
         coordinate: Point? = Point.fromLngLat(-122.4, 37.8),
     ) = PlaceRecord(
         id = id,
-        name = "name",
+        name = name,
         coordinate = coordinate,
+        description = description,
     )
 
     private val location = Location.Builder().apply {
@@ -103,6 +119,9 @@ class PlacesListOnMapManagerTest : MapboxRobolectricTestRunner() {
         mockkObject(CarLocationProvider)
         every { CarLocationProvider.getRegisteredInstance() } returns locationProvider
         coEvery { locationProvider.validLocation() } coAnswers { validLocation.await() }
+        coEvery {
+            locationProvider.waitForLocationOrNull(any())
+        } coAnswers { locationWithinTimeout.await() }
         mockkConstructor(PlaceMarkerRenderer::class)
         every { anyConstructed<PlaceMarkerRenderer>().renderMarker() } returns mockk {
             every { type } returns CarIcon.TYPE_CUSTOM
@@ -114,7 +133,7 @@ class PlacesListOnMapManagerTest : MapboxRobolectricTestRunner() {
     }
 
     @Test
-    fun `places loaded before the first location fix stay loading until a location arrives`() {
+    fun `places loaded before the first location fix wait a short time for a location`() {
         every { locationProvider.lastLocation() } returns null
         coEvery { placesProvider.getPlaces() } returns ExpectedFactory.createValue(listOf(place))
 
@@ -122,12 +141,103 @@ class PlacesListOnMapManagerTest : MapboxRobolectricTestRunner() {
 
         assertEquals(PlacesListState.Loading, manager.state.value)
 
-        validLocation.complete(location)
+        locationWithinTimeout.complete(location)
 
         val state = manager.state.value
         assertTrue(state is PlacesListState.Loaded)
         assertEquals(1, (state as PlacesListState.Loaded).itemList.items.size)
         assertEquals(state.itemList, manager.itemList.value)
+        assertFalse((state.itemList.items.single() as Row).texts.isEmpty())
+        manager.onDetached(carMapSurface)
+    }
+
+    @Test
+    fun `places are listed without distances when no location arrives in time`() {
+        manager.showsInListTemplate = true
+        every { locationProvider.lastLocation() } returns null
+        coEvery { placesProvider.getPlaces() } returns ExpectedFactory.createValue(listOf(place))
+
+        manager.onAttached(carMapSurface)
+        locationWithinTimeout.complete(null)
+
+        val state = manager.state.value
+        assertTrue(state is PlacesListState.Loaded)
+        assertTrue(((state as PlacesListState.Loaded).itemList.items.single() as Row).texts.isEmpty())
+
+        validLocation.complete(location)
+
+        val withDistance = manager.state.value as PlacesListState.Loaded
+        assertFalse((withDistance.itemList.items.single() as Row).texts.isEmpty())
+        manager.onDetached(carMapSurface)
+    }
+
+    @Test
+    fun `a place list template stays valid until a location arrives`() {
+        every { locationProvider.lastLocation() } returns null
+        coEvery { placesProvider.getPlaces() } returns ExpectedFactory.createValue(listOf(place))
+
+        manager.onAttached(carMapSurface)
+        locationWithinTimeout.complete(null)
+
+        // A place list template rejects rows without a distance.
+        val withoutLocation = manager.state.value as PlacesListState.Loaded
+        assertTrue(withoutLocation.itemList.items.isEmpty())
+
+        validLocation.complete(location)
+
+        val withLocation = manager.state.value as PlacesListState.Loaded
+        assertEquals(1, withLocation.itemList.items.size)
+        @Suppress("DEPRECATION")
+        PlaceListNavigationTemplate.Builder().setItemList(withLocation.itemList).build()
+        manager.onDetached(carMapSurface)
+    }
+
+    @Test
+    fun `places are listed while no navigation is attached`() {
+        carAppTestRule.onDetached(mapboxNavigation)
+        every { locationProvider.lastLocation() } returns location
+        coEvery { placesProvider.getPlaces() } returns ExpectedFactory.createValue(listOf(place))
+
+        manager.onAttached(carMapSurface)
+
+        assertTrue(manager.state.value is PlacesListState.Loaded)
+        manager.onDetached(carMapSurface)
+    }
+
+    @Test
+    fun `a provider that throws is reported as a failure`() {
+        every { locationProvider.lastLocation() } returns location
+        listOf(
+            IllegalStateException("broken provider"),
+            NotImplementedError("provider not implemented"),
+            CancellationException("provider timed out"),
+        ).forEach { error ->
+            coEvery { placesProvider.getPlaces() } throws error
+            val manager = PlacesListOnMapManager(placesProvider)
+
+            manager.onAttached(carMapSurface)
+
+            assertEquals(error.toString(), PlacesListState.Failed, manager.state.value)
+            manager.onDetached(carMapSurface)
+        }
+    }
+
+    @Test
+    fun `a place without a name is titled by its description, or skipped`() {
+        every { locationProvider.lastLocation() } returns location
+        coEvery { placesProvider.getPlaces() } returns ExpectedFactory.createValue(
+            listOf(
+                place(id = "described", name = " ", description = "1 Main St"),
+                place(id = "unnamed", name = ""),
+            ),
+        )
+
+        manager.onAttached(carMapSurface)
+
+        val rows = (manager.state.value as PlacesListState.Loaded).itemList.items
+        assertEquals(listOf("1 Main St"), rows.map { (it as Row).title.toString() })
+        // A place without a row gets no marker either.
+        assertEquals(listOf("described"), manager.placeRecords.value.map { it.id })
         manager.onDetached(carMapSurface)
     }
 
@@ -240,17 +350,41 @@ class PlacesListOnMapManagerTest : MapboxRobolectricTestRunner() {
     }
 
     @Test
-    fun `the list stops updating while navigation is detached`() {
+    fun `a list on screen is kept when navigation detaches, and rebuilt when it attaches`() {
+        every { locationProvider.lastLocation() } returns location
+        coEvery { placesProvider.getPlaces() } returns ExpectedFactory.createValue(listOf(place))
+        manager.onAttached(carMapSurface)
+        val shownList = manager.itemList.value
+
+        carAppTestRule.onDetached(mapboxNavigation)
+
+        assertSame(shownList, manager.itemList.value)
+
+        // The navigation attached next measures in miles, so a rebuilt list shows miles.
+        every {
+            mapboxNavigation.navigationOptions.distanceFormatterOptions.unitType
+        } returns UnitType.IMPERIAL
+        carAppTestRule.onAttached(mapboxNavigation)
+
+        assertEquals(Distance.UNIT_MILES, firstRowDistanceUnit(manager.itemList.value))
+        manager.onDetached(carMapSurface)
+    }
+
+    private fun firstRowDistanceUnit(itemList: ItemList): Int {
+        val text = (itemList.items.first() as Row).texts.first()
+        val span = text.spans.single { it.carSpan is DistanceSpan }.carSpan
+        return (span as DistanceSpan).distance!!.displayUnit
+    }
+
+    @Test
+    fun `a list still loading when navigation detaches is built without it`() {
         every { locationProvider.lastLocation() } returns null
         coEvery { placesProvider.getPlaces() } returns ExpectedFactory.createValue(listOf(place))
+        manager.showsInListTemplate = true
         manager.onAttached(carMapSurface)
 
         carAppTestRule.onDetached(mapboxNavigation)
-        validLocation.complete(location)
-
-        assertEquals(PlacesListState.Loading, manager.state.value)
-
-        carAppTestRule.onAttached(mapboxNavigation)
+        locationWithinTimeout.complete(location)
 
         assertTrue(manager.state.value is PlacesListState.Loaded)
         manager.onDetached(carMapSurface)

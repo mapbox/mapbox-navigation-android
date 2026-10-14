@@ -29,7 +29,8 @@ object CarDistanceFormatter {
 
     /**
      * The distance formatted to locale and unit type, which can be shown in a human viewable
-     * text element.
+     * text element. The formatter is set up when a [MapboxNavigation] is attached to
+     * [MapboxNavigationApp]; calling this before that throws.
      *
      * @param distance in meters.
      * @return [SpannableString] formatted with bold and relative size.
@@ -43,12 +44,19 @@ object CarDistanceFormatter {
 
     /**
      * Provides a [Distance] object used in [Template] objects like [RoutingInfo] and
-     * [TravelEstimate].
+     * [TravelEstimate]. The formatter is set up when a [MapboxNavigation] is attached to
+     * [MapboxNavigationApp]; calling this before that throws.
      */
     @JvmStatic
     fun carDistance(distanceMeters: Double): Distance {
         return delegate.carDistance(distanceMeters)
     }
+
+    /**
+     * Like [formatDistance], but null before a [MapboxNavigation] has been attached.
+     */
+    internal fun formatDistanceOrNull(distance: Double): SpannableString? =
+        if (::mapboxDistanceFormatter.isInitialized) formatDistance(distance) else null
 
     private fun onAttached(mapboxNavigation: MapboxNavigation) {
         val distanceFormatterOptions = mapboxNavigation.navigationOptions.distanceFormatterOptions

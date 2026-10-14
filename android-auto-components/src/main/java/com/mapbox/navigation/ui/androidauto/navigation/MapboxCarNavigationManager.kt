@@ -131,17 +131,33 @@ class MapboxCarNavigationManager internal constructor(
         // Tell android auto navigation stopped. Navigation can continue with Mapbox navigation
         // on another device.
         endActiveNavigation()
-        navigationManager.clearNavigationManagerCallback()
+        callNavigationManager("clearNavigationManagerCallback") {
+            clearNavigationManagerCallback()
+        }
     }
 
     private fun onUpdateTrip(routeProgress: RouteProgress, trip: Trip) {
-        try {
-            navigationManager.updateTrip(trip)
+        if (callNavigationManager("updateTrip") { updateTrip(trip) }) {
             lastRouteProgress = routeProgress
             lastTripUpdateMillis = elapsedRealtimeMillis()
-        } catch (e: IllegalStateException) {
-            logAndroidAutoFailure("$LOG_CATEGORY updateTrip failed", e)
         }
+    }
+
+    /**
+     * Calls the host's [NavigationManager]. Besides the state errors it documents, a call can
+     * fail on the host or while bundling a [Trip], so any failure is logged rather than thrown.
+     *
+     * @return whether the call succeeded.
+     */
+    private inline fun callNavigationManager(
+        name: String,
+        call: NavigationManager.() -> Unit,
+    ): Boolean = try {
+        navigationManager.call()
+        true
+    } catch (e: RuntimeException) {
+        logAndroidAutoFailure("$LOG_CATEGORY $name failed", e)
+        false
     }
 
     private fun clearTripState() {
@@ -152,9 +168,10 @@ class MapboxCarNavigationManager internal constructor(
     private fun startActiveNavigation() {
         if (inActiveNavigation) return
         logAndroidAuto("$LOG_CATEGORY start active navigation")
-        inActiveNavigation = true
         clearTripState()
-        navigationManager.navigationStarted()
+        // Trips are sent only once the host knows navigation started. A failed start is tried
+        // again with the next routes.
+        inActiveNavigation = callNavigationManager("navigationStarted") { navigationStarted() }
     }
 
     private fun endActiveNavigation() {
@@ -162,7 +179,7 @@ class MapboxCarNavigationManager internal constructor(
         logAndroidAuto("$LOG_CATEGORY stop active navigation")
         inActiveNavigation = false
         clearTripState()
-        navigationManager.navigationEnded()
+        callNavigationManager("navigationEnded") { navigationEnded() }
     }
 
     private fun RouteProgress.shouldUpdateTrip(): Boolean {

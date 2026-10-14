@@ -18,6 +18,7 @@ import com.mapbox.navigation.ui.androidauto.R
 import com.mapbox.navigation.ui.androidauto.internal.extensions.addBackPressedHandler
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAuto
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAutoFailure
+import com.mapbox.navigation.ui.androidauto.internal.rowTitle
 import com.mapbox.navigation.ui.androidauto.navigation.CarDistanceFormatter
 import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen
 import com.mapbox.search.result.SearchResult
@@ -91,7 +92,9 @@ internal class PlaceSearchScreen @UiThread constructor(
             .setShowKeyboardByDefault(false)
         val itemList = when (val state = uiState) {
             is SearchUiState.Content -> ItemList.Builder().apply {
-                state.suggestions.forEach { addItem(searchItemRow(it)) }
+                state.suggestions.forEach { suggestion ->
+                    searchItemRow(suggestion)?.let { addItem(it) }
+                }
             }.build()
             is SearchUiState.NoItems -> buildNoItemsList(state.messageRes)
             is SearchUiState.Error -> buildNoItemsList(R.string.car_search_error)
@@ -146,15 +149,24 @@ internal class PlaceSearchScreen @UiThread constructor(
         return SearchUiState.Error(e)
     }
 
-    private fun searchItemRow(suggestion: SearchSuggestion) = Row.Builder()
-        .setTitle(suggestion.name)
-        .addText(formatDistance(suggestion))
-        .setOnClickListener { onClickSearch(suggestion) }
-        .build()
+    private fun searchItemRow(suggestion: SearchSuggestion): Row? {
+        val title = suggestion.name.takeIf { it.isNotBlank() }
+            ?: rowTitle(suggestion.fullAddress, suggestion.descriptionText)
+        if (title == null) {
+            logAndroidAuto("PlaceSearchScreen skips a suggestion without a name: $suggestion")
+            return null
+        }
+        return Row.Builder()
+            .setTitle(title)
+            .addText(formatDistance(suggestion))
+            .setOnClickListener { onClickSearch(suggestion) }
+            .build()
+    }
 
     private fun formatDistance(searchSuggestion: SearchSuggestion): CharSequence {
         val distanceMeters = searchSuggestion.distanceMeters ?: return ""
-        return CarDistanceFormatter.formatDistance(distanceMeters)
+        // No distance before MapboxNavigation is attached, as the units aren't known yet.
+        return CarDistanceFormatter.formatDistanceOrNull(distanceMeters) ?: ""
     }
 
     private fun onClickSearch(searchSuggestion: SearchSuggestion) {

@@ -42,6 +42,9 @@ internal abstract class CarGridFeedbackScreen @UiThread constructor(
     private val parentPolls = ArrayDeque<CarFeedbackPoll>()
     private var submitting = false
 
+    // The options whose blank titles were logged already, as templates are rebuilt often.
+    private var reportedBlankOptions: List<CarFeedbackOption>? = null
+
     private val iconDownloader = CarFeedbackIconDownloader(screen = this)
 
     // Started undispatched so the snapshot request is queued before this screen is shown.
@@ -78,7 +81,13 @@ internal abstract class CarGridFeedbackScreen @UiThread constructor(
     private fun buildItemList(options: List<CarFeedbackOption>): ItemList {
         val itemListBuilder = ItemList.Builder()
         val gridLimit = carContext.contentLimit(ConstraintManager.CONTENT_LIMIT_TYPE_GRID)
-        for (option in options.take(gridLimit)) {
+        // A grid item can't have a blank title, and integrators build their own polls.
+        val (shownOptions, blankOptions) = options.partition { it.title.isNotBlank() }
+        if (blankOptions.isNotEmpty() && reportedBlankOptions !== options) {
+            reportedBlankOptions = options
+            logAndroidAutoFailure("Feedback options without a title are skipped: $blankOptions")
+        }
+        for (option in shownOptions.take(gridLimit)) {
             val itemBuilder = GridItem.Builder().setTitle(option.title)
             val image = iconDownloader.getOrDownload(option.icon)
             if (image != null && !submitting) {

@@ -39,14 +39,35 @@ import kotlinx.coroutines.launch
  * @param options customizes the route line and maneuver arrow rendering components, see
  * [CarRouteLineRendererOptions].
  * @param carRoutesProvider provides the routes to draw.
- * @param onRouteClick invoked with the route the driver tapped on the map.
  */
 class CarRouteLineRenderer(
     private val options: CarRouteLineRendererOptions = CarRouteLineRendererOptions.Builder()
         .build(),
     private val carRoutesProvider: CarRoutesProvider = NavigationCarRoutesProvider(),
-    private val onRouteClick: ((NavigationRoute) -> Unit)? = null,
 ) : MapboxCarMapObserver {
+
+    private var onRouteClick: ((NavigationRoute) -> Unit)? = null
+
+    /**
+     * Creates a renderer that also reports the route the driver taps on the map.
+     *
+     * Taps reach the map only through a gesture handler that forwards `onClick`, such as
+     * `DefaultMapboxCarMapGestureHandler`. A custom `MapboxCarMapGestureHandler` has to extend it
+     * or forward `onClick` itself.
+     *
+     * @param options customizes the route line and maneuver arrow rendering components, see
+     * [CarRouteLineRendererOptions].
+     * @param carRoutesProvider provides the routes to draw.
+     * @param onRouteClick invoked with the route the driver tapped on the map, or null to not
+     * listen for taps.
+     */
+    constructor(
+        options: CarRouteLineRendererOptions,
+        carRoutesProvider: CarRoutesProvider,
+        onRouteClick: ((NavigationRoute) -> Unit)?,
+    ) : this(options, carRoutesProvider) {
+        this.onRouteClick = onRouteClick
+    }
 
     private var routeLineResources: RouteLineResources? = null
     private var coroutineScope: CoroutineScope? = null
@@ -109,8 +130,8 @@ class CarRouteLineRenderer(
         val locationPlugin = mapboxCarMapSurface.mapSurface.location
         locationPlugin.addOnIndicatorPositionChangedListener(onPositionChangedListener)
         MapboxNavigationApp.registerObserver(navigationObserver)
-        if (onRouteClick != null) {
-            routeClickInteraction = addRouteClickInteraction(mapboxCarMapSurface, onRouteClick)
+        onRouteClick?.let {
+            routeClickInteraction = addRouteClickInteraction(mapboxCarMapSurface, it)
         }
     }
 
