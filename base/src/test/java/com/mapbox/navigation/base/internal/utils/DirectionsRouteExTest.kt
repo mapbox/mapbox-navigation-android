@@ -98,6 +98,45 @@ class DirectionsRouteExTest {
     }
 
     @Test
+    fun isSameRoute_sameRequestUuidAndRouteIndex_doesNotCompareGeometry() {
+        fun routeWithoutGeometry(requestUuid: String, routeIndex: String): DirectionsRoute =
+            mockk {
+                every { requestUuid() } returns requestUuid
+                every { routeIndex() } returns routeIndex
+                every {
+                    geometry()
+                } throws AssertionError("same routes should not compare geometry")
+                every {
+                    legs()
+                } throws AssertionError("same routes should not compare step names")
+            }
+
+        val route = routeWithoutGeometry(requestUuid = "uuid", routeIndex = "0")
+        val refreshedRoute = routeWithoutGeometry(requestUuid = "uuid", routeIndex = "0")
+
+        assertTrue(route.isSameRoute(refreshedRoute))
+    }
+
+    @Test
+    fun isSameRoute_otherRequestUuidOrRouteIndex_comparesGeometry() {
+        val route = route(requestUuid = "uuid", routeIndex = "0", geometry = "a")
+
+        assertTrue(
+            route.isSameRoute(route(requestUuid = "uuid2", routeIndex = "0", geometry = "a")),
+        )
+        assertFalse(
+            route.isSameRoute(route(requestUuid = "uuid", routeIndex = "1", geometry = "b")),
+        )
+        assertFalse(
+            route.isSameRoute(route(requestUuid = null, routeIndex = "0", geometry = "b")),
+        )
+        assertTrue(
+            route(requestUuid = null, routeIndex = "0", geometry = "b")
+                .isSameRoute(route(requestUuid = null, routeIndex = "0", geometry = "b")),
+        )
+    }
+
+    @Test
     fun areSameRoutes() {
         val geometry1 = "aaabbb"
         val geometry2 = "cccddd"
@@ -310,5 +349,12 @@ class DirectionsRouteExTest {
                     },
                 )
             }
+            .build()
+
+    private fun route(requestUuid: String?, routeIndex: String, geometry: String): DirectionsRoute =
+        getDirectionRouteBuilder()
+            .requestUuid(requestUuid)
+            .routeIndex(routeIndex)
+            .geometry(geometry)
             .build()
 }

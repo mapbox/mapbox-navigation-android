@@ -126,7 +126,6 @@ internal open class RouteRefreshIntegrationTest {
                 override fun seconds() = millis() / 1000
             },
             NoOpRouteRefreshHistoryRecorder,
-            computationDispatcher = testDispatcher,
         )
     }
 

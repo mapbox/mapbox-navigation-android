@@ -82,15 +82,12 @@ class RouteRefresherTest {
 
     private val routesRefreshDataProvider = mockk<RoutesRefreshDataProvider>(relaxed = true)
     private val evRefreshDataProvider = mockk<EVRefreshDataProvider>(relaxed = true)
-    private val routeDiffProvider = mockk<DirectionsRouteDiffProvider>(relaxed = true)
     private val routeRefresh = mockk<RouteRefresh>(relaxed = true)
     private val sut = RouteRefresher(
         routesRefreshDataProvider,
         evRefreshDataProvider,
-        routeDiffProvider,
         routeRefresh,
         globalScope = coroutineRule.createTestScope(),
-        computationDispatcher = coroutineRule.testDispatcher,
     )
 
     @Before
@@ -132,14 +129,6 @@ class RouteRefresherTest {
             (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute2, refreshResponse2)
             0
         }
-        every { routeDiffProvider.buildRouteDiffs(route1, newRoute1, legIndex1) } returns listOf(
-            "diff#1",
-            "diff#2",
-        )
-        every { routeDiffProvider.buildRouteDiffs(route2, newRoute2, legIndex2) } returns listOf(
-            "diff#3",
-            "diff#4",
-        )
         val expected = RoutesRefresherResult(
             RouteRefresherResult(
                 newRoute1,
@@ -160,10 +149,6 @@ class RouteRefresherTest {
         verify(exactly = 1) {
             logger.logI("Received refreshed route $route1Id", "RouteRefreshController")
             logger.logI("Received refreshed route $route2Id", "RouteRefreshController")
-            logger.logI("diff#1", "RouteRefreshController")
-            logger.logI("diff#2", "RouteRefreshController")
-            logger.logI("diff#3", "RouteRefreshController")
-            logger.logI("diff#4", "RouteRefreshController")
         }
     }
 
@@ -180,20 +165,12 @@ class RouteRefresherTest {
             (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute2, refreshResponse2)
             0
         }
-        every {
-            routeDiffProvider.buildRouteDiffs(route1, newRoute1, legIndex1)
-        } returns emptyList()
-        every {
-            routeDiffProvider.buildRouteDiffs(route2, newRoute2, legIndex2)
-        } returns emptyList()
 
         sut.refresh(listOf(route1, route2), 10)
 
         verify(exactly = 1) {
             logger.logI("Received refreshed route $route1Id", "RouteRefreshController")
             logger.logI("Received refreshed route $route2Id", "RouteRefreshController")
-            logger.logI("No changes in annotations for route $route1Id", "RouteRefreshController")
-            logger.logI("No changes in annotations for route $route2Id", "RouteRefreshController")
         }
     }
 
@@ -216,10 +193,6 @@ class RouteRefresherTest {
             (args[2] as NavigationRouterRefreshCallback).onRefreshReady(newRoute2, refreshResponse2)
             0
         }
-        every { routeDiffProvider.buildRouteDiffs(any(), any(), any()) } returns listOf(
-            "diff#1",
-            "diff#2",
-        )
         val expected = RoutesRefresherResult(
             RouteRefresherResult(route1, routesProgressData1, RouteRefresherStatus.Failure),
             listOf(
@@ -241,8 +214,6 @@ class RouteRefresherTest {
                 "RouteRefreshController",
             )
             logger.logI("Received refreshed route $route2Id", "RouteRefreshController")
-            logger.logI("diff#1", "RouteRefreshController")
-            logger.logI("diff#2", "RouteRefreshController")
         }
     }
 

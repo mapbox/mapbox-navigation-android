@@ -30,6 +30,16 @@ fun DirectionsRoute.isSameRoute(compare: DirectionsRoute?): Boolean {
             return false
         }
 
+        val requestUuid = requestUuid()
+        val routeIndex = routeIndex()
+        if (!requestUuid.isNullOrEmpty() &&
+            routeIndex != null &&
+            requestUuid == compare.requestUuid() &&
+            routeIndex == compare.routeIndex()
+        ) {
+            return true
+        }
+
         ifNonNull(this.geometry(), compare.geometry()) { g1, g2 ->
             return g1 == g2
         }
