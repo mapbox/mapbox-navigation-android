@@ -119,7 +119,10 @@ internal class PlaceSearchScreen @UiThread constructor(
             uiState = SearchUiState.NoItems(R.string.car_search_no_results)
             return
         }
-        uiState = SearchUiState.Loading
+        // Keep the current list while typing so a loading refresh does not disrupt the editor.
+        if (!debounce) {
+            uiState = SearchUiState.Loading
+        }
         searchJob = lifecycleScope.launch {
             try {
                 if (debounce) {
@@ -176,6 +179,7 @@ internal class PlaceSearchScreen @UiThread constructor(
             is SearchUiState.Selecting -> state.content
             else -> return
         }
+        searchJob?.cancel()
         selectJob?.cancel()
         uiState = SearchUiState.Selecting(content)
         selectJob = lifecycleScope.launch {

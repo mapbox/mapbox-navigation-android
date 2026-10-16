@@ -229,6 +229,71 @@ class PlaceSearchScreenTest : MapboxRobolectricTestRunner() {
     }
 
     @Test
+    fun `typing refreshes only when results arrive and keeps the previous list while waiting`() =
+        coroutineRule.runBlockingTest {
+            setScreenState(Lifecycle.State.RESUMED)
+            val appManager = searchCarContext.carContext.getCarService(AppManager::class.java)
+            val firstResponse = CompletableDeferred<Result<List<SearchSuggestion>>>()
+            val nextResponse = CompletableDeferred<Result<List<SearchSuggestion>>>()
+            coEvery { carPlaceSearch.search("caf") } coAnswers { firstResponse.await() }
+            coEvery { carPlaceSearch.search("cafe") } coAnswers { nextResponse.await() }
+            fun template() = placeSearchScreen.onGetTemplate() as SearchTemplate
+
+            template().searchCallbackDelegate.sendSearchTextChanged("caf", onDoneCallback)
+            testScheduler.advanceTimeBy(400L)
+
+            verify(exactly = 0) { appManager.invalidate() }
+            assertTrue(placeSearchScreen.uiState is SearchUiState.NoItems)
+
+            firstResponse.complete(Result.success(listOf(mockSuggestion("Cafe", 1.0))))
+            verify(exactly = 1) { appManager.invalidate() }
+            val previousContent = placeSearchScreen.uiState
+            assertTrue(previousContent is SearchUiState.Content)
+
+            template().searchCallbackDelegate.sendSearchTextChanged("cafe", onDoneCallback)
+            testScheduler.advanceTimeBy(400L)
+
+            verify(exactly = 1) { appManager.invalidate() }
+            assertEquals(previousContent, placeSearchScreen.uiState)
+            assertEquals(
+                listOf("Cafe"),
+                template().itemList.items.map { (it as Row).title.toString() },
+            )
+
+            nextResponse.complete(Result.success(listOf(mockSuggestion("Cafe nearby", 2.0))))
+            verify(exactly = 2) { appManager.invalidate() }
+            assertEquals(
+                listOf("Cafe nearby"),
+                template().itemList.items.map { (it as Row).title.toString() },
+            )
+        }
+
+    @Test
+    fun `selecting a visible result cancels the pending search`() =
+        coroutineRule.runBlockingTest {
+            val rows = searchWithResults("first")
+            val content = placeSearchScreen.uiState
+            val response = CompletableDeferred<Result<List<SearchSuggestion>>>()
+            val selection = CompletableDeferred<Result<List<SearchResult>>>()
+            coEvery { carPlaceSearch.search("next") } coAnswers { response.await() }
+            coEvery { carPlaceSearch.select(any()) } coAnswers { selection.await() }
+
+            placeSearchScreen.doSearch("next", debounce = true)
+            testScheduler.advanceTimeBy(400L)
+            rows[0].onClickDelegate.sendClick(onDoneCallback)
+            response.complete(Result.success(listOf(mockSuggestion("Next", 2.0))))
+
+            assertEquals(
+                SearchUiState.Selecting(content as SearchUiState.Content),
+                placeSearchScreen.uiState,
+            )
+
+            selection.complete(Result.success(listOf(mockk())))
+            assertEquals(content, placeSearchScreen.uiState)
+            verify(exactly = 1) { routePreviewRequest.request(any(), any()) }
+        }
+
+    @Test
     fun `typing debounces before searching`() = coroutineRule.runBlockingTest {
         coEvery {
             carPlaceSearch.search(any())
