@@ -30,7 +30,7 @@ class FreeDriveActionStrip(
             CarIcon.Builder(
                 IconCompat.createWithResource(
                     screen.carContext,
-                    R.drawable.ic_settings,
+                    R.drawable.ic_settings_24px,
                 ),
             ).build(),
         )
@@ -53,7 +53,7 @@ class FreeDriveActionStrip(
             CarIcon.Builder(
                 IconCompat.createWithResource(
                     screen.carContext,
-                    R.drawable.ic_search_black36dp,
+                    R.drawable.ic_search_24px,
                 ),
             ).build(),
         )
