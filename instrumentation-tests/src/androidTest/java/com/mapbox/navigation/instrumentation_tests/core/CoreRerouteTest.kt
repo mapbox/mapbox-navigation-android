@@ -94,7 +94,6 @@ import kotlinx.coroutines.yield
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import java.util.concurrent.TimeUnit
@@ -1651,7 +1650,6 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
      * `Idle → FetchingRoute → Interrupted → Idle → FetchingRoute → RouteFetched → Idle`.
      * The final route must include the adapter's modifications (ferry exclusion).
      */
-    @Ignore("Flaky test - NAVAND-7338")
     @Test
     fun replan_interrupts_ongoing_reroute_request() = sdkTest {
         // Setting to 4s to ensure reroute is in progress when replan is called
