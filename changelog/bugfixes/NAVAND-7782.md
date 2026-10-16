@@ -1,1 +1,0 @@
-- Fixed `UpcomingCamerasObserver.onSpeedZoneProgress` being called for every active speed zone on each update when zones overlap. The callback now fires only for the most recently entered active zone.
