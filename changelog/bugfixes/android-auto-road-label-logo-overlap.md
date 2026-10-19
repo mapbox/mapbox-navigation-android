@@ -1,1 +1,0 @@
-- Fixed the Android Auto road name label covering the Mapbox logo on high-density head units. `CarRoadLabelRenderer` keeps the label out of the bottom corners of the visible area and ellipsizes a road name that does not fit, and `CarLogoRenderer` margins now follow the head unit density.
