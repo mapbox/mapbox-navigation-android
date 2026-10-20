@@ -1,6 +1,7 @@
 package com.mapbox.navigation.instrumentation_tests.core
 
 import android.location.Location
+import com.adevinta.android.barista.rule.cleardata.ClearFilesRule
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.common.MapboxOptions
@@ -21,7 +22,6 @@ import com.mapbox.navigation.core.routerefresh.RouteRefreshExtra
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.http.MockRequestHandler
-import com.mapbox.navigation.testing.ui.utils.clearInternalStorage
 import com.mapbox.navigation.testing.ui.utils.coroutines.MapMatchingRequestResult
 import com.mapbox.navigation.testing.ui.utils.coroutines.getSuccessfulResultOrThrowException
 import com.mapbox.navigation.testing.ui.utils.coroutines.requestMapMatching
@@ -63,6 +63,15 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
 
     @get:Rule
     val mockLocationReplayerRule = MockLocationReplayerRule(mockLocationUpdatesRule)
+
+    /**
+     * Files cleanup is required because tests in this class whose online request fails
+     * ([unauthorised], [noInternet]) expect the onboard router fallback to fail immediately.
+     * A tiles version persisted by an earlier test would instead make it search an empty tile
+     * cache for longer than the test timeout.
+     */
+    @get:Rule
+    val clearFilesRule = ClearFilesRule()
 
     private val origin = Point.fromLngLat(
         13.361378213031003,
@@ -420,7 +429,6 @@ class CoreMapMatchingTests : BaseCoreNoCleanUpTest() {
     @Test
     fun noInternet() = sdkTest {
         withoutInternet {
-            clearInternalStorage()
             withMapboxNavigation(
                 historyRecorderRule = mapboxHistoryTestRule,
             ) { navigation ->
