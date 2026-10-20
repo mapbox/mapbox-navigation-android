@@ -248,9 +248,9 @@ ext {
       googleServices       : '4.4.2',
       mapboxSdkVersions    : '1.1.5',
       dokka                : '1.9.20',
-      mapboxSdkRegistry    : '1.5.7',
-      mapboxAccessToken    : '0.2.1',
-      mapboxNativeDownload : '0.2.2',
+      mapboxSdkRegistry    : '2.0.0',
+      mapboxAccessToken    : '0.5.0',
+      mapboxNativeDownload : '0.5.6',
       microbenchmark       : version.microbenchmark,
       firebaseCrashlytics  : '3.0.3'
   ]
