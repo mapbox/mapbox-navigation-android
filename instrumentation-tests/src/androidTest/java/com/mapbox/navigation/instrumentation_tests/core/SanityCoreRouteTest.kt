@@ -19,9 +19,9 @@ import com.mapbox.navigation.testing.utils.history.MapboxHistoryTestRule
 import com.mapbox.navigation.testing.utils.location.MockLocationReplayerRule
 import com.mapbox.navigation.testing.utils.routes.RoutesProvider
 import com.mapbox.navigation.testing.utils.withMapboxNavigation
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 
@@ -71,16 +71,13 @@ class SanityCoreRouteTest : BaseCoreNoCleanUpTest() {
             mapboxNavigation.setNavigationRoutes(routes)
             mockLocationReplayerRule.playRoute(routes[0].directionsRoute)
 
-            mapboxNavigation.routeProgressUpdates()
-                .filter { it.currentState == RouteProgressState.COMPLETE }
-                .first()
+            mapboxNavigation.routeProgressUpdates().first { it.currentState == RouteProgressState.COMPLETE }
 
             mapboxNavigation.historyRecorder.stopRecording()
             expectedStates.assert()
         }
     }
 
-    @Ignore("Flaky test - NAVAND-7338")
     @Test
     fun route_with_two_legs_completes() = sdkTest {
         withMapboxNavigation(
@@ -109,9 +106,20 @@ class SanityCoreRouteTest : BaseCoreNoCleanUpTest() {
                 .getSuccessfulResultOrThrowException()
                 .routes
             mapboxNavigation.setNavigationRoutes(routes)
+            val finalArrival = async(start = CoroutineStart.UNDISPATCHED) {
+                mapboxNavigation.flowOnFinalDestinationArrival().first()
+            }
             mockLocationReplayerRule.playRoute(routes.first().directionsRoute)
 
-            mapboxNavigation.flowOnFinalDestinationArrival().first()
+            // Arrival observers are notified before the test's route progress observers, so the
+            // arrival callback alone doesn't mean expectedStates has seen the final COMPLETE.
+            // This flow is registered after expectedStates, so its update is delivered later.
+            val lastLegIndex = routes.first().directionsRoute.legs()!!.lastIndex
+            mapboxNavigation.routeProgressUpdates().first {
+                it.currentState == RouteProgressState.COMPLETE &&
+                    it.currentLegProgress?.legIndex == lastLegIndex
+            }
+            finalArrival.await()
             mapboxNavigation.historyRecorder.stopRecording()
 
             expectedStates.assert()
