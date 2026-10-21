@@ -82,6 +82,7 @@ fun MapboxCarContext.prepareScreens() = apply {
 }
 
 @ExperimentalPreviewMapboxNavigationAPI
+@Deprecated("Use MapboxScreen.NAVIGATION instead.")
 fun MapboxCarContext.prepareExperimentalRoutePreviewScreen() = apply {
     mapboxScreenManager[ROUTE_PREVIEW] = RoutePreviewScreenFactory2(mapboxCarContext = this)
 }

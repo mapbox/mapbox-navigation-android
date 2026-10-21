@@ -126,6 +126,14 @@ package com.mapbox.navigation.ui.androidauto.deeplink {
 
 }
 
+package com.mapbox.navigation.ui.androidauto.extensions {
+
+  public final class CarContextExtensions {
+    method public static boolean supportsUnifiedNavigation(androidx.car.app.CarContext);
+  }
+
+}
+
 package com.mapbox.navigation.ui.androidauto.feedback.core {
 
   public final class CarFeedbackOptions {
@@ -761,7 +769,7 @@ package com.mapbox.navigation.ui.androidauto.screenmanager {
   }
 
   public final class MapboxScreenGraph {
-    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static com.mapbox.navigation.ui.androidauto.MapboxCarContext prepareExperimentalRoutePreviewScreen(com.mapbox.navigation.ui.androidauto.MapboxCarContext);
+    method @Deprecated @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static prepareExperimentalRoutePreviewScreen(com.mapbox.navigation.ui.androidauto.MapboxCarContext);
     method public static com.mapbox.navigation.ui.androidauto.MapboxCarContext prepareScreens(com.mapbox.navigation.ui.androidauto.MapboxCarContext);
   }
 
@@ -1059,4 +1067,3 @@ package com.mapbox.navigation.ui.androidauto.ui.maneuver.view {
   }
 
 }
-

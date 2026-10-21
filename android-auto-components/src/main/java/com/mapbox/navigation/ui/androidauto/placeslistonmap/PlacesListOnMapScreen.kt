@@ -2,7 +2,6 @@ package com.mapbox.navigation.ui.androidauto.placeslistonmap
 
 import androidx.annotation.StringRes
 import androidx.annotation.UiThread
-import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import androidx.car.app.annotations.RequiresCarApi
 import androidx.car.app.model.Action
@@ -11,7 +10,6 @@ import androidx.car.app.model.ItemList
 import androidx.car.app.model.ListTemplate
 import androidx.car.app.model.Template
 import androidx.car.app.navigation.model.MapWithContentTemplate
-import androidx.car.app.versioning.CarAppApiLevels
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -19,6 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.androidauto.R
+import com.mapbox.navigation.ui.androidauto.extensions.supportsUnifiedNavigation
 import com.mapbox.navigation.ui.androidauto.internal.extensions.addBackPressedHandler
 import com.mapbox.navigation.ui.androidauto.internal.setHeaderCompat
 import com.mapbox.navigation.ui.androidauto.location.CarLocationRenderer
@@ -48,7 +47,7 @@ internal class PlacesListOnMapScreen @UiThread constructor(
     ) { messageRes -> carContext.showSearchToast(messageRes) }
 
     init {
-        placesListOnMapManager.showsInListTemplate = carContext.usesMapWithContentTemplate()
+        placesListOnMapManager.showsInListTemplate = carContext.supportsUnifiedNavigation()
         addBackPressedHandler {
             searchCarContext.mapboxScreenManager.goBack()
         }
@@ -86,7 +85,7 @@ internal class PlacesListOnMapScreen @UiThread constructor(
     }
 
     override fun onGetTemplate(): Template {
-        return if (carContext.usesMapWithContentTemplate()) {
+        return if (carContext.supportsUnifiedNavigation()) {
             buildMapWithContentTemplate()
         } else {
             buildPlaceListNavigationTemplate()
@@ -172,10 +171,3 @@ internal class PlacesListOnMapScreen @UiThread constructor(
         }
     }
 }
-
-/**
- * Whether [PlacesListOnMapScreen] shows its places in a [MapWithContentTemplate]. Older hosts get
- * the legacy place list template.
- */
-private fun CarContext.usesMapWithContentTemplate(): Boolean =
-    carAppApiLevel >= CarAppApiLevels.LEVEL_7

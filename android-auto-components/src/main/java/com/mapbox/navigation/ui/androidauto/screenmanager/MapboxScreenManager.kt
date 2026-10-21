@@ -7,11 +7,11 @@ import androidx.car.app.Screen
 import androidx.car.app.ScreenManager
 import androidx.car.app.Session
 import androidx.car.app.model.Template
-import androidx.car.app.versioning.CarAppApiLevels
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.mapbox.navigation.ui.androidauto.MapboxCarContext
+import com.mapbox.navigation.ui.androidauto.extensions.supportsUnifiedNavigation
 import com.mapbox.navigation.ui.androidauto.internal.context.MapboxCarContextOwner
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAuto
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAutoFailure
@@ -224,9 +224,9 @@ class MapboxScreenManager internal constructor(
      */
     @Suppress("DEPRECATION")
     internal fun defaultMapScreenKey(): String {
-        val carAppApiLevel = carContextOwner.carContext().carAppApiLevel
+        val carContext = carContextOwner.carContext()
         return if (
-            carAppApiLevel >= CarAppApiLevels.LEVEL_7 && contains(MapboxScreen.NAVIGATION)
+            carContext.supportsUnifiedNavigation() && contains(MapboxScreen.NAVIGATION)
         ) {
             MapboxScreen.NAVIGATION
         } else {
