@@ -1,0 +1,107 @@
+<svg viewBox="0 0 960 700" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .bridge-box { fill: #E8EAF6; stroke: #3F51B5; stroke-width: 2; }
+      .optional-box { fill: #FFF3E0; stroke: #F57C00; stroke-width: 1.5; }
+      .native-box { fill: #E8F5E9; stroke: #388E3C; stroke-width: 2; }
+      .box-title { fill: #212529; font-size: 13px; font-weight: 700; font-family: monospace; }
+      .box-desc { fill: #495057; font-size: 10px; }
+      .group-label { fill: #212529; font-size: 13px; font-weight: 700; }
+      .connector { stroke: #6c757d; stroke-width: 2; fill: none; }
+      .annotation { fill: #868e96; font-size: 10px; font-style: italic; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#6c757d" />
+    </marker>
+  </defs>
+
+  <text x="480" y="30" text-anchor="middle" style="fill: #212529; font-size: 20px; font-weight: 700;">
+    Navigation SDK for Android - Native Bindings (3.32.0-rc.1)
+  </text>
+  <text x="480" y="52" text-anchor="middle" class="annotation">Every module whose build.gradle declares a bound native SDK directly, and the SDK it declares</text>
+
+  <!-- Public tree binders -->
+  <text x="60" y="90" class="group-label">Public tree (mapbox-navigation-android/)</text>
+
+  <rect x="60" y="100" width="260" height="60" rx="6" class="bridge-box"/>
+  <text x="70" y="120" class="box-title">navigator</text>
+  <text x="70" y="135" class="box-desc">JNI bridge, internal only</text>
+  <text x="70" y="150" class="box-desc">api/current.txt holds the signature header only</text>
+
+  <rect x="60" y="170" width="260" height="45" rx="6" class="bridge-box"/>
+  <text x="70" y="190" class="box-title">base</text>
+  <text x="70" y="205" class="box-desc">Base interfaces and models</text>
+
+  <!-- Internal tree binders -->
+  <text x="60" y="255" class="group-label">Internal tree (repository root)</text>
+
+  <rect x="60" y="265" width="260" height="45" rx="6" class="optional-box"/>
+  <text x="70" y="285" class="box-title" style="font-size: 12px;">coordination</text>
+  <text x="70" y="300" class="box-desc">Redux-style state/UI layer</text>
+
+  <rect x="60" y="320" width="260" height="45" rx="6" class="optional-box"/>
+  <text x="70" y="340" class="box-title" style="font-size: 12px;">coordination-full-hd</text>
+  <text x="70" y="355" class="box-desc">HD-map extension to coordination</text>
+
+  <rect x="60" y="375" width="260" height="45" rx="6" class="optional-box"/>
+  <text x="70" y="395" class="box-title" style="font-size: 12px;">datainputs</text>
+  <text x="70" y="410" class="box-desc">External vehicle-signal data feed</text>
+
+  <rect x="60" y="430" width="260" height="45" rx="6" class="optional-box"/>
+  <text x="70" y="450" class="box-title" style="font-size: 12px;">roadcam</text>
+  <text x="70" y="465" class="box-desc">Road camera detection</text>
+
+  <rect x="60" y="485" width="260" height="45" rx="6" class="optional-box"/>
+  <text x="70" y="505" class="box-title" style="font-size: 12px;">libnavigation-compose-core</text>
+  <text x="70" y="520" class="box-desc">Compose state holders</text>
+
+  <!-- Bound native SDKs -->
+  <text x="640" y="90" class="group-label">Bound native SDKs (external)</text>
+
+  <rect x="640" y="150" width="260" height="75" rx="6" class="native-box"/>
+  <text x="770" y="175" text-anchor="middle" class="box-title">Navigation Native</text>
+  <text x="770" y="193" text-anchor="middle" class="box-desc">v324.32.0-rc.1 (C++)</text>
+  <text x="770" y="208" text-anchor="middle" class="box-desc">Routing, map matching, Electronic Horizon</text>
+
+  <rect x="640" y="330" width="260" height="75" rx="6" class="native-box"/>
+  <text x="770" y="355" text-anchor="middle" class="box-title">Nav SDK C++</text>
+  <text x="770" y="373" text-anchor="middle" class="box-desc">v0.32.0-rc.1, plus full HD artifact</text>
+  <text x="770" y="388" text-anchor="middle" class="box-desc">Camera and map components, HD map</text>
+
+  <rect x="640" y="470" width="260" height="60" rx="6" class="native-box"/>
+  <text x="770" y="495" text-anchor="middle" class="box-title">Core Common</text>
+  <text x="770" y="513" text-anchor="middle" class="box-desc">v24.32.0-rc.1 - networking, tile store, location</text>
+
+  <path d="M 900 190 L 925 190 L 925 500 L 910 500" class="connector" stroke-dasharray="4,3" marker-end="url(#arrowhead)"/>
+  <path d="M 770 405 L 770 460" class="connector" stroke-dasharray="4,3" marker-end="url(#arrowhead)"/>
+
+  <!-- Arrows: module to the SDK it declares -->
+  <path d="M 320 130 L 630 175" class="connector" marker-end="url(#arrowhead)"/>
+  <path d="M 320 192 L 630 183" class="connector" marker-end="url(#arrowhead)"/>
+  <path d="M 320 342 L 630 195" class="connector" marker-end="url(#arrowhead)"/>
+  <path d="M 320 397 L 630 203" class="connector" marker-end="url(#arrowhead)"/>
+  <path d="M 320 452 L 630 211" class="connector" marker-end="url(#arrowhead)"/>
+  <path d="M 320 507 L 630 219" class="connector" marker-end="url(#arrowhead)"/>
+
+  <path d="M 320 287 L 630 360" class="connector" marker-end="url(#arrowhead)"/>
+  <path d="M 320 350 L 630 372" class="connector" marker-end="url(#arrowhead)"/>
+
+  <text x="60" y="548" class="annotation">solid arrows: binding declared in the module's build.gradle at this commit. dashed arrows: the native SDK depends on Core Common</text>
+
+  <!-- Legend -->
+  <line x1="60" y1="560" x2="900" y2="560" stroke="#adb5bd" stroke-width="1"/>
+  <text x="60" y="583" style="fill: #868e96; font-size: 12px; font-weight: 600;">Legend</text>
+
+  <rect x="60" y="596" width="24" height="18" rx="3" class="bridge-box"/>
+  <text x="92" y="609" class="box-desc">Public-tree module with a direct native binding</text>
+
+  <rect x="340" y="596" width="24" height="18" rx="3" class="optional-box"/>
+  <text x="372" y="609" class="box-desc">Optional library with a direct native binding</text>
+
+  <rect x="620" y="596" width="24" height="18" rx="3" class="native-box"/>
+  <text x="652" y="609" class="box-desc">Bound Mapbox SDK (external, not designed here)</text>
+
+  <text x="60" y="645" style="fill: #495057; font-size: 12px; font-weight: 600;">Key Design Rule:</text>
+  <text x="60" y="665" class="box-desc">These seven modules are the only in-scope libraries that declare a native SDK. navigation reaches Navigation Native</text>
+  <text x="60" y="681" class="box-desc">through navigator and base; every other Core, UI and Optional library reaches native code through them.</text>
+</svg>

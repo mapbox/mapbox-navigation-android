@@ -1,0 +1,187 @@
+<svg viewBox="0 0 1000 980" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .core-box { fill: #E3F2FD; stroke: #1976D2; stroke-width: 1.5; }
+      .ui-box { fill: #F3E5F5; stroke: #7B1FA2; stroke-width: 1.5; }
+      .optional-box { fill: #FFF3E0; stroke: #F57C00; stroke-width: 1.5; }
+      .module-name { fill: #212529; font-size: 12px; font-weight: 600; font-family: monospace; }
+      .module-desc { fill: #495057; font-size: 10px; }
+      .group-label { fill: #212529; font-size: 15px; font-weight: 700; }
+      .root-label { fill: #868e96; font-size: 11px; font-style: italic; }
+    </style>
+  </defs>
+
+  <text x="500" y="30" text-anchor="middle" style="fill: #212529; font-size: 20px; font-weight: 700;">
+    Navigation SDK for Android - Module Map (3.32.0-rc.1)
+  </text>
+  <text x="500" y="55" text-anchor="middle" class="root-label">Core and UI: mapbox-navigation-android/ (public tree) . Optional: repository root (internal tree)</text>
+
+  <!-- Core Group -->
+  <text x="50" y="95" class="group-label">Core Libraries</text>
+
+  <rect x="50" y="105" width="170" height="38" rx="4" class="core-box"/>
+  <text x="60" y="124" class="module-name">libnavigation-android</text>
+  <text x="60" y="137" class="module-desc">Aggregate public artifact</text>
+
+  <rect x="240" y="105" width="150" height="38" rx="4" class="core-box"/>
+  <text x="250" y="124" class="module-name">navigation</text>
+  <text x="250" y="137" class="module-desc">Core logic, MapboxNavigation</text>
+
+  <rect x="410" y="105" width="150" height="38" rx="4" class="core-box"/>
+  <text x="420" y="124" class="module-name">navigator</text>
+  <text x="420" y="137" class="module-desc">JNI bridge to native engine</text>
+
+  <rect x="580" y="105" width="130" height="38" rx="4" class="core-box"/>
+  <text x="590" y="124" class="module-name">base</text>
+  <text x="590" y="137" class="module-desc">Base interfaces</text>
+
+  <rect x="730" y="105" width="130" height="38" rx="4" class="core-box"/>
+  <text x="740" y="124" class="module-name">utils</text>
+  <text x="740" y="137" class="module-desc">Shared utilities</text>
+
+  <rect x="50" y="153" width="150" height="38" rx="4" class="core-box"/>
+  <text x="60" y="172" class="module-name">tripdata</text>
+  <text x="60" y="185" class="module-desc">Route progress, trip data</text>
+
+  <rect x="220" y="153" width="130" height="38" rx="4" class="core-box"/>
+  <text x="230" y="172" class="module-name">voice</text>
+  <text x="230" y="185" class="module-desc">Voice instructions</text>
+
+  <rect x="370" y="153" width="130" height="38" rx="4" class="core-box"/>
+  <text x="380" y="172" class="module-name">copilot</text>
+  <text x="380" y="185" class="module-desc">Session recording</text>
+
+  <rect x="520" y="153" width="130" height="38" rx="4" class="core-box"/>
+  <text x="530" y="172" class="module-name">metrics</text>
+  <text x="530" y="185" class="module-desc">Telemetry</text>
+
+  <rect x="670" y="153" width="150" height="38" rx="4" class="core-box"/>
+  <text x="680" y="172" class="module-name">notification</text>
+  <text x="680" y="185" class="module-desc">Trip notifications</text>
+
+  <rect x="50" y="201" width="130" height="38" rx="4" class="core-box"/>
+  <text x="60" y="220" class="module-name">search</text>
+  <text x="60" y="233" class="module-desc">Search integration</text>
+
+  <rect x="200" y="201" width="190" height="38" rx="4" class="core-box"/>
+  <text x="210" y="220" class="module-name">driver-notification</text>
+  <text x="210" y="233" class="module-desc">Driver-facing alerts</text>
+
+  <!-- UI Group -->
+  <text x="50" y="280" class="group-label">UI Libraries</text>
+
+  <rect x="50" y="290" width="130" height="38" rx="4" class="ui-box"/>
+  <text x="60" y="309" class="module-name">ui-base</text>
+  <text x="60" y="322" class="module-desc">Base UI classes</text>
+
+  <rect x="200" y="290" width="130" height="38" rx="4" class="ui-box"/>
+  <text x="210" y="309" class="module-name">ui-maps</text>
+  <text x="210" y="322" class="module-desc">Map rendering, camera</text>
+
+  <rect x="350" y="290" width="130" height="38" rx="4" class="ui-box"/>
+  <text x="360" y="309" class="module-name">ui-utils</text>
+  <text x="360" y="322" class="module-desc">UI helpers</text>
+
+  <rect x="500" y="290" width="160" height="38" rx="4" class="ui-box"/>
+  <text x="510" y="309" class="module-name">ui-components</text>
+  <text x="510" y="322" class="module-desc">Reusable widgets</text>
+
+  <rect x="680" y="290" width="150" height="38" rx="4" class="ui-box"/>
+  <text x="690" y="309" class="module-name">androidauto</text>
+  <text x="690" y="322" class="module-desc">Android Auto screens (changed)</text>
+
+  <!-- Optional Group -->
+  <text x="50" y="370" class="group-label">Optional Libraries</text>
+
+  <rect x="50" y="380" width="150" height="36" rx="4" class="optional-box"/>
+  <text x="60" y="398" class="module-name">coordination</text>
+  <text x="60" y="410" class="module-desc">Redux-style UI layer</text>
+
+  <rect x="220" y="380" width="170" height="36" rx="4" class="optional-box"/>
+  <text x="230" y="398" class="module-name">coordination-full-hd</text>
+  <text x="230" y="410" class="module-desc">HD-map coordination</text>
+
+  <rect x="410" y="380" width="110" height="36" rx="4" class="optional-box"/>
+  <text x="420" y="398" class="module-name">adasis</text>
+  <text x="420" y="410" class="module-desc">ADAS integration</text>
+
+  <rect x="540" y="380" width="90" height="36" rx="4" class="optional-box"/>
+  <text x="550" y="398" class="module-name">ev</text>
+  <text x="550" y="410" class="module-desc">EV routing</text>
+
+  <rect x="650" y="380" width="90" height="36" rx="4" class="optional-box"/>
+  <text x="660" y="398" class="module-name">ev-ui</text>
+  <text x="660" y="410" class="module-desc">EV UI</text>
+
+  <rect x="760" y="380" width="120" height="36" rx="4" class="optional-box"/>
+  <text x="770" y="398" class="module-name">ev-rangemap</text>
+  <text x="770" y="410" class="module-desc">Range visualization</text>
+
+  <rect x="50" y="426" width="130" height="36" rx="4" class="optional-box"/>
+  <text x="60" y="444" class="module-name">roadcam</text>
+  <text x="60" y="456" class="module-desc">Road camera detection</text>
+
+  <rect x="200" y="426" width="120" height="36" rx="4" class="optional-box"/>
+  <text x="210" y="444" class="module-name">roadcam-ui</text>
+  <text x="210" y="456" class="module-desc">Camera warnings UI</text>
+
+  <rect x="340" y="426" width="110" height="36" rx="4" class="optional-box"/>
+  <text x="350" y="444" class="module-name">weather</text>
+  <text x="350" y="456" class="module-desc">Weather overlays</text>
+
+  <rect x="470" y="426" width="90" height="36" rx="4" class="optional-box"/>
+  <text x="480" y="444" class="module-name">audio</text>
+  <text x="480" y="456" class="module-desc">Audio focus/sound</text>
+
+  <rect x="580" y="426" width="140" height="36" rx="4" class="optional-box"/>
+  <text x="590" y="444" class="module-name">core-mapgpt</text>
+  <text x="590" y="456" class="module-desc">MapGPT core</text>
+
+  <rect x="740" y="426" width="140" height="36" rx="4" class="optional-box"/>
+  <text x="750" y="444" class="module-name">ui-mapgpt</text>
+  <text x="750" y="456" class="module-desc">MapGPT UI</text>
+
+  <rect x="50" y="472" width="180" height="36" rx="4" class="optional-box"/>
+  <text x="60" y="490" class="module-name">datainputs</text>
+  <text x="60" y="502" class="module-desc">External vehicle data feed</text>
+
+  <rect x="250" y="472" width="90" height="36" rx="4" class="optional-box"/>
+  <text x="260" y="490" class="module-name">noa</text>
+  <text x="260" y="502" class="module-desc">Natural-language nav</text>
+
+  <rect x="360" y="472" width="220" height="36" rx="4" class="optional-box"/>
+  <text x="370" y="490" class="module-name">libnavigation-custom-route</text>
+  <text x="370" y="502" class="module-desc">Custom route providers</text>
+
+  <rect x="600" y="472" width="240" height="36" rx="4" class="optional-box"/>
+  <text x="610" y="490" class="module-name">libnavigation-compose(-core/-foundation)</text>
+  <text x="610" y="502" class="module-desc">Compose wrappers (3 modules)</text>
+
+  <rect x="50" y="518" width="230" height="36" rx="4" class="optional-box"/>
+  <text x="60" y="536" class="module-name">ev-driver-notification</text>
+  <text x="60" y="548" class="module-desc">EV-specific driver alerts</text>
+
+  <!-- Legend -->
+  <line x1="50" y1="590" x2="900" y2="590" stroke="#adb5bd" stroke-width="1"/>
+  <text x="50" y="615" style="fill: #868e96; font-size: 12px; font-weight: 600;">Legend</text>
+
+  <rect x="50" y="630" width="70" height="24" rx="4" class="core-box"/>
+  <text x="130" y="647" class="module-desc">Core library</text>
+
+  <rect x="260" y="630" width="70" height="24" rx="4" class="ui-box"/>
+  <text x="340" y="647" class="module-desc">UI library</text>
+
+  <rect x="450" y="630" width="70" height="24" rx="4" class="optional-box"/>
+  <text x="530" y="647" class="module-desc">Optional library</text>
+
+  <!-- Dependency Notes -->
+  <text x="50" y="700" class="module-desc" style="font-weight: 600;">Key Dependencies:</text>
+  <text x="50" y="722" class="module-desc">- UI libraries depend on Core; Optional libraries depend on Core</text>
+  <text x="50" y="742" class="module-desc">- Core libraries never depend on UI or Optional libraries</text>
+  <text x="50" y="762" class="module-desc">- Optional libraries are independent of each other unless named otherwise (see 03_optional_libraries)</text>
+  <text x="50" y="782" class="module-desc">- navigator, base and five optional libraries declare a native SDK directly (see 04_native_bridge)</text>
+  <text x="50" y="800" class="module-desc" style="font-weight: 600;">- androidauto's public API changed at this tag (see context summary)</text>
+  <text x="50" y="822" class="module-desc" style="font-style: italic;">Excluded (out of scope): app-qa-androidauto, qa-test-app, screenshot-tests, billing-tests,</text>
+  <text x="50" y="840" class="module-desc" style="font-style: italic;">instrumentation-tests(-internal), app-tests-wrapper, libtesting-*, microbenchmark-internal,</text>
+  <text x="50" y="858" class="module-desc" style="font-style: italic;">app-compose-demo, mapgpt-showcase-app, full-hd-replayer, libnavui-resources</text>
+</svg>

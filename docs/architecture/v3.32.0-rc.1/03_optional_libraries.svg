@@ -1,0 +1,199 @@
+<svg viewBox="0 0 1050 900" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .header-row { fill: #FFF3E0; stroke: #F57C00; stroke-width: 1.5; }
+      .row-even { fill: #fdfdfd; stroke: #dee2e6; stroke-width: 1; }
+      .row-odd { fill: #f8f9fa; stroke: #dee2e6; stroke-width: 1; }
+      .header-text { fill: #212529; font-size: 12px; font-weight: 700; }
+      .module-name { fill: #212529; font-size: 11px; font-weight: 600; font-family: monospace; }
+      .cell-text { fill: #495057; font-size: 10px; }
+    </style>
+  </defs>
+
+  <text x="525" y="30" text-anchor="middle" style="fill: #212529; font-size: 20px; font-weight: 700;">
+    Navigation SDK for Android - Optional Libraries (3.32.0-rc.1)
+  </text>
+  <text x="525" y="52" text-anchor="middle" style="fill: #868e96; font-size: 11px; font-style: italic;">
+    Consumed selectively per integrator. "Depends on" is read from each module's build.gradle at this commit.
+  </text>
+
+  <!-- Header -->
+  <rect x="50" y="70" width="260" height="30" class="header-row"/>
+  <text x="60" y="90" class="header-text">Module</text>
+  <rect x="310" y="70" width="340" height="30" class="header-row"/>
+  <text x="320" y="90" class="header-text">Purpose</text>
+  <rect x="650" y="70" width="390" height="30" class="header-row"/>
+  <text x="660" y="90" class="header-text">Depends on</text>
+
+  <!-- Rows -->
+  <!-- 1 -->
+  <rect x="50" y="100" width="260" height="34" class="row-odd"/>
+  <text x="60" y="122" class="module-name">coordination</text>
+  <rect x="310" y="100" width="340" height="34" class="row-odd"/>
+  <text x="320" y="122" class="cell-text">Redux-style state/UI layer between SDK and app UI</text>
+  <rect x="650" y="100" width="390" height="34" class="row-odd"/>
+  <text x="660" y="122" class="cell-text">base, ui-maps, navigator, utils; Nav SDK C++</text>
+
+  <!-- 2 -->
+  <rect x="50" y="134" width="260" height="34" class="row-even"/>
+  <text x="60" y="156" class="module-name">coordination-full-hd</text>
+  <rect x="310" y="134" width="340" height="34" class="row-even"/>
+  <text x="320" y="156" class="cell-text">HD-map extension to the coordination layer</text>
+  <rect x="650" y="134" width="390" height="34" class="row-even"/>
+  <text x="660" y="156" class="cell-text">coordination, navigator; Navigation Native, Nav SDK C++ (HD)</text>
+
+  <!-- 3 -->
+  <rect x="50" y="168" width="260" height="34" class="row-odd"/>
+  <text x="60" y="190" class="module-name">adasis</text>
+  <rect x="310" y="168" width="340" height="34" class="row-odd"/>
+  <text x="320" y="190" class="cell-text">Advanced Driver Assistance Systems integration</text>
+  <rect x="650" y="168" width="390" height="34" class="row-odd"/>
+  <text x="660" y="190" class="cell-text">base, navigation, navigator, weather</text>
+
+  <!-- 4 -->
+  <rect x="50" y="202" width="260" height="34" class="row-even"/>
+  <text x="60" y="224" class="module-name">ev</text>
+  <rect x="310" y="202" width="340" height="34" class="row-even"/>
+  <text x="320" y="224" class="cell-text">Electric vehicle charging and range routing</text>
+  <rect x="650" y="202" width="390" height="34" class="row-even"/>
+  <text x="660" y="224" class="cell-text">navigation, utils; Maps SDK, Core Common</text>
+
+  <!-- 5 -->
+  <rect x="50" y="236" width="260" height="34" class="row-odd"/>
+  <text x="60" y="258" class="module-name">ev-ui</text>
+  <rect x="310" y="236" width="340" height="34" class="row-odd"/>
+  <text x="320" y="258" class="cell-text">UI components for EV charging state</text>
+  <rect x="650" y="236" width="390" height="34" class="row-odd"/>
+  <text x="660" y="258" class="cell-text">ev, base, utils; Maps SDK</text>
+
+  <!-- 6 -->
+  <rect x="50" y="270" width="260" height="34" class="row-even"/>
+  <text x="60" y="292" class="module-name">ev-rangemap</text>
+  <rect x="310" y="270" width="340" height="34" class="row-even"/>
+  <text x="320" y="292" class="cell-text">EV remaining-range map visualization</text>
+  <rect x="650" y="270" width="390" height="34" class="row-even"/>
+  <text x="660" y="292" class="cell-text">ev, navigation; Maps SDK</text>
+
+  <!-- 7 -->
+  <rect x="50" y="304" width="260" height="34" class="row-odd"/>
+  <text x="60" y="326" class="module-name">ev-driver-notification</text>
+  <rect x="310" y="304" width="340" height="34" class="row-odd"/>
+  <text x="320" y="326" class="cell-text">EV-specific driver-facing alerts</text>
+  <rect x="650" y="304" width="390" height="34" class="row-odd"/>
+  <text x="660" y="326" class="cell-text">navigation, driver-notification</text>
+
+  <!-- 8 -->
+  <rect x="50" y="338" width="260" height="34" class="row-even"/>
+  <text x="60" y="360" class="module-name">roadcam</text>
+  <rect x="310" y="338" width="340" height="34" class="row-even"/>
+  <text x="320" y="360" class="cell-text">Road camera detection and warnings</text>
+  <rect x="650" y="338" width="390" height="34" class="row-even"/>
+  <text x="660" y="360" class="cell-text">base, navigation, navigator; Navigation Native</text>
+
+  <!-- 9 -->
+  <rect x="50" y="372" width="260" height="34" class="row-odd"/>
+  <text x="60" y="394" class="module-name">roadcam-ui</text>
+  <rect x="310" y="372" width="340" height="34" class="row-odd"/>
+  <text x="320" y="394" class="cell-text">UI overlays for road camera alerts</text>
+  <rect x="650" y="372" width="390" height="34" class="row-odd"/>
+  <text x="660" y="394" class="cell-text">roadcam, base; Maps SDK</text>
+
+  <!-- 10 -->
+  <rect x="50" y="406" width="260" height="34" class="row-even"/>
+  <text x="60" y="428" class="module-name">weather</text>
+  <rect x="310" y="406" width="340" height="34" class="row-even"/>
+  <text x="320" y="428" class="cell-text">Weather data integration and overlays</text>
+  <rect x="650" y="406" width="390" height="34" class="row-even"/>
+  <text x="660" y="428" class="cell-text">navigation</text>
+
+  <!-- 11 -->
+  <rect x="50" y="440" width="260" height="34" class="row-odd"/>
+  <text x="60" y="462" class="module-name">audio</text>
+  <rect x="310" y="440" width="340" height="34" class="row-odd"/>
+  <text x="320" y="462" class="cell-text">Navigation audio focus and sound management</text>
+  <rect x="650" y="440" width="390" height="34" class="row-odd"/>
+  <text x="660" y="462" class="cell-text">base, utils, navigation; Core Common</text>
+
+  <!-- 12 -->
+  <rect x="50" y="474" width="260" height="34" class="row-even"/>
+  <text x="60" y="496" class="module-name">core-mapgpt</text>
+  <rect x="310" y="474" width="340" height="34" class="row-even"/>
+  <text x="320" y="496" class="cell-text">MapGPT core integration</text>
+  <rect x="650" y="474" width="390" height="34" class="row-even"/>
+  <text x="660" y="496" class="cell-text">base, navigation, audio; Core Common</text>
+
+  <!-- 13 -->
+  <rect x="50" y="508" width="260" height="34" class="row-odd"/>
+  <text x="60" y="530" class="module-name">ui-mapgpt</text>
+  <rect x="310" y="508" width="340" height="34" class="row-odd"/>
+  <text x="320" y="530" class="cell-text">MapGPT UI components</text>
+  <rect x="650" y="508" width="390" height="34" class="row-odd"/>
+  <text x="660" y="530" class="cell-text">core-mapgpt</text>
+
+  <!-- 14 -->
+  <rect x="50" y="542" width="260" height="34" class="row-even"/>
+  <text x="60" y="564" class="module-name">applemusic-mapgpt</text>
+  <rect x="310" y="542" width="340" height="34" class="row-even"/>
+  <text x="320" y="564" class="cell-text">Apple Music extension for MapGPT</text>
+  <rect x="650" y="542" width="390" height="34" class="row-even"/>
+  <text x="660" y="564" class="cell-text">core-mapgpt</text>
+
+  <!-- 15 -->
+  <rect x="50" y="576" width="260" height="34" class="row-odd"/>
+  <text x="60" y="598" class="module-name">datainputs</text>
+  <rect x="310" y="576" width="340" height="34" class="row-odd"/>
+  <text x="320" y="598" class="cell-text">External vehicle-signal data feed integration</text>
+  <rect x="650" y="576" width="390" height="34" class="row-odd"/>
+  <text x="660" y="598" class="cell-text">base, navigation, navigator; Navigation Native</text>
+
+  <!-- 16 -->
+  <rect x="50" y="610" width="260" height="34" class="row-even"/>
+  <text x="60" y="632" class="module-name">noa</text>
+  <rect x="310" y="610" width="340" height="34" class="row-even"/>
+  <text x="320" y="632" class="cell-text">Natural-language navigation assistant</text>
+  <rect x="650" y="610" width="390" height="34" class="row-even"/>
+  <text x="660" y="632" class="cell-text">base, navigation</text>
+
+  <!-- 17 -->
+  <rect x="50" y="644" width="260" height="34" class="row-odd"/>
+  <text x="60" y="666" class="module-name">libnavigation-custom-route</text>
+  <rect x="310" y="644" width="340" height="34" class="row-odd"/>
+  <text x="320" y="666" class="cell-text">Custom route-provider extension points</text>
+  <rect x="650" y="644" width="390" height="34" class="row-odd"/>
+  <text x="660" y="666" class="cell-text">base, utils</text>
+
+  <!-- 18 -->
+  <rect x="50" y="678" width="260" height="34" class="row-even"/>
+  <text x="60" y="700" class="module-name">libnavigation-compose-foundation</text>
+  <rect x="310" y="678" width="340" height="34" class="row-even"/>
+  <text x="320" y="700" class="cell-text">Compose primitives for navigation UI</text>
+  <rect x="650" y="678" width="390" height="34" class="row-even"/>
+  <text x="660" y="700" class="cell-text">none (Compose primitives only)</text>
+
+  <!-- 19 -->
+  <rect x="50" y="712" width="260" height="34" class="row-odd"/>
+  <text x="60" y="734" class="module-name">libnavigation-compose-core</text>
+  <rect x="310" y="712" width="340" height="34" class="row-odd"/>
+  <text x="320" y="734" class="cell-text">Compose state holders for navigation</text>
+  <rect x="650" y="712" width="390" height="34" class="row-odd"/>
+  <text x="660" y="734" class="cell-text">base, ui-maps, tripdata, utils, compose-foundation; Nav Native</text>
+
+  <!-- 20 -->
+  <rect x="50" y="746" width="260" height="34" class="row-even"/>
+  <text x="60" y="768" class="module-name">libnavigation-compose</text>
+  <rect x="310" y="746" width="340" height="34" class="row-even"/>
+  <text x="320" y="768" class="cell-text">Top-level Compose entry point for navigation</text>
+  <rect x="650" y="746" width="390" height="34" class="row-even"/>
+  <text x="660" y="768" class="cell-text">coordination, compose-core; Maps SDK Compose extension</text>
+
+  <!-- Footer note -->
+  <text x="50" y="810" style="fill: #868e96; font-size: 10px; font-style: italic;">
+    Module names before the semicolon are in-scope libraries (com.mapbox.navigationcore:name is public-tree module name;
+  </text>
+  <text x="50" y="826" style="fill: #868e96; font-size: 10px; font-style: italic;">
+    project(':x') is internal module x). Bound SDKs after the semicolon are declared directly by that module.
+  </text>
+  <text x="50" y="842" style="fill: #868e96; font-size: 10px; font-style: italic;">
+    Mapbox Java SDK sub-artifacts, AndroidX, Kotlin and test dependencies are omitted. "compose-" is short for "libnavigation-compose-".
+  </text>
+</svg>

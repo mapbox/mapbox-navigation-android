@@ -1,0 +1,95 @@
+<svg viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .layer-app { fill: #f8f9fa; stroke: #495057; stroke-width: 2; }
+      .layer-ui { fill: #F3E5F5; stroke: #7B1FA2; stroke-width: 2; }
+      .layer-core { fill: #E3F2FD; stroke: #1976D2; stroke-width: 2; }
+      .layer-native { fill: #E8EAF6; stroke: #3F51B5; stroke-width: 2; }
+      .layer-sdk { fill: #E8F5E9; stroke: #388E3C; stroke-width: 2; }
+      .layer-optional { fill: #FFF3E0; stroke: #F57C00; stroke-width: 2; stroke-dasharray: 4,3; }
+      .layer-title { fill: #212529; font-size: 16px; font-weight: 700; }
+      .layer-desc { fill: #495057; font-size: 11px; }
+      .diagram-title { fill: #212529; font-size: 20px; font-weight: 700; }
+      .connector { stroke: #6c757d; stroke-width: 2; fill: none; }
+      .legend-text { fill: #495057; font-size: 11px; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#6c757d" />
+    </marker>
+  </defs>
+
+  <text x="400" y="30" text-anchor="middle" class="diagram-title">Navigation SDK for Android - Layer Overview (3.32.0-rc.1)</text>
+
+  <!-- Calling app -->
+  <rect x="150" y="55" width="500" height="55" rx="6" class="layer-app"/>
+  <text x="400" y="78" text-anchor="middle" class="layer-title">CALLING APP</text>
+  <text x="400" y="95" text-anchor="middle" class="layer-desc">The integrator's Android application</text>
+
+  <path d="M 400 110 L 400 135" class="connector" marker-end="url(#arrowhead)"/>
+
+  <!-- UI libraries -->
+  <rect x="150" y="140" width="500" height="65" rx="6" class="layer-ui"/>
+  <text x="400" y="163" text-anchor="middle" class="layer-title">UI LIBRARIES</text>
+  <text x="400" y="180" text-anchor="middle" class="layer-desc">ui-base . ui-maps . ui-utils . ui-components . androidauto</text>
+  <text x="400" y="195" text-anchor="middle" class="layer-desc">Map rendering, camera, turn-by-turn UI components</text>
+
+  <path d="M 400 205 L 400 230" class="connector" marker-end="url(#arrowhead)"/>
+
+  <!-- Core libraries -->
+  <rect x="150" y="235" width="500" height="80" rx="6" class="layer-core"/>
+  <text x="400" y="258" text-anchor="middle" class="layer-title">CORE LIBRARIES</text>
+  <text x="400" y="276" text-anchor="middle" class="layer-desc">libnavigation-android . navigation . navigator . base . utils</text>
+  <text x="400" y="291" text-anchor="middle" class="layer-desc">tripdata . voice . copilot . metrics . notification . search . driver-notification</text>
+  <text x="400" y="306" text-anchor="middle" class="layer-desc" style="font-style: italic;">Route state, native-engine bridging, trip data</text>
+
+  <!-- Optional libraries branch -->
+  <rect x="680" y="235" width="100" height="80" rx="6" class="layer-optional"/>
+  <text x="730" y="258" text-anchor="middle" style="fill: #212529; font-size: 13px; font-weight: 700;">OPTIONAL</text>
+  <text x="730" y="273" text-anchor="middle" class="legend-text" style="font-size: 9px;">EV . ADASIS</text>
+  <text x="730" y="285" text-anchor="middle" class="legend-text" style="font-size: 9px;">coordination</text>
+  <text x="730" y="297" text-anchor="middle" class="legend-text" style="font-size: 9px;">MapGPT . roadcam</text>
+  <text x="730" y="309" text-anchor="middle" class="legend-text" style="font-size: 9px;">weather . audio</text>
+  <path d="M 680 275 L 655 275" class="connector" stroke-dasharray="3,3" marker-end="url(#arrowhead)"/>
+
+  <path d="M 400 315 L 400 340" class="connector" marker-end="url(#arrowhead)"/>
+
+  <!-- Native bindings -->
+  <rect x="150" y="345" width="500" height="70" rx="6" class="layer-native"/>
+  <text x="400" y="368" text-anchor="middle" class="layer-title">NATIVE BINDINGS</text>
+  <text x="400" y="385" text-anchor="middle" class="layer-desc">public tree: navigator . base</text>
+  <text x="400" y="400" text-anchor="middle" class="layer-desc">internal tree: coordination . coordination-full-hd . datainputs . roadcam . libnavigation-compose-core</text>
+
+  <path d="M 400 415 L 400 440" class="connector" marker-end="url(#arrowhead)"/>
+
+  <!-- Bound SDKs -->
+  <rect x="150" y="445" width="500" height="105" rx="6" class="layer-sdk"/>
+  <text x="400" y="468" text-anchor="middle" class="layer-title">BOUND MAPBOX SDKs (external)</text>
+  <text x="400" y="490" text-anchor="middle" class="layer-desc">Maps SDK v11.32.0-rc.1 . Navigation Native v324.32.0-rc.1 . Core Common v24.32.0-rc.1</text>
+  <text x="400" y="505" text-anchor="middle" class="layer-desc">Nav SDK C++ v0.32.0-rc.1 . Search SDK v2.32.0-rc.1 . Mapbox Java SDK v7.10.1</text>
+  <text x="400" y="537" text-anchor="middle" class="layer-desc" style="font-style: italic;">Not designed here - versions only</text>
+
+  <!-- Legend -->
+  <line x1="150" y1="580" x2="650" y2="580" stroke="#adb5bd" stroke-width="1"/>
+  <text x="150" y="605" style="fill: #868e96; font-size: 12px; font-weight: 600;">Legend</text>
+
+  <rect x="150" y="620" width="24" height="18" rx="3" class="layer-app"/>
+  <text x="182" y="633" class="legend-text">Calling app</text>
+
+  <rect x="330" y="620" width="24" height="18" rx="3" class="layer-ui"/>
+  <text x="362" y="633" class="legend-text">UI libraries</text>
+  <rect x="490" y="620" width="24" height="18" rx="3" class="layer-core"/>
+  <text x="522" y="633" class="legend-text">Core libraries</text>
+
+  <rect x="150" y="648" width="24" height="18" rx="3" class="layer-optional"/>
+  <text x="182" y="661" class="legend-text">Optional libraries</text>
+  <rect x="330" y="648" width="24" height="18" rx="3" class="layer-native"/>
+  <text x="362" y="661" class="legend-text">Native bindings</text>
+  <rect x="490" y="648" width="24" height="18" rx="3" class="layer-sdk"/>
+  <text x="522" y="661" class="legend-text">Bound Mapbox SDKs</text>
+
+  <text x="150" y="700" style="fill: #495057; font-size: 12px; font-weight: 600;">Key Dependencies:</text>
+  <text x="150" y="720" class="legend-text">- Dependencies flow downward only: a lower layer never imports a higher layer</text>
+  <text x="150" y="738" class="legend-text">- Optional libraries depend on Core; Core never depends on UI or Optional</text>
+  <text x="150" y="756" class="legend-text">- Native SDKs are declared only by the modules in the Native bindings layer (see 04_native_bridge)</text>
+  <text x="150" y="774" class="legend-text">- Every other library reaches native code through those modules</text>
+</svg>
