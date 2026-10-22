@@ -43,7 +43,7 @@ import org.junit.Test
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.time.Duration.Companion.seconds
 
-class OfflineTest : BaseCoreNoCleanUpTest(useFakeDeviceLocationProvider = false) {
+class OfflineTest : BaseCoreNoCleanUpTest() {
 
     @get:Rule
     val mapboxHistoryTestRule = MapboxHistoryTestRule()
