@@ -217,6 +217,8 @@ internal constructor(
             NavigationCameraTransitionOptions.Builder().maxDuration(3500L).build()
         internal val DEFAULT_FRAME_TRANSITION_OPT =
             NavigationCameraTransitionOptions.Builder().maxDuration(1000L).build()
+        internal val INSTANT_FRAME_TRANSITION_OPT =
+            NavigationCameraTransitionOptions.Builder().maxDuration(0L).build()
 
         @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
         @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -600,24 +602,29 @@ internal constructor(
 
     private fun updateFrame(viewportData: ViewportData, instant: Boolean) {
         if (!isMapValid()) return
+        val transitionOptions = if (instant) {
+            INSTANT_FRAME_TRANSITION_OPT
+        } else {
+            frameTransitionOptions
+        }
         when (stateInternal) {
             FOLLOWING -> {
                 startFrameAnimation(viewportData.cameraForFollowing, instant) {
-                    animatorsCreator.updateFrameForFollowing(it, frameTransitionOptions)
+                    animatorsCreator.updateFrameForFollowing(it, transitionOptions)
                 }
             }
 
             ROUTE_OVERVIEW -> {
                 setCameraAnimationHintWhileInOverview(viewportData.cameraForFollowing)
                 startFrameAnimation(viewportData.cameraForOverview, instant) {
-                    animatorsCreator.updateFrameForOverview(it, frameTransitionOptions)
+                    animatorsCreator.updateFrameForOverview(it, transitionOptions)
                 }
             }
 
             POINTS_OVERVIEW -> {
                 setCameraAnimationHintWhileInOverview(viewportData.cameraForFollowing)
                 startFrameAnimation(viewportData.cameraForPointsOverview, instant) {
-                    animatorsCreator.updateFrameForOverview(it, frameTransitionOptions)
+                    animatorsCreator.updateFrameForOverview(it, transitionOptions)
                 }
             }
 

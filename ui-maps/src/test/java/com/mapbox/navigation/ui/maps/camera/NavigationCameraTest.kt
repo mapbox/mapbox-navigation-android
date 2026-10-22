@@ -6,6 +6,7 @@ import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.DEFAULT_FRAME_TRANSITION_OPT
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.DEFAULT_STATE_TRANSITION_OPT
+import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.INSTANT_FRAME_TRANSITION_OPT
 import com.mapbox.navigation.ui.maps.camera.data.ViewportData
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceUpdateObserver
@@ -783,14 +784,14 @@ class NavigationCameraTest {
         internalTransitionListenerSlot.captured.onAnimationEnd(overviewAnimatorSet)
 
         val frameTransition = mockFrameTransitionForOverview(
-            DEFAULT_FRAME_TRANSITION_OPT,
+            INSTANT_FRAME_TRANSITION_OPT,
         )
         navigationCamera.resetFrame()
 
         verifyTransitionExecuted(
             AnimatorsCreator::updateFrameForOverview,
             frameTransition.frameCamera,
-            DEFAULT_FRAME_TRANSITION_OPT,
+            INSTANT_FRAME_TRANSITION_OPT,
             frameTransition.frameAnimatorSet,
             instant = true,
         )
@@ -804,14 +805,14 @@ class NavigationCameraTest {
         internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
 
         val frameTransition = mockFrameTransitionForFollowing(
-            DEFAULT_FRAME_TRANSITION_OPT,
+            INSTANT_FRAME_TRANSITION_OPT,
         )
         navigationCamera.resetFrame()
 
         verifyTransitionExecuted(
             AnimatorsCreator::updateFrameForFollowing,
             frameTransition.frameCamera,
-            DEFAULT_FRAME_TRANSITION_OPT,
+            INSTANT_FRAME_TRANSITION_OPT,
             frameTransition.frameAnimatorSet,
             instant = true,
         )
