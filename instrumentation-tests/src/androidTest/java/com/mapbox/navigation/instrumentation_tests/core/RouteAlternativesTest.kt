@@ -77,7 +77,7 @@ import kotlin.time.Duration.Companion.seconds
  * are given during active guidance.
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class, ExperimentalMapboxNavigationAPI::class)
-class RouteAlternativesTest : BaseCoreNoCleanUpTest(useFakeDeviceLocationProvider = false) {
+class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
 
     @get:Rule
     val clearFilesRule = ClearFilesRule()
