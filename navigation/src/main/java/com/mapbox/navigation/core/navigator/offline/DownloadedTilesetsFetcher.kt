@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.navigator.offline
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.TileStore
+import com.mapbox.common.TileStoreInternalFuncs
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import kotlinx.serialization.Serializable
@@ -105,7 +106,7 @@ internal class DownloadedTilesetsFetcher(
         regionId: String,
         callback: (TilesetDescriptorsMetadata) -> Unit,
     ) {
-        tileStore.getTileRegionTilesets(regionId) {
+        TileStoreInternalFuncs.get(tileStore).getTileRegionTilesets(regionId) {
             it.onError { tileRegionError ->
                 callback(
                     ExpectedFactory.createError(

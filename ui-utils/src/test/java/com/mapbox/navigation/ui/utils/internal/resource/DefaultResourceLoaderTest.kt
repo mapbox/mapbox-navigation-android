@@ -19,6 +19,7 @@ import com.mapbox.common.ResourceLoadResultCallback
 import com.mapbox.common.ResourceLoadStatus
 import com.mapbox.common.TileDataDomain
 import com.mapbox.common.TileStore
+import com.mapbox.common.TileStoreInternalFuncs
 import com.mapbox.navigation.testing.toDataRef
 import com.mapbox.navigation.utils.internal.NavigationTileStore
 import io.mockk.every
@@ -35,13 +36,15 @@ import java.util.Date
 class DefaultResourceLoaderTest {
 
     private lateinit var mockTileStore: TileStore
+    private lateinit var mockTileStoreInternalFuncs: TileStoreInternalFuncs
     private lateinit var mockNavigationTileStore: NavigationTileStore
     private lateinit var mockReachability: ReachabilityInterface
     private lateinit var sut: ResourceLoader
 
     @Before
     fun setUp() {
-        mockTileStore = mockk<StubTileStore>(relaxed = true)
+        mockTileStore = mockk(relaxed = true)
+        mockTileStoreInternalFuncs = mockk<StubTileStoreInternalFuncs>(relaxed = true)
         mockNavigationTileStore = mockk<NavigationTileStore>(relaxed = true)
         every { mockNavigationTileStore.invoke() } returns mockTileStore
 
@@ -51,6 +54,7 @@ class DefaultResourceLoaderTest {
         sut = DefaultResourceLoader(
             mockNavigationTileStore,
             mockReachability,
+            internalFuncs = { mockTileStoreInternalFuncs },
         )
     }
 
@@ -65,7 +69,7 @@ class DefaultResourceLoaderTest {
         val descriptionCapture = slot<ResourceDescription>()
         val optionsCapture = slot<ResourceLoadOptions>()
         every {
-            mockTileStore.loadResource(
+            mockTileStoreInternalFuncs.loadResource(
                 capture(descriptionCapture),
                 capture(optionsCapture),
                 ofType(ResourceLoadProgressCallback::class),
@@ -92,7 +96,7 @@ class DefaultResourceLoaderTest {
         val progressCallbackCapture = slot<ResourceLoadProgressCallback>()
         val resultCallbackCapture = slot<ResourceLoadResultCallback>()
         every {
-            mockTileStore.loadResource(
+            mockTileStoreInternalFuncs.loadResource(
                 any(),
                 any(),
                 capture(progressCallbackCapture),
@@ -124,7 +128,7 @@ class DefaultResourceLoaderTest {
 
         val optionsCapture = slot<ResourceLoadOptions>()
         verify {
-            mockTileStore.loadResource(
+            mockTileStoreInternalFuncs.loadResource(
                 ResourceDescription(TileDataDomain.NAVIGATION, loadRequest.url),
                 capture(optionsCapture),
                 any(),
@@ -146,7 +150,7 @@ class DefaultResourceLoaderTest {
         }
         val cancelable = spyk(stubCancelable())
         every {
-            mockTileStore.loadResource(any(), any(), any(), any())
+            mockTileStoreInternalFuncs.loadResource(any(), any(), any(), any())
         } returns cancelable
 
         val requestId = sut.load(loadRequest, mockk(relaxed = true))
@@ -167,7 +171,7 @@ class DefaultResourceLoaderTest {
         val progressCallbackCapture = slot<ResourceLoadProgressCallback>()
         val resultCallbackCapture = slot<ResourceLoadResultCallback>()
         every {
-            mockTileStore.loadResource(
+            mockTileStoreInternalFuncs.loadResource(
                 any(),
                 any(),
                 capture(progressCallbackCapture),
@@ -209,7 +213,7 @@ class DefaultResourceLoaderTest {
         val progressCallbackCapture = slot<ResourceLoadProgressCallback>()
         val resultCallbackCapture = slot<ResourceLoadResultCallback>()
         every {
-            mockTileStore.loadResource(
+            mockTileStoreInternalFuncs.loadResource(
                 any(),
                 any(),
                 capture(progressCallbackCapture),
@@ -251,8 +255,8 @@ class DefaultResourceLoaderTest {
     }
 }
 
-// Stub TileStore to avoid java.lang.UnsatisfiedLinkError
-private class StubTileStore : TileStore(0) {
+// Stub TileStoreInternalFuncs to avoid java.lang.UnsatisfiedLinkError
+private class StubTileStoreInternalFuncs : TileStoreInternalFuncs(0) {
     override fun loadResource(
         description: ResourceDescription,
         options: ResourceLoadOptions,

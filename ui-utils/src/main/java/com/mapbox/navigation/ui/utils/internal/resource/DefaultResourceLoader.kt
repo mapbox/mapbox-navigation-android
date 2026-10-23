@@ -15,6 +15,7 @@ import com.mapbox.common.ResourceLoadResult
 import com.mapbox.common.ResourceLoadResultCallback
 import com.mapbox.common.TileDataDomain
 import com.mapbox.common.TileStore
+import com.mapbox.common.TileStoreInternalFuncs
 import com.mapbox.navigation.utils.internal.NavigationTileStore
 import java.util.Queue
 import java.util.concurrent.ConcurrentHashMap
@@ -33,6 +34,7 @@ import java.util.concurrent.atomic.AtomicLong
 class DefaultResourceLoader(
     private val navigationTileStore: NavigationTileStore,
     private val reachability: ReachabilityInterface,
+    private val internalFuncs: (TileStore) -> TileStoreInternalFuncs = TileStoreInternalFuncs::get,
 ) : ResourceLoader() {
 
     private val nextRequestId = AtomicLong(0L)
@@ -52,7 +54,7 @@ class DefaultResourceLoader(
         val callbackAdapter = CallbackAdapter(request, callback, observers)
 
         callbackAdapter.notifyOnStart(request)
-        cancelableMap[requestId] = tileStore.loadResource(
+        cancelableMap[requestId] = internalFuncs(tileStore).loadResource(
             /* description */ request.toResourceDescription(),
             /* options */ loadOptions(request, requestId),
             /* progressCallback */ callbackAdapter,
