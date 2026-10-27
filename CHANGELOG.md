@@ -1,3 +1,19 @@
+## Navigation SDK Core Framework 3.33.1 - 27 October, 2026
+#### Features
+
+
+#### Bug fixes and improvements
+- Fixed an issue where a route or route refresh request could remain without a result when the response was delivered very quickly. [#20915](https://github.com/mapbox/mapbox-sdk/pull/20915)
+- Fixed an issue where Copilot could upload history files with an empty or rotated access token captured when the upload was scheduled. The current `MapboxOptions.accessToken` is now used whenever possible.
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.33.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.33.1))
+- Mapbox Navigation Native `v324.33.1`
+- Mapbox Core Common `v24.33.1`
+- Mapbox Java `v7.10.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.1))
+
 ## Navigation SDK Core Framework 3.33.0 - 16 October, 2026
 #### Features
 - Android Auto: added experimental public constructors so apps that own their navigation state can use the components without `MapboxCarContext`: `MapboxCarNavigationManager(carContext, onStopNavigation)`, `MapboxCarNotification(carContext, notificationOptions)` and `CarSpeedLimitRenderer(speedLimitOptions)`. Added `CarNavigationTemplates` with the free drive, active guidance and route preview templates of the Mapbox navigation screen.
