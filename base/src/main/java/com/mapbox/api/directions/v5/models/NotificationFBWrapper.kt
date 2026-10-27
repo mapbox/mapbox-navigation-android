@@ -150,6 +150,8 @@ internal class NotificationFBWrapper private constructor(
                     "unnecessaryChargingAtNextCPOI"
                 FBNotificationSubtype.Vignette ->
                     "vignette"
+                FBNotificationSubtype.BetterStationsPossible ->
+                    "betterStationsPossible"
                 FBNotificationSubtype.Unknown -> unrecognized?.get(propertyName)?.asString()
             }
         }
