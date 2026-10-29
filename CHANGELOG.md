@@ -1,3 +1,57 @@
+## Navigation SDK Core Framework 3.34.1 - 29 October, 2026
+#### Features
+- Replaced `MapboxEvViewOptions.Builder#withIconFactory` with `withIconVariantsFactory`, which returns an ordered list of icon variants for a station. The map shows the first variant that fits. Icons are now created lazily from `MapboxEvViewClient#onStyleImageMissing`. [#21104](https://github.com/mapbox/mapbox-sdk/pull/21104)
+- Added `MapboxEvViewOptions.Builder#withIconOffsets` to set an icon offset per variant. [#21104](https://github.com/mapbox/mapbox-sdk/pull/21104)
+- Android Auto: `CarRouteLineRenderer` takes an optional `onRouteClick` callback that receives the route the driver tapped on the car map.
+- Android Auto: in the route preview of the navigation screen, tapping a route on the car map selects it.
+
+
+#### Bug fixes and improvements
+- Fixed an issue where Copilot could upload history files with an empty or rotated access token captured when the upload was scheduled. The current `MapboxOptions.accessToken` is now used whenever possible.
+- Fixed an issue where a route or route refresh request could remain without a result when the response was delivered very quickly. [#20915](https://github.com/mapbox/mapbox-sdk/pull/20915)
+- Fixed `RouteRefreshController.requestImmediateRouteRefresh` not invoking its callback with `ImmediateRouteRefreshResult.Cancelled` when the refresh was cancelled  before the request started executing.
+- Fixed Android Auto opening the route preview again after pressing Back from it on the Favorites and geo deeplink screens. Tapping the same place again now requests a new route.
+- Fixed Android Auto Favorites and geo deeplink screens failing to request routes with "No results" after a search screen opened on top of them was closed.
+- Android Auto route request errors on the Favorites, geo deeplink and search screens are now shown to the driver, and the places stay on screen so they can be tapped again.
+- The Android Auto search screen now shows a loading state while a result is selected, cancels the previous selection, shows a message when the selection fails, and no longer sends blank queries.
+- Android Auto route request results no longer change the screen when they arrive after another screen was opened on top. The result is applied when the driver returns.
+- Fixed the Android Auto Favorites and geo deeplink lists staying empty when the places loaded before the first location fix. The lists now show a loading state until a location is known, and an error when the places fail to load.
+- Fixed Android Auto Favorites requests that could stay pending forever when a newer request started. Closing the Favorites screen now also cancels its pending request.
+- Fixed `GeoDeeplinkGeocoding` running the newer of two back-to-back requests twice, which failed with "Already executed" or returned the newer places to the older request. The newer request now cancels the older one.
+- Fixed Android Auto feedback crashing when the feedback could not be serialized for the history recorder or feedback metadata was unavailable.
+- Android Auto feedback screen no longer stalls the car UI when it opens: the map screenshot is captured and encoded in the background, and the history recorder no longer stores the encoded screenshot.
+- Android Auto feedback toast now reports whether the feedback was sent.
+- Android Auto remote feedback icons are decoded at grid size off the main thread and retried after a failure.
+- Back from a nested Android Auto feedback poll now returns to the previous poll.
+- Android Auto active guidance no longer re-renders maneuver icons, exits and road shields on every route progress, and refreshes the navigation template only when the shown maneuver, distance, arrival time or remaining minutes change.
+- Fixed the Android Auto speed limit sign and lane guidance images being redrawn while they were still shown.
+- Android Auto place markers are rendered once per list.
+- Fixed the Android Auto audio guidance button not refreshing on one screen after another screen was shown.
+- Android Auto route preview registers one routes preview observer and refreshes only when the preview changes.
+- `MapboxCarMapLoader.onCarConfigurationChanged` reloads the map style only when the dark mode or the style override changed.
+- Android Auto place, route and feedback lists, and the place markers on the map, respect the host's content limits.
+- Android Auto Favorites and geo deeplink screens use `MapWithContentTemplate` on Car API 7 or newer hosts, instead of the deprecated `PlaceListNavigationTemplate`.
+- Android Auto screens set their title and back action with `Header` on hosts that support it, instead of the template header setters deprecated in Car App Library 1.7.0.
+- On Car API 7 or newer hosts, the Android Auto Favorites and geo deeplink screens show, mark and frame as many places as the host allows in a list, and each row shows its place marker icon.
+- Restored the Android Auto `CarRouteLineRenderer(options, carRoutesProvider)` constructor of the previous release, so apps and libraries built against it keep working. The route tap callback moved to a new `CarRouteLineRenderer(options, carRoutesProvider, onRouteClick)` constructor.
+- Android Auto Favorites and geo deeplink lists no longer wait forever for a location or for `MapboxNavigation`. Without a location, on Car API 7 or newer hosts they show the places without distances after a short wait, and add the distances when a location arrives; older hosts, whose place list needs distances, show the places once a location arrives. A list already shown is kept when `MapboxNavigation` detaches. Places without a name or description are no longer shown, and `PlacesListOnMapManager.placeRecords` is documented: it holds only the places shown, up to the host's content limit.
+- Fixed Android Auto crashes: an intersection with a lanes array but no lane indications during guidance, a `PlacesListOnMapProvider` that throws, a place or search result with an empty name, `CarLocationsOverviewCamera.updateWithLocations` before the map is attached, a host or serialization failure in `NavigationManager` calls, a feedback option with a blank title, an unknown remaining duration in the guidance notification, search results before `MapboxNavigation` is attached, and a host failure when reading content limits.
+- Fixed the Android Auto trip notification showing the instruction, distance, arrival time or maneuver icon of a finished trip at the start of the next one.
+- Fixed `CarLocationProvider` returning, and replaying to the location puck, the last location of a previous drive after `MapboxNavigation` was detached.
+- Fixed the Android Auto places list not telling the user when a route to the selected place could not be requested, and not allowing the same place to be selected again.
+- The Android Auto speed limit sign, the road label and the place overview padding now scale with the head unit display density.
+- Fixed `MapboxCarMapLoader` reloading the Android Auto map style on the next configuration change after a tile, source, sprite or glyph loading error. Only a style loading error makes the next configuration change load the style again.
+- Fixed the Android Auto road name label covering the Mapbox logo on high-density head units. `CarRoadLabelRenderer` keeps the label out of the bottom corners of the visible area and ellipsizes a road name that does not fit, and `CarLogoRenderer` margins now follow the head unit density.
+- Route callouts attached with `MapboxRouteLineView.setCalloutAdapter` no longer cover the origin, waypoint and destination icons drawn by `MapboxRouteLineView`.
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.34.1` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.34.1))
+- Mapbox Navigation Native `v324.34.1`
+- Mapbox Core Common `v24.34.1`
+- Mapbox Java `v7.10.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.1))
+
 ## Navigation SDK Core Framework 3.34.0-rc.1 - 19 October, 2026
 #### Features
 - Replaced `MapboxEvViewOptions.Builder#withIconFactory` with `withIconVariantsFactory`, which returns an ordered list of icon variants for a station. The map shows the first variant that fits. Icons are now created lazily from `MapboxEvViewClient#onStyleImageMissing`. [#21104](https://github.com/mapbox/mapbox-sdk/pull/21104)
