@@ -43,6 +43,7 @@ import com.mapbox.navigation.ui.androidauto.screenmanager.factories.SettingsScre
  *
  * You can swap in your own [MapboxScreenFactory] to customize the experience.
  */
+@Suppress("DEPRECATION")
 fun MapboxCarContext.prepareScreens() = apply {
     val mapboxCarContext = this
     mapboxScreenManager.putAll(

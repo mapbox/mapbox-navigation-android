@@ -11,14 +11,15 @@ import com.mapbox.navigation.ui.androidauto.MapboxCarContext
 import com.mapbox.navigation.ui.androidauto.R
 import com.mapbox.navigation.ui.androidauto.internal.extensions.addBackPressedHandler
 import com.mapbox.navigation.ui.androidauto.internal.setHeaderCompat
-import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen
 
 /**
  * Handle the android auto car app settings.
  *
  * The default app has no settings yet, so the single toggle below is a sample slot that shows
- * how a setting is stored. It is kept on purpose: the free drive action strip opens this screen,
- * and integrators replace it by registering their own factory for [MapboxScreen.SETTINGS].
+ * how a setting is stored. Legacy screens open this compatibility screen. On Car API 7 or newer,
+ * the unified navigation screen embeds the same settings template alongside its map.
+ * Configure [com.mapbox.navigation.ui.androidauto.MapboxCarOptions.Customization.settingsTemplateProvider]
+ * to customize inline settings content.
  */
 internal class CarSettingsScreen(
     private val mapboxCarContext: MapboxCarContext,
@@ -30,39 +31,33 @@ internal class CarSettingsScreen(
         }
     }
 
-    override fun onGetTemplate(): Template {
-        val templateBuilder = ListTemplate.Builder().setSingleList(
-            ItemList.Builder()
-                .addItem(
-                    buildRowToggle(
-                        R.string.car_settings_toggle_place_holder,
-                        R.string.car_settings_toggle_place_holder_key,
-                    ),
-                )
+    override fun onGetTemplate(): Template = mapboxCarContext.buildCarSettingsTemplate()
+}
+
+/**
+ * Builds a placeholder settings template with a sample toggle, not functional app settings.
+ * Configure [com.mapbox.navigation.ui.androidauto.MapboxCarOptions.Customization.settingsTemplateProvider]
+ * to display custom inline settings on the navigation screen.
+ */
+internal fun MapboxCarContext.buildCarSettingsTemplate(): ListTemplate {
+    val label = carContext.getString(R.string.car_settings_toggle_place_holder)
+    val key = carContext.getString(R.string.car_settings_toggle_place_holder_key)
+    val row = Row.Builder()
+        .setTitle(label)
+        .setToggle(
+            Toggle.Builder { value ->
+                mapboxCarStorage.writeSharedPref(key, value)
+            }
+                .setChecked(mapboxCarStorage.readSharedPref(key, false))
                 .build(),
         )
-        return templateBuilder
-            .setHeaderCompat(
-                carContext,
-                title = carContext.getString(R.string.car_settings_title),
-                startAction = Action.BACK,
-            )
-            .build()
-    }
-
-    private fun buildRowToggle(labelResource: Int, prefKeyResource: Int): Row {
-        val storage = mapboxCarContext.mapboxCarStorage
-        val label = carContext.getString(labelResource)
-        val key = carContext.getString(prefKeyResource)
-        return Row.Builder()
-            .setTitle(label)
-            .setToggle(
-                Toggle.Builder { value ->
-                    mapboxCarContext.mapboxCarStorage.writeSharedPref(key, value)
-                }
-                    .setChecked(storage.readSharedPref(key, false))
-                    .build(),
-            )
-            .build()
-    }
+        .build()
+    return ListTemplate.Builder()
+        .setSingleList(ItemList.Builder().addItem(row).build())
+        .setHeaderCompat(
+            carContext,
+            title = carContext.getString(R.string.car_settings_title),
+            startAction = Action.BACK,
+        )
+        .build()
 }

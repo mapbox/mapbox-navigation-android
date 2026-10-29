@@ -31,6 +31,8 @@ import com.mapbox.navigation.ui.androidauto.navigation.roadlabel.CarRoadLabelRen
 import com.mapbox.navigation.ui.androidauto.navigation.speedlimit.CarSpeedLimitRenderer
 import com.mapbox.navigation.ui.androidauto.preview.CarRouteLineRenderer
 import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen
+import com.mapbox.navigation.ui.androidauto.settings.CarSettingsMode
+import com.mapbox.navigation.ui.androidauto.settings.buildCarSettingsTemplate
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
@@ -41,7 +43,7 @@ import kotlinx.coroutines.launch
 /**
  * A single map screen for free drive, route preview, and active guidance.
  *
- * Route preview uses [MapWithContentTemplate]. Free drive and active guidance use
+ * Route preview and inline settings use [MapWithContentTemplate]. Free drive and active guidance use
  * [NavigationTemplate], with active guidance displaying the host's native travel-estimate card.
  * The screen requires Car API 7 and keeps the map and its renderers attached while navigation
  * state changes.
@@ -68,7 +70,6 @@ internal class MapboxNavigationScreen @UiThread constructor(
     private val carRoadLabelRenderer = CarRoadLabelRenderer()
     private val carMarkers = CarActiveGuidanceMarkers(routesProvider)
     private val navigationInfoProvider = CarNavigationInfoProvider()
-        .invalidateOnChange(this)
     private val mapActionStripBuilder = MapboxMapActionStrip(this, carNavigationCamera)
     private val carArrivalTrigger = CarArrivalTrigger()
     private val mapObservers: List<MapboxCarMapObserver> = listOf(
@@ -82,10 +83,17 @@ internal class MapboxNavigationScreen @UiThread constructor(
     )
     private var isResumed = false
     private var routeClickRefresh: Job? = null
+    internal var isShowingSettings = false
+        private set
 
     init {
         logAndroidAuto("MapboxNavigationScreen constructor")
         addBackPressedHandler {
+            if (isShowingSettings) {
+                isShowingSettings = false
+                invalidate()
+                return@addBackPressedHandler
+            }
             val isPreview = routesProvider.state.value.screenState ==
                 MapboxNavigationScreenState.ROUTE_PREVIEW
             if (isPreview) {
@@ -97,10 +105,24 @@ internal class MapboxNavigationScreen @UiThread constructor(
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
+                    navigationInfoProvider.carNavigationInfo.collect {
+                        if (!isShowingSettings &&
+                            routesProvider.state.value.screenState ==
+                            MapboxNavigationScreenState.ACTIVE_GUIDANCE
+                        ) {
+                            invalidate()
+                        }
+                    }
+                }
+                launch {
                     routesProvider.state
                         .map { it.screenState }
                         .distinctUntilChanged()
                         .collect { screenState ->
+                            if (isShowingSettings) {
+                                isShowingSettings = false
+                                invalidate()
+                            }
                             if (isResumed) {
                                 carNavigationCamera.updateCameraMode(
                                     screenState.preferredCameraMode(),
@@ -139,6 +161,10 @@ internal class MapboxNavigationScreen @UiThread constructor(
 
                 override fun onPause(owner: LifecycleOwner) {
                     logAndroidAuto("MapboxNavigationScreen onPause")
+                    if (isShowingSettings) {
+                        isShowingSettings = false
+                        invalidate()
+                    }
                     isResumed = false
                     mapObservers.forEach(mapboxCarContext.mapboxCarMap::unregisterObserver)
                     mapboxCarContext.mapboxCarMap.setGestureHandler(null)
@@ -153,6 +179,7 @@ internal class MapboxNavigationScreen @UiThread constructor(
     }
 
     private fun onRouteClicked(route: NavigationRoute) {
+        if (isShowingSettings) return
         val state = routesProvider.state.value
         if (state.screenState != MapboxNavigationScreenState.ROUTE_PREVIEW) return
         val routesPreview = state.routesPreview ?: return
@@ -169,18 +196,35 @@ internal class MapboxNavigationScreen @UiThread constructor(
     override fun onGetTemplate(): Template {
         val state = routesProvider.state.value
         logAndroidAuto("MapboxNavigationScreen onGetTemplate ${state.screenState}")
+        if (isShowingSettings) {
+            return buildMapWithContentTemplate(
+                mapboxCarContext.options.settingsTemplateProvider
+                    ?.getSettingsTemplate(this, state.screenState.settingsMode())
+                    ?: mapboxCarContext.buildCarSettingsTemplate(),
+                state.screenState,
+            )
+        }
         return when (state.screenState) {
             MapboxNavigationScreenState.FREE_DRIVE -> buildFreeDriveTemplate()
             MapboxNavigationScreenState.ACTIVE_GUIDANCE -> buildActiveGuidanceTemplate()
-            MapboxNavigationScreenState.ROUTE_PREVIEW -> buildRoutePreviewMapTemplate(state)
+            MapboxNavigationScreenState.ROUTE_PREVIEW -> buildMapWithContentTemplate(
+                buildRoutePreviewTemplate(state),
+                state.screenState,
+            )
         }
     }
 
-    private fun buildRoutePreviewMapTemplate(
-        state: MapboxNavigationRoutesState,
+    internal fun showSettings() {
+        isShowingSettings = true
+        invalidate()
+    }
+
+    private fun buildMapWithContentTemplate(
+        contentTemplate: ListTemplate,
+        screenState: MapboxNavigationScreenState,
     ): MapWithContentTemplate {
         return MapWithContentTemplate.Builder()
-            .setContentTemplate(buildRoutePreviewTemplate(state))
+            .setContentTemplate(contentTemplate)
             .setMapController(
                 MapController.Builder()
                     .setMapActionStrip(mapActionStripBuilder.build())
@@ -189,7 +233,7 @@ internal class MapboxNavigationScreen @UiThread constructor(
             .setActionStrip(
                 mapboxCarContext.options.actionStripProvider.getActionStrip(
                     this,
-                    MapboxScreen.ROUTE_PREVIEW,
+                    screenState.screenKey(),
                 ),
             )
             .build()
@@ -242,5 +286,17 @@ internal class MapboxNavigationScreen @UiThread constructor(
         MapboxNavigationScreenState.FREE_DRIVE,
         MapboxNavigationScreenState.ACTIVE_GUIDANCE,
         -> CarCameraMode.FOLLOWING
+    }
+
+    private fun MapboxNavigationScreenState.screenKey() = when (this) {
+        MapboxNavigationScreenState.FREE_DRIVE -> MapboxScreen.FREE_DRIVE
+        MapboxNavigationScreenState.ROUTE_PREVIEW -> MapboxScreen.ROUTE_PREVIEW
+        MapboxNavigationScreenState.ACTIVE_GUIDANCE -> MapboxScreen.ACTIVE_GUIDANCE
+    }
+
+    private fun MapboxNavigationScreenState.settingsMode() = when (this) {
+        MapboxNavigationScreenState.FREE_DRIVE -> CarSettingsMode.FREE_DRIVE
+        MapboxNavigationScreenState.ROUTE_PREVIEW -> CarSettingsMode.ROUTE_PREVIEW
+        MapboxNavigationScreenState.ACTIVE_GUIDANCE -> CarSettingsMode.ACTIVE_GUIDANCE
     }
 }

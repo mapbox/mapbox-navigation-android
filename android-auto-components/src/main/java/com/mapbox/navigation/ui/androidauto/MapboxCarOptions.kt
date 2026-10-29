@@ -12,6 +12,7 @@ import com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotificationOp
 import com.mapbox.navigation.ui.androidauto.preview.CarRouteLineRendererOptions
 import com.mapbox.navigation.ui.androidauto.preview.CarRouteOptionsInterceptor
 import com.mapbox.navigation.ui.androidauto.search.CarSearchMode
+import com.mapbox.navigation.ui.androidauto.settings.CarSettingsTemplateProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -85,6 +86,14 @@ class MapboxCarOptions {
         private set
 
     /**
+     * Custom inline settings content for each navigation mode, or null to use built-in settings.
+     * Does not replace legacy dedicated settings screens.
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    var settingsTemplateProvider: CarSettingsTemplateProvider? = null
+        private set
+
+    /**
      * Apply the desired customization.
      */
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -98,6 +107,7 @@ class MapboxCarOptions {
         customization.carFeedbackOptions?.also { this.carFeedbackOptions = it }
         customization.feedbackPollProvider?.also { this.feedbackPollProvider = it }
         customization.actionsStripProvider?.also { this.actionStripProvider = it }
+        customization.settingsTemplateProvider?.also { this.settingsTemplateProvider = it }
         customization.searchMode?.also { this.searchMode = it }
     }
 
@@ -152,6 +162,12 @@ class MapboxCarOptions {
          */
         @ExperimentalPreviewMapboxNavigationAPI
         var actionsStripProvider: MapboxScreenActionStripProvider? = null
+
+        /**
+         * Modify inline settings content for free drive, route preview, and active guidance.
+         */
+        @ExperimentalPreviewMapboxNavigationAPI
+        var settingsTemplateProvider: CarSettingsTemplateProvider? = null
 
         /**
          * Modify the search engine mode used for place search and geo deeplinks.

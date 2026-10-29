@@ -11,6 +11,7 @@ import com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackAction
 import com.mapbox.navigation.ui.androidauto.freedrive.FreeDriveActionStrip
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAutoFailure
 import com.mapbox.navigation.ui.androidauto.navigation.CarArrivalTrigger
+import com.mapbox.navigation.ui.androidauto.navigation.MapboxNavigationScreen
 import com.mapbox.navigation.ui.androidauto.navigation.audioguidance.CarAudioGuidanceAction
 import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen
 import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenManager
@@ -92,6 +93,11 @@ open class MapboxScreenActionStripProvider {
      */
     protected open fun getRoutePreview(screen: Screen): ActionStrip {
         return ActionStrip.Builder()
+            .apply {
+                if (screen is MapboxNavigationScreen && !screen.isShowingSettings) {
+                    addAction(buildSettingsAction(screen))
+                }
+            }
             .addAction(
                 CarFeedbackAction(
                     MapboxScreen.ROUTE_PREVIEW_FEEDBACK,
@@ -106,6 +112,11 @@ open class MapboxScreenActionStripProvider {
     protected open fun getActiveGuidance(screen: Screen): ActionStrip {
         val arrivalOnClickListener = OnClickListener { triggerArrivalOnStop() }
         return ActionStrip.Builder()
+            .apply {
+                if (screen is MapboxNavigationScreen && !screen.isShowingSettings) {
+                    addAction(buildSettingsAction(screen))
+                }
+            }
             .addAction(CarFeedbackAction(MapboxScreen.ACTIVE_GUIDANCE_FEEDBACK).getAction(screen))
             .addAction(CarAudioGuidanceAction().getAction(screen))
             .addAction(

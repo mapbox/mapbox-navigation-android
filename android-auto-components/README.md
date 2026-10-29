@@ -99,6 +99,51 @@ class MainCarAppService : CarAppService() {
 
 The `MainCarSession` example is where you will implement your Android Auto experience. All the building blocks are included in the SDK, but you will need to decide how to use them yourself. Mapbox is also simplifiying and solidifying this architecuture. Please refer to `MapboxCarMap` and `MapboxNavigationApp`. `MapboxCarMap` will make the Mapbox Map show on the Android Auto head unit, you can add/remove elements with `MapboxCarMapObserver`. Similarly, `MapboxNavigationApp` helps you to customize the entire turn-by-turn navigation experience.
 
+## Inline navigation settings
+
+On Car API 7 and later, the unified `MapboxScreen.NAVIGATION` screen shows settings as
+`MapWithContentTemplate` content alongside the map. The default settings action is available in
+free drive, route preview, and active guidance. Back closes settings and restores the current
+navigation template without clearing a route preview or stopping guidance. The map and its
+renderers remain attached; while settings are open, the settings panel temporarily replaces the
+route list or maneuver and travel-estimate card. Android Auto controls the panel's exact position
+and size. Settings also close when the navigation mode changes or another screen covers the
+navigation screen, so a newly selected route or guidance is not hidden on return. Navigation-info
+updates do not refresh the settings panel; settings changes can still invalidate it explicitly.
+The default action strips omit the settings action while the panel is already open.
+
+Set `MapboxCarOptions.Customization.settingsTemplateProvider` to a `CarSettingsTemplateProvider`
+to supply your own inline settings list. Its `getSettingsTemplate(screen, mode)` callback
+receives a `CarSettingsMode` (`FREE_DRIVE`, `ROUTE_PREVIEW`, or `ACTIVE_GUIDANCE`) on each
+template request, without depending on deprecated screen keys.
+Return a `ListTemplate` with `Action.BACK` as its header action; the navigation screen handles
+closing settings. Call `screen.invalidate()` when the settings content changes. The sample app's
+`MainCarSession` demonstrates different content for all three modes.
+
+Without a provider, the built-in panel uses the same stored settings as the legacy settings screen.
+A custom
+`MapboxScreen.SETTINGS` factory still applies to dedicated settings screens, not this inline panel.
+The dedicated `SettingsScreenFactory` and `MapboxScreen.SETTINGS` are deprecated; use
+`MapboxNavigationScreenFactory` with `MapboxScreen.NAVIGATION` instead (Car API 7 or newer).
+Legacy settings screens remain available for compatibility.
+Custom action-strip providers can retain the inline behavior by using
+`buildSettingsAction(screen)` from the `com.mapbox.navigation.ui.androidauto.action` package.
+Pass a `CarIcon` to `buildSettingsAction(screen, icon)` to customize the settings button icon.
+Omitting the icon retains the default settings icon.
+Use `buildSettingsAction(screen, title = title)` for a custom title with the default icon, or
+`buildSettingsAction(screen, icon, title)` to customize both. Titles count toward the host's
+action-strip text limits.
+
+`CarSettingsMode`, `CarSettingsTemplateProvider`, both `settingsTemplateProvider` properties,
+and the top-level `buildSettingsAction` function require opting in to
+`ExperimentalPreviewMapboxNavigationAPI`. Java callers can use the generated overloads on
+`CarSettingsActionKt`.
+
+The default unified active-guidance strip uses all four host action slots: settings, feedback,
+audio guidance, and Stop. Custom providers must replace an existing action rather than append a
+fifth action to `super.getActiveGuidance(screen)`. The default route-preview strip also includes
+settings before feedback. Legacy dedicated preview and guidance strips are unchanged.
+
 ## Testing
 
 Please refer to [Google training documentation](https://developer.android.com/training/cars/testing) to use the ./desktop-head-unit.

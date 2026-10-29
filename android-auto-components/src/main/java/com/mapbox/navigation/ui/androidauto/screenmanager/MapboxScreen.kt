@@ -24,11 +24,14 @@ object MapboxScreen {
 
     /**
      * Provides the user with a screen for changing app settings.
+     *
+     * @deprecated Use inline settings on [NAVIGATION] instead (Car API 7 or newer).
      */
+    @Deprecated("Use NAVIGATION with inline settings instead.")
     const val SETTINGS = "MAPBOX_SETTINGS"
 
     /**
-     * Combines free drive, route preview, and active guidance on one map screen.
+     * Combines free drive, route preview, active guidance, and inline settings on one map screen.
      *
      * This screen requires Car API 7 or newer.
      */
