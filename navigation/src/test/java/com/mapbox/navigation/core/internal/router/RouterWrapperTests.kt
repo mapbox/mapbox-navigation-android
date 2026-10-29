@@ -50,6 +50,7 @@ import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.RouterOrigin
 import com.mapbox.navigator.RouterRefreshCallback
 import com.mapbox.navigator.RoutingProfile
+import io.mockk.CapturingSlot
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -102,6 +103,7 @@ class RouterWrapperTests {
 
     private lateinit var routerWrapper: RouterWrapper
     private val router: RouterInterface = mockk(relaxed = true)
+    private val onDeviceRouteRefresh: OnDeviceRouteRefresh = mockk()
     private val accessToken = "pk.123"
     private val route: DirectionsRoute = mockk(relaxed = true)
     private val navigationRouterCallback: NavigationRouterCallback = mockk(relaxed = true)
@@ -222,6 +224,7 @@ class RouterWrapperTests {
             createTestNavigationRoutesParsing(
                 parsingDispatcher = coroutineRule.testDispatcher,
             ),
+            onDeviceRouteRefresh,
         )
     }
 
@@ -1327,7 +1330,253 @@ class RouterWrapperTests {
         verify(exactly = 1) { routerRefreshCallback.onFailure(capture(errorSlot)) }
         assertEquals("Route refresh failed", errorSlot.captured.message)
         assertEquals(errorMessage, errorSlot.captured.throwable?.message)
+        assertFalse(errorSlot.captured.permanent)
     }
+
+    @Test
+    fun `route refresh failure from the router is permanent only for an offline refresh`() {
+        for ((type, permanent) in listOf(
+            RouterErrorType.OFFLINE_REFRESH to true,
+            RouterErrorType.INPUT_ERROR to false,
+            RouterErrorType.UNKNOWN to false,
+        )) {
+            clearMocks(routerRefreshCallback, answers = false)
+            routerWrapper.getRouteRefresh(
+                createNavigationRoute(createDirectionsRoute(requestUuid = UUID)),
+                routeRefreshRequestData,
+                routerRefreshCallback,
+            )
+            refreshRouteSlot.captured.run(
+                ExpectedFactory.createError<List<RouterError>, DataRef>(
+                    listOf(createRouterError(FAILURE_MESSAGE, type, REQUEST_ID, null)),
+                ),
+                nativeOriginOnboard,
+                hashMapOf(),
+            )
+
+            val errorSlot = slot<NavigationRouterRefreshError>()
+            verify(exactly = 1) { routerRefreshCallback.onFailure(capture(errorSlot)) }
+            assertEquals("$type", permanent, errorSlot.captured.permanent)
+        }
+    }
+
+    @Test
+    fun `supportsOnDeviceRefresh asks the native router`() {
+        for (supported in listOf(true, false)) {
+            every { onDeviceRouteRefresh.isSupported(router) } returns supported
+            assertEquals(supported, routerWrapper.supportsOnDeviceRefresh())
+        }
+    }
+
+    @Test
+    fun `offline route is refreshed on the device when the router supports it`() {
+        every { onDeviceRouteRefresh.isSupported(router) } returns true
+        val deviceRefreshSlot = slot<RouterRefreshCallback>()
+        every {
+            onDeviceRouteRefresh.refresh(
+                router,
+                any(),
+                any(),
+                capture(deviceRefreshSlot),
+            )
+        } returns mockk(relaxed = true)
+
+        routerWrapper.getRouteRefresh(
+            createNavigationRoute(
+                createDirectionsRoute(requestUuid = "local@uuid"),
+                routerOrigin = OFFLINE,
+            ),
+            routeRefreshRequestData,
+            routerRefreshCallback,
+        )
+        deviceRefreshSlot.captured.run(routerResultFailure, nativeOriginOnboard, hashMapOf())
+
+        verify(exactly = 0) { router.getRouteRefresh(any(), any()) }
+        verify(exactly = 1) { routerRefreshCallback.onFailure(any()) }
+    }
+
+    @Test
+    fun `offline route uses the stateless refresh when the router can't refresh it on the device`() {
+        every { onDeviceRouteRefresh.isSupported(router) } returns false
+
+        routerWrapper.getRouteRefresh(
+            createNavigationRoute(
+                createDirectionsRoute(requestUuid = "local@uuid"),
+                routerOrigin = OFFLINE,
+            ),
+            routeRefreshRequestData,
+            routerRefreshCallback,
+        )
+
+        verify(exactly = 1) { router.getRouteRefresh(any(), any()) }
+        verify(exactly = 0) {
+            onDeviceRouteRefresh.refresh(any(), any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `online route never asks whether the device can refresh`() {
+        routerWrapper.getRouteRefresh(
+            createNavigationRoute(createDirectionsRoute(requestUuid = UUID)),
+            routeRefreshRequestData,
+            routerRefreshCallback,
+        )
+
+        verify(exactly = 1) { router.getRouteRefresh(any(), any()) }
+        verify(exactly = 0) {
+            onDeviceRouteRefresh.isSupported(any())
+            onDeviceRouteRefresh.refresh(any(), any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `cancel of a device refresh cancels the native request and ignores its result`() {
+        every { onDeviceRouteRefresh.isSupported(router) } returns true
+        val handle = mockk<Cancelable>(relaxed = true)
+        val deviceRefreshSlot = slot<RouterRefreshCallback>()
+        every {
+            onDeviceRouteRefresh.refresh(
+                router,
+                any(),
+                any(),
+                capture(deviceRefreshSlot),
+            )
+        } returns handle
+
+        val requestId = routerWrapper.getRouteRefresh(
+            createNavigationRoute(
+                createDirectionsRoute(requestUuid = "local@uuid"),
+                routerOrigin = OFFLINE,
+            ),
+            routeRefreshRequestData,
+            routerRefreshCallback,
+        )
+        routerWrapper.cancelRouteRefreshRequest(requestId)
+
+        verify(exactly = 1) { handle.cancel() }
+        val errorSlot = slot<NavigationRouterRefreshError>()
+        verify(exactly = 1) { routerRefreshCallback.onFailure(capture(errorSlot)) }
+        assertEquals("Request cancelled", errorSlot.captured.message)
+
+        clearMocks(routerRefreshCallback, answers = false)
+        deviceRefreshSlot.captured.run(routerRefreshSuccess, nativeOriginOnboard, hashMapOf())
+
+        verify(exactly = 0) { routerRefreshCallback.onFailure(any()) }
+        verify(exactly = 0) { routerRefreshCallback.onRefreshReady(any(), any()) }
+    }
+
+    @Test
+    fun `offline route refreshed on the device delivers the refreshed route`() = runBlockingTest {
+        val deviceRefreshSlot = stubDeviceRefresh(mockk(relaxed = true))
+        val options = RouteOptions.builder()
+            .applyDefaultNavigationOptions()
+            .coordinatesList(
+                listOf(
+                    Point.fromLngLat(17.035958238636283, 51.123073179658476),
+                    Point.fromLngLat(17.033342297413395, 51.11608871549779),
+                    Point.fromLngLat(17.030364743939824, 51.11309150868635),
+                    Point.fromLngLat(17.032132688234814, 51.10720758039439),
+                ),
+            )
+            .build()
+        val route = createNavigationRoutes(
+            DirectionsResponse.fromJson(testRouteFixtures.loadMultiLegRouteForRefresh(), options),
+            options,
+            OFFLINE,
+        ).first()
+
+        routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
+        deviceRefreshSlot.captured.run(routerRefreshSuccess, nativeOriginOnboard, hashMapOf())
+
+        val expected = createNavigationRoutes(
+            DirectionsResponse.fromJson(testRouteFixtures.loadRefreshedMultiLegRoute(), options),
+            options,
+            OFFLINE,
+        ).first()
+        verify(exactly = 1) {
+            routerRefreshCallback.onRefreshReady(capture(routeSlot), capture(refreshResponseSlot))
+        }
+        verify(exactly = 0) { router.getRouteRefresh(any(), any()) }
+        checkRefreshedNavigationRouteWithWithWaypoints(expected, routeSlot.captured)
+        assertEquals(routerRefreshSuccess.value, refreshResponseSlot.captured)
+    }
+
+    @Test
+    fun `offline refresh failure on the device is permanent`() {
+        val deviceRefreshSlot = stubDeviceRefresh(mockk(relaxed = true))
+
+        routerWrapper.getRouteRefresh(offlineRoute(), routeRefreshRequestData, routerRefreshCallback)
+        deviceRefreshSlot.captured.run(
+            ExpectedFactory.createError<List<RouterError>, DataRef>(
+                listOf(
+                    createRouterError(
+                        FAILURE_MESSAGE,
+                        RouterErrorType.OFFLINE_REFRESH,
+                        REQUEST_ID,
+                        null,
+                    ),
+                ),
+            ),
+            nativeOriginOnboard,
+            hashMapOf(),
+        )
+
+        val errorSlot = slot<NavigationRouterRefreshError>()
+        verify(exactly = 1) { routerRefreshCallback.onFailure(capture(errorSlot)) }
+        assertTrue(errorSlot.captured.permanent)
+    }
+
+    @Test
+    fun `device refresh that finishes after a router reset fails without being permanent`() {
+        val deviceRefreshSlot = stubDeviceRefresh(mockk(relaxed = true))
+
+        routerWrapper.getRouteRefresh(offlineRoute(), routeRefreshRequestData, routerRefreshCallback)
+        routerWrapper.resetRouter(mockk())
+        deviceRefreshSlot.captured.run(routerRefreshSuccess, nativeOriginOnboard, hashMapOf())
+
+        val errorSlot = slot<NavigationRouterRefreshError>()
+        verify(exactly = 1) { routerRefreshCallback.onFailure(capture(errorSlot)) }
+        verify(exactly = 0) { routerRefreshCallback.onRefreshReady(any(), any()) }
+        assertEquals("Failed to refresh a route", errorSlot.captured.message)
+        assertFalse(errorSlot.captured.permanent)
+    }
+
+    @Test
+    fun `cancelAll cancels a device refresh and ignores its result`() {
+        val handle = mockk<Cancelable>(relaxed = true)
+        val deviceRefreshSlot = stubDeviceRefresh(handle)
+
+        routerWrapper.getRouteRefresh(offlineRoute(), routeRefreshRequestData, routerRefreshCallback)
+        routerWrapper.cancelAll()
+
+        verify(exactly = 1) { handle.cancel() }
+        val errorSlot = slot<NavigationRouterRefreshError>()
+        verify(exactly = 1) { routerRefreshCallback.onFailure(capture(errorSlot)) }
+        assertEquals("Request cancelled", errorSlot.captured.message)
+        assertFalse(errorSlot.captured.permanent)
+
+        clearMocks(routerRefreshCallback, answers = false)
+        deviceRefreshSlot.captured.run(routerRefreshSuccess, nativeOriginOnboard, hashMapOf())
+
+        verify(exactly = 0) {
+            routerRefreshCallback.onFailure(any())
+            routerRefreshCallback.onRefreshReady(any(), any())
+        }
+    }
+
+    private fun stubDeviceRefresh(handle: Cancelable): CapturingSlot<RouterRefreshCallback> {
+        every { onDeviceRouteRefresh.isSupported(router) } returns true
+        val deviceRefreshSlot = slot<RouterRefreshCallback>()
+        every {
+            onDeviceRouteRefresh.refresh(router, any(), any(), capture(deviceRefreshSlot))
+        } returns handle
+        return deviceRefreshSlot
+    }
+
+    private fun offlineRoute() = createNavigationRoute(
+        createDirectionsRoute(requestUuid = "local@uuid"),
+        routerOrigin = OFFLINE,
+    )
 
     @Test
     fun `route refresh failure with refresh ttl updates routes expiration data`() {

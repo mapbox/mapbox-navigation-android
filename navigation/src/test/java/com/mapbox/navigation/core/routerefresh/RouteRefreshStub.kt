@@ -38,6 +38,10 @@ internal class RouteRefreshStub : RouteRefresh {
     override fun cancelRouteRefreshRequest(requestId: Long) {
     }
 
+    var onDeviceRefreshSupported = false
+
+    override fun supportsOnDeviceRefresh(): Boolean = onDeviceRefreshSupported
+
     /***
      * Tne next route refresh requests will return the actual routes
      */

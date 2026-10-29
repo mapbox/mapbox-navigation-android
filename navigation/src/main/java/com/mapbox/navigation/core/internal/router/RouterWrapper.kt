@@ -17,6 +17,7 @@ import com.mapbox.navigation.base.internal.RouteRefreshRequestData
 import com.mapbox.navigation.base.internal.RouterFailureFactory
 import com.mapbox.navigation.base.internal.performance.PerformanceTracker
 import com.mapbox.navigation.base.internal.route.internalRefreshRoute
+import com.mapbox.navigation.base.internal.route.nativeRoute
 import com.mapbox.navigation.base.internal.route.parsing.ResponseToParse
 import com.mapbox.navigation.base.internal.route.parsing.models.directions.NavigationRouteParsingSuccessfulResult
 import com.mapbox.navigation.base.internal.route.parsing.models.directions.NavigationRoutesParser
@@ -49,6 +50,7 @@ import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.RouterErrorType
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.RouterOrigin
+import com.mapbox.navigator.RouterRefreshCallback
 import com.mapbox.navigator.RoutingProfile
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -56,6 +58,7 @@ import kotlinx.coroutines.withContext
 import java.net.URL
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.time.ExperimentalTime
+import com.mapbox.navigation.base.route.RouterOrigin as SdkRouterOrigin
 
 private interface RouteRequestCallback<T> {
     fun onSuccess(result: T, routerOrigin: String)
@@ -82,6 +85,7 @@ internal class RouterWrapper(
     private val threadController: ThreadController,
     private val navigationRoutesParser: NavigationRoutesParser,
     private val mapMatchedRoutesParser: MapMatchingMatchParser,
+    private val onDeviceRouteRefresh: OnDeviceRouteRefresh = NativeOnDeviceRouteRefresh,
 ) : Router {
 
     private val activeRouteRequests = mutableMapOf<Long, OngoingRequest>()
@@ -196,7 +200,7 @@ internal class RouterWrapper(
                 PerformanceTracker.asyncSectionCompleted(section)
                 callback.onCanceled(
                     routeOptionsForCallback,
-                    com.mapbox.navigation.base.route.RouterOrigin.OFFLINE,
+                    SdkRouterOrigin.OFFLINE,
                 )
             },
         )
@@ -285,9 +289,7 @@ internal class RouterWrapper(
         activeRouteRefreshRequests[id] = ongoingRequest
 
         ongoingRequest.handle = try {
-            originRouter.getRouteRefresh(
-                refreshOptions,
-            ) { result, _, _ ->
+            val refreshCallback = RouterRefreshCallback { result, _, _ ->
                 logI("Received result from router.getRouteRefresh for ${route.id}", LOG_CATEGORY)
 
                 mainJobControl.scope.launch {
@@ -306,6 +308,21 @@ internal class RouterWrapper(
                     )
                 }
             }
+            // The stateless getRouteRefresh only has the uuid and never refreshes an offline
+            // route, so an offline route hands the route itself to nav-native.
+            if (route.origin == SdkRouterOrigin.OFFLINE &&
+                onDeviceRouteRefresh.isSupported(originRouter)
+            ) {
+                logI("Refreshing offline route ${route.id} on the device", LOG_CATEGORY)
+                onDeviceRouteRefresh.refresh(
+                    originRouter,
+                    route.nativeRoute(),
+                    refreshOptions,
+                    refreshCallback,
+                )
+            } else {
+                originRouter.getRouteRefresh(refreshOptions, refreshCallback)
+            }
         } catch (throwable: Throwable) {
             activeRouteRefreshRequests.remove(id)
             throw throwable
@@ -320,6 +337,8 @@ internal class RouterWrapper(
             it.cancelPendingWork()
         }
     }
+
+    override fun supportsOnDeviceRefresh(): Boolean = onDeviceRouteRefresh.isSupported(router)
 
     override fun cancelRouteRequest(requestId: Long) {
         removeActiveRequest(requestId)
@@ -511,6 +530,8 @@ internal class RouterWrapper(
                             "Route refresh failed",
                             Exception(errorMessage),
                             refreshTtl = error.refreshTtl,
+                            // The device can't refresh this route, and asking again won't help.
+                            permanent = error.type == RouterErrorType.OFFLINE_REFRESH,
                         ),
                     )
                 },

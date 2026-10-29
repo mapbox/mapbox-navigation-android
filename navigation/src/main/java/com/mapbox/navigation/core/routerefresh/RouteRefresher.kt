@@ -33,6 +33,9 @@ internal sealed class RouteRefresherStatus {
     object Failure : RouteRefresherStatus()
     object Invalid : RouteRefresherStatus()
     object Invalidated : RouteRefresherStatus()
+
+    /** Permanent: this route cannot be refreshed (e.g. OfflineRefresh). Do not retry. */
+    object Unsupported : RouteRefresherStatus()
 }
 
 internal data class RouteRefresherResult<out T>(
@@ -58,6 +61,13 @@ internal data class RoutesRefresherResult(
             alternativesRouteRefresherResults.any { it.status == RouteRefresherStatus.Failure }
     }
 
+    fun allUnsupported(): Boolean {
+        return primaryRouteRefresherResult.status == RouteRefresherStatus.Unsupported &&
+            alternativesRouteRefresherResults.all {
+                it.status == RouteRefresherStatus.Unsupported
+            }
+    }
+
     fun find(routeId: String?): RouteRefresherResult<RouteProgressData?>? {
         if (primaryRouteRefresherResult.route.id == routeId) {
             return primaryRouteRefresherResult
@@ -75,6 +85,12 @@ internal class RouteRefresher(
     private val globalScope: CoroutineScope = GlobalScope,
 ) {
 
+    // Routes the router answered can never be refreshed. They are not requested again.
+    // A plain set: every refresh coroutine runs on the single main dispatcher
+    // (RouteRefreshControllerProvider gets SdkDispatchers.Main), so two refreshes never touch it
+    // at the same time, even when a cancelled one is still finishing.
+    private val unrefreshableRouteIds = mutableSetOf<String>()
+
     /**
      * Refreshes routes.
      *
@@ -85,6 +101,7 @@ internal class RouteRefresher(
         routes: List<NavigationRoute>,
         routeRefreshTimeout: Long,
     ): RoutesRefresherResult {
+        unrefreshableRouteIds.retainAll(routes.map { it.id }.toSet())
         val routesRefreshData = routesRefreshDataProvider.getRoutesRefreshData(routes)
         val refreshedRoutes = refreshRoutes(routesRefreshData, routeRefreshTimeout)
         val primaryRoute = if (refreshedRoutes.first().isSuccess()) {
@@ -152,7 +169,15 @@ internal class RouteRefresher(
         route: NavigationRoute,
         routeProgressData: RouteProgressData,
     ): RouteRefresherResult<RouteProgressData?> {
-        val validationResult = RouteRefreshValidator.validateRoute(route)
+        if (route.id in unrefreshableRouteIds) {
+            logI(
+                "route ${route.id} is not refreshed again: the router can't refresh it",
+                RouteRefreshLog.LOG_CATEGORY,
+            )
+            return RouteRefresherResult(route, routeProgressData, RouteRefresherStatus.Unsupported)
+        }
+        val validationResult =
+            RouteRefreshValidator.validateRoute(route, routeRefresh::supportsOnDeviceRefresh)
         if (validationResult is RouteRefreshValidator.RouteValidationResult.Invalid) {
             logI(
                 "route ${route.id} can't be refreshed because ${validationResult.reason}",
@@ -188,10 +213,14 @@ internal class RouteRefresher(
                         "throwable=${result.error.throwable}",
                     RouteRefreshLog.LOG_CATEGORY,
                 )
-                val status = if (result.error.refreshTtl == 0) {
-                    RouteRefresherStatus.Invalidated
-                } else {
-                    RouteRefresherStatus.Failure
+                val status = when {
+                    result.error.refreshTtl == 0 -> RouteRefresherStatus.Invalidated
+                    // Not a Failure: a failure is retried, and this route never refreshes.
+                    result.error.permanent -> {
+                        unrefreshableRouteIds.add(route.id)
+                        RouteRefresherStatus.Unsupported
+                    }
+                    else -> RouteRefresherStatus.Failure
                 }
                 RouteRefresherResult(route, routeProgressData, status)
             }

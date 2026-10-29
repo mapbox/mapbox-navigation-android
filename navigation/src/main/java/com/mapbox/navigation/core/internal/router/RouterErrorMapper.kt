@@ -18,5 +18,7 @@ internal fun RouterErrorType.mapToSdkRouterFailureType(): String {
         RouterErrorType.MAP_MATCHING_CREATION_ERROR -> RouterFailureType.ROUTE_CREATION_ERROR
         RouterErrorType.MISSING_TILES_ERROR -> RouterFailureType.MISSING_TILES_ERROR
         RouterErrorType.ROUTE_NOT_FOUND_ON_SERVER -> RouterFailureType.ROUTE_EXPIRY_ERROR
+        // Refresh-only error; route requests and reroutes never receive it.
+        RouterErrorType.OFFLINE_REFRESH -> RouterFailureType.INPUT_ERROR
     }
 }

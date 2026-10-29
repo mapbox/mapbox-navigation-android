@@ -139,6 +139,8 @@ internal class MapboxDirectionsSession(
         router.cancelRouteRefreshRequest(requestId)
     }
 
+    override fun supportsOnDeviceRefresh(): Boolean = router.supportsOnDeviceRefresh()
+
     /**
      * Fetch route based on [RouteOptions]
      *

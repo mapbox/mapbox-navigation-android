@@ -63,6 +63,7 @@ internal object RouteRefreshControllerProvider {
             timeProvider,
             routeRefreshUtils,
             currentPrimaryRouteIdProvider,
+            directionsSession::supportsOnDeviceRefresh,
             historyRecorder,
         )
         val immediateRouteRefreshController = ImmediateRouteRefreshController(

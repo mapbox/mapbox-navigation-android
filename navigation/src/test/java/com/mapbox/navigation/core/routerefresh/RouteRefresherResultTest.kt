@@ -22,6 +22,7 @@ internal class RouteRefresherResultTest(
                 arrayOf(RouteRefresherStatus.Failure, false),
                 arrayOf(RouteRefresherStatus.Invalidated, false),
                 arrayOf(RouteRefresherStatus.Invalid, false),
+                arrayOf(RouteRefresherStatus.Unsupported, false),
                 arrayOf(RouteRefresherStatus.Success(mockk()), true),
             )
             assertEquals(RouteRefresherStatus::class.sealedSubclasses.size, result.size)

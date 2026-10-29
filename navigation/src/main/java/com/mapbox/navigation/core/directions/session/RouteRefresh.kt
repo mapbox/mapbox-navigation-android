@@ -23,4 +23,9 @@ internal interface RouteRefresh {
      * Cancels [requestRouteRefresh].
      */
     fun cancelRouteRefreshRequest(requestId: Long)
+
+    /**
+     * Whether an offline route that requests `state_of_charge` is refreshed on the device.
+     */
+    fun supportsOnDeviceRefresh(): Boolean
 }

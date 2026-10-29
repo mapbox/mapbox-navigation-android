@@ -30,12 +30,15 @@ internal interface NavigationRouterRefreshCallback {
  * @param routerFailure failure in case the failure happened during a request
  * @param refreshTtl time in seconds after which the route will be invalidated
  *  (no refreshes will be possible). Baseline is request time.
+ * @param permanent when true, further planned refreshes for this route cannot succeed
+ *  (for example [com.mapbox.navigator.RouterErrorType.OFFLINE_REFRESH]).
  */
 class NavigationRouterRefreshError internal constructor(
     val message: String? = null,
     val throwable: Throwable? = null,
     val routerFailure: RouterFailure? = null,
     val refreshTtl: Int? = null,
+    internal val permanent: Boolean = false,
 ) {
 
     /**
@@ -50,7 +53,8 @@ class NavigationRouterRefreshError internal constructor(
         if (message != other.message) return false
         if (throwable != other.throwable) return false
         if (routerFailure != other.routerFailure) return false
-        return refreshTtl == other.refreshTtl
+        if (refreshTtl != other.refreshTtl) return false
+        return permanent == other.permanent
     }
 
     /**
@@ -61,6 +65,7 @@ class NavigationRouterRefreshError internal constructor(
         result = 31 * result + throwable.hashCode()
         result = 31 * result + routerFailure.hashCode()
         result = 31 * result + refreshTtl.hashCode()
+        result = 31 * result + permanent.hashCode()
         return result
     }
 
@@ -72,7 +77,8 @@ class NavigationRouterRefreshError internal constructor(
             "message=$message, " +
             "throwable=$throwable, " +
             "routerFailure=$routerFailure, " +
-            "refreshTtl=$refreshTtl" +
+            "refreshTtl=$refreshTtl, " +
+            "permanent=$permanent" +
             ")"
     }
 }
