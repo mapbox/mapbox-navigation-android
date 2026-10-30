@@ -1,6 +1,6 @@
 # Navigation SDK for Android - Architecture Diagrams Manifest
 
-This document defines the design rules, conventions, and guidelines for creating architectural diagrams for the Navigation SDK for Android release architecture records under `docs/architecture/<version>/`, where `<version>` is `v` plus the SDK's own version (`v3.32.0-rc.1`), not the git tag.
+This document defines the design rules, conventions, and guidelines for creating architectural diagrams for the Navigation SDK for Android release architecture records under `docs/architecture/<line>/`, where `<line>` is `v` plus the SDK's own major and minor version (`v3.32`), not the git tag. One record covers every RC, GA and patch release of the line.
 
 ## Design Principles
 
@@ -142,7 +142,7 @@ Examples:
 04_native_bridge.svg
 ```
 
-Numbers 01-04 are fixed for a release record's four core diagrams. A module record adds a file under `<version>/modules/<module>.svg` with its own `.md`, named by module, not by sequence.
+Numbers 01-04 are fixed for a release record's four core diagrams. A module record adds a file under `<line>/modules/<module>.svg` with its own `.md`, named by module, not by sequence.
 
 ---
 
@@ -180,4 +180,4 @@ Numbers 01-04 are fixed for a release record's four core diagrams. A module reco
 - A new layout pattern is needed beyond the fixed four-diagram set
 - The color palette or typography scale changes
 
-This manifest is shared across all `docs/architecture/<version>/` records. Update it in place; do not fork a copy per version.
+This manifest is shared across all `docs/architecture/<line>/` records. Update it in place; do not fork a copy per line.
