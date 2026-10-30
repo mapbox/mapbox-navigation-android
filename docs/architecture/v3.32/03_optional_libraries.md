@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Diagram `02_module_map.svg` groups Optional libraries by name only; this reference table carries the detail that would overload that diagram: each optional library's purpose and what it depends on, at release `3.32.0-rc.1` (tag `v0.32.0-rc.1`).
+Diagram `02_module_map.svg` groups Optional libraries by name only; this reference table carries the detail that would overload that diagram: each optional library's purpose and what it depends on, at release `3.32.0` (tag `v0.32.0`).
 
 ---
 
@@ -16,9 +16,9 @@ Optional libraries that depend on another optional library: `coordination-full-h
 
 `libnavigation-compose-foundation` depends on no in-scope library; it holds Compose primitives only.
 
-Five optional libraries declare a native SDK directly: `coordination` (Nav SDK C++), `coordination-full-hd` (Navigation Native, Nav SDK C++ full HD), `datainputs`, `roadcam` and `libnavigation-compose-core` (Navigation Native). See `04_native_bridge.md`.
+Five optional libraries declare a native SDK directly: `coordination` (Nav SDK C++), `coordination-full-hd` (Navigation Native, Nav SDK C++ and its full HD artifact), `datainputs`, `roadcam` and `libnavigation-compose-core` (Navigation Native). See `04_native_bridge.md`.
 
-No optional-library dependency changed between `3.31.1` (tag `v0.31.1`) and `3.32.0-rc.1` (tag `v0.32.0-rc.1`).
+No optional-library dependency changed between `3.32.0-rc.1` (tag `v0.32.0-rc.1`) and `3.32.0` (tag `v0.32.0`).
 
 ---
 

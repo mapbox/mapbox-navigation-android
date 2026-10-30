@@ -18,7 +18,7 @@
     </marker>
   </defs>
 
-  <text x="400" y="30" text-anchor="middle" class="diagram-title">Navigation SDK for Android - Layer Overview (3.32.0-rc.1)</text>
+  <text x="400" y="30" text-anchor="middle" class="diagram-title">Navigation SDK for Android - Layer Overview (3.32.0)</text>
 
   <!-- Calling app -->
   <rect x="150" y="55" width="500" height="55" rx="6" class="layer-app"/>
@@ -64,8 +64,8 @@
   <!-- Bound SDKs -->
   <rect x="150" y="445" width="500" height="105" rx="6" class="layer-sdk"/>
   <text x="400" y="468" text-anchor="middle" class="layer-title">BOUND MAPBOX SDKs (external)</text>
-  <text x="400" y="490" text-anchor="middle" class="layer-desc">Maps SDK v11.32.0-rc.1 . Navigation Native v324.32.0-rc.1 . Core Common v24.32.0-rc.1</text>
-  <text x="400" y="505" text-anchor="middle" class="layer-desc">Nav SDK C++ v0.32.0-rc.1 . Search SDK v2.32.0-rc.1 . Mapbox Java SDK v7.10.1</text>
+  <text x="400" y="490" text-anchor="middle" class="layer-desc">Maps SDK v11.32.0 . Navigation Native v324.32.0 . Core Common v24.32.0</text>
+  <text x="400" y="505" text-anchor="middle" class="layer-desc">Nav SDK C++ v0.32.0 . Search SDK v2.32.0 . Mapbox Java SDK v7.10.1</text>
   <text x="400" y="537" text-anchor="middle" class="layer-desc" style="font-style: italic;">Not designed here - versions only</text>
 
   <!-- Legend -->

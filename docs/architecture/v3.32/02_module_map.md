@@ -4,7 +4,7 @@
 
 ## Purpose
 
-This diagram lists every in-scope Gradle library module at release `3.32.0-rc.1` (tag `v0.32.0-rc.1`), grouped into Core, UI, and Optional, so a reader can see the SDK's full shape at a glance without opening either `settings.gradle`. Core and UI libraries live in the public tree `mapbox-navigation-android/` and ship as `com.mapbox.navigationcore:<module>` artifacts. Optional libraries live in the internal tree at the repository root and depend on the public tree through those artifact coordinates.
+This diagram lists every in-scope Gradle library module at release `3.32.0` (tag `v0.32.0`), grouped into Core, UI, and Optional, so a reader can see the SDK's full shape at a glance without opening either `settings.gradle`. Core and UI libraries live in the public tree `mapbox-navigation-android/` and ship as `com.mapbox.navigationcore:<module>` artifacts. Optional libraries live in the internal tree at the repository root and depend on the public tree through those artifact coordinates.
 
 ---
 
@@ -14,7 +14,7 @@ This diagram lists every in-scope Gradle library module at release `3.32.0-rc.1`
 
 ## UI Libraries
 
-`ui-base`, `ui-maps` (map rendering and camera), `ui-utils`, `ui-components` (reusable widgets), `androidauto` (Android Auto screens; public API changed at this tag, see below).
+`ui-base`, `ui-maps` (map rendering and camera), `ui-utils`, `ui-components` (reusable widgets), `androidauto` (Android Auto screens).
 
 ## Optional Libraries
 
@@ -26,7 +26,7 @@ Application, demo, test-harness, instrumentation, and benchmark modules are out 
 
 ## What changed at this tag
 
-`androidauto`'s `api/current.txt` changed between `3.31.1` (tag `v0.31.1`) and `3.32.0-rc.1` (tag `v0.32.0-rc.1`). See the release context summary for detail; no other library's public API or module set changed.
+No library's `api/current.txt` or `build.gradle` and neither `settings.gradle` changed between `3.32.0-rc.1` (tag `v0.32.0-rc.1`) and `3.32.0` (tag `v0.32.0`). `navigation`, `ui-maps` and `coordination` changed implementation only. See the release context summary for detail.
 
 ---
 
