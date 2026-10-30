@@ -11,7 +11,7 @@
   </defs>
 
   <text x="525" y="30" text-anchor="middle" style="fill: #212529; font-size: 20px; font-weight: 700;">
-    Navigation SDK for Android - Optional Libraries (3.32.0-rc.1)
+    Navigation SDK for Android - Optional Libraries (3.32.0)
   </text>
   <text x="525" y="52" text-anchor="middle" style="fill: #868e96; font-size: 11px; font-style: italic;">
     Consumed selectively per integrator. "Depends on" is read from each module's build.gradle at this commit.
@@ -40,7 +40,7 @@
   <rect x="310" y="134" width="340" height="34" class="row-even"/>
   <text x="320" y="156" class="cell-text">HD-map extension to the coordination layer</text>
   <rect x="650" y="134" width="390" height="34" class="row-even"/>
-  <text x="660" y="156" class="cell-text">coordination, navigator; Navigation Native, Nav SDK C++ (HD)</text>
+  <text x="660" y="156" class="cell-text">coordination, navigator; Navigation Native, Nav SDK C++, full HD</text>
 
   <!-- 3 -->
   <rect x="50" y="168" width="260" height="34" class="row-odd"/>

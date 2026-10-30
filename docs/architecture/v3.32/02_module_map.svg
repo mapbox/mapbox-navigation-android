@@ -12,7 +12,7 @@
   </defs>
 
   <text x="500" y="30" text-anchor="middle" style="fill: #212529; font-size: 20px; font-weight: 700;">
-    Navigation SDK for Android - Module Map (3.32.0-rc.1)
+    Navigation SDK for Android - Module Map (3.32.0)
   </text>
   <text x="500" y="55" text-anchor="middle" class="root-label">Core and UI: mapbox-navigation-android/ (public tree) . Optional: repository root (internal tree)</text>
 
@@ -180,7 +180,7 @@
   <text x="50" y="742" class="module-desc">- Core libraries never depend on UI or Optional libraries</text>
   <text x="50" y="762" class="module-desc">- Optional libraries are independent of each other unless named otherwise (see 03_optional_libraries)</text>
   <text x="50" y="782" class="module-desc">- navigator, base and five optional libraries declare a native SDK directly (see 04_native_bridge)</text>
-  <text x="50" y="800" class="module-desc" style="font-weight: 600;">- androidauto's public API changed at this tag (see context summary)</text>
+  <text x="50" y="800" class="module-desc" style="font-weight: 600;">- No library API or module set changed since 3.32.0-rc.1 (see context summary)</text>
   <text x="50" y="822" class="module-desc" style="font-style: italic;">Excluded (out of scope): app-qa-androidauto, qa-test-app, screenshot-tests, billing-tests,</text>
   <text x="50" y="840" class="module-desc" style="font-style: italic;">instrumentation-tests(-internal), app-tests-wrapper, libtesting-*, microbenchmark-internal,</text>
   <text x="50" y="858" class="module-desc" style="font-style: italic;">app-compose-demo, mapgpt-showcase-app, full-hd-replayer, libnavui-resources</text>
