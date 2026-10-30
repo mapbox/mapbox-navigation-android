@@ -16,7 +16,7 @@
   </defs>
 
   <text x="480" y="30" text-anchor="middle" style="fill: #212529; font-size: 20px; font-weight: 700;">
-    Navigation SDK for Android - Native Bindings (3.32.0-rc.1)
+    Navigation SDK for Android - Native Bindings (3.32.0)
   </text>
   <text x="480" y="52" text-anchor="middle" class="annotation">Every module whose build.gradle declares a bound native SDK directly, and the SDK it declares</text>
 
@@ -60,17 +60,17 @@
 
   <rect x="640" y="150" width="260" height="75" rx="6" class="native-box"/>
   <text x="770" y="175" text-anchor="middle" class="box-title">Navigation Native</text>
-  <text x="770" y="193" text-anchor="middle" class="box-desc">v324.32.0-rc.1 (C++)</text>
+  <text x="770" y="193" text-anchor="middle" class="box-desc">v324.32.0 (C++)</text>
   <text x="770" y="208" text-anchor="middle" class="box-desc">Routing, map matching, Electronic Horizon</text>
 
   <rect x="640" y="330" width="260" height="75" rx="6" class="native-box"/>
   <text x="770" y="355" text-anchor="middle" class="box-title">Nav SDK C++</text>
-  <text x="770" y="373" text-anchor="middle" class="box-desc">v0.32.0-rc.1, plus full HD artifact</text>
+  <text x="770" y="373" text-anchor="middle" class="box-desc">v0.32.0, plus full HD artifact</text>
   <text x="770" y="388" text-anchor="middle" class="box-desc">Camera and map components, HD map</text>
 
   <rect x="640" y="470" width="260" height="60" rx="6" class="native-box"/>
   <text x="770" y="495" text-anchor="middle" class="box-title">Core Common</text>
-  <text x="770" y="513" text-anchor="middle" class="box-desc">v24.32.0-rc.1 - networking, tile store, location</text>
+  <text x="770" y="513" text-anchor="middle" class="box-desc">v24.32.0 - networking, tile store, location</text>
 
   <path d="M 900 190 L 925 190 L 925 500 L 910 500" class="connector" stroke-dasharray="4,3" marker-end="url(#arrowhead)"/>
   <path d="M 770 405 L 770 460" class="connector" stroke-dasharray="4,3" marker-end="url(#arrowhead)"/>
