@@ -198,6 +198,25 @@ internal class BillingController(
         private const val logCategory = "BillingController"
         private const val BILLING_EXPLANATION_CATEGORY = "BillingExplanation"
         private const val MAX_WAYPOINTS_DISTANCE_DIFF_METERS = 100.0
+
+        // Must not touch instance state: it is called from callbacks that the native billing
+        // service may hold on to long after the controller is destroyed (e.g. a request queued
+        // while offline), and anything those callbacks capture stays reachable until then.
+        private fun handlerError(error: BillingServiceError) {
+            when (error.code) {
+                null -> {
+                    throw IllegalArgumentException(error.toString())
+                }
+                BillingServiceErrorCode.RESUME_FAILED,
+                BillingServiceErrorCode.TOKEN_VALIDATION_FAILED,
+                -> {
+                    logW(
+                        error.toString(),
+                        logCategory,
+                    )
+                }
+            }
+        }
     }
 
     private val billingService = BillingServiceProvider.getInstance()
@@ -470,22 +489,6 @@ internal class BillingController(
         }
 
         return true
-    }
-
-    private fun handlerError(error: BillingServiceError) {
-        when (error.code) {
-            null -> {
-                throw IllegalArgumentException(error.toString())
-            }
-            BillingServiceErrorCode.RESUME_FAILED,
-            BillingServiceErrorCode.TOKEN_VALIDATION_FAILED,
-            -> {
-                logW(
-                    error.toString(),
-                    logCategory,
-                )
-            }
-        }
     }
 }
 
