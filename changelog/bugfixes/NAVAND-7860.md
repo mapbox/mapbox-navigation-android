@@ -1,3 +1,0 @@
-- Android Auto Favorites and geo deeplink screens use `MapWithContentTemplate` on Car API 7 or newer hosts, instead of the deprecated `PlaceListNavigationTemplate`.
-- Android Auto screens set their title and back action with `Header` on hosts that support it, instead of the template header setters deprecated in Car App Library 1.7.0.
-- On Car API 7 or newer hosts, the Android Auto Favorites and geo deeplink screens show, mark and frame as many places as the host allows in a list, and each row shows its place marker icon.

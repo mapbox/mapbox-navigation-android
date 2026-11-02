@@ -1,1 +1,0 @@
-- Fixed `MapboxCarMapLoader` reloading the Android Auto map style on the next configuration change after a tile, source, sprite or glyph loading error. Only a style loading error makes the next configuration change load the style again.
