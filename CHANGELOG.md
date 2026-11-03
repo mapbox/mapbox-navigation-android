@@ -1,3 +1,17 @@
+## Navigation SDK Core Framework 3.34.2 - 03 November, 2026
+#### Features
+
+
+#### Bug fixes and improvements
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.34.2` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.34.2))
+- Mapbox Navigation Native `v324.34.2`
+- Mapbox Core Common `v24.34.2`
+- Mapbox Java `v7.10.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.1))
+
 ## Navigation SDK Core Framework 3.34.1 - 29 October, 2026
 #### Features
 - Replaced `MapboxEvViewOptions.Builder#withIconFactory` with `withIconVariantsFactory`, which returns an ordered list of icon variants for a station. The map shows the first variant that fits. Icons are now created lazily from `MapboxEvViewClient#onStyleImageMissing`. [#21104](https://github.com/mapbox/mapbox-sdk/pull/21104)
