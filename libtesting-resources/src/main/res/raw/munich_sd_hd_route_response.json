@@ -1,0 +1,2430 @@
+{
+    "code": "Ok",
+    "waypoints": [
+        {
+            "location": [
+                11.548577,
+                48.247717
+            ],
+            "name": "Sonnenstraße",
+            "distance": 2.513,
+            "time_zone": {
+                "offset": "+01:00",
+                "identifier": "Europe/Berlin",
+                "abbreviation": "CET"
+            }
+        },
+        {
+            "location": [
+                11.543619,
+                48.237478
+            ],
+            "name": "Sonnenstraße",
+            "distance": 36.753,
+            "time_zone": {
+                "offset": "+01:00",
+                "identifier": "Europe/Berlin",
+                "abbreviation": "CET"
+            }
+        }
+    ],
+    "routes": [
+        {
+            "geometry": "iyx_{Aayz_UhA_HlHzDfIpBnZ|EvRxJfbA~FbAbBhFy@]sClIez@`BsPPaBJHdB\\dBWzAiA`GgA~EDfYxHJB|Ab@zAf@fvA`f@lPvEpNvCtWjDdFl@hm@~G|N~BfLdDlFhBzFtB|OdHvEtCrEbDpDvCnDtDjFtGbFjHhFfIpEpJb|AlpDtF|KpF~JtAdB",
+            "distance": 1393.403,
+            "duration": 138.75,
+            "weight": 137.11,
+            "weight_name": "auto",
+            "route_labels": [
+                "eco"
+            ],
+            "energy_consumption_saving": 10,
+            "duration_typical": 125.867,
+            "weight_typical": 148.29,
+            "legs": [
+                {
+                    "steps": [
+                        {
+                            "geometry": "iyx_{Aayz_UhA_H",
+                            "mode": "driving",
+                            "driving_side": "right",
+                            "distance": 11.462,
+                            "duration": 3.403,
+                            "weight": 3.141,
+                            "duration_typical": 3.141,
+                            "weight_typical": 3.141,
+                            "name": "Sonnenstraße",
+                            "maneuver": {
+                                "location": [
+                                    11.548577,
+                                    48.247717
+                                ],
+                                "bearing_before": 0,
+                                "bearing_after": 111,
+                                "instruction": "Drive east on Sonnenstraße.",
+                                "type": "depart"
+                            },
+                            "intersections": [
+                                {
+                                    "location": [
+                                        11.548577,
+                                        48.247717
+                                    ],
+                                    "geometry_index": 0,
+                                    "admin_index": 0,
+                                    "out": 0,
+                                    "entry": [
+                                        true
+                                    ],
+                                    "bearings": [
+                                        111
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "service"
+                                    }
+                                }
+                            ],
+                            "bannerInstructions": [
+                                {
+                                    "distanceAlongGeometry": 11.462,
+                                    "primary": {
+                                        "text": "Sonnenstraße",
+                                        "type": "turn",
+                                        "modifier": "right",
+                                        "components": [
+                                            {
+                                                "text": "Sonnenstraße",
+                                                "type": "text"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "voiceInstructions": [
+                                {
+                                    "distanceAlongGeometry": 11.462,
+                                    "announcement": "Drive east on Sonnenstraße. Then Turn right to stay on Sonnenstraße.",
+                                    "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Drive east on <say-as interpret-as=\"address\">Sonnenstraße</say-as>. Then Turn right to stay on <say-as interpret-as=\"address\">Sonnenstraße</say-as>.</prosody></amazon:effect></speak>"
+                                }
+                            ]
+                        },
+                        {
+                            "geometry": "_wx_{Aab{_UlHzDfIpBnZ|EvRxJfbA~FbAbB",
+                            "mode": "driving",
+                            "driving_side": "right",
+                            "distance": 249.92,
+                            "duration": 39.878,
+                            "weight": 44.488,
+                            "duration_typical": 38.07,
+                            "weight_typical": 44.488,
+                            "name": "Sonnenstraße",
+                            "maneuver": {
+                                "location": [
+                                    11.548721,
+                                    48.24768
+                                ],
+                                "bearing_before": 111,
+                                "bearing_after": 203,
+                                "modifier": "right",
+                                "instruction": "Turn right to stay on Sonnenstraße.",
+                                "type": "continue"
+                            },
+                            "intersections": [
+                                {
+                                    "location": [
+                                        11.548721,
+                                        48.24768
+                                    ],
+                                    "geometry_index": 1,
+                                    "admin_index": 0,
+                                    "turn_weight": 4,
+                                    "duration": 13.396,
+                                    "weight": 16.99,
+                                    "in": 2,
+                                    "out": 1,
+                                    "entry": [
+                                        true,
+                                        true,
+                                        false
+                                    ],
+                                    "bearings": [
+                                        53,
+                                        203,
+                                        291
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "street"
+                                    }
+                                },
+                                {
+                                    "location": [
+                                        11.548459,
+                                        48.246925
+                                    ],
+                                    "geometry_index": 4,
+                                    "admin_index": 0,
+                                    "turn_weight": 3,
+                                    "in": 0,
+                                    "out": 1,
+                                    "entry": [
+                                        false,
+                                        true,
+                                        true
+                                    ],
+                                    "bearings": [
+                                        10,
+                                        202,
+                                        275
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "street"
+                                    }
+                                }
+                            ],
+                            "bannerInstructions": [
+                                {
+                                    "distanceAlongGeometry": 249.92,
+                                    "primary": {
+                                        "text": "Bear left",
+                                        "type": "turn",
+                                        "modifier": "slight left",
+                                        "components": [
+                                            {
+                                                "text": "Bear left",
+                                                "type": "text"
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "distanceAlongGeometry": 91.44,
+                                    "primary": {
+                                        "text": "Bear left",
+                                        "type": "turn",
+                                        "modifier": "slight left",
+                                        "components": [
+                                            {
+                                                "text": "Bear left",
+                                                "type": "text"
+                                            }
+                                        ]
+                                    },
+                                    "sub": {
+                                        "text": "St. Hubertus Straße",
+                                        "type": "turn",
+                                        "modifier": "left",
+                                        "components": [
+                                            {
+                                                "text": "St. Hubertus Straße",
+                                                "type": "text"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "voiceInstructions": [
+                                {
+                                    "distanceAlongGeometry": 246.587,
+                                    "announcement": "Continue for 800 feet.",
+                                    "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Continue for 800 feet.</prosody></amazon:effect></speak>"
+                                },
+                                {
+                                    "distanceAlongGeometry": 91.44,
+                                    "announcement": "In 300 feet, Bear left.",
+                                    "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">In 300 feet, Bear left.</prosody></amazon:effect></speak>"
+                                },
+                                {
+                                    "distanceAlongGeometry": 15.278,
+                                    "announcement": "Bear left. Then Turn left.",
+                                    "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Bear left. Then Turn left.</prosody></amazon:effect></speak>"
+                                }
+                            ]
+                        },
+                        {
+                            "geometry": "unt_{Awzy_UhFy@",
+                            "mode": "driving",
+                            "driving_side": "right",
+                            "distance": 13.201,
+                            "duration": 3.965,
+                            "weight": 4.98,
+                            "duration_typical": 2.018,
+                            "weight_typical": 4.98,
+                            "name": "",
+                            "maneuver": {
+                                "location": [
+                                    11.548092,
+                                    48.245499
+                                ],
+                                "bearing_before": 198,
+                                "bearing_after": 171,
+                                "modifier": "slight left",
+                                "instruction": "Bear left.",
+                                "type": "turn"
+                            },
+                            "intersections": [
+                                {
+                                    "location": [
+                                        11.548092,
+                                        48.245499
+                                    ],
+                                    "geometry_index": 7,
+                                    "admin_index": 0,
+                                    "turn_weight": 3,
+                                    "in": 0,
+                                    "out": 1,
+                                    "entry": [
+                                        false,
+                                        true,
+                                        true
+                                    ],
+                                    "bearings": [
+                                        18,
+                                        171,
+                                        279
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "street"
+                                    }
+                                }
+                            ],
+                            "bannerInstructions": [
+                                {
+                                    "distanceAlongGeometry": 13.201,
+                                    "primary": {
+                                        "text": "St. Hubertus Straße",
+                                        "type": "turn",
+                                        "modifier": "left",
+                                        "components": [
+                                            {
+                                                "text": "St. Hubertus Straße",
+                                                "type": "text"
+                                            }
+                                        ]
+                                    },
+                                    "sub": {
+                                        "text": "St2342",
+                                        "type": "roundabout",
+                                        "modifier": "right",
+                                        "degrees": 87,
+                                        "driving_side": "right",
+                                        "components": [
+                                            {
+                                                "text": "St2342",
+                                                "type": "icon"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "voiceInstructions": [
+                                {
+                                    "distanceAlongGeometry": 13.201,
+                                    "announcement": "Turn left onto St. Hubertus Straße. Then Enter the roundabout and take the 1st exit.",
+                                    "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Turn left onto <say-as interpret-as=\"address\">St. Hubertus Straße</say-as>. Then Enter the roundabout and take the 1st exit.</prosody></amazon:effect></speak>"
+                                }
+                            ]
+                        },
+                        {
+                            "geometry": "kgt_{Aq|y_U]sClIez@`BsPPaB",
+                            "mode": "driving",
+                            "driving_side": "right",
+                            "distance": 103.731,
+                            "duration": 15.965,
+                            "weight": 25.76,
+                            "duration_typical": 16.504,
+                            "weight_typical": 25.76,
+                            "name": "St. Hubertus Straße",
+                            "maneuver": {
+                                "location": [
+                                    11.548121,
+                                    48.245382
+                                ],
+                                "bearing_before": 171,
+                                "bearing_after": 93,
+                                "modifier": "left",
+                                "instruction": "Turn left onto St. Hubertus Straße.",
+                                "type": "turn"
+                            },
+                            "intersections": [
+                                {
+                                    "location": [
+                                        11.548121,
+                                        48.245382
+                                    ],
+                                    "geometry_index": 8,
+                                    "admin_index": 0,
+                                    "turn_weight": 10,
+                                    "duration": 11.754,
+                                    "weight": 21.754,
+                                    "in": 2,
+                                    "out": 0,
+                                    "entry": [
+                                        true,
+                                        true,
+                                        false
+                                    ],
+                                    "bearings": [
+                                        93,
+                                        237,
+                                        351
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "street"
+                                    }
+                                },
+                                {
+                                    "location": [
+                                        11.549142,
+                                        48.24523
+                                    ],
+                                    "geometry_index": 10,
+                                    "admin_index": 0,
+                                    "turn_weight": 0.2,
+                                    "in": 2,
+                                    "out": 1,
+                                    "entry": [
+                                        true,
+                                        true,
+                                        false
+                                    ],
+                                    "bearings": [
+                                        63,
+                                        105,
+                                        285
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "street"
+                                    }
+                                }
+                            ],
+                            "bannerInstructions": [
+                                {
+                                    "distanceAlongGeometry": 103.731,
+                                    "primary": {
+                                        "text": "St2342",
+                                        "type": "roundabout",
+                                        "modifier": "right",
+                                        "degrees": 87,
+                                        "driving_side": "right",
+                                        "components": [
+                                            {
+                                                "text": "St2342",
+                                                "type": "icon"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "voiceInstructions": [
+                                {
+                                    "distanceAlongGeometry": 87.065,
+                                    "announcement": "Enter the roundabout and take the 1st exit onto Sonnenstraße, St2342.",
+                                    "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Enter the roundabout and take the 1st exit onto <say-as interpret-as=\"address\">Sonnenstraße</say-as>, <say-as interpret-as=\"address\">St2342</say-as>.</prosody></amazon:effect></speak>"
+                                }
+                            ]
+                        },
+                        {
+                            "geometry": "gzs_{Aaq|_UJHdB\\dBWzAiA",
+                            "mode": "driving",
+                            "driving_side": "right",
+                            "distance": 18.105,
+                            "duration": 1.448,
+                            "weight": 5.037,
+                            "duration_typical": 2.607,
+                            "weight_typical": 4.629,
+                            "name": "",
+                            "ref": "St2342",
+                            "maneuver": {
+                                "location": [
+                                    11.549473,
+                                    48.245172
+                                ],
+                                "bearing_before": 105,
+                                "bearing_after": 173,
+                                "modifier": "right",
+                                "instruction": "Enter the roundabout and take the 1st exit onto Sonnenstraße/St2342.",
+                                "type": "roundabout",
+                                "exit": 1
+                            },
+                            "intersections": [
+                                {
+                                    "location": [
+                                        11.549473,
+                                        48.245172
+                                    ],
+                                    "geometry_index": 12,
+                                    "admin_index": 0,
+                                    "turn_weight": 3,
+                                    "in": 2,
+                                    "out": 1,
+                                    "entry": [
+                                        false,
+                                        true,
+                                        false
+                                    ],
+                                    "bearings": [
+                                        44,
+                                        173,
+                                        285
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "secondary"
+                                    }
+                                }
+                            ],
+                            "bannerInstructions": [
+                                {
+                                    "distanceAlongGeometry": 18.105,
+                                    "primary": {
+                                        "text": "Sonnenstraße / St2342",
+                                        "type": "roundabout",
+                                        "modifier": "right",
+                                        "degrees": 87,
+                                        "driving_side": "right",
+                                        "components": [
+                                            {
+                                                "text": "Sonnenstraße",
+                                                "type": "text"
+                                            },
+                                            {
+                                                "text": "/",
+                                                "type": "delimiter"
+                                            },
+                                            {
+                                                "text": "St2342",
+                                                "type": "icon"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "voiceInstructions": []
+                        },
+                        {
+                            "geometry": "sps_{A{r|_U`GgA~EDfYxHJB|Ab@zAf@fvA`f@lPvEpNvCtWjDdFl@hm@~G|N~BfLdDlFhBzFtB|OdHvEtCrEbDpDvCnDtDjFtGbFjHhFfIpEpJb|AlpDtF|KpF~JtAdB",
+                            "mode": "driving",
+                            "driving_side": "right",
+                            "distance": 996.984,
+                            "duration": 74.091,
+                            "weight": 53.705,
+                            "duration_typical": 63.526,
+                            "weight_typical": 65.291,
+                            "name": "Sonnenstraße",
+                            "ref": "St2342",
+                            "maneuver": {
+                                "location": [
+                                    11.549502,
+                                    48.245018
+                                ],
+                                "bearing_before": 173,
+                                "bearing_after": 173,
+                                "modifier": "straight",
+                                "instruction": "Exit the roundabout onto Sonnenstraße/St2342. Continue on St2342.",
+                                "type": "exit roundabout"
+                            },
+                            "intersections": [
+                                {
+                                    "location": [
+                                        11.549502,
+                                        48.245018
+                                    ],
+                                    "geometry_index": 16,
+                                    "admin_index": 0,
+                                    "turn_weight": 0.1,
+                                    "duration": 2.363,
+                                    "weight": 2.421,
+                                    "in": 2,
+                                    "out": 1,
+                                    "entry": [
+                                        true,
+                                        true,
+                                        false
+                                    ],
+                                    "bearings": [
+                                        108,
+                                        173,
+                                        353
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "secondary"
+                                    }
+                                },
+                                {
+                                    "location": [
+                                        11.549535,
+                                        48.244777
+                                    ],
+                                    "geometry_index": 18,
+                                    "admin_index": 0,
+                                    "turn_weight": 1.5,
+                                    "duration": 4.341,
+                                    "weight": 4.46,
+                                    "in": 2,
+                                    "out": 1,
+                                    "entry": [
+                                        true,
+                                        true,
+                                        false
+                                    ],
+                                    "bearings": [
+                                        34,
+                                        194,
+                                        356
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "secondary"
+                                    }
+                                },
+                                {
+                                    "location": [
+                                        11.549358,
+                                        48.244304
+                                    ],
+                                    "geometry_index": 21,
+                                    "admin_index": 0,
+                                    "duration": 0.426,
+                                    "weight": 0.291,
+                                    "in": 0,
+                                    "out": 1,
+                                    "entry": [
+                                        false,
+                                        true
+                                    ],
+                                    "bearings": [
+                                        14,
+                                        196
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "secondary"
+                                    }
+                                },
+                                {
+                                    "location": [
+                                        11.549338,
+                                        48.244258
+                                    ],
+                                    "geometry_index": 22,
+                                    "admin_index": 0,
+                                    "duration": 22.389,
+                                    "weight": 15.266,
+                                    "in": 0,
+                                    "out": 1,
+                                    "entry": [
+                                        false,
+                                        true
+                                    ],
+                                    "bearings": [
+                                        16,
+                                        197
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "secondary"
+                                    }
+                                },
+                                {
+                                    "location": [
+                                        11.54842,
+                                        48.241824
+                                    ],
+                                    "geometry_index": 27,
+                                    "admin_index": 0,
+                                    "turn_weight": 0.1,
+                                    "duration": 10.908,
+                                    "weight": 7.013,
+                                    "in": 0,
+                                    "out": 2,
+                                    "entry": [
+                                        false,
+                                        true,
+                                        true
+                                    ],
+                                    "bearings": [
+                                        8,
+                                        96,
+                                        187
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "secondary"
+                                    }
+                                },
+                                {
+                                    "location": [
+                                        11.548129,
+                                        48.240616
+                                    ],
+                                    "geometry_index": 30,
+                                    "admin_index": 0,
+                                    "turn_weight": 0.1,
+                                    "duration": 0.732,
+                                    "weight": 0.772,
+                                    "in": 0,
+                                    "out": 1,
+                                    "entry": [
+                                        false,
+                                        true,
+                                        true
+                                    ],
+                                    "bearings": [
+                                        15,
+                                        197,
+                                        251
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "secondary"
+                                    }
+                                },
+                                {
+                                    "location": [
+                                        11.548076,
+                                        48.240497
+                                    ],
+                                    "geometry_index": 31,
+                                    "admin_index": 0,
+                                    "duration": 0.778,
+                                    "weight": 0.715,
+                                    "in": 0,
+                                    "out": 1,
+                                    "entry": [
+                                        false,
+                                        true
+                                    ],
+                                    "bearings": [
+                                        17,
+                                        197
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "secondary"
+                                    }
+                                },
+                                {
+                                    "location": [
+                                        11.548017,
+                                        48.240371
+                                    ],
+                                    "geometry_index": 32,
+                                    "admin_index": 0,
+                                    "duration": 24.324,
+                                    "weight": 22.352,
+                                    "in": 0,
+                                    "out": 1,
+                                    "entry": [
+                                        false,
+                                        true
+                                    ],
+                                    "bearings": [
+                                        17,
+                                        200
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "secondary"
+                                    }
+                                },
+                                {
+                                    "location": [
+                                        11.54367,
+                                        48.237521
+                                    ],
+                                    "geometry_index": 44,
+                                    "admin_index": 0,
+                                    "turn_weight": 0.1,
+                                    "in": 0,
+                                    "out": 1,
+                                    "entry": [
+                                        false,
+                                        true,
+                                        true
+                                    ],
+                                    "bearings": [
+                                        47,
+                                        218,
+                                        248
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "secondary"
+                                    }
+                                }
+                            ],
+                            "bannerInstructions": [
+                                {
+                                    "distanceAlongGeometry": 996.984,
+                                    "primary": {
+                                        "text": "Your destination will be on the left",
+                                        "type": "arrive",
+                                        "modifier": "left",
+                                        "components": [
+                                            {
+                                                "text": "Your destination will be on the left",
+                                                "type": "text"
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "distanceAlongGeometry": 97.222,
+                                    "primary": {
+                                        "text": "Your destination is on the left",
+                                        "type": "arrive",
+                                        "modifier": "left",
+                                        "components": [
+                                            {
+                                                "text": "Your destination is on the left",
+                                                "type": "text"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "voiceInstructions": [
+                                {
+                                    "distanceAlongGeometry": 980.317,
+                                    "announcement": "Continue on St2342 for a half mile.",
+                                    "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Continue on <say-as interpret-as=\"address\">St2342</say-as> for a half mile.</prosody></amazon:effect></speak>"
+                                },
+                                {
+                                    "distanceAlongGeometry": 402.336,
+                                    "announcement": "In a quarter mile, Your destination will be on the left.",
+                                    "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">In a quarter mile, Your destination will be on the left.</prosody></amazon:effect></speak>"
+                                },
+                                {
+                                    "distanceAlongGeometry": 97.222,
+                                    "announcement": "Your destination is on the left.",
+                                    "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Your destination is on the left.</prosody></amazon:effect></speak>"
+                                }
+                            ]
+                        },
+                        {
+                            "geometry": "kyd_{Aecq_U??",
+                            "mode": "driving",
+                            "driving_side": "right",
+                            "distance": 0,
+                            "duration": 0,
+                            "weight": 0,
+                            "duration_typical": 0,
+                            "weight_typical": 0,
+                            "name": "Sonnenstraße",
+                            "ref": "St2342",
+                            "maneuver": {
+                                "location": [
+                                    11.543619,
+                                    48.237478
+                                ],
+                                "bearing_before": 218,
+                                "bearing_after": 0,
+                                "modifier": "left",
+                                "instruction": "Your destination is on the left.",
+                                "type": "arrive"
+                            },
+                            "intersections": [
+                                {
+                                    "location": [
+                                        11.543619,
+                                        48.237478
+                                    ],
+                                    "geometry_index": 45,
+                                    "admin_index": 0,
+                                    "in": 0,
+                                    "entry": [
+                                        true
+                                    ],
+                                    "bearings": [
+                                        38
+                                    ]
+                                }
+                            ],
+                            "bannerInstructions": [],
+                            "voiceInstructions": []
+                        }
+                    ],
+                    "summary": "Sonnenstraße, St. Hubertus Straße",
+                    "distance": 1393.403,
+                    "duration": 138.75,
+                    "weight": 137.11,
+                    "route_factors": {
+                        "hierarchy": 3.441,
+                        "continuity": 4,
+                        "traffic_lights": 0,
+                        "maneuvers": 3,
+                        "raw_maneuvers": 3,
+                        "has_ferry": false,
+                        "absolute ppe": 7617.8525,
+                        "normalized ppe": 7617.8525,
+                        "road_class_info": {
+                            "secondary": 1014.136,
+                            "unclassified": 366,
+                            "service_other": 11.462
+                        },
+                        "base_cost_maneuvers": 3,
+                        "turn_counts": {
+                            "right": 1,
+                            "left": 1,
+                            "roundabouts": 1
+                        },
+                        "path_integral": 0.126459,
+                        "path_integral_normalized": 0.086611,
+                        "hierarchy_peak_length": 0,
+                        "hierarchy_jank": 0,
+                        "connection_info": {
+                            "connection_idx": 1,
+                            "path_distance": 274,
+                            "path_idx": 1,
+                            "location": [
+                                11.548121,
+                                48.245382
+                            ],
+                            "used_forward_alt_preds": false,
+                            "used_reverse_alt_preds": false
+                        },
+                        "dive_bombs": 0
+                    },
+                    "duration_typical": 125.867,
+                    "weight_typical": 148.29,
+                    "admins": [
+                        {
+                            "iso_3166_1": "DE",
+                            "iso_3166_1_alpha3": "DEU"
+                        }
+                    ],
+                    "annotation": {
+                        "duration": [
+                            3.403,
+                            2.815,
+                            2.899,
+                            7.683,
+                            6.14,
+                            19.482,
+                            0.859,
+                            3.965,
+                            0.86,
+                            10.894,
+                            3.586,
+                            0.625,
+                            0.061,
+                            0.463,
+                            0.46,
+                            0.465,
+                            1.275,
+                            1.088,
+                            3.855,
+                            0.055,
+                            0.432,
+                            0.426,
+                            12.973,
+                            2.566,
+                            2.263,
+                            3.554,
+                            1.033,
+                            6.654,
+                            2.302,
+                            1.951,
+                            0.732,
+                            0.778,
+                            1.698,
+                            0.701,
+                            0.703,
+                            0.603,
+                            0.63,
+                            0.884,
+                            0.893,
+                            0.943,
+                            0.954,
+                            14.187,
+                            1.089,
+                            1.038,
+                            7.83
+                        ],
+                        "speed": [
+                            3.3,
+                            6.7,
+                            6.7,
+                            6.7,
+                            6.7,
+                            6.7,
+                            6.7,
+                            6.7,
+                            6.7,
+                            6.7,
+                            6.7,
+                            6.7,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            18.9,
+                            18.9,
+                            18.9,
+                            18.9,
+                            18.9,
+                            18.9,
+                            18.9,
+                            18.9,
+                            18.9,
+                            18.9,
+                            18.9,
+                            18.9,
+                            18.9,
+                            18.9,
+                            18.6
+                        ],
+                        "congestion": [
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown"
+                        ],
+                        "historical_speed": [
+                            13,
+                            23,
+                            23,
+                            23,
+                            23,
+                            23,
+                            23,
+                            23,
+                            23,
+                            23,
+                            23,
+                            23,
+                            40,
+                            40,
+                            40,
+                            40,
+                            42,
+                            42,
+                            48,
+                            48,
+                            48,
+                            48,
+                            48,
+                            48,
+                            48,
+                            48,
+                            48,
+                            49,
+                            49,
+                            49,
+                            69,
+                            69,
+                            69,
+                            69,
+                            69,
+                            69,
+                            69,
+                            69,
+                            69,
+                            69,
+                            69,
+                            69,
+                            69,
+                            69,
+                            66
+                        ],
+                        "current_speed": [
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            32,
+                            32,
+                            32,
+                            32,
+                            42,
+                            42,
+                            66,
+                            66,
+                            66,
+                            66,
+                            66,
+                            66,
+                            66,
+                            66,
+                            66,
+                            72,
+                            72,
+                            72,
+                            74,
+                            74,
+                            74,
+                            74,
+                            74,
+                            74,
+                            74,
+                            74,
+                            74,
+                            74,
+                            74,
+                            74,
+                            74,
+                            74,
+                            70
+                        ]
+                    },
+                    "via_waypoints": []
+                }
+            ],
+            "voiceLocale": "en-US"
+        },
+        {
+            "geometry": "iyx_{Aayz_UhA_HaCwFuBcGOg@mEiSoPuFiAuDHiG~@iHx@_Iv@sGbAuItAgKtDiKL]Pu@xA}F`QlF~NrEdeAt[j\\~JxNtFxEzCzCbC`@r@lCtE~@xBlAhAJHdB\\dBWzAiA`GgA~EDfYxHJB|Ab@zAf@fvA`f@lPvEpNvCtWjDdFl@hm@~G|N~BfLdDlFhBzFtB|OdHvEtCrEbDpDvCnDtDjFtGbFjHhFfIpEpJb|AlpDtF|KpF~JtAdB",
+            "distance": 1548.231,
+            "duration": 142.378,
+            "weight": 137.988,
+            "weight_name": "auto",
+            "duration_typical": 127.697,
+            "weight_typical": 145.451,
+            "legs": [
+                {
+                    "steps": [
+                        {
+                            "geometry": "iyx_{Aayz_UhA_H",
+                            "mode": "driving",
+                            "driving_side": "right",
+                            "distance": 11.462,
+                            "duration": 3.574,
+                            "weight": 3.141,
+                            "duration_typical": 3.141,
+                            "weight_typical": 3.141,
+                            "name": "Sonnenstraße",
+                            "maneuver": {
+                                "location": [
+                                    11.548577,
+                                    48.247717
+                                ],
+                                "bearing_before": 0,
+                                "bearing_after": 111,
+                                "instruction": "Drive east on Sonnenstraße.",
+                                "type": "depart"
+                            },
+                            "intersections": [
+                                {
+                                    "location": [
+                                        11.548577,
+                                        48.247717
+                                    ],
+                                    "geometry_index": 0,
+                                    "admin_index": 0,
+                                    "out": 0,
+                                    "entry": [
+                                        true
+                                    ],
+                                    "bearings": [
+                                        111
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "service"
+                                    }
+                                }
+                            ],
+                            "bannerInstructions": [
+                                {
+                                    "distanceAlongGeometry": 11.462,
+                                    "primary": {
+                                        "text": "Sonnenstraße",
+                                        "type": "turn",
+                                        "modifier": "left",
+                                        "components": [
+                                            {
+                                                "text": "Sonnenstraße",
+                                                "type": "text"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "voiceInstructions": [
+                                {
+                                    "distanceAlongGeometry": 11.462,
+                                    "announcement": "Drive east on Sonnenstraße. Then Turn left to stay on Sonnenstraße.",
+                                    "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Drive east on <say-as interpret-as=\"address\">Sonnenstraße</say-as>. Then Turn left to stay on <say-as interpret-as=\"address\">Sonnenstraße</say-as>.</prosody></amazon:effect></speak>"
+                                }
+                            ]
+                        },
+                        {
+                            "geometry": "_wx_{Aab{_UaCwFuBcGOg@mEiSoPuFiAuDHiG~@iHx@_Iv@sGbAuItAgKtDiKL]Pu@xA}F",
+                            "mode": "driving",
+                            "driving_side": "right",
+                            "distance": 197.176,
+                            "duration": 32.383,
+                            "weight": 42.976,
+                            "duration_typical": 29.923,
+                            "weight_typical": 42.976,
+                            "name": "Sonnenstraße",
+                            "maneuver": {
+                                "location": [
+                                    11.548721,
+                                    48.24768
+                                ],
+                                "bearing_before": 111,
+                                "bearing_after": 53,
+                                "modifier": "left",
+                                "instruction": "Turn left to stay on Sonnenstraße.",
+                                "type": "continue"
+                            },
+                            "intersections": [
+                                {
+                                    "location": [
+                                        11.548721,
+                                        48.24768
+                                    ],
+                                    "geometry_index": 1,
+                                    "admin_index": 0,
+                                    "turn_weight": 10,
+                                    "duration": 3.953,
+                                    "weight": 13.763,
+                                    "in": 2,
+                                    "out": 0,
+                                    "entry": [
+                                        true,
+                                        true,
+                                        false
+                                    ],
+                                    "bearings": [
+                                        53,
+                                        203,
+                                        291
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "street"
+                                    }
+                                },
+                                {
+                                    "location": [
+                                        11.548995,
+                                        48.247812
+                                    ],
+                                    "geometry_index": 4,
+                                    "admin_index": 0,
+                                    "turn_weight": 0.2,
+                                    "duration": 22.724,
+                                    "weight": 21.208,
+                                    "in": 2,
+                                    "out": 1,
+                                    "entry": [
+                                        true,
+                                        true,
+                                        false
+                                    ],
+                                    "bearings": [
+                                        0,
+                                        65,
+                                        236
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "street"
+                                    }
+                                },
+                                {
+                                    "location": [
+                                        11.550481,
+                                        48.248061
+                                    ],
+                                    "geometry_index": 13,
+                                    "admin_index": 0,
+                                    "turn_weight": 3,
+                                    "duration": 3.166,
+                                    "weight": 5.666,
+                                    "in": 2,
+                                    "out": 1,
+                                    "entry": [
+                                        false,
+                                        true,
+                                        false
+                                    ],
+                                    "bearings": [
+                                        99,
+                                        125,
+                                        288
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "street"
+                                    }
+                                },
+                                {
+                                    "location": [
+                                        11.550678,
+                                        48.24797
+                                    ],
+                                    "geometry_index": 14,
+                                    "admin_index": 0,
+                                    "turn_weight": 0.2,
+                                    "in": 2,
+                                    "out": 1,
+                                    "entry": [
+                                        false,
+                                        true,
+                                        false
+                                    ],
+                                    "bearings": [
+                                        18,
+                                        118,
+                                        305
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "street"
+                                    }
+                                }
+                            ],
+                            "bannerInstructions": [
+                                {
+                                    "distanceAlongGeometry": 197.176,
+                                    "primary": {
+                                        "text": "Sonnenstraße / St2342",
+                                        "type": "turn",
+                                        "modifier": "right",
+                                        "components": [
+                                            {
+                                                "text": "Sonnenstraße",
+                                                "type": "text"
+                                            },
+                                            {
+                                                "text": "/",
+                                                "type": "delimiter"
+                                            },
+                                            {
+                                                "text": "St2342",
+                                                "type": "icon"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "voiceInstructions": [
+                                {
+                                    "distanceAlongGeometry": 193.843,
+                                    "announcement": "Continue for 600 feet.",
+                                    "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Continue for 600 feet.</prosody></amazon:effect></speak>"
+                                },
+                                {
+                                    "distanceAlongGeometry": 91.44,
+                                    "announcement": "In 300 feet, Turn right onto Sonnenstraße.",
+                                    "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">In 300 feet, Turn right onto <say-as interpret-as=\"address\">Sonnenstraße</say-as>.</prosody></amazon:effect></speak>"
+                                },
+                                {
+                                    "distanceAlongGeometry": 16.667,
+                                    "announcement": "Turn right onto Sonnenstraße, St2342.",
+                                    "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Turn right onto <say-as interpret-as=\"address\">Sonnenstraße</say-as>, <say-as interpret-as=\"address\">St2342</say-as>.</prosody></amazon:effect></speak>"
+                                }
+                            ]
+                        },
+                        {
+                            "geometry": "iey_{A}f_`U`QlF~NrEdeAt[j\\~JxNtFxEzCzCbC`@r@lCtE",
+                            "mode": "driving",
+                            "driving_side": "right",
+                            "distance": 313.612,
+                            "duration": 26.35,
+                            "weight": 32.021,
+                            "duration_typical": 27.243,
+                            "weight_typical": 28.833,
+                            "name": "Sonnenstraße",
+                            "ref": "St2342",
+                            "maneuver": {
+                                "location": [
+                                    11.550847,
+                                    48.247909
+                                ],
+                                "bearing_before": 118,
+                                "bearing_after": 195,
+                                "modifier": "right",
+                                "instruction": "Turn right onto Sonnenstraße/St2342.",
+                                "type": "turn"
+                            },
+                            "intersections": [
+                                {
+                                    "location": [
+                                        11.550847,
+                                        48.247909
+                                    ],
+                                    "geometry_index": 17,
+                                    "admin_index": 0,
+                                    "yield_sign": true,
+                                    "turn_weight": 3,
+                                    "duration": 2.803,
+                                    "weight": 5.669,
+                                    "in": 2,
+                                    "out": 1,
+                                    "entry": [
+                                        true,
+                                        true,
+                                        false
+                                    ],
+                                    "bearings": [
+                                        15,
+                                        195,
+                                        298
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "secondary"
+                                    }
+                                },
+                                {
+                                    "location": [
+                                        11.550728,
+                                        48.24762
+                                    ],
+                                    "geometry_index": 18,
+                                    "admin_index": 0,
+                                    "duration": 2.484,
+                                    "weight": 2.365,
+                                    "in": 0,
+                                    "out": 1,
+                                    "entry": [
+                                        false,
+                                        true
+                                    ],
+                                    "bearings": [
+                                        15,
+                                        195
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "secondary"
+                                    }
+                                },
+                                {
+                                    "location": [
+                                        11.550622,
+                                        48.247364
+                                    ],
+                                    "geometry_index": 19,
+                                    "admin_index": 0,
+                                    "turn_weight": 0.1,
+                                    "duration": 10.886,
+                                    "weight": 10.239,
+                                    "in": 0,
+                                    "out": 2,
+                                    "entry": [
+                                        false,
+                                        true,
+                                        true
+                                    ],
+                                    "bearings": [
+                                        15,
+                                        106,
+                                        195
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "secondary"
+                                    }
+                                },
+                                {
+                                    "location": [
+                                        11.550163,
+                                        48.246241
+                                    ],
+                                    "geometry_index": 20,
+                                    "admin_index": 0,
+                                    "turn_weight": 0.1,
+                                    "duration": 4.556,
+                                    "weight": 5.522,
+                                    "in": 0,
+                                    "out": 2,
+                                    "entry": [
+                                        false,
+                                        true,
+                                        true
+                                    ],
+                                    "bearings": [
+                                        15,
+                                        108,
+                                        195
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "secondary"
+                                    }
+                                },
+                                {
+                                    "location": [
+                                        11.549971,
+                                        48.245771
+                                    ],
+                                    "geometry_index": 21,
+                                    "admin_index": 0,
+                                    "duration": 2.487,
+                                    "weight": 2.96,
+                                    "in": 0,
+                                    "out": 1,
+                                    "entry": [
+                                        false,
+                                        true
+                                    ],
+                                    "bearings": [
+                                        15,
+                                        198
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "secondary"
+                                    }
+                                },
+                                {
+                                    "location": [
+                                        11.549848,
+                                        48.245518
+                                    ],
+                                    "geometry_index": 22,
+                                    "admin_index": 0,
+                                    "turn_weight": 0.1,
+                                    "in": 0,
+                                    "out": 2,
+                                    "entry": [
+                                        false,
+                                        false,
+                                        true
+                                    ],
+                                    "bearings": [
+                                        18,
+                                        183,
+                                        207
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "secondary"
+                                    }
+                                }
+                            ],
+                            "bannerInstructions": [
+                                {
+                                    "distanceAlongGeometry": 313.612,
+                                    "primary": {
+                                        "text": "St2342",
+                                        "type": "roundabout",
+                                        "modifier": "right",
+                                        "degrees": 178,
+                                        "driving_side": "right",
+                                        "components": [
+                                            {
+                                                "text": "St2342",
+                                                "type": "icon"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "voiceInstructions": [
+                                {
+                                    "distanceAlongGeometry": 296.945,
+                                    "announcement": "In a quarter mile, Enter the roundabout and take the 2nd exit onto Sonnenstraße.",
+                                    "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">In a quarter mile, Enter the roundabout and take the 2nd exit onto <say-as interpret-as=\"address\">Sonnenstraße</say-as>.</prosody></amazon:effect></speak>"
+                                },
+                                {
+                                    "distanceAlongGeometry": 116.667,
+                                    "announcement": "Enter the roundabout and take the 2nd exit onto Sonnenstraße, St2342.",
+                                    "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Enter the roundabout and take the 2nd exit onto <say-as interpret-as=\"address\">Sonnenstraße</say-as>, <say-as interpret-as=\"address\">St2342</say-as>.</prosody></amazon:effect></speak>"
+                                }
+                            ]
+                        },
+                        {
+                            "geometry": "u~s_{Aew|_U~@xBlAhAJHdB\\dBWzAiA",
+                            "mode": "driving",
+                            "driving_side": "right",
+                            "distance": 28.997,
+                            "duration": 2.521,
+                            "weight": 6.145,
+                            "duration_typical": 3.864,
+                            "weight_typical": 5.21,
+                            "name": "",
+                            "ref": "St2342",
+                            "maneuver": {
+                                "location": [
+                                    11.549571,
+                                    48.245243
+                                ],
+                                "bearing_before": 220,
+                                "bearing_after": 223,
+                                "modifier": "straight",
+                                "instruction": "Enter the roundabout and take the 2nd exit onto Sonnenstraße/St2342.",
+                                "type": "roundabout",
+                                "exit": 2
+                            },
+                            "intersections": [
+                                {
+                                    "location": [
+                                        11.549571,
+                                        48.245243
+                                    ],
+                                    "geometry_index": 26,
+                                    "admin_index": 0,
+                                    "yield_sign": true,
+                                    "turn_weight": 0.1,
+                                    "duration": 1,
+                                    "weight": 1.608,
+                                    "in": 0,
+                                    "out": 2,
+                                    "entry": [
+                                        false,
+                                        false,
+                                        true
+                                    ],
+                                    "bearings": [
+                                        40,
+                                        99,
+                                        223
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "secondary"
+                                    }
+                                },
+                                {
+                                    "location": [
+                                        11.549473,
+                                        48.245172
+                                    ],
+                                    "geometry_index": 28,
+                                    "admin_index": 0,
+                                    "turn_weight": 2.5,
+                                    "in": 0,
+                                    "out": 1,
+                                    "entry": [
+                                        false,
+                                        true,
+                                        true
+                                    ],
+                                    "bearings": [
+                                        43,
+                                        173,
+                                        284
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "secondary"
+                                    }
+                                }
+                            ],
+                            "bannerInstructions": [
+                                {
+                                    "distanceAlongGeometry": 28.997,
+                                    "primary": {
+                                        "text": "Sonnenstraße / St2342",
+                                        "type": "roundabout",
+                                        "modifier": "right",
+                                        "degrees": 178,
+                                        "driving_side": "right",
+                                        "components": [
+                                            {
+                                                "text": "Sonnenstraße",
+                                                "type": "text"
+                                            },
+                                            {
+                                                "text": "/",
+                                                "type": "delimiter"
+                                            },
+                                            {
+                                                "text": "St2342",
+                                                "type": "icon"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "voiceInstructions": []
+                        },
+                        {
+                            "geometry": "sps_{A{r|_U`GgA~EDfYxHJB|Ab@zAf@fvA`f@lPvEpNvCtWjDdFl@hm@~G|N~BfLdDlFhBzFtB|OdHvEtCrEbDpDvCnDtDjFtGbFjHhFfIpEpJb|AlpDtF|KpF~JtAdB",
+                            "mode": "driving",
+                            "driving_side": "right",
+                            "distance": 996.984,
+                            "duration": 77.55,
+                            "weight": 53.705,
+                            "duration_typical": 63.526,
+                            "weight_typical": 65.291,
+                            "name": "Sonnenstraße",
+                            "ref": "St2342",
+                            "maneuver": {
+                                "location": [
+                                    11.549502,
+                                    48.245018
+                                ],
+                                "bearing_before": 173,
+                                "bearing_after": 173,
+                                "modifier": "straight",
+                                "instruction": "Exit the roundabout onto Sonnenstraße/St2342. Continue on St2342.",
+                                "type": "exit roundabout"
+                            },
+                            "intersections": [
+                                {
+                                    "location": [
+                                        11.549502,
+                                        48.245018
+                                    ],
+                                    "geometry_index": 32,
+                                    "admin_index": 0,
+                                    "turn_weight": 0.1,
+                                    "duration": 2.595,
+                                    "weight": 2.421,
+                                    "in": 2,
+                                    "out": 1,
+                                    "entry": [
+                                        true,
+                                        true,
+                                        false
+                                    ],
+                                    "bearings": [
+                                        108,
+                                        173,
+                                        353
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "secondary"
+                                    }
+                                },
+                                {
+                                    "location": [
+                                        11.549535,
+                                        48.244777
+                                    ],
+                                    "geometry_index": 34,
+                                    "admin_index": 0,
+                                    "turn_weight": 1.5,
+                                    "duration": 4.559,
+                                    "weight": 4.46,
+                                    "in": 2,
+                                    "out": 1,
+                                    "entry": [
+                                        true,
+                                        true,
+                                        false
+                                    ],
+                                    "bearings": [
+                                        34,
+                                        194,
+                                        356
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "secondary"
+                                    }
+                                },
+                                {
+                                    "location": [
+                                        11.549358,
+                                        48.244304
+                                    ],
+                                    "geometry_index": 37,
+                                    "admin_index": 0,
+                                    "duration": 0.448,
+                                    "weight": 0.291,
+                                    "in": 0,
+                                    "out": 1,
+                                    "entry": [
+                                        false,
+                                        true
+                                    ],
+                                    "bearings": [
+                                        14,
+                                        196
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "secondary"
+                                    }
+                                },
+                                {
+                                    "location": [
+                                        11.549338,
+                                        48.244258
+                                    ],
+                                    "geometry_index": 38,
+                                    "admin_index": 0,
+                                    "duration": 23.515,
+                                    "weight": 15.266,
+                                    "in": 0,
+                                    "out": 1,
+                                    "entry": [
+                                        false,
+                                        true
+                                    ],
+                                    "bearings": [
+                                        16,
+                                        197
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "secondary"
+                                    }
+                                },
+                                {
+                                    "location": [
+                                        11.54842,
+                                        48.241824
+                                    ],
+                                    "geometry_index": 43,
+                                    "admin_index": 0,
+                                    "turn_weight": 0.1,
+                                    "duration": 11.456,
+                                    "weight": 7.013,
+                                    "in": 0,
+                                    "out": 2,
+                                    "entry": [
+                                        false,
+                                        true,
+                                        true
+                                    ],
+                                    "bearings": [
+                                        8,
+                                        96,
+                                        187
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "secondary"
+                                    }
+                                },
+                                {
+                                    "location": [
+                                        11.548129,
+                                        48.240616
+                                    ],
+                                    "geometry_index": 46,
+                                    "admin_index": 0,
+                                    "turn_weight": 0.1,
+                                    "duration": 0.768,
+                                    "weight": 0.772,
+                                    "in": 0,
+                                    "out": 1,
+                                    "entry": [
+                                        false,
+                                        true,
+                                        true
+                                    ],
+                                    "bearings": [
+                                        15,
+                                        197,
+                                        251
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "secondary"
+                                    }
+                                },
+                                {
+                                    "location": [
+                                        11.548076,
+                                        48.240497
+                                    ],
+                                    "geometry_index": 47,
+                                    "admin_index": 0,
+                                    "duration": 0.817,
+                                    "weight": 0.715,
+                                    "in": 0,
+                                    "out": 1,
+                                    "entry": [
+                                        false,
+                                        true
+                                    ],
+                                    "bearings": [
+                                        17,
+                                        197
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "secondary"
+                                    }
+                                },
+                                {
+                                    "location": [
+                                        11.548017,
+                                        48.240371
+                                    ],
+                                    "geometry_index": 48,
+                                    "admin_index": 0,
+                                    "duration": 25.546,
+                                    "weight": 22.352,
+                                    "in": 0,
+                                    "out": 1,
+                                    "entry": [
+                                        false,
+                                        true
+                                    ],
+                                    "bearings": [
+                                        17,
+                                        200
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "secondary"
+                                    }
+                                },
+                                {
+                                    "location": [
+                                        11.54367,
+                                        48.237521
+                                    ],
+                                    "geometry_index": 60,
+                                    "admin_index": 0,
+                                    "turn_weight": 0.1,
+                                    "in": 0,
+                                    "out": 1,
+                                    "entry": [
+                                        false,
+                                        true,
+                                        true
+                                    ],
+                                    "bearings": [
+                                        47,
+                                        218,
+                                        248
+                                    ],
+                                    "mapbox_streets_v8": {
+                                        "class": "secondary"
+                                    }
+                                }
+                            ],
+                            "bannerInstructions": [
+                                {
+                                    "distanceAlongGeometry": 996.984,
+                                    "primary": {
+                                        "text": "Your destination will be on the left",
+                                        "type": "arrive",
+                                        "modifier": "left",
+                                        "components": [
+                                            {
+                                                "text": "Your destination will be on the left",
+                                                "type": "text"
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "distanceAlongGeometry": 97.222,
+                                    "primary": {
+                                        "text": "Your destination is on the left",
+                                        "type": "arrive",
+                                        "modifier": "left",
+                                        "components": [
+                                            {
+                                                "text": "Your destination is on the left",
+                                                "type": "text"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "voiceInstructions": [
+                                {
+                                    "distanceAlongGeometry": 980.317,
+                                    "announcement": "Continue on St2342 for a half mile.",
+                                    "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Continue on <say-as interpret-as=\"address\">St2342</say-as> for a half mile.</prosody></amazon:effect></speak>"
+                                },
+                                {
+                                    "distanceAlongGeometry": 402.336,
+                                    "announcement": "In a quarter mile, Your destination will be on the left.",
+                                    "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">In a quarter mile, Your destination will be on the left.</prosody></amazon:effect></speak>"
+                                },
+                                {
+                                    "distanceAlongGeometry": 97.222,
+                                    "announcement": "Your destination is on the left.",
+                                    "ssmlAnnouncement": "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Your destination is on the left.</prosody></amazon:effect></speak>"
+                                }
+                            ]
+                        },
+                        {
+                            "geometry": "kyd_{Aecq_U??",
+                            "mode": "driving",
+                            "driving_side": "right",
+                            "distance": 0,
+                            "duration": 0,
+                            "weight": 0,
+                            "duration_typical": 0,
+                            "weight_typical": 0,
+                            "name": "Sonnenstraße",
+                            "ref": "St2342",
+                            "maneuver": {
+                                "location": [
+                                    11.543619,
+                                    48.237478
+                                ],
+                                "bearing_before": 218,
+                                "bearing_after": 0,
+                                "modifier": "left",
+                                "instruction": "Your destination is on the left.",
+                                "type": "arrive"
+                            },
+                            "intersections": [
+                                {
+                                    "location": [
+                                        11.543619,
+                                        48.237478
+                                    ],
+                                    "geometry_index": 61,
+                                    "admin_index": 0,
+                                    "in": 0,
+                                    "entry": [
+                                        true
+                                    ],
+                                    "bearings": [
+                                        38
+                                    ]
+                                }
+                            ],
+                            "bannerInstructions": [],
+                            "voiceInstructions": []
+                        }
+                    ],
+                    "summary": "Sonnenstraße, St2342",
+                    "distance": 1548.231,
+                    "duration": 142.378,
+                    "weight": 137.988,
+                    "route_factors": {
+                        "hierarchy": 3.716,
+                        "continuity": 4,
+                        "traffic_lights": 0,
+                        "maneuvers": 2,
+                        "raw_maneuvers": 2,
+                        "has_ferry": false,
+                        "absolute ppe": 6054.1025,
+                        "normalized ppe": 6054.1025,
+                        "road_class_info": {
+                            "secondary": 1339.136,
+                            "unclassified": 197,
+                            "service_other": 11.462
+                        },
+                        "base_cost_maneuvers": 0,
+                        "turn_counts": {
+                            "right": 1,
+                            "left": 1
+                        },
+                        "path_integral": 0.167526,
+                        "path_integral_normalized": 0.114739,
+                        "hierarchy_peak_length": 0,
+                        "hierarchy_jank": 0,
+                        "connection_info": {
+                            "connection_idx": 0,
+                            "path_distance": 271,
+                            "path_idx": 1,
+                            "location": [
+                                11.550622,
+                                48.247364
+                            ],
+                            "used_forward_alt_preds": false,
+                            "used_reverse_alt_preds": false
+                        },
+                        "dive_bombs": 0
+                    },
+                    "alternative_factors": [
+                        {
+                            "compare_to": 0,
+                            "final_rank": -0.046,
+                            "distance_rel_diff_rank": -0.111,
+                            "distance_rel_diff_weight": 0.379,
+                            "distance_rel_diff_conjunctive_fail_group": -1,
+                            "distance_rel_diff_accepted": 1393.289,
+                            "distance_rel_diff_candidate": 1548.117,
+                            "cost_rel_diff_rank": -0.006,
+                            "cost_rel_diff_weight": 0.621,
+                            "cost_rel_diff_conjunctive_fail_group": -1,
+                            "cost_rel_diff_accepted": 137.11,
+                            "cost_rel_diff_candidate": 137.988,
+                            "detour_cost_rank": -1,
+                            "detour_cost_weight": 0,
+                            "detour_cost_conjunctive_fail_group": -1,
+                            "detour_cost_max_percentage": 0,
+                            "detour_cost_accepted": 78.228,
+                            "detour_cost_candidate": 79.106,
+                            "detour_duration_rank": -0.161,
+                            "detour_duration_weight": 0,
+                            "detour_duration_conjunctive_fail_group": 0,
+                            "detour_duration_max_percentage": 0.6,
+                            "detour_duration_accepted": 57.57,
+                            "detour_duration_candidate": 63.117,
+                            "detour_fork_rank": -1,
+                            "detour_fork_weight": 0,
+                            "detour_fork_conjunctive_fail_group": -1,
+                            "detour_fork_distance": 0,
+                            "detour_fork_max_distance": 0,
+                            "detour_is_visually_similar_rank": 0,
+                            "detour_is_visually_similar_weight": 0,
+                            "detour_is_visually_similar_conjunctive_fail_group": 1,
+                            "detour_is_visually_similar_visually_similar": 0,
+                            "detour_is_visually_similar_enable_factor": 1,
+                            "detour_distance_rank": -1,
+                            "detour_distance_weight": 0,
+                            "detour_distance_conjunctive_fail_group": -1,
+                            "detour_distance_max_percentage": 0,
+                            "detour_distance_accepted": 366.852,
+                            "detour_distance_candidate": 521.681
+                        }
+                    ],
+                    "duration_typical": 127.697,
+                    "weight_typical": 145.451,
+                    "admins": [
+                        {
+                            "iso_3166_1": "DE",
+                            "iso_3166_1_alpha3": "DEU"
+                        }
+                    ],
+                    "annotation": {
+                        "duration": [
+                            3.574,
+                            1.843,
+                            1.837,
+                            0.272,
+                            4.329,
+                            5.269,
+                            1.282,
+                            1.602,
+                            1.883,
+                            1.994,
+                            1.735,
+                            2.146,
+                            2.482,
+                            3.166,
+                            0.242,
+                            0.399,
+                            1.9,
+                            2.803,
+                            2.484,
+                            10.886,
+                            4.556,
+                            2.487,
+                            1.129,
+                            0.837,
+                            0.227,
+                            0.941,
+                            0.529,
+                            0.471,
+                            0.064,
+                            0.486,
+                            0.483,
+                            0.488,
+                            1.4,
+                            1.195,
+                            4.048,
+                            0.057,
+                            0.454,
+                            0.448,
+                            13.625,
+                            2.695,
+                            2.377,
+                            3.733,
+                            1.085,
+                            6.988,
+                            2.418,
+                            2.049,
+                            0.768,
+                            0.817,
+                            1.783,
+                            0.737,
+                            0.738,
+                            0.634,
+                            0.661,
+                            0.928,
+                            0.938,
+                            0.991,
+                            1.002,
+                            14.902,
+                            1.144,
+                            1.09,
+                            7.847
+                        ],
+                        "speed": [
+                            3.3,
+                            6.7,
+                            6.7,
+                            6.7,
+                            6.7,
+                            6.7,
+                            6.7,
+                            6.7,
+                            6.7,
+                            6.7,
+                            6.7,
+                            6.7,
+                            6.7,
+                            6.7,
+                            6.7,
+                            6.7,
+                            6.7,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            12.5,
+                            18.9,
+                            18.9,
+                            18.9,
+                            18.9,
+                            18.9,
+                            18.9,
+                            18.9,
+                            18.9,
+                            18.9,
+                            18.9,
+                            18.9,
+                            18.9,
+                            18.9,
+                            18.9,
+                            18.6
+                        ],
+                        "congestion": [
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown"
+                        ],
+                        "historical_speed": [
+                            13,
+                            23,
+                            23,
+                            23,
+                            23,
+                            23,
+                            23,
+                            23,
+                            23,
+                            23,
+                            23,
+                            23,
+                            23,
+                            23,
+                            23,
+                            23,
+                            23,
+                            45,
+                            45,
+                            45,
+                            44,
+                            44,
+                            40,
+                            40,
+                            40,
+                            40,
+                            40,
+                            40,
+                            40,
+                            40,
+                            40,
+                            40,
+                            42,
+                            42,
+                            48,
+                            48,
+                            48,
+                            48,
+                            48,
+                            48,
+                            48,
+                            48,
+                            48,
+                            49,
+                            49,
+                            49,
+                            69,
+                            69,
+                            69,
+                            69,
+                            69,
+                            69,
+                            69,
+                            69,
+                            69,
+                            69,
+                            69,
+                            69,
+                            69,
+                            69,
+                            66
+                        ],
+                        "current_speed": [
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            46,
+                            36,
+                            36,
+                            26,
+                            26,
+                            26,
+                            26,
+                            26,
+                            26,
+                            32,
+                            32,
+                            32,
+                            32,
+                            42,
+                            42,
+                            66,
+                            66,
+                            66,
+                            66,
+                            66,
+                            66,
+                            66,
+                            66,
+                            66,
+                            72,
+                            72,
+                            72,
+                            74,
+                            74,
+                            74,
+                            74,
+                            74,
+                            74,
+                            74,
+                            74,
+                            74,
+                            74,
+                            74,
+                            74,
+                            74,
+                            74,
+                            70
+                        ]
+                    },
+                    "via_waypoints": []
+                }
+            ],
+            "voiceLocale": "en-US"
+        }
+    ],
+    "uuid": "Lh2drE4ZS6G82mwoqRuqxhGXc4g9_f745heTCfNOAgk3ED2DTP9mdw=="
+}
