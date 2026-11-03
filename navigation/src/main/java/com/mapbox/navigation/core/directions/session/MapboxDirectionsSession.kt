@@ -141,6 +141,9 @@ internal class MapboxDirectionsSession(
 
     override fun supportsOnDeviceRefresh(): Boolean = router.supportsOnDeviceRefresh()
 
+    override fun refreshesOnDevice(route: NavigationRoute): Boolean =
+        router.refreshesOnDevice(route)
+
     /**
      * Fetch route based on [RouteOptions]
      *

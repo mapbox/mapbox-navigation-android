@@ -56,11 +56,12 @@ internal object RouteRefreshValidator {
         else -> RouteValidationResult.Valid
     }
 
-    private fun NavigationRoute.requestsStateOfCharge(): Boolean =
-        routeOptions.annotationsList()?.contains("state_of_charge") == true
-
     sealed class RouteValidationResult {
         object Valid : RouteValidationResult()
         data class Invalid(val reason: String) : RouteValidationResult()
     }
 }
+
+/** Whether the route asks for state_of_charge, the annotation the device refreshes. */
+internal fun NavigationRoute.requestsStateOfCharge(): Boolean =
+    routeOptions.annotationsList()?.contains("state_of_charge") == true

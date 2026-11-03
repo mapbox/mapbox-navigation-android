@@ -38,6 +38,7 @@ import com.mapbox.navigation.core.mapmatching.MapMatchingAPICallback
 import com.mapbox.navigation.core.mapmatching.MapMatchingFailure
 import com.mapbox.navigation.core.mapmatching.MapMatchingOptions
 import com.mapbox.navigation.core.mapmatching.MapMatchingSuccessfulResult
+import com.mapbox.navigation.core.routerefresh.requestsStateOfCharge
 import com.mapbox.navigation.navigator.internal.mapToRoutingMode
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.Time
@@ -283,14 +284,20 @@ internal class RouterWrapper(
             {
                 PerformanceTracker.asyncSectionCompleted(routeRefreshSection)
 
-                callback.onFailure(NavigationRouterRefreshError("Request cancelled"))
+                callback.onFailure(
+                    NavigationRouterRefreshError("Request cancelled", transient = true),
+                )
             },
         )
         activeRouteRefreshRequests[id] = ongoingRequest
 
         ongoingRequest.handle = try {
-            val refreshCallback = RouterRefreshCallback { result, _, _ ->
-                logI("Received result from router.getRouteRefresh for ${route.id}", LOG_CATEGORY)
+            val refreshCallback = RouterRefreshCallback { result, resultOrigin, _ ->
+                logI(
+                    "Received result from router.getRouteRefresh for ${route.id}, " +
+                        "origin=$resultOrigin, success=${result.isValue}",
+                    LOG_CATEGORY,
+                )
 
                 mainJobControl.scope.launch {
                     ongoingRequest.handle = null
@@ -304,16 +311,18 @@ internal class RouterWrapper(
                         refreshOptions,
                         route,
                         result,
+                        resultOrigin,
                         RouteRefreshRequestEnder(id, callback),
                     )
                 }
             }
             // The stateless getRouteRefresh only has the uuid and never refreshes an offline
-            // route, so an offline route hands the route itself to nav-native.
-            if (route.origin == SdkRouterOrigin.OFFLINE &&
-                onDeviceRouteRefresh.isSupported(originRouter)
-            ) {
-                logI("Refreshing offline route ${route.id} on the device", LOG_CATEGORY)
+            // route, so an offline route hands the route itself to nav-native, and so does an
+            // online EV route: nav-native refreshes it online, and on the device when the device
+            // is offline or the server can't answer (a network error, a server failure or
+            // throttling).
+            if (refreshesWithRoute(route) && onDeviceRouteRefresh.isSupported(originRouter)) {
+                logI("Refreshing ${route.origin} route ${route.id} with the route", LOG_CATEGORY)
                 onDeviceRouteRefresh.refresh(
                     originRouter,
                     route.nativeRoute(),
@@ -330,6 +339,13 @@ internal class RouterWrapper(
         return id
     }
 
+    private fun refreshesWithRoute(route: NavigationRoute): Boolean =
+        when (route.origin) {
+            SdkRouterOrigin.OFFLINE -> true
+            SdkRouterOrigin.ONLINE -> route.requestsStateOfCharge()
+            else -> false
+        }
+
     private fun removeActiveRequest(requestId: Long) {
         activeRouteRequests[requestId]?.let {
             it.onCancel()
@@ -339,6 +355,9 @@ internal class RouterWrapper(
     }
 
     override fun supportsOnDeviceRefresh(): Boolean = onDeviceRouteRefresh.isSupported(router)
+
+    override fun refreshesOnDevice(route: NavigationRoute): Boolean =
+        refreshesWithRoute(route) && onDeviceRouteRefresh.isSupported(router)
 
     override fun cancelRouteRequest(requestId: Long) {
         removeActiveRequest(requestId)
@@ -492,6 +511,7 @@ internal class RouterWrapper(
         refreshOptions: RouteRefreshOptions,
         route: NavigationRoute,
         result: Expected<List<RouterError>, DataRef>,
+        resultOrigin: RouterOrigin,
         callback: RouteRefreshRequestEnder,
     ) {
         if (id != null && activeRouteRefreshRequests[id] == null) {
@@ -501,7 +521,7 @@ internal class RouterWrapper(
         if (originRouter != router) {
             logD(LOG_CATEGORY) { "router was recreated, onFailure callback will be fired" }
             callback.onFailure(
-                NavigationRouterRefreshError("Failed to refresh a route"),
+                NavigationRouterRefreshError("Failed to refresh a route", transient = true),
             )
         } else {
             val responseTimeElapsedSeconds = Time.SystemClockImpl.seconds()
@@ -509,6 +529,11 @@ internal class RouterWrapper(
                 { errors ->
                     val error = errors.first()
 
+                    // When the online refresh and the device both fail, the device errors
+                    // follow the online one.
+                    val otherErrors = errors.drop(1).joinToString(separator = "") {
+                        "\nalso: type = ${it.type}, message = ${it.message}"
+                    }
                     val errorMessage =
                         """
                                Route refresh failed.
@@ -518,7 +543,7 @@ internal class RouterWrapper(
                                requestId = ${error.requestId}
                                refreshTTL = ${error.refreshTtl}
                                routeRefreshRequestData = $routeRefreshRequestData
-                        """.trimIndent()
+                        """.trimIndent() + otherErrors
 
                     logW(errorMessage, LOG_CATEGORY)
 
@@ -531,11 +556,22 @@ internal class RouterWrapper(
                             Exception(errorMessage),
                             refreshTtl = error.refreshTtl,
                             // The device can't refresh this route, and asking again won't help.
-                            permanent = error.type == RouterErrorType.OFFLINE_REFRESH,
+                            // A route the server built can still be refreshed online later; a
+                            // route built on the device has no server session, whatever its
+                            // origin.
+                            permanent = error.type == RouterErrorType.OFFLINE_REFRESH &&
+                                (
+                                    route.origin == SdkRouterOrigin.OFFLINE ||
+                                        requestUuid.startsWith(ONBOARD_ROUTE_UUID_PREFIX)
+                                    ),
                         ),
                     )
                 },
                 { dataRef ->
+                    // The device refreshes only the charge of a route the server built. The
+                    // traffic stays as old as the last refresh from the server.
+                    val chargeOnly = resultOrigin == RouterOrigin.ONBOARD &&
+                        route.origin == SdkRouterOrigin.ONLINE
                     mainJobControl.scope.launch {
                         if (id != null) {
                             if (activeRouteRefreshRequests[id] == null) {
@@ -554,12 +590,16 @@ internal class RouterWrapper(
                                 responseTimeElapsedSeconds = responseTimeElapsedSeconds,
                                 experimentalProperties = routeRefreshRequestData
                                     .experimentalProperties,
+                                chargeOnly = chargeOnly,
                             )
                         }.fold(
                             { refreshedRoute ->
-                                callback.onRefreshReady(refreshedRoute, dataRef)
+                                callback.onRefreshReady(refreshedRoute, dataRef, chargeOnly)
                             },
                             { throwable ->
+                                // Not transient: the same response would fail again. An
+                                // expired route is then reported as invalidated instead of
+                                // being retried at once; it is still requested next interval.
                                 callback.onFailure(
                                     NavigationRouterRefreshError(
                                         "failed for response: $dataRef",
@@ -612,9 +652,13 @@ internal class RouterWrapper(
         private val callback: NavigationRouterRefreshCallback,
     ) : NavigationRouterRefreshCallback {
 
-        override fun onRefreshReady(route: NavigationRoute, refreshResponse: DataRef) {
+        override fun onRefreshReady(
+            route: NavigationRoute,
+            refreshResponse: DataRef,
+            chargeOnly: Boolean,
+        ) {
             if (removeRequest()) {
-                callback.onRefreshReady(route, refreshResponse)
+                callback.onRefreshReady(route, refreshResponse, chargeOnly)
             }
         }
 
@@ -636,5 +680,8 @@ internal class RouterWrapper(
     private companion object {
         private const val LOG_CATEGORY = "RouterWrapper"
         private const val REQUEST_FAILURE = -1L
+
+        // The request uuid of a route built on the device.
+        private const val ONBOARD_ROUTE_UUID_PREFIX = "local@"
     }
 }

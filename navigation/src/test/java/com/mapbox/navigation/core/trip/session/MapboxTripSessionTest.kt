@@ -1144,6 +1144,32 @@ class MapboxTripSessionTest {
         }
 
     @Test
+    fun `route cleared of expiring data refreshes nav-native from the route itself`() =
+        coroutineRule.runBlockingTest {
+            val route = mockk<NavigationRoute>(relaxed = true) {
+                every { id } returns "id0"
+            }
+            tripSession.start(true)
+
+            tripSession.setRoutes(
+                listOf(route),
+                RefreshControllerRefresh(
+                    RoutesRefresherResult(
+                        RouteRefresherResult(
+                            route,
+                            RouteProgressData(0, 12, 0),
+                            Success(mockk(), chargeOnly = true),
+                            expiringDataRemoved = true,
+                        ),
+                        emptyList(),
+                    ),
+                ),
+            )
+
+            coVerify(exactly = 1) { navigator.refreshRoute(route, null, 12) }
+        }
+
+    @Test
     fun `refresh route propagates the refreshed directionsRouteContext into the route`() =
         coroutineRule.runBlockingTest {
             val route = createNavigationRoute()

@@ -161,6 +161,14 @@ class MapboxDirectionsSessionTest {
     }
 
     @Test
+    fun `refreshesOnDevice asks the router`() {
+        for (refreshes in listOf(true, false)) {
+            every { router.refreshesOnDevice(route) } returns refreshes
+            assertEquals(refreshes, session.refreshesOnDevice(route))
+        }
+    }
+
+    @Test
     fun `route refresh response - failure`() {
         val error: NavigationRouterRefreshError = mockk()
         session.requestRouteRefresh(route, routeRefreshRequestData, routesRefreshRequestCallback)

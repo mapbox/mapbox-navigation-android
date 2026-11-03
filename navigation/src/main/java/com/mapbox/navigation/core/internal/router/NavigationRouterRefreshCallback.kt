@@ -13,8 +13,14 @@ internal interface NavigationRouterRefreshCallback {
      * Called with a new instance of [NavigationRoute] with the underlying [DirectionsRoute] refreshed.
      * @param route The refreshed route
      * @param refreshResponse The original refresh response
+     * @param chargeOnly the refresh updated only the charge: the device refreshed a route the
+     *  server built, and the traffic is as old as the last refresh from the server
      */
-    fun onRefreshReady(route: NavigationRoute, refreshResponse: DataRef)
+    fun onRefreshReady(
+        route: NavigationRoute,
+        refreshResponse: DataRef,
+        chargeOnly: Boolean = false,
+    )
 
     /**
      * Called when an error has occurred while refreshing the route.
@@ -32,6 +38,8 @@ internal interface NavigationRouterRefreshCallback {
  *  (no refreshes will be possible). Baseline is request time.
  * @param permanent when true, further planned refreshes for this route cannot succeed
  *  (for example [com.mapbox.navigator.RouterErrorType.OFFLINE_REFRESH]).
+ * @param transient the SDK failed the request, the router didn't answer it, so the failure says
+ *  nothing about the route (for example the router was recreated during the request).
  */
 class NavigationRouterRefreshError internal constructor(
     val message: String? = null,
@@ -39,6 +47,7 @@ class NavigationRouterRefreshError internal constructor(
     val routerFailure: RouterFailure? = null,
     val refreshTtl: Int? = null,
     internal val permanent: Boolean = false,
+    internal val transient: Boolean = false,
 ) {
 
     /**
@@ -54,7 +63,8 @@ class NavigationRouterRefreshError internal constructor(
         if (throwable != other.throwable) return false
         if (routerFailure != other.routerFailure) return false
         if (refreshTtl != other.refreshTtl) return false
-        return permanent == other.permanent
+        if (permanent != other.permanent) return false
+        return transient == other.transient
     }
 
     /**
@@ -66,6 +76,7 @@ class NavigationRouterRefreshError internal constructor(
         result = 31 * result + routerFailure.hashCode()
         result = 31 * result + refreshTtl.hashCode()
         result = 31 * result + permanent.hashCode()
+        result = 31 * result + transient.hashCode()
         return result
     }
 
@@ -78,7 +89,8 @@ class NavigationRouterRefreshError internal constructor(
             "throwable=$throwable, " +
             "routerFailure=$routerFailure, " +
             "refreshTtl=$refreshTtl, " +
-            "permanent=$permanent" +
+            "permanent=$permanent, " +
+            "transient=$transient" +
             ")"
     }
 }

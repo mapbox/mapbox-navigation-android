@@ -134,8 +134,9 @@ internal open class RouteRefreshIntegrationTest {
         enableRefresh: Boolean = true,
         successfulAttemptNumber: Int = 0,
         responseDelay: Long = 0,
+        chargeOnly: Boolean = false,
     ): List<NavigationRoute> {
-        setUpRouteRefresh(fileName, successfulAttemptNumber, responseDelay)
+        setUpRouteRefresh(fileName, successfulAttemptNumber, responseDelay, chargeOnly)
         return createNavigationRoutes(
             DirectionsResponse.fromJson(FileUtils.loadJsonFixture(fileName)),
             RouteOptions.builder()
@@ -182,6 +183,7 @@ internal open class RouteRefreshIntegrationTest {
         fileName: String,
         successfulAttemptNumber: Int = 0,
         responseDelay: Long = 0,
+        chargeOnly: Boolean = false,
     ) {
         val refreshedRoutes = createNavigationRoutes(
             DirectionsResponse.fromJson(FileUtils.loadJsonFixture(fileName)),
@@ -234,6 +236,7 @@ internal open class RouteRefreshIntegrationTest {
                             .getOrThrow()
                             .toJson()
                             .toDataRef(),
+                        chargeOnly,
                     )
                 } else {
                     callback.onFailure(NavigationRouterRefreshError())

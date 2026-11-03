@@ -74,6 +74,14 @@ internal interface Router {
     fun supportsOnDeviceRefresh(): Boolean
 
     /**
+     * Whether [route] may be refreshed on the device: an offline route, or an online route that
+     * requests `state_of_charge`, when [supportsOnDeviceRefresh]. An online route is refreshed on
+     * the device only without a network. The device doesn't need the server's refresh session,
+     * so the route may be refreshed after it expires.
+     */
+    fun refreshesOnDevice(route: NavigationRoute): Boolean
+
+    /**
      * Cancels a specific route request.
      */
     fun cancelRouteRequest(requestId: Long)

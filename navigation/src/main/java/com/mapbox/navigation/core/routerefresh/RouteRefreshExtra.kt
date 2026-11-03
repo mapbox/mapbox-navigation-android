@@ -30,6 +30,10 @@ object RouteRefreshExtra {
     /**
      * The state becomes [REFRESH_STATE_CLEARED_EXPIRED] when expired incidents and congestion
      * annotations are removed from the route due to failure of a route refresh request.
+     * It also follows [REFRESH_STATE_FINISHED_SUCCESS] when the device refreshed only the state
+     * of charge of a route built online: the traffic is then as old as the last refresh from the
+     * server. Until a refresh from the server succeeds, the later refreshes on the device are
+     * cleared too, without this state.
      */
     const val REFRESH_STATE_CLEARED_EXPIRED = "CLEARED_EXPIRED"
 

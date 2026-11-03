@@ -28,4 +28,9 @@ internal interface RouteRefresh {
      * Whether an offline route that requests `state_of_charge` is refreshed on the device.
      */
     fun supportsOnDeviceRefresh(): Boolean
+
+    /**
+     * Whether [route] may be refreshed on the device, also after it expires.
+     */
+    fun refreshesOnDevice(route: NavigationRoute): Boolean
 }

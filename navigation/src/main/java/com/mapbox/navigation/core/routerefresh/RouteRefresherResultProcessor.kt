@@ -12,27 +12,51 @@ internal class RouteRefresherResultProcessor(
     private val staleDataTimeoutMillis: Long,
 ) : RouteRefresherListener {
 
+    // The last refresh that brought more than the charge.
     private var lastRefreshTimeMillis: Long = 0
+
+    // The expiring data was removed, and no refresh has brought new traffic since. The device
+    // keeps refreshing the charge, so the routes it refreshes are cleared too.
+    private var expiringDataRemoved = false
 
     fun reset() {
         lastRefreshTimeMillis = timeProvider.millis()
+        expiringDataRemoved = false
     }
 
     override fun onRoutesRefreshed(result: RoutesRefresherResult) {
         val currentTime = timeProvider.millis()
-        if (result.anySuccess()) {
+        // One timer for all the routes: they are refreshed together, from the same network state.
+        if (result.anyFullSuccess()) {
             lastRefreshTimeMillis = currentTime
+            expiringDataRemoved = false
             observersManager.onRoutesRefreshed(result)
-        } else {
-            if (currentTime >= lastRefreshTimeMillis + staleDataTimeoutMillis) {
-                lastRefreshTimeMillis = currentTime
-                val newRoutesResult = expiringDataRemover.removeExpiringDataFromRoutesProgressData(
-                    result,
-                )
+            return
+        }
+        val staleDataTimedOut = currentTime >= lastRefreshTimeMillis + staleDataTimeoutMillis
+        if (staleDataTimedOut) {
+            lastRefreshTimeMillis = currentTime
+            expiringDataRemoved = true
+        }
+        if (result.anySuccess()) {
+            // Only the charge was refreshed. A route backed by a native route object can't be
+            // cleared, and keeps its isUpToDate.
+            val newRoutesResult = if (expiringDataRemoved) {
+                expiringDataRemover.removeExpiringDataFromRoutesProgressData(result)
+            } else {
+                result
+            }
+            if (staleDataTimedOut) {
                 stateHolder.onClearedExpired()
-                if (result != newRoutesResult) {
-                    observersManager.onRoutesRefreshed(newRoutesResult)
-                }
+            }
+            observersManager.onRoutesRefreshed(newRoutesResult)
+        } else if (staleDataTimedOut) {
+            val newRoutesResult = expiringDataRemover.removeExpiringDataFromRoutesProgressData(
+                result,
+            )
+            stateHolder.onClearedExpired()
+            if (result != newRoutesResult) {
+                observersManager.onRoutesRefreshed(newRoutesResult)
             }
         }
     }

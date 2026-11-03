@@ -15,6 +15,8 @@ import java.util.concurrent.TimeUnit
  *
  * In case of a route refresh failing for `3 * `[intervalMillis] (default is 5 min), expired incidents and congestion annotations
  * will be removed from the route in order to avoid presenting non-critical, outdated information. Closures are not cleared automatically, only upon information from a successful refresh.
+ * When the device refreshes a route that was built online, for example without a network,
+ * it updates only the state of charge, and that refresh does not reset this timeout.
  *
  * @param intervalMillis The refresh interval in milliseconds, default is 5 min.
  */

@@ -36,15 +36,22 @@ internal open class RoadObjectsRefresher<T, BUILDER>(
         startingLegGeometryIndex: Int,
         lastRefreshLegGeometryIndex: Int,
     ): List<T> {
-        val prevRoadObjects = oldRoadObjects?.takeWhile {
-            val endIndex = it.endIndexExtractor()
-            if (endIndex != null) {
-                endIndex < startingLegGeometryIndex
+        val old = oldRoadObjects.orEmpty()
+        // A placed object is tested on its own, as the native route merge does: an object
+        // before the range is kept even when one that overlaps the range is listed ahead of it.
+        // An object without geometry indices has no place, so it is kept when it is listed in
+        // the leading run of before-range objects or the trailing run of after-range ones, and
+        // twice when it is listed in both.
+        val leadingRunSize = old.indexOfFirst { !it.isBefore(startingLegGeometryIndex) }
+            .takeIf { it >= 0 } ?: old.size
+        val trailingRunStart = old.indexOfLast { !it.isAfter(lastRefreshLegGeometryIndex) } + 1
+        val prevRoadObjects = old.filterIndexed { index, roadObject ->
+            if (roadObject.hasNoGeometryIndex()) {
+                index < leadingRunSize
             } else {
-                val startIndex = it.startIndexExtractor()
-                startIndex == null || startIndex < startingLegGeometryIndex
+                roadObject.isBefore(startingLegGeometryIndex)
             }
-        }.orEmpty()
+        }
         val refreshedRoadObjects = newRoadObjects?.map { roadObject ->
             roadObject.toBuilder()
                 .apply {
@@ -57,17 +64,36 @@ internal open class RoadObjectsRefresher<T, BUILDER>(
                 }
                 .build()
         }.orEmpty()
-        val nextRoadObjects = oldRoadObjects?.takeLastWhile {
-            val startIndex = it.startIndexExtractor()
-            if (startIndex != null) {
-                startIndex > lastRefreshLegGeometryIndex
+        val nextRoadObjects = old.filterIndexed { index, roadObject ->
+            if (roadObject.hasNoGeometryIndex()) {
+                index >= trailingRunStart
             } else {
-                val endIndex = it.endIndexExtractor()
-                endIndex == null || endIndex > lastRefreshLegGeometryIndex
+                roadObject.isAfter(lastRefreshLegGeometryIndex)
             }
-        }.orEmpty()
+        }
         return prevRoadObjects + refreshedRoadObjects + nextRoadObjects
     }
+
+    private fun T.isBefore(startingLegGeometryIndex: Int): Boolean {
+        val endIndex = endIndexExtractor()
+        if (endIndex != null) {
+            return endIndex < startingLegGeometryIndex
+        }
+        val startIndex = startIndexExtractor()
+        return startIndex == null || startIndex < startingLegGeometryIndex
+    }
+
+    private fun T.isAfter(lastRefreshLegGeometryIndex: Int): Boolean {
+        val startIndex = startIndexExtractor()
+        if (startIndex != null) {
+            return startIndex > lastRefreshLegGeometryIndex
+        }
+        val endIndex = endIndexExtractor()
+        return endIndex == null || endIndex > lastRefreshLegGeometryIndex
+    }
+
+    private fun T.hasNoGeometryIndex(): Boolean =
+        startIndexExtractor() == null && endIndexExtractor() == null
 
     private fun adjustedIndex(offsetIndex: Int, originalIndex: Int?): Int? {
         return originalIndex?.let { offsetIndex + it }

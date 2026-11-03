@@ -138,6 +138,7 @@ class NavigationRoute internal constructor(
         legGeometryIndex: Int,
         responseTimeElapsedSeconds: Long,
         experimentalProperties: Map<String, String>? = null,
+        chargeOnly: Boolean = false,
     ): Result<NavigationRoute> {
         // A refreshed instance  of Nro is unconditionally presented in NavigationRoute
         val refreshedContextExpected = PerformanceTracker.trackPerformanceSync(
@@ -162,7 +163,7 @@ class NavigationRoute internal constructor(
                     legGeometryIndex,
                     responseTimeElapsedSeconds,
                     refreshedContext,
-                ).map { refresh(it, refreshedContext, experimentalProperties) }
+                ).map { refresh(it, refreshedContext, experimentalProperties, chargeOnly) }
             },
         )
     }
@@ -188,24 +189,44 @@ class NavigationRoute internal constructor(
         route: RouteUpdate,
         refreshedDirectionsRouteContext: DirectionsRouteContext,
         experimentalProperties: Map<String, String>? = null,
+        chargeOnly: Boolean = false,
     ): NavigationRoute = this.copy(
         directionsRoute = route.routeModelsParsingResult.data.route,
         waypoints = route.routeModelsParsingResult.data.routesWaypoint,
         operations = route.routeModelsParsingResult.operations,
         directionsRouteContext = refreshedDirectionsRouteContext,
-        routeRefreshMetadata = if (experimentalProperties != null) {
-            RouteRefreshMetadata(
-                isUpToDate = route.routeRefreshMetadata?.isUpToDate ?: true,
-                experimentalProperties = experimentalProperties,
-            )
+        routeRefreshMetadata = refreshMetadata(route, experimentalProperties, chargeOnly),
+        // The expiry is the server's refresh session, which a refresh on the device doesn't
+        // renew. The native route model keeps the old refresh_ttl when a response has none,
+        // and adding it to the time of the response would push the expiry on every refresh.
+        expirationTimeElapsedSeconds = if (chargeOnly) {
+            expirationTimeElapsedSeconds
         } else {
-            route.routeRefreshMetadata
+            route.newExpirationTimeElapsedSeconds.update(expirationTimeElapsedSeconds)
         },
-        expirationTimeElapsedSeconds = route.newExpirationTimeElapsedSeconds.update(
-            expirationTimeElapsedSeconds,
-        ),
         overriddenTraffic = route.overriddenTraffic.update(overriddenTraffic),
     )
+
+    private fun refreshMetadata(
+        route: RouteUpdate,
+        experimentalProperties: Map<String, String>?,
+        chargeOnly: Boolean,
+    ): RouteRefreshMetadata? {
+        if (experimentalProperties == null && !chargeOnly) {
+            return route.routeRefreshMetadata
+        }
+        // A refresh of the charge only leaves the traffic as it was, so the route stays
+        // as up to date as it was before.
+        val isUpToDate = if (chargeOnly) {
+            routeRefreshMetadata?.isUpToDate
+        } else {
+            route.routeRefreshMetadata?.isUpToDate
+        } ?: true
+        return RouteRefreshMetadata(
+            isUpToDate = isUpToDate,
+            experimentalProperties = experimentalProperties,
+        )
+    }
 
     companion object {
 

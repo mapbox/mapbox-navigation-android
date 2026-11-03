@@ -8,13 +8,15 @@ import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.RouterRefreshCallback
 
 /**
- * Refresh of an offline route on the device. Wraps the static native calls of
- * [RouteRefreshWithRoute], which unit tests can't mock.
+ * Refresh of a route on the device: an offline route, or an online route that requests
+ * `state_of_charge`, which nav-native refreshes on the device when the device is offline or the
+ * server can't answer. Wraps the static native calls of [RouteRefreshWithRoute], which unit
+ * tests can't mock.
  */
 internal interface OnDeviceRouteRefresh {
 
     /**
-     * Whether [router] refreshes an offline route that requests `state_of_charge` on the device.
+     * Whether [router] refreshes a route that requests `state_of_charge` on the device.
      */
     fun isSupported(router: RouterInterface): Boolean
 

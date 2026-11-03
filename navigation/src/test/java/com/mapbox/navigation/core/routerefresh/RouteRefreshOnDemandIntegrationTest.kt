@@ -1,9 +1,13 @@
 package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.base.internal.route.isExpired
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.directions.session.RoutesExtra
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.testing.assertIs
+import io.mockk.every
+import io.mockk.mockkStatic
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -46,6 +50,28 @@ internal class RouteRefreshOnDemandIntegrationTest : RouteRefreshIntegrationTest
         assertEquals(0, refreshObserver.refreshes.size)
         testDispatcher.advanceTimeBy(20_000)
         assertEquals(1, refreshObserver.refreshes.size)
+    }
+
+    @Test
+    fun expiredRouteTheDeviceRefreshesIsRefreshedOnDemand() = runBlocking {
+        val routes = setUpRoutes("route_response_single_route_refresh.json", chargeOnly = true)
+        every { router.refreshesOnDevice(any()) } returns true
+        routeRefreshController = createRefreshController(100_000)
+        routeRefreshController.registerRouteRefreshObserver(refreshObserver)
+
+        mockkStatic(NavigationRoute::isExpired) {
+            every { any<NavigationRoute>().isExpired() } returns true
+            routeRefreshController.onRoutesChanged(
+                RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW),
+            )
+            routeRefreshController.requestImmediateRouteRefresh()
+        }
+
+        assertEquals(1, refreshObserver.refreshes.size)
+        assertEquals(
+            RouteRefresherStatus.Success::class,
+            refreshObserver.refreshes.first().primaryRouteRefresherResult.status::class,
+        )
     }
 
     @Test

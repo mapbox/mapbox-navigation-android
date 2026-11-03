@@ -189,9 +189,13 @@ internal class MapboxTripSession(
                             }
                             val refreshSuccess =
                                 refreshMetadata?.status as? RouteRefresherStatus.Success
+                            // A route cleared of its expiring data is newer than the response:
+                            // nav-native gets a response generated from the route instead.
+                            val refreshResponse = refreshSuccess?.refreshResponse
+                                ?.takeUnless { refreshMetadata?.expiringDataRemoved == true }
                             refreshRouteResult = navigator.refreshRoute(
                                 route = route,
-                                refreshResponse = refreshSuccess?.refreshResponse,
+                                refreshResponse = refreshResponse,
                                 geometryIndex =
                                 refreshMetadata?.routeProgressData?.routeGeometryIndex,
                             )
