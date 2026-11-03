@@ -47,6 +47,16 @@ enum class Tileset(
         "persistent_config_helsinki"
     ),
     /**
+     * A few hundred meters in Munich with Maps (incl. HD roads), Navigation (2026_10_25-06_10_32)
+     * and Navigation HD (2026-10-28-v2) data.
+     * See libtesting-resources/tiles-downloading/configs/munich_hd_sd_2026-10-28.
+     */
+    MunichHdSd(
+        "tileset_munich_hd_sd_2026-10-28",
+        listOf(TileDataDomain.NAVIGATION, TileDataDomain.NAVIGATION_HD),
+        "persistent_config_munich_hd_sd_2026_10_28"
+    ),
+    /**
      * Golden Gate Bridge and Presidio Parkway including its tunnels, with Maps (incl. HD roads),
      * Navigation (2026_09_20-06_15_51) and Navigation HD (2026-09-27-v2) data.
      * See libtesting-resources/tiles-downloading/configs/ggb_tunnel_2026-09-27.

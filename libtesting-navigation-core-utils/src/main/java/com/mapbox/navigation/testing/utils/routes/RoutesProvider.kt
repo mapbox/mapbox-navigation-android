@@ -758,6 +758,30 @@ object RoutesProvider {
     }
 
     /**
+     * Drive in Munich that starts in an SD area and ends in an HD area (pairs with
+     * `Tileset.MunichHdSd`).
+     */
+    fun munich_sd_to_hd(context: Context): MockRoute {
+        val jsonResponse = readRawFileText(context, R.raw.munich_sd_hd_route_response)
+        val coordinates = listOf(
+            Point.fromLngLat(11.548577, 48.247717),
+            Point.fromLngLat(11.543619, 48.237478),
+        )
+        return MockRoute(
+            jsonResponse,
+            DirectionsResponse.fromJson(jsonResponse),
+            listOf(
+                MockDirectionsRequestHandler(
+                    profile = PROFILE_DRIVING_TRAFFIC,
+                    jsonResponse = jsonResponse,
+                    expectedCoordinates = coordinates,
+                ),
+            ),
+            coordinates,
+        )
+    }
+
+    /**
      * Southbound drive across the Golden Gate Bridge, from the north end to the south end.
      */
     fun golden_gate_bridge_hd_sd(context: Context): MockRoute {
