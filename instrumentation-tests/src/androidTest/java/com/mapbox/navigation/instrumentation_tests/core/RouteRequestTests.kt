@@ -5,6 +5,8 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.extensions.applyDefaultNavigationOptions
+import com.mapbox.navigation.base.route.RouterFailureType
+import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.base.route.isRetryable
 import com.mapbox.navigation.instrumentation_tests.R
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
@@ -18,8 +20,8 @@ import com.mapbox.navigation.testing.utils.withMapboxNavigation
 import com.mapbox.navigation.testing.utils.withoutInternet
 import okhttp3.mockwebserver.MockResponse
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 
@@ -45,17 +47,24 @@ class RouteRequestTests : BaseCoreNoCleanUpTest() {
         }
     }
 
-    @Ignore("Flaky test - NAVAND-7338")
     @Test
     fun requestRouteWithoutInternetAndTiles() = sdkTest {
         withMapboxNavigation(
             historyRecorderRule = mapboxHistoryTestRule,
         ) { navigation ->
             withoutInternet {
-                val routes = navigation.requestRoutes(createTestRouteOptions())
-                assertTrue(routes is RouteRequestResult.Failure)
-                val isRetryable = (routes as RouteRequestResult.Failure).reasons.isRetryable
-                assertTrue(isRetryable)
+                val result = navigation.requestRoutes(createTestRouteOptions())
+                assertTrue("expected a failure, got $result", result is RouteRequestResult.Failure)
+                val reasons = (result as RouteRequestResult.Failure).reasons
+                val onlineNetworkFailure = reasons.firstOrNull {
+                    it.routerOrigin == RouterOrigin.ONLINE &&
+                        it.type == RouterFailureType.NETWORK_ERROR
+                }
+                assertNotNull(
+                    "expected an online NETWORK_ERROR failure, got $reasons",
+                    onlineNetworkFailure,
+                )
+                assertTrue(reasons.isRetryable)
             }
         }
     }
