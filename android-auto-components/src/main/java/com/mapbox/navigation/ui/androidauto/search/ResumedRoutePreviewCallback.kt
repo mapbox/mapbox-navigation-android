@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
  * a different place by then, because another request finished in the meantime. When the screen
  * is destroyed, the kept result is dropped and the request made with this callback is canceled.
  *
+ * @param onPreviewReady handles a ready preview inline instead of changing screens, when supplied.
  * @param onError shows the given message to the driver.
  */
 @UiThread
@@ -36,6 +37,7 @@ internal class ResumedRoutePreviewCallback(
     private val lifecycle: Lifecycle,
     private val mapboxScreenManager: MapboxScreenManager,
     private val routePreviewRequest: CarRoutePreviewRequest,
+    private val onPreviewReady: (() -> Unit)? = null,
     private val onError: (messageRes: Int) -> Unit,
 ) : CarRoutePreviewRequestCallback {
 
@@ -78,7 +80,9 @@ internal class ResumedRoutePreviewCallback(
 
     override fun onRoutesReady(placeRecord: PlaceRecord, routes: List<NavigationRoute>) {
         deliver {
-            if (
+            if (onPreviewReady != null) {
+                onPreviewReady.invoke()
+            } else if (
                 !mapboxScreenManager.isScreenBelowTop(MapboxScreen.NAVIGATION) ||
                 !mapboxScreenManager.goBack()
             ) {

@@ -7,6 +7,7 @@ import androidx.car.app.model.CarIcon
 import androidx.core.graphics.drawable.IconCompat
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.androidauto.R
+import com.mapbox.navigation.ui.androidauto.action.buildFavoritesAction
 import com.mapbox.navigation.ui.androidauto.action.buildSettingsAction
 import com.mapbox.navigation.ui.androidauto.feedback.ui.CarFeedbackAction
 import com.mapbox.navigation.ui.androidauto.navigation.MapboxNavigationScreen
@@ -27,7 +28,11 @@ class FreeDriveActionStrip(
         }
         .addAction(buildFeedbackAction())
         .addAction(buildSearchAction())
-        .addAction(buildFavoritesAction())
+        .apply {
+            if (screen !is MapboxNavigationScreen || !screen.isShowingFavorites) {
+                addAction(buildFavoritesAction())
+            }
+        }
 
     /**
      * Action to show settings inline on the unified navigation screen, or open the settings
@@ -60,12 +65,9 @@ class FreeDriveActionStrip(
         .build()
 
     /**
-     * Action to open favorite places screen.
+     * Action to show favorites inline on the unified navigation screen, or open the favorites
+     * screen on legacy screens.
      */
-    fun buildFavoritesAction(): Action = Action.Builder()
-        .setTitle(screen.carContext.resources.getString(R.string.car_action_search_favorites))
-        .setOnClickListener {
-            MapboxScreenManager.push(MapboxScreen.FAVORITES)
-        }
-        .build()
+    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
+    fun buildFavoritesAction(): Action = buildFavoritesAction(screen)
 }

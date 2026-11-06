@@ -144,6 +144,53 @@ audio guidance, and Stop. Custom providers must replace an existing action rathe
 fifth action to `super.getActiveGuidance(screen)`. The default route-preview strip also includes
 settings before feedback. Legacy dedicated preview and guidance strips are unchanged.
 
+## Inline favorites
+
+On Car API 7 and later, the favorites action on `MapboxScreen.NAVIGATION` opens a
+`ListTemplate` alongside the existing map, like inline settings, without pushing another screen.
+Favorites retain the navigation camera and renderers and show the saved destinations with map
+markers and distances when a location is available. Loading, empty, and error states appear in
+the list. Selecting a favorite requests a route and shows its preview on the same navigation screen;
+route-request errors show a toast and leave the list open.
+During guidance, the selected favorite's preview and route lines are shown while navigation on the
+current route continues. Back dismisses that preview and returns to guidance; Navigate replaces the
+current route with the selected preview.
+
+Back closes favorites without clearing an existing preview or stopping guidance. Favorites also
+close when the navigation mode changes, another screen covers navigation, or settings are opened.
+Closing favorites removes their markers and cancels their pending route request. Navigation-info
+updates do not refresh the favorites panel. The default free-drive strip omits the favorites action
+while favorites are already open.
+The favorites manager is created lazily and reused for the navigation screen's lifetime. Reopening
+favorites reattaches the manager and reloads saved destinations, retaining the previous list meanwhile.
+
+By default, the navigation camera zooms out to frame all displayed favorite markers, accounting for
+the host's visible map area. The existing route is excluded from that overview. Closing favorites,
+including when switching to settings, restores the previous navigation camera mode and route framing.
+Manual zoom after opening favorites disables automatic zoom until it is re-enabled with a camera
+action. Marker and viewport updates respect that choice; reopening favorites frames the markers again
+without changing the saved navigation zoom preference.
+Set the experimental `MapboxCarOptions.Customization.frameFavoritesOnMap` property to `false` to
+leave the camera unchanged instead:
+
+```kotlin
+mapboxCarContext.customize {
+    frameFavoritesOnMap = false
+}
+```
+
+The option is read each time favorites open, so a change takes effect on the next opening.
+
+Custom action-strip providers can use the experimental `buildFavoritesAction(screen)` from
+`com.mapbox.navigation.ui.androidauto.action`, including in preview or guidance by replacing an
+existing action to stay within the host's action limits.
+`FreeDriveActionStrip.buildFavoritesAction()` delegates to the same inline behavior.
+`MapboxScreen.FAVORITES` and `FavoritesScreenFactory` are deprecated; use
+`MapboxNavigationScreenFactory` with `MapboxScreen.NAVIGATION` instead.
+Dedicated favorites screens remain available for legacy flows. An app that registers a custom
+factory under `MapboxScreen.FAVORITES` continues to open that screen, including on Car API 7 and
+newer; only the default favorites use the inline list.
+
 ## Testing
 
 Please refer to [Google training documentation](https://developer.android.com/training/cars/testing) to use the ./desktop-head-unit.

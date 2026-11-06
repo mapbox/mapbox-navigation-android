@@ -31,7 +31,7 @@ object MapboxScreen {
     const val SETTINGS = "MAPBOX_SETTINGS"
 
     /**
-     * Combines free drive, route preview, active guidance, and inline settings on one map screen.
+     * Combines free drive, route preview, active guidance, inline settings, and favorites on one map.
      *
      * This screen requires Car API 7 or newer.
      */
@@ -62,7 +62,10 @@ object MapboxScreen {
 
     /**
      * Gives the user the ability to select a personally favorite destination.
+     *
+     * @deprecated Use inline favorites on [NAVIGATION] instead (Car API 7 or newer).
      */
+    @Deprecated("Use NAVIGATION with inline favorites instead.")
     const val FAVORITES = "MAPBOX_FAVORITES"
 
     /**

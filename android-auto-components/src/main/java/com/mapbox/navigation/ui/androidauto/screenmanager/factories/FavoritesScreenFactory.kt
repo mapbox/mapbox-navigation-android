@@ -12,7 +12,11 @@ import com.mapbox.search.ServiceProvider
 
 /**
  * Default screen for [MapboxScreen.FAVORITES].
+ *
+ * @deprecated Use [MapboxNavigationScreenFactory] for [MapboxScreen.NAVIGATION] instead.
+ * Favorites are shown inline on the navigation screen from Car API 7.
  */
+@Deprecated("Use MapboxNavigationScreenFactory for MapboxScreen.NAVIGATION with inline favorites instead.")
 class FavoritesScreenFactory(
     private val mapboxCarContext: MapboxCarContext,
 ) : MapboxScreenFactory {

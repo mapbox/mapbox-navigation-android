@@ -94,6 +94,14 @@ class MapboxCarOptions {
         private set
 
     /**
+     * Frames the displayed favorite markers when inline favorites open. Enabled by default.
+     * Read when the panel opens; changes apply the next time it opens.
+     */
+    @ExperimentalPreviewMapboxNavigationAPI
+    var frameFavoritesOnMap: Boolean = true
+        private set
+
+    /**
      * Apply the desired customization.
      */
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -109,6 +117,7 @@ class MapboxCarOptions {
         customization.actionsStripProvider?.also { this.actionStripProvider = it }
         customization.settingsTemplateProvider?.also { this.settingsTemplateProvider = it }
         customization.searchMode?.also { this.searchMode = it }
+        customization.frameFavoritesOnMap?.also { this.frameFavoritesOnMap = it }
     }
 
     /**
@@ -168,6 +177,13 @@ class MapboxCarOptions {
          */
         @ExperimentalPreviewMapboxNavigationAPI
         var settingsTemplateProvider: CarSettingsTemplateProvider? = null
+
+        /**
+         * Enable or disable automatic framing of inline favorite markers. Defaults to enabled.
+         * Changes apply the next time favorites open.
+         */
+        @ExperimentalPreviewMapboxNavigationAPI
+        var frameFavoritesOnMap: Boolean? = null
 
         /**
          * Modify the search engine mode used for place search and geo deeplinks.

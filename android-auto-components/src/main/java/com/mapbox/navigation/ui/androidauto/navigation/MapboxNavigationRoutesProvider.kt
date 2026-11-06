@@ -21,12 +21,13 @@ import kotlinx.coroutines.flow.map
 
 /**
  * Combines preview and active routes so one set of map components can render every navigation
- * state. Active routes take precedence over routes being previewed.
+ * state. Active routes take precedence unless this screen explicitly opens a route preview.
  */
 internal class MapboxNavigationRoutesProvider : CarRoutesProvider, MapboxNavigationObserver {
 
     private var activeRoutes = emptyList<NavigationRoute>()
     private var routesPreview: RoutesPreview? = null
+    private var isPreviewOpen = false
     private val mutableState = MutableStateFlow(MapboxNavigationRoutesState())
 
     val state: StateFlow<MapboxNavigationRoutesState> = mutableState.asStateFlow()
@@ -42,6 +43,9 @@ internal class MapboxNavigationRoutesProvider : CarRoutesProvider, MapboxNavigat
 
     private val routesPreviewObserver = RoutesPreviewObserver { result ->
         routesPreview = result.routesPreview
+        if (routesPreview?.routesList.isNullOrEmpty()) {
+            isPreviewOpen = false
+        }
         updateState()
     }
 
@@ -58,6 +62,7 @@ internal class MapboxNavigationRoutesProvider : CarRoutesProvider, MapboxNavigat
         mapboxNavigation.unregisterRoutesPreviewObserver(routesPreviewObserver)
         activeRoutes = emptyList()
         routesPreview = null
+        isPreviewOpen = false
         updateState()
     }
 
@@ -92,19 +97,28 @@ internal class MapboxNavigationRoutesProvider : CarRoutesProvider, MapboxNavigat
     }
 
     fun clearPreview() {
+        isPreviewOpen = false
         MapboxNavigationApp.current()?.setRoutesPreview(emptyList())
+        updateState()
+    }
+
+    fun showPreview() {
+        isPreviewOpen = true
+        updateState()
     }
 
     private fun updateState() {
         mutableState.value = when {
+            !routesPreview?.routesList.isNullOrEmpty() &&
+                (isPreviewOpen || activeRoutes.isEmpty()) ->
+                MapboxNavigationRoutesState(
+                    screenState = MapboxNavigationScreenState.ROUTE_PREVIEW,
+                    routes = routesPreview?.routesList.orEmpty(),
+                    routesPreview = routesPreview,
+                )
             activeRoutes.isNotEmpty() -> MapboxNavigationRoutesState(
                 screenState = MapboxNavigationScreenState.ACTIVE_GUIDANCE,
                 routes = activeRoutes,
-                routesPreview = routesPreview,
-            )
-            !routesPreview?.routesList.isNullOrEmpty() -> MapboxNavigationRoutesState(
-                screenState = MapboxNavigationScreenState.ROUTE_PREVIEW,
-                routes = routesPreview?.routesList.orEmpty(),
                 routesPreview = routesPreview,
             )
             else -> MapboxNavigationRoutesState()

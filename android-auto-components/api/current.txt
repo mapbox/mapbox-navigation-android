@@ -29,6 +29,7 @@ package com.mapbox.navigation.ui.androidauto {
     method public com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackOptions getCarFeedbackOptions();
     method @Deprecated public com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions getCarPlaceSearchOptions();
     method public com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackPollProvider getFeedbackPollProvider();
+    method public boolean getFrameFavoritesOnMap();
     method public com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotificationOptions getNotificationOptions();
     method public com.mapbox.navigation.ui.androidauto.preview.CarRouteLineRendererOptions getRouteLineRendererOptions();
     method public com.mapbox.navigation.ui.androidauto.preview.CarRouteOptionsInterceptor getRouteOptionsInterceptor();
@@ -39,6 +40,7 @@ package com.mapbox.navigation.ui.androidauto {
     property public final com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackOptions carFeedbackOptions;
     property @Deprecated public final com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions carPlaceSearchOptions;
     property public final com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackPollProvider feedbackPollProvider;
+    property public final boolean frameFavoritesOnMap;
     property public final com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotificationOptions notificationOptions;
     property public final com.mapbox.navigation.ui.androidauto.preview.CarRouteLineRendererOptions routeLineRendererOptions;
     property public final com.mapbox.navigation.ui.androidauto.preview.CarRouteOptionsInterceptor routeOptionsInterceptor;
@@ -52,6 +54,7 @@ package com.mapbox.navigation.ui.androidauto {
     method public com.mapbox.navigation.ui.androidauto.action.MapboxScreenActionStripProvider? getActionsStripProvider();
     method public com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackOptions? getCarFeedbackOptions();
     method public com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackPollProvider? getFeedbackPollProvider();
+    method public Boolean? getFrameFavoritesOnMap();
     method public com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotificationOptions? getNotificationOptions();
     method @Deprecated public com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions? getPlaceSearchOptions();
     method public com.mapbox.navigation.ui.androidauto.preview.CarRouteLineRendererOptions? getRouteLineRendererOptions();
@@ -62,6 +65,7 @@ package com.mapbox.navigation.ui.androidauto {
     method public void setActionsStripProvider(com.mapbox.navigation.ui.androidauto.action.MapboxScreenActionStripProvider?);
     method public void setCarFeedbackOptions(com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackOptions?);
     method public void setFeedbackPollProvider(com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackPollProvider?);
+    method public void setFrameFavoritesOnMap(Boolean?);
     method public void setNotificationOptions(com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotificationOptions?);
     method @Deprecated public void setPlaceSearchOptions(com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions?);
     method public void setRouteLineRendererOptions(com.mapbox.navigation.ui.androidauto.preview.CarRouteLineRendererOptions?);
@@ -72,6 +76,7 @@ package com.mapbox.navigation.ui.androidauto {
     property public final com.mapbox.navigation.ui.androidauto.action.MapboxScreenActionStripProvider? actionsStripProvider;
     property public final com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackOptions? carFeedbackOptions;
     property public final com.mapbox.navigation.ui.androidauto.feedback.core.CarFeedbackPollProvider? feedbackPollProvider;
+    property public final Boolean? frameFavoritesOnMap;
     property public final com.mapbox.navigation.ui.androidauto.notification.MapboxCarNotificationOptions? notificationOptions;
     property @Deprecated public final com.mapbox.navigation.ui.androidauto.search.CarPlaceSearchOptions? placeSearchOptions;
     property public final com.mapbox.navigation.ui.androidauto.preview.CarRouteLineRendererOptions? routeLineRendererOptions;
@@ -84,6 +89,10 @@ package com.mapbox.navigation.ui.androidauto {
 }
 
 package com.mapbox.navigation.ui.androidauto.action {
+
+  public final class CarFavoritesActionKt {
+    method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static androidx.car.app.model.Action buildFavoritesAction(androidx.car.app.Screen screen);
+  }
 
   public final class CarSettingsActionKt {
     method @com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI public static androidx.car.app.model.Action buildSettingsAction(androidx.car.app.Screen screen, androidx.car.app.model.CarIcon icon = defaultSettingsIcon(screen), CharSequence? title = null);
@@ -749,7 +758,7 @@ package com.mapbox.navigation.ui.androidauto.screenmanager {
     field @Deprecated public static final String ACTIVE_GUIDANCE = "MAPBOX_ACTIVE_GUIDANCE";
     field public static final String ACTIVE_GUIDANCE_FEEDBACK = "MAPBOX_ACTIVE_GUIDANCE_FEEDBACK";
     field public static final String ARRIVAL = "MAPBOX_ARRIVAL";
-    field public static final String FAVORITES = "MAPBOX_FAVORITES";
+    field @Deprecated public static final String FAVORITES = "MAPBOX_FAVORITES";
     field public static final String FAVORITES_FEEDBACK = "MAPBOX_FAVORITES_FEEDBACK";
     field @Deprecated public static final String FREE_DRIVE = "MAPBOX_FREE_DRIVE";
     field public static final String FREE_DRIVE_FEEDBACK = "MAPBOX_FREE_DRIVE_FEEDBACK";
@@ -844,7 +853,7 @@ package com.mapbox.navigation.ui.androidauto.screenmanager.factories {
     method public String getSourceName();
   }
 
-  public final class FavoritesScreenFactory implements com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenFactory {
+  @Deprecated public final class FavoritesScreenFactory implements com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenFactory {
     ctor public FavoritesScreenFactory(com.mapbox.navigation.ui.androidauto.MapboxCarContext mapboxCarContext);
     method public androidx.car.app.Screen create(androidx.car.app.CarContext carContext);
   }

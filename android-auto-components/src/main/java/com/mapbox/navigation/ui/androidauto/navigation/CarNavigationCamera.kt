@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.androidauto.navigation
 import android.graphics.Rect
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
+import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.ScreenCoordinate
@@ -25,6 +26,13 @@ import com.mapbox.navigation.ui.androidauto.routes.NavigationCarRoutesProvider
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
+import com.mapbox.navigation.ui.maps.internal.camera.FollowingFramingModeHolder
+import com.mapbox.navigation.ui.maps.internal.camera.InternalRouteOverviewOptions
+import com.mapbox.navigation.ui.maps.internal.camera.MapboxNavigationViewportDataSourceFactory
+import com.mapbox.navigation.ui.maps.internal.camera.OverviewMode
+import com.mapbox.navigation.ui.maps.internal.camera.PointsOverviewViewportDataSource
+import com.mapbox.navigation.ui.maps.internal.camera.RouteOverviewViewportDataSource
+import com.mapbox.navigation.ui.maps.internal.camera.requestNavigationCameraToPointsOverview
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -55,12 +63,14 @@ class CarNavigationCamera(
 
     private var mapboxCarMapSurface: MapboxCarMapSurface? = null
     private lateinit var navigationCamera: NavigationCamera
+    private lateinit var pointsOverviewDataSource: PointsOverviewViewportDataSource
 
     @VisibleForTesting
     internal lateinit var viewportDataSource: MapboxNavigationViewportDataSource
         private set
 
     private var overviewPaddingPx by Delegates.notNull<Int>()
+    private var placesOverviewPaddingPx by Delegates.notNull<Int>()
     private var followingPaddingPx by Delegates.notNull<Int>()
     private lateinit var coroutineScope: CoroutineScope
 
@@ -78,6 +88,10 @@ class CarNavigationCamera(
 
     private var isLocationInitialized = false
     private var requestedCameraMode: CarCameraMode? = null
+    private var primaryRouteId: String? = null
+    private var overviewPoints = emptyList<Point>()
+    private var modeBeforePlacesOverview: CarCameraMode? = null
+    private var isPlacesZoomOverrideEnabled = false
 
     // Kept outside the viewport data source, which is only created on attach, so the setting can
     // be changed before the map surface is attached. It is reset on detach: attaching again
@@ -118,15 +132,22 @@ class CarNavigationCamera(
                         stateTransitionOptions = instantTransition,
                     )
 
-                    CarCameraMode.OVERVIEW -> navigationCamera.requestNavigationCameraToOverview(
-                        stateTransitionOptions = instantTransition,
-                    )
+                    CarCameraMode.OVERVIEW -> if (overviewPoints.isNotEmpty()) {
+                        navigationCamera.requestNavigationCameraToPointsOverview(
+                            stateTransitionOptions = instantTransition,
+                        )
+                    } else {
+                        navigationCamera.requestNavigationCameraToOverview(
+                            stateTransitionOptions = instantTransition,
+                        )
+                    }
                 }
             }
         }
     }
 
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
+        if (primaryRouteId != routeProgress.navigationRoute.id) return@RouteProgressObserver
         viewportDataSource.onRouteProgressChanged(routeProgress)
         viewportDataSource.evaluate()
     }
@@ -181,12 +202,27 @@ class CarNavigationCamera(
             FOLLOWING_OVERVIEW_PADDING_DP,
         )
         this.overviewPaddingPx = mapboxCarMapSurface.carContext.dpToPx(OVERVIEW_PADDING_DP)
+        this.placesOverviewPaddingPx = mapboxCarMapSurface.carContext.dpToPx(
+            PLACES_OVERVIEW_PADDING_DP,
+        )
         logAndroidAuto("CarNavigationCamera loaded $mapboxCarMapSurface")
 
         val mapboxMap = mapboxCarMapSurface.mapSurface.getMapboxMap()
         initialCameraOptions?.let { mapboxMap.setCamera(it) }
-        viewportDataSource = MapboxNavigationViewportDataSource(
-            mapboxCarMapSurface.mapSurface.getMapboxMap(),
+        pointsOverviewDataSource = PointsOverviewViewportDataSource(mapboxMap).apply {
+            additionalPointsToFrame(overviewPoints)
+        }
+        viewportDataSource = MapboxNavigationViewportDataSourceFactory.create(
+            mapboxMap,
+            FollowingFramingModeHolder(),
+            RouteOverviewViewportDataSource(
+                mapboxMap,
+                InternalRouteOverviewOptions(
+                    overviewMode = OverviewMode.ACTIVE_LEG,
+                    overviewAlternatives = false,
+                ),
+            ),
+            pointsOverviewDataSource,
         )
         applyZoomUpdatesAllowed()
         navigationCamera = NavigationCamera(
@@ -199,6 +235,7 @@ class CarNavigationCamera(
 
         coroutineScope.launch {
             carRoutesProvider.navigationRoutes.collect { routes ->
+                primaryRouteId = routes.firstOrNull()?.id
                 if (routes.isEmpty()) {
                     viewportDataSource.clearRouteData()
                 } else {
@@ -206,6 +243,10 @@ class CarNavigationCamera(
                 }
                 viewportDataSource.evaluate()
             }
+        }
+        if (overviewPoints.isNotEmpty()) {
+            viewportDataSource.evaluate()
+            updateCameraMode(CarCameraMode.OVERVIEW)
         }
     }
 
@@ -218,6 +259,12 @@ class CarNavigationCamera(
             edgeInsets.left + overviewPaddingPx,
             edgeInsets.bottom + overviewPaddingPx,
             edgeInsets.right + overviewPaddingPx,
+        )
+        pointsOverviewDataSource.padding = EdgeInsets(
+            edgeInsets.top + placesOverviewPaddingPx,
+            edgeInsets.left + placesOverviewPaddingPx,
+            edgeInsets.bottom + placesOverviewPaddingPx,
+            edgeInsets.right + placesOverviewPaddingPx,
         )
 
         val visibleHeight = visibleArea.bottom - visibleArea.top
@@ -242,7 +289,33 @@ class CarNavigationCamera(
         when (carCameraMode) {
             CarCameraMode.IDLE -> navigationCamera.requestNavigationCameraToIdle()
             CarCameraMode.FOLLOWING -> navigationCamera.requestNavigationCameraToFollowing()
-            CarCameraMode.OVERVIEW -> navigationCamera.requestNavigationCameraToOverview()
+            CarCameraMode.OVERVIEW -> if (overviewPoints.isNotEmpty()) {
+                navigationCamera.requestNavigationCameraToPointsOverview()
+            } else {
+                navigationCamera.requestNavigationCameraToOverview()
+            }
+        }
+    }
+
+    internal fun updateOverviewPoints(points: List<Point>) {
+        if (overviewPoints == points) return
+        if (overviewPoints.isEmpty() && points.isNotEmpty()) {
+            modeBeforePlacesOverview = requestedCameraMode ?: initialCarCameraMode
+            isPlacesZoomOverrideEnabled = true
+        } else if (points.isEmpty()) {
+            isPlacesZoomOverrideEnabled = false
+        }
+        overviewPoints = points
+        if (mapboxCarMapSurface != null) {
+            pointsOverviewDataSource.additionalPointsToFrame(points)
+            applyZoomUpdatesAllowed()
+            viewportDataSource.evaluate()
+        }
+        if (points.isNotEmpty()) {
+            updateCameraMode(CarCameraMode.OVERVIEW)
+        } else {
+            modeBeforePlacesOverview?.let(::updateCameraMode)
+            modeBeforePlacesOverview = null
         }
     }
 
@@ -261,6 +334,7 @@ class CarNavigationCamera(
      * the feature is disabled.
      */
     fun zoomUpdatesAllowed(allowed: Boolean) {
+        isPlacesZoomOverrideEnabled = false
         zoomUpdatesAllowedMutable.value = allowed
         applyZoomUpdatesAllowed()
     }
@@ -275,6 +349,8 @@ class CarNavigationCamera(
         val allowed = zoomUpdatesAllowedMutable.value
         viewportDataSource.options.followingFrameOptions.zoomUpdatesAllowed = allowed
         viewportDataSource.options.overviewFrameOptions.zoomUpdatesAllowed = allowed
+        pointsOverviewDataSource.options.zoomUpdatesAllowed =
+            allowed || isPlacesZoomOverrideEnabled
     }
 
     private fun scaleEaseBy(delta: Double) {
@@ -289,6 +365,7 @@ class CarNavigationCamera(
         this.mapboxCarMapSurface = null
         MapboxNavigationApp.unregisterObserver(navigationObserver)
         isLocationInitialized = false
+        primaryRouteId = null
         zoomUpdatesAllowedMutable.value = true
         coroutineScope.cancel()
     }
@@ -309,6 +386,7 @@ class CarNavigationCamera(
          * While overviewing a route, add padding to the viewport.
          */
         private const val OVERVIEW_PADDING_DP = 5
+        private const val PLACES_OVERVIEW_PADDING_DP = 15
 
         /**
          * When zooming the camera by a delta, this is an estimated min-zoom.

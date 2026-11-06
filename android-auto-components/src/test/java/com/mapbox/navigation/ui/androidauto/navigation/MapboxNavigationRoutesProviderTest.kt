@@ -87,6 +87,126 @@ class MapboxNavigationRoutesProviderTest {
     }
 
     @Test
+    fun `explicit preview displays favorite routes without changing ongoing guidance`() {
+        val activeRoute = route("active")
+        val previewRoute = route("favorite")
+        every { mapboxNavigation.getNavigationRoutes() } returns listOf(activeRoute)
+        givenPreview(listOf(previewRoute))
+        sut.onAttached(mapboxNavigation)
+        assertEquals(MapboxNavigationScreenState.ACTIVE_GUIDANCE, sut.state.value.screenState)
+
+        sut.showPreview()
+
+        assertEquals(MapboxNavigationScreenState.ROUTE_PREVIEW, sut.state.value.screenState)
+        assertEquals(listOf(previewRoute), sut.state.value.routes)
+        routesObserver.captured.onRoutesChanged(
+            mockk { every { navigationRoutes } returns listOf(route("updated-active")) },
+        )
+        assertEquals(listOf(previewRoute), sut.state.value.routes)
+        verifyNoRouteChanges()
+    }
+
+    @Test
+    fun `explicit preview waits for asynchronously published preview routes`() {
+        every { mapboxNavigation.getNavigationRoutes() } returns listOf(route("active"))
+        sut.onAttached(mapboxNavigation)
+
+        sut.showPreview()
+
+        assertEquals(MapboxNavigationScreenState.ACTIVE_GUIDANCE, sut.state.value.screenState)
+        val previewRoute = route("favorite")
+        routesPreviewObserver.captured.routesPreviewUpdated(
+            mockk {
+                every { routesPreview } returns mockk {
+                    every { routesList } returns listOf(previewRoute)
+                }
+            },
+        )
+        assertEquals(MapboxNavigationScreenState.ROUTE_PREVIEW, sut.state.value.screenState)
+        assertEquals(listOf(previewRoute), sut.state.value.routes)
+        verifyNoRouteChanges()
+    }
+
+    @Test
+    fun `dismissing explicit preview restores active routes and removes hidden preview`() {
+        val activeRoute = route("active")
+        every { mapboxNavigation.getNavigationRoutes() } returns listOf(activeRoute)
+        givenPreview(listOf(route("favorite")))
+        sut.onAttached(mapboxNavigation)
+        sut.showPreview()
+        every { mapboxNavigation.setRoutesPreview(emptyList()) } answers {
+            routesPreviewObserver.captured.routesPreviewUpdated(
+                mockk { every { routesPreview } returns null },
+            )
+        }
+
+        sut.clearPreview()
+
+        assertEquals(MapboxNavigationScreenState.ACTIVE_GUIDANCE, sut.state.value.screenState)
+        assertEquals(listOf(activeRoute), sut.state.value.routes)
+        routesObserver.captured.onRoutesChanged(
+            mockk { every { navigationRoutes } returns emptyList() },
+        )
+        assertEquals(MapboxNavigationScreenState.FREE_DRIVE, sut.state.value.screenState)
+        verify(exactly = 1) { mapboxNavigation.setRoutesPreview(emptyList()) }
+        verify(exactly = 0) { mapboxNavigation.setNavigationRoutes(any()) }
+    }
+
+    @Test
+    fun `confirming explicit preview replaces guidance with selected routes`() {
+        val activeRoute = route("active")
+        val previewRoute = route("favorite")
+        val alternativeRoute = route("alternative")
+        every { mapboxNavigation.getNavigationRoutes() } returns listOf(activeRoute)
+        givenPreview(listOf(previewRoute, alternativeRoute))
+        sut.onAttached(mapboxNavigation)
+        sut.showPreview()
+        every { mapboxNavigation.setNavigationRoutes(any()) } answers {
+            val routes = firstArg<List<NavigationRoute>>()
+            routesObserver.captured.onRoutesChanged(
+                mockk { every { navigationRoutes } returns routes },
+            )
+        }
+        every { mapboxNavigation.setRoutesPreview(emptyList()) } answers {
+            routesPreviewObserver.captured.routesPreviewUpdated(
+                mockk { every { routesPreview } returns null },
+            )
+        }
+
+        sut.startNavigation("alternative")
+
+        assertEquals(MapboxNavigationScreenState.ACTIVE_GUIDANCE, sut.state.value.screenState)
+        assertEquals(listOf(alternativeRoute, previewRoute), sut.state.value.routes)
+        verifyOrder {
+            mapboxNavigation.setNavigationRoutes(listOf(alternativeRoute, previewRoute))
+            mapboxNavigation.setRoutesPreview(emptyList())
+        }
+    }
+
+    @Test
+    fun `clearing a preview resets explicit preview precedence`() {
+        val activeRoute = route("active")
+        every { mapboxNavigation.getNavigationRoutes() } returns listOf(activeRoute)
+        givenPreview(listOf(route("favorite")))
+        sut.onAttached(mapboxNavigation)
+        sut.showPreview()
+
+        routesPreviewObserver.captured.routesPreviewUpdated(
+            mockk { every { routesPreview } returns null },
+        )
+        routesPreviewObserver.captured.routesPreviewUpdated(
+            mockk {
+                every { routesPreview } returns mockk {
+                    every { routesList } returns listOf(route("other-preview"))
+                }
+            },
+        )
+
+        assertEquals(MapboxNavigationScreenState.ACTIVE_GUIDANCE, sut.state.value.screenState)
+        assertEquals(listOf(activeRoute), sut.state.value.routes)
+    }
+
+    @Test
     fun `select route changes preview primary route`() {
         val firstRoute = route("first")
         val secondRoute = route("second")

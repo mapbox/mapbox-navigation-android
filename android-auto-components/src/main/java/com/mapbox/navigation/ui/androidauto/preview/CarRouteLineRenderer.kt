@@ -75,12 +75,23 @@ class CarRouteLineRenderer(
 
     private val onPositionChangedListener = OnIndicatorPositionChangedListener { point ->
         val resources = routeLineResources ?: return@OnIndicatorPositionChangedListener
+        val activeRoute = MapboxNavigationApp.current()?.getNavigationRoutes()?.firstOrNull()
+        if (activeRoute == null ||
+            activeRoute.id != resources.routeLineApi.getPrimaryNavigationRoute()?.id
+        ) {
+            return@OnIndicatorPositionChangedListener
+        }
         val result = resources.routeLineApi.updateTraveledRouteLine(point)
         resources.routeLineView.renderRouteLineUpdate(resources.style, result)
     }
 
     private val routeProgressObserver = RouteProgressObserver { routeProgress ->
         val resources = routeLineResources ?: return@RouteProgressObserver
+        if (resources.routeLineApi.getPrimaryNavigationRoute()?.id !=
+            routeProgress.navigationRoute.id
+        ) {
+            return@RouteProgressObserver
+        }
         resources.routeLineApi.updateWithRouteProgress(routeProgress) { result ->
             resources.routeLineView.renderRouteLineUpdate(resources.style, result)
         }
@@ -194,6 +205,8 @@ class CarRouteLineRenderer(
         routes: List<NavigationRoute>,
     ) {
         logAndroidAuto("CarRouteLine onRoutesChanged ${routes.size}")
+        val clearArrowValue = resources.routeArrowApi.clearArrows()
+        resources.routeArrowView.render(resources.style, clearArrowValue)
         if (routes.isNotEmpty()) {
             val routesMetadata = MapboxNavigationApp.current()
                 ?.getAlternativeMetadataFor(routes).orEmpty()
@@ -204,8 +217,6 @@ class CarRouteLineRenderer(
             resources.routeLineApi.clearRouteLine { value ->
                 resources.routeLineView.renderClearRouteLineValue(resources.style, value)
             }
-            val clearArrowValue = resources.routeArrowApi.clearArrows()
-            resources.routeArrowView.render(resources.style, clearArrowValue)
         }
     }
 

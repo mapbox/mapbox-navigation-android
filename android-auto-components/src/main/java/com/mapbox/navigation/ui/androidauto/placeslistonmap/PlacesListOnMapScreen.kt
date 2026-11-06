@@ -1,13 +1,11 @@
 package com.mapbox.navigation.ui.androidauto.placeslistonmap
 
-import androidx.annotation.StringRes
 import androidx.annotation.UiThread
 import androidx.car.app.Screen
 import androidx.car.app.annotations.RequiresCarApi
 import androidx.car.app.model.Action
 import androidx.car.app.model.ActionStrip
 import androidx.car.app.model.ItemList
-import androidx.car.app.model.ListTemplate
 import androidx.car.app.model.Template
 import androidx.car.app.navigation.model.MapWithContentTemplate
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -16,7 +14,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.ui.androidauto.R
 import com.mapbox.navigation.ui.androidauto.extensions.supportsUnifiedNavigation
 import com.mapbox.navigation.ui.androidauto.internal.extensions.addBackPressedHandler
 import com.mapbox.navigation.ui.androidauto.internal.setHeaderCompat
@@ -94,13 +91,7 @@ internal class PlacesListOnMapScreen @UiThread constructor(
 
     @RequiresCarApi(7)
     private fun buildMapWithContentTemplate(): MapWithContentTemplate {
-        val listTemplate = ListTemplate.Builder()
-            .setHeaderCompat(carContext, title = null, startAction = Action.BACK)
-            .setLoadingOrItemList(
-                setLoading = { setLoading(it) },
-                setItemList = { setSingleList(it) },
-            )
-            .build()
+        val listTemplate = placesListOnMapManager.buildListTemplate(carContext)
         return MapWithContentTemplate.Builder()
             .setContentTemplate(listTemplate)
             .setActionStrip(actionStrip())
@@ -126,32 +117,14 @@ internal class PlacesListOnMapScreen @UiThread constructor(
         setLoading: B.(Boolean) -> Unit,
         setItemList: B.(ItemList) -> Unit,
     ): B = apply {
-        val itemList = itemListOrNull()
+        val itemList = placesListOnMapManager.itemListOrNull(carContext)
         if (itemList == null) setLoading(true) else setItemList(itemList)
     }
-
-    /**
-     * The list to show for the current state, or `null` while the places are loading.
-     */
-    private fun itemListOrNull(): ItemList? =
-        when (val state = placesListOnMapManager.state.value) {
-            PlacesListState.Loading -> null
-            is PlacesListState.Loaded -> if (state.itemList.items.isEmpty()) {
-                buildNoItemsList(R.string.car_search_no_results)
-            } else {
-                state.itemList
-            }
-            PlacesListState.Failed -> buildNoItemsList(R.string.car_search_error)
-        }
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     private fun actionStrip(): ActionStrip =
         searchCarContext.mapboxCarContext.options.actionStripProvider
             .getActionStrip(this, mapboxScreenKey)
-
-    private fun buildNoItemsList(@StringRes stringRes: Int) = ItemList.Builder()
-        .setNoItemsMessage(carContext.getString(stringRes))
-        .build()
 
     private fun onPlaceRecordsChanged(placeRecords: List<PlaceRecord>) {
         invalidate()

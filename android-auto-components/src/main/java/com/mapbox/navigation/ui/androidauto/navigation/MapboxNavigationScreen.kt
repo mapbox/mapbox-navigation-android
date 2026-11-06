@@ -26,13 +26,22 @@ import com.mapbox.navigation.ui.androidauto.action.MapboxMapActionStrip
 import com.mapbox.navigation.ui.androidauto.internal.extensions.addBackPressedHandler
 import com.mapbox.navigation.ui.androidauto.internal.extensions.contentLimit
 import com.mapbox.navigation.ui.androidauto.internal.logAndroidAuto
+import com.mapbox.navigation.ui.androidauto.internal.search.FavoritesApi
 import com.mapbox.navigation.ui.androidauto.location.CarLocationRenderer
 import com.mapbox.navigation.ui.androidauto.navigation.roadlabel.CarRoadLabelRenderer
 import com.mapbox.navigation.ui.androidauto.navigation.speedlimit.CarSpeedLimitRenderer
+import com.mapbox.navigation.ui.androidauto.placeslistonmap.PlacesListOnMapManager
+import com.mapbox.navigation.ui.androidauto.placeslistonmap.buildListTemplate
 import com.mapbox.navigation.ui.androidauto.preview.CarRouteLineRenderer
 import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreen
+import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenFactory
+import com.mapbox.navigation.ui.androidauto.screenmanager.MapboxScreenManager
+import com.mapbox.navigation.ui.androidauto.screenmanager.factories.FavoritesScreenFactory
+import com.mapbox.navigation.ui.androidauto.search.ResumedRoutePreviewCallback
+import com.mapbox.navigation.ui.androidauto.search.showSearchToast
 import com.mapbox.navigation.ui.androidauto.settings.CarSettingsMode
 import com.mapbox.navigation.ui.androidauto.settings.buildCarSettingsTemplate
+import com.mapbox.search.ServiceProvider
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
@@ -43,7 +52,7 @@ import kotlinx.coroutines.launch
 /**
  * A single map screen for free drive, route preview, and active guidance.
  *
- * Route preview and inline settings use [MapWithContentTemplate]. Free drive and active guidance use
+ * Route preview and inline panels use [MapWithContentTemplate]. Free drive and active guidance use
  * [NavigationTemplate], with active guidance displaying the host's native travel-estimate card.
  * The screen requires Car API 7 and keeps the map and its renderers attached while navigation
  * state changes.
@@ -83,14 +92,40 @@ internal class MapboxNavigationScreen @UiThread constructor(
     )
     private var isResumed = false
     private var routeClickRefresh: Job? = null
+
     internal var isShowingSettings = false
         private set
+    internal var isShowingFavorites = false
+        private set
+    private val isShowingInlineContent: Boolean
+        get() = isShowingSettings || isShowingFavorites
+
+    private val favoritesManager by lazy {
+        PlacesListOnMapManager(
+            FavoritesApi(ServiceProvider.INSTANCE.favoritesDataProvider()),
+        ).apply { showsInListTemplate = true }
+    }
+    private var favoritesJob: Job? = null
+    private var isFramingFavorites = false
+
+    private val favoritesRouteCallback by lazy {
+        ResumedRoutePreviewCallback(
+            lifecycle = lifecycle,
+            mapboxScreenManager = mapboxCarContext.mapboxScreenManager,
+            routePreviewRequest = mapboxCarContext.routePreviewRequest,
+            onPreviewReady = {
+                hideInlineContent()
+                routesProvider.showPreview()
+                invalidate()
+            },
+        ) { messageRes -> carContext.showSearchToast(messageRes) }
+    }
 
     init {
         logAndroidAuto("MapboxNavigationScreen constructor")
         addBackPressedHandler {
-            if (isShowingSettings) {
-                isShowingSettings = false
+            if (isShowingInlineContent) {
+                hideInlineContent()
                 invalidate()
                 return@addBackPressedHandler
             }
@@ -106,7 +141,7 @@ internal class MapboxNavigationScreen @UiThread constructor(
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     navigationInfoProvider.carNavigationInfo.collect {
-                        if (!isShowingSettings &&
+                        if (!isShowingInlineContent &&
                             routesProvider.state.value.screenState ==
                             MapboxNavigationScreenState.ACTIVE_GUIDANCE
                         ) {
@@ -119,8 +154,8 @@ internal class MapboxNavigationScreen @UiThread constructor(
                         .map { it.screenState }
                         .distinctUntilChanged()
                         .collect { screenState ->
-                            if (isShowingSettings) {
-                                isShowingSettings = false
+                            if (isShowingInlineContent) {
+                                hideInlineContent()
                                 invalidate()
                             }
                             if (isResumed) {
@@ -161,8 +196,8 @@ internal class MapboxNavigationScreen @UiThread constructor(
 
                 override fun onPause(owner: LifecycleOwner) {
                     logAndroidAuto("MapboxNavigationScreen onPause")
-                    if (isShowingSettings) {
-                        isShowingSettings = false
+                    if (isShowingInlineContent) {
+                        hideInlineContent()
                         invalidate()
                     }
                     isResumed = false
@@ -179,7 +214,7 @@ internal class MapboxNavigationScreen @UiThread constructor(
     }
 
     private fun onRouteClicked(route: NavigationRoute) {
-        if (isShowingSettings) return
+        if (isShowingInlineContent) return
         val state = routesProvider.state.value
         if (state.screenState != MapboxNavigationScreenState.ROUTE_PREVIEW) return
         val routesPreview = state.routesPreview ?: return
@@ -196,27 +231,84 @@ internal class MapboxNavigationScreen @UiThread constructor(
     override fun onGetTemplate(): Template {
         val state = routesProvider.state.value
         logAndroidAuto("MapboxNavigationScreen onGetTemplate ${state.screenState}")
-        if (isShowingSettings) {
-            return buildMapWithContentTemplate(
-                mapboxCarContext.options.settingsTemplateProvider
-                    ?.getSettingsTemplate(this, state.screenState.settingsMode())
-                    ?: mapboxCarContext.buildCarSettingsTemplate(),
-                state.screenState,
-            )
-        }
-        return when (state.screenState) {
-            MapboxNavigationScreenState.FREE_DRIVE -> buildFreeDriveTemplate()
-            MapboxNavigationScreenState.ACTIVE_GUIDANCE -> buildActiveGuidanceTemplate()
-            MapboxNavigationScreenState.ROUTE_PREVIEW -> buildMapWithContentTemplate(
-                buildRoutePreviewTemplate(state),
-                state.screenState,
-            )
+        return when {
+            isShowingFavorites -> {
+                buildMapWithContentTemplate(
+                    favoritesManager.buildListTemplate(carContext),
+                    state.screenState,
+                )
+            }
+            isShowingSettings -> {
+                buildMapWithContentTemplate(
+                    mapboxCarContext.options.settingsTemplateProvider
+                        ?.getSettingsTemplate(this, state.screenState.settingsMode())
+                        ?: mapboxCarContext.buildCarSettingsTemplate(),
+                    state.screenState,
+                )
+            }
+            else -> when (state.screenState) {
+                MapboxNavigationScreenState.FREE_DRIVE -> buildFreeDriveTemplate()
+                MapboxNavigationScreenState.ACTIVE_GUIDANCE -> buildActiveGuidanceTemplate()
+                MapboxNavigationScreenState.ROUTE_PREVIEW -> buildMapWithContentTemplate(
+                    buildRoutePreviewTemplate(state),
+                    state.screenState,
+                )
+            }
         }
     }
 
     internal fun showSettings() {
+        hideInlineContent()
         isShowingSettings = true
         invalidate()
+    }
+
+    @Suppress("DEPRECATION")
+    internal fun showFavorites() {
+        val screenManager = mapboxCarContext.mapboxScreenManager
+        if (MapboxScreen.FAVORITES in screenManager &&
+            screenManager.requireScreenFactory<MapboxScreenFactory>(MapboxScreen.FAVORITES)
+            !is FavoritesScreenFactory
+        ) {
+            MapboxScreenManager.push(MapboxScreen.FAVORITES)
+            return
+        }
+        if (isShowingFavorites) return
+        hideInlineContent()
+        isShowingFavorites = true
+        isFramingFavorites = mapboxCarContext.options.frameFavoritesOnMap
+        favoritesJob = lifecycleScope.launch {
+            launch { favoritesManager.state.collect { invalidate() } }
+            if (isFramingFavorites) {
+                launch {
+                    favoritesManager.placeRecords.collect { places ->
+                        carNavigationCamera.updateOverviewPoints(
+                            places.mapNotNull { it.coordinate },
+                        )
+                    }
+                }
+            }
+            favoritesManager.placeClicks.collect { place ->
+                mapboxCarContext.routePreviewRequest.request(place, favoritesRouteCallback)
+            }
+        }
+        mapboxCarContext.mapboxCarMap.registerObserver(favoritesManager)
+        invalidate()
+    }
+
+    private fun hideInlineContent() {
+        isShowingSettings = false
+        favoritesJob?.cancel()
+        favoritesJob = null
+        if (isFramingFavorites) {
+            carNavigationCamera.updateOverviewPoints(emptyList())
+            isFramingFavorites = false
+        }
+        if (isShowingFavorites) {
+            mapboxCarContext.routePreviewRequest.cancelRequest(favoritesRouteCallback)
+            mapboxCarContext.mapboxCarMap.unregisterObserver(favoritesManager)
+        }
+        isShowingFavorites = false
     }
 
     private fun buildMapWithContentTemplate(
