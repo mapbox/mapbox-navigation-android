@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.maps.guidance.restarea.api
 
-import android.net.Uri
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.bindgen.DataRef
@@ -9,6 +8,7 @@ import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.common.MapboxServices
 import com.mapbox.common.ResourceLoadError
 import com.mapbox.common.ResourceLoadResult
+import com.mapbox.navigation.base.internal.utils.MapboxApiUrlUtils
 import com.mapbox.navigation.base.internal.utils.MapboxOptionsUtil
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.roadobject.reststop.RestStop
@@ -33,10 +33,6 @@ import kotlinx.coroutines.launch
 class MapboxRestAreaApi @JvmOverloads constructor(
     val options: MapboxRestAreaOptions = MapboxRestAreaOptions.Builder().build(),
 ) {
-
-    private companion object {
-        private const val KEY: String = "access_token"
-    }
 
     private val mainJobController by lazy { InternalJobControlFactory.createMainScopeJobControl() }
     private val resourceLoader by lazy { ResourceLoaderFactory.getInstance() }
@@ -113,9 +109,7 @@ class MapboxRestAreaApi @JvmOverloads constructor(
         consumer: MapboxNavigationConsumer<Expected<RestAreaGuideMapError, RestAreaGuideMapValue>>,
     ) {
         val accessToken = MapboxOptionsUtil.getTokenForService(MapboxServices.DIRECTIONS)
-        val url = Uri.parse(result.sapaMapUrl).buildUpon()
-            .appendQueryParameter(KEY, accessToken)
-            .build().toString()
+        val url = MapboxApiUrlUtils.withMapboxAccessToken(result.sapaMapUrl, accessToken)
         val requestAction = RestAreaAction.PrepareRestAreaMapRequest(url)
         val signboardRequest = RestAreaProcessor.process(requestAction)
         val loadRequest = (signboardRequest as RestAreaResult.RestAreaMapRequest).request

@@ -469,8 +469,13 @@ class MapboxRouteShieldApiTest {
 
     @Test
     fun `get shields for road uses up-to-date access token`() = coroutineRule.runBlockingTest {
+        val component = mockk<RoadComponent>(relaxed = true) {
+            every { shield } returns mockk<MapboxShield>(relaxed = true) {
+                every { baseUrl() } returns "https://api.mapbox.com/styles/v1"
+            }
+        }
         val road = mockk<Road> {
-            every { components } returns listOf(mockk(relaxed = true))
+            every { components } returns listOf(component)
         }
         val userId = "userId"
         val styleId = "styleId"

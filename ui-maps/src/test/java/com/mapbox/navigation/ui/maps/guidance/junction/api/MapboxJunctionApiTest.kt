@@ -133,7 +133,7 @@ class MapboxJunctionApiTest {
         val consumer: JunctionValueConsumer = mockk(relaxed = true)
 
         val expectedError = "No junction available for current maneuver."
-        val url = "https//abc.mapbox.com"
+        val url = "https://api.mapbox.com/guidance-views/v1/abc"
         val loadRequest = mockk<ResourceLoadRequest>()
         val loadResponse = mockk<Expected<ResourceLoadError, ResourceLoadResult>>()
         val rasterResult = mockk<JunctionResult.JunctionRaster.Empty>()
@@ -160,7 +160,7 @@ class MapboxJunctionApiTest {
         val consumer: JunctionValueConsumer = mockk(relaxed = true)
 
         val expectedError = "Resource is missing"
-        val url = "https//abc.mapbox.com"
+        val url = "https://api.mapbox.com/guidance-views/v1/abc"
         val loadRequest = mockk<ResourceLoadRequest>()
         val loadResponse = mockk<Expected<ResourceLoadError, ResourceLoadResult>>()
         val rasterResult = mockk<JunctionResult.JunctionRaster.Failure> {
@@ -189,7 +189,7 @@ class MapboxJunctionApiTest {
         val consumer: JunctionValueConsumer = mockk(relaxed = true)
 
         val expectedError = "Error parsing raster to bitmap as raster is empty"
-        val url = "https//abc.mapbox.com"
+        val url = "https://api.mapbox.com/guidance-views/v1/abc"
         val loadRequest = mockk<ResourceLoadRequest>()
         val loadResponse = mockk<Expected<ResourceLoadError, ResourceLoadResult>>()
         val rasterData = byteArrayOf().toDataRef()
@@ -222,7 +222,7 @@ class MapboxJunctionApiTest {
         val consumer: JunctionValueConsumer = mockk(relaxed = true)
 
         val expectedBitmap = mockk<Bitmap>()
-        val url = "https//abc.mapbox.com"
+        val url = "https://api.mapbox.com/guidance-views/v1/abc"
         val loadRequest = mockk<ResourceLoadRequest>()
         val loadResponse = mockk<Expected<ResourceLoadError, ResourceLoadResult>>()
         val rasterData = byteArrayOf(12, -12, 23, 45, 67, 65, 44, 45, 12, 34, 45, 56, 76)
@@ -339,7 +339,7 @@ class MapboxJunctionApiTest {
         val consumer: JunctionViewDataConsumer = mockk(relaxed = true)
 
         val expectedError = "Resource is missing"
-        val url = "https//abc.mapbox.com"
+        val url = "https://api.mapbox.com/guidance-views/v1/abc"
         val loadRequest = mockk<ResourceLoadRequest>()
         val loadResponse = mockk<Expected<ResourceLoadError, ResourceLoadResult>>()
         val rasterResult = mockk<JunctionResult.JunctionRaster.Failure> {
@@ -367,7 +367,7 @@ class MapboxJunctionApiTest {
     fun `process state junction available for svg`() {
         val consumer: JunctionViewDataConsumer = mockk(relaxed = true)
 
-        val url = "https//abc.mapbox.com"
+        val url = "https://api.mapbox.com/guidance-views/v1/abc"
         val loadRequest = mockk<ResourceLoadRequest>()
         val loadResponse = mockk<Expected<ResourceLoadError, ResourceLoadResult>>()
         val svgData = byteArrayOf(12, -12, 23, 45, 67, 65, 44, 45, 12, 34, 45, 56, 76)
@@ -407,7 +407,7 @@ class MapboxJunctionApiTest {
     fun `process state junction available for explicit png`() {
         val consumer: JunctionViewDataConsumer = mockk(relaxed = true)
 
-        val url = "https//abc.mapbox.com"
+        val url = "https://api.mapbox.com/guidance-views/v1/abc"
         val loadRequest = mockk<ResourceLoadRequest>()
         val loadResponse = mockk<Expected<ResourceLoadError, ResourceLoadResult>>()
         val svgData = byteArrayOf(12, -12, 23, 45, 67, 65, 44, 45, 12, 34, 45, 56, 76)
@@ -443,18 +443,49 @@ class MapboxJunctionApiTest {
         }
     }
 
+    @Test
+    fun `access token is not sent to a junction url on another host`() {
+        val consumer: JunctionViewDataConsumer = mockk(relaxed = true)
+
+        val url = "https://test.example/guidance-views/v1/abc"
+        val loadRequest = mockk<ResourceLoadRequest>()
+        val loadResponse = mockk<Expected<ResourceLoadError, ResourceLoadResult>>()
+        givenResourceLoaderResponse(
+            request = loadRequest,
+            response = loadResponse,
+        )
+        givenProcessorResults(
+            checkJunctionAvailability = JunctionResult.JunctionAvailable(url),
+            prepareJunctionRequest = JunctionResult.JunctionRequest(loadRequest),
+            processJunctionResponse = JunctionResult.JunctionRaster.Success(
+                byteArrayOf(1, 2, 3).toDataRef(),
+                "image/png",
+            ),
+        )
+
+        junctionApi.generateJunction(bannerInstructions, JunctionViewFormat.PNG, consumer)
+
+        verify(exactly = 1) {
+            JunctionProcessor.process(
+                JunctionAction.PrepareJunctionRequest(
+                    "https://test.example/guidance-views/v1/abc?image_format=png",
+                ),
+            )
+        }
+    }
+
     private fun buildExpectedJunctionUrl(
         baseUrl: String,
         @JunctionViewFormat format: String?,
         token: String? = DIRECTIONS_TOKEN,
     ): String {
         return Uri.parse(baseUrl).buildUpon()
-            .appendQueryParameter("access_token", token)
             .apply {
                 if (format != null) {
                     appendQueryParameter("image_format", format)
                 }
             }
+            .appendQueryParameter("access_token", token)
             .build()
             .toString()
     }
