@@ -1642,6 +1642,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         tripSessionLocationEngine.destroy()
         routeAlternativesController.unregisterAll()
         navigationTelemetry.clearObservers()
+        rerouteController?.shutdown()
         rerouteController?.interrupt()
 
         navigator.shutdown()

@@ -105,10 +105,12 @@ class MapboxNativeNavigatorImpl(
     override val inputsService: InputsServiceHandle =
         NavigatorLoader.createInputService(config, historyRecorderComposite)
 
-    // Built once and kept stable; its internal Navigator/CacheHandle are replaced on every
-    // (re)create in [init].
-    override val navigatorHandle: NavigatorHandle =
+    private var _navigatorHandleRef: NavigatorHandle? =
         NavigatorLoader.createNavigatorHandle(historyRecorderComposite)
+
+    // Nulled in shutdown() so the C++ peer can be released before GC sweeps this island.
+    override val navigatorHandle: NavigatorHandle
+        get() = _navigatorHandleRef ?: error("NavigatorHandle accessed after shutdown")
 
     private val nativeNavigatorRecreationObservers =
         CopyOnWriteArraySet<NativeNavigatorRecreationObserver>()
@@ -543,6 +545,7 @@ class MapboxNativeNavigatorImpl(
 
         isShutdown = true
         navigator.shutdown()
+        _navigatorHandleRef = null
     }
 
     override fun createMapsPredictiveCacheController(
