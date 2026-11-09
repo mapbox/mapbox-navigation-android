@@ -7,3 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 fun MapboxNavigation.internalEvUpdatedData(): StateFlow<Map<String, String>> =
     internalEvUpdatedData()
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+fun MapboxNavigation.internalChargerConnected(): StateFlow<Boolean> =
+    internalChargerConnected()

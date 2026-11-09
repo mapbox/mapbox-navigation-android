@@ -176,6 +176,7 @@ import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.navigator.TilesConfig
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -343,6 +344,8 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         NavigationComponentProvider.createRouteRefreshRequestDataProvider()
 
     private val evDynamicDataHolder = NavigationComponentProvider.createEVDynamicDataHolder()
+
+    private val chargerConnected = MutableStateFlow(false)
 
     private val routerWrapper: RouterWrapper
 
@@ -2397,9 +2400,9 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     /**
-     * Reports that the driver has started charging at the current EV charging station,
-     * transitioning the charging phase from [ChargingState.AWAIT_CHARGING] to
-     * [ChargingState.CHARGING].
+     * Reports that the charger has been connected. At an EV charging station of the route,
+     * transitions the charging phase from [ChargingState.AWAIT_CHARGING] to
+     * [ChargingState.CHARGING], otherwise to [ChargingState.EXTRA_CHARGING].
      *
      * Call this when your application detects, from vehicle telemetry, that the charger has
      * been connected. This does not affect the navigation state; see [stopCharging] to resume
@@ -2409,13 +2412,14 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      */
     @ExperimentalMapboxNavigationAPI
     fun startCharging() {
+        chargerConnected.value = true
         navigator.startCharging()
     }
 
     /**
-     * Exits the charging state entered via [startCharging], resuming navigation and
-     * automatically advancing to the next route leg if applicable. Must be called only while
-     * the current waypoint is an EV charging station.
+     * Reports that the charger has been disconnected, exiting the charging state entered via
+     * [startCharging]. If the vehicle was charging at a reached waypoint, resumes navigation and
+     * automatically advances to the next route leg.
      *
      * @param callback invoked with whether the next leg was started, once changing leg is
      * resolved (or immediately if changing leg isn't possible)
@@ -2423,6 +2427,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     @ExperimentalMapboxNavigationAPI
     @JvmOverloads
     fun stopCharging(callback: StopChargingCallback = StopChargingCallback {}) {
+        chargerConnected.value = false
         navigator.stopCharging { legChanged ->
             callback.onFinished(ChargingFinishedData(legChanged))
         }
@@ -2494,6 +2499,12 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     internal fun internalEvUpdatedData(): StateFlow<Map<String, String>> {
         return evDynamicDataHolder.updatedRawData()
     }
+
+    /**
+     * Allows other Nav SDK modules observe whether a charger is connected, as reported by
+     * [startCharging] and [stopCharging].
+     */
+    internal fun internalChargerConnected(): StateFlow<Boolean> = chargerConnected
 
     internal fun registerOnRoutesSetStartedObserver(observer: SetNavigationRoutesStartedObserver) {
         directionsSession.registerSetNavigationRoutesStartedObserver(observer)

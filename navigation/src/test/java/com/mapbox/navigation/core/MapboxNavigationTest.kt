@@ -2419,6 +2419,20 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         assertEquals(true, result?.legChanged)
     }
 
+    @OptIn(ExperimentalMapboxNavigationAPI::class)
+    @Test
+    fun chargerConnectedFollowsStartAndStopCharging() {
+        createMapboxNavigation()
+        every { navigator.startCharging() } just Runs
+        every { navigator.stopCharging(any()) } just Runs
+
+        assertFalse(mapboxNavigation.internalChargerConnected().value)
+        mapboxNavigation.startCharging()
+        assertTrue(mapboxNavigation.internalChargerConnected().value)
+        mapboxNavigation.stopCharging()
+        assertFalse(mapboxNavigation.internalChargerConnected().value)
+    }
+
     @Test(expected = IllegalArgumentException::class)
     fun moveRoutesFromPreviewToNavigatorNoPreviewedRoutes() {
         createMapboxNavigation()
