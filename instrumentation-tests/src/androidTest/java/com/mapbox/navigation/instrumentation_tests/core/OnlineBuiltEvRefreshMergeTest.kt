@@ -24,12 +24,13 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 /**
- * The device EV refresh of a route the server built sends only state_of_charge and the stop's
- * charge numbers from the planner, and sends back the route's own values the merge would drop.
- * The route model kept in Kotlin and the native route model merge that response separately, so
- * both are run on the same route and response here and must agree with each other and keep
- * everything but the charge. The JVM unit test JavaRouteOperationsOnlineBuiltEvRefreshTest and
- * nav-native ev_refresh_online_built.test.cpp use the same route and response.
+ * The device EV refresh of a route the server built sends only state_of_charge, the charge
+ * notifications and the stop's charge numbers from the planner, and sends back the route's own
+ * values the merge would drop. The route model kept in Kotlin and the native route model merge
+ * that response separately, so both are run on the same route and response here and must agree
+ * with each other and keep everything but the charge. The JVM unit test
+ * JavaRouteOperationsOnlineBuiltEvRefreshTest and nav-native ev_refresh_online_built.test.cpp
+ * use the same route and response.
  */
 class OnlineBuiltEvRefreshMergeTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
 
@@ -104,10 +105,24 @@ class OnlineBuiltEvRefreshMergeTest : BaseTest<EmptyTestActivity>(EmptyTestActiv
                 isNow.annotation()["state_of_charge"].asJsonArray.map { it.asDouble },
             )
             assertEquals("leg $leg", was["duration"].asDouble, isNow["duration"].asDouble, 0.0)
-            for (key in ROAD_OBJECT_KEYS) {
+            for (key in ROAD_OBJECT_KEYS - "notifications") {
                 assertEquals("leg $leg $key", sorted(was[key]), sorted(isNow[key]))
             }
+            assertEquals(
+                "leg $leg notifications",
+                sorted(was["notifications"]) { !it.isChargeNotification() },
+                sorted(isNow["notifications"]) { !it.isChargeNotification() },
+            )
         }
+        // The charge notifications are the response's: the route's own are gone.
+        assertEquals(
+            listOf("evMinChargeAtDestination"),
+            after.legs().flatMap { leg ->
+                leg.asJsonObject["notifications"]?.asJsonArray?.toList().orEmpty()
+                    .filter { it.isChargeNotification() }
+                    .map { it.asJsonObject["subtype"].asString }
+            },
+        )
 
         val expectedStation = before.waypoints()[1].deepCopy().asJsonObject
         expectedStation["metadata"].asJsonObject.apply {
@@ -156,11 +171,18 @@ class OnlineBuiltEvRefreshMergeTest : BaseTest<EmptyTestActivity>(EmptyTestActiv
     private fun JsonObject.metadata(): JsonObject = this["metadata"].asJsonObject
 
     // Number values compared as numbers: a merge may write 3 as 3.0.
-    private fun sorted(list: JsonElement?): List<String> =
+    private fun sorted(
+        list: JsonElement?,
+        keep: (JsonElement) -> Boolean = { true },
+    ): List<String> =
         list?.takeIf { it.isJsonArray }?.asJsonArray
+            ?.filter(keep)
             ?.map { normalized(it).toString() }
             ?.sorted()
             .orEmpty()
+
+    private fun JsonElement.isChargeNotification(): Boolean =
+        asJsonObject["subtype"]?.asString in CHARGE_SUBTYPES
 
     private fun normalized(element: JsonElement?): JsonElement? = when {
         element == null || element.isJsonNull -> null
@@ -180,6 +202,11 @@ class OnlineBuiltEvRefreshMergeTest : BaseTest<EmptyTestActivity>(EmptyTestActiv
         val ANNOTATION_KEYS =
             listOf("distance", "duration", "congestion_numeric", "historical_speed")
         val ROAD_OBJECT_KEYS = listOf("incidents", "closures", "notifications")
+        val CHARGE_SUBTYPES = setOf(
+            "evInsufficientCharge",
+            "evMinChargeAtChargingStation",
+            "evMinChargeAtDestination",
+        )
 
         val ROUTE_OPTIONS: RouteOptions = RouteOptions.builder()
             .profile("driving-traffic")
@@ -271,8 +298,10 @@ class OnlineBuiltEvRefreshMergeTest : BaseTest<EmptyTestActivity>(EmptyTestActiv
         """.trimIndent()
 
         // What the device refresh sends for that route with the car at point 2: the planner's
-        // charge, the online historical_speed slice, the in-range road objects and dynamic
-        // notifications rebased to the car, and the online stop with new charge numbers.
+        // charge and charge notifications, the online historical_speed slice, the in-range road
+        // objects and other dynamic notifications rebased to the car (none here:
+        // stationUnavailable at 1 lies before the car), and the online stop with new charge
+        // numbers.
         val DEVICE_RESPONSE = """
             {"code": "Ok", "route": {
               "legs": [
@@ -282,15 +311,13 @@ class OnlineBuiltEvRefreshMergeTest : BaseTest<EmptyTestActivity>(EmptyTestActiv
                                 "geometry_index_start": -1, "geometry_index_end": 1},
                                {"id": "2", "type": "accident",
                                 "geometry_index_start": 2, "geometry_index_end": 2}],
-                 "closures": [{"geometry_index_start": -1, "geometry_index_end": 2}],
-                 "notifications": [
-                   {"type": "alert", "refresh_type": "dynamic",
-                    "subtype": "evInsufficientCharge", "geometry_index": 1}]},
+                 "closures": [{"geometry_index_start": -1, "geometry_index_end": 2}]},
                 {"annotation": {"state_of_charge": [67, 66, 65, 64, 63],
                                 "historical_speed": [60, 61, 62, 63, 64]},
                  "notifications": [
-                   {"type": "alert", "refresh_type": "dynamic",
-                    "subtype": "evMinChargeAtDestination", "geometry_index": 2}]}],
+                   {"type": "violation", "subtype": "evMinChargeAtDestination",
+                    "refresh_type": "dynamic", "details": {"requested_value": 7700,
+                    "actual_value": 4200, "unit": "Wh"}}]}],
               "waypoints": [
                 {},
                 {"name": "station", "location": [11.505, 48.1],

@@ -731,7 +731,7 @@ class RouteAlternativesControllerTest {
         }
 
     @Test
-    fun `ignore offline alternatives if current route is online`() =
+    fun `offline alternatives are offered when current route is online`() =
         coroutineRule.runBlockingTest {
             val routeAlternativesController = createRouteAlternativesController()
             val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
@@ -753,8 +753,70 @@ class RouteAlternativesControllerTest {
                 null,
                 listOf(
                     createNativeAlternativeMock(
-                        alternativeId = 0,
+                        alternativeId = 1,
+                        fileName = "route_response_new_for_refresh.json",
+                        routeIndex = 0,
+                        routerOrigin = com.mapbox.navigator.RouterOrigin.ONBOARD,
+                    ),
+                    createNativeAlternativeMock(
+                        alternativeId = 2,
+                        fileName = "route_response_new_for_refresh.json",
+                        routeIndex = 1,
+                        routerOrigin = com.mapbox.navigator.RouterOrigin.ONBOARD,
+                    ),
+                ),
+                emptyList(),
+            )
+
+            assertNotNull(
+                "no routes update suggestion",
+                routesUpdateSuggestion,
+            )
+            assertEquals(
+                SuggestionType.AlternativesUpdated,
+                routesUpdateSuggestion!!.type,
+            )
+            assertEquals(
+                listOf(
+                    "testPrimaryRoute#0",
+                    "route_response_new_for_refresh#0",
+                    "route_response_new_for_refresh#1",
+                ),
+                routesUpdateSuggestion!!.newRoutes.map { it.id },
+            )
+        }
+
+    @Test
+    fun `only online alternatives are offered when current route is online and both exist`() =
+        coroutineRule.runBlockingTest {
+            val routeAlternativesController = createRouteAlternativesController()
+            val nativeObserver = slot<com.mapbox.navigator.RouteAlternativesObserver>()
+            every { controllerInterface.addObserver(capture(nativeObserver)) } just runs
+
+            val testPrimaryRoute = createNavigationRoute(
+                createDirectionsRoute(requestUuid = "testPrimaryRoute"),
+            )
+            val routeProgress = mockk<RouteProgress>(relaxed = true) {
+                every { navigationRoute } returns testPrimaryRoute
+            }
+            every { tripSession.getRouteProgress() } returns routeProgress
+
+            var routesUpdateSuggestion: UpdateRouteSuggestion? = null
+            routeAlternativesController.setRouteUpdateSuggestionListener {
+                routesUpdateSuggestion = it
+            }
+            nativeObserver.captured.onRouteAlternativesUpdated(
+                null,
+                listOf(
+                    createNativeAlternativeMock(
+                        alternativeId = 1,
                         fileName = "route_alternative_from_native.json",
+                        routeIndex = 0,
+                        routerOrigin = com.mapbox.navigator.RouterOrigin.ONLINE,
+                    ),
+                    createNativeAlternativeMock(
+                        alternativeId = 2,
+                        fileName = "route_response_new_for_refresh.json",
                         routeIndex = 0,
                         routerOrigin = com.mapbox.navigator.RouterOrigin.ONBOARD,
                     ),
@@ -770,12 +832,12 @@ class RouteAlternativesControllerTest {
                 SuggestionType.AlternativesUpdated,
                 routesUpdateSuggestion!!.type,
             )
-            val newRoutes = routesUpdateSuggestion!!.newRoutes
             assertEquals(
                 listOf(
                     "testPrimaryRoute#0",
+                    "FYenNs6nfVvkDQgvLWnYcZvn2nvekWStF7nM0JV0X_IBAlsXWvomuA==#0",
                 ),
-                newRoutes.map { it.id },
+                routesUpdateSuggestion!!.newRoutes.map { it.id },
             )
         }
 
