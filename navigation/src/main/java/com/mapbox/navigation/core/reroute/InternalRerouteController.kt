@@ -18,6 +18,11 @@ internal abstract class InternalRerouteController : RerouteController() {
 
     abstract fun setEnabled(enabled: Boolean)
 
+    /**
+     * Releases any resources that would otherwise prevent garbage collection of this controller.
+     */
+    abstract fun shutdown()
+
     @UiThread
     fun interface RouteReplanRoutesCallback {
         fun onNewRoutes(rerouteResult: RerouteResult)
