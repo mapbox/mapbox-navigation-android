@@ -62,7 +62,6 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import java.io.InputStreamReader
@@ -857,7 +856,6 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
         }
     }
 
-    @Ignore("Flaky test - NAVAND-7338")
     @Test
     fun alternative_request_keeps_eta_model_parameter() = sdkTest {
         setupMockRequestHandlers()
