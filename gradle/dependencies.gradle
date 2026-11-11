@@ -14,7 +14,7 @@ ext {
   // Release Train depends on these two lines below
   // https://github.com/mapbox/release-train/blob/bd530da200d62fb45166ef91d7d892d90a453fa6/backend/model/step/navcoreandroid/PrepareChangelogNavCore.py#L122-L124
 
-  def mapboxSdkVersionSuffix = '36.0-SNAPSHOT-11-10--16-28.git-e4d9b24'
+  def mapboxSdkVersionSuffix = '36.0-SNAPSHOT-11-11--01-23.git-6638809'
   def mapboxNavigatorVersion = "324.${mapboxSdkVersionSuffix}"
 
   def ndkVersionSuffix = ""
