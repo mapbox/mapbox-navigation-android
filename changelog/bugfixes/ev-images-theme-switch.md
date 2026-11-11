@@ -1,0 +1,1 @@
+- Fixed a main thread freeze in `MapboxEvViewClient#refreshImages` on a theme change. The EV station icons that are in the style are now drawn again in the background and replaced in small batches, so the markers stay on the map. Icons that the map has already removed from the style are not drawn again.
