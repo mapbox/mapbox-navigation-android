@@ -95,7 +95,21 @@ workflows:
             branches:
               only:
                 - $LTS_V2_BRANCH_NAME
+  # TEMP: read-only remote check of the release jobs, runs only on the release-pipeline-test branch. Remove before merging.
+  release-test:
+    when:
+      equal: [ release-pipeline-test, << pipeline.git.branch >> ]
+    jobs:
+      - release
+      - release-upload-test:
+          requires:
+            - release
+      - publish-documentation-test
   default:
+    # TEMP: skip the regular checks on the release-pipeline-test branch. Remove before merging.
+    when:
+      not:
+        equal: [ release-pipeline-test, << pipeline.git.branch >> ]
     jobs:
       - assemble
       - assemble-old-deps-compat
@@ -1017,6 +1031,96 @@ jobs:
       - run:
           name: Publish API docs Android
           command: ./scripts/publish_api_docs_android.sh $CIRCLE_TAG
+
+  # TEMP: read-only check of release-upload, nothing is uploaded. Remove before merging.
+  release-upload-test:
+    executor: ndk-r22-latest-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/code
+      - prepare-mbx-ci
+      - setup-aws-credentials
+      - run:
+          name: Show AWS identity
+          command: aws sts get-caller-identity
+      - run:
+          name: Check that the guard refuses an already published version
+          command: |
+            export GITHUB_TOKEN=$(./mbx-ci github writer private token)
+            if ./scripts/check-release-not-published.sh build/sdk-registry-upload/aws-s3-cp-commands.txt; then
+              echo "Expected a refusal: the staged version is already published in api-downloads"
+              exit 1
+            fi
+      - run:
+          name: Dry-run the staged SDK Registry upload
+          command: |
+            sed 's/^aws s3 cp /aws s3 cp --dryrun /' build/sdk-registry-upload/aws-s3-cp-commands.txt > /tmp/dryrun-commands.txt
+            if grep -v -e '^[[:space:]]*$' -e '^[[:space:]]*#' /tmp/dryrun-commands.txt | grep -v -q -e '--dryrun'; then
+              echo "Refusing to run: some commands would not be dry-run"
+              exit 1
+            fi
+            ./scripts/run-commands-from-file.sh /tmp/dryrun-commands.txt
+      - store_artifacts:
+          path: build/sdk-registry-upload
+
+  # TEMP: read-only check of publish-documentation for v2.23.0, nothing is uploaded. Remove before merging.
+  publish-documentation-test:
+    executor: ndk-r22-latest-executor
+    resource_class: xlarge
+    steps:
+      - checkout
+      - prepare-mbx-ci
+      - setup-aws-credentials
+      - run:
+          name: Show AWS identity
+          command: aws sts get-caller-identity
+      - run:
+          name: Run the publish script for v2.23.0 with aws limited to s3 sync --dryrun
+          command: |
+            mkdir -p ~/dryrun-bin
+            printf '%s\n' \
+              '#!/bin/bash' \
+              'if [ "$1 $2" != "s3 sync" ]; then echo "blocked: aws $*" >&2; exit 1; fi' \
+              'exec /usr/local/bin/aws "$@" --dryrun' > ~/dryrun-bin/aws
+            chmod +x ~/dryrun-bin/aws
+            cp scripts/publish_api_docs_android.sh /tmp/publish_api_docs_android.sh
+            git fetch --force origin "refs/tags/v2.23.0:refs/tags/v2.23.0"
+            git checkout --force v2.23.0
+            PATH=~/dryrun-bin:$PATH /tmp/publish_api_docs_android.sh v2.23.0 | tee /tmp/publish-dryrun.log
+            echo "Dry-run uploads: $(grep -c '^(dryrun) upload:' /tmp/publish-dryrun.log)"
+      - run:
+          name: Compare generated docs with what is live in S3
+          command: |
+            aws s3api list-objects-v2 --bucket docs.mapbox.com --prefix android/navigation/v2/api/2.23.0/ \
+              --query 'Contents[].[Key,ETag]' --output text > /tmp/s3-objects.txt
+            python3 -c '
+            import hashlib, os
+            prefix = "android/navigation/v2/api/2.23.0/"
+            s3 = {}
+            for line in open("/tmp/s3-objects.txt"):
+                parts = line.rstrip("\n").split("\t")
+                if len(parts) == 2:
+                    s3[parts[0][len(prefix):]] = parts[1].strip("\"")
+            local = {}
+            for root, _, files in os.walk("build/kdoc"):
+                for name in files:
+                    path = os.path.join(root, name)
+                    with open(path, "rb") as f:
+                        local[os.path.relpath(path, "build/kdoc")] = hashlib.md5(f.read()).hexdigest()
+            new = sorted(set(local) - set(s3))
+            absent = sorted(set(s3) - set(local))
+            changed = sorted(k for k in set(local) & set(s3) if local[k] != s3[k])
+            print("generated files:", len(local), "S3 objects:", len(s3))
+            for title, keys in (("would be new in S3", new), ("in S3 but not generated", absent), ("content differs", changed)):
+                print(title + ":", len(keys))
+                for key in keys[:30]:
+                    print("  " + key)
+            '
+      - store_artifacts:
+          path: /tmp/publish-dryrun.log
+      - store_artifacts:
+          path: /tmp/s3-objects.txt
 
   changelog-verification:
     executor: ndk-r22-latest-executor
