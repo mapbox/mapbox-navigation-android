@@ -1016,4 +1016,56 @@ class NavigationScaleGestureHandlerTest {
         verify(exactly = 1) { cameraChangedTask.cancel() }
         assertFalse(controller.isInitialized)
     }
+
+    @Test
+    fun `navigation animations stay protected while another handler on the plugin is initialized`() {
+        val other = createHandler()
+        controller.initialize()
+        other.initialize()
+
+        controller.cleanup(shouldResetGestureManager = true)
+
+        verify(exactly = 1) { gesturesPlugin.addProtectedAnimationOwner(NAVIGATION_CAMERA_OWNER) }
+        verify(exactly = 0) {
+            gesturesPlugin.removeProtectedAnimationOwner(NAVIGATION_CAMERA_OWNER)
+        }
+
+        other.cleanup(shouldResetGestureManager = true)
+
+        verify(exactly = 1) {
+            gesturesPlugin.removeProtectedAnimationOwner(NAVIGATION_CAMERA_OWNER)
+        }
+    }
+
+    @Test
+    fun `repeated initialize and cleanup do not unbalance navigation animation protection`() {
+        val other = createHandler()
+        controller.initialize()
+        controller.initialize()
+        other.initialize()
+
+        controller.cleanup(shouldResetGestureManager = true)
+        controller.cleanup(shouldResetGestureManager = true)
+
+        verify(exactly = 0) {
+            gesturesPlugin.removeProtectedAnimationOwner(NAVIGATION_CAMERA_OWNER)
+        }
+
+        other.cleanup(shouldResetGestureManager = true)
+
+        verify(exactly = 1) {
+            gesturesPlugin.removeProtectedAnimationOwner(NAVIGATION_CAMERA_OWNER)
+        }
+    }
+
+    private fun createHandler() = NavigationScaleGestureHandler(
+        context,
+        navigationCamera,
+        mapboxMap,
+        gesturesPlugin,
+        locationPlugin,
+        scaleActionListener,
+        options,
+        MutableStateFlow(true),
+    )
 }

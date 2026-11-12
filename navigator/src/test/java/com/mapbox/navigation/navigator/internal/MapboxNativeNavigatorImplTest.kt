@@ -20,6 +20,9 @@ import com.mapbox.navigator.InputsServiceHandle
 import com.mapbox.navigator.NavigatorHandle
 import com.mapbox.navigator.NavigatorInterface
 import com.mapbox.navigator.NavigatorObserver
+import com.mapbox.navigator.NavigatorOperationsDelegate
+import com.mapbox.navigator.NavigatorOperationsStartActiveGuidanceCallback
+import com.mapbox.navigator.NavigatorOperationsSwitchToAlternativeRouteCallback
 import com.mapbox.navigator.RefreshRouteCallback
 import com.mapbox.navigator.RefreshRouteResult
 import com.mapbox.navigator.RoadObjectMatcherConfig
@@ -39,6 +42,7 @@ import io.mockk.verifyOrder
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -87,6 +91,7 @@ class MapboxNativeNavigatorImplTest {
             NavigatorLoader.createNavigatorHandle(any())
         } returns mockk<NavigatorHandle>(relaxed = true)
         every { NavigatorLoader.updateNavigatorHandle(any(), any(), any()) } just Runs
+        every { NavigatorLoader.setOperationsDelegate(any(), any()) } just Runs
 
         navigatorImpl = MapboxNativeNavigatorImpl(
             tilesConfig = mockk<TilesConfig>(relaxed = true),
@@ -120,6 +125,50 @@ class MapboxNativeNavigatorImplTest {
             mockAdasisFacade.resetAdasisMessageCallback()
             mockNavigator.shutdown()
         }
+    }
+
+    @Test
+    fun `shutdown replaces the operations delegate before shutting down the navigator`() {
+        val ownerDelegate = mockk<NavigatorOperationsDelegate>(relaxed = true)
+        val delegates = mutableListOf<NavigatorOperationsDelegate>()
+        every { NavigatorLoader.setOperationsDelegate(any(), capture(delegates)) } just Runs
+        navigatorImpl.setOperationsDelegate(ownerDelegate)
+
+        navigatorImpl.shutdown()
+
+        assertEquals(2, delegates.size)
+        assertNotSame(ownerDelegate, delegates.last())
+        verifyOrder {
+            NavigatorLoader.setOperationsDelegate(any(), delegates.last())
+            mockNavigator.shutdown()
+        }
+    }
+
+    @Test
+    fun `operations delegate installed on shutdown rejects all operations`() {
+        val delegates = mutableListOf<NavigatorOperationsDelegate>()
+        every { NavigatorLoader.setOperationsDelegate(any(), capture(delegates)) } just Runs
+        navigatorImpl.shutdown()
+        val startCallback = mockk<NavigatorOperationsStartActiveGuidanceCallback>(relaxed = true)
+        val switchCallback =
+            mockk<NavigatorOperationsSwitchToAlternativeRouteCallback>(relaxed = true)
+
+        delegates.single().startActiveGuidance(emptyList(), 0, startCallback)
+        delegates.single().switchToAlternativeRoute("route-id", switchCallback)
+
+        verify(exactly = 1) { startCallback.run(match { it.isError }) }
+        verify(exactly = 1) { switchCallback.run(match { it.isError }) }
+    }
+
+    @Test
+    fun `when navigator is shut down, setOperationsDelegate logs warning and skips native call`() {
+        navigatorImpl.shutdown()
+        clearMocks(loggingFrontend, answers = false)
+
+        navigatorImpl.setOperationsDelegate(mockk(relaxed = true))
+
+        verify(exactly = 1) { NavigatorLoader.setOperationsDelegate(any(), any()) }
+        verify(exactly = 1) { loggingFrontend.logW(any(), LOG_CATEGORY) }
     }
 
     @Test

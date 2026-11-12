@@ -36,6 +36,7 @@ import com.mapbox.navigation.ui.maps.internal.camera.lifecycle.CameraStateManage
 import com.mapbox.navigation.ui.maps.internal.camera.lifecycle.UserLocationIndicatorPositionObserver
 import com.mapbox.navigation.ui.maps.internal.camera.lifecycle.UserLocationIndicatorPositionProvider
 import kotlinx.coroutines.flow.StateFlow
+import java.util.WeakHashMap
 
 /**
  * Provides support in reacting to map gesture interaction
@@ -472,7 +473,9 @@ class NavigationScaleGestureHandler internal constructor(
         gesturesPlugin.addOnScaleListener(onScaleListener)
         gesturesPlugin.addOnRotateListener(onRotateListener)
 
-        gesturesPlugin.addProtectedAnimationOwner(NAVIGATION_CAMERA_OWNER)
+        if (!isInitialized) {
+            ProtectedAnimationOwnerRefCounter.acquire(gesturesPlugin)
+        }
 
         userLocationIndicatorPositionProvider.addObserver(onIndicatorPositionChangedListener)
 
@@ -500,7 +503,9 @@ class NavigationScaleGestureHandler internal constructor(
         gesturesPlugin.removeOnScaleListener(onScaleListener)
         gesturesPlugin.removeOnShoveListener(onShoveListener)
         gesturesPlugin.removeOnRotateListener(onRotateListener)
-        gesturesPlugin.removeProtectedAnimationOwner(NAVIGATION_CAMERA_OWNER)
+        if (isInitialized) {
+            ProtectedAnimationOwnerRefCounter.release(gesturesPlugin)
+        }
         gesturesPlugin.updateSettings { focalPoint = null }
         userLocationIndicatorPositionProvider.removeObserver(onIndicatorPositionChangedListener)
 
@@ -524,5 +529,34 @@ class NavigationScaleGestureHandler internal constructor(
             updateFlingGesture(isFollowing = false)
         }
         isInitialized = false
+    }
+}
+
+/**
+ * Keeps [NAVIGATION_CAMERA_OWNER] protected while any handler using the gestures plugin is
+ * initialized, since the plugin stores protected owners in a set shared by all handlers.
+ */
+private object ProtectedAnimationOwnerRefCounter {
+
+    private val counts = WeakHashMap<GesturesPlugin, Int>()
+
+    @Synchronized
+    fun acquire(gesturesPlugin: GesturesPlugin) {
+        val count = counts[gesturesPlugin] ?: 0
+        if (count == 0) {
+            gesturesPlugin.addProtectedAnimationOwner(NAVIGATION_CAMERA_OWNER)
+        }
+        counts[gesturesPlugin] = count + 1
+    }
+
+    @Synchronized
+    fun release(gesturesPlugin: GesturesPlugin) {
+        val count = counts[gesturesPlugin] ?: return
+        if (count > 1) {
+            counts[gesturesPlugin] = count - 1
+        } else {
+            counts.remove(gesturesPlugin)
+            gesturesPlugin.removeProtectedAnimationOwner(NAVIGATION_CAMERA_OWNER)
+        }
     }
 }

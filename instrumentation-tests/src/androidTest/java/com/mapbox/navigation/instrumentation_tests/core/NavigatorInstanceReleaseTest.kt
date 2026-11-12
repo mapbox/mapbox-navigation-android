@@ -3,15 +3,19 @@ package com.mapbox.navigation.instrumentation_tests.core
 import android.location.Location
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.RoutingTilesOptions
+import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigationProvider
+import com.mapbox.navigation.core.internal.extensions.retrieveNavigatorHandle
 import com.mapbox.navigation.testing.ui.BaseCoreNoCleanUpTest
 import com.mapbox.navigation.testing.ui.utils.MapboxNavigationRule
 import com.mapbox.navigation.testing.ui.utils.runOnMainSync
+import com.mapbox.navigator.NavigatorHandle
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import java.io.File
+import java.lang.ref.WeakReference
 import java.net.URI
 
 class NavigatorInstanceReleaseTest : BaseCoreNoCleanUpTest() {
@@ -54,6 +58,34 @@ class NavigatorInstanceReleaseTest : BaseCoreNoCleanUpTest() {
             0,
             leakedThreadCount,
         )
+    }
+
+    @Test
+    fun destroyedMapboxNavigationIsCollectedWhileItsNavigatorHandleIsStillReferenced() {
+        // SDK components (e.g. HD controllers) may hold the handle after destroy.
+        lateinit var navigationReference: WeakReference<MapboxNavigation>
+        lateinit var navigatorHandle: NavigatorHandle
+        runOnMainSync {
+            val navigation = MapboxNavigationProvider.create(buildNavigationOptions())
+            navigationReference = WeakReference(navigation)
+            navigatorHandle = navigation.retrieveNavigatorHandle()
+            MapboxNavigationProvider.destroy()
+        }
+
+        val collected = waitForCollection(navigationReference, timeoutMs = 30_000)
+
+        // Using the handle here keeps it alive during the wait.
+        assertTrue("MapboxNavigation retained by navigator handle $navigatorHandle", collected)
+    }
+
+    private fun waitForCollection(reference: WeakReference<*>, timeoutMs: Long): Boolean {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (reference.get() != null && System.currentTimeMillis() < deadline) {
+            Runtime.getRuntime().gc()
+            System.runFinalization()
+            Thread.sleep(500)
+        }
+        return reference.get() == null
     }
 
     private fun buildNavigationOptions() = NavigationOptions.Builder(context)

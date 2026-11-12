@@ -43,6 +43,8 @@ import com.mapbox.navigator.NavigatorHandle
 import com.mapbox.navigator.NavigatorInterface
 import com.mapbox.navigator.NavigatorObserver
 import com.mapbox.navigator.NavigatorOperationsDelegate
+import com.mapbox.navigator.NavigatorOperationsStartActiveGuidanceCallback
+import com.mapbox.navigator.NavigatorOperationsSwitchToAlternativeRouteCallback
 import com.mapbox.navigator.PredictiveCacheControllerInterface
 import com.mapbox.navigator.PredictiveCacheControllerOptions
 import com.mapbox.navigator.RefreshRouteResult
@@ -56,6 +58,7 @@ import com.mapbox.navigator.RoadObjectsStoreInterface
 import com.mapbox.navigator.RoadObjectsStoreObserver
 import com.mapbox.navigator.RouteAlternative
 import com.mapbox.navigator.RouteAlternativesControllerInterface
+import com.mapbox.navigator.RouteInterface
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.SetRoutesParams
 import com.mapbox.navigator.SetRoutesReason
@@ -471,6 +474,7 @@ class MapboxNativeNavigatorImpl(
     }
 
     override fun setOperationsDelegate(delegate: NavigatorOperationsDelegate) {
+        if (warnIfShutdown("setOperationsDelegate")) return
         NavigatorLoader.setOperationsDelegate(navigatorHandle, delegate)
     }
 
@@ -542,6 +546,9 @@ class MapboxNativeNavigatorImpl(
         nativeNavigatorRecreationObservers.clear()
         resetAdasisMessageCallback()
         voiceInstructionsRetriever = null
+
+        // The native handle may outlive this navigator; don't let it retain the owner's delegate.
+        NavigatorLoader.setOperationsDelegate(navigatorHandle, ShutdownOperationsDelegate)
 
         isShutdown = true
         navigator.shutdown()
@@ -759,5 +766,23 @@ class MapboxNativeNavigatorImpl(
 
         private const val PERF_TRACKER_SECTION_NAME = "MapboxNativeNavigatorImpl"
         const val LOG_CATEGORY = "MapboxNativeNavigatorImpl"
+        private const val SHUTDOWN_ERROR = "Navigator is shut down"
+    }
+
+    private object ShutdownOperationsDelegate : NavigatorOperationsDelegate {
+        override fun startActiveGuidance(
+            routes: List<RouteInterface>,
+            initialLegIndex: Int,
+            callback: NavigatorOperationsStartActiveGuidanceCallback,
+        ) {
+            callback.run(ExpectedFactory.createError(SHUTDOWN_ERROR))
+        }
+
+        override fun switchToAlternativeRoute(
+            routeId: String,
+            callback: NavigatorOperationsSwitchToAlternativeRouteCallback,
+        ) {
+            callback.run(ExpectedFactory.createError(SHUTDOWN_ERROR))
+        }
     }
 }
