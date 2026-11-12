@@ -86,7 +86,7 @@ registry {
     production = true
     snapshot = project.ext.snapshot
     override = snapshot
-    dryRun = false
+    dryRun = project.hasProperty('dryRun')
     publish = true
     publishMessage = "cc @mapbox/navigation-android"
     publications = ["release"]

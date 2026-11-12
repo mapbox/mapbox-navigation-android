@@ -186,10 +186,29 @@ upload-to-sdk-registry-snapshot:
 	./gradlew mapboxSDKRegistryUpload -Psnapshot=true
 	./gradlew mapboxSDKRegistryUpload -Psnapshot=true -PndkMajor=27
 
+SDK_REGISTRY_STAGING_DIR = build/sdk-registry-upload
+SDK_REGISTRY_COMMANDS = $(SDK_REGISTRY_STAGING_DIR)/aws-s3-cp-commands.txt
+
+# Prepares release artifacts and the S3 copy commands without uploading anything.
+# Each Gradle run rewrites the combined commands file, so it's collected after every pass.
+.PHONY: stage-sdk-registry-upload
+stage-sdk-registry-upload:
+	rm -rf build/tmp/mapboxSDKRegistry build/tmp/combined-aws-s3-cp-commands.txt $(SDK_REGISTRY_STAGING_DIR)
+	mkdir -p $(SDK_REGISTRY_STAGING_DIR)
+	./gradlew mapboxSDKRegistryUpload -x libnavui-androidauto:mapboxSDKRegistryUpload -PdryRun
+	cat build/tmp/combined-aws-s3-cp-commands.txt >> $(SDK_REGISTRY_COMMANDS)
+	./gradlew mapboxSDKRegistryUpload -x libnavui-androidauto:mapboxSDKRegistryUpload -PdryRun -PndkMajor=27
+	cat build/tmp/combined-aws-s3-cp-commands.txt >> $(SDK_REGISTRY_COMMANDS)
+
+# Copies the staged artifacts to S3. Safe to rerun until the release is published in api-downloads:
+# existing files are overwritten with the same staged files.
+.PHONY: upload-staged-to-sdk-registry
+upload-staged-to-sdk-registry:
+	./scripts/check-release-not-published.sh $(SDK_REGISTRY_COMMANDS)
+	./scripts/run-commands-from-file.sh $(SDK_REGISTRY_COMMANDS)
+
 .PHONY: upload-to-sdk-registry
-upload-to-sdk-registry:
-	./gradlew mapboxSDKRegistryUpload -x libnavui-androidauto:mapboxSDKRegistryUpload
-	./gradlew mapboxSDKRegistryUpload -x libnavui-androidauto:mapboxSDKRegistryUpload -PndkMajor=27
+upload-to-sdk-registry: stage-sdk-registry-upload upload-staged-to-sdk-registry
 
 .PHONY: publish-to-sdk-registry
 publish-to-sdk-registry:

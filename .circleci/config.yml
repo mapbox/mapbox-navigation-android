@@ -62,6 +62,14 @@ workflows:
               only: /v2.*/
             branches:
               ignore: /.*/
+      - release-upload:
+          requires:
+            - release
+          filters:
+            tags:
+              only: /v2.*/
+            branches:
+              ignore: /.*/
       - release-androidauto:
           filters:
             tags:
@@ -70,7 +78,7 @@ workflows:
               ignore: /.*/
       - publish-documentation:
           requires:
-            - release
+            - release-upload
           filters:
             tags:
               only: /^v2.*/
@@ -642,12 +650,27 @@ commands:
           command: |
             make upload-to-sdk-registry-snapshot
 
+  stage-artifacts:
+    steps:
+      - run:
+          name: Stage Navigation SDK for SDK Registry (no upload)
+          command: |
+            make stage-sdk-registry-upload
+      - persist_to_workspace:
+          root: ~/code
+          paths:
+            - build/sdk-registry-upload
+            - build/tmp/mapboxSDKRegistry
+
   upload-artifacts:
     steps:
+      - attach_workspace:
+          at: ~/code
       - deploy:
-          name: Upload Navigation SDK to SDK Registry
+          name: Upload staged Navigation SDK to SDK Registry
           command: |
-            make upload-to-sdk-registry
+            export GITHUB_TOKEN=$(./mbx-ci github writer private token)
+            make upload-staged-to-sdk-registry
 
   publish-artifacts:
     steps:
@@ -990,13 +1013,10 @@ jobs:
     steps:
       - checkout
       - prepare-mbx-ci
+      - setup-aws-credentials
       - run:
           name: Publish API docs Android
-          command: |
-            GITHUB_WRITER_TOKEN=$(./mbx-ci github writer public token)
-            git remote set-url origin "https://x-access-token:$GITHUB_WRITER_TOKEN@github.com/mapbox/mapbox-navigation-android"
-            git config --global user.email no-reply@mapbox.com && git config --global user.name mapbox-ci
-            ./scripts/publish_api_docs_android.sh -p $GITHUB_WRITER_TOKEN -t $CIRCLE_TAG
+          command: ./scripts/publish_api_docs_android.sh $CIRCLE_TAG
 
   changelog-verification:
     executor: ndk-r22-latest-executor
@@ -1198,13 +1218,20 @@ jobs:
 
   release:
     executor: ndk-r22-latest-executor
-    resource_class: medium+
+    resource_class: xlarge
     steps:
       - checkout
       - assemble-core-release
       - assemble-ui-release
       - check-public-documentation
       - generate-documentation
+      - stage-artifacts
+
+  # Uploads what the release job staged. Rerunning this job alone is safe: it copies the same files again.
+  release-upload:
+    executor: ndk-r22-latest-executor
+    steps:
+      - checkout
       - prepare-mbx-ci
       - setup-aws-credentials
       - upload-artifacts
