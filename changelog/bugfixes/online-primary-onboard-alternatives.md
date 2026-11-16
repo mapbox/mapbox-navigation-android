@@ -1,1 +1,0 @@
-- When the primary route was built by the server and the only alternatives are built on the device, for example a route with a charging stop planned after an insufficient charge warning, those alternatives are now offered with the primary route. Before, they were dropped. Server-built alternatives still take precedence over them.
