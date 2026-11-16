@@ -37,6 +37,7 @@ class CarLocationsOverviewCameraTest : MapboxRobolectricTestRunner() {
         val mapboxNavigation = mockk<MapboxNavigation>(relaxUnitFun = true)
         val mapboxMap = mockk<MapboxMap>(relaxUnitFun = true)
         every { mapboxMap.isValid() } returns true
+        every { mapboxMap.style } returns null
         every { mapboxMap.subscribeStyleLoaded(any()) } returns mockk(relaxed = true)
         val cameraAnimationsPlugin = mockk<CameraAnimationsPlugin>()
         val aMapSurface = mockk<MapSurface> {
@@ -79,6 +80,7 @@ class CarLocationsOverviewCameraTest : MapboxRobolectricTestRunner() {
     fun `overview padding is converted from dp to pixels`() {
         val mapboxMap = mockk<MapboxMap>(relaxed = true) {
             every { isValid() } returns true
+            every { style } returns null
         }
         val aMapSurface = mockk<MapSurface> {
             every { getMapboxMap() } returns mapboxMap
@@ -111,6 +113,7 @@ class CarLocationsOverviewCameraTest : MapboxRobolectricTestRunner() {
         every { anyConstructed<MapboxNavigationViewportDataSource>().evaluate() } returns Unit
         val mapboxMap = mockk<MapboxMap>(relaxUnitFun = true)
         every { mapboxMap.isValid() } returns true
+        every { mapboxMap.style } returns null
         every { mapboxMap.subscribeStyleLoaded(any()) } returns mockk(relaxed = true)
         val aMapSurface = mockk<MapSurface> {
             every { getMapboxMap() } returns mapboxMap

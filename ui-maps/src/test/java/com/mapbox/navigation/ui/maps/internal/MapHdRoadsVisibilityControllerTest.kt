@@ -4,6 +4,7 @@ import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.bindgen.Value
 import com.mapbox.common.Cancelable
 import com.mapbox.maps.MapboxMap
+import com.mapbox.maps.Style
 import com.mapbox.maps.StyleLoadedCallback
 import com.mapbox.maps.StylePropertyValue
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
@@ -37,11 +38,40 @@ class MapHdRoadsVisibilityControllerTest {
 
     @Test
     fun `subscribes to the map style loaded events on creation`() {
-        val mapboxMap = mockk<MapboxMap>(relaxed = true)
+        val mapboxMap = mockk<MapboxMap>(relaxed = true) {
+            every { style } returns null
+        }
 
         MapHdRoadsVisibilityController(mapboxMap)
 
         verify(exactly = 1) { mapboxMap.subscribeStyleLoaded(any()) }
+    }
+
+    @Test
+    fun `does not register an uncancellable callback while the style is not loaded`() {
+        val mapboxMap = mockk<MapboxMap>(relaxed = true) {
+            every { style } returns null
+        }
+
+        MapHdRoadsVisibilityController(mapboxMap)
+
+        verify(exactly = 0) { mapboxMap.getStyle(any<Style.OnStyleLoaded>()) }
+    }
+
+    @Test
+    fun `hides HD roads on creation when the style is loaded already`() {
+        val mapboxMap = givenHdCapableMap(currentlyVisible = true)
+        every { mapboxMap.style } returns mockk(relaxed = true)
+
+        MapHdRoadsVisibilityController(mapboxMap)
+
+        verify(exactly = 1) {
+            mapboxMap.setStyleImportConfigProperty(
+                BASEMAP_IMPORT_ID,
+                SHOW_HD_ROADS_CONFIG_KEY,
+                Value.valueOf(false),
+            )
+        }
     }
 
     @Test
@@ -75,6 +105,7 @@ class MapHdRoadsVisibilityControllerTest {
     @Test
     fun `does nothing when the style has no showHdRoads import config key`() {
         val mapboxMap = mockk<MapboxMap>(relaxed = true) {
+            every { style } returns null
             every { isValid() } returns true
             every {
                 getStyleImportConfigProperty(BASEMAP_IMPORT_ID, SHOW_HD_ROADS_CONFIG_KEY)
@@ -105,6 +136,7 @@ class MapHdRoadsVisibilityControllerTest {
     fun `cancels the style subscription on destroy`() {
         val cancelable = mockk<Cancelable>(relaxUnitFun = true)
         val mapboxMap = mockk<MapboxMap>(relaxed = true) {
+            every { style } returns null
             every { subscribeStyleLoaded(any()) } returns cancelable
         }
         val controller = MapHdRoadsVisibilityController(mapboxMap)
@@ -128,6 +160,7 @@ class MapHdRoadsVisibilityControllerTest {
         val propertyValue = mockk<StylePropertyValue>()
         every { propertyValue.value } returns Value.valueOf(currentlyVisible)
         return mockk<MapboxMap>(relaxed = true) {
+            every { style } returns null
             every { isValid() } returns true
             every {
                 getStyleImportConfigProperty(BASEMAP_IMPORT_ID, SHOW_HD_ROADS_CONFIG_KEY)

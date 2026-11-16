@@ -86,6 +86,7 @@ class CarNavigationCameraTest : MapboxRobolectricTestRunner() {
     private fun mockCarMapSurface(): MapboxCarMapSurface {
         val mapboxMap = mockk<MapboxMap>(relaxed = true) {
             every { isValid() } returns true
+            every { style } returns null
         }
         val aMapSurface = mockk<MapSurface> {
             every { getMapboxMap() } returns mapboxMap
