@@ -27,7 +27,12 @@ internal class MapHdRoadsVisibilityController(private val mapboxMap: MapboxMap) 
     private var styleLoadedCancelable: Cancelable? = null
 
     init {
-        mapboxMap.getStyle { hideHdRoadsIfNoCoordination(it) }
+        // MapboxMap.getStyle(callback) is not used for a style that is not loaded yet: such a
+        // callback cannot be cancelled and, while the style never loads (e.g. offline), stays in
+        // the map together with this controller. The subscription below handles that case.
+        if (mapboxMap.style != null) {
+            hideHdRoadsIfNoCoordination(mapboxMap)
+        }
         styleLoadedCancelable = mapboxMap.subscribeStyleLoaded {
             hideHdRoadsIfNoCoordination(mapboxMap)
         }

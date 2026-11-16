@@ -117,6 +117,7 @@ class CarNavigationCameraTest : MapboxRobolectricTestRunner() {
     private fun mockCarMapSurface(): MapboxCarMapSurface {
         val mapboxMap = mockk<MapboxMap>(relaxed = true) {
             every { isValid() } returns true
+            every { style } returns null
             every { cameraForCoordinates(any(), any<CameraOptions>(), any(), any(), any()) } returns
                 CameraOptions.Builder().center(Point.fromLngLat(17.0, 52.0)).zoom(5.0).build()
         }
