@@ -14,5 +14,11 @@
             android:exported="true">
             <intent-filter tools:node="removeAll" />
         </activity>
+        <!-- merged from test-only libraries, but its class lives in the app APK,
+             so the test APK process crashes on start if it is kept -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            tools:node="remove" />
     </application>
 </manifest>

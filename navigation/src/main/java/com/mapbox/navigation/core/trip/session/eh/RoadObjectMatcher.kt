@@ -32,7 +32,8 @@ class RoadObjectMatcher internal constructor(
     private val roadObjectMatcherObservers = CopyOnWriteArraySet<RoadObjectMatcherObserver>()
 
     init {
-        navigator.addNativeNavigatorRecreationObserver {
+        // the navigator builds a new native matcher on every tiles version change
+        navigator.addTilesVersionChangedObserver { _, _ ->
             if (roadObjectMatcherObservers.isNotEmpty()) {
                 navigator.roadObjectMatcher.setListener(roadObjectMatcherListener)
             }

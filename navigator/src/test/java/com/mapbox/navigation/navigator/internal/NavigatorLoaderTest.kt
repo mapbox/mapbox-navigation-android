@@ -20,51 +20,50 @@ class NavigatorLoaderTest {
     val loggerFrontendTestRule = LoggingFrontendTestRule(loggingFrontend)
 
     @Test
-    fun `test enable telemetry immediate`() {
-        val adjustedConfig = NavigatorLoader.enableTelemetryNavigationEvents(
-            DEFAULT_CONFIG,
-            sendImmediate = true,
-        )
+    fun `adds required features with immediate telemetry`() {
+        val adjustedConfig = with(NavigatorLoader) {
+            DEFAULT_CONFIG.enrichWithRequiredSdkFeatures(sendImmediate = true)
+        }
 
-        assertEqualsJson(DEFAULT_CONFIG_USE_TELEMETRY_IMMEDIATE, adjustedConfig)
+        assertEqualsJson(DEFAULT_CONFIG_REQUIRED_FEATURES_IMMEDIATE, adjustedConfig)
     }
 
     @Test
-    fun `test enable telemetry not-immediate`() {
-        val adjustedConfig = NavigatorLoader.enableTelemetryNavigationEvents(
-            DEFAULT_CONFIG,
-            sendImmediate = false,
-        )
+    fun `adds required features without immediate telemetry`() {
+        val adjustedConfig = with(NavigatorLoader) {
+            DEFAULT_CONFIG.enrichWithRequiredSdkFeatures(sendImmediate = false)
+        }
 
-        assertEqualsJson(DEFAULT_CONFIG_USE_TELEMETRY, adjustedConfig)
+        assertEqualsJson(DEFAULT_CONFIG_REQUIRED_FEATURES, adjustedConfig)
     }
 
     @Test
-    fun `test enable telemetry on empty config string`() {
-        val adjustedConfig = NavigatorLoader.enableTelemetryNavigationEvents(
-            "",
-            sendImmediate = false,
-        )
-        assertEqualsJson(DEFAULT_CONFIG_USE_TELEMETRY, adjustedConfig)
+    fun `adds required features to empty config string`() {
+        val adjustedConfig = with(NavigatorLoader) {
+            "".enrichWithRequiredSdkFeatures(sendImmediate = false)
+        }
+        assertEqualsJson(DEFAULT_CONFIG_REQUIRED_FEATURES, adjustedConfig)
     }
 
     @Test
-    fun `test enable telemetry on incorrect config string`() {
-        val adjustedConfig = NavigatorLoader.enableTelemetryNavigationEvents(
-            "incorrect-json-string",
-            sendImmediate = false,
-        )
-        assertEqualsJson(DEFAULT_CONFIG_USE_TELEMETRY, adjustedConfig)
+    fun `adds required features to incorrect config string`() {
+        val adjustedConfig = with(NavigatorLoader) {
+            "incorrect-json-string".enrichWithRequiredSdkFeatures(sendImmediate = false)
+        }
+        assertEqualsJson(DEFAULT_CONFIG_REQUIRED_FEATURES, adjustedConfig)
         verify(exactly = 1) {
             loggingFrontend.logE(any())
         }
     }
 
     @Test
-    fun `appends required data to existing config`() {
-        val defaultConfig = """
+    fun `appends required features to existing config`() {
+        val customConfig = """
             {
-            "foo": "bar"
+                "foo": "bar",
+                "features": {
+                    "customFeature": true
+                }
             }
         """
 
@@ -72,35 +71,38 @@ class NavigatorLoaderTest {
             {
                 "foo": "bar",
                 "features": {
-                    "useTelemetryNavigationEvents": true
+                    "customFeature": true,
+                    "useTelemetryNavigationEvents": true,
+                    "allowTilesCacheReset": true
                 }
             }
         """
 
-        val fixedConfig = NavigatorLoader.enableTelemetryNavigationEvents(
-            defaultConfig,
-            sendImmediate = false,
-        )
+        val adjustedConfig = with(NavigatorLoader) {
+            customConfig.enrichWithRequiredSdkFeatures(sendImmediate = false)
+        }
 
-        assertEqualsJson(expectedConfig, fixedConfig)
+        assertEqualsJson(expectedConfig, adjustedConfig)
     }
 
     private companion object {
 
         const val DEFAULT_CONFIG = "{}"
 
-        const val DEFAULT_CONFIG_USE_TELEMETRY = """
+        const val DEFAULT_CONFIG_REQUIRED_FEATURES = """
             {
                 "features": {
-                    "useTelemetryNavigationEvents": true
+                    "useTelemetryNavigationEvents": true,
+                    "allowTilesCacheReset": true
                 }
             }
         """
 
-        const val DEFAULT_CONFIG_USE_TELEMETRY_IMMEDIATE = """
+        const val DEFAULT_CONFIG_REQUIRED_FEATURES_IMMEDIATE = """
             {
                 "features": {
-                    "useTelemetryNavigationEvents": true
+                    "useTelemetryNavigationEvents": true,
+                    "allowTilesCacheReset": true
                 },
                 "telemetry": {
                     "eventsPriority": "Immediate"

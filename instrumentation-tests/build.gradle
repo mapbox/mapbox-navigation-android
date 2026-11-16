@@ -67,6 +67,7 @@ dependencies {
     androidTestImplementation project(':libtesting-router')
     androidTestImplementation dependenciesList.testRunner
     androidTestImplementation dependenciesList.mapboxNavigator
+    androidTestImplementation dependenciesList.mapboxOfflineSearch
     androidTestUtil dependenciesList.testOrchestrator
     implementation project(":libtesting-resources")
 

@@ -5,7 +5,6 @@
 package com.mapbox.navigation.core.internal.router
 
 import androidx.annotation.MainThread
-import androidx.annotation.VisibleForTesting
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.DataRef
 import com.mapbox.bindgen.Expected
@@ -32,7 +31,6 @@ import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.ResponseOriginAPI
 import com.mapbox.navigation.base.route.RouterFailure
-import com.mapbox.navigation.base.route.RouterFailureType
 import com.mapbox.navigation.base.route.RouterFailureType.Companion.RESPONSE_PARSING_ERROR
 import com.mapbox.navigation.core.mapmatching.MapMatchingAPICallback
 import com.mapbox.navigation.core.mapmatching.MapMatchingFailure
@@ -57,7 +55,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.URL
-import java.util.concurrent.atomic.AtomicReference
 import kotlin.time.ExperimentalTime
 import com.mapbox.navigation.base.route.RouterOrigin as SdkRouterOrigin
 
@@ -82,7 +79,7 @@ private class OngoingRequest(
 @OptIn(ExperimentalTime::class)
 @MainThread // Router is not thread safe: in theory it doesn't have to be main thread
 internal class RouterWrapper(
-    router: RouterInterface,
+    private val router: RouterInterface,
     private val threadController: ThreadController,
     private val navigationRoutesParser: NavigationRoutesParser,
     private val mapMatchedRoutesParser: MapMatchingMatchParser,
@@ -95,17 +92,6 @@ internal class RouterWrapper(
     private var nextRequestId = 1L
 
     private val mainJobControl by lazy { threadController.getMainScopeAndRootJob() }
-
-    private val routerRef = AtomicReference(router)
-
-    @VisibleForTesting
-    internal val router: RouterInterface
-        get() = routerRef.get()
-
-    fun resetRouter(router: RouterInterface) {
-        val oldRouter = routerRef.getAndSet(router)
-        oldRouter.cancelAll()
-    }
 
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     override fun getRoute(
@@ -189,7 +175,6 @@ internal class RouterWrapper(
     ): Long {
         val urlWithoutToken = URL(routeUrl.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM))
         logI(LOG_CATEGORY) { "$logRequestMessage $urlWithoutToken" }
-        val originRouter = router
         val section = PerformanceTracker.asyncSectionStarted(performanceSectionName)
         val requestId = nextRequestId++
 
@@ -218,7 +203,6 @@ internal class RouterWrapper(
                         routeOptionsForCallback,
                         routeUrl,
                         urlWithoutToken,
-                        originRouter,
                         result,
                         origin,
                         RouteRequestEnder(requestId, callback),
@@ -271,8 +255,6 @@ internal class RouterWrapper(
             HashMap(routeRefreshRequestData.experimentalProperties),
         )
 
-        val originRouter = router
-
         val routeRefreshSection = PerformanceTracker.asyncSectionStarted(
             "RouterWrapper#getRouteRefresh()",
         )
@@ -305,7 +287,6 @@ internal class RouterWrapper(
 
                     endRouteRefreshRequest(
                         id,
-                        originRouter,
                         requestUuid,
                         routeRefreshRequestData,
                         refreshOptions,
@@ -321,16 +302,16 @@ internal class RouterWrapper(
             // online EV route: nav-native refreshes it online, and on the device when the device
             // is offline or the server can't answer (a network error, a server failure or
             // throttling).
-            if (refreshesWithRoute(route) && onDeviceRouteRefresh.isSupported(originRouter)) {
+            if (refreshesWithRoute(route) && onDeviceRouteRefresh.isSupported(router)) {
                 logI("Refreshing ${route.origin} route ${route.id} with the route", LOG_CATEGORY)
                 onDeviceRouteRefresh.refresh(
-                    originRouter,
+                    router,
                     route.nativeRoute(),
                     refreshOptions,
                     refreshCallback,
                 )
             } else {
-                originRouter.getRouteRefresh(refreshOptions, refreshCallback)
+                router.getRouteRefresh(refreshOptions, refreshCallback)
             }
         } catch (throwable: Throwable) {
             activeRouteRefreshRequests.remove(id)
@@ -399,7 +380,6 @@ internal class RouterWrapper(
         routeOptions: RouteOptions,
         routeUrl: String,
         urlWithoutToken: URL,
-        originRouter: RouterInterface,
         result: Expected<List<RouterError>, DataRef>,
         origin: RouterOrigin,
         requestEnder: RouteRequestCallback<T>,
@@ -411,101 +391,84 @@ internal class RouterWrapper(
             return
         }
 
-        if (originRouter != router) {
-            logD(LOG_CATEGORY) { "router was recreated, onFailure callback will be fired" }
-            requestEnder.onFailure(
-                listOf(
-                    RouterFailureFactory.create(
-                        url = urlWithoutToken,
-                        routerOrigin = origin.mapToSdkRouteOrigin(),
-                        message = "Failed to get a route",
-                        type = RouterFailureType.ROUTER_RECREATION_ERROR,
-                        isRetryable = true,
-                    ),
-                ),
-                routeOptions,
-            )
-        } else {
-            result.fold(
-                { errors ->
-                    // https://mapbox.atlassian.net/browse/NN-1733
-                    // NN should guarantee that there's at most one cancelled request
-                    if (errors.any { it.type == RouterErrorType.REQUEST_CANCELLED }) {
-                        logI(
-                            "Route request cancelled: $routeOptions, $origin",
-                            LOG_CATEGORY,
+        result.fold(
+            { errors ->
+                // https://mapbox.atlassian.net/browse/NN-1733
+                // NN should guarantee that there's at most one cancelled request
+                if (errors.any { it.type == RouterErrorType.REQUEST_CANCELLED }) {
+                    logI(
+                        "Route request cancelled: $routeOptions, $origin",
+                        LOG_CATEGORY,
+                    )
+                    requestEnder.onCanceled(
+                        routeOptions,
+                        origin.mapToSdkRouteOrigin(),
+                    )
+                } else {
+                    val failures = errors.map {
+                        RouterFailureFactory.create(
+                            url = urlWithoutToken,
+                            routerOrigin = origin.mapToSdkRouteOrigin(),
+                            message = it.message,
+                            type = it.type.mapToSdkRouterFailureType(),
+                            throwable = null,
+                            isRetryable = it.isErrorRetryable,
                         )
-                        requestEnder.onCanceled(
-                            routeOptions,
+                    }
+
+                    logW("Route request failed with: $failures", LOG_CATEGORY)
+                    requestEnder.onFailure(failures, routeOptions)
+                }
+            },
+            { responseBody ->
+                mainJobControl.scope.launch {
+                    logI(
+                        "processing successful response " +
+                            "from router.getRoute for $urlWithoutToken",
+                        LOG_CATEGORY,
+                    )
+
+                    if (id != null) {
+                        if (activeRouteRequests[id] == null) {
+                            logI { "Request $id has been processed before" }
+                            return@launch
+                        } else {
+                            activeRouteRequests[id]?.parsingJob =
+                                this@launch.coroutineContext[Job]
+                        }
+                    }
+                    parseResponse(
+                        ResponseToParse(
+                            responseBody,
+                            routeUrl,
                             origin.mapToSdkRouteOrigin(),
-                        )
-                    } else {
-                        val failures = errors.map {
-                            RouterFailureFactory.create(
-                                url = urlWithoutToken,
-                                routerOrigin = origin.mapToSdkRouteOrigin(),
-                                message = it.message,
-                                type = it.type.mapToSdkRouterFailureType(),
-                                throwable = null,
-                                isRetryable = it.isErrorRetryable,
-                            )
-                        }
-
-                        logW("Route request failed with: $failures", LOG_CATEGORY)
-                        requestEnder.onFailure(failures, routeOptions)
-                    }
-                },
-                { responseBody ->
-                    mainJobControl.scope.launch {
-                        logI(
-                            "processing successful response " +
-                                "from router.getRoute for $urlWithoutToken",
-                            LOG_CATEGORY,
-                        )
-
-                        if (id != null) {
-                            if (activeRouteRequests[id] == null) {
-                                logI { "Request $id has been processed before" }
-                                return@launch
-                            } else {
-                                activeRouteRequests[id]?.parsingJob =
-                                    this@launch.coroutineContext[Job]
-                            }
-                        }
-                        parseResponse(
-                            ResponseToParse(
-                                responseBody,
-                                routeUrl,
-                                origin.mapToSdkRouteOrigin(),
-                                responseOriginAPI,
-                            ),
-                        ).onSuccess { response ->
-                            val routeOrigin = origin.mapToSdkRouteOrigin()
-                            logI("Routes parsing completed", LOG_CATEGORY)
-                            requestEnder.onSuccess(response, routeOrigin)
-                        }.onFailure { throwable ->
-                            requestEnder.onFailure(
-                                listOf(
-                                    RouterFailureFactory.create(
-                                        url = urlWithoutToken,
-                                        routerOrigin = origin.mapToSdkRouteOrigin(),
-                                        message = "Failed to parse response",
-                                        type = RESPONSE_PARSING_ERROR,
-                                        throwable = throwable,
-                                    ),
+                            responseOriginAPI,
+                        ),
+                    ).onSuccess { response ->
+                        val routeOrigin = origin.mapToSdkRouteOrigin()
+                        logI("Routes parsing completed", LOG_CATEGORY)
+                        requestEnder.onSuccess(response, routeOrigin)
+                    }.onFailure { throwable ->
+                        requestEnder.onFailure(
+                            listOf(
+                                RouterFailureFactory.create(
+                                    url = urlWithoutToken,
+                                    routerOrigin = origin.mapToSdkRouteOrigin(),
+                                    message = "Failed to parse response",
+                                    type = RESPONSE_PARSING_ERROR,
+                                    throwable = throwable,
                                 ),
-                                routeOptions,
-                            )
-                        }
+                            ),
+                            routeOptions,
+                        )
                     }
-                },
-            )
-        }
+                }
+            },
+        )
     }
 
     private fun endRouteRefreshRequest(
         id: Long?,
-        originRouter: RouterInterface,
         requestUuid: String,
         routeRefreshRequestData: RouteRefreshRequestData,
         refreshOptions: RouteRefreshOptions,
@@ -518,101 +481,94 @@ internal class RouterWrapper(
             logI { "Response for refresh request $id has already been processed" }
             return
         }
-        if (originRouter != router) {
-            logD(LOG_CATEGORY) { "router was recreated, onFailure callback will be fired" }
-            callback.onFailure(
-                NavigationRouterRefreshError("Failed to refresh a route", transient = true),
-            )
-        } else {
-            val responseTimeElapsedSeconds = Time.SystemClockImpl.seconds()
-            result.fold(
-                { errors ->
-                    val error = errors.first()
+        val responseTimeElapsedSeconds = Time.SystemClockImpl.seconds()
+        result.fold(
+            { errors ->
+                val error = errors.first()
 
-                    // When the online refresh and the device both fail, the device errors
-                    // follow the online one.
-                    val otherErrors = errors.drop(1).joinToString(separator = "") {
-                        "\nalso: type = ${it.type}, message = ${it.message}"
-                    }
-                    val errorMessage =
-                        """
-                               Route refresh failed.
-                               requestUuid = $requestUuid
-                               message = ${error.message}
-                               type = ${error.type}
-                               requestId = ${error.requestId}
-                               refreshTTL = ${error.refreshTtl}
-                               routeRefreshRequestData = $routeRefreshRequestData
-                        """.trimIndent() + otherErrors
+                // When the online refresh and the device both fail, the device errors
+                // follow the online one.
+                val otherErrors = errors.drop(1).joinToString(separator = "") {
+                    "\nalso: type = ${it.type}, message = ${it.message}"
+                }
+                val errorMessage =
+                    """
+                           Route refresh failed.
+                           requestUuid = $requestUuid
+                           message = ${error.message}
+                           type = ${error.type}
+                           requestId = ${error.requestId}
+                           refreshTTL = ${error.refreshTtl}
+                           routeRefreshRequestData = $routeRefreshRequestData
+                    """.trimIndent() + otherErrors
 
-                    logW(errorMessage, LOG_CATEGORY)
+                logW(errorMessage, LOG_CATEGORY)
 
-                    error.refreshTtl?.let {
-                        route.updateExpirationTime(it + responseTimeElapsedSeconds)
-                    }
-                    callback.onFailure(
-                        NavigationRouterRefreshError(
-                            "Route refresh failed",
-                            Exception(errorMessage),
-                            refreshTtl = error.refreshTtl,
-                            // The device can't refresh this route, and asking again won't help.
-                            // A route the server built can still be refreshed online later; a
-                            // route built on the device has no server session, whatever its
-                            // origin.
-                            permanent = error.type == RouterErrorType.OFFLINE_REFRESH &&
-                                (
-                                    route.origin == SdkRouterOrigin.OFFLINE ||
-                                        requestUuid.startsWith(ONBOARD_ROUTE_UUID_PREFIX)
-                                    ),
-                        ),
-                    )
-                },
-                { dataRef ->
-                    // The device refreshes only the charge of a route the server built. The
-                    // traffic stays as old as the last refresh from the server.
-                    val chargeOnly = resultOrigin == RouterOrigin.ONBOARD &&
-                        route.origin == SdkRouterOrigin.ONLINE
-                    mainJobControl.scope.launch {
-                        if (id != null) {
-                            if (activeRouteRefreshRequests[id] == null) {
-                                logI { "Refresh request $id has already been processed" }
-                                return@launch
-                            } else {
-                                activeRouteRefreshRequests[id]?.parsingJob =
-                                    this@launch.coroutineContext[Job]
-                            }
+                error.refreshTtl?.let {
+                    route.updateExpirationTime(it + responseTimeElapsedSeconds)
+                }
+                callback.onFailure(
+                    NavigationRouterRefreshError(
+                        "Route refresh failed",
+                        Exception(errorMessage),
+                        refreshTtl = error.refreshTtl,
+                        // The device can't refresh this route, and asking again won't help.
+                        // A route the server built can still be refreshed online later; a
+                        // route built on the device has no server session, whatever its
+                        // origin.
+                        permanent = error.type == RouterErrorType.OFFLINE_REFRESH &&
+                            (
+                                route.origin == SdkRouterOrigin.OFFLINE ||
+                                    requestUuid.startsWith(ONBOARD_ROUTE_UUID_PREFIX)
+                                ),
+                    ),
+                )
+            },
+            { dataRef ->
+                // The device refreshes only the charge of a route the server built. The
+                // traffic stays as old as the last refresh from the server.
+                val chargeOnly = resultOrigin == RouterOrigin.ONBOARD &&
+                    route.origin == SdkRouterOrigin.ONLINE
+                mainJobControl.scope.launch {
+                    if (id != null) {
+                        if (activeRouteRefreshRequests[id] == null) {
+                            logI { "Refresh request $id has already been processed" }
+                            return@launch
+                        } else {
+                            activeRouteRefreshRequests[id]?.parsingJob =
+                                this@launch.coroutineContext[Job]
                         }
-                        withContext(ThreadController.DefaultDispatcher) {
-                            route.internalRefreshRoute(
-                                refreshResponse = dataRef,
-                                legIndex = refreshOptions.legIndex,
-                                legGeometryIndex = routeRefreshRequestData.legGeometryIndex ?: 0,
-                                responseTimeElapsedSeconds = responseTimeElapsedSeconds,
-                                experimentalProperties = routeRefreshRequestData
-                                    .experimentalProperties,
-                                chargeOnly = chargeOnly,
-                            )
-                        }.fold(
-                            { refreshedRoute ->
-                                callback.onRefreshReady(refreshedRoute, dataRef, chargeOnly)
-                            },
-                            { throwable ->
-                                // Not transient: the same response would fail again. An
-                                // expired route is then reported as invalidated instead of
-                                // being retried at once; it is still requested next interval.
-                                callback.onFailure(
-                                    NavigationRouterRefreshError(
-                                        "failed for response: $dataRef",
-                                        throwable,
-                                    ),
-                                )
-                            },
-
-                        )
                     }
-                },
-            )
-        }
+                    withContext(ThreadController.DefaultDispatcher) {
+                        route.internalRefreshRoute(
+                            refreshResponse = dataRef,
+                            legIndex = refreshOptions.legIndex,
+                            legGeometryIndex = routeRefreshRequestData.legGeometryIndex ?: 0,
+                            responseTimeElapsedSeconds = responseTimeElapsedSeconds,
+                            experimentalProperties = routeRefreshRequestData
+                                .experimentalProperties,
+                            chargeOnly = chargeOnly,
+                        )
+                    }.fold(
+                        { refreshedRoute ->
+                            callback.onRefreshReady(refreshedRoute, dataRef, chargeOnly)
+                        },
+                        { throwable ->
+                            // Not transient: the same response would fail again. An
+                            // expired route is then reported as invalidated instead of
+                            // being retried at once; it is still requested next interval.
+                            callback.onFailure(
+                                NavigationRouterRefreshError(
+                                    "failed for response: $dataRef",
+                                    throwable,
+                                ),
+                            )
+                        },
+
+                    )
+                }
+            },
+        )
     }
 
     private inner class RouteRequestEnder<T>(

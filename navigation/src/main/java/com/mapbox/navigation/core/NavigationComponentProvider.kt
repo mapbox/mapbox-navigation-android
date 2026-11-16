@@ -41,7 +41,6 @@ import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.navigator.internal.MapboxNativeRerouteInterface
 import com.mapbox.navigation.utils.internal.ThreadController
-import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.EventsMetadataInterface
 import com.mapbox.navigator.HistoryRecorderHandle
@@ -73,14 +72,14 @@ internal object NavigationComponentProvider {
         tilesConfig: TilesConfig,
         config: ConfigHandle,
         historyRecorderComposite: HistoryRecorderHandle?,
-        offlineCacheHandle: CacheHandle?,
+        offlineTilesConfig: TilesConfig?,
         eventsMetadataProvider: EventsMetadataInterface,
         roadObjectMatcherConfig: RoadObjectMatcherConfig,
     ): MapboxNativeNavigator = PerformanceTracker.trackPerformanceSync("createNativeNavigator") {
         MapboxNativeNavigatorImpl(
             tilesConfig,
             historyRecorderComposite,
-            offlineCacheHandle,
+            offlineTilesConfig,
             roadObjectMatcherConfig,
             config,
             eventsMetadataProvider,

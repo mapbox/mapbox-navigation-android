@@ -48,7 +48,6 @@ import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.logW
-import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigationStatusOrigin
 import com.mapbox.navigator.NavigatorObserver
@@ -302,7 +301,6 @@ internal class MapboxTripSession(
     @OptIn(MapboxExperimental::class)
     private val relevantVoiceInstructionsCallbacks =
         CopyOnWriteArraySet<RelevantVoiceInstructionsCallback>()
-    private val fallbackVersionsObservers = CopyOnWriteArraySet<FallbackVersionsObserver>()
 
     private val bannerInstructionEvent = BannerInstructionEvent()
 
@@ -347,25 +345,6 @@ internal class MapboxTripSession(
     override var locationMatcherResult: LocationMatcherResult? = null
         private set
 
-    private val nativeFallbackVersionsObserver =
-        object : FallbackVersionsObserver {
-            override fun onFallbackVersionsFound(versions: MutableList<String>) {
-                mainJobController.scope.launch {
-                    fallbackVersionsObservers.forEach {
-                        it.onFallbackVersionsFound(versions)
-                    }
-                }
-            }
-
-            override fun onCanReturnToLatest(version: String) {
-                mainJobController.scope.launch {
-                    fallbackVersionsObservers.forEach {
-                        it.onCanReturnToLatest(version)
-                    }
-                }
-            }
-        }
-
     // worker thread
     private val onRawLocationUpdate: (Location) -> Unit = { rawLocation ->
         rawLocationState.value = rawLocation
@@ -396,23 +375,6 @@ internal class MapboxTripSession(
 
     @OptIn(MapboxExperimental::class)
     private var voiceInstructionsObserver: VoiceInstructionsCallback? = null
-
-    init {
-        navigator.addNativeNavigatorRecreationObserver {
-            if (fallbackVersionsObservers.isNotEmpty()) {
-                navigator.setFallbackVersionsObserver(nativeFallbackVersionsObserver)
-            }
-            if (state == TripSessionState.STARTED) {
-                navigator.addNavigatorObserver(navigatorObserver)
-            }
-            @OptIn(MapboxExperimental::class)
-            if (voiceInstructionsAvailableObserver.isNotEmpty()) {
-                navigator.addVoiceInstructionsAvailabilityObserver(
-                    voiceInstructionsAvailabilityObserver,
-                )
-            }
-        }
-    }
 
     /**
      * Return raw location
@@ -808,29 +770,6 @@ internal class MapboxTripSession(
 
     override fun unregisterAllEHorizonObservers() {
         eHorizonSubscriptionManager.unregisterAllObservers()
-    }
-
-    override fun registerFallbackVersionsObserver(
-        fallbackVersionsObserver: FallbackVersionsObserver,
-    ) {
-        if (fallbackVersionsObservers.isEmpty()) {
-            navigator.setFallbackVersionsObserver(nativeFallbackVersionsObserver)
-        }
-        fallbackVersionsObservers.add(fallbackVersionsObserver)
-    }
-
-    override fun unregisterFallbackVersionsObserver(
-        fallbackVersionsObserver: FallbackVersionsObserver,
-    ) {
-        fallbackVersionsObservers.remove(fallbackVersionsObserver)
-        if (fallbackVersionsObservers.isEmpty()) {
-            navigator.setFallbackVersionsObserver(null)
-        }
-    }
-
-    override fun unregisterAllFallbackVersionsObservers() {
-        fallbackVersionsObservers.clear()
-        navigator.setFallbackVersionsObserver(null)
     }
 
     override fun resetOffRouteDeviationFlag() {

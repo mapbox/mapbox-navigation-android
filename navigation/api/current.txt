@@ -844,9 +844,6 @@ package com.mapbox.navigation.core.mapmatching {
 
 package com.mapbox.navigation.core.navigator {
 
-  public final class CacheHandleWrapperKt {
-  }
-
   public final class LocationEx {
   }
 

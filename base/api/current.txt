@@ -1430,7 +1430,7 @@ package com.mapbox.navigation.base.route {
     field public static final String MISSING_TILES_ERROR = "MISSING_TILES_ERROR";
     field public static final String NETWORK_ERROR = "NETWORK_ERROR";
     field public static final String RESPONSE_PARSING_ERROR = "RESPONSE_PARSING_ERROR";
-    field public static final String ROUTER_RECREATION_ERROR = "ROUTER_RECREATION_ERROR";
+    field @Deprecated public static final String ROUTER_RECREATION_ERROR = "ROUTER_RECREATION_ERROR";
     field public static final String ROUTE_CREATION_ERROR = "ROUTE_CREATION_ERROR";
     field public static final String ROUTE_EXPIRY_ERROR = "ROUTE_EXPIRY_ERROR";
     field public static final String THROTTLING_ERROR = "THROTTLING_ERROR";
@@ -1443,7 +1443,7 @@ package com.mapbox.navigation.base.route {
     field public static final String MISSING_TILES_ERROR = "MISSING_TILES_ERROR";
     field public static final String NETWORK_ERROR = "NETWORK_ERROR";
     field public static final String RESPONSE_PARSING_ERROR = "RESPONSE_PARSING_ERROR";
-    field public static final String ROUTER_RECREATION_ERROR = "ROUTER_RECREATION_ERROR";
+    field @Deprecated public static final String ROUTER_RECREATION_ERROR = "ROUTER_RECREATION_ERROR";
     field public static final String ROUTE_CREATION_ERROR = "ROUTE_CREATION_ERROR";
     field public static final String ROUTE_EXPIRY_ERROR = "ROUTE_EXPIRY_ERROR";
     field public static final String THROTTLING_ERROR = "THROTTLING_ERROR";

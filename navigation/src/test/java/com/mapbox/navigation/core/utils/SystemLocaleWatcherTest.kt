@@ -6,10 +6,7 @@ import android.os.Handler
 import androidx.core.content.ContextCompat
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocales
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
-import com.mapbox.navigation.navigator.internal.NativeNavigatorRecreationObserver
-import io.mockk.Runs
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.slot
@@ -122,20 +119,6 @@ class SystemLocaleWatcherTest {
     }
 
     @Test
-    fun setsUserLanguageProviderOnNavigationRecreationEvent() {
-        val navRecreationObserverSlot = slot<NativeNavigatorRecreationObserver>()
-        every {
-            navigator.addNativeNavigatorRecreationObserver(capture(navRecreationObserverSlot))
-        } just Runs
-
-        createWatcher()
-        navRecreationObserverSlot.captured.onNativeNavigatorRecreated()
-        verify(exactly = 2) {
-            navigator.setUserLanguages(defaultLocaleTags)
-        }
-    }
-
-    @Test
     fun setsOverriddenUserLanguagesWhenOverrideIsApplied() {
         createWatcher()
 
@@ -155,22 +138,6 @@ class SystemLocaleWatcherTest {
 
         verify(exactly = 2) {
             navigator.setUserLanguages(defaultLocaleTags)
-        }
-    }
-
-    @Test
-    fun keepsOverriddenUserLanguagesOnNavigationRecreationEvent() {
-        val navRecreationObserverSlot = slot<NativeNavigatorRecreationObserver>()
-        every {
-            navigator.addNativeNavigatorRecreationObserver(capture(navRecreationObserverSlot))
-        } just Runs
-
-        createWatcher()
-        systemLocaleWatcher.setOverrideLanguages(listOf("de-DE"))
-        navRecreationObserverSlot.captured.onNativeNavigatorRecreated()
-
-        verify(exactly = 2) {
-            navigator.setUserLanguages(listOf("de-DE"))
         }
     }
 

@@ -91,10 +91,9 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.mapmatching.MapMatchingAPICallback
 import com.mapbox.navigation.core.mapmatching.MapMatchingOptions
 import com.mapbox.navigation.core.mapmatching.MapMatchingSuccessfulResult
-import com.mapbox.navigation.core.navigator.CacheHandleWrapper
+import com.mapbox.navigation.core.navigator.TilesManagerHandleWrapper
 import com.mapbox.navigation.core.navigator.TilesetDescriptorFactory
 import com.mapbox.navigation.core.navigator.offline.TilesetVersionManager
-import com.mapbox.navigation.core.navigator.toFixLocation
 import com.mapbox.navigation.core.preview.RoutesPreview
 import com.mapbox.navigation.core.preview.RoutesPreviewObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
@@ -154,6 +153,7 @@ import com.mapbox.navigation.core.utils.SystemLocaleWatcher
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.NavigatorLoader
 import com.mapbox.navigation.navigator.internal.NavigatorLoader.createRoadObjectMatcherOptions
+import com.mapbox.navigation.navigator.internal.TilesVersionChangedObserver
 import com.mapbox.navigation.utils.internal.ConnectivityHandler
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.Time
@@ -164,16 +164,14 @@ import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
 import com.mapbox.navigator.AlertsServiceOptions
-import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.ElectronicHorizonOptions
-import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.IncidentsOptions
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.PollingConfig
-import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.navigator.TilesConfig
+import com.mapbox.navigator.TilesVersionChangeReason
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -315,7 +313,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     )
     private val internalRoutesObserver: RoutesObserver
     private val routesCacheClearer = NavigationComponentProvider.createRoutesCacheClearer()
-    private val internalFallbackVersionsObserver: FallbackVersionsObserver
     private val routeAlternativesController: RouteAlternativesController
     private val arrivalProgressObserver: ArrivalProgressObserver
     private val electronicHorizonOptions: ElectronicHorizonOptions = ElectronicHorizonOptions(
@@ -549,9 +546,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             tilesConfig,
             config,
             historyRecorderHandles.composite,
-            PerformanceTracker.trackPerformanceSync("${initSectionName}createOfflineCacheHandle") {
-                createOfflineCacheHandle(config)
-            },
+            createOfflineTilesConfig(),
             NavigationComponentProvider.createEventsMetadataInterface(
                 navigationOptions.applicationContext,
                 appLifecycleMonitor,
@@ -730,11 +725,12 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         rerouteController = defaultRerouteController
 
         internalRoutesObserver = createInternalRoutesObserver()
-        internalFallbackVersionsObserver = createInternalFallbackVersionsObserver()
-        tripSession.registerFallbackVersionsObserver(internalFallbackVersionsObserver)
         registerRoutesObserver(internalRoutesObserver)
         registerRoutesObserver(routeRefreshController::onRoutesChanged)
         setUpRouteCacheClearer()
+
+        // the native navigator switches tiles versions itself and reports it here
+        navigator.addTilesVersionChangedObserver(createTilesVersionChangedObserver())
 
         roadObjectsStore = RoadObjectsStore(navigator)
         graphAccessor = GraphAccessor(navigator)
@@ -743,7 +739,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         ) {
             TilesetDescriptorFactory(
                 navigationOptions.routingTilesOptions,
-                navigator.cache,
+                navigator.tilesManagerHandle,
             )
         }
         roadObjectMatcher = RoadObjectMatcher(navigator)
@@ -779,14 +775,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         get() = tripSessionLocationEngine.handlerThread
 
     @OptIn(ExperimentalMapboxNavigationAPI::class)
-    private fun createOfflineCacheHandle(config: ConfigHandle): CacheHandle? {
+    private fun createOfflineTilesConfig(): TilesConfig? {
         val version = navigationOptions.routingTilesOptions.fallbackOfflineTilesVersion
             ?: return null
-        return NavigatorLoader.createCacheHandle(
-            config,
-            createTilesConfig(false, version),
-            historyRecorderHandles.composite,
-        )
+
+        return createTilesConfig(isFallback = false, tilesVersion = version)
     }
 
     /**
@@ -1376,7 +1369,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      *   updates is received. See [RoadGraphDataUpdateCallback].
      */
     fun requestRoadGraphDataUpdate(callback: RoadGraphDataUpdateCallback) {
-        CacheHandleWrapper.requestRoadGraphDataUpdate(navigator.cache, callback)
+        TilesManagerHandleWrapper.requestRoadGraphDataUpdate(navigator.tilesManagerHandle, callback)
     }
 
     /**
@@ -1641,7 +1634,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         tripSession.unregisterAllBannerInstructionsObservers()
         tripSession.unregisterAllVoiceInstructionsObservers()
         tripSession.unregisterAllEHorizonObservers()
-        tripSession.unregisterAllFallbackVersionsObservers()
         tripSessionLocationEngine.destroy()
         routeAlternativesController.unregisterAll()
         navigationTelemetry.clearObservers()
@@ -2448,7 +2440,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         timeoutSeconds: Int? = null,
         callback: RoadGraphVersionInfoCallback,
     ) {
-        navigator.cache.getCurrentRoadGraphVersionInfo(
+        navigator.tilesManagerHandle.currentVersion(
             { isVersionResolved, currentVersionInfo ->
                 if (!isVersionResolved || currentVersionInfo == null) {
                     callback.onError(isTimeoutError = !isVersionResolved)
@@ -2560,70 +2552,31 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         routesProgressDataProvider.onNewRoutes(result.navigationRoutes)
     }
 
-    private fun createInternalFallbackVersionsObserver() = object : FallbackVersionsObserver {
-        override fun onFallbackVersionsFound(versions: List<String>) {
-            logI(
-                "FallbackVersionsObserver.onFallbackVersionsFound called with versions = $versions",
-                LOG_CATEGORY,
-            )
-            if (versions.isNotEmpty()) {
-                // the last version in the list is the latest one
-                val tilesVersion = versions.last()
-                recreateNavigatorInstance(isFallback = true, tilesVersion = tilesVersion)
-                navigationVersionSwitchObservers.forEach {
-                    it.onSwitchToFallbackVersion(tilesVersion)
-                }
-            }
-        }
-
-        override fun onCanReturnToLatest(version: String) {
-            logI(
-                "FallbackVersionsObserver.onCanReturnToLatest called with version = $version",
-                LOG_CATEGORY,
-            )
-            recreateNavigatorInstance(
-                isFallback = false,
-                tilesVersion = navigationOptions.routingTilesOptions.tilesVersion,
-            )
-            navigationVersionSwitchObservers.forEach { observer ->
-                observer.onSwitchToTargetVersion(
-                    navigationOptions.routingTilesOptions.tilesVersion.takeIf { it.isNotEmpty() },
-                )
-            }
-        }
-    }
-
-    private fun recreateNavigatorInstance(isFallback: Boolean, tilesVersion: String) {
-        logD(
-            "recreateNavigatorInstance(). " +
-                "isFallback = $isFallback, tilesVersion = $tilesVersion",
+    private fun createTilesVersionChangedObserver() = TilesVersionChangedObserver { info, reason ->
+        logI(
+            "Tiles version changed: version = ${info.version}, reason = $reason",
             LOG_CATEGORY,
         )
-
-        mainJobController.scope.launch {
-            navigator.recreate(createTilesConfig(isFallback, tilesVersion))
-
-            routerWrapper.resetRouter(navigator.getRouter())
-            routeAlternativesController.navigatorUpdated(navigator)
-
-            etcGateAPI.experimental = navigator.experimental
-
-            val routes = directionsSession.routes
-            if (routes.isNotEmpty()) {
-                navigator.setRoutes(
-                    primaryRoute = routes[0],
-                    startingLeg = tripSession.getRouteProgress()?.currentLegProgress?.legIndex ?: 0,
-                    alternatives = routes.drop(1),
-                    when (isFallback) {
-                        true -> SetRoutesReason.FALLBACK_TO_OFFLINE
-                        false -> SetRoutesReason.RESTORE_TO_ONLINE
-                    },
-                )
+        when (reason) {
+            TilesVersionChangeReason.FALLBACK -> {
+                navigationVersionSwitchObservers.forEach {
+                    it.onSwitchToFallbackVersion(info.version)
+                }
             }
-            tripSession.getRawLocation()?.let { lastRawLocation ->
-                logI(LOG_CATEGORY) { "Re-pushing last raw location $lastRawLocation" }
-                navigator.updateLocation(lastRawLocation.toFixLocation())
+
+            TilesVersionChangeReason.RETURN_TO_LATEST,
+            TilesVersionChangeReason.RETURN_TO_PINNED,
+            -> {
+                // documented contract: the configured version, null for auto-latest
+                val targetVersion = navigationOptions.routingTilesOptions.tilesVersion
+                    .takeIf { version -> version.isNotEmpty() }
+
+                navigationVersionSwitchObservers.forEach {
+                    it.onSwitchToTargetVersion(targetVersion)
+                }
             }
+
+            TilesVersionChangeReason.UPDATED -> Unit // only hd sends Updated reason
         }
     }
 

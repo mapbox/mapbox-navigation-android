@@ -913,4 +913,19 @@ class PredictiveCacheControllerTest {
             styleLoadedTask2.cancel()
         }
     }
+
+    @Test
+    fun `onDestroy destroys the predictive cache`() {
+        val mockedTileStore = mockk<TileStore>()
+        every { TileStore.create(any()) } returns mockedTileStore
+        every { MapboxMapsOptions.tileStore } returns mockedTileStore
+        val predictiveCacheController = PredictiveCacheController(
+            PredictiveCacheOptions.Builder().build(),
+            predictiveCache,
+        )
+
+        predictiveCacheController.onDestroy()
+
+        verify(exactly = 1) { predictiveCache.onDestroy() }
+    }
 }

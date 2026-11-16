@@ -243,7 +243,7 @@ class PredictiveCacheController @VisibleForTesting internal constructor(
             it.value.cancel()
         }
         mapSubscriptions.clear()
-        predictiveCache.clean()
+        predictiveCache.onDestroy()
     }
 
     private fun handleError(error: String?) {

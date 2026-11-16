@@ -10,10 +10,6 @@ interface MapboxNativeRerouteInterface {
     fun addRerouteObserver(nativeRerouteObserver: RerouteObserver)
     fun removeRerouteObserver(nativeRerouteObserver: RerouteObserver)
 
-    fun addNativeNavigatorRecreationObserver(
-        nativeNavigatorRecreationObserver: NativeNavigatorRecreationObserver,
-    )
-
     fun getRerouteDetector(): RerouteDetectorInterface?
     fun getRerouteController(): RerouteControllerInterface?
 

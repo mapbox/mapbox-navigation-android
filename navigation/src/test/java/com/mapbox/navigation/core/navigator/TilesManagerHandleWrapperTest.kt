@@ -1,9 +1,9 @@
 package com.mapbox.navigation.core.navigator
 
 import com.mapbox.navigation.core.RoadGraphDataUpdateCallback
-import com.mapbox.navigator.CacheHandleInterface
-import com.mapbox.navigator.RoadGraphUpdateAvailabilityCallback
 import com.mapbox.navigator.RoadGraphVersionInfo
+import com.mapbox.navigator.TilesManagerHandleInterface
+import com.mapbox.navigator.TilesUpdateAvailabilityCallback
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Test
@@ -12,9 +12,9 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.random.Random
 
 @RunWith(RobolectricTestRunner::class)
-class CacheHandleWrapperTest {
+class TilesManagerHandleWrapperTest {
 
-    private val cache = mockk<CacheHandleInterface>(relaxed = true)
+    private val tilesManagerHandle = mockk<TilesManagerHandleInterface>(relaxed = true)
     private val callback = mockk<RoadGraphDataUpdateCallback>(relaxed = true)
 
     @Test
@@ -24,11 +24,11 @@ class CacheHandleWrapperTest {
         val expectedVersion = "my version"
         val versionInfo = RoadGraphVersionInfo(expectedDataset, expectedVersion)
 
-        CacheHandleWrapper.requestRoadGraphDataUpdate(cache, callback)
+        TilesManagerHandleWrapper.requestRoadGraphDataUpdate(tilesManagerHandle, callback)
 
-        val nativeCallbacks = mutableListOf<RoadGraphUpdateAvailabilityCallback>()
+        val nativeCallbacks = mutableListOf<TilesUpdateAvailabilityCallback>()
         verify(exactly = 1) {
-            cache.isRoadGraphDataUpdateAvailable(capture(nativeCallbacks))
+            tilesManagerHandle.checkUpdateAvailable(capture(nativeCallbacks))
         }
         nativeCallbacks[0].run(expectedIsUpdateAvailable, versionInfo)
         verify(exactly = 1) {
@@ -43,11 +43,11 @@ class CacheHandleWrapperTest {
     fun `requestRoadGraphDataUpdate invokes callback with null version info`() {
         val expectedIsUpdateAvailable = Random.nextBoolean()
 
-        CacheHandleWrapper.requestRoadGraphDataUpdate(cache, callback)
+        TilesManagerHandleWrapper.requestRoadGraphDataUpdate(tilesManagerHandle, callback)
 
-        val nativeCallbacks = mutableListOf<RoadGraphUpdateAvailabilityCallback>()
+        val nativeCallbacks = mutableListOf<TilesUpdateAvailabilityCallback>()
         verify(exactly = 1) {
-            cache.isRoadGraphDataUpdateAvailable(capture(nativeCallbacks))
+            tilesManagerHandle.checkUpdateAvailable(capture(nativeCallbacks))
         }
         nativeCallbacks[0].run(expectedIsUpdateAvailable, null)
         verify(exactly = 1) {
@@ -62,11 +62,11 @@ class CacheHandleWrapperTest {
         val expectedVersion = "my version"
         val versionInfo = RoadGraphVersionInfo(expectedDataset, expectedVersion)
 
-        CacheHandleWrapper.requestHDGraphDataUpdate(cache, callback)
+        TilesManagerHandleWrapper.requestHDGraphDataUpdate(tilesManagerHandle, callback)
 
-        val nativeCallbacks = mutableListOf<RoadGraphUpdateAvailabilityCallback>()
+        val nativeCallbacks = mutableListOf<TilesUpdateAvailabilityCallback>()
         verify(exactly = 1) {
-            cache.isHDGraphDataUpdateAvailable(capture(nativeCallbacks))
+            tilesManagerHandle.checkHDUpdateAvailable(capture(nativeCallbacks))
         }
         nativeCallbacks[0].run(expectedIsUpdateAvailable, versionInfo)
         verify(exactly = 1) {
@@ -81,11 +81,11 @@ class CacheHandleWrapperTest {
     fun `requestHDGraphDataUpdate invokes callback with null version info`() {
         val expectedIsUpdateAvailable = Random.nextBoolean()
 
-        CacheHandleWrapper.requestHDGraphDataUpdate(cache, callback)
+        TilesManagerHandleWrapper.requestHDGraphDataUpdate(tilesManagerHandle, callback)
 
-        val nativeCallbacks = mutableListOf<RoadGraphUpdateAvailabilityCallback>()
+        val nativeCallbacks = mutableListOf<TilesUpdateAvailabilityCallback>()
         verify(exactly = 1) {
-            cache.isHDGraphDataUpdateAvailable(capture(nativeCallbacks))
+            tilesManagerHandle.checkHDUpdateAvailable(capture(nativeCallbacks))
         }
         nativeCallbacks[0].run(expectedIsUpdateAvailable, null)
         verify(exactly = 1) {

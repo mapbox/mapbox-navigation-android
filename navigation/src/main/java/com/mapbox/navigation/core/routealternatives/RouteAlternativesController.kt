@@ -36,19 +36,7 @@ internal class RouteAlternativesController(
 
     private var observerProcessingJob: Job? = null
 
-    private var nativeRouteAlternativesController = setupNativeController(navigator)
-
-    fun navigatorUpdated(navigator: MapboxNativeNavigator) {
-        if (isCaRunning()) {
-            nativeRouteAlternativesController.removeObserver(nativeObserver)
-        }
-
-        nativeRouteAlternativesController = setupNativeController(navigator)
-
-        if (isCaRunning()) {
-            nativeRouteAlternativesController.addObserver(nativeObserver)
-        }
-    }
+    private val nativeRouteAlternativesController = setupNativeController(navigator)
 
     private fun setupNativeController(
         navigator: MapboxNativeNavigator,

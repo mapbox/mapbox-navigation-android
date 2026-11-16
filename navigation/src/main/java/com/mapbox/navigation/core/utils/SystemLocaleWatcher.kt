@@ -30,10 +30,6 @@ internal class SystemLocaleWatcher private constructor(
 
     init {
         registerLocaleChangeReceiver()
-
-        navigator.addNativeNavigatorRecreationObserver {
-            updateUserLanguages()
-        }
     }
 
     fun setOverrideLanguages(languages: List<String>?) {

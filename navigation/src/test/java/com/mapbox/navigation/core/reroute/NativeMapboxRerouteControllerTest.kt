@@ -12,7 +12,6 @@ import com.mapbox.navigation.base.internal.utils.mapToSdkRouteOrigin
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.core.internal.router.util.TestRouteFixtures
 import com.mapbox.navigation.navigator.internal.MapboxNativeRerouteInterface
-import com.mapbox.navigation.navigator.internal.NativeNavigatorRecreationObserver
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.testing.NativeRouteParserRule
 import com.mapbox.navigation.testing.factories.createDirectionsResponse
@@ -1551,11 +1550,6 @@ private class MapboxNativeRerouteInterfaceImpl : MapboxNativeRerouteInterface {
     }
 
     override fun removeRerouteObserver(nativeRerouteObserver: RerouteObserver) {
-    }
-
-    override fun addNativeNavigatorRecreationObserver(
-        nativeNavigatorRecreationObserver: NativeNavigatorRecreationObserver,
-    ) {
     }
 
     override fun getRerouteDetector(): RerouteDetectorInterface? {

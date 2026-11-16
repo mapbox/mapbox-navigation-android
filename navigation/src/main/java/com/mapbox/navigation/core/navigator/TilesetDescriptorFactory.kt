@@ -3,7 +3,8 @@ package com.mapbox.navigation.core.navigator
 import com.mapbox.common.TilesetDescriptor
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.RoutingTilesOptions
-import com.mapbox.navigator.CacheHandle
+import com.mapbox.navigator.TilesDomain
+import com.mapbox.navigator.TilesManagerHandle
 
 private typealias NativeTilesetDescriptorFactory = com.mapbox.navigator.TilesetDescriptorFactory
 
@@ -12,7 +13,7 @@ private typealias NativeTilesetDescriptorFactory = com.mapbox.navigator.TilesetD
  */
 class TilesetDescriptorFactory internal constructor(
     private val routingTilesOptions: RoutingTilesOptions,
-    private val cache: CacheHandle,
+    private val tilesManagerHandle: TilesManagerHandle,
     private val nativeFactoryWrapper: NativeFactoryWrapper = NativeFactoryWrapperImpl(),
 ) {
 
@@ -73,7 +74,11 @@ class TilesetDescriptorFactory internal constructor(
      * @param tilesVersion TilesetDescriptor version
      */
     fun getSpecificVersion(tilesVersion: String): TilesetDescriptor =
-        nativeFactoryWrapper.getSpecificVersion(cache, tilesVersion, false)
+        nativeFactoryWrapper.getSpecificVersion(
+            combineDatasetWithProfile(null, null),
+            tilesVersion,
+            false,
+        )
 
     /**
      * Gets TilesetDescriptor which corresponds to the currently used routing tiles dataset
@@ -83,12 +88,16 @@ class TilesetDescriptorFactory internal constructor(
      */
     @ExperimentalPreviewMapboxNavigationAPI
     fun getSpecificVersion(tilesVersion: String, includeAdas: Boolean): TilesetDescriptor =
-        nativeFactoryWrapper.getSpecificVersion(cache, tilesVersion, includeAdas)
+        nativeFactoryWrapper.getSpecificVersion(
+            combineDatasetWithProfile(null, null),
+            tilesVersion,
+            includeAdas,
+        )
 
     /**
      * Gets TilesetDescriptor which corresponds to the latest available version of routing tiles.
      */
-    fun getLatest(): TilesetDescriptor = nativeFactoryWrapper.getLatest(cache, false)
+    fun getLatest(): TilesetDescriptor = nativeFactoryWrapper.getLatest(tilesManagerHandle, false)
 
     /**
      * Gets TilesetDescriptor which corresponds to the latest available version of routing tiles.
@@ -97,7 +106,7 @@ class TilesetDescriptorFactory internal constructor(
      */
     @ExperimentalPreviewMapboxNavigationAPI
     fun getLatest(includeAdas: Boolean): TilesetDescriptor =
-        nativeFactoryWrapper.getLatest(cache, includeAdas)
+        nativeFactoryWrapper.getLatest(tilesManagerHandle, includeAdas)
 
     private fun combineDatasetWithProfile(tilesDataset: String?, tilesProfile: String?): String {
         val dataset: String = tilesDataset ?: routingTilesOptions.tilesDataset
@@ -113,12 +122,15 @@ class TilesetDescriptorFactory internal constructor(
     // need the wrapper to avoid UnsatisfiedLinkError in unit tests
     internal interface NativeFactoryWrapper {
         fun getSpecificVersion(
-            cache: CacheHandle,
+            tilesDatasetAndProfile: String,
             tilesVersion: String,
             includeAdas: Boolean,
         ): TilesetDescriptor
 
-        fun getLatest(cache: CacheHandle, includeAdas: Boolean): TilesetDescriptor
+        fun getLatest(
+            tilesManagerHandle: TilesManagerHandle,
+            includeAdas: Boolean,
+        ): TilesetDescriptor
 
         fun build(
             tilesDatasetAndProfile: String,
@@ -130,20 +142,30 @@ class TilesetDescriptorFactory internal constructor(
     internal class NativeFactoryWrapperImpl : NativeFactoryWrapper {
 
         override fun getSpecificVersion(
-            cache: CacheHandle,
+            tilesDatasetAndProfile: String,
             tilesVersion: String,
             includeAdas: Boolean,
         ): TilesetDescriptor {
-            return NativeTilesetDescriptorFactory.getSpecificVersion(
-                cache,
+            return TilesManagerHandle.tilesetDescriptor(
+                tilesDatasetAndProfile,
                 tilesVersion,
                 includeAdas,
             )
         }
 
-        override fun getLatest(cache: CacheHandle, includeAdas: Boolean): TilesetDescriptor {
-            return NativeTilesetDescriptorFactory.getLatest(cache, includeAdas)
+        override fun getLatest(
+            tilesManagerHandle: TilesManagerHandle,
+            includeAdas: Boolean,
+        ): TilesetDescriptor {
+            return tilesManagerHandle.tilesetDescriptor(domains(includeAdas))
         }
+
+        private fun domains(includeAdas: Boolean): List<TilesDomain> =
+            if (includeAdas) {
+                listOf(TilesDomain.NAVIGATION, TilesDomain.ADAS)
+            } else {
+                listOf(TilesDomain.NAVIGATION)
+            }
 
         override fun build(
             tilesDatasetAndProfile: String,

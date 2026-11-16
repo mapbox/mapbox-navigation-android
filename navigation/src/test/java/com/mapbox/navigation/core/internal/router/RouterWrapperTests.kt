@@ -67,7 +67,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
-import kotlinx.coroutines.test.runTest
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -1784,22 +1783,6 @@ class RouterWrapperTests {
     }
 
     @Test
-    fun `device refresh that finishes after a router reset fails without being permanent`() {
-        val deviceRefreshSlot = stubDeviceRefresh(mockk(relaxed = true))
-
-        routerWrapper.getRouteRefresh(offlineRoute(), routeRefreshRequestData, routerRefreshCallback)
-        routerWrapper.resetRouter(mockk())
-        deviceRefreshSlot.captured.run(routerRefreshSuccess, nativeOriginOnboard, hashMapOf())
-
-        val errorSlot = slot<NavigationRouterRefreshError>()
-        verify(exactly = 1) { routerRefreshCallback.onFailure(capture(errorSlot)) }
-        verify(exactly = 0) { routerRefreshCallback.onRefreshReady(any(), any(), any()) }
-        assertEquals("Failed to refresh a route", errorSlot.captured.message)
-        assertFalse(errorSlot.captured.permanent)
-        assertTrue(errorSlot.captured.transient)
-    }
-
-    @Test
     fun `cancelAll cancels a device refresh and ignores its result`() {
         val handle = mockk<Cancelable>(relaxed = true)
         val deviceRefreshSlot = stubDeviceRefresh(handle)
@@ -2080,41 +2063,6 @@ class RouterWrapperTests {
         }
 
     @Test
-    fun `check on failure callback is called on getRoute when router reset`() {
-        routerWrapper.getRoute(routerOptions, signature, navigationRouterCallback)
-        routerWrapper.resetRouter(mockk())
-        getRouteSlot.captured.run(routerResultSuccess, nativeOriginOnline)
-
-        verify {
-            router.getRoute(
-                routeUrl,
-                any(),
-                nativeSignature,
-                any<com.mapbox.navigator.RouterDataRefCallback>(),
-            )
-        }
-
-        val expected = RouterFailureFactory.create(
-            url = routeUrl.toHttpUrlOrNull()!!.redactQueryParam(ACCESS_TOKEN_QUERY_PARAM).toUrl(),
-            routerOrigin = ONLINE,
-            message = "Failed to get a route",
-            type = RouterFailureType.ROUTER_RECREATION_ERROR,
-            isRetryable = true,
-        )
-
-        val failures = slot<List<RouterFailure>>()
-        verify(exactly = 1) {
-            navigationRouterCallback.onFailure(capture(failures), routerOptions)
-        }
-        val failure: RouterFailure = failures.captured[0]
-        assertEquals(expected.message, failure.message)
-        assertEquals(expected.type, failure.type)
-        assertEquals(expected.routerOrigin, failure.routerOrigin)
-        assertEquals(expected.url, failure.url)
-        assertTrue(failure.isRetryable)
-    }
-
-    @Test
     fun `get route map matched is called with expected url and options`() {
         routerWrapper.getRouteMapMatched(mapMatchingOptions, signature, mapMatchingCallback)
 
@@ -2247,48 +2195,6 @@ class RouterWrapperTests {
         verify(exactly = 0) { mapMatchingCallback.onCancel() }
         verify(exactly = 0) { mapMatchingCallback.success(any()) }
         verify(exactly = 0) { mapMatchingCallback.failure(any()) }
-    }
-
-    @Test
-    fun `check map matched on failure callback is called when router reset`() =
-        coroutineRule.runBlockingTest {
-            routerWrapper.getRouteMapMatched(mapMatchingOptions, signature, mapMatchingCallback)
-            routerWrapper.resetRouter(mockk())
-            mapMatchedRouteSlot.captured.run(routerResultSuccessMapMatching, nativeOriginOnline)
-
-            verify(exactly = 1) { mapMatchingCallback.failure(any()) }
-            verify(exactly = 0) { mapMatchingCallback.success(any()) }
-        }
-
-    @Test
-    fun `check on failure callback is called on getRouteRefresh when router reset`() = runTest {
-        val options = RouteOptions.builder()
-            .applyDefaultNavigationOptions()
-            .coordinatesList(
-                listOf(
-                    Point.fromLngLat(17.035958238636283, 51.123073179658476),
-                    Point.fromLngLat(17.033342297413395, 51.11608871549779),
-                    Point.fromLngLat(17.030364743939824, 51.11309150868635),
-                    Point.fromLngLat(17.032132688234814, 51.10720758039439),
-                ),
-            )
-            .build()
-        val route = createNavigationRoutes(
-            DirectionsResponse.fromJson(
-                testRouteFixtures.loadMultiLegRouteForRefresh(),
-                options,
-            ),
-            options,
-            ONLINE,
-        ).first()
-
-        routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
-        routerWrapper.resetRouter(mockk())
-        refreshRouteSlot.captured.run(routerRefreshSuccess, nativeOriginOnboard, hashMapOf())
-
-        val errorSlot = slot<NavigationRouterRefreshError>()
-        verify(exactly = 1) { routerRefreshCallback.onFailure(capture(errorSlot)) }
-        assertEquals("Failed to refresh a route", errorSlot.captured.message)
     }
 
     // Work dispatched to it stays suspended, which keeps a request active after its result arrives.

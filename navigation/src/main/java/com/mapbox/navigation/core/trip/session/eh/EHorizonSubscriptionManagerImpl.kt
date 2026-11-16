@@ -101,14 +101,6 @@ internal class EHorizonSubscriptionManagerImpl(
             }
         }
 
-    init {
-        navigator.addNativeNavigatorRecreationObserver {
-            if (eHorizonObservers.isNotEmpty()) {
-                setNavigatorObservers()
-            }
-        }
-    }
-
     override fun registerObserver(observer: EHorizonObserver) {
         if (eHorizonObservers.isEmpty()) {
             setNavigatorObservers()

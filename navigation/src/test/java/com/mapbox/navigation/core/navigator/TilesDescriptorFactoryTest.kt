@@ -3,7 +3,7 @@ package com.mapbox.navigation.core.navigator
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.RoutingTilesOptions
 import com.mapbox.navigation.core.navigator.TilesetDescriptorFactory.NativeFactoryWrapper
-import com.mapbox.navigator.CacheHandle
+import com.mapbox.navigator.TilesManagerHandle
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -14,10 +14,10 @@ import org.junit.Test
 class TilesDescriptorFactoryTest {
 
     private val routingTilesOptions: RoutingTilesOptions = mockk(relaxed = true)
-    private val cache: CacheHandle = mockk(relaxed = true)
+    private val tilesManagerHandle: TilesManagerHandle = mockk(relaxed = true)
     private val nativeFactoryWrapper: NativeFactoryWrapper = mockk(relaxed = true)
     private val tilesetDescriptorFactory by lazy {
-        TilesetDescriptorFactory(routingTilesOptions, cache, nativeFactoryWrapper)
+        TilesetDescriptorFactory(routingTilesOptions, tilesManagerHandle, nativeFactoryWrapper)
     }
 
     @Before

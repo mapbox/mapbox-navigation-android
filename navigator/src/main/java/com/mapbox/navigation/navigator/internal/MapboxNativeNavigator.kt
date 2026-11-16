@@ -11,14 +11,12 @@ import com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigator.ADASISv2MessageCallback
 import com.mapbox.navigator.AdasisConfig
-import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ChangeLegCallback
 import com.mapbox.navigator.ChargingState
 import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.ElectronicHorizonObserver
 import com.mapbox.navigator.EventsMetadataInterface
 import com.mapbox.navigator.Experimental
-import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.GraphAccessorInterface
 import com.mapbox.navigator.InputsServiceHandleInterface
@@ -33,7 +31,7 @@ import com.mapbox.navigator.RefreshRouteResult
 import com.mapbox.navigator.RerouteControllerInterface
 import com.mapbox.navigator.RerouteDetectorInterface
 import com.mapbox.navigator.ResetCallback
-import com.mapbox.navigator.RoadObjectMatcher
+import com.mapbox.navigator.RoadObjectMatcherInterface
 import com.mapbox.navigator.RoadObjectsStoreInterface
 import com.mapbox.navigator.RoadObjectsStoreObserver
 import com.mapbox.navigator.RouteAlternative
@@ -43,7 +41,7 @@ import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.SetRoutesResult
 import com.mapbox.navigator.Telemetry
 import com.mapbox.navigator.TestingContext
-import com.mapbox.navigator.TilesConfig
+import com.mapbox.navigator.TilesManagerHandle
 import com.mapbox.navigator.VehicleType
 import com.mapbox.navigator.VoiceInstructionsAvailabilityObserver
 import com.mapbox.navigator.VoiceInstructionsCallback
@@ -57,11 +55,6 @@ import com.mapbox.navigator.WeatherData
 @UiThread
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 interface MapboxNativeNavigator : MapboxNativeRerouteInterface {
-
-    /**
-     * Reinitialize the navigator with a device profile
-     */
-    fun recreate(tilesConfig: TilesConfig)
 
     /**
      * Get router
@@ -184,21 +177,15 @@ interface MapboxNativeNavigator : MapboxNativeRerouteInterface {
 
     fun removeRoadObjectsStoreObserver(roadObjectsStoreObserver: RoadObjectsStoreObserver)
 
-    fun setFallbackVersionsObserver(fallbackVersionsObserver: FallbackVersionsObserver?)
-
     /**
      * Sets the [NavigatorOperationsDelegate] on the [navigatorHandle] so that route-mutating
      * operations from SDK components are routed back through the route-state owner.
      */
     fun setOperationsDelegate(delegate: NavigatorOperationsDelegate)
 
-    override fun addNativeNavigatorRecreationObserver(
-        nativeNavigatorRecreationObserver: NativeNavigatorRecreationObserver,
-    )
+    fun addTilesVersionChangedObserver(observer: TilesVersionChangedObserver)
 
-    fun removeNativeNavigatorRecreationObserver(
-        nativeNavigatorRecreationObserver: NativeNavigatorRecreationObserver,
-    )
+    fun removeTilesVersionChangedObserver(observer: TilesVersionChangedObserver)
 
     fun addVoiceInstructionsAvailabilityObserver(
         observer: VoiceInstructionsAvailabilityObserver,
@@ -298,8 +285,7 @@ interface MapboxNativeNavigator : MapboxNativeRerouteInterface {
     val navigator: NavigatorInterface
 
     /**
-     * Opaque handle to the native Navigator instance. Stays the same across navigator
-     * recreation (e.g. offline fallback); its internal Navigator/CacheHandle are replaced.
+     * Opaque handle to the native Navigator instance.
      */
     val navigatorHandle: NavigatorHandle
 
@@ -309,9 +295,9 @@ interface MapboxNativeNavigator : MapboxNativeRerouteInterface {
 
     val roadObjectsStore: RoadObjectsStoreInterface
 
-    val cache: CacheHandle
+    val tilesManagerHandle: TilesManagerHandle
 
-    val roadObjectMatcher: RoadObjectMatcher
+    val roadObjectMatcher: RoadObjectMatcherInterface
 
     val experimental: Experimental
 

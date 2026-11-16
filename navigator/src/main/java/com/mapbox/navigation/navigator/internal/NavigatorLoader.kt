@@ -15,7 +15,6 @@ import com.mapbox.navigator.AdasisFacadeBuilder
 import com.mapbox.navigator.AdasisFacadeHandle
 import com.mapbox.navigator.AdasisFacadeHandleInterface
 import com.mapbox.navigator.BillingProductType
-import com.mapbox.navigator.CacheFactory
 import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ConfigFactory
 import com.mapbox.navigator.ConfigHandle
@@ -28,6 +27,7 @@ import com.mapbox.navigator.NavigatorHandle
 import com.mapbox.navigator.NavigatorHandleBuilder
 import com.mapbox.navigator.NavigatorInterface
 import com.mapbox.navigator.NavigatorOperationsDelegate
+import com.mapbox.navigator.OnVersionChangedCallback
 import com.mapbox.navigator.ProfileApplication
 import com.mapbox.navigator.ProfilePlatform
 import com.mapbox.navigator.RoadObjectMatcher
@@ -39,8 +39,10 @@ import com.mapbox.navigator.RouterType
 import com.mapbox.navigator.SdkHistoryInfo
 import com.mapbox.navigator.SettingsProfile
 import com.mapbox.navigator.TilesConfig
+import com.mapbox.navigator.TilesManagerHandle
 import org.json.JSONException
 import org.json.JSONObject
+import java.io.Closeable
 
 /**
  * This class is expected to gain more responsibility as we define [customConfig].
@@ -56,7 +58,7 @@ object NavigatorLoader {
         return ConfigFactory.build(
             settingsProfile(deviceProfile),
             navigatorConfig,
-            enableTelemetryNavigationEvents(deviceProfile.customConfig),
+            deviceProfile.customConfig.enrichWithRequiredSdkFeatures(),
         )
     }
 
@@ -77,31 +79,48 @@ object NavigatorLoader {
     }
 
     internal fun createNavigator(
-        cacheHandle: CacheHandle,
         config: ConfigHandle,
-        historyRecorderComposite: HistoryRecorderHandle?,
-        offlineCacheHandle: CacheHandle?,
+        tilesManagerHandle: TilesManagerHandle,
+        historyRecorder: HistoryRecorderHandle?,
         inputsServiceHandle: InputsServiceHandle,
         adasisFacade: AdasisFacadeHandleInterface,
     ): NavigatorInterface {
         return Navigator(
             config,
-            cacheHandle,
-            historyRecorderComposite,
+            tilesManagerHandle,
+            historyRecorder,
             RouterType.HYBRID,
             inputsServiceHandle,
             // TODO(NN-4796) make Navigator accept interface types
             adasisFacade as AdasisFacadeHandle,
-            offlineCacheHandle,
         )
     }
 
-    fun createCacheHandle(
+    fun createTilesManagerHandle(
         config: ConfigHandle,
         tilesConfig: TilesConfig,
         historyRecorder: HistoryRecorderHandle?,
-    ): CacheHandle {
-        return CacheFactory.build(tilesConfig, config, historyRecorder, BillingProductType.CF)
+    ): TilesManagerHandle {
+        return TilesManagerHandle.build(
+            tilesConfig,
+            config,
+            historyRecorder,
+            BillingProductType.CF,
+        )
+    }
+
+    /**
+     * Sets [callback] as the tiles version change callback. Closing the result clears it, which
+     * also releases the callback on the native side.
+     *
+     * A direct native call cannot be mocked, so it goes through here to keep unit tests JVM-only.
+     */
+    fun setOnVersionChangedCallback(
+        tilesManagerHandle: TilesManagerHandle,
+        callback: OnVersionChangedCallback,
+    ): Closeable {
+        tilesManagerHandle.setOnVersionChangedCallback(callback)
+        return Closeable { tilesManagerHandle.setOnVersionChangedCallback(null) }
     }
 
     /**
@@ -117,18 +136,17 @@ object NavigatorLoader {
         }
 
     /**
-     * Replaces the [CacheHandle] and [Navigator] instances inside [handle]. Call on navigator
-     * (re)creation, e.g. on offline restart, keeping the same [handle] instance.
+     * Sets the [TilesManagerHandle] and [Navigator] inside [handle]. Call on navigator
+     * (re)creation, keeping the same [handle] instance.
      */
     fun updateNavigatorHandle(
         handle: NavigatorHandle,
-        cacheHandle: CacheHandle,
+        tilesManagerHandle: TilesManagerHandle,
         navigator: NavigatorInterface,
     ) {
-        // TODO migrate to setTilesManagerHandleAndNavigator when Android adopts TilesManagerHandle.
-        NavigatorHandleBuilder.setCacheHandleAndNavigator(
+        NavigatorHandleBuilder.setTilesManagerHandleAndNavigator(
             handle,
-            cacheHandle,
+            tilesManagerHandle,
             navigator as Navigator,
         )
     }
@@ -190,21 +208,21 @@ object NavigatorLoader {
 
     internal fun createAdasisFacade(
         config: ConfigHandle,
-        cacheHandle: CacheHandle,
+        tilesManagerHandle: TilesManagerHandle,
         historyRecorder: HistoryRecorderHandle?,
     ): AdasisFacadeHandleInterface {
-        return AdasisFacadeBuilder.build(config, cacheHandle, historyRecorder)
+        return AdasisFacadeBuilder.build(config, tilesManagerHandle, historyRecorder)
     }
 
-    internal fun createGraphAccessor(cacheHandle: CacheHandle): GraphAccessor {
-        return GraphAccessor(cacheHandle)
+    internal fun createGraphAccessor(tilesManagerHandle: TilesManagerHandle): GraphAccessor {
+        return GraphAccessor(tilesManagerHandle)
     }
 
     internal fun createRoadObjectMatcher(
-        cacheHandle: CacheHandle,
+        tilesManagerHandle: TilesManagerHandle,
         config: RoadObjectMatcherConfig,
     ): RoadObjectMatcher {
-        return RoadObjectMatcher(cacheHandle, config)
+        return RoadObjectMatcher(tilesManagerHandle, config)
     }
 
     private fun buildHistoryRecorder(
@@ -261,31 +279,41 @@ object NavigatorLoader {
         }
     }
 
-    // TODO should be enabled by default in NN when platforms migrate to native telemetry
+    /**
+     * The integrator's custom config with the native features the SDK always requires on top.
+     */
     @VisibleForTesting
-    internal fun enableTelemetryNavigationEvents(
-        config: String,
+    internal fun String.enrichWithRequiredSdkFeatures(
         sendImmediate: Boolean = BuildConfig.DEBUG,
     ): String {
-        val rootJson = if (config.isNotBlank()) {
-            try {
-                JSONObject(config)
-            } catch (e: JSONException) {
-                logE("Custom config is not valid: $e, $config")
-                JSONObject()
-            }
-        } else {
+        val rootJson = parseCustomConfig(this)
+        rootJson.enableTelemetryNavigationEvents(sendImmediate)
+        rootJson.enableTilesVersionSwap()
+        return rootJson.toString()
+    }
+
+    private fun parseCustomConfig(config: String): JSONObject {
+        if (config.isBlank()) {
+            return JSONObject()
+        }
+        return try {
+            JSONObject(config)
+        } catch (e: JSONException) {
+            logE("Custom config is not valid: $e, $config")
             JSONObject()
         }
+    }
 
-        rootJson.getOrPutJsonObject("features")
-            .put("useTelemetryNavigationEvents", true)
-
+    private fun JSONObject.enableTelemetryNavigationEvents(sendImmediate: Boolean) {
+        getOrPutJsonObject("features").put("useTelemetryNavigationEvents", true)
         if (sendImmediate) {
-            rootJson.getOrPutJsonObject("telemetry")
-                .put("eventsPriority", "Immediate")
+            getOrPutJsonObject("telemetry").put("eventsPriority", "Immediate")
         }
-        return rootJson.toString()
+    }
+
+    // tiles versions are switched inside the native navigator instead of recreating it
+    private fun JSONObject.enableTilesVersionSwap() {
+        getOrPutJsonObject("features").put("allowTilesCacheReset", true)
     }
 
     data class HistoryRecorderHandles(

@@ -133,7 +133,7 @@ class RouteAlternativesTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
-    fun caAfterNavigatorRecreation() = sdkTest(timeout = 60_000) {
+    fun caAfterTilesVersionSwitch() = sdkTest(timeout = 60_000) {
         val testRouteOptions = setupMockServerForCAAfterWaypointInBerlin()
         val version = context.unpackTiles(Tileset.Berlin)[TileDataDomain.NAVIGATION]
         withMapboxNavigation(

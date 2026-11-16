@@ -6,6 +6,7 @@ import com.mapbox.navigation.base.options.PredictiveCacheLocationOptions
 import com.mapbox.navigation.base.options.PredictiveCacheMapsOptions
 import com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.NavigationVersionSwitchObserver
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigator.PredictiveCacheControllerInterface
@@ -26,38 +27,47 @@ class PredictiveCache(private val mapboxNavigation: MapboxNavigation) {
         Pair<TileStore, List<Pair<TilesetDescriptor, PredictiveCacheLocationOptions>>>,
         >()
 
+    // controllers stay bound to the tiles version they were created for, so recreate them with
+    // the same options after every tiles version change
+    private val versionSwitchObserver = object : NavigationVersionSwitchObserver {
+        override fun onSwitchToFallbackVersion(tilesVersion: String?) = recreateControllers()
+
+        override fun onSwitchToTargetVersion(tilesVersion: String?) = recreateControllers()
+    }
+
     init {
-        // recreate controllers with the same options but with a new navigator instance
-        mapboxNavigation.navigator.addNativeNavigatorRecreationObserver {
-            val navOptions = navPredictiveCacheOptions.toSet()
-            val mapControllersData = cachedMapsPredictiveCacheControllers
-                .map { (mapboxMap, predictiveCacheControllersMap) ->
-                    mapboxMap to predictiveCacheControllersMap.keys.toList()
-                }
+        mapboxNavigation.registerNavigationVersionSwitchObserver(versionSwitchObserver)
+    }
 
-            val searchOptions =
-                searchPredictiveCacheLocationOptions.toMap()
-
-            clean()
-
-            navOptions.forEach {
-                createNavigationController(it)
+    private fun recreateControllers() {
+        val navOptions = navPredictiveCacheOptions.toSet()
+        val mapControllersData = cachedMapsPredictiveCacheControllers
+            .map { (mapboxMap, predictiveCacheControllersMap) ->
+                mapboxMap to predictiveCacheControllersMap.keys.toList()
             }
 
-            mapControllersData.forEach { (mapboxMap, predictiveCacheControllerKeys) ->
-                createMapsControllers(
-                    mapboxMap,
-                    predictiveCacheControllerKeys,
+        val searchOptions =
+            searchPredictiveCacheLocationOptions.toMap()
+
+        clean()
+
+        navOptions.forEach {
+            createNavigationController(it)
+        }
+
+        mapControllersData.forEach { (mapboxMap, predictiveCacheControllerKeys) ->
+            createMapsControllers(
+                mapboxMap,
+                predictiveCacheControllerKeys,
+            )
+        }
+
+        searchOptions.forEach {
+            it.let { (tileStore, searchDescriptorsAndOptions) ->
+                createSearchControllers(
+                    tileStore = tileStore,
+                    searchDescriptorsAndOptions = searchDescriptorsAndOptions,
                 )
-            }
-
-            searchOptions.forEach {
-                it.let { (tileStore, searchDescriptorsAndOptions) ->
-                    createSearchControllers(
-                        tileStore = tileStore,
-                        searchDescriptorsAndOptions = searchDescriptorsAndOptions,
-                    )
-                }
             }
         }
     }
@@ -138,6 +148,11 @@ class PredictiveCache(private val mapboxNavigation: MapboxNavigation) {
         cachedSearchPredictiveCacheControllers.clear()
         navPredictiveCacheOptions.clear()
         searchPredictiveCacheLocationOptions.clear()
+    }
+
+    fun onDestroy() {
+        mapboxNavigation.unregisterNavigationVersionSwitchObserver(versionSwitchObserver)
+        clean()
     }
 
     data class PredictiveCacheControllerKey(

@@ -47,7 +47,6 @@ import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
 import com.mapbox.navigation.core.trip.session.eh.EHorizonSubscriptionManager
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
-import com.mapbox.navigation.navigator.internal.NativeNavigatorRecreationObserver
 import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.navigator.internal.utils.calculateRemainingWaypoints
 import com.mapbox.navigation.navigator.internal.utils.getCurrentLegDestination
@@ -177,7 +176,6 @@ class MapboxTripSessionTest {
     }
     private val eHorizonSubscriptionManager: EHorizonSubscriptionManager = mockk(relaxed = true)
     private val navigatorObserverImplSlot = slot<NavigatorObserver>()
-    private val navigatorRecreationObserverImplSlot = slot<NativeNavigatorRecreationObserver>()
 
     @Before
     fun setUp() {
@@ -228,11 +226,6 @@ class MapboxTripSessionTest {
 
         every {
             navigator.addNavigatorObserver(capture(navigatorObserverImplSlot))
-        } answers {}
-        every {
-            navigator.addNativeNavigatorRecreationObserver(
-                capture(navigatorRecreationObserverImplSlot),
-            )
         } answers {}
     }
 
@@ -1856,45 +1849,6 @@ class MapboxTripSessionTest {
 
         verify(exactly = 1) { eHorizonSubscriptionManager.unregisterAllObservers() }
         tripSession.stop()
-    }
-
-    @Test
-    fun `when session is started and navigator is recreated observer is reset`() {
-        tripSession = buildTripSession()
-        tripSession.start(true)
-
-        navigatorRecreationObserverImplSlot.captured.onNativeNavigatorRecreated()
-
-        verify(exactly = 2) { navigator.addNavigatorObserver(any()) }
-        tripSession.stop()
-    }
-
-    @Test
-    fun `when session is not started and navigator is recreated observer is not reset`() {
-        tripSession = buildTripSession()
-
-        navigatorRecreationObserverImplSlot.captured.onNativeNavigatorRecreated()
-
-        verify(exactly = 0) { navigator.addNavigatorObserver(any()) }
-    }
-
-    @Test
-    fun `when not empty fallback observers and navigator is recreated fallback observer reset`() {
-        tripSession = buildTripSession()
-        tripSession.registerFallbackVersionsObserver(mockk())
-
-        navigatorRecreationObserverImplSlot.captured.onNativeNavigatorRecreated()
-
-        verify(exactly = 2) { navigator.setFallbackVersionsObserver(any()) }
-    }
-
-    @Test
-    fun `when no fallback observers and navigator is recreated fallback observer is not reset`() {
-        tripSession = buildTripSession()
-
-        navigatorRecreationObserverImplSlot.captured.onNativeNavigatorRecreated()
-
-        verify(exactly = 0) { navigator.setFallbackVersionsObserver(any()) }
     }
 
     @Test

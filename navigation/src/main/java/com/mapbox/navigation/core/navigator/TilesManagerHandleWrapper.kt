@@ -1,17 +1,16 @@
 package com.mapbox.navigation.core.navigator
 
 import com.mapbox.navigation.core.RoadGraphDataUpdateCallback
-import com.mapbox.navigator.CacheHandleInterface
+import com.mapbox.navigator.TilesManagerHandleInterface
+import com.mapbox.navigation.core.RoadGraphVersionInfo as SDKRoadGraphVersionInfo
 
-private typealias SDKRoadGraphVersionInfo = com.mapbox.navigation.core.RoadGraphVersionInfo
-
-internal object CacheHandleWrapper {
+internal object TilesManagerHandleWrapper {
 
     fun requestRoadGraphDataUpdate(
-        cache: CacheHandleInterface,
+        tilesManagerHandle: TilesManagerHandleInterface,
         callback: RoadGraphDataUpdateCallback,
     ) {
-        cache.isRoadGraphDataUpdateAvailable { isUpdateAvailable, newVersionInfo ->
+        tilesManagerHandle.checkUpdateAvailable { isUpdateAvailable, newVersionInfo ->
             callback.onRoadGraphDataUpdateInfoAvailable(
                 isUpdateAvailable,
                 newVersionInfo?.let { SDKRoadGraphVersionInfo(it.dataset, it.version) },
@@ -20,10 +19,10 @@ internal object CacheHandleWrapper {
     }
 
     fun requestHDGraphDataUpdate(
-        cache: CacheHandleInterface,
+        tilesManagerHandle: TilesManagerHandleInterface,
         callback: RoadGraphDataUpdateCallback,
     ) {
-        cache.isHDGraphDataUpdateAvailable { isUpdateAvailable, newVersionInfo ->
+        tilesManagerHandle.checkHDUpdateAvailable { isUpdateAvailable, newVersionInfo ->
             callback.onRoadGraphDataUpdateInfoAvailable(
                 isUpdateAvailable,
                 newVersionInfo?.let { SDKRoadGraphVersionInfo(it.dataset, it.version) },

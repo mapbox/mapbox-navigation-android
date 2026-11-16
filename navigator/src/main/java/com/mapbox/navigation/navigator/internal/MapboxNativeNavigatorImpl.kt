@@ -17,6 +17,7 @@ import com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions
 import com.mapbox.navigation.base.options.toPredictiveLocationTrackerOptions
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.navigator.internal.utils.toEvStateData
+import com.mapbox.navigation.utils.internal.InternalJobControlFactory
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logE
@@ -25,15 +26,14 @@ import com.mapbox.navigation.utils.internal.toDataRef
 import com.mapbox.navigator.ADASISv2MessageCallback
 import com.mapbox.navigator.AdasisConfig
 import com.mapbox.navigator.AdasisFacadeHandleInterface
+import com.mapbox.navigator.BillingProductType
 import com.mapbox.navigator.CacheDataDomain
-import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ChangeLegCallback
 import com.mapbox.navigator.ChargingState
 import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.ElectronicHorizonObserver
 import com.mapbox.navigator.EventsMetadataInterface
 import com.mapbox.navigator.Experimental
-import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.GraphAccessor
 import com.mapbox.navigator.HistoryRecorderHandle
@@ -52,8 +52,8 @@ import com.mapbox.navigator.RerouteControllerInterface
 import com.mapbox.navigator.RerouteDetectorInterface
 import com.mapbox.navigator.RerouteObserver
 import com.mapbox.navigator.ResetCallback
-import com.mapbox.navigator.RoadObjectMatcher
 import com.mapbox.navigator.RoadObjectMatcherConfig
+import com.mapbox.navigator.RoadObjectMatcherInterface
 import com.mapbox.navigator.RoadObjectsStoreInterface
 import com.mapbox.navigator.RoadObjectsStoreObserver
 import com.mapbox.navigator.RouteAlternative
@@ -66,13 +66,16 @@ import com.mapbox.navigator.SetRoutesResult
 import com.mapbox.navigator.Telemetry
 import com.mapbox.navigator.TestingContext
 import com.mapbox.navigator.TilesConfig
+import com.mapbox.navigator.TilesManagerHandle
 import com.mapbox.navigator.VehicleType
 import com.mapbox.navigator.VoiceInstructionsAvailabilityObserver
 import com.mapbox.navigator.VoiceInstructionsCallback
 import com.mapbox.navigator.VoiceInstructionsRetriever
 import com.mapbox.navigator.WeatherData
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import java.io.Closeable
 import java.util.concurrent.CopyOnWriteArraySet
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
@@ -85,23 +88,25 @@ import kotlin.coroutines.resume
 class MapboxNativeNavigatorImpl(
     tilesConfig: TilesConfig,
     private val historyRecorderComposite: HistoryRecorderHandle?,
-    private val offlineCacheHandle: CacheHandle?,
+    private val offlineTilesConfig: TilesConfig?,
     private val roadObjectMatcherConfig: RoadObjectMatcherConfig,
     override val config: ConfigHandle,
     override val eventsMetadataProvider: EventsMetadataInterface,
 ) : MapboxNativeNavigator {
 
-    override lateinit var navigator: NavigatorInterface
-    override lateinit var graphAccessor: GraphAccessor
-    override lateinit var roadObjectMatcher: RoadObjectMatcher
-    override lateinit var roadObjectsStore: RoadObjectsStoreInterface
-    override lateinit var experimental: Experimental
-    override lateinit var cache: CacheHandle
-    override lateinit var routeAlternativesController: RouteAlternativesControllerInterface
-    override lateinit var telemetry: Telemetry
+    override val navigator: NavigatorInterface
+    override val graphAccessor: GraphAccessor
+    override lateinit var roadObjectMatcher: RoadObjectMatcherInterface
+    override val roadObjectsStore: RoadObjectsStoreInterface
+    override val experimental: Experimental
+    override val tilesManagerHandle: TilesManagerHandle
+    override val routeAlternativesController: RouteAlternativesControllerInterface
+    override val telemetry: Telemetry
 
-    private lateinit var adasisFacade: AdasisFacadeHandleInterface
+    private val adasisFacade: AdasisFacadeHandleInterface
     private var voiceInstructionsRetriever: VoiceInstructionsRetriever? = null
+
+    private var tilesVersionChangedCallback: Closeable? = null
 
     private var isShutdown = false
 
@@ -115,25 +120,18 @@ class MapboxNativeNavigatorImpl(
     override val navigatorHandle: NavigatorHandle
         get() = _navigatorHandleRef ?: error("NavigatorHandle accessed after shutdown")
 
-    private val nativeNavigatorRecreationObservers =
-        CopyOnWriteArraySet<NativeNavigatorRecreationObserver>()
+    private val tilesVersionChangedObservers =
+        CopyOnWriteArraySet<TilesVersionChangedObserver>()
+
+    private val mainJobControl = InternalJobControlFactory.createMainScopeJobControl()
 
     init {
-        init(tilesConfig)
-
-        // Updated here rather than inside init() because init() is also called from recreate(),
-        // where the navigation session is restored only after init() returns. updateNavigatorHandle
-        // fires the navigatorInstanceChanged() signal, so it must run after the session is restored
-        // (see recreate()) - otherwise subscribers would observe a navigator without its session.
-        // On first construction there is no session to restore, so we update right away.
-        NavigatorLoader.updateNavigatorHandle(navigatorHandle, cache, navigator)
-    }
-
-    private fun init(tilesConfig: TilesConfig) {
-        isShutdown = false
         val sectionPrefix = "$PERF_TRACKER_SECTION_NAME#init-"
-        val cacheHandle = PerformanceTracker.trackPerformanceSync("${sectionPrefix}cacheHandle") {
-            NavigatorLoader.createCacheHandle(
+
+        tilesManagerHandle = PerformanceTracker.trackPerformanceSync(
+            "${sectionPrefix}tilesManagerHandle",
+        ) {
+            NavigatorLoader.createTilesManagerHandle(
                 config,
                 tilesConfig,
                 historyRecorderComposite,
@@ -141,28 +139,37 @@ class MapboxNativeNavigatorImpl(
         }
 
         adasisFacade = PerformanceTracker.trackPerformanceSync("${sectionPrefix}adasisFacade") {
-            NavigatorLoader.createAdasisFacade(config, cacheHandle, historyRecorderComposite)
+            NavigatorLoader.createAdasisFacade(config, tilesManagerHandle, historyRecorderComposite)
+        }
+
+        offlineTilesConfig?.let {
+            tilesManagerHandle.addOfflineCache(
+                /* tilesConfig = */ it,
+                /* config = */ config,
+                /* historyRecorder = */ historyRecorderComposite,
+                /* frameworkTypeForSKU = */ BillingProductType.CF,
+            )
         }
 
         navigator = PerformanceTracker.trackPerformanceSync("${sectionPrefix}navigator") {
             NavigatorLoader.createNavigator(
-                cacheHandle,
-                config,
-                historyRecorderComposite,
-                offlineCacheHandle,
-                inputsService,
-                adasisFacade,
+                config = config,
+                tilesManagerHandle = tilesManagerHandle,
+                historyRecorder = historyRecorderComposite,
+                inputsServiceHandle = inputsService,
+                adasisFacade = adasisFacade,
             )
         }
 
-        cache = cacheHandle
+        setOnTilesVersionChangedCallback()
+
         graphAccessor = PerformanceTracker.trackPerformanceSync("${sectionPrefix}graphAccessor") {
-            NavigatorLoader.createGraphAccessor(cacheHandle)
+            NavigatorLoader.createGraphAccessor(tilesManagerHandle)
         }
         roadObjectMatcher = PerformanceTracker.trackPerformanceSync(
             "${sectionPrefix}roadObjectMatcher",
         ) {
-            NavigatorLoader.createRoadObjectMatcher(cacheHandle, roadObjectMatcherConfig)
+            NavigatorLoader.createRoadObjectMatcher(tilesManagerHandle, roadObjectMatcherConfig)
         }
         roadObjectsStore = PerformanceTracker.trackPerformanceSync(
             "${sectionPrefix}roadObjectsStore",
@@ -181,27 +188,25 @@ class MapboxNativeNavigatorImpl(
             navigator.getTelemetry(eventsMetadataProvider)
         }
         prepareVoiceInstructionsRetriever()
+
+        NavigatorLoader.updateNavigatorHandle(navigatorHandle, tilesManagerHandle, navigator)
     }
 
-    override fun recreate(tilesConfig: TilesConfig) {
-        val storeNavSessionState = navigator.storeNavigationSession()
-
-        unregisterAllNativeNavigatorObservers()
-        navigator.shutdown()
-
-        init(tilesConfig)
-
-        navigator.restoreNavigationSession(storeNavSessionState)
-
-        // Update the handle only after the session is restored, so subscribers of the navigator
-        // instance change observe a navigator with its session already in place. If this ordering
-        // is changed, update the constructor's init {} block accordingly (it also calls
-        // updateNavigatorHandle).
-        NavigatorLoader.updateNavigatorHandle(navigatorHandle, cache, navigator)
-
-        // Observers need updated NavigatorHandle, so do it after NavigatorLoader.updateNavigatorHandle().
-        nativeNavigatorRecreationObservers.forEach {
-            it.onNativeNavigatorRecreated()
+    private fun setOnTilesVersionChangedCallback() {
+        tilesVersionChangedCallback = NavigatorLoader.setOnVersionChangedCallback(
+            tilesManagerHandle,
+        ) { versionInfo, reason ->
+            // native calls back on a worker thread and may call once more after shutdown
+            mainJobControl.scope.launch {
+                if (isShutdown) return@launch
+                roadObjectMatcher = NavigatorLoader.createRoadObjectMatcher(
+                    tilesManagerHandle,
+                    roadObjectMatcherConfig,
+                )
+                tilesVersionChangedObservers.forEach {
+                    it.onTilesVersionChanged(versionInfo, reason)
+                }
+            }
         }
     }
 
@@ -468,27 +473,18 @@ class MapboxNativeNavigatorImpl(
         roadObjectsStore.removeObserver(roadObjectsStoreObserver)
     }
 
-    override fun setFallbackVersionsObserver(fallbackVersionsObserver: FallbackVersionsObserver?) {
-        if (warnIfShutdown("setFallbackVersionsObserver")) return
-        navigator.setFallbackVersionsObserver(fallbackVersionsObserver)
-    }
-
     override fun setOperationsDelegate(delegate: NavigatorOperationsDelegate) {
         if (warnIfShutdown("setOperationsDelegate")) return
         NavigatorLoader.setOperationsDelegate(navigatorHandle, delegate)
     }
 
-    override fun addNativeNavigatorRecreationObserver(
-        nativeNavigatorRecreationObserver: NativeNavigatorRecreationObserver,
-    ) {
-        if (warnIfShutdown("addNativeNavigatorRecreationObserver")) return
-        nativeNavigatorRecreationObservers.add(nativeNavigatorRecreationObserver)
+    override fun addTilesVersionChangedObserver(observer: TilesVersionChangedObserver) {
+        if (warnIfShutdown("addTilesVersionChangedObserver")) return
+        tilesVersionChangedObservers.add(observer)
     }
 
-    override fun removeNativeNavigatorRecreationObserver(
-        nativeNavigatorRecreationObserver: NativeNavigatorRecreationObserver,
-    ) {
-        nativeNavigatorRecreationObservers.remove(nativeNavigatorRecreationObserver)
+    override fun removeTilesVersionChangedObserver(observer: TilesVersionChangedObserver) {
+        tilesVersionChangedObservers.remove(observer)
     }
 
     @OptIn(MapboxExperimental::class)
@@ -519,7 +515,6 @@ class MapboxNativeNavigatorImpl(
 
     private fun unregisterAllNativeNavigatorObservers() {
         navigator.setElectronicHorizonObserver(null)
-        navigator.setFallbackVersionsObserver(null)
         currentNavigatorObservers.forEach {
             navigator.removeObserver(it)
         }
@@ -543,7 +538,10 @@ class MapboxNativeNavigatorImpl(
         reset(null)
         unregisterAllNativeNavigatorObservers()
         roadObjectsStore.removeAllCustomRoadObjects()
-        nativeNavigatorRecreationObservers.clear()
+        tilesVersionChangedObservers.clear()
+        tilesVersionChangedCallback?.close()
+        tilesVersionChangedCallback = null
+        mainJobControl.job.cancel()
         resetAdasisMessageCallback()
         voiceInstructionsRetriever = null
 

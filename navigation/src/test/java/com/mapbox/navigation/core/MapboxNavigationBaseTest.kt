@@ -33,7 +33,7 @@ import com.mapbox.navigation.core.history.MapboxHistoryRecorder
 import com.mapbox.navigation.core.internal.LowMemoryManager
 import com.mapbox.navigation.core.internal.SdkInfoProvider
 import com.mapbox.navigation.core.internal.router.RouterWrapper
-import com.mapbox.navigation.core.navigator.CacheHandleWrapper
+import com.mapbox.navigation.core.navigator.TilesManagerHandleWrapper
 import com.mapbox.navigation.core.preview.RoutesPreviewController
 import com.mapbox.navigation.core.reroute.InternalRerouteController
 import com.mapbox.navigation.core.routealternatives.RouteAlternativesController
@@ -61,11 +61,11 @@ import com.mapbox.navigation.testing.NativeRouteParserRule
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.LoggerProvider
 import com.mapbox.navigation.utils.internal.ThreadController
-import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.HistoryRecorderHandle
 import com.mapbox.navigator.NavigatorObserver
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.Telemetry
+import com.mapbox.navigator.TilesManagerHandle
 import io.mockk.CapturingSlot
 import io.mockk.Runs
 import io.mockk.coEvery
@@ -99,7 +99,7 @@ internal open class MapboxNavigationBaseTest {
     val nativeRouteParserRule = NativeRouteParserRule()
 
     val directionsSession: DirectionsSession = mockk(relaxUnitFun = true)
-    val cache: CacheHandle = mockk(relaxUnitFun = true)
+    val tilesManagerHandle: TilesManagerHandle = mockk(relaxUnitFun = true)
     val telemetry: Telemetry = mockk(relaxUnitFun = true)
     val navigator: MapboxNativeNavigator = mockk(relaxUnitFun = true)
     val router: RouterInterface = mockk(relaxUnitFun = true)
@@ -181,9 +181,6 @@ internal open class MapboxNavigationBaseTest {
 
         mockkObject(LoggerProvider)
         mockkObject(NavigatorLoader)
-        every {
-            NavigatorLoader.createNativeRouterInterface(any(), any(), any())
-        } returns nativeRouter
         every { NavigatorLoader.createConfig(any(), any()) } returns mockk()
         every {
             NavigatorLoader.createHistoryRecorderHandles(
@@ -195,9 +192,6 @@ internal open class MapboxNavigationBaseTest {
         } returns mockk(relaxed = true) {
             every { composite } returns compositeHandle
         }
-        every {
-            NavigatorLoader.createCacheHandle(any(), any(), any())
-        } returns mockk()
 
         mockkObject(MapboxSDKCommon)
         mockkStatic(MapboxOptions::class)
@@ -215,8 +209,8 @@ internal open class MapboxNavigationBaseTest {
         } returns mockk()
 
         mockkObject(NavigationComponentProvider)
-        mockkObject(CacheHandleWrapper)
-        every { CacheHandleWrapper.requestRoadGraphDataUpdate(any(), any()) } just runs
+        mockkObject(TilesManagerHandleWrapper)
+        every { TilesManagerHandleWrapper.requestRoadGraphDataUpdate(any(), any()) } just runs
         mockkObject(RouteRefreshControllerProvider)
         every {
             RouteRefreshControllerProvider.createRouteRefreshController(
@@ -317,7 +311,7 @@ internal open class MapboxNavigationBaseTest {
         unmockkObject(MapboxSDKCommon)
         unmockkObject(MapboxModuleProvider)
         unmockkObject(NavigationComponentProvider)
-        unmockkObject(CacheHandleWrapper)
+        unmockkObject(TilesManagerHandleWrapper)
         unmockkObject(RouteRefreshControllerProvider)
         unmockkObject(RouteAlternativesControllerProvider)
         unmockkObject(TelemetryUtilsDelegate)
@@ -362,7 +356,7 @@ internal open class MapboxNavigationBaseTest {
             createSetRouteResult()
         }
         coEvery { navigator.updateLocation(any()) } returns false
-        every { navigator.cache } returns cache
+        every { navigator.tilesManagerHandle } returns tilesManagerHandle
         every { navigator.telemetry } returns telemetry
         every { navigator.getRerouteDetector() } returns null
         every { navigator.getRerouteController() } returns null

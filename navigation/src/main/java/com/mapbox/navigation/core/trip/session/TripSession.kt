@@ -9,7 +9,6 @@ import com.mapbox.navigation.core.trip.RelevantVoiceInstructionsCallback
 import com.mapbox.navigation.core.trip.VoiceInstructionsAvailableObserver
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.eh.EHorizonObserver
-import com.mapbox.navigator.FallbackVersionsObserver
 
 internal interface TripSession {
 
@@ -72,10 +71,6 @@ internal interface TripSession {
     fun registerEHorizonObserver(eHorizonObserver: EHorizonObserver)
     fun unregisterEHorizonObserver(eHorizonObserver: EHorizonObserver)
     fun unregisterAllEHorizonObservers()
-
-    fun registerFallbackVersionsObserver(fallbackVersionsObserver: FallbackVersionsObserver)
-    fun unregisterFallbackVersionsObserver(fallbackVersionsObserver: FallbackVersionsObserver)
-    fun unregisterAllFallbackVersionsObservers()
 
     fun resetOffRouteDeviationFlag()
 }

@@ -73,9 +73,7 @@ fun MapboxNavigation.retrieveCompositeHistoryRecorder(): MapboxHistoryRecorder =
     compositeRecorder
 
 /**
- * Opaque handle to the native Navigator instance for SDK components. The handle instance is
- * stable across navigator recreation (offline fallback); its internal Navigator/CacheHandle are
- * replaced in place.
+ * Opaque handle to the native Navigator instance for SDK components.
  */
 fun MapboxNavigation.retrieveNavigatorHandle(): NavigatorHandle =
     navigator.navigatorHandle

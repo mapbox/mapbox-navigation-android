@@ -64,7 +64,11 @@ annotation class RouterFailureType {
 
         /**
          * Indicates that router was recreated for some internal reason.
+         *
+         * Not reported anymore: the router is no longer recreated when the navigation tiles
+         * version changes.
          */
+        @Deprecated("Not reported anymore: the router is no longer recreated")
         const val ROUTER_RECREATION_ERROR = "ROUTER_RECREATION_ERROR"
 
         /**

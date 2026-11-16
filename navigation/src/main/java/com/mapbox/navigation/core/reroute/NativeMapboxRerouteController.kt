@@ -49,8 +49,8 @@ internal class NativeMapboxRerouteController(
 
     private var activeParsingJob: Job? = null
     private var rerouteOptionsAdapter: RerouteOptionsAdapter? = null
-    private var rerouteController = rerouteInterface.getRerouteController()
-    private var rerouteDetector = rerouteInterface.getRerouteDetector()
+    private val rerouteController = rerouteInterface.getRerouteController()
+    private val rerouteDetector = rerouteInterface.getRerouteDetector()
     private val observers = CopyOnWriteArraySet<RerouteStateObserver>()
     private val observersV2 = CopyOnWriteArraySet<RerouteStateV2Observer>()
     private var isEnabled = false
@@ -198,18 +198,6 @@ internal class NativeMapboxRerouteController(
         logD(TAG) { "Registering native reroute observer" }
         rerouteInterface.addRerouteObserver(nativeRerouteObserver)
         isEnabled = true
-        // Re-register the reroute observer when the navigator is recreated
-        rerouteInterface.addNativeNavigatorRecreationObserver {
-            if (isEnabled) {
-                logD(TAG) { "Navigator recreated - re-registering native reroute observer" }
-                rerouteInterface.addRerouteObserver(nativeRerouteObserver)
-            }
-            rerouteController = rerouteInterface.getRerouteController()
-            rerouteDetector = rerouteInterface.getRerouteDetector()
-            rerouteOptionsAdapter?.let {
-                setRerouteOptionsAdapter(it)
-            }
-        }
     }
 
     /**

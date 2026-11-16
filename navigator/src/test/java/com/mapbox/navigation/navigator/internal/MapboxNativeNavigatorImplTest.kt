@@ -8,10 +8,10 @@ import com.mapbox.navigation.base.internal.route.directionsRouteContext
 import com.mapbox.navigation.base.internal.route.toDirectionsRefreshResponseInternal
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
+import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.toDataRef
 import com.mapbox.navigation.utils.internal.LoggerFrontend
 import com.mapbox.navigator.AdasisFacadeHandleInterface
-import com.mapbox.navigator.CacheHandle
 import com.mapbox.navigator.ChangeLegCallback
 import com.mapbox.navigator.ChargingState
 import com.mapbox.navigator.ConfigHandle
@@ -23,11 +23,17 @@ import com.mapbox.navigator.NavigatorObserver
 import com.mapbox.navigator.NavigatorOperationsDelegate
 import com.mapbox.navigator.NavigatorOperationsStartActiveGuidanceCallback
 import com.mapbox.navigator.NavigatorOperationsSwitchToAlternativeRouteCallback
+import com.mapbox.navigator.OnVersionChangedCallback
 import com.mapbox.navigator.RefreshRouteCallback
 import com.mapbox.navigator.RefreshRouteResult
+import com.mapbox.navigator.RoadGraphVersionInfo
+import com.mapbox.navigator.RoadObjectMatcher
 import com.mapbox.navigator.RoadObjectMatcherConfig
+import com.mapbox.navigator.RoadObjectMatcherInterface
 import com.mapbox.navigator.RoadObjectsStoreInterface
 import com.mapbox.navigator.TilesConfig
+import com.mapbox.navigator.TilesManagerHandle
+import com.mapbox.navigator.TilesVersionChangeReason
 import io.mockk.Runs
 import io.mockk.clearMocks
 import io.mockk.every
@@ -35,28 +41,32 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
+import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import io.mockk.verify
 import io.mockk.verifyOrder
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.io.Closeable
 
-@OptIn(MapboxExperimental::class)
+@OptIn(MapboxExperimental::class, ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 class MapboxNativeNavigatorImplTest {
 
     private val mockNavigator = mockk<NavigatorInterface>(relaxed = true)
-    private val mockCacheHandle = mockk<CacheHandle>(relaxed = true)
+    private val mockTilesManagerHandle = mockk<TilesManagerHandle>(relaxed = true)
     private val mockInputsService = mockk<InputsServiceHandle>(relaxed = true)
     private val mockAdasisFacade = mockk<AdasisFacadeHandleInterface>(relaxed = true)
     private val mockRoadObjectStore = mockk<RoadObjectsStoreInterface>(relaxed = true)
@@ -66,7 +76,13 @@ class MapboxNativeNavigatorImplTest {
     @get:Rule
     val loggerFrontendTestRule = LoggingFrontendTestRule(loggingFrontend)
 
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
+
     private lateinit var navigatorImpl: MapboxNativeNavigatorImpl
+
+    private val versionChangedCallbackSlot = slot<OnVersionChangedCallback>()
+    private val mockTilesVersionChangeCallback = mockk<Closeable>(relaxed = true)
 
     @Before
     fun setup() {
@@ -75,7 +91,12 @@ class MapboxNativeNavigatorImplTest {
         mockkObject(NavigatorLoader)
 
         every { NavigatorLoader.createInputService(any(), any()) } returns mockInputsService
-        every { NavigatorLoader.createCacheHandle(any(), any(), any()) } returns mockCacheHandle
+        every {
+            NavigatorLoader.createTilesManagerHandle(any(), any(), any())
+        } returns mockTilesManagerHandle
+        every {
+            NavigatorLoader.setOnVersionChangedCallback(any(), capture(versionChangedCallbackSlot))
+        } returns mockTilesVersionChangeCallback
         every { NavigatorLoader.createAdasisFacade(any(), any(), any()) } returns mockAdasisFacade
         every { NavigatorLoader.createGraphAccessor(any()) } returns mockk(relaxed = true)
         every {
@@ -85,7 +106,7 @@ class MapboxNativeNavigatorImplTest {
             )
         } returns mockk(relaxed = true)
         every {
-            NavigatorLoader.createNavigator(any(), any(), any(), any(), any(), any())
+            NavigatorLoader.createNavigator(any(), any(), any(), any(), any())
         } returns mockNavigator
         every {
             NavigatorLoader.createNavigatorHandle(any())
@@ -96,7 +117,7 @@ class MapboxNativeNavigatorImplTest {
         navigatorImpl = MapboxNativeNavigatorImpl(
             tilesConfig = mockk<TilesConfig>(relaxed = true),
             historyRecorderComposite = null,
-            offlineCacheHandle = null,
+            offlineTilesConfig = null,
             roadObjectMatcherConfig = mockk<RoadObjectMatcherConfig>(relaxed = true),
             config = mockk<ConfigHandle>(relaxed = true),
             eventsMetadataProvider = mockk<EventsMetadataInterface>(relaxed = true),
@@ -119,7 +140,6 @@ class MapboxNativeNavigatorImplTest {
         verifyOrder {
             mockNavigator.reset(null)
             mockNavigator.setElectronicHorizonObserver(null)
-            mockNavigator.setFallbackVersionsObserver(null)
             mockNavigator.removeObserver(navigatorObserver)
             mockRoadObjectStore.removeAllCustomRoadObjects()
             mockAdasisFacade.resetAdasisMessageCallback()
@@ -252,17 +272,6 @@ class MapboxNativeNavigatorImplTest {
 
         verify(exactly = 1) { loggingFrontend.logW(any(), LOG_CATEGORY) }
         verify(exactly = 0) { mockNavigator.setElectronicHorizonObserver(any()) }
-    }
-
-    @Test
-    fun `when navigator is shut down, setFallbackVersionsObserver logs warning and skips native call`() {
-        navigatorImpl.shutdown()
-        clearMocks(mockNavigator, answers = false)
-
-        navigatorImpl.setFallbackVersionsObserver(null)
-
-        verify(exactly = 1) { loggingFrontend.logW(any(), LOG_CATEGORY) }
-        verify(exactly = 0) { mockNavigator.setFallbackVersionsObserver(any()) }
     }
 
     @Test
@@ -493,7 +502,103 @@ class MapboxNativeNavigatorImplTest {
         verify(exactly = 0) { mockNavigator.stateOfCharging() }
     }
 
+    @Test
+    fun `sets tiles version callback once on init`() {
+        verify(exactly = 1) {
+            NavigatorLoader.setOnVersionChangedCallback(mockTilesManagerHandle, any())
+        }
+    }
+
+    @Test
+    fun `shutdown clears tiles version callback`() {
+        navigatorImpl.shutdown()
+
+        verify(exactly = 1) { mockTilesVersionChangeCallback.close() }
+    }
+
+    @Test
+    fun `tiles version change rebuilds road object matcher before notifying observers`() {
+        val newMatcher = mockk<RoadObjectMatcher>(relaxed = true)
+        every { NavigatorLoader.createRoadObjectMatcher(any(), any()) } returns newMatcher
+        var matcherSeenByObserver: RoadObjectMatcherInterface? = null
+        navigatorImpl.addTilesVersionChangedObserver { _, _ ->
+            matcherSeenByObserver = navigatorImpl.roadObjectMatcher
+        }
+
+        versionChangedCallbackSlot.captured.run(
+            RoadGraphVersionInfo(DATASET, VERSION),
+            TilesVersionChangeReason.FALLBACK,
+        )
+
+        assertSame(newMatcher, matcherSeenByObserver)
+        assertSame(newMatcher, navigatorImpl.roadObjectMatcher)
+    }
+
+    @Test
+    fun `tiles version change is forwarded to all observers`() {
+        val observer1 = mockk<TilesVersionChangedObserver>(relaxed = true)
+        val observer2 = mockk<TilesVersionChangedObserver>(relaxed = true)
+        navigatorImpl.addTilesVersionChangedObserver(observer1)
+        navigatorImpl.addTilesVersionChangedObserver(observer2)
+        val versionInfo = RoadGraphVersionInfo(DATASET, VERSION)
+
+        versionChangedCallbackSlot.captured.run(
+            versionInfo,
+            TilesVersionChangeReason.RETURN_TO_LATEST,
+        )
+
+        verify(exactly = 1) {
+            observer1.onTilesVersionChanged(versionInfo, TilesVersionChangeReason.RETURN_TO_LATEST)
+            observer2.onTilesVersionChanged(versionInfo, TilesVersionChangeReason.RETURN_TO_LATEST)
+        }
+    }
+
+    @Test
+    fun `removed tiles version observer is not notified`() {
+        val observer = mockk<TilesVersionChangedObserver>(relaxed = true)
+        navigatorImpl.addTilesVersionChangedObserver(observer)
+        navigatorImpl.removeTilesVersionChangedObserver(observer)
+
+        versionChangedCallbackSlot.captured.run(
+            RoadGraphVersionInfo(DATASET, VERSION),
+            TilesVersionChangeReason.FALLBACK,
+        )
+
+        verify(exactly = 0) { observer.onTilesVersionChanged(any(), any()) }
+    }
+
+    @Test
+    fun `tiles version observers are not notified after shutdown`() {
+        val observer = mockk<TilesVersionChangedObserver>(relaxed = true)
+        navigatorImpl.addTilesVersionChangedObserver(observer)
+        val callback = versionChangedCallbackSlot.captured
+        navigatorImpl.shutdown()
+
+        callback.run(
+            RoadGraphVersionInfo(DATASET, VERSION),
+            TilesVersionChangeReason.FALLBACK,
+        )
+
+        verify(exactly = 0) { observer.onTilesVersionChanged(any(), any()) }
+    }
+
+    @Test
+    fun `tiles version change after shutdown does not rebuild road object matcher`() {
+        val callback = versionChangedCallbackSlot.captured
+        navigatorImpl.shutdown()
+        clearMocks(NavigatorLoader, answers = false)
+
+        callback.run(
+            RoadGraphVersionInfo(DATASET, VERSION),
+            TilesVersionChangeReason.FALLBACK,
+        )
+
+        verify(exactly = 0) { NavigatorLoader.createRoadObjectMatcher(any(), any()) }
+    }
+
     private companion object {
         const val LOG_CATEGORY = "MapboxNativeNavigatorImpl"
+        const val DATASET = "mapbox/driving-traffic"
+        const val VERSION = "2025_08_31-06_57_13"
     }
 }

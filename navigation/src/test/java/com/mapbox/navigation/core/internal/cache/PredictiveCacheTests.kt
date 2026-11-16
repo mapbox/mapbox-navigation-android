@@ -5,10 +5,11 @@ import com.mapbox.common.TilesetDescriptor
 import com.mapbox.navigation.base.options.PredictiveCacheMapsOptions
 import com.mapbox.navigation.base.options.PredictiveCacheNavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.NavigationVersionSwitchObserver
 import com.mapbox.navigation.core.internal.PredictiveCache
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
-import com.mapbox.navigation.navigator.internal.NativeNavigatorRecreationObserver
 import com.mapbox.navigation.testing.LoggingFrontendTestRule
+import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -26,21 +27,22 @@ class PredictiveCacheTests {
     @get:Rule
     val logRule = LoggingFrontendTestRule()
 
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
+
     private val tileStore: TileStore = mockk()
-    private val navigatorRecreationCallbackSlot = slot<NativeNavigatorRecreationObserver>()
+    private val versionSwitchObserverSlot = slot<NavigationVersionSwitchObserver>()
     private val navigator: MapboxNativeNavigator = mockk(relaxed = true)
+    private lateinit var mapboxNavigation: MapboxNavigation
     private lateinit var predictiveCache: PredictiveCache
 
     @Before
     fun setUp() {
-        every {
-            navigator.addNativeNavigatorRecreationObserver(
-                capture(navigatorRecreationCallbackSlot),
-            )
-        } just Runs
-
-        val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true)
+        mapboxNavigation = mockk(relaxed = true)
         every { mapboxNavigation.navigator } returns navigator
+        every {
+            mapboxNavigation.registerNavigationVersionSwitchObserver(capture(versionSwitchObserverSlot))
+        } just Runs
         predictiveCache = PredictiveCache(mapboxNavigation)
     }
 
@@ -133,7 +135,7 @@ class PredictiveCacheTests {
     }
 
     @Test
-    fun `controllers are recreated when navigator is recreated`() {
+    fun `controllers are recreated when tiles version changes`() {
         val navOptions1: PredictiveCacheNavigationOptions = mockk()
         val navOptions2: PredictiveCacheNavigationOptions = mockk()
         val navOptions3: PredictiveCacheNavigationOptions = mockk()
@@ -169,8 +171,7 @@ class PredictiveCacheTests {
         predictiveCache.createNavigationController(navOptions1)
         predictiveCache.createNavigationController(navOptions2)
 
-        val callback = navigatorRecreationCallbackSlot.captured
-        callback.onNativeNavigatorRecreated()
+        versionSwitchObserverSlot.captured.onSwitchToFallbackVersion("fallback-version")
 
         assertEquals(2, predictiveCache.cachedMapsPredictiveCacheControllers.size)
         assertEquals(2, predictiveCache.cachedMapsPredictiveCacheControllers[map1]!!.size)
@@ -210,6 +211,21 @@ class PredictiveCacheTests {
         verify(exactly = 2) {
             navigator.createNavigationPredictiveCacheController(navOptions2)
         }
+    }
+
+    @Test
+    fun `version switch observer is unregistered on destroy`() {
+        predictiveCache.createNavigationController(mockk())
+
+        predictiveCache.onDestroy()
+
+        verify(exactly = 1) {
+            mapboxNavigation.unregisterNavigationVersionSwitchObserver(
+                versionSwitchObserverSlot.captured,
+            )
+        }
+        assertEquals(0, predictiveCache.cachedNavigationPredictiveCacheControllers.size)
+        assertEquals(0, predictiveCache.navPredictiveCacheOptions.size)
     }
 
     @Test

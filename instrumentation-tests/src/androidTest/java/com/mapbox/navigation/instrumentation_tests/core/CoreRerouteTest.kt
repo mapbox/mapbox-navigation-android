@@ -205,7 +205,7 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
      * so that switching to offline pack won't be needed during navigation.
      */
     @Test
-    fun reroute_triggered_after_navigator_recreation_with_fallback() = sdkTest(120_000) {
+    fun reroute_triggered_after_tiles_version_switch_to_fallback() = sdkTest(120_000) {
         val mockRoute = RoutesProvider.near_munich_with_waypoints(context)
         val originLocation = mockRoute.routeWaypoints.first()
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
@@ -243,6 +243,10 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
                         ctrl.rerouteStates().first { it is RerouteState.FetchingRoute }
                         ctrl.rerouteStatesV2().first { it is RerouteStateV2.FetchingRoute }
                     }
+                // the onboard router builds the new route from the fallback tiles version
+                val rerouteUpdate = navigation.routesUpdates()
+                    .first { it.reason == ROUTES_UPDATE_REASON_REROUTE }
+                assertEquals(RouterOrigin.OFFLINE, rerouteUpdate.navigationRoutes.first().origin)
             }
         }
     }
@@ -267,7 +271,7 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
         // The offline deviation reroute below needs navigation tiles for the area to be
         // present onboard.Unpacking a pre-bundled tileset and pin the navigator to its version:
         // no tile downloads are needed at all,
-        // and no FallbackToOffline navigator recreation happens because the pinned version
+        // and no switch to a fallback tiles version happens because the pinned version
         // is available from the start.
         val tilesVersion = context.unpackTiles(Tileset.NearMunich)[TileDataDomain.NAVIGATION]!!
         val tileStore = createTileStoreWithFastRetryBackoff()
@@ -327,7 +331,7 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
             // 2. Short offline window: deviate so the hybrid router falls back to onboard
             //    (timeoutToFallbackSeconds=1) and the next set lands as OFFLINE. We do NOT
             //    wait for versionSwitchObserver — the offline window must stay short enough
-            //    that the navigator instance is preserved (no FallbackToOffline recreation).
+            //    that no switch to a fallback tiles version happens.
             navigation.moveAlongTheCurrentRouteUntilLocation(rerouteLocation)
             mockLocationReplayerRule.stopAndClearEvents()
 
@@ -391,17 +395,12 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
 
     /**
      * Verifies that `replanRouteAsync()` produces a valid route — with the
-     * [RerouteOptionsAdapter] modifications applied — after the navigator has been recreated
-     * twice: once by falling back to offline tiles (FallbackToOffline) and once by restoring
-     * the online tiles (RestoreToOnline).
+     * [RerouteOptionsAdapter] modifications applied — after the navigation tiles version has
+     * been switched twice: once to the offline fallback version and once back to the target
+     * version.
      *
-     * Each navigator recreation swaps the underlying `RouterInterface` instance
-     * (`RouterWrapper.resetRouter` in [MapboxNavigation.recreateNavigatorInstance]). Any
-     * route request that races with the swap is aborted with
-     * `RouterFailureType.ROUTER_RECREATION_ERROR` and a `replanRouteAsync` call would surface
-     * it as `ReplanRouteError.REPLAN_ROUTE_INTERNAL_ERROR`. This test guards against that by
-     * awaiting both version switches (fallback **and** target) before issuing the replan
-     * request, and verifies that:
+     * The test awaits both version switches (fallback **and** target) before issuing the
+     * replan request, and verifies that:
      *   1. the destination waypoint is preserved across the replan;
      *   2. the new route's options reflect the adapter's modification (motorway exclusion).
      *
@@ -409,7 +408,7 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
      * so that switching to the offline pack is never triggered during navigation.
      */
     @Test
-    fun route_replan_triggered_after_navigator_recreation_with_fallback() = sdkTest(180_000) {
+    fun route_replan_succeeds_after_tiles_version_switches() = sdkTest(180_000) {
         val mockRoute = RoutesProvider.near_munich_tile_boundary_crossing(context)
         val originLocation = mockRoute.routeWaypoints.first()
         mockWebServerRule.requestHandlers.addAll(mockRoute.mockRequestHandlers)
@@ -466,8 +465,7 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
             val mockReplanRoute = RoutesProvider.near_munich_tile_boundary_crossing_replan(context)
             val originLocationReplanRoute = mockReplanRoute.routeWaypoints.first()
 
-            // 4. Drop the network: NN exhausts online tiles and switches to the offline pack,
-            //    which recreates the navigator with SetRoutesReason.FALLBACK_TO_OFFLINE.
+            // 4. Drop the network: NN exhausts online tiles and switches to the offline pack.
             //    Wait for the fallback version switch, then drive the route to the location
             //    where the replan should originate.
             withoutInternet {
@@ -477,15 +475,12 @@ class CoreRerouteTest : BaseCoreNoCleanUpTest() {
             }
 
             // 5. Network is restored. Park the puck at the replan origin and wait for NN to
-            //    switch back to the target version — this is the second recreation
-            //    (SetRoutesReason.RESTORE_TO_ONLINE). We must wait for this swap to complete
-            //    before issuing any route request, otherwise the in-flight request would be
-            //    aborted with ROUTER_RECREATION_ERROR.
+            //    switch back to the target version — this is the second version switch.
             mockLocationReplayerRule.stopAndClearEvents()
             stayOnPosition(originLocationReplanRoute, bearing = 0.0f) {
                 navigation.versionSwitchObserver().first { it != tilesVersion }
 
-                // let the new navigator settle after the restore-to-online recreation
+                // let the navigator settle after the switch back to the target version
                 navigation.routeProgressUpdates()
                     .map { it.currentState == RouteProgressState.TRACKING }
                     .take(2)
