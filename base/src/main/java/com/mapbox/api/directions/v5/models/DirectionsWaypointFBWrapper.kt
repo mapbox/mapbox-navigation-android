@@ -20,6 +20,9 @@ internal class DirectionsWaypointFBWrapper private constructor(
     override val unrecognizedPropertiesLength: Int
         get() = fb.unrecognizedPropertiesLength
 
+    override val platformAddedUnrecognizedProperties: Map<String, Any?>?
+        get() = fb.externalId?.let { mapOf(KEY_EXTERNAL_ID to it) }
+
     override fun name(): String = fb.name
 
     override fun rawLocation(): DoubleArray {
@@ -62,6 +65,8 @@ internal class DirectionsWaypointFBWrapper private constructor(
     }
 
     internal companion object {
+        internal const val KEY_EXTERNAL_ID = "external_id"
+
         internal fun wrap(fb: FBDirectionsWaypoint?): DirectionsWaypoint? {
             return when {
                 fb == null -> null
