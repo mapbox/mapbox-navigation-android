@@ -15,6 +15,13 @@ internal interface BaseFBWrapper {
 
     val unrecognizedPropertiesLength: Int
 
+    /**
+     * Fields that the native parser stores in dedicated flatbuffer fields, but that the
+     * mapbox-java model has no getter for. The Java parser keeps such fields as unrecognized
+     * properties, so a wrapper returns them here, and [unrecognizedMap] and [unrecognized] merge
+     * them with the unrecognized-properties flexbuffer. This keeps NRO and Java models returning
+     * the same unrecognized properties.
+     */
     val platformAddedUnrecognizedProperties: Map<String, Any?>?
         get() = null
 
