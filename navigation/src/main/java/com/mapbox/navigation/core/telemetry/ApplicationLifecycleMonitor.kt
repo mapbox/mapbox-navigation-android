@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 
 internal class ApplicationLifecycleMonitor(
-    application: Application,
+    private val application: Application,
 ) : Application.ActivityLifecycleCallbacks {
 
     companion object {
@@ -64,6 +64,14 @@ internal class ApplicationLifecycleMonitor(
                 it.application.unregisterActivityLifecycleCallbacks(this)
             }
         }
+    }
+
+    /**
+     * Stops observing activity lifecycle events. Must be called when the owner is destroyed,
+     * because the [Application] outlives it and would otherwise keep this monitor registered.
+     */
+    fun destroy() {
+        application.unregisterActivityLifecycleCallbacks(this)
     }
 
     //region Unused Lifecycle Methods

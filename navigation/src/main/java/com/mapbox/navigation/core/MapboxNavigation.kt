@@ -473,9 +473,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
     private val systemLocaleWatcher: SystemLocaleWatcher
 
-    private val appLifecycleMonitor = ApplicationLifecycleMonitor(
-        navigationOptions.applicationContext as Application,
-    )
+    private val appLifecycleMonitor: ApplicationLifecycleMonitor
 
     internal val navigationTelemetry: NavigationTelemetry
 
@@ -525,6 +523,12 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             )
         }
         hasInstance = true
+
+        // Created only after the single-instance check: the monitor registers itself on the
+        // Application, so a rejected construction must not leave one behind.
+        appLifecycleMonitor = ApplicationLifecycleMonitor(
+            navigationOptions.applicationContext as Application,
+        )
 
         val config = NavigatorLoader.createConfig(
             deviceProfile = navigationOptions.deviceProfile,
@@ -1623,6 +1627,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
 
         lowMemoryManager.removeObserver(lowMemoryObserver)
         systemLocaleWatcher.destroy()
+        appLifecycleMonitor.destroy()
         billingController.onDestroy()
         directionsSession.shutdown()
         directionsSession.unregisterAllSetNavigationRoutesFinishedObserver()

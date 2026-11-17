@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core
 
+import android.app.Application.ActivityLifecycleCallbacks
 import com.mapbox.annotation.MapboxExperimental
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.ExpectedFactory
@@ -45,6 +46,7 @@ import com.mapbox.navigation.core.routerefresh.RouteRefreshObserver
 import com.mapbox.navigation.core.routerefresh.RouteRefresherResult
 import com.mapbox.navigation.core.routerefresh.RouteRefresherStatus
 import com.mapbox.navigation.core.routerefresh.RoutesRefresherResult
+import com.mapbox.navigation.core.telemetry.ApplicationLifecycleMonitor
 import com.mapbox.navigation.core.telemetry.NavigationTelemetry
 import com.mapbox.navigation.core.telemetry.UserFeedback
 import com.mapbox.navigation.core.telemetry.events.FeedbackMetadata
@@ -95,6 +97,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -2385,6 +2388,51 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         verify(exactly = 1) {
             localeWatcher.destroy()
         }
+    }
+
+    @Test
+    fun `application lifecycle monitor is unregistered on destroy`() {
+        val registeredMonitors = trackRegisteredApplicationLifecycleMonitors()
+
+        createMapboxNavigation()
+        assertEquals(1, registeredMonitors.size)
+        val monitor = registeredMonitors.single()
+
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 1) { applicationContext.unregisterActivityLifecycleCallbacks(monitor) }
+        assertTrue(registeredMonitors.isEmpty())
+    }
+
+    @Test
+    fun `rejected second instance leaves no application lifecycle monitor registered`() {
+        val registeredMonitors = trackRegisteredApplicationLifecycleMonitors()
+        createMapboxNavigation()
+        val firstInstanceMonitor = registeredMonitors.single()
+
+        assertThrows(IllegalStateException::class.java) {
+            MapboxNavigation(navigationOptions)
+        }
+
+        assertEquals(listOf(firstInstanceMonitor), registeredMonitors)
+        mapboxNavigation.onDestroy()
+        assertTrue(registeredMonitors.isEmpty())
+    }
+
+    /**
+     * Mirrors the Application's list of registered activity lifecycle callbacks, keeping only
+     * the [ApplicationLifecycleMonitor]s.
+     */
+    private fun trackRegisteredApplicationLifecycleMonitors(): List<ActivityLifecycleCallbacks> {
+        val registered = mutableListOf<ActivityLifecycleCallbacks>()
+        every { applicationContext.registerActivityLifecycleCallbacks(any()) } answers {
+            val callbacks = firstArg<ActivityLifecycleCallbacks>()
+            if (callbacks is ApplicationLifecycleMonitor) registered.add(callbacks)
+        }
+        every { applicationContext.unregisterActivityLifecycleCallbacks(any()) } answers {
+            registered.remove(firstArg<ActivityLifecycleCallbacks>())
+        }
+        return registered
     }
 
     @Test
