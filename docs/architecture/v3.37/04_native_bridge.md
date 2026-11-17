@@ -27,7 +27,7 @@ Navigation Native and Nav SDK C++ both depend on Core Common (`v24.37`) for netw
 
 `ui-maps` references Navigation Native in its test configuration only, and `navigation` reads the Navigation Native version string into its `BuildConfig` without declaring the artifact. Neither counts as a binding here.
 
-No native-binding declaration changed since `3.35`.
+No native-binding declaration changed since `3.36.0-rc.1`.
 
 ---
 

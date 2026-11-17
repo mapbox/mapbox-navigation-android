@@ -26,9 +26,9 @@ Application, demo, test-harness, instrumentation, and benchmark modules are out 
 
 ## What changed at this tag
 
-No module-set change since `3.35`: neither `settings.gradle` changed, and no library was added, removed or renamed.
+No module-set change since `3.36.0-rc.1`: neither `settings.gradle` changed, and no library was added, removed or renamed.
 
-`android-auto-components`, `coordination` and `ev-rangemap` changed their public API. See the release context summary for detail.
+`navigation` and `base` changed their public API. See the release context summary for detail.
 
 ---
 
