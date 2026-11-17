@@ -12,10 +12,14 @@ import java.util.Locale
 
 /**
  * App configuration changes observer.
+ *
+ * Registers [ComponentCallbacks] on the given [context] when created.
+ * Call [release] when the owner is no longer needed, otherwise the callbacks
+ * (and this owner) stay registered for the lifetime of the context.
  */
-class NavigationConfigOwner(context: Context) {
+class NavigationConfigOwner(private val context: Context) {
 
-    private lateinit var appConfigFlow: MutableStateFlow<Configuration>
+    private val appConfigFlow = MutableStateFlow(context.resources.configuration)
 
     private val componentCallbacks = object : ComponentCallbacks {
 
@@ -27,8 +31,15 @@ class NavigationConfigOwner(context: Context) {
     }
 
     init {
-        appConfigFlow = MutableStateFlow(context.resources.configuration)
         context.registerComponentCallbacks(componentCallbacks)
+    }
+
+    /**
+     * Unregisters the configuration callbacks from the context.
+     * The flows returned by [config] and [language] stop receiving updates afterwards.
+     */
+    fun release() {
+        context.unregisterComponentCallbacks(componentCallbacks)
     }
 
     fun config(): Flow<Configuration> = appConfigFlow

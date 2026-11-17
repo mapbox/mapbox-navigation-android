@@ -72,6 +72,7 @@ class TestMapboxAudioGuidanceServices(
 
     private val carAppConfigOwner: NavigationConfigOwner = mockk {
         every { language() } returns flowOf(deviceLanguage)
+        every { release() } just Runs
     }
 
     val dataStoreOwner = testCarAppDataStoreOwner.carAppDataStoreOwner

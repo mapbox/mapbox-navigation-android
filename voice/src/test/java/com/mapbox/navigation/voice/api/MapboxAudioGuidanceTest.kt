@@ -1,11 +1,14 @@
 package com.mapbox.navigation.voice.api
 
+import android.content.ComponentCallbacks
+import android.content.Context
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.utils.internal.configuration.NavigationConfigOwner
 import com.mapbox.navigation.voice.TestMapboxAudioGuidanceServices
 import com.mapbox.navigation.voice.TestMapboxAudioGuidanceServices.Companion.SPEECH_ANNOUNCEMENT_DELAY_MS
 import com.mapbox.navigation.voice.internal.MapboxVoiceInstructionsState
@@ -16,6 +19,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.excludeRecords
 import io.mockk.mockk
+import io.mockk.spyk
 import io.mockk.verify
 import io.mockk.verifySequence
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -23,6 +27,7 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import org.junit.Assert.assertEquals
@@ -397,4 +402,52 @@ class MapboxAudioGuidanceTest {
         carAppAudioGuidance.onDetached(mapboxNavigation)
         // no crash
     }
+
+    @Test
+    fun `onDetached releases config owner`() = coroutineRule.runBlockingTest {
+        val configOwner = testMapboxAudioGuidanceServices.mapboxAudioGuidanceServices
+            .configOwner(mockk())
+        carAppAudioGuidance.onAttached(mapboxNavigation)
+
+        carAppAudioGuidance.onDetached(mapboxNavigation)
+
+        verify(exactly = 1) { configOwner.release() }
+    }
+
+    @Test
+    fun `re-attaching does not accumulate configuration callbacks`() =
+        coroutineRule.runBlockingTest {
+            val registeredCallbacks = mutableListOf<ComponentCallbacks>()
+            val context = mockk<Context> {
+                every { resources } returns mockk {
+                    every { configuration } returns mockk()
+                }
+                every { registerComponentCallbacks(any()) } answers {
+                    registeredCallbacks.add(firstArg())
+                }
+                every { unregisterComponentCallbacks(any()) } answers {
+                    registeredCallbacks.remove(firstArg<ComponentCallbacks>())
+                }
+            }
+            every {
+                testMapboxAudioGuidanceServices.mapboxAudioGuidanceServices.configOwner(any())
+            } answers {
+                spyk(NavigationConfigOwner(context)) {
+                    every { language() } returns flowOf("en")
+                }
+            }
+
+            carAppAudioGuidance.onAttached(mapboxNavigation)
+            carAppAudioGuidance.onDetached(mapboxNavigation)
+            carAppAudioGuidance.onAttached(mapboxNavigation)
+
+            assertEquals(1, registeredCallbacks.size)
+            verify(exactly = 2) { context.registerComponentCallbacks(any()) }
+            verify(exactly = 1) { context.unregisterComponentCallbacks(any()) }
+
+            carAppAudioGuidance.onDetached(mapboxNavigation)
+
+            assertTrue(registeredCallbacks.isEmpty())
+            verify(exactly = 2) { context.unregisterComponentCallbacks(any()) }
+        }
 }

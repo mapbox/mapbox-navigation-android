@@ -66,11 +66,12 @@ internal constructor(
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         val context = mapboxNavigation.navigationOptions.applicationContext
         dataStoreOwner = audioGuidanceServices.dataStoreOwner(context)
-        configOwner = audioGuidanceServices.configOwner(context)
+        val configOwner = audioGuidanceServices.configOwner(context)
+        this.configOwner = configOwner
         mapboxVoiceInstructions.registerObservers(mapboxNavigation)
         job = scope.launch {
             restoreMutedState()
-            audioGuidanceFlow(mapboxNavigation).collect()
+            audioGuidanceFlow(mapboxNavigation, configOwner).collect()
         }
     }
 
@@ -83,6 +84,8 @@ internal constructor(
         trigger?.onDetached(mapboxNavigation)
         job?.cancel()
         job = null
+        configOwner?.release()
+        configOwner = null
     }
 
     /**
@@ -143,8 +146,9 @@ internal constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun audioGuidanceFlow(
         mapboxNavigation: MapboxNavigation,
+        configOwner: NavigationConfigOwner,
     ): Flow<MapboxAudioGuidanceState> {
-        return mapboxNavigation.audioGuidanceVoice().flatMapLatest { audioGuidance ->
+        return mapboxNavigation.audioGuidanceVoice(configOwner).flatMapLatest { audioGuidance ->
             var lastPlayedInstructions: VoiceInstructions? = null
             mutedStateFlow.flatMapLatest { isMuted ->
                 val voiceInstructions = mapboxVoiceInstructions.voiceInstructions()
@@ -187,10 +191,12 @@ internal constructor(
     }
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-    private fun MapboxNavigation.audioGuidanceVoice(): Flow<MapboxAudioGuidanceVoice> {
+    private fun MapboxNavigation.audioGuidanceVoice(
+        configOwner: NavigationConfigOwner,
+    ): Flow<MapboxAudioGuidanceVoice> {
         return combine(
             mapboxVoiceInstructions.voiceLanguage(),
-            configOwner!!.language(),
+            configOwner.language(),
             optionsFlow,
         ) { voiceLanguage, deviceLanguage, options -> (voiceLanguage ?: deviceLanguage) to options }
             .distinctUntilChanged()
