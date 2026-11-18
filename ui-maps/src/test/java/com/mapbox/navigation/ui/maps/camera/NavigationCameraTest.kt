@@ -1,9 +1,12 @@
 package com.mapbox.navigation.ui.maps.camera
 
+import android.os.SystemClock
 import com.mapbox.maps.CameraOptions
+import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.plugin.animation.CameraAnimationsPlugin
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.testing.LoggingFrontendTestRule
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.DEFAULT_FRAME_TRANSITION_OPT
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.DEFAULT_STATE_TRANSITION_OPT
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera.Companion.INSTANT_FRAME_TRANSITION_OPT
@@ -29,17 +32,26 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.mockk.slot
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import io.mockk.verifySequence
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 class NavigationCameraTest {
 
-    private val mapboxMap: MapboxMap = mockk(relaxUnitFun = true)
+    @get:Rule
+    val loggerRule = LoggingFrontendTestRule()
+
+    private val mapboxMap: MapboxMap = mockk(relaxUnitFun = true) {
+        every { cameraState } returns mockk(relaxed = true)
+    }
     private val cameraPlugin: CameraAnimationsPlugin = mockk(relaxUnitFun = true)
 
     private val internalTransitionListenerSlot = slot<MapboxAnimatorSetListener>()
@@ -99,8 +111,12 @@ class NavigationCameraTest {
 
     private lateinit var navigationCamera: NavigationCamera
 
+    private var elapsedRealtime = 10_000L
+
     @Before
     fun setup() {
+        mockkStatic(SystemClock::elapsedRealtime)
+        every { SystemClock.elapsedRealtime() } answers { elapsedRealtime }
         every { mapboxMap.isValid() } returns true
         navigationCamera = NavigationCamera(
             mapboxMap,
@@ -108,6 +124,11 @@ class NavigationCameraTest {
             viewportDataSource,
             animatorsCreator,
         )
+    }
+
+    @After
+    fun tearDown() {
+        unmockkStatic(SystemClock::elapsedRealtime)
     }
 
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
@@ -205,18 +226,103 @@ class NavigationCameraTest {
     }
 
     @Test
-    fun `when points overview transition ends, do a frame animation`() {
+    fun `when points overview transition ends, no frame animation is started`() {
         navigationCamera.requestNavigationCameraToPointsOverview()
 
         internalTransitionListenerSlot.captured.onAnimationStart(pointsOverviewAnimatorSet)
         internalTransitionListenerSlot.captured.onAnimationEnd(pointsOverviewAnimatorSet)
 
-        verifyTransitionExecuted(
-            AnimatorsCreator::updateFrameForOverview,
-            pointsOverviewCameraOptions,
-            DEFAULT_FRAME_TRANSITION_OPT,
-            overviewFrameAnimatorSet,
+        verifyNoFrameAnimationStarted()
+    }
+
+    @Test
+    fun `when points overview and viewport data is updated, no frame animation is started`() {
+        navigationCamera.requestNavigationCameraToPointsOverview()
+        internalTransitionListenerSlot.captured.onAnimationStart(pointsOverviewAnimatorSet)
+        internalTransitionListenerSlot.captured.onAnimationEnd(pointsOverviewAnimatorSet)
+
+        internalDataSourceObserverSlot.captured.viewportDataSourceUpdated(viewportData)
+
+        verifyNoFrameAnimationStarted()
+    }
+
+    @Test
+    fun `when transitioning to points overview and viewport data is updated, no frame animation`() {
+        navigationCamera.requestNavigationCameraToPointsOverview()
+        internalTransitionListenerSlot.captured.onAnimationStart(pointsOverviewAnimatorSet)
+
+        internalDataSourceObserverSlot.captured.viewportDataSourceUpdated(viewportData)
+
+        verifyNoFrameAnimationStarted()
+    }
+
+    @OptIn(MapboxExperimental::class)
+    @Test
+    fun `when points overview is active and viewport data is updated, camera animation hint is set`() {
+        // GIVEN
+        enterPointsOverview()
+
+        // WHEN
+        internalDataSourceObserverSlot.captured.viewportDataSourceUpdated(viewportData)
+
+        // THEN hint was called
+        verify(exactly = 1) { mapboxMap.setCameraAnimationHint(any()) }
+        // no frame animation started
+        verifyNoFrameAnimationStarted()
+    }
+
+    @Test
+    fun `when points overview is active and another request is done, transition end listener is called when animation complete`() {
+        // GIVEN
+        enterPointsOverview()
+
+        // WHEN another request is done with a listener
+        navigationCamera.requestNavigationCameraToPointsOverview(
+            transitionEndListener = transitionEndListener,
         )
+
+        // THEN the listener is not called before the animation completes
+        verify(exactly = 0) { transitionEndListener.onTransitionEnd(any()) }
+
+        // WHEN the animation completes
+        internalTransitionListenerSlot.captured.onAnimationStart(pointsOverviewAnimatorSet)
+        internalTransitionListenerSlot.captured.onAnimationEnd(pointsOverviewAnimatorSet)
+
+        // THEN the listener is called once, not canceled
+        verify(exactly = 1) { transitionEndListener.onTransitionEnd(isCanceled = false) }
+    }
+
+    @Test
+    fun `when transitioning to points overview and requested again, transition restarts`() {
+        // GIVEN a transition to points overview is in progress
+        navigationCamera.requestNavigationCameraToPointsOverview()
+        internalTransitionListenerSlot.captured.onAnimationStart(pointsOverviewAnimatorSet)
+        assertEquals(
+            NavigationCameraStateInternal.TRANSITION_TO_POINTS_OVERVIEW,
+            navigationCamera.stateInternal,
+        )
+        // AND the points overview framing changed meanwhile
+        val updatedCameraOptions = CameraOptions.Builder().zoom(5.0).build()
+        every { viewportData.cameraForPointsOverview } returns updatedCameraOptions
+
+        // WHEN points overview is requested again
+        navigationCamera.requestNavigationCameraToPointsOverview()
+
+        // THEN the running transition is cancelled and a new one targets the updated framing
+        verify(exactly = 1) { pointsOverviewAnimatorSet.cancel() }
+        verify(exactly = 1) {
+            animatorsCreator.transitionToPointsOverview(
+                updatedCameraOptions,
+                DEFAULT_STATE_TRANSITION_OPT,
+            )
+        }
+        verify(exactly = 2) { pointsOverviewAnimatorSet.start() }
+    }
+
+    private fun enterPointsOverview() {
+        navigationCamera.requestNavigationCameraToPointsOverview()
+        internalTransitionListenerSlot.captured.onAnimationStart(pointsOverviewAnimatorSet)
+        internalTransitionListenerSlot.captured.onAnimationEnd(pointsOverviewAnimatorSet)
     }
 
     /**
@@ -974,6 +1080,13 @@ class NavigationCameraTest {
         }
         verify(exactly = times) { returnTransitionSet.start() }
         verify(exactly = if (instant) 1 else 0) { returnTransitionSet.makeInstant() }
+    }
+
+    private fun verifyNoFrameAnimationStarted() {
+        verify(exactly = 0) { animatorsCreator.updateFrameForFollowing(any(), any()) }
+        verify(exactly = 0) { animatorsCreator.updateFrameForOverview(any(), any()) }
+        verify(exactly = 0) { followingFrameAnimatorSet.start() }
+        verify(exactly = 0) { overviewFrameAnimatorSet.start() }
     }
 
     private fun mockFrameTransitionForFollowing(
