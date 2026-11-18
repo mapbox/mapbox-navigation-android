@@ -1,1 +1,0 @@
-- Fixed Copilot history files not being uploaded in apps minified with R8 full mode.

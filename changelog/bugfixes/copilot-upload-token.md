@@ -1,1 +1,0 @@
-- Fixed an issue where Copilot could upload history files with an empty or rotated access token captured when the upload was scheduled. The current `MapboxOptions.accessToken` is now used whenever possible.

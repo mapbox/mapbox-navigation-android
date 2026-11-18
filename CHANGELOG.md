@@ -1,3 +1,24 @@
+## Navigation SDK Core Framework 3.31.2 - 18 November, 2026
+#### Features
+- Added `SdkDispatchers` (`@MapboxExperimental`) — a central coroutine dispatcher holder for the Navigation SDK. Call `SdkDispatchers.configure {}` in `Application.onCreate()` to limit SDK parallelism (e.g. `setDefaultParallelism`, `setIoParallelism`) and reduce contention with the host application's own thread pools. If `configure` is never called the SDK falls back to `Dispatchers.Default` and `Dispatchers.IO`. [#18548](https://github.com/mapbox/mapbox-sdk/pull/18548)
+- Replaced `MapboxEvViewOptions.Builder#withIconFactory` with `withIconVariantsFactory`, which returns an ordered list of icon variants for a station. The map shows the first variant that fits. Icons are now created lazily from `MapboxEvViewClient#onStyleImageMissing`. [#21104](https://github.com/mapbox/mapbox-sdk/pull/21104)
+- Added `MapboxEvViewOptions.Builder#withIconOffsets` to set an icon offset per variant. [#21104](https://github.com/mapbox/mapbox-sdk/pull/21104)
+- Added support for the `INITIALIZED` route state during EV charging at the departure waypoint. Added `ChargingState`, `RouteProgress#chargingState`, and `RouteProgress#isChargingExpected` to expose the current charging phase, and `MapboxNavigation#startCharging`/`MapboxNavigation#stopCharging` to control charging transitions.
+
+
+#### Bug fixes and improvements
+- Fixed EV dynamic data updates mixing the battery conditioning model parameters with the legacy preconditioning parameters, which produced a conflicting set that Directions rejected. An update now supersedes the other group, keeping only the parameters from the latest update. [#22183](https://github.com/mapbox/mapbox-sdk/pull/22183)
+- Fixed Copilot history files not being uploaded in apps minified with R8 full mode.
+- Fixed an issue where Copilot could upload history files with an empty or rotated access token captured when the upload was scheduled. The current `MapboxOptions.accessToken` is now used whenever possible.
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.31.2` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.31.2))
+- Mapbox Navigation Native `v324.31.2`
+- Mapbox Core Common `v24.31.2`
+- Mapbox Java `v7.10.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.1))
+
 ## Navigation SDK Core Framework 3.31.1 - 25 September, 2026
 #### Features
 
