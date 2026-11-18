@@ -1,3 +1,19 @@
+## Navigation SDK Core Framework 3.34.3 - 18 November, 2026
+#### Features
+
+
+#### Bug fixes and improvements
+- Fixed EV dynamic data updates mixing the battery conditioning model parameters with the legacy preconditioning parameters, which produced a conflicting set that Directions rejected. An update now supersedes the other group, keeping only the parameters from the latest update. [#22183](https://github.com/mapbox/mapbox-sdk/pull/22183)
+- Fixed inconsistency between native and java route objects parsing for unrecognized properties.
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.34.3` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.34.3))
+- Mapbox Navigation Native `v324.34.3`
+- Mapbox Core Common `v24.34.3`
+- Mapbox Java `v7.10.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.1))
+
 ## Navigation SDK Core Framework 3.34.2 - 03 November, 2026
 #### Features
 
