@@ -384,6 +384,22 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Core Common `v24.33.0-rc.1`
 - Mapbox Java `v7.10.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.1))
 
+## Navigation SDK Core Framework 3.32.4 - 18 November, 2026
+#### Features
+
+
+#### Bug fixes and improvements
+- Fixed native navigator instances not being released after `MapboxNavigationProvider.destroy()`, causing background threads to accumulate across create/destroy cycles. [#19726](https://github.com/mapbox/mapbox-sdk/pull/19726)
+- Fixed an issue where Copilot could upload history files with an empty or rotated access token captured when the upload was scheduled. The current `MapboxOptions.accessToken` is now used whenever possible.
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.32.4` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.32.4))
+- Mapbox Navigation Native `v324.32.4`
+- Mapbox Core Common `v24.32.4`
+- Mapbox Java `v7.10.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.1))
+
 ## Navigation SDK Core Framework 3.32.3 - 19 October, 2026
 #### Features
 
