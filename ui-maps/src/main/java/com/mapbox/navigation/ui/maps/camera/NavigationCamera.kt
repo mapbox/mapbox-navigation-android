@@ -515,23 +515,19 @@ internal constructor(
      * @param frameTransitionOptions options that impact the transition animations between viewport frames in the selected state.
      * @param transitionEndListener invoked when transition ends.
      */
-    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     internal fun requestNavigationCameraToPointsOverview(
         stateTransitionOptions: NavigationCameraTransitionOptions = DEFAULT_STATE_TRANSITION_OPT,
         frameTransitionOptions: NavigationCameraTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT,
         transitionEndListener: TransitionEndListener? = null,
     ) {
         when (stateInternal) {
-            POINTS_OVERVIEW -> {
-                transitionEndListener?.onTransitionEnd(isCanceled = false)
-            }
-
             IDLE,
             TRANSITION_TO_FOLLOWING,
             FOLLOWING,
             TRANSITION_TO_ROUTE_OVERVIEW,
             ROUTE_OVERVIEW,
             TRANSITION_TO_POINTS_OVERVIEW,
+            POINTS_OVERVIEW,
             -> {
                 startAnimation(
                     getPointsOverviewTransition(
@@ -614,18 +610,8 @@ internal constructor(
                     instant,
                 )
             }
-
             POINTS_OVERVIEW -> {
                 setCameraAnimationHintWhileInOverview(viewportData.cameraForFollowing)
-                startAnimation(
-                    animatorsCreator.updateFrameForOverview(
-                        viewportData.cameraForPointsOverview,
-                        frameTransitionOptions,
-                    ).apply {
-                        addAnimationEndListener(createFrameListener())
-                    },
-                    instant,
-                )
             }
 
             IDLE,
