@@ -64,8 +64,8 @@
   <!-- Bound SDKs -->
   <rect x="150" y="445" width="500" height="105" rx="6" class="layer-sdk"/>
   <text x="400" y="468" text-anchor="middle" class="layer-title">BOUND MAPBOX SDKs (external)</text>
-  <text x="400" y="490" text-anchor="middle" class="layer-desc">Maps SDK v11.37 . Navigation Native v324.37 . Core Common v24.37</text>
-  <text x="400" y="505" text-anchor="middle" class="layer-desc">Nav SDK C++ v0.37 . Search SDK v2.37 . Mapbox Java SDK v7.10.1</text>
+  <text x="400" y="490" text-anchor="middle" class="layer-desc">Maps SDK 11.37.0 . Navigation Native 324.37.0 . Core Common 24.37.0</text>
+  <text x="400" y="505" text-anchor="middle" class="layer-desc">Nav SDK C++ 0.37.0 . Search SDK 2.37.0 . Mapbox Java SDK 7.10.1</text>
   <text x="400" y="537" text-anchor="middle" class="layer-desc" style="font-style: italic;">Not designed here - versions only</text>
 
   <!-- Legend -->

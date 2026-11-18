@@ -32,7 +32,7 @@ Contains: `libnavigation-android`, `navigation`, `navigator`, `base`, `utils`, `
 ### Bound Mapbox SDKs (external)
 **What it does:** Mapbox native and platform libraries this SDK binds but does not design.
 
-At Navigation SDK `3.37`: Maps SDK `v11.37`, Navigation Native `v324.37`, Core Common `v24.37`, Nav SDK C++ `v0.37`, Search SDK `v2.37`, Mapbox Java SDK `v7.10.1`.
+At Navigation SDK `3.37`: Maps SDK `11.37.0`, Navigation Native `324.37.0`, Core Common `24.37.0`, Nav SDK C++ `0.37.0`, Search SDK `2.37.0`, Mapbox Java SDK `7.10.1`.
 
 ---
 
