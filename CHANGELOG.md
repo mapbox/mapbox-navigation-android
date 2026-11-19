@@ -1,3 +1,18 @@
+## Navigation SDK Core Framework 3.30.8 - 19 November, 2026
+#### Features
+
+
+#### Bug fixes and improvements
+- Fixed an issue where Copilot could upload history files with an empty or rotated access token captured when the upload was scheduled. The current `MapboxOptions.accessToken` is now used whenever possible.
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.30.8` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.30.8))
+- Mapbox Navigation Native `v324.30.8`
+- Mapbox Core Common `v24.30.8`
+- Mapbox Java `v7.10.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.1))
+
 ## Navigation SDK Core Framework 3.30.7 - 20 October, 2026
 #### Features
 
