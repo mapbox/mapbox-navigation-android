@@ -18,7 +18,7 @@ Optional libraries that depend on another optional library: `coordination-full-h
 
 Five optional libraries declare a native SDK directly: `coordination` (Nav SDK C++), `coordination-full-hd` (Navigation Native, Nav SDK C++ and its full HD artifact), `datainputs`, `roadcam` and `libnavigation-compose-core` (Navigation Native). See `04_native_bridge.md`.
 
-No optional library was added or removed since `3.36.0-rc.1`, and no optional-library dependency changed. `coordination` added optional blur values to `LaneLevelGuidanceTheme` and its update builder, and `datainputs` added an optional `yawAccuracy` value to `OrientationData`, both in their public APIs.
+No optional library was added or removed since `3.36.0-rc.1`, and no optional-library dependency changed. `coordination` added optional blur values to `LaneLevelGuidanceTheme` and its update builder, `ev-ui` added an optional `alwaysShownStations` list to `MapboxEvViewOptions`, and `datainputs` added an optional `yawAccuracy` value to `OrientationData`, all in their public APIs.
 
 ---
 
