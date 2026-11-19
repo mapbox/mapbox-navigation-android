@@ -758,6 +758,12 @@ License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENS
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the kotlinx-coroutines-android (Coroutines support libraries for Kotlin).
+URL: [https://github.com/Kotlin/kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines)
+License: [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the kotlinx-coroutines-core (Coroutines support libraries for Kotlin).
 URL: [https://github.com/Kotlin/kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines)
 License: [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
