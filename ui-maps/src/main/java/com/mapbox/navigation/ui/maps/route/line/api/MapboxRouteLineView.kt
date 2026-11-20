@@ -1204,6 +1204,11 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
 
     /**
      * Cancels any/all background tasks that may be running and removes callout adapter.
+     *
+     * A [RoutesRenderedCallback] that is still waiting for the map to finish rendering or clearing
+     * routes is invoked right away, with the routes the map has not rendered or cleared yet
+     * reported as cancelled. A render that this call stops before it reaches the map does not
+     * invoke its callback.
      */
     @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     fun cancel() {
@@ -1211,6 +1216,7 @@ class MapboxRouteLineView @VisibleForTesting internal constructor(
         sender.sendCancelEvent()
         scope.cancelChildren()
         calculationScope.coroutineContext.cancelChildren()
+        routesExpector.cancelAll()
     }
 
     internal fun registerRoutesAttachedToLayersObserver(observer: RoutesAttachedToLayersObserver) {

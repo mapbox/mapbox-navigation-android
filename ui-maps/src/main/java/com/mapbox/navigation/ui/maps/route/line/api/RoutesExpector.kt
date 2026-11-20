@@ -84,6 +84,30 @@ internal class RoutesExpector {
         }
     }
 
+    /**
+     * Stops waiting for the map: cancels every source-data subscription and notifies each pending
+     * callback, reporting the routes that have not been rendered or cleared yet as cancelled.
+     *
+     * All subscriptions are cancelled before any callback is invoked, and a callback that throws
+     * does not prevent the remaining ones from being notified. The first exception is rethrown
+     * once every holder has been handled.
+     */
+    fun cancelAll() {
+        val holders = routeRenderCallbackDatas.values.distinct()
+        routeRenderCallbackDatas.clear()
+        holders.forEach { it.cancelSubscription() }
+        var failure: Throwable? = null
+        holders.forEach {
+            try {
+                it.cancelPending()
+                it.notifyAndCleanUp()
+            } catch (t: Throwable) {
+                if (failure == null) failure = t else failure?.addSuppressed(t)
+            }
+        }
+        failure?.let { throw it }
+    }
+
     private fun maybeFinish(callbackHolder: RouteRenderCallbackHolder) {
         if (callbackHolder.hasAllRoutes()) {
             val keysToRemove = routeRenderCallbackDatas.filter { it.value == callbackHolder }.keys
@@ -125,6 +149,14 @@ private class RouteRenderCallbackHolder(
     private val successfulRouteIds = mutableSetOf<String>()
     private val renderingCancelledRouteIds = mutableSetOf<String>()
     private val clearingCancelledRouteIds = mutableSetOf<String>()
+    private var notified = false
+    private var subscriptionCancelled = false
+
+    fun cancelSubscription() {
+        if (subscriptionCancelled) return
+        subscriptionCancelled = true
+        subscription.cancel()
+    }
 
     fun onRouteRendered(sourceId: String) {
         val renderedRouteId = expectedRoutes.getRenderedRouteId(sourceId)
@@ -168,13 +200,41 @@ private class RouteRenderCallbackHolder(
         }
     }
 
+    fun cancelPending() {
+        expectedRoutes.getSourceAndDataIds().forEach { (sourceId, _) ->
+            expectedRoutes.getRenderedRouteId(sourceId)?.let { routeId ->
+                if (isPending(routeId, renderedRouteIdsToNotify)) {
+                    renderingCancelledRouteIds.add(routeId)
+                }
+            }
+            expectedRoutes.getClearedRouteId(sourceId)?.let { routeId ->
+                if (isPending(routeId, clearedRouteIdsToNotify)) {
+                    clearingCancelledRouteIds.add(routeId)
+                }
+            }
+        }
+    }
+
+    private fun isPending(routeId: String, routeIdsToNotify: Set<String>): Boolean {
+        return routeId in allRouteIds &&
+            routeId in routeIdsToNotify &&
+            routeId !in successfulRouteIds
+    }
+
     fun hasAllRoutes(): Boolean {
         return allRouteIds ==
             successfulRouteIds + renderingCancelledRouteIds + clearingCancelledRouteIds
     }
 
+    /**
+     * Notifies the callback at most once. A callback may call [RoutesExpector.cancelAll]
+     * reentrantly while a map event is still finishing other holders, so a holder that
+     * `cancelAll` already notified can reach this method again.
+     */
     fun notifyAndCleanUp() {
-        subscription.cancel()
+        if (notified) return
+        notified = true
+        cancelSubscription()
         val result = RoutesRenderedResult(
             successfullyRenderedRouteIds = renderedRouteIdsToNotify - renderingCancelledRouteIds,
             renderingCancelledRouteIds = renderingCancelledRouteIds,

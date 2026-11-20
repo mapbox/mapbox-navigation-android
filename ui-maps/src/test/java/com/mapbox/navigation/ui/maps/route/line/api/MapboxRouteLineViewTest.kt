@@ -7,6 +7,7 @@ import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.bindgen.Value
+import com.mapbox.common.Cancelable
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.maps.MapboxMap
@@ -5180,6 +5181,33 @@ class MapboxRouteLineViewTest {
 
         assertTrue(scope.isActive)
         assertTrue(job.isCancelled)
+    }
+
+    @Test
+    fun cancelReleasesPendingRouteRenderSubscriptions() {
+        val subscription = mockk<Cancelable>(relaxed = true)
+        val map = mockk<MapboxMap>(relaxed = true) {
+            every { subscribeSourceDataLoaded(any()) } returns subscription
+        }
+        val renderedCallback = mockk<DelayedRoutesRenderedCallback>(relaxed = true)
+        val expector = RoutesExpector()
+        val options = MapboxRouteLineViewOptions.Builder(ctx).build()
+        val view = MapboxRouteLineView(options, expector, dataIdHolder, sender)
+        expector.expectRoutes(
+            setOf("id#0"),
+            emptySet(),
+            ExpectedRoutesToRenderData().apply { addRenderedRoute("source1", 2, "id#0") },
+            RoutesRenderedCallbackWrapper(map, renderedCallback),
+        )
+
+        view.cancel()
+
+        verify(exactly = 1) { subscription.cancel() }
+        verify(exactly = 1) {
+            renderedCallback.onRoutesRendered(
+                RoutesRenderedResult(emptySet(), setOf("id#0"), emptySet(), emptySet()),
+            )
+        }
     }
 
     @Test

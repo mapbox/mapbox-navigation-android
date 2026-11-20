@@ -762,4 +762,25 @@ class RouteLineComponentTest {
 
         verify { mockView.cancel() }
     }
+
+    @Test
+    fun `onDetached removes the same map click listener that onAttached added`() {
+        val mockApi = mockk<MapboxRouteLineApi>(relaxed = true)
+        val mockView = mockk<MapboxRouteLineView>(relaxed = true)
+        val component = RouteLineComponent(
+            mockMap,
+            mapPluginProvider,
+            apiOptions,
+            viewOptions,
+            mockApi,
+            mockView,
+        )
+        val addedListener = slot<OnMapClickListener>()
+        component.onAttached(mockMapboxNavigation)
+        verify { mockGestures.addOnMapClickListener(capture(addedListener)) }
+
+        component.onDetached(mockMapboxNavigation)
+
+        verify(exactly = 1) { mockGestures.removeOnMapClickListener(addedListener.captured) }
+    }
 }

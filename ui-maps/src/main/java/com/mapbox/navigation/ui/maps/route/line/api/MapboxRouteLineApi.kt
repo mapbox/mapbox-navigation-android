@@ -80,6 +80,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.lang.ref.WeakReference
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.time.ExperimentalTime
 
@@ -224,9 +225,11 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
     private val routeFeatureData: MutableList<RouteFeatureData> = mutableListOf()
     private val mutex = Mutex()
 
-    private val lowMemoryObserver = LowMemoryManager.Observer {
-        resetCaches()
-    }
+    // The memory monitor this observer is registered on lives for the whole process. Holding the
+    // API only weakly lets an instance that was dropped without cancel() be garbage collected
+    // together with its routes and caches.
+    private val lowMemoryObserver: LowMemoryManager.Observer =
+        WeakLowMemoryObserver(WeakReference(this))
 
     private var isMemoryMonitorObserverRegistered = false
 
@@ -1084,6 +1087,11 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
 
     /**
      * Cancels any/all background tasks that may be running.
+     *
+     * Call this when the instance is no longer needed, for example when the map that renders its
+     * data is destroyed. Besides stopping background work, it unregisters the instance from the
+     * process-wide memory monitor and clears the route line caches. The instance can still be
+     * used after this call.
      */
     fun cancel() {
         sender.sendCancelEvent()
@@ -1681,4 +1689,13 @@ class MapboxRouteLineApi @VisibleForTesting internal constructor(
 
     private fun Long.nanoToMs(): Long = this / 1_000_000
     private fun Double.nanoToMs(): Long = (this / 1_000_000).toLong()
+
+    private class WeakLowMemoryObserver(
+        private val apiRef: WeakReference<MapboxRouteLineApi>,
+    ) : LowMemoryManager.Observer {
+
+        override fun onLowMemory() {
+            apiRef.get()?.resetCaches()
+        }
+    }
 }

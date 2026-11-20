@@ -92,6 +92,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.lang.ref.WeakReference
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -1938,8 +1939,30 @@ class MapboxRouteLineApiTest {
         api.cancel()
 
         verify(exactly = 1) {
-            lowMemoryManager.removeObserver(any())
+            lowMemoryManager.removeObserver(lowMemoryObserverSlot.captured)
         }
+    }
+
+    @Test
+    fun registeredLowMemoryObserverDoesNotRetainApiDroppedWithoutCancel() = runBlocking {
+        val apiRef = createApiWithRoutesAndDropIt()
+
+        var attempts = 0
+        while (apiRef.get() != null && attempts++ < GC_ATTEMPTS) {
+            System.gc()
+            Thread.sleep(GC_WAIT_MS)
+        }
+
+        assertTrue(lowMemoryObserverSlot.isCaptured)
+        assertNull(apiRef.get())
+        // the observer outlives the API and must tolerate it being collected
+        lowMemoryObserverSlot.captured.onLowMemory()
+    }
+
+    private suspend fun createApiWithRoutesAndDropIt(): WeakReference<MapboxRouteLineApi> {
+        val api = createRouteLineApi()
+        api.setNavigationRoutes(listOf(multilegRouteWithOverlap.navigationRoute))
+        return WeakReference(api)
     }
 
     @Test
@@ -2173,5 +2196,10 @@ class MapboxRouteLineApiTest {
             every { calculateRestrictedRoadSections } returns false
             every { styleInactiveRouteLegsIndependently } returns false
         }
+    }
+
+    private companion object {
+        private const val GC_ATTEMPTS = 20
+        private const val GC_WAIT_MS = 50L
     }
 }

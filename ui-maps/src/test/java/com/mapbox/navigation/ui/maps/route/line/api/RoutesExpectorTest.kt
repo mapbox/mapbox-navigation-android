@@ -12,6 +12,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import java.util.Date
@@ -542,6 +543,180 @@ class RoutesExpectorTest {
         verify(exactly = 0) {
             callback.onRoutesRendered(any())
             callback2.onRoutesRendered(any())
+        }
+    }
+
+    @Test
+    fun cancelAll_nothingPending_doesNothing() {
+        expector.cancelAll()
+
+        verify(exactly = 0) {
+            callback.onRoutesRendered(any())
+            sourceDataLoadedTask.cancel()
+        }
+    }
+
+    @Test
+    fun cancelAll_pendingRoutes_cancelsSubscriptionAndReportsThemCancelled() {
+        val expectedRoutesToRender = ExpectedRoutesToRenderData().apply {
+            addRenderedRoute("source1", 2, "id#0")
+            addClearedRoute("source2", 3, "id#1")
+        }
+        expector.expectRoutes(
+            setOf("id#0"),
+            setOf("id#1"),
+            expectedRoutesToRender,
+            callbackWrapper,
+        )
+
+        expector.cancelAll()
+
+        verify(exactly = 1) {
+            sourceDataLoadedTask.cancel()
+            callback.onRoutesRendered(
+                RoutesRenderedResult(emptySet(), setOf("id#0"), emptySet(), setOf("id#1")),
+            )
+        }
+    }
+
+    @Test
+    fun cancelAll_partiallyRendered_keepsAlreadyRenderedRoutesSuccessful() {
+        val expectedRoutesToRender = ExpectedRoutesToRenderData().apply {
+            addRenderedRoute("source1", 2, "id#0")
+            addRenderedRoute("source2", 3, "id#1")
+        }
+        expector.expectRoutes(
+            setOf("id#0", "id#1"),
+            emptySet(),
+            expectedRoutesToRender,
+            callbackWrapper,
+        )
+        captureMapCallback().run(
+            sourceDataLoadedEventData("source1", SourceDataLoadedType.METADATA, "2"),
+        )
+
+        expector.cancelAll()
+
+        verify(exactly = 1) {
+            sourceDataLoadedTask.cancel()
+            callback.onRoutesRendered(
+                RoutesRenderedResult(setOf("id#0"), setOf("id#1"), emptySet(), emptySet()),
+            )
+        }
+    }
+
+    @Test
+    fun cancelAll_multipleCallbacks_notifiesEachOnce() {
+        val callback2 = mockk<DelayedRoutesRenderedCallback>(relaxed = true)
+        expector.expectRoutes(
+            setOf("id#0"),
+            emptySet(),
+            ExpectedRoutesToRenderData().apply { addRenderedRoute("source1", 2, "id#0") },
+            callbackWrapper,
+        )
+        expector.expectRoutes(
+            setOf("id#1"),
+            emptySet(),
+            ExpectedRoutesToRenderData().apply {
+                addRenderedRoute("source2", 3, "id#1")
+                addRenderedRoute("source3", 4, "id#1")
+            },
+            RoutesRenderedCallbackWrapper(map, callback2),
+        )
+
+        expector.cancelAll()
+
+        verify(exactly = 2) { sourceDataLoadedTask.cancel() }
+        verify(exactly = 1) {
+            callback.onRoutesRendered(
+                RoutesRenderedResult(emptySet(), setOf("id#0"), emptySet(), emptySet()),
+            )
+            callback2.onRoutesRendered(
+                RoutesRenderedResult(emptySet(), setOf("id#1"), emptySet(), emptySet()),
+            )
+        }
+    }
+
+    @Test
+    fun cancelAll_mapEventAfterCancel_doesNotNotifyAgain() {
+        expector.expectRoutes(
+            setOf("id#0"),
+            emptySet(),
+            ExpectedRoutesToRenderData().apply { addRenderedRoute("source1", 2, "id#0") },
+            callbackWrapper,
+        )
+        val listener = captureMapCallback()
+        expector.cancelAll()
+
+        listener.run(sourceDataLoadedEventData("source1", SourceDataLoadedType.METADATA, "2"))
+
+        verify(exactly = 1) { callback.onRoutesRendered(any()) }
+    }
+
+    @Test
+    fun cancelAll_fromCallbackWhileMapEventFinishesSeveralRenders_notifiesEachOnce() {
+        val callback2 = mockk<DelayedRoutesRenderedCallback>(relaxed = true)
+        every { callback.onRoutesRendered(any()) } answers { expector.cancelAll() }
+        expector.expectRoutes(
+            setOf("id#0"),
+            emptySet(),
+            ExpectedRoutesToRenderData().apply { addRenderedRoute("source1", 2, "id#0") },
+            callbackWrapper,
+        )
+        val listener = captureMapCallback()
+        expector.expectRoutes(
+            setOf("id#1"),
+            emptySet(),
+            ExpectedRoutesToRenderData().apply { addRenderedRoute("source1", 3, "id#1") },
+            RoutesRenderedCallbackWrapper(map, callback2),
+        )
+
+        listener.run(sourceDataLoadedEventData("source1", SourceDataLoadedType.METADATA, "4"))
+
+        verify(exactly = 1) {
+            callback.onRoutesRendered(
+                RoutesRenderedResult(emptySet(), setOf("id#0"), emptySet(), emptySet()),
+            )
+        }
+        verify(exactly = 1) {
+            callback2.onRoutesRendered(
+                RoutesRenderedResult(emptySet(), setOf("id#1"), emptySet(), emptySet()),
+            )
+        }
+        verify(exactly = 1) { callback2.onRoutesRendered(any()) }
+    }
+
+    @Test
+    fun cancelAll_callbackThrows_remainingCallbacksNotifiedAndSubscriptionsCancelled() {
+        val callback2 = mockk<DelayedRoutesRenderedCallback>(relaxed = true)
+        var cancelsBeforeFirstCallback = -1
+        var cancelCount = 0
+        every { sourceDataLoadedTask.cancel() } answers { cancelCount++ }
+        every { callback.onRoutesRendered(any()) } answers {
+            cancelsBeforeFirstCallback = cancelCount
+            throw IllegalStateException("callback failure")
+        }
+        expector.expectRoutes(
+            setOf("id#0"),
+            emptySet(),
+            ExpectedRoutesToRenderData().apply { addRenderedRoute("source1", 2, "id#0") },
+            callbackWrapper,
+        )
+        expector.expectRoutes(
+            setOf("id#1"),
+            emptySet(),
+            ExpectedRoutesToRenderData().apply { addRenderedRoute("source2", 3, "id#1") },
+            RoutesRenderedCallbackWrapper(map, callback2),
+        )
+
+        val error = runCatching { expector.cancelAll() }.exceptionOrNull()
+
+        assertEquals("callback failure", error?.message)
+        assertEquals(2, cancelsBeforeFirstCallback)
+        verify(exactly = 1) {
+            callback2.onRoutesRendered(
+                RoutesRenderedResult(emptySet(), setOf("id#1"), emptySet(), emptySet()),
+            )
         }
     }
 

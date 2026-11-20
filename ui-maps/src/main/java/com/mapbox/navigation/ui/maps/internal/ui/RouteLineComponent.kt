@@ -191,6 +191,7 @@ class RouteLineComponent(
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         super.onDetached(mapboxNavigation)
+        mapPlugins.gestures.removeOnMapClickListener(onMapClickListener)
         mapPlugins.location.removeOnIndicatorPositionChangedListener(onPositionChangedListener)
         routeLineApi.cancel()
         routeLineView.cancel()
