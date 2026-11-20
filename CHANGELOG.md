@@ -1,3 +1,17 @@
+## Navigation SDK Core Framework 3.31.3 - 20 November, 2026
+#### Features
+
+
+#### Bug fixes and improvements
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.31.3` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.31.3))
+- Mapbox Navigation Native `v324.31.3`
+- Mapbox Core Common `v24.31.3`
+- Mapbox Java `v7.10.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.1))
+
 ## Navigation SDK Core Framework 3.31.2 - 18 November, 2026
 #### Features
 - Added `SdkDispatchers` (`@MapboxExperimental`) — a central coroutine dispatcher holder for the Navigation SDK. Call `SdkDispatchers.configure {}` in `Application.onCreate()` to limit SDK parallelism (e.g. `setDefaultParallelism`, `setIoParallelism`) and reduce contention with the host application's own thread pools. If `configure` is never called the SDK falls back to `Dispatchers.Default` and `Dispatchers.IO`. [#18548](https://github.com/mapbox/mapbox-sdk/pull/18548)
