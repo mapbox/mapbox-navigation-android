@@ -279,8 +279,8 @@ internal class MapboxTripSession(
         }
     }
 
-    private val mainJobController: JobControl = threadController.getMainScopeAndRootJob()
-    private val ioJobController: JobControl = threadController.getIOScopeAndRootJob()
+    private val mainJobController: JobControl = threadController.createMainScopeAndRootJob()
+    private val ioJobController: JobControl = threadController.createIOScopeAndRootJob()
 
     // the String is this observer's performance trace name, resolved once at registration
     // time (see locationObserverName) so it isn't recomputed on every dispatch

@@ -91,7 +91,7 @@ internal class RouterWrapper(
 
     private var nextRequestId = 1L
 
-    private val mainJobControl by lazy { threadController.getMainScopeAndRootJob() }
+    private val mainJobControl by lazy { threadController.createMainScopeAndRootJob() }
 
     @OptIn(ExperimentalMapboxNavigationAPI::class)
     override fun getRoute(

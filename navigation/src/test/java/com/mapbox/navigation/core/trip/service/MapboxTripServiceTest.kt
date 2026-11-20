@@ -42,8 +42,8 @@ class MapboxTripServiceTest {
     fun setUp() {
         val testScope = CoroutineScope(SupervisorJob() + coroutineRule.testDispatcher)
         val threadController = mockk<ThreadController>().apply {
-            every { getMainScopeAndRootJob() } returns JobControl(SupervisorJob(), testScope)
-            every { getIOScopeAndRootJob() } returns JobControl(SupervisorJob(), testScope)
+            every { createMainScopeAndRootJob() } returns JobControl(SupervisorJob(), testScope)
+            every { createIOScopeAndRootJob() } returns JobControl(SupervisorJob(), testScope)
         }
         service = MapboxTripService(
             tripNotification,

@@ -172,10 +172,12 @@ import com.mapbox.navigator.PollingConfig
 import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.navigator.TilesConfig
 import com.mapbox.navigator.TilesVersionChangeReason
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -293,7 +295,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         LowMemoryManager.create(),
     )
 
-    private val mainJobController = threadController.getMainScopeAndRootJob()
+    private val mainJobController = threadController.createMainScopeAndRootJob()
     private val directionsSession: DirectionsSession
 
     private val historyRecorderHandles: NavigatorLoader.HistoryRecorderHandles
@@ -332,10 +334,13 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     )
 
     private val routesPreviewController = NavigationComponentProvider.createRoutesPreviewController(
-        threadController.getMainScopeAndRootJob().scope,
+        threadController.createMainScopeAndRootJob().scope,
     )
 
     private val routeUpdateMutex = Mutex()
+
+    /** [registerRoutesObserver] jobs waiting for [routeUpdateMutex]. Main thread only. */
+    private val pendingRoutesObserverRegistrations = mutableMapOf<RoutesObserver, Job>()
 
     private val routesProgressDataProvider =
         NavigationComponentProvider.createRouteRefreshRequestDataProvider()
@@ -1216,7 +1221,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         extraLogInfo: String = "",
         body: suspend () -> Unit,
     ) {
-        val job = threadController.getMainScopeAndRootJob().scope
+        val job = mainJobController.scope
             .launch(SdkDispatchers.Main.immediate) {
                 logI(LOG_CATEGORY) {
                     "[$tag] Coroutine launched, waiting to acquire routeUpdateMutex; " +
@@ -1576,7 +1581,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     }
 
     private fun resetTripSessionRoutes() {
-        threadController.getMainScopeAndRootJob().scope.launch(SdkDispatchers.Main.immediate) {
+        mainJobController.scope.launch(SdkDispatchers.Main.immediate) {
             routeUpdateMutex.withLock {
                 val routes = directionsSession.routes
                 val legIndex = latestLegIndex ?: directionsSession.initialLegIndex
@@ -1631,6 +1636,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         billingController.onDestroy()
         directionsSession.shutdown()
         directionsSession.unregisterAllSetNavigationRoutesFinishedObserver()
+        pendingRoutesObserverRegistrations.clear()
         tripSession.stop()
         tripSession.unregisterAllLocationObservers()
         tripSession.unregisterAllRouteProgressObservers()
@@ -1734,8 +1740,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * the observer waits for the processing to finish before delivering the latest result.
      */
     fun registerRoutesObserver(routesObserver: RoutesObserver) {
-        threadController.getMainScopeAndRootJob().scope.launch(SdkDispatchers.Main.immediate) {
+        mainJobController.scope.launch(SdkDispatchers.Main.immediate) {
+            pendingRoutesObserverRegistrations.put(routesObserver, coroutineContext.job)?.cancel()
             routeUpdateMutex.withLock {
+                pendingRoutesObserverRegistrations.remove(routesObserver)
                 directionsSession.registerSetNavigationRoutesFinishedObserver(routesObserver)
             }
         }
@@ -1745,7 +1753,11 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * Unregisters [RoutesObserver].
      */
     fun unregisterRoutesObserver(routesObserver: RoutesObserver) {
-        directionsSession.unregisterSetNavigationRoutesFinishedObserver(routesObserver)
+        // On main, like registration, so it runs after registrations requested before it.
+        mainJobController.scope.launch(SdkDispatchers.Main.immediate) {
+            pendingRoutesObserverRegistrations.remove(routesObserver)?.cancel()
+            directionsSession.unregisterSetNavigationRoutesFinishedObserver(routesObserver)
+        }
     }
 
     /**

@@ -583,7 +583,7 @@ private fun buildTripSession(
     val parentJob = SupervisorJob()
     val testScope = CoroutineScope(parentJob + TestCoroutineDispatcher())
     val threadController = spyk<ThreadController>()
-    every { threadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
+    every { threadController.createMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
 
     every { LocationServiceFactory.getOrCreate() } returns mockk {
         every {

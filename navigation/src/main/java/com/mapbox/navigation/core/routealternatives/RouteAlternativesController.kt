@@ -32,7 +32,7 @@ internal class RouteAlternativesController(
     private val routeInterfacesParser: RouteInterfacesParser,
 ) : AlternativeMetadataProvider {
 
-    private val mainJobControl by lazy { threadController.getMainScopeAndRootJob() }
+    private val mainJobControl by lazy { threadController.createMainScopeAndRootJob() }
 
     private var observerProcessingJob: Job? = null
 

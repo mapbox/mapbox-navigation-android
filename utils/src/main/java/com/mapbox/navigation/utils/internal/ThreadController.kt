@@ -84,7 +84,7 @@ class ThreadController {
      * data class contains both the new [Job] object and the [CoroutineScope] that uses the [Job] object.
      * This construct allows the caller to cancel all coroutines created from the returned [CoroutineScope].
      * Example:
-     * val jobController:JobController = ThreadController.getIOScopeAndRootJob()
+     * val jobController:JobController = ThreadController.createIOScopeAndRootJob()
      * val job_1 = jobController.ioScope.launch{ doSomethingUsefull_1()}
      * val job_2 = jobController.ioScope.launch{ doSomethingUsefull_2()}
      * val job_3 = jobController.ioScope.launch{ doSomethingUsefull_3()}
@@ -94,15 +94,15 @@ class ThreadController {
      * To cancel all coroutines: jobController.job.cancel()
      * To cancel a specific coroutine: job_1.cancel(), etc.
      */
-    fun getIOScopeAndRootJob(): JobControl {
+    fun createIOScopeAndRootJob(): JobControl {
         val parentJob = SupervisorJob(ioRootJob)
         return JobControl(parentJob, CoroutineScope(parentJob + IODispatcher))
     }
 
     /**
-     * Same as [getIOScopeAndRootJob], but using the MainThread dispatcher.
+     * Same as [createIOScopeAndRootJob], but using the MainThread dispatcher.
      */
-    fun getMainScopeAndRootJob(): JobControl {
+    fun createMainScopeAndRootJob(): JobControl {
         val parentJob = SupervisorJob(mainRootJob)
         return JobControl(parentJob, CoroutineScope(parentJob + SdkDispatchers.Main))
     }

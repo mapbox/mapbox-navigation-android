@@ -100,7 +100,7 @@ internal class MapboxTripService(
 
     private val notificationChannel = Channel<TripNotificationState>(Channel.CONFLATED)
 
-    private val ioJobController = threadController.getIOScopeAndRootJob()
+    private val ioJobController = threadController.createIOScopeAndRootJob()
     private var allowedNotificationTime = 0L
     private var notificationJob: Job? = null
 

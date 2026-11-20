@@ -1273,6 +1273,100 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         }
 
     @Test
+    fun `routes observer unregistered while route update holds mutex is not registered`() =
+        coroutineRule.runBlockingTest {
+            val registeredObservers = holdRouteUpdateMutexAndTrackRoutesObservers()
+            val observer = RoutesObserver { }
+
+            // setNavigationRoutes holds routeUpdateMutex while tripSession.setRoutes runs,
+            // so the registration is queued behind it.
+            mapboxNavigation.setNavigationRoutes(listOf(mockk(relaxed = true)))
+            mapboxNavigation.registerRoutesObserver(observer)
+            mapboxNavigation.unregisterRoutesObserver(observer)
+            advanceTimeBy(SLOW_SET_ROUTES_DELAY_MS * 2)
+
+            assertFalse(observer in registeredObservers)
+        }
+
+    @Test
+    fun `routes observer registered twice while route update holds mutex is unregistered once`() =
+        coroutineRule.runBlockingTest {
+            val registeredObservers = holdRouteUpdateMutexAndTrackRoutesObservers()
+            val observer = RoutesObserver { }
+
+            mapboxNavigation.setNavigationRoutes(listOf(mockk(relaxed = true)))
+            mapboxNavigation.registerRoutesObserver(observer)
+            mapboxNavigation.registerRoutesObserver(observer)
+            mapboxNavigation.unregisterRoutesObserver(observer)
+            advanceTimeBy(SLOW_SET_ROUTES_DELAY_MS * 2)
+
+            assertFalse(observer in registeredObservers)
+        }
+
+    @Test
+    fun `routes observer registered while mutex is free is registered immediately`() =
+        coroutineRule.runBlockingTest {
+            val registeredObservers = holdRouteUpdateMutexAndTrackRoutesObservers()
+            val observer = RoutesObserver { }
+
+            mapboxNavigation.registerRoutesObserver(observer)
+            assertTrue(observer in registeredObservers)
+
+            mapboxNavigation.unregisterRoutesObserver(observer)
+            assertFalse(observer in registeredObservers)
+        }
+
+    @Test
+    fun `routes observer registered while route update holds mutex is registered after it`() =
+        coroutineRule.runBlockingTest {
+            val registeredObservers = holdRouteUpdateMutexAndTrackRoutesObservers()
+            val observer = RoutesObserver { }
+
+            mapboxNavigation.setNavigationRoutes(listOf(mockk(relaxed = true)))
+            mapboxNavigation.registerRoutesObserver(observer)
+            assertFalse(observer in registeredObservers)
+            advanceTimeBy(SLOW_SET_ROUTES_DELAY_MS * 2)
+
+            assertTrue(observer in registeredObservers)
+        }
+
+    @Test
+    fun `routes observer re-registered while route update holds mutex is registered after it`() =
+        coroutineRule.runBlockingTest {
+            val registeredObservers = holdRouteUpdateMutexAndTrackRoutesObservers()
+            val observer = RoutesObserver { }
+
+            mapboxNavigation.setNavigationRoutes(listOf(mockk(relaxed = true)))
+            mapboxNavigation.registerRoutesObserver(observer)
+            mapboxNavigation.unregisterRoutesObserver(observer)
+            mapboxNavigation.registerRoutesObserver(observer)
+            advanceTimeBy(SLOW_SET_ROUTES_DELAY_MS * 2)
+
+            assertTrue(observer in registeredObservers)
+        }
+
+    /**
+     * Creates [mapboxNavigation] with a [tripSession] whose `setRoutes` takes
+     * [SLOW_SET_ROUTES_DELAY_MS], so a route update keeps routeUpdateMutex held for that long.
+     * Returns the set of routes observers currently registered in [directionsSession].
+     */
+    private fun holdRouteUpdateMutexAndTrackRoutesObservers(): Set<RoutesObserver> {
+        coEvery { tripSession.setRoutes(any(), any()) } coAnswers {
+            delay(SLOW_SET_ROUTES_DELAY_MS)
+            NativeSetRouteValue(firstArg(), emptyList())
+        }
+        createMapboxNavigation()
+        val registeredObservers = mutableSetOf<RoutesObserver>()
+        every {
+            directionsSession.registerSetNavigationRoutesFinishedObserver(any())
+        } answers { registeredObservers.add(firstArg()) }
+        every {
+            directionsSession.unregisterSetNavigationRoutesFinishedObserver(any())
+        } answers { registeredObservers.remove(firstArg()) }
+        return registeredObservers
+    }
+
+    @Test
     fun `set route - correct order of actions, result applied to alternatives controller`() =
         coroutineRule.runBlockingTest {
             createMapboxNavigation()
@@ -2628,3 +2722,5 @@ internal class MapboxNavigationTest : MapboxNavigationBaseTest() {
         const val PINNED_TILES_VERSION = "2026_01_01-00_00_00"
     }
 }
+
+private const val SLOW_SET_ROUTES_DELAY_MS = 500L

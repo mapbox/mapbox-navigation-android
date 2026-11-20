@@ -26,7 +26,7 @@ class ThreadControllerTest {
     @Test
     fun jobCountValidationNonUIScope() {
         val maxCoroutines = 100
-        val jobControl = threadController.getIOScopeAndRootJob()
+        val jobControl = threadController.createIOScopeAndRootJob()
         repeat(maxCoroutines) {
             jobControl.scope.launch {
                 suspendCoroutine {
@@ -110,7 +110,7 @@ class ThreadControllerTest {
         val ioRootJob = SupervisorJob()
         threadController.ioRootJob = ioRootJob
 
-        val ioJobController = threadController.getIOScopeAndRootJob()
+        val ioJobController = threadController.createIOScopeAndRootJob()
 
         assertEquals(ioRootJob.children.first(), ioJobController.job)
         assertEquals(
@@ -124,7 +124,7 @@ class ThreadControllerTest {
         val mainRootJob = SupervisorJob()
         threadController.mainRootJob = mainRootJob
 
-        val mainJobController = threadController.getMainScopeAndRootJob()
+        val mainJobController = threadController.createMainScopeAndRootJob()
 
         assertEquals(mainRootJob.children.first(), mainJobController.job)
         assertEquals(

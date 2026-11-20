@@ -17,7 +17,7 @@ internal class EHorizonSubscriptionManagerImpl(
     threadController: ThreadController,
 ) : EHorizonSubscriptionManager {
 
-    private val mainJobController = threadController.getMainScopeAndRootJob()
+    private val mainJobController = threadController.createMainScopeAndRootJob()
     private val eHorizonObservers = CopyOnWriteArraySet<EHorizonObserver>()
     private var currentPosition: EHorizonPosition? = null
     private var currentDistances: List<RoadObjectDistanceInfo>? = null

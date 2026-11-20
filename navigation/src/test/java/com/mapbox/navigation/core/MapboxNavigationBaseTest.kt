@@ -166,13 +166,13 @@ internal open class MapboxNavigationBaseTest {
 
     @Before
     open fun setUp() {
-        every { threadController.getMainScopeAndRootJob() } answers {
+        every { threadController.createMainScopeAndRootJob() } answers {
             JobControl(
                 mockk { every { children } returns sequenceOf() },
                 coroutineRule.createTestScope(),
             )
         }
-        every { threadController.getIOScopeAndRootJob() } answers {
+        every { threadController.createIOScopeAndRootJob() } answers {
             JobControl(
                 mockk { every { children } returns sequenceOf() },
                 coroutineRule.createTestScope(),
