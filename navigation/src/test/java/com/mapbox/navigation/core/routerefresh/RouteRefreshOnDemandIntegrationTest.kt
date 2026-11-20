@@ -213,9 +213,9 @@ internal class RouteRefreshOnDemandIntegrationTest : RouteRefreshIntegrationTest
             RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW),
         )
 
-        var immediateRefreshResult: ImmediateRouteRefreshResult? = null
+        val immediateRefreshResults = mutableListOf<ImmediateRouteRefreshResult>()
         routeRefreshController.requestImmediateRouteRefresh { result ->
-            immediateRefreshResult = result
+            immediateRefreshResults.add(result)
         }
 
         setUpRouteRefresh("route_response_single_route_refresh.json", responseDelay = 0)
@@ -225,7 +225,10 @@ internal class RouteRefreshOnDemandIntegrationTest : RouteRefreshIntegrationTest
 
         testDispatcher.advanceTimeBy(30_000)
 
-        assertIs<ImmediateRouteRefreshResult.Cancelled>(immediateRefreshResult)
+        // cancelled while the refresh request is in flight: notified once, from the
+        // completion handler
+        assertEquals(1, immediateRefreshResults.size)
+        assertIs<ImmediateRouteRefreshResult.Cancelled>(immediateRefreshResults.first())
         assertEquals(1, refreshObserver.refreshes.size)
         assertEquals(
             listOf(
@@ -253,13 +256,18 @@ internal class RouteRefreshOnDemandIntegrationTest : RouteRefreshIntegrationTest
         // does not start before the new routes are set, mirroring how Dispatchers.Main
         // queues a launch and the next Main-thread message cancels it before it runs.
         testDispatcher.pauseDispatcher()
-        routeRefreshController.requestImmediateRouteRefresh()
+        val immediateRefreshResults = mutableListOf<ImmediateRouteRefreshResult>()
+        routeRefreshController.requestImmediateRouteRefresh { result ->
+            immediateRefreshResults.add(result)
+        }
         routeRefreshController.onRoutesChanged(
             RoutesUpdatedResult(routes, emptyList(), RoutesExtra.ROUTES_UPDATE_REASON_NEW),
         )
 
         testDispatcher.advanceTimeBy(30_000)
 
+        assertEquals(1, immediateRefreshResults.size)
+        assertIs<ImmediateRouteRefreshResult.Cancelled>(immediateRefreshResults.first())
         assertEquals(1, refreshObserver.refreshes.size)
         assertEquals(
             listOf(

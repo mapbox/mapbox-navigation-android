@@ -1,0 +1,1 @@
+- Fixed `RouteRefreshController.requestImmediateRouteRefresh` not invoking its callback with `ImmediateRouteRefreshResult.Cancelled` when the refresh was cancelled  before the request started executing.
