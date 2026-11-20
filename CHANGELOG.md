@@ -1,4 +1,19 @@
 ## Navigation SDK Core Framework 3.36.0-rc.1 - 16 November, 2026
+## Navigation SDK Core Framework 3.34.5 - 20 November, 2026
+#### Features
+
+
+#### Bug fixes and improvements
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.34.5` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.34.5))
+- Mapbox Navigation Native `v324.34.5`
+- Mapbox Core Common `v24.34.5`
+- Mapbox Java `v7.10.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.1))
+
+## Navigation SDK Core Framework 3.34.4 - 20 November, 2026
 #### Features
 - Android Auto: on Car API 7 and newer, favorites open inline alongside the map on `MapboxScreen.NAVIGATION`, like settings, rather than pushing a separate screen. Back restores navigation without clearing the route preview or stopping guidance. Favorites close on navigation-mode changes or when the screen pauses, and selecting a favorite shows its route preview on the same navigation screen.
 - Android Auto: added experimental `buildFavoritesAction(screen)` for custom action strips. `FreeDriveActionStrip.buildFavoritesAction()` also uses inline favorites on the unified navigation screen. Legacy screens continue to open the dedicated favorites screen.
