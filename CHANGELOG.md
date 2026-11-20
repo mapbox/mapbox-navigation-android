@@ -30,6 +30,7 @@ This release depends on, and has been tested with, the following Mapbox dependen
 - Mapbox Java `v7.10.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.1))
 
 ## Navigation SDK Core Framework 3.35.1 - 18 November, 2026
+## Navigation SDK Core Framework 3.33.4 - 20 November, 2026
 #### Features
 
 
@@ -180,6 +181,12 @@ This release depends on, and has been tested with, the following Mapbox dependen
 ## Navigation SDK Core Framework 3.34.2 - 03 November, 2026
 ## Navigation SDK Core Framework 3.31.3 - 20 November, 2026
 ## Navigation SDK Core Framework 3.32.5 - 20 November, 2026
+- Mapbox Maps SDK `v11.33.4` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.33.4))
+- Mapbox Navigation Native `v324.33.4`
+- Mapbox Core Common `v24.33.4`
+- Mapbox Java `v7.10.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.1))
+
+## Navigation SDK Core Framework 3.33.3 - 20 November, 2026
 #### Features
 
 
