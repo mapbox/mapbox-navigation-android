@@ -44,10 +44,8 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
-import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkObject
-import io.mockk.unmockkStatic
 import io.mockk.verify
 import io.mockk.verifyOrder
 import org.junit.After
@@ -87,10 +85,18 @@ class MapboxNavigationViewportDataSourceTest {
     }
 
     private val navigationRoute: NavigationRoute = mockk(relaxed = true) {
+        every { id } returns "first_response#0"
         every { routeOptions } returns route.routeOptions()!!
         every { directionsRoute } returns route
     }
-    private val navigationRoute2: NavigationRoute = mockk(relaxed = true)
+    private val navigationRoute2: NavigationRoute = mockk(relaxed = true) {
+        every { id } returns "first_response#1"
+    }
+    private val otherResponseNavigationRoute: NavigationRoute = mockk(relaxed = true) {
+        every { id } returns "second_response#0"
+        every { routeOptions } returns route.routeOptions()!!
+        every { directionsRoute } returns route
+    }
 
     private val routeProgress: RouteProgress = mockk()
     private val completeRoutePoints: List<List<List<Point>>> =
@@ -164,6 +170,7 @@ class MapboxNavigationViewportDataSourceTest {
         }
 
         viewportDataSource = MapboxNavigationViewportDataSource(mapboxMap)
+        every { routeProgress.navigationRoute } returns navigationRoute
 
         mockkObject(ViewportDataSourceProcessor)
         mockkObject(MapboxFollowingCameraFramingStrategy)
@@ -459,7 +466,6 @@ class MapboxNavigationViewportDataSourceTest {
             every { currentStepProgress } returns mockk()
         }
         every { routeProgress.currentLegProgress } returns legProgress
-        every { routeProgress.route } returns route
 
         viewportDataSource.onRouteProgressChanged(routeProgress)
 
@@ -481,15 +487,12 @@ class MapboxNavigationViewportDataSourceTest {
             every { currentStepProgress } returns mockk()
         }
         every { routeProgress.currentLegProgress } returns legProgress
-        every { routeProgress.route } returns mockk(relaxed = true)
 
         viewportDataSource.onRouteChanged(navigationRoute)
         clearMocks(routeOverviewViewportDataSource)
 
-        mockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
-        every { route.isSameRoute(any()) } returns false
+        every { routeProgress.navigationRoute } returns otherResponseNavigationRoute
         viewportDataSource.onRouteProgressChanged(routeProgress)
-        unmockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
 
         verify(exactly = 0) {
             routeOverviewViewportDataSource.onRouteProgressChanged(any())
@@ -509,7 +512,6 @@ class MapboxNavigationViewportDataSourceTest {
             every { currentStepProgress } returns null
         }
         every { routeProgress.currentLegProgress } returns legProgress
-        every { routeProgress.route } returns route
 
         viewportDataSource.onRouteChanged(navigationRoute)
         viewportDataSource.onRouteProgressChanged(routeProgress)
@@ -537,7 +539,6 @@ class MapboxNavigationViewportDataSourceTest {
             every { currentStepProgress } returns mockk()
         }
         every { routeProgress.currentLegProgress } returns legProgress
-        every { routeProgress.route } returns route
 
         viewportDataSource.onRouteChanged(navigationRoute)
         viewportDataSource.onRouteProgressChanged(routeProgress)
@@ -645,6 +646,77 @@ class MapboxNavigationViewportDataSourceTest {
     }
 
     @Test
+    fun onlyAlternativesChangedReappliesProgressToOverview() {
+        val routeOverviewViewportDataSource = mockk<RouteOverviewViewportDataSource>(relaxed = true)
+        viewportDataSource = MapboxNavigationViewportDataSource(
+            mapboxMap,
+            followingFrameModeHolder,
+            routeOverviewViewportDataSource,
+        )
+        viewportDataSource.options.followingFrameOptions.framingStrategy = mockk(relaxed = true)
+        every { routeProgress.currentLegProgress } returns mockk {
+            every { currentStepProgress } returns mockk()
+        }
+        viewportDataSource.onRoutesChanged(listOf(navigationRoute, navigationRoute2))
+        viewportDataSource.onRouteProgressChanged(routeProgress)
+        clearMocks(routeOverviewViewportDataSource)
+
+        viewportDataSource.onRoutesChanged(listOf(navigationRoute))
+
+        // the overview frames the remainder of the route right away, not the complete route
+        verifyOrder {
+            routeOverviewViewportDataSource.onRoutesChanged(listOf(navigationRoute))
+            routeOverviewViewportDataSource.onRouteProgressChanged(routeProgress)
+        }
+        verify(exactly = 0) {
+            routeOverviewViewportDataSource.clearRouteData()
+            routeOverviewViewportDataSource.clearProgressData()
+        }
+    }
+
+    @Test
+    fun newPrimaryRouteWithSameGeometryRebuildsFollowingData() {
+        val routeOverviewViewportDataSource = mockk<RouteOverviewViewportDataSource>(relaxed = true)
+        viewportDataSource = MapboxNavigationViewportDataSource(
+            mapboxMap,
+            followingFrameModeHolder,
+            routeOverviewViewportDataSource,
+        )
+        every { route.geometry() } returns "same_geometry"
+        every { route.requestUuid() } returns "first_response"
+        val sameGeometryRoute: DirectionsRoute = mockk(relaxed = true) {
+            every { geometry() } returns "same_geometry"
+            every { requestUuid() } returns "second_response"
+            every { routeIndex() } returns "0"
+        }
+        // the geometry-based comparison would treat both routes as the same one
+        assertTrue(route.isSameRoute(sameGeometryRoute))
+        val sameGeometryNavigationRoute: NavigationRoute = mockk(relaxed = true) {
+            every { id } returns "second_response#0"
+            every { directionsRoute } returns sameGeometryRoute
+        }
+        val newCompleteRoutePoints = completeRoutePoints + listOf(
+            listOf(listOf(Point.fromLngLat(21.0, 22.0))),
+        )
+        val newPostManeuverFramingPoints = postManeuverFramingPoints + listOf(
+            listOf(listOf(Point.fromLngLat(23.0, 24.0))),
+        )
+        every { processRoutePoints(sameGeometryRoute) } returns newCompleteRoutePoints
+        every {
+            processRouteForPostManeuverFramingGeometry(any(), any(), any(), sameGeometryRoute, any())
+        } returns newPostManeuverFramingPoints
+        viewportDataSource.onRoutesChanged(listOf(navigationRoute))
+
+        viewportDataSource.onRoutesChanged(listOf(sameGeometryNavigationRoute))
+
+        verify(exactly = 1) { processRoutePoints(sameGeometryRoute) }
+        assertEquals(
+            newPostManeuverFramingPoints,
+            viewportDataSource.postManeuverFramingPointsStateForTests(),
+        )
+    }
+
+    @Test
     fun routeIsPassedToOverviewDataSourceAfterReevaluate() {
         val routeOverviewViewportDataSource = mockk<RouteOverviewViewportDataSource>(relaxed = true)
         viewportDataSource = MapboxNavigationViewportDataSource(
@@ -692,13 +764,10 @@ class MapboxNavigationViewportDataSourceTest {
 
         viewportDataSource.onRouteChanged(navigationRoute)
         clearMocks(routeOverviewViewportDataSource)
-        every { routeProgress.route } returns mockk(relaxed = true)
         every { routeProgress.currentLegProgress } returns mockk(relaxed = true)
 
-        mockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
-        every { route.isSameRoute(any()) } returns false
+        every { routeProgress.navigationRoute } returns otherResponseNavigationRoute
         viewportDataSource.onRouteProgressChanged(routeProgress)
-        unmockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
 
         verify { routeOverviewViewportDataSource.clearProgressData() }
     }
@@ -1196,7 +1265,6 @@ class MapboxNavigationViewportDataSourceTest {
             every { currentStepProgress } returns stepProgress
         }
         every { routeProgress.currentLegProgress } returns legProgress
-        every { routeProgress.route } returns route
 
         val location = createLocation()
 
@@ -1277,7 +1345,6 @@ class MapboxNavigationViewportDataSourceTest {
             every { currentStepProgress } returns stepProgress
         }
         every { routeProgress.currentLegProgress } returns legProgress
-        every { routeProgress.route } returns route
 
         every {
             isFramingManeuver(any(), any())
@@ -1336,7 +1403,6 @@ class MapboxNavigationViewportDataSourceTest {
             every { currentStepProgress } returns stepProgress
         }
         every { routeProgress.currentLegProgress } returns legProgress
-        every { routeProgress.route } returns route
 
         val location = createLocation()
 
@@ -1405,7 +1471,6 @@ class MapboxNavigationViewportDataSourceTest {
             every { currentStepProgress } returns stepProgress
         }
         every { routeProgress.currentLegProgress } returns legProgress
-        every { routeProgress.route } returns route
 
         val location = createLocation()
 
@@ -1487,7 +1552,6 @@ class MapboxNavigationViewportDataSourceTest {
             every { currentStepProgress } returns stepProgress
         }
         every { routeProgress.currentLegProgress } returns legProgress
-        every { routeProgress.route } returns route
 
         every {
             isFramingManeuver(any(), any())
@@ -1580,7 +1644,6 @@ class MapboxNavigationViewportDataSourceTest {
             every { currentStepProgress } returns stepProgress
         }
         every { routeProgress.currentLegProgress } returns legProgress
-        every { routeProgress.route } returns route
 
         val location = createLocation()
 
@@ -1638,7 +1701,6 @@ class MapboxNavigationViewportDataSourceTest {
             every { currentStepProgress } returns stepProgress
         }
         every { routeProgress.currentLegProgress } returns legProgress
-        every { routeProgress.route } returns route
 
         every {
             isFramingManeuver(any(), any())
@@ -1725,7 +1787,6 @@ class MapboxNavigationViewportDataSourceTest {
             every { currentStepProgress } returns stepProgress
         }
         every { routeProgress.currentLegProgress } returns legProgress
-        every { routeProgress.route } returns route
 
         every {
             isFramingManeuver(any(), any())
@@ -1821,7 +1882,6 @@ class MapboxNavigationViewportDataSourceTest {
             every { currentStepProgress } returns stepProgress
         }
         every { routeProgress.currentLegProgress } returns legProgress
-        every { routeProgress.route } returns route
 
         val location = createLocation()
 
@@ -1909,7 +1969,6 @@ class MapboxNavigationViewportDataSourceTest {
             every { currentStepProgress } returns stepProgress
         }
         every { routeProgress.currentLegProgress } returns legProgress
-        every { routeProgress.route } returns route
 
         val location = createLocation()
 
@@ -2003,7 +2062,6 @@ class MapboxNavigationViewportDataSourceTest {
             every { currentStepProgress } returns stepProgress
         }
         every { routeProgress.currentLegProgress } returns legProgress
-        every { routeProgress.route } returns route
 
         val location = createLocation()
 
@@ -2098,7 +2156,6 @@ class MapboxNavigationViewportDataSourceTest {
             every { currentStepProgress } returns stepProgress
         }
         every { routeProgress.currentLegProgress } returns legProgress
-        every { routeProgress.route } returns route
 
         val location = createLocation()
 
@@ -2141,10 +2198,7 @@ class MapboxNavigationViewportDataSourceTest {
         viewportDataSource.onLocationChanged(location)
         viewportDataSource.onRouteChanged(navigationRoute)
         viewportDataSource.onRouteProgressChanged(routeProgress)
-        mockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
-        every { route.isSameRoute(any()) } returns false
-        viewportDataSource.onRouteChanged(navigationRoute)
-        unmockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
+        viewportDataSource.onRouteChanged(otherResponseNavigationRoute)
         viewportDataSource.evaluate()
         val data = viewportDataSource.getViewportData()
 
@@ -2172,7 +2226,6 @@ class MapboxNavigationViewportDataSourceTest {
             every { currentStepProgress } returns stepProgress
         }
         every { routeProgress.currentLegProgress } returns legProgress
-        every { routeProgress.route } returns route
 
         val location = createLocation()
 
@@ -2216,10 +2269,8 @@ class MapboxNavigationViewportDataSourceTest {
         viewportDataSource.onRouteChanged(navigationRoute)
         viewportDataSource.onRouteProgressChanged(routeProgress)
 
-        mockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
-        every { route.isSameRoute(any()) } returns false
+        every { routeProgress.navigationRoute } returns otherResponseNavigationRoute
         viewportDataSource.onRouteProgressChanged(routeProgress)
-        unmockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
 
         viewportDataSource.evaluate()
         val data = viewportDataSource.getViewportData()
@@ -2402,7 +2453,6 @@ class MapboxNavigationViewportDataSourceTest {
 
     @Test
     fun `reevaluate route - no route`() {
-        every { routeProgress.route } returns route
         every { routeProgress.currentLegProgress } returns mockk(relaxed = true) {
             every { currentStepProgress } returns mockk(relaxed = true)
         }
@@ -2494,7 +2544,6 @@ class MapboxNavigationViewportDataSourceTest {
 
     @Test
     fun `reevaluate route - has route, no route progress`() {
-        every { routeProgress.route } returns route
         every { routeProgress.currentLegProgress } returns mockk(relaxed = true) {
             every { currentStepProgress } returns mockk(relaxed = true)
         }
@@ -2592,7 +2641,6 @@ class MapboxNavigationViewportDataSourceTest {
             .zoom(14.5)
             .build()
 
-        every { routeProgress.route } returns route
         every { routeProgress.currentLegProgress } returns mockk(relaxed = true) {
             every { currentStepProgress } returns mockk(relaxed = true)
         }

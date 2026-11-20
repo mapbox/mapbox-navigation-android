@@ -11,7 +11,6 @@ import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapboxMap
 import com.mapbox.navigation.base.internal.extensions.internalAlternativeRouteIndices
 import com.mapbox.navigation.base.internal.route.routeOptions
-import com.mapbox.navigation.base.internal.utils.isSameRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -88,6 +87,11 @@ class RouteOverviewViewportDataSourceTest {
         every { routeOptions } returns route2.routeOptions()!!
         every { directionsRoute } returns route2
         every { id } returns alternativeRouteId
+    }
+    private val otherResponseNavigationRoute: NavigationRoute = mockk(relaxed = true) {
+        every { id } returns "otherResponseRouteId"
+        every { routeOptions } returns route.routeOptions()!!
+        every { directionsRoute } returns route
     }
 
     private val completeRoutePoints: List<List<List<Point>>> =
@@ -168,6 +172,7 @@ class RouteOverviewViewportDataSourceTest {
         LoggerProvider.setLoggerFrontend(mockk(relaxed = true))
         mockkObject(ViewportDataSourceProcessor)
         mockkStatic(DecodeUtils::class)
+        every { routeProgress.navigationRoute } returns navigationRoute
         every {
             route.legs()
         } returns List(primaryLegIndex) { mockk<RouteLeg>(relaxed = true) } + listOf(
@@ -568,7 +573,6 @@ class RouteOverviewViewportDataSourceTest {
             every { currentStepProgress } returns stepProgress
         }
         every { routeProgress.currentLegProgress } returns legProgress
-        every { routeProgress.route } returns route
 
         val location = createLocation()
 
@@ -637,7 +641,6 @@ class RouteOverviewViewportDataSourceTest {
             every { currentStepProgress } returns stepProgress
         }
         every { routeProgress.currentLegProgress } returns legProgress
-        every { routeProgress.route } returns route
 
         val location = createLocation()
 
@@ -746,7 +749,6 @@ class RouteOverviewViewportDataSourceTest {
             every { currentStepProgress } returns stepProgress
         }
         every { routeProgress.currentLegProgress } returns legProgress
-        every { routeProgress.route } returns route
 
         val location = createLocation()
 
@@ -779,10 +781,7 @@ class RouteOverviewViewportDataSourceTest {
         viewportDataSource.onLocationChanged(location)
         viewportDataSource.onRoutesChanged(listOf(navigationRoute))
         viewportDataSource.onRouteProgressChanged(routeProgress)
-        mockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
-        every { route.isSameRoute(any()) } returns false
-        viewportDataSource.onRoutesChanged(listOf(navigationRoute))
-        unmockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
+        viewportDataSource.onRoutesChanged(listOf(otherResponseNavigationRoute))
         viewportDataSource.evaluate()
         val data = viewportDataSource.cameraOptions
 
@@ -802,7 +801,6 @@ class RouteOverviewViewportDataSourceTest {
             every { currentStepProgress } returns stepProgress
         }
         every { routeProgress.currentLegProgress } returns legProgress
-        every { routeProgress.route } returns route
 
         val location = createLocation()
 
@@ -836,10 +834,8 @@ class RouteOverviewViewportDataSourceTest {
         viewportDataSource.onRoutesChanged(listOf(navigationRoute))
         viewportDataSource.onRouteProgressChanged(routeProgress)
 
-        mockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
-        every { route.isSameRoute(any()) } returns false
+        every { routeProgress.navigationRoute } returns otherResponseNavigationRoute
         viewportDataSource.onRouteProgressChanged(routeProgress)
-        unmockkStatic("com.mapbox.navigation.base.internal.utils.DirectionsRouteEx")
 
         viewportDataSource.evaluate()
         val data = viewportDataSource.cameraOptions
@@ -1056,6 +1052,18 @@ class RouteOverviewViewportDataSourceTest {
         verify(exactly = 0) {
             processRoutePoints(any())
         }
+    }
+
+    @Test
+    fun onRoutesChangedWithSameGeometryAndOtherIdRedecodesRouteGeometry() {
+        viewportDataSource.onRoutesChanged(listOf(navigationRoute))
+        viewportDataSource.evaluate()
+        clearMocks(ViewportDataSourceProcessor, answers = false)
+
+        // the geometry is equal, but a route from another response can have another leg layout
+        viewportDataSource.onRoutesChanged(listOf(otherResponseNavigationRoute))
+
+        verify(exactly = 1) { processRoutePoints(any()) }
     }
 
     @Test
@@ -1459,7 +1467,8 @@ class RouteOverviewViewportDataSourceTest {
                 }
                 every { geometryIndex } returns primaryLegGeometryIndex
             }
-            every { route } returns this@RouteOverviewViewportDataSourceTest.route
+            every { navigationRoute } returns
+                this@RouteOverviewViewportDataSourceTest.navigationRoute
         }
 
         viewportDataSource.onRouteProgressChanged(routeProgress2)

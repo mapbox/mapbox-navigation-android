@@ -8,8 +8,6 @@ import com.mapbox.maps.MapboxMap
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.extensions.internalAlternativeRouteIndices
 import com.mapbox.navigation.base.internal.performance.PerformanceTracker
-import com.mapbox.navigation.base.internal.utils.areSameRoutes
-import com.mapbox.navigation.base.internal.utils.isSameRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.utils.DecodeUtils.stepGeometryToPoints
@@ -91,7 +89,7 @@ class RouteOverviewViewportDataSource @VisibleForTesting internal constructor(
     }
 
     fun onRoutesChanged(routes: List<NavigationRoute>) {
-        if (!areSameRoutes(navigationRoutes, routes)) {
+        if (navigationRoutes.map { it.id } != routes.map { it.id }) {
             navigationRoutes = routes
             routeDataUpToDate = false
             calculateRouteData(routes)
@@ -170,7 +168,7 @@ class RouteOverviewViewportDataSource @VisibleForTesting internal constructor(
         if (currentRoute == null) {
             return
         }
-        if (!currentRoute.directionsRoute.isSameRoute(routeProgress.route)) {
+        if (currentRoute.id != routeProgress.navigationRoute.id) {
             clearProgressData()
             return
         }

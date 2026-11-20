@@ -1,0 +1,1 @@
+- `MapboxNavigationViewportDataSource` now treats a route from another directions response as a new route even when its geometry is the same as the current one, and rebuilds the framing data for it. Route progress updates for a route other than the one set with `onRouteChanged` are ignored on the same basis.

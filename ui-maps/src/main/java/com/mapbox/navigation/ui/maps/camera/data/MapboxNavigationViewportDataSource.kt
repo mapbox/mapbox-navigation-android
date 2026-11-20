@@ -17,8 +17,6 @@ import com.mapbox.maps.toCameraOptions
 import com.mapbox.maps.util.isEmpty
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.performance.PerformanceTracker
-import com.mapbox.navigation.base.internal.utils.areSameRoutes
-import com.mapbox.navigation.base.internal.utils.isSameRoute
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -489,6 +487,10 @@ class MapboxNavigationViewportDataSource private constructor(
      * Call whenever the primary route changes.
      * This produces and stores geometries that need to be framed for route overview.
      *
+     * Routes are matched by [NavigationRoute.id]: a route with another ID is treated as a new
+     * route even if its geometry is the same, and [onRouteProgressChanged] updates whose
+     * [RouteProgress.navigationRoute] has another ID are ignored.
+     *
      * @see [MapboxNavigation.registerRoutesObserver]
      * @see [clearRouteData]
      * @see [evaluate]
@@ -507,10 +509,18 @@ class MapboxNavigationViewportDataSource private constructor(
         ) {
             if (routes.isEmpty()) {
                 clearRouteData()
-            } else if (!areSameRoutes(routes, navigationRoutes)) {
-                clearRouteData()
+            } else if (routes.map { it.id } != navigationRoutes.map { it.id }) {
                 this.navigationRoutes = routes
                 calculateRouteData(routes)
+                // calculateRouteData makes the overview frame the complete route again,
+                // so re-apply the last progress if it belongs to the same primary route
+                routeProgress?.let {
+                    if (it.navigationRoute.id == routes.first().id) {
+                        onRouteProgressChangedInternal(it)
+                    } else {
+                        clearProgressData()
+                    }
+                }
             }
         }
     }
@@ -637,7 +647,9 @@ class MapboxNavigationViewportDataSource private constructor(
             )
             clearProgressData()
             return
-        } else if (!currentRoute.directionsRoute.isSameRoute(routeProgress.route)) {
+        } else if (currentRoute.id != routeProgress.navigationRoute.id) {
+            // compared by id: a route from another response with equal geometry
+            // can have a different leg and step layout
             logE(
                 "Provided route (#onRouteChanged) and navigated route " +
                     "(#onRouteProgressChanged) are not the same. " +
