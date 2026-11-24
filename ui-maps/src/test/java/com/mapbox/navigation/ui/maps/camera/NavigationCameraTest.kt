@@ -377,7 +377,7 @@ class NavigationCameraTest {
     }
 
     @Test
-    fun `when overview requested second time after first completed, transition executed once`() {
+    fun `when overview requested second time after first completed, transition executed twice`() {
         navigationCamera.requestNavigationCameraToOverview()
         internalTransitionListenerSlot.captured.onAnimationStart(overviewAnimatorSet)
         internalTransitionListenerSlot.captured.onAnimationEnd(overviewAnimatorSet)
@@ -388,7 +388,7 @@ class NavigationCameraTest {
             overviewCameraOptions,
             DEFAULT_STATE_TRANSITION_OPT,
             overviewAnimatorSet,
-            times = 1,
+            times = 2,
         )
     }
 
@@ -536,19 +536,6 @@ class NavigationCameraTest {
         )
 
         internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
-
-        verify(exactly = 1) { transitionEndListener.onTransitionEnd(isCanceled = false) }
-    }
-
-    @Test
-    fun `when overview requested after animation, listener notified`() {
-        navigationCamera.requestNavigationCameraToOverview()
-        internalTransitionListenerSlot.captured.onAnimationStart(followingAnimatorSet)
-        internalTransitionListenerSlot.captured.onAnimationEnd(followingAnimatorSet)
-
-        navigationCamera.requestNavigationCameraToOverview(
-            transitionEndListener = transitionEndListener,
-        )
 
         verify(exactly = 1) { transitionEndListener.onTransitionEnd(isCanceled = false) }
     }

@@ -38,6 +38,8 @@ import io.mockk.unmockkStatic
 import io.mockk.verify
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -143,7 +145,7 @@ class RouteOverviewViewportDataSourceTest {
     private val viewportDataSource = RouteOverviewViewportDataSource(
         mapboxMap,
         InternalRouteOverviewOptions(
-            overviewMode = OverviewMode.ACTIVE_LEG,
+            overviewMode = OverviewMode.ENTIRE_ROUTE,
             overviewAlternatives = false,
         ),
         indicesConverter,
@@ -152,7 +154,7 @@ class RouteOverviewViewportDataSourceTest {
     private val viewportDataSourceWithAlternatives = RouteOverviewViewportDataSource(
         mapboxMap,
         InternalRouteOverviewOptions(
-            overviewMode = OverviewMode.ACTIVE_LEG,
+            overviewMode = OverviewMode.ENTIRE_ROUTE,
             overviewAlternatives = true,
         ),
         indicesConverter,
@@ -573,7 +575,6 @@ class RouteOverviewViewportDataSourceTest {
             every { currentStepProgress } returns stepProgress
         }
         every { routeProgress.currentLegProgress } returns legProgress
-
         val location = createLocation()
 
         // overview mocks
@@ -619,6 +620,9 @@ class RouteOverviewViewportDataSourceTest {
         } returns overviewCameraOptions
 
         // run
+        viewportDataSource.internalOptions = viewportDataSource.internalOptions.copy(
+            overviewMode = OverviewMode.ACTIVE_LEG,
+        )
         viewportDataSource.onLocationChanged(location)
         viewportDataSource.onRoutesChanged(listOf(navigationRoute))
         viewportDataSource.onRouteProgressChanged(routeProgress)
@@ -1098,14 +1102,14 @@ class RouteOverviewViewportDataSourceTest {
         clearMocks(ViewportDataSourceProcessor, mapboxMap, answers = false)
 
         viewportDataSource.internalOptions = viewportDataSource.internalOptions.copy(
-            overviewMode = OverviewMode.ENTIRE_ROUTE,
+            overviewMode = OverviewMode.ACTIVE_LEG,
         )
 
         verify {
             processRoutePoints(route)
         }
         verify {
-            getRemainingPointsOnRoute(any(), any(), OverviewMode.ENTIRE_ROUTE, any(), any())
+            getRemainingPointsOnRoute(any(), any(), OverviewMode.ACTIVE_LEG, any(), any())
         }
         verify {
             mapboxMap.cameraForCoordinates(
@@ -1130,7 +1134,7 @@ class RouteOverviewViewportDataSourceTest {
         clearMocks(ViewportDataSourceProcessor, mapboxMap, answers = false)
 
         viewportDataSource.internalOptions = viewportDataSource.internalOptions.copy(
-            overviewMode = OverviewMode.ACTIVE_LEG,
+            overviewMode = OverviewMode.ENTIRE_ROUTE,
         )
 
         verify(exactly = 0) {
@@ -1148,6 +1152,55 @@ class RouteOverviewViewportDataSourceTest {
                 any(),
             )
         }
+    }
+
+    @Test
+    fun evaluateOverviewChangeIsFalseWhenNothingChanged() {
+        assertFalse(viewportDataSource.evaluateOverviewChange())
+    }
+
+    @Test
+    fun evaluateOverviewChangeIsTrueWhenOnlyOverviewModeChanged() {
+        viewportDataSource.onRoutesChanged(listOf(navigationRoute))
+        viewportDataSource.onRouteProgressChanged(routeProgress)
+        // the leg index of the progress is recorded as the baseline, and stays the same below
+        assertFalse(viewportDataSource.evaluateOverviewChange())
+
+        setOverviewMode(OverviewMode.ACTIVE_LEG)
+
+        assertTrue(viewportDataSource.evaluateOverviewChange())
+    }
+
+    @Test
+    fun evaluateOverviewChangeReportsAChangedOverviewModeOnce() {
+        setOverviewMode(OverviewMode.ACTIVE_LEG)
+
+        assertTrue(viewportDataSource.evaluateOverviewChange())
+        assertFalse(viewportDataSource.evaluateOverviewChange())
+    }
+
+    @Test
+    fun evaluateOverviewChangeIsTrueWhenOverviewModeChangedToEntireRoute() {
+        setOverviewMode(OverviewMode.ACTIVE_LEG)
+        assertTrue(viewportDataSource.evaluateOverviewChange())
+
+        setOverviewMode(OverviewMode.ENTIRE_ROUTE)
+
+        assertTrue(viewportDataSource.evaluateOverviewChange())
+    }
+
+    @Test
+    fun evaluateOverviewChangeIsFalseWhenOverviewModeIsChangedAndRestoredBetweenCalls() {
+        setOverviewMode(OverviewMode.ACTIVE_LEG)
+        setOverviewMode(OverviewMode.ENTIRE_ROUTE)
+
+        assertFalse(viewportDataSource.evaluateOverviewChange())
+    }
+
+    private fun setOverviewMode(overviewMode: OverviewMode) {
+        viewportDataSource.internalOptions = viewportDataSource.internalOptions.copy(
+            overviewMode = overviewMode,
+        )
     }
 
     @Test

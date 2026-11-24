@@ -356,6 +356,8 @@ class MapboxNavigationViewportDataSource private constructor(
         }
     private val viewportDataSourceUpdateObservers =
         CopyOnWriteArraySet<ViewportDataSourceUpdateObserver>()
+    private val overviewChangeObservers =
+        CopyOnWriteArraySet<OverviewChangeObserver>()
 
     private val mapSizeReadyCallbackHelper = MapSizeInitializedCallbackHelper(mapboxMap)
     private var mapsSizeReadyCancellable: Cancelable? = null
@@ -388,6 +390,14 @@ class MapboxNavigationViewportDataSource private constructor(
         viewportDataSourceUpdateObserver: ViewportDataSourceUpdateObserver,
     ) {
         viewportDataSourceUpdateObservers.remove(viewportDataSourceUpdateObserver)
+    }
+
+    internal fun registerOverviewChangeObserver(observer: OverviewChangeObserver) {
+        overviewChangeObservers.add(observer)
+    }
+
+    internal fun unregisterOverviewChangeObserver(observer: OverviewChangeObserver) {
+        overviewChangeObservers.remove(observer)
     }
 
     /**
@@ -423,6 +433,17 @@ class MapboxNavigationViewportDataSource private constructor(
 
         if (framed) hasEvaluatedForFollowing = true
         viewportData = buildViewportData()
+        publishOverviewPropertyChangeIfRequired()
+    }
+
+    /**
+     * If overview property changed, notify observers.
+     */
+    private fun publishOverviewPropertyChangeIfRequired() {
+        val overviewPropertyChanged = routeOverviewViewportDataSource.evaluateOverviewChange()
+        if (overviewPropertyChanged) {
+            overviewChangeObservers.forEach { it.onOverviewChange() }
+        }
     }
 
     /**

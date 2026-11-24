@@ -67,6 +67,10 @@ class RouteOverviewViewportDataSource @VisibleForTesting internal constructor(
     private var targetLocation: Location? = null
     private var cachedRemainingPoints: MutableMap<String, CachedRemainingPoints> = hashMapOf()
 
+    // Evaluation flags of properties which have impact on view port frame.
+    private var evaluatedLegIndex: Int? = null
+    private var evaluatedOverviewMode = internalOptions.overviewMode
+
     // Tracks whether simplifiedCompleteRoutesPoints is current. Avoids re-decoding all step
     // geometries on every setActive(true) when routes and simplification settings have not changed.
     private var routeDataUpToDate = false
@@ -84,12 +88,19 @@ class RouteOverviewViewportDataSource @VisibleForTesting internal constructor(
         } else {
             logD(TAG) { "Route data up-to-date - skipping calculation" }
         }
-        routeProgress?.let { onRouteProgressChanged(it) }
+        val progress = routeProgress
+        if (progress != null) {
+            onRouteProgressChanged(progress)
+        } else {
+            // the overview mode may have changed, and it decides what is framed without progress
+            runIfActive { simplifiedRemainingPointsOnRoutes = getPointsWithoutProgress() }
+        }
         super.reevaluate()
     }
 
     fun onRoutesChanged(routes: List<NavigationRoute>) {
         if (navigationRoutes.map { it.id } != routes.map { it.id }) {
+            evaluatedLegIndex = null
             navigationRoutes = routes
             routeDataUpToDate = false
             calculateRouteData(routes)
@@ -126,8 +137,7 @@ class RouteOverviewViewportDataSource @VisibleForTesting internal constructor(
                             it,
                         )
                     }
-                    simplifiedRemainingPointsOnRoutes =
-                        simplifiedCompleteRoutesPoints.flatten().flatten().flatten()
+                    simplifiedRemainingPointsOnRoutes = getPointsWithoutProgress()
                     routeDataUpToDate = true
                     lastSimplificationEnabled = options.geometrySimplification.enabled
                     lastSimplificationFactor = options.geometrySimplification.simplificationFactor
@@ -148,6 +158,7 @@ class RouteOverviewViewportDataSource @VisibleForTesting internal constructor(
     fun clearRouteData() {
         routeDataUpToDate = false
         this.navigationRoutes = emptyList()
+        evaluatedLegIndex = null
         clearRoutePointsData()
     }
 
@@ -155,8 +166,7 @@ class RouteOverviewViewportDataSource @VisibleForTesting internal constructor(
         this.routeProgress = null
         cachedRemainingPoints = hashMapOf()
         runIfActive {
-            simplifiedRemainingPointsOnRoutes = simplifiedCompleteRoutesPoints
-                .flatten().flatten().flatten()
+            simplifiedRemainingPointsOnRoutes = getPointsWithoutProgress()
         }
     }
 
@@ -231,6 +241,27 @@ class RouteOverviewViewportDataSource @VisibleForTesting internal constructor(
         }
     }
 
+    /**
+     * Points to frame while the progress of the current routes is not known, for example right
+     * after new routes are set.
+     *
+     * When only the active leg is framed, that is the leg of the latest evaluation
+     * ([evaluatedLegIndex]), the first one for new routes: framing all the legs, or a leg that is
+     * already passed, would make the camera zoom to a wrong frame, and back once the progress
+     * arrives.
+     */
+    private fun getPointsWithoutProgress(): List<Point> {
+        val legsPoints = if (internalOptions.overviewMode == OverviewMode.ACTIVE_LEG) {
+            val legIndex = evaluatedLegIndex ?: 0
+            simplifiedCompleteRoutesPoints.mapNotNull {
+                it.getOrNull(minOf(legIndex, it.lastIndex))
+            }
+        } else {
+            simplifiedCompleteRoutesPoints.flatten()
+        }
+        return legsPoints.flatten().flatten()
+    }
+
     private fun getCachedRemainingPoints(
         route: NavigationRoute,
         indices: RouteIndices,
@@ -263,6 +294,34 @@ class RouteOverviewViewportDataSource @VisibleForTesting internal constructor(
         // Track the puck as part of the route overview frame.
         targetLocation?.let { points.add(0, it.toPoint()) }
         return points
+    }
+
+    /**
+     * Compares the leg index and the overview mode with the ones of the previous
+     * call, so call it once per evaluation. A mode that is changed and changed back between two
+     * calls is not a change.
+     *
+     * @return true when an overview property changed which can lead to a frame jump:
+     * - the overview mode changed,
+     * - the active leg changed while the overview frames the active leg only. In the entire route
+     * overview a leg change does not move the frame.
+     */
+    fun evaluateOverviewChange(): Boolean {
+        val previousOverviewMode = evaluatedOverviewMode
+        val overviewMode = internalOptions.overviewMode
+        evaluatedOverviewMode = overviewMode
+
+        val previousLegIndex = evaluatedLegIndex
+        val legIndex = routeProgress?.currentLegProgress?.legIndex
+        // A missing progress keeps the baseline: it is reset only by the route and progress events.
+        if (legIndex != null) {
+            evaluatedLegIndex = legIndex
+        }
+        val legIndexChanged =
+            previousLegIndex != null && legIndex != null && previousLegIndex != legIndex
+
+        return previousOverviewMode != overviewMode ||
+            (legIndexChanged && overviewMode == OverviewMode.ACTIVE_LEG)
     }
 
     private fun hasSimplificationChanged(): Boolean {

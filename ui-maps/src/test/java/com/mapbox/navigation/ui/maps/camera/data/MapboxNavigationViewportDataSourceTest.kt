@@ -170,6 +170,8 @@ class MapboxNavigationViewportDataSourceTest {
         }
 
         viewportDataSource = MapboxNavigationViewportDataSource(mapboxMap)
+        // the overview frames the active leg by default, the tests expect the entire route
+        setOverviewMode(OverviewMode.ENTIRE_ROUTE)
         every { routeProgress.navigationRoute } returns navigationRoute
 
         mockkObject(ViewportDataSourceProcessor)
@@ -1449,6 +1451,7 @@ class MapboxNavigationViewportDataSourceTest {
         } returns overviewCameraOptions
 
         // run
+        setOverviewMode(OverviewMode.ACTIVE_LEG)
         viewportDataSource.onLocationChanged(location)
         viewportDataSource.onRouteChanged(navigationRoute)
         viewportDataSource.onRouteProgressChanged(routeProgress)
@@ -2778,5 +2781,12 @@ class MapboxNavigationViewportDataSourceTest {
             .pitch(emptyCameraState.pitch)
             .apply(block)
             .build()
+    }
+
+    // The setup configures the entire route overview, the tests of the other mode set it themselves.
+    private fun setOverviewMode(overviewMode: OverviewMode) {
+        viewportDataSource.routeOverviewViewportDataSource.let {
+            it.internalOptions = it.internalOptions.copy(overviewMode = overviewMode)
+        }
     }
 }

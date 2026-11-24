@@ -16,6 +16,7 @@ import com.mapbox.maps.plugin.animation.animator.CameraAnimator
 import com.mapbox.maps.util.isEmpty
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
+import com.mapbox.navigation.ui.maps.camera.data.OverviewChangeObserver
 import com.mapbox.navigation.ui.maps.camera.data.ViewportData
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.ViewportDataSourceUpdateObserver
@@ -180,7 +181,6 @@ internal constructor(
         ),
     )
 
-    @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
     internal constructor(
         mapboxMap: MapboxMap,
         cameraPlugin: CameraAnimationsPlugin,
@@ -248,6 +248,9 @@ internal constructor(
     private var runningAnimation: MapboxAnimatorSet? = null
     private val transitionEndListeners = CopyOnWriteArraySet<TransitionEndListener>()
     private var frameTransitionOptions = DEFAULT_FRAME_TRANSITION_OPT
+
+    // State transition options of the latest overview request, replayed when the overview properties changed
+    private var overviewStateTransitionOptions = DEFAULT_STATE_TRANSITION_OPT
 
     private var lastCameraHintTime = 0L
     private var prevFollowingCameraForOverviewAnimationHint: CameraOptions? = null
@@ -323,8 +326,40 @@ internal constructor(
             updateFrame(viewportData, instant = false)
         }
 
+    /**
+     * Replays the route overview transition when the overview property has changed, and can lead
+     * to a frame jump. Ignored in any other state: the change must not pull the camera into
+     * overview.
+     */
+    private val overviewChangeObserver = OverviewChangeObserver {
+        if (!isMapValid()) {
+            return@OverviewChangeObserver
+        }
+        if (stateInternal != ROUTE_OVERVIEW && stateInternal != TRANSITION_TO_ROUTE_OVERVIEW) {
+            return@OverviewChangeObserver
+        }
+        logI("Replaying route overview transition", LOG_CATEGORY)
+        requestNavigationCameraToOverview(overviewStateTransitionOptions, frameTransitionOptions)
+    }
+
     init {
         viewportDataSource.registerUpdateObserver(sourceUpdateObserver)
+        (viewportDataSource as? MapboxNavigationViewportDataSource)
+            ?.registerOverviewChangeObserver(overviewChangeObserver)
+    }
+
+    fun onDestroy() {
+        detachFromViewportDataSource()
+    }
+
+    /**
+     * Stops listening to the [ViewportDataSource] this camera was created with.
+     *
+     */
+    private fun detachFromViewportDataSource() {
+        viewportDataSource.unregisterUpdateObserver(sourceUpdateObserver)
+        (viewportDataSource as? MapboxNavigationViewportDataSource)
+            ?.unregisterOverviewChangeObserver(overviewChangeObserver)
     }
 
     /**
@@ -465,27 +500,34 @@ internal constructor(
         transitionEndListener: TransitionEndListener? = null,
     ) {
         when (stateInternal) {
-            ROUTE_OVERVIEW -> {
-                transitionEndListener?.onTransitionEnd(isCanceled = false)
-            }
-
             IDLE,
             TRANSITION_TO_FOLLOWING,
             FOLLOWING,
             TRANSITION_TO_POINTS_OVERVIEW,
             POINTS_OVERVIEW,
             TRANSITION_TO_ROUTE_OVERVIEW,
+            ROUTE_OVERVIEW,
             -> {
-                startAnimation(
-                    getOverviewTransition(
-                        stateTransitionOptions,
-                        frameTransitionOptions,
-                    ),
-                    instant = false,
+                overviewStateTransitionOptions = stateTransitionOptions
+                startOverviewTransition(
+                    stateTransitionOptions,
+                    frameTransitionOptions,
                     transitionEndListener,
                 )
             }
         }
+    }
+
+    private fun startOverviewTransition(
+        stateTransitionOptions: NavigationCameraTransitionOptions,
+        frameTransitionOptions: NavigationCameraTransitionOptions,
+        transitionEndListener: TransitionEndListener? = null,
+    ) {
+        startAnimation(
+            getOverviewTransition(stateTransitionOptions, frameTransitionOptions),
+            instant = false,
+            transitionEndListener,
+        )
     }
 
     private fun getOverviewTransition(
