@@ -90,6 +90,7 @@
 
   <!-- Legend -->
   <line x1="60" y1="560" x2="900" y2="560" stroke="#adb5bd" stroke-width="1"/>
+  <text x="60" y="566" class="annotation">ev-offline declares only the Navigation Native on-device planner artifact, not the native engine, so it is not a binder</text>
   <text x="60" y="583" style="fill: #868e96; font-size: 12px; font-weight: 600;">Legend</text>
 
   <rect x="60" y="596" width="24" height="18" rx="3" class="bridge-box"/>

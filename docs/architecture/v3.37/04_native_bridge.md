@@ -27,7 +27,7 @@ Navigation Native and Nav SDK C++ both depend on Core Common (`24.37.0`) for net
 
 `ui-maps` references Navigation Native in its test configuration only, and `navigation` reads the Navigation Native version string into its `BuildConfig` without declaring the artifact. Neither counts as a binding here.
 
-No native-binding declaration changed since `3.36.0-rc.1`.
+`ev-offline` (Optional library, new since `3.36.0-rc.1`) declares the Navigation Native on-device planner artifact (`dependenciesList.mapboxEvPlanner`), not `dependenciesList.mapboxNavigator`, so it is not in the binder set. `navigator` still declares `dependenciesList.mapboxNavigator`; only a comment in its `build.gradle` changed. No native-binding declaration was added, removed or changed since `3.36.0-rc.1`.
 
 ---
 

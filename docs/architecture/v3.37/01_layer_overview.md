@@ -24,7 +24,7 @@ Contains: `ui-base`, `ui-maps`, `ui-utils`, `ui-components`, `android-auto-compo
 Contains: `libnavigation-android`, `navigation`, `navigator`, `base`, `utils`, `dispatchers`, `tripdata`, `voice`, `copilot`, `metrics`, `notification`, `search`, `driver-notification`.
 
 ### Optional Libraries (side branch)
-**What it does:** Product features an integrator opts into individually, such as EV routing, ADASIS, the coordination UI layer, MapGPT, road camera, weather, audio, the compose wrappers, and the Android Auto virtual display. Each depends on Core directly; they do not form their own layer because no integrator is expected to take all of them.
+**What it does:** Product features an integrator opts into individually, such as EV routing (including the on-device EV planner packaging), ADASIS, the coordination UI layer, MapGPT, road camera, weather, audio, the compose wrappers, and the Android Auto virtual display. Each depends on Core directly; they do not form their own layer because no integrator is expected to take all of them.
 
 ### Native Bindings
 **What it does:** The modules that declare a bound native SDK directly in their `build.gradle`. In the public tree these are `navigator` (the JNI bridge, no public API of its own) and `base`. In the internal tree, `coordination`, `coordination-full-hd`, `datainputs`, `roadcam` and `libnavigation-compose-core` also declare Navigation Native or Nav SDK C++ directly. See `04_native_bridge.md`.

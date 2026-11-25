@@ -169,6 +169,10 @@
   <text x="310" y="536" class="module-name">android-auto-virtual-display</text>
   <text x="310" y="548" class="module-desc">Android Auto virtual display</text>
 
+  <rect x="560" y="518" width="190" height="36" rx="4" class="optional-box"/>
+  <text x="570" y="536" class="module-name">ev-offline</text>
+  <text x="570" y="548" class="module-desc">On-device EV planner packaging</text>
+
   <!-- Legend -->
   <line x1="50" y1="590" x2="900" y2="590" stroke="#adb5bd" stroke-width="1"/>
   <text x="50" y="615" style="fill: #868e96; font-size: 12px; font-weight: 600;">Legend</text>
@@ -188,7 +192,7 @@
   <text x="50" y="742" class="module-desc">- Core libraries never depend on UI or Optional libraries</text>
   <text x="50" y="762" class="module-desc">- Optional libraries are independent of each other unless named otherwise (see 03_optional_libraries)</text>
   <text x="50" y="782" class="module-desc">- navigator, base and five optional libraries declare a native SDK directly (see 04_native_bridge)</text>
-  <text x="50" y="800" class="module-desc" style="font-weight: 600;">- Since 3.36.0-rc.1: no module change; navigation, base, coordination, ev-ui, datainputs API changed</text>
+  <text x="50" y="800" class="module-desc" style="font-weight: 600;">- Since 3.36.0-rc.1: ev-offline added; navigation, base, coordination, ev-ui, datainputs API changed</text>
   <text x="50" y="822" class="module-desc" style="font-style: italic;">Excluded (out of scope): app-qa-androidauto, qa-test-app, screenshot-tests, billing-tests,</text>
   <text x="50" y="840" class="module-desc" style="font-style: italic;">instrumentation-tests(-internal), app-tests-wrapper, libtesting-*, microbenchmark-internal,</text>
   <text x="50" y="858" class="module-desc" style="font-style: italic;">app-compose-demo, mapgpt-showcase-app, full-hd-replayer, libnavui-resources</text>

@@ -18,7 +18,7 @@ This diagram lists every in-scope Gradle library module at release line `3.37`, 
 
 ## Optional Libraries
 
-`coordination` and `coordination-full-hd` (Redux-style UI coordination layer), `adasis` (ADAS integration), `ev` / `ev-ui` / `ev-rangemap` / `ev-driver-notification` (electric-vehicle family), `roadcam` / `roadcam-ui` (road camera detection), `weather`, `audio`, `core-mapgpt` / `ui-mapgpt` / `applemusic-mapgpt` (MapGPT family), `datainputs` (external vehicle-signal feed), `noa` (Navigate on Autopilot), `libnavigation-custom-route` (custom route providers), `libnavigation-compose` / `-compose-core` / `-compose-foundation` (Compose wrappers), `android-auto-virtual-display` (Android Auto screen that hosts an app View on a virtual display).
+`coordination` and `coordination-full-hd` (Redux-style UI coordination layer), `adasis` (ADAS integration), `ev` / `ev-ui` / `ev-rangemap` / `ev-driver-notification` / `ev-offline` (electric-vehicle family; `ev-offline` packages the on-device EV planner), `roadcam` / `roadcam-ui` (road camera detection), `weather`, `audio`, `core-mapgpt` / `ui-mapgpt` / `applemusic-mapgpt` (MapGPT family), `datainputs` (external vehicle-signal feed), `noa` (Navigate on Autopilot), `libnavigation-custom-route` (custom route providers), `libnavigation-compose` / `-compose-core` / `-compose-foundation` (Compose wrappers), `android-auto-virtual-display` (Android Auto screen that hosts an app View on a virtual display).
 
 ## Excluded from this record
 
@@ -26,7 +26,7 @@ Application, demo, test-harness, instrumentation, and benchmark modules are out 
 
 ## What changed at this tag
 
-No module-set change since `3.36.0-rc.1`: the module lists in both `settings.gradle` files are unchanged, and no library was added, removed or renamed.
+One module was added since `3.36.0-rc.1`: the Optional library `ev-offline`, listed in the root `settings.gradle`. The module list in `mapbox-navigation-android/settings.gradle` is unchanged, and no library was removed or renamed.
 
 `navigation`, `base`, `coordination`, `ev-ui` and `datainputs` changed their public API. See the release context summary for detail.
 

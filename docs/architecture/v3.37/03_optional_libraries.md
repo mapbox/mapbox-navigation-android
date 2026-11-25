@@ -14,11 +14,11 @@ The "Depends on" column is read from each module's `build.gradle` at this commit
 
 Optional libraries that depend on another optional library: `coordination-full-hd` on `coordination`; `adasis` on `weather`; `ev-ui` and `ev-rangemap` on `ev`; `roadcam-ui` on `roadcam`; `core-mapgpt` on `audio`; `ui-mapgpt` and `applemusic-mapgpt` on `core-mapgpt`; `libnavigation-compose-core` on `libnavigation-compose-foundation`; `libnavigation-compose` on `coordination` and `libnavigation-compose-core`. `ev-driver-notification` does not depend on `ev`; it depends on `navigation` and `driver-notification` only.
 
-`libnavigation-compose-foundation` depends on no in-scope library; it holds Compose primitives only.
+`libnavigation-compose-foundation` depends on no in-scope library; it holds Compose primitives only. `ev-offline` also depends on no in-scope library. It packages the on-device EV planner: its only dependency is the Navigation Native planner artifact (`dependenciesList.mapboxEvPlanner`, `dash-ev-planner`), published on the same Navigation Native line (`324.37.0`), so an app takes the planner by depending on this module.
 
 Five optional libraries declare a native SDK directly: `coordination` (Nav SDK C++), `coordination-full-hd` (Navigation Native, Nav SDK C++ and its full HD artifact), `datainputs`, `roadcam` and `libnavigation-compose-core` (Navigation Native). See `04_native_bridge.md`.
 
-No optional library was added or removed since `3.36.0-rc.1`, and no optional-library dependency changed. `coordination` added optional blur values, a `displayTrafficOnCarpet` flag and soft-gradient traffic options to `LaneLevelGuidanceTheme` and its update builder, `ev-ui` added an optional `alwaysShownStations` list to `MapboxEvViewOptions`, and `datainputs` added an optional `yawAccuracy` value to `OrientationData`, all in their public APIs.
+One optional library was added since `3.36.0-rc.1`: `ev-offline`. No optional library was removed, and no other optional-library dependency changed. `coordination` added optional blur values, a `displayTrafficOnCarpet` flag and soft-gradient traffic options to `LaneLevelGuidanceTheme` and its update builder, `ev-ui` added an optional `alwaysShownStations` list to `MapboxEvViewOptions`, and `datainputs` added an optional `yawAccuracy` value to `OrientationData`, all in their public APIs.
 
 ---
 
