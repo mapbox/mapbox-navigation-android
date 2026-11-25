@@ -38,6 +38,7 @@ import org.junit.Rule
 import org.junit.Test
 import java.io.File
 import java.io.InputStream
+import java.util.zip.GZIPOutputStream
 
 @OptIn(ExperimentalMapboxNavigationAPI::class)
 class MapboxHistoryTest : BaseCoreNoCleanUpTest() {
@@ -209,8 +210,8 @@ class MapboxHistoryTest : BaseCoreNoCleanUpTest() {
     }
 
     @Test
-    fun legacy_json_verify_set_route_works_for_clearing_a_route() {
-        val historyReader = historyReaderFromAssetFile("set_route_event_cleared.json")
+    fun verify_set_route_works_for_clearing_a_route() {
+        val historyReader = historyReaderFromPbfAsset("set_route_event_cleared.pbf")
 
         val events: List<HistoryEvent> = historyReader.asSequence().toList()
 
@@ -221,11 +222,14 @@ class MapboxHistoryTest : BaseCoreNoCleanUpTest() {
         assertEquals(0, setRouteEvent.legIndex)
     }
 
-    @Test(expected = Throwable::class)
-    fun legacy_json_verify_invalid_json_crashes() {
-        val historyReader = historyReaderFromAssetFile("set_route_event_invalid.json")
+    @Test
+    fun verify_non_history_file_has_no_events() {
+        val file = File(testDirectory, "not_a_history_file.json")
+        file.writeText("""{"events":[]}""")
 
-        historyReader.asSequence().toList()
+        val events = MapboxHistoryReader(file.absolutePath).asSequence().toList()
+
+        assertTrue(events.isEmpty())
     }
 
     @Test
@@ -255,12 +259,12 @@ class MapboxHistoryTest : BaseCoreNoCleanUpTest() {
         return historyRecorder.stopRecording()!!
     }
 
-    private fun historyReaderFromAssetFile(
+    private fun historyReaderFromPbfAsset(
         name: String,
     ): MapboxHistoryReader {
         val inputStream: InputStream = context.assets.open(name)
-        val outputFile = File(testDirectory, name)
-        outputFile.outputStream().use { fileOut ->
+        val outputFile = File(testDirectory, "$name.gz")
+        GZIPOutputStream(outputFile.outputStream()).use { fileOut ->
             inputStream.copyTo(fileOut)
         }
         return MapboxHistoryReader(outputFile.absolutePath)
