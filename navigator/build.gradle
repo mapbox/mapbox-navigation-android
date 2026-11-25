@@ -41,7 +41,7 @@ dependencies {
     api dependenciesList.mapboxSdkGeoJSON
     implementation dependenciesList.mapboxSdkRefreshModels
 
-    // Navigator
+    // The on-device planner is the separate ev-offline artifact.
     api dependenciesList.mapboxNavigator
 
     implementation dependenciesList.mapboxAndroidCommon

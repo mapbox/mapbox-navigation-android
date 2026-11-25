@@ -59,6 +59,7 @@ ext {
         'datainputs' : new Tuple2("datainputs$ndkVersionSuffix", 'navigation-core-datainputs'),
         'adasis' : new Tuple2("adasis$ndkVersionSuffix", 'navigation-core-adasis'),
         'ev' : new Tuple2("ev$ndkVersionSuffix", 'navigation-core-ev'),
+        'ev-offline' : new Tuple2("ev-offline$ndkVersionSuffix", 'navigation-core-ev-offline'),
         'ev-rangemap' : new Tuple2("ev-rangemap$ndkVersionSuffix", 'navigation-core-ev-rangemap'),
         'ev-ui' : new Tuple2("ev-ui$ndkVersionSuffix", 'navigation-core-ev-ui'),
         'weather' : new Tuple2("weather$ndkVersionSuffix", 'navigation-core-weather'),

@@ -66,10 +66,8 @@ internal interface Router {
     ): Long
 
     /**
-     * Whether an offline route that requests `state_of_charge` is refreshed on the device.
-     * The native router decides at runtime: it needs a nav-native build with the on-device EV
-     * planner, and both `cache.evOffline.enable` and `router.onboardConfig.enableOnboardRefresh`
-     * set in `DeviceProfile.customConfig`.
+     * Whether an offline route that requests `state_of_charge` can be refreshed on the device.
+     * True when the planner library is loaded and onboard refresh is enabled.
      */
     fun supportsOnDeviceRefresh(): Boolean
 
