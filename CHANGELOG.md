@@ -1,3 +1,31 @@
+## Navigation SDK Core Framework 3.36.0 - 26 November, 2026
+#### Features
+- Android Auto: on Car API 7 and newer, favorites open inline alongside the map on `MapboxScreen.NAVIGATION`, like settings, rather than pushing a separate screen. Back restores navigation without clearing the route preview or stopping guidance. Favorites close on navigation-mode changes or when the screen pauses, and selecting a favorite shows its route preview on the same navigation screen.
+- Android Auto: added experimental `buildFavoritesAction(screen)` for custom action strips. `FreeDriveActionStrip.buildFavoritesAction()` also uses inline favorites on the unified navigation screen. Legacy screens continue to open the dedicated favorites screen.
+- Android Auto: deprecated `MapboxScreen.FAVORITES` and `FavoritesScreenFactory`. Use inline favorites on `MapboxScreen.NAVIGATION` instead; dedicated legacy favorites screens remain available for compatibility.
+- Android Auto: inline favorites now frame all displayed markers using the existing navigation camera and restore its previous mode when closed. The experimental `MapboxCarOptions.Customization.frameFavoritesOnMap` property disables this behavior when set to `false`; it is enabled by default and read each time favorites open.
+- Android Auto: selecting an inline favorite during guidance displays its route preview while the current route remains active. Back returns to guidance; Navigate starts the selected route. Registered custom favorites screen factories retain their dedicated-screen behavior on all supported hosts.
+- Android Auto: manual zoom while favorites are open is no longer overridden by automatic marker framing. Reopening favorites still frames all markers without changing the saved navigation zoom preference.
+
+
+#### Bug fixes and improvements
+- Fixed a `NullPointerException` in `GraphAccessor.getEdgeMetadata` when the native layer returned a road name without its text or language. Such a name is now skipped and logged as an error instead. [#21942](https://github.com/mapbox/mapbox-sdk/pull/21942)
+- Fixed EV dynamic data updates mixing the battery conditioning model parameters with the legacy preconditioning parameters, which produced a conflicting set that Directions rejected. An update now supersedes the other group, keeping only the parameters from the latest update. [#22183](https://github.com/mapbox/mapbox-sdk/pull/22183)
+- Road shield, junction view, signboard and rest area image requests now add the Mapbox access token only to `https://api.mapbox.com` URLs. URLs on any other host are still requested, but without the token. [#22338](https://github.com/mapbox/mapbox-sdk/pull/22338)
+- Fixed a main thread freeze in `MapboxEvViewClient#refreshImages` on a theme change. The EV station icons that are in the style are now drawn again in the background and replaced in small batches, so the markers stay on the map. Icons that the map has already removed from the style are not drawn again.
+- When the device refreshes the state of charge of a route that was built online, for example without a network, the route's congestion and incidents are no longer reported as up to date: `RouteRefreshMetadata#isUpToDate` keeps its previous value, and after `3 * RouteRefreshOptions#intervalMillis` without a refresh from the server the expired data is cleared and `RouteRefreshExtra.REFRESH_STATE_CLEARED_EXPIRED` is reported after a successful refresh.
+- A route that the device can refresh is still refreshed after its refresh session expires on the server. It is reported to `RoutesInvalidatedObserver` only when such a refresh fails, and it may still be refreshed on the device afterwards.
+- A route refresh now keeps the incidents and closures with geometry indices that are outside the refreshed part of the leg, wherever they are listed, as routes with `NavigationOptions.Builder.nativeRouteObject(true)` do. Before, an object before or after the refreshed part was dropped when an object inside or overlapping that part was listed between it and the start or the end of the list.
+- When the primary route was built by the server and the only alternatives are built on the device, for example a route with a charging stop planned after an insufficient charge warning, those alternatives are now offered with the primary route. Before, they were dropped. Server-built alternatives still take precedence over them.
+
+
+### Mapbox dependencies
+This release depends on, and has been tested with, the following Mapbox dependencies:
+- Mapbox Maps SDK `v11.36.0` ([release notes](https://github.com/mapbox/mapbox-maps-android/releases/tag/v11.36.0))
+- Mapbox Navigation Native `v324.36.0`
+- Mapbox Core Common `v24.36.0`
+- Mapbox Java `v7.10.1` ([release notes](https://github.com/mapbox/mapbox-java/releases/tag/v7.10.1))
+
 ## Navigation SDK Core Framework 3.36.0-rc.1 - 16 November, 2026
 #### Features
 - Android Auto: on Car API 7 and newer, favorites open inline alongside the map on `MapboxScreen.NAVIGATION`, like settings, rather than pushing a separate screen. Back restores navigation without clearing the route preview or stopping guidance. Favorites close on navigation-mode changes or when the screen pauses, and selecting a favorite shows its route preview on the same navigation screen.
