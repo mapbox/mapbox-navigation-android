@@ -6,127 +6,140 @@ import com.mapbox.api.directions.v5.models.utils.throwNotComparableRouteObjects
 import com.mapbox.api.directions.v5.models.utils.toDoubleArrayOrEmpty
 import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.auto.value.gson.SerializableJsonElement
+import com.mapbox.directions.accessors.FbBuffer
+import com.mapbox.directions.accessors.FbRoadClassEnumWrapper
+import com.mapbox.directions.accessors.FbStepIntersection
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
 internal class StepIntersectionFBWrapper private constructor(
-    private val fb: FBStepIntersection,
+    private val b: FbBuffer,
+    private val fb: FbStepIntersection,
 ) : StepIntersection(), BaseFBWrapper {
 
     override val unrecognized: ByteBuffer?
-        get() = fb.unrecognizedPropertiesAsByteBuffer
+        get() = fb.unrecognizedProperties(b).asByteBuffer(b)
 
     override val unrecognizedPropertiesLength: Int
-        get() = fb.unrecognizedPropertiesLength
+        get() = fb.unrecognizedProperties(b).size
 
     override fun rawLocation(): DoubleArray {
-        return fb.location.toDoubleArrayOrEmpty()
+        return fb.location(b).toDoubleArrayOrEmpty(b)
     }
 
     override fun bearings(): List<Int>? {
-        return FlatbuffersListWrapper.get(fb.bearingsLength) {
-            fb.bearings(it)
+        val bearings = fb.bearings(b)
+        return FlatbuffersListWrapper.get(bearings.size) {
+            bearings.get(b, it)
         }
     }
 
     override fun classes(): List<String?>? {
-        return FlatbuffersListWrapper.get(fb.classesLength) {
-            fb.classes(it)?.toRoadClassString()
+        val classes = fb.classes(b)
+        return FlatbuffersListWrapper.get(classes.size) {
+            classes.get(b, it).toRoadClassString(b)
         }
     }
 
     override fun entry(): List<Boolean>? {
-        return FlatbuffersListWrapper.get(fb.entryLength) {
-            fb.entry(it)
+        val entry = fb.entry(b)
+        return FlatbuffersListWrapper.get(entry.size) {
+            entry.get(b, it)
         }
     }
 
     override fun formOfWay(): List<String?>? {
-        return FlatbuffersListWrapper.get(fb.formOfWayLength) {
-            fb.formOfWay(it)
+        val formOfWay = fb.formOfWay(b)
+        return FlatbuffersListWrapper.get(formOfWay.size) {
+            formOfWay.get(b, it)
         }
     }
 
     override fun geometries(): List<String?>? {
-        return FlatbuffersListWrapper.get(fb.geometriesLength) {
-            val geometry = fb.geometries(it)
+        val geometries = fb.geometries(b)
+        return FlatbuffersListWrapper.get(geometries.size) {
+            val geometry = geometries.get(b, it)
             when {
-                geometry == null -> null
-                geometry.isNull -> null
-                else -> geometry.value
+                !geometry.isPresent -> null
+                geometry.isNull(b) -> null
+                else -> geometry.value(b)
             }
         }
     }
 
     override fun access(): List<Int?>? {
-        return FlatbuffersListWrapper.get(fb.accessLength) {
-            fb.access(it)
+        val access = fb.access(b)
+        return FlatbuffersListWrapper.get(access.size) {
+            access.get(b, it)
         }
     }
 
     override fun elevated(): List<Boolean?>? {
-        return FlatbuffersListWrapper.get(fb.elevatedLength) {
-            fb.elevated(it)
+        val elevated = fb.elevated(b)
+        return FlatbuffersListWrapper.get(elevated.size) {
+            elevated.get(b, it)
         }
     }
 
     override fun bridges(): List<Boolean?>? {
-        return FlatbuffersListWrapper.get(fb.bridgesLength) {
-            fb.bridges(it)
+        val bridges = fb.bridges(b)
+        return FlatbuffersListWrapper.get(bridges.size) {
+            bridges.get(b, it)
         }
     }
 
-    override fun `in`(): Int? = fb.inIndex
+    override fun `in`(): Int? = fb.inIndexOrNull(b)
 
-    override fun out(): Int? = fb.outIndex
+    override fun out(): Int? = fb.outIndexOrNull(b)
 
     override fun lanes(): List<IntersectionLanes?>? {
-        return FlatbuffersListWrapper.get(fb.lanesLength) {
-            IntersectionLanesFBWrapper.wrap(fb.lanes(it))
+        val lanes = fb.lanes(b)
+        return FlatbuffersListWrapper.get(lanes.size) {
+            IntersectionLanesFBWrapper.wrap(b, lanes.get(b, it))
         }
     }
 
-    override fun geometryIndex(): Int? = fb.geometryIndex
+    override fun geometryIndex(): Int? = fb.geometryIndexOrNull(b)
 
-    override fun isUrban(): Boolean? = fb.isUrban
+    override fun isUrban(): Boolean? = fb.isUrbanOrNull(b)
 
-    override fun adminIndex(): Int? = fb.adminIndex
+    override fun adminIndex(): Int? = fb.adminIndexOrNull(b)
 
     override fun restStop(): RestStop? {
-        return RestStopFBWrapper.wrap(fb.restStop)
+        return RestStopFBWrapper.wrap(b, fb.restStop(b))
     }
 
     override fun tollCollection(): TollCollection? {
-        return TollCollectionFBWrapper.wrap(fb.tollCollection)
+        return TollCollectionFBWrapper.wrap(b, fb.tollCollection(b))
     }
 
     override fun mapboxStreetsV8(): MapboxStreetsV8? {
-        return MapboxStreetsV8FBWrapper.wrap(fb.mapboxStreetsV8)
+        return MapboxStreetsV8FBWrapper.wrap(b, fb.mapboxStreetsV8(b))
     }
 
-    override fun tunnelName(): String? = fb.tunnelName
+    override fun tunnelName(): String? = fb.tunnelName(b)
 
-    override fun railwayCrossing(): Boolean? = fb.railwayCrossing
+    override fun railwayCrossing(): Boolean? = fb.railwayCrossingOrNull(b)
 
-    override fun trafficSignal(): Boolean? = fb.trafficSignal
+    override fun trafficSignal(): Boolean? = fb.trafficSignalOrNull(b)
 
-    override fun stopSign(): Boolean? = fb.stopSign
+    override fun stopSign(): Boolean? = fb.stopSignOrNull(b)
 
-    override fun yieldSign(): Boolean? = fb.yieldSign
+    override fun yieldSign(): Boolean? = fb.yieldSignOrNull(b)
 
     override fun interchange(): Interchange? {
-        return InterchangeFBWrapper.wrap(fb.interchange)
+        return InterchangeFBWrapper.wrap(b, fb.interchange(b))
     }
 
     override fun junction(): Junction? {
-        return JunctionFBWrapper.wrap(fb.junction)
+        return JunctionFBWrapper.wrap(b, fb.junction(b))
     }
 
     override fun mergingArea(): MergingArea? {
-        return MergingAreaFBWrapper.wrap(fb.mergingArea)
+        return MergingAreaFBWrapper.wrap(b, fb.mergingArea(b))
     }
 
-    override fun duration(): Double? = fb.duration
+    override fun duration(): Double? = fb.durationOrNull(b)
 
     override fun toBuilder(): Builder? {
         NotSupportedForNativeRouteObject("StepIntersection#toBuilder()")
@@ -143,10 +156,10 @@ internal class StepIntersectionFBWrapper private constructor(
             throwNotComparableRouteObjects()
         }
         if (other !is StepIntersectionFBWrapper) return false
-        return fb.contentEquals(other.fb)
+        return fb.contentEquals(b, other.fb, other.b)
     }
 
-    override fun hashCode() = fb.hash.toHashCode()
+    override fun hashCode() = fb.hash(b).toHashCode()
 
     override fun toString(): String {
         return "StepIntersection(" +
@@ -182,25 +195,25 @@ internal class StepIntersectionFBWrapper private constructor(
 
     internal companion object {
 
-        internal fun wrap(fb: FBStepIntersection?): StepIntersection? {
+        internal fun wrap(b: FbBuffer, fb: FbStepIntersection): StepIntersection? {
             return when {
-                fb == null -> null
-                fb.isNull -> null
-                else -> StepIntersectionFBWrapper(fb)
+                !fb.isPresent -> null
+                fb.isNull(b) -> null
+                else -> StepIntersectionFBWrapper(b, fb)
             }
         }
 
-        private fun FBRoadClassEnumWrapper.toRoadClassString(): String? {
-            return if (this.isNull) {
+        private fun FbRoadClassEnumWrapper.toRoadClassString(b: FbBuffer): String? {
+            return if (!isPresent || isNull(b)) {
                 null
             } else {
-                when (FBRoadClass.fromByteOrThrow(this.value)) {
+                when (FBRoadClass.fromByteOrThrow(value(b))) {
                     FBRoadClass.Toll -> "toll"
                     FBRoadClass.Ferry -> "ferry"
                     FBRoadClass.Motorway -> "motorway"
                     FBRoadClass.Restricted -> "restricted"
                     FBRoadClass.Tunnel -> "tunnel"
-                    FBRoadClass.Unknown -> this.unrecognizedValue
+                    FBRoadClass.Unknown -> unrecognizedValue(b)
                 }
             }
         }

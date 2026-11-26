@@ -8,23 +8,26 @@ import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
 import com.mapbox.api.directions.v5.models.utils.throwNotComparableRouteObjects
 import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.auto.value.gson.SerializableJsonElement
+import com.mapbox.directions.accessors.FbBuffer
+import com.mapbox.directions.accessors.FbNotification
 import com.mapbox.directions.generated.NotificationRefreshType
 import com.mapbox.directions.generated.NotificationType
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
 internal class NotificationFBWrapper private constructor(
-    private val fb: FBNotification,
+    private val b: FbBuffer,
+    private val fb: FbNotification,
 ) : Notification(), BaseFBWrapper {
 
     override val platformAddedUnrecognizedProperties: Map<String, Any?>?
         get() {
             val result = mutableMapOf<String, Any?>()
-            if (fb.initialTemp != null) {
-                result["initial_temp"] = fb.initialTemp
+            if (fb.initialTempOrNull(b) != null) {
+                result["initial_temp"] = fb.initialTempOrNull(b)
             }
-            if (fb.finalTemp != null) {
-                result["final_temp"] = fb.finalTemp
+            if (fb.finalTempOrNull(b) != null) {
+                result["final_temp"] = fb.finalTempOrNull(b)
             }
             return result.ifEmpty {
                 null
@@ -32,39 +35,38 @@ internal class NotificationFBWrapper private constructor(
         }
 
     override val unrecognized: ByteBuffer?
-        get() = fb.unrecognizedPropertiesAsByteBuffer
+        get() = fb.unrecognizedProperties(b).asByteBuffer(b)
 
     override val unrecognizedPropertiesLength: Int
-        get() = fb.unrecognizedPropertiesLength
+        get() = fb.unrecognizedProperties(b).size
 
-    override fun type(): String = fb.type.fbToNotificationsTypeCriteria(
+    override fun type(): String = FBNotificationType.fromByteOrThrow(fb.type(b)).fbToNotificationsTypeCriteria(
         "type",
         unrecognizeFlexBufferMap,
     )
 
-    override fun refreshType(): String = fb.refreshType.fbToNotificationsRefreshTypeCriteria(
-        "refresh_type",
-        unrecognizeFlexBufferMap,
-    )
+    override fun refreshType(): String = FBNotificationRefreshType
+        .fromByteOrThrow(fb.refreshType(b))
+        .fbToNotificationsRefreshTypeCriteria("refresh_type", unrecognizeFlexBufferMap)
 
-    override fun subtype(): String? = fb.subtype?.fbToNotificationsSubtypeCriteria(
+    override fun subtype(): String? = fb.subtypeOrNull(b)?.fbToNotificationsSubtypeCriteria(
         "subtype",
         unrecognizeFlexBufferMap,
     )
 
-    override fun geometryIndexStart(): Int? = fb.geometryIndexStart
+    override fun geometryIndexStart(): Int? = fb.geometryIndexStartOrNull(b)
 
-    override fun geometryIndex(): Int? = fb.geometryIndex
+    override fun geometryIndex(): Int? = fb.geometryIndexOrNull(b)
 
-    override fun geometryIndexEnd(): Int? = fb.geometryIndexEnd
+    override fun geometryIndexEnd(): Int? = fb.geometryIndexEndOrNull(b)
 
     override fun details(): NotificationDetails? {
-        return NotificationDetailsFBWrapper.wrap(fb.details)
+        return NotificationDetailsFBWrapper.wrap(b, fb.details(b))
     }
 
-    override fun reason(): String? = fb.reason
+    override fun reason(): String? = fb.reason(b)
 
-    override fun chargingStationId(): String? = fb.stationId
+    override fun chargingStationId(): String? = fb.stationId(b)
 
     override fun toBuilder(): Builder? {
         NotSupportedForNativeRouteObject("Notification#toBuilder()")
@@ -81,10 +83,10 @@ internal class NotificationFBWrapper private constructor(
             throwNotComparableRouteObjects()
         }
         if (other !is NotificationFBWrapper) return false
-        return fb.contentEquals(other.fb)
+        return fb.contentEquals(b, other.fb, other.b)
     }
 
-    override fun hashCode() = fb.hash.toHashCode()
+    override fun hashCode() = fb.hash(b).toHashCode()
 
     override fun toString(): String {
         return "Notification(" +
@@ -103,11 +105,11 @@ internal class NotificationFBWrapper private constructor(
 
     internal companion object {
 
-        internal fun wrap(fb: FBNotification?): Notification? {
+        internal fun wrap(b: FbBuffer, fb: FbNotification): Notification? {
             return when {
-                fb == null -> null
-                fb.isNull -> null
-                else -> NotificationFBWrapper(fb)
+                !fb.isPresent -> null
+                fb.isNull(b) -> null
+                else -> NotificationFBWrapper(b, fb)
             }
         }
 

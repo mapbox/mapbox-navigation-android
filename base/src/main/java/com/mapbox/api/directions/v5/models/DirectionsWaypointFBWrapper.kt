@@ -6,34 +6,37 @@ import com.mapbox.api.directions.v5.models.utils.toDoubleArrayOrEmpty
 import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.api.directions.v5.models.utils.toPoint
 import com.mapbox.auto.value.gson.SerializableJsonElement
+import com.mapbox.directions.accessors.FbBuffer
+import com.mapbox.directions.accessors.FbDirectionsWaypoint
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
 internal class DirectionsWaypointFBWrapper private constructor(
-    private val fb: FBDirectionsWaypoint,
+    private val b: FbBuffer,
+    private val fb: FbDirectionsWaypoint,
 ) : DirectionsWaypoint(), BaseFBWrapper {
 
     override val unrecognized: ByteBuffer?
-        get() = fb.unrecognizedPropertiesAsByteBuffer
+        get() = fb.unrecognizedProperties(b).asByteBuffer(b)
 
     override val unrecognizedPropertiesLength: Int
-        get() = fb.unrecognizedPropertiesLength
+        get() = fb.unrecognizedProperties(b).size
 
     override val platformAddedUnrecognizedProperties: Map<String, Any?>?
-        get() = fb.externalId?.let { mapOf(KEY_EXTERNAL_ID to it) }
+        get() = fb.externalId(b)?.let { mapOf(KEY_EXTERNAL_ID to it) }
 
-    override fun name(): String = fb.name
+    override fun name(): String = fb.name(b)
 
     override fun rawLocation(): DoubleArray {
-        return fb.location.toDoubleArrayOrEmpty()
+        return fb.location(b).toDoubleArrayOrEmpty(b)
     }
 
     override fun location(): Point {
-        return fb.location.toPoint()
+        return fb.location(b).toPoint(b)
     }
 
-    override fun distance(): Double? = fb.distance
+    override fun distance(): Double? = fb.distanceOrNull(b)
 
     override fun toBuilder(): Builder? {
         NotSupportedForNativeRouteObject("DirectionsWaypoint#toBuilder()")
@@ -50,10 +53,10 @@ internal class DirectionsWaypointFBWrapper private constructor(
             throwNotComparableRouteObjects()
         }
         if (other !is DirectionsWaypointFBWrapper) return false
-        return fb.contentEquals(other.fb)
+        return fb.contentEquals(b, other.fb, other.b)
     }
 
-    override fun hashCode() = fb.hash.toHashCode()
+    override fun hashCode() = fb.hash(b).toHashCode()
 
     override fun toString(): String {
         return "DirectionsWaypoint(" +
@@ -67,11 +70,11 @@ internal class DirectionsWaypointFBWrapper private constructor(
     internal companion object {
         internal const val KEY_EXTERNAL_ID = "external_id"
 
-        internal fun wrap(fb: FBDirectionsWaypoint?): DirectionsWaypoint? {
+        internal fun wrap(b: FbBuffer, fb: FbDirectionsWaypoint): DirectionsWaypoint? {
             return when {
-                fb == null -> null
-                fb.isNull -> null
-                else -> DirectionsWaypointFBWrapper(fb)
+                !fb.isPresent -> null
+                fb.isNull(b) -> null
+                else -> DirectionsWaypointFBWrapper(b, fb)
             }
         }
     }

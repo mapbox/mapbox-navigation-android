@@ -6,19 +6,23 @@ import com.mapbox.api.directions.v5.models.utils.FlatbuffersListWrapper
 import com.mapbox.api.directions.v5.models.utils.throwNotComparableRouteObjects
 import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.auto.value.gson.SerializableJsonElement
+import com.mapbox.directions.accessors.FbBuffer
+import com.mapbox.directions.accessors.FbCongestionLevelEnumWrapper
+import com.mapbox.directions.accessors.FbLegAnnotation
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import com.mapbox.navigation.base.internal.StateOfCharge
 import java.nio.ByteBuffer
 
 internal class LegAnnotationFBWrapper private constructor(
-    private val fb: FBLegAnnotation,
+    private val b: FbBuffer,
+    private val fb: FbLegAnnotation,
 ) : LegAnnotation(), BaseFBWrapper {
 
     override val unrecognized: ByteBuffer?
-        get() = fb.unrecognizedPropertiesAsByteBuffer
+        get() = fb.unrecognizedProperties(b).asByteBuffer(b)
 
     override val unrecognizedPropertiesLength: Int
-        get() = fb.unrecognizedPropertiesLength
+        get() = fb.unrecognizedProperties(b).size
 
     internal val stateOfCharge
         get(): StateOfCharge? {
@@ -33,32 +37,37 @@ internal class LegAnnotationFBWrapper private constructor(
         }
 
     override fun distance(): List<Double>? {
-        return FlatbuffersListWrapper.get(fb.distanceLength) {
-            fb.distance(it)
+        val distance = fb.distance(b)
+        return FlatbuffersListWrapper.get(distance.size) {
+            distance.get(b, it)
         }
     }
 
     override fun duration(): List<Double>? {
-        return FlatbuffersListWrapper.get(fb.durationLength) {
-            fb.duration(it)
+        val duration = fb.duration(b)
+        return FlatbuffersListWrapper.get(duration.size) {
+            duration.get(b, it)
         }
     }
 
     override fun speed(): List<Double>? {
-        return FlatbuffersListWrapper.get(fb.speedLength) {
-            fb.speed(it)
+        val speed = fb.speed(b)
+        return FlatbuffersListWrapper.get(speed.size) {
+            speed.get(b, it)
         }
     }
 
     override fun congestion(): List<String?>? {
-        return FlatbuffersListWrapper.get(fb.congestionLength) {
-            fb.congestion(it)?.toCongestionLevelString()
+        val congestion = fb.congestion(b)
+        return FlatbuffersListWrapper.get(congestion.size) {
+            congestion.get(b, it).toCongestionLevelString(b)
         }
     }
 
     override fun congestionNumeric(): List<Int?>? {
-        return FlatbuffersListWrapper.get(fb.congestionNumericLength) {
-            val value = fb.congestionNumeric(it)
+        val congestionNumeric = fb.congestionNumeric(b)
+        return FlatbuffersListWrapper.get(congestionNumeric.size) {
+            val value = congestionNumeric.get(b, it)
             if (value == -1) {
                 null
             } else {
@@ -68,28 +77,32 @@ internal class LegAnnotationFBWrapper private constructor(
     }
 
     override fun maxspeed(): List<MaxSpeed?>? {
-        return FlatbuffersListWrapper.get(fb.maxspeedLength) {
-            MaxSpeedFBWrapper.wrap(fb.maxspeed(it))
+        val maxspeed = fb.maxspeed(b)
+        return FlatbuffersListWrapper.get(maxspeed.size) {
+            MaxSpeedFBWrapper.wrap(b, maxspeed.get(b, it))
         }
     }
 
     override fun trafficTendency(): List<Int>? {
-        return FlatbuffersListWrapper.get(fb.trafficTendencyLength) {
-            fb.trafficTendency(it)
+        val trafficTendency = fb.trafficTendency(b)
+        return FlatbuffersListWrapper.get(trafficTendency.size) {
+            trafficTendency.get(b, it)
         }
     }
 
     override fun freeflowSpeed(): List<Int?>? {
-        return FlatbuffersListWrapper.get(fb.freeflowSpeedLength) {
-            fb.freeflowSpeed(it).let {
+        val freeflowSpeed = fb.freeflowSpeed(b)
+        return FlatbuffersListWrapper.get(freeflowSpeed.size) {
+            freeflowSpeed.get(b, it).let {
                 if (it == -1) null else it
             }
         }
     }
 
     override fun currentSpeed(): List<Int?>? {
-        return FlatbuffersListWrapper.get(fb.currentSpeedLength) {
-            fb.currentSpeed(it).let {
+        val currentSpeed = fb.currentSpeed(b)
+        return FlatbuffersListWrapper.get(currentSpeed.size) {
+            currentSpeed.get(b, it).let {
                 if (it == -1) null else it
             }
         }
@@ -110,10 +123,10 @@ internal class LegAnnotationFBWrapper private constructor(
             throwNotComparableRouteObjects()
         }
         if (other !is LegAnnotationFBWrapper) return false
-        return fb.contentEquals(other.fb)
+        return fb.contentEquals(b, other.fb, other.b)
     }
 
-    override fun hashCode() = fb.hash.toHashCode()
+    override fun hashCode() = fb.hash(b).toHashCode()
 
     override fun toString(): String {
         return "LegAnnotation(" +
@@ -131,22 +144,22 @@ internal class LegAnnotationFBWrapper private constructor(
 
     internal companion object {
 
-        internal fun wrap(fb: FBLegAnnotation?): LegAnnotation? {
-            return fb?.let { LegAnnotationFBWrapper(it) }
+        internal fun wrap(b: FbBuffer, fb: FbLegAnnotation): LegAnnotation? {
+            return if (fb.isPresent) LegAnnotationFBWrapper(b, fb) else null
         }
 
-        private fun FBCongestionLevelEnumWrapper.toCongestionLevelString(): String? {
-            return if (this.isNull) {
+        private fun FbCongestionLevelEnumWrapper.toCongestionLevelString(b: FbBuffer): String? {
+            return if (!isPresent || isNull(b)) {
                 null
             } else {
-                when (FBCongestionLevel.fromByteOrThrow(this.value)) {
+                when (FBCongestionLevel.fromByteOrThrow(value(b))) {
                     FBCongestionLevel.Low -> "low"
                     FBCongestionLevel.Moderate -> "moderate"
                     FBCongestionLevel.Heavy -> "heavy"
                     FBCongestionLevel.Severe -> "severe"
                     FBCongestionLevel.UnknownCongestion -> "unknown"
                     FBCongestionLevel.Unknown ->
-                        this.unrecognizedValue
+                        unrecognizedValue(b)
                             ?: throw IllegalStateException(
                                 "Unknown congestion level with no unrecognized value",
                             )

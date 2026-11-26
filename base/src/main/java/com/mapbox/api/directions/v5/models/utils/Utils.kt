@@ -2,12 +2,13 @@ package com.mapbox.api.directions.v5.models.utils
 
 import androidx.annotation.RestrictTo
 import com.google.flatbuffers.FlexBuffers
-import com.mapbox.api.directions.v5.models.FBCoordinate
 import com.mapbox.api.directions.v5.models.FBLaneIndication
 import com.mapbox.api.directions.v5.models.FBManeuverModifier
 import com.mapbox.api.directions.v5.models.FBManeuverType
 import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver
+import com.mapbox.directions.accessors.FbBuffer
+import com.mapbox.directions.accessors.FbCoordinate
 import com.mapbox.directions.generated.ManeuverType
 import com.mapbox.geojson.Point
 
@@ -29,18 +30,13 @@ internal fun throwNotComparableRouteObjects(): Nothing {
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-internal fun FBCoordinate.toDoubleArray(): DoubleArray? {
-    return doubleArrayOf(longitude, latitude)
+internal fun FbCoordinate.toDoubleArrayOrEmpty(b: FbBuffer): DoubleArray {
+    return if (isPresent) doubleArrayOf(longitude(b), latitude(b)) else doubleArrayOf()
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-internal fun FBCoordinate?.toDoubleArrayOrEmpty(): DoubleArray {
-    return this?.toDoubleArray() ?: doubleArrayOf()
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-internal fun FBCoordinate.toPoint(): Point {
-    return Point.fromLngLat(longitude, latitude)
+internal fun FbCoordinate.toPoint(b: FbBuffer): Point {
+    return Point.fromLngLat(longitude(b), latitude(b))
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)

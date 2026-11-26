@@ -133,9 +133,9 @@ internal class NroFromNativeRouteMapMatchedRoutesParser(
         val directionsData = DirectionsParsedRouteData(
             route = route,
             routesWaypoint = route.waypoints()?.filterNotNull(),
-            requestUUID = route.fbContext.uuid,
+            requestUUID = route.contextUuid,
             routeOptions = routeOptions,
-            routeIndex = route.fbContext.route.routeIndex.toInt(),
+            routeIndex = route.contextRouteIndex,
             routerOrigin = routerOrigin,
             responseOriginAPI = responseOriginApi,
         )

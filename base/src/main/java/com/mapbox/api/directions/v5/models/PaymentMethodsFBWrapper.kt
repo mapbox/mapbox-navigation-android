@@ -4,29 +4,32 @@ import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
 import com.mapbox.api.directions.v5.models.utils.throwNotComparableRouteObjects
 import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.auto.value.gson.SerializableJsonElement
+import com.mapbox.directions.accessors.FbBuffer
+import com.mapbox.directions.accessors.FbPaymentMethods
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
 internal class PaymentMethodsFBWrapper private constructor(
-    private val fb: FBPaymentMethods,
+    private val b: FbBuffer,
+    private val fb: FbPaymentMethods,
 ) : PaymentMethods(), BaseFBWrapper {
 
     override val unrecognized: ByteBuffer?
-        get() = fb.unrecognizedPropertiesAsByteBuffer
+        get() = fb.unrecognizedProperties(b).asByteBuffer(b)
 
     override val unrecognizedPropertiesLength: Int
-        get() = fb.unrecognizedPropertiesLength
+        get() = fb.unrecognizedProperties(b).size
 
     override fun etc(): CostPerVehicleSize? {
-        return CostPerVehicleSizeFBWrapper.wrap(fb.etc)
+        return CostPerVehicleSizeFBWrapper.wrap(b, fb.etc(b))
     }
 
     override fun etc2(): CostPerVehicleSize? {
-        return CostPerVehicleSizeFBWrapper.wrap(fb.etc2)
+        return CostPerVehicleSizeFBWrapper.wrap(b, fb.etc2(b))
     }
 
     override fun cash(): CostPerVehicleSize? {
-        return CostPerVehicleSizeFBWrapper.wrap(fb.cash)
+        return CostPerVehicleSizeFBWrapper.wrap(b, fb.cash(b))
     }
 
     override fun toBuilder(): Builder? {
@@ -44,10 +47,10 @@ internal class PaymentMethodsFBWrapper private constructor(
             throwNotComparableRouteObjects()
         }
         if (other !is PaymentMethodsFBWrapper) return false
-        return fb.contentEquals(other.fb)
+        return fb.contentEquals(b, other.fb, other.b)
     }
 
-    override fun hashCode() = fb.hash.toHashCode()
+    override fun hashCode() = fb.hash(b).toHashCode()
 
     override fun toString(): String {
         return "PaymentMethods(" +
@@ -58,8 +61,8 @@ internal class PaymentMethodsFBWrapper private constructor(
     }
 
     internal companion object {
-        internal fun wrap(fb: FBPaymentMethods?): PaymentMethods? {
-            return fb?.let { PaymentMethodsFBWrapper(it) }
+        internal fun wrap(b: FbBuffer, fb: FbPaymentMethods): PaymentMethods? {
+            return if (fb.isPresent) PaymentMethodsFBWrapper(b, fb) else null
         }
     }
 }

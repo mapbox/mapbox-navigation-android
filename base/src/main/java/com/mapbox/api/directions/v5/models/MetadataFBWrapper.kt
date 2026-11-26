@@ -4,23 +4,27 @@ import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
 import com.mapbox.api.directions.v5.models.utils.throwNotComparableRouteObjects
 import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.auto.value.gson.SerializableJsonElement
+import com.mapbox.directions.accessors.FbBuffer
+import com.mapbox.directions.accessors.FbResponseMetadata
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
 internal class MetadataFBWrapper private constructor(
-    private val fb: FBResponseMetadata,
+    private val b: FbBuffer,
+    private val fb: FbResponseMetadata,
 ) : Metadata(), BaseFBWrapper {
 
     override val unrecognized: ByteBuffer?
-        get() = fb.unrecognizedPropertiesAsByteBuffer
+        get() = fb.unrecognizedProperties(b).asByteBuffer(b)
 
     override val unrecognizedPropertiesLength: Int
-        get() = fb.unrecognizedPropertiesLength
+        get() = fb.unrecognizedProperties(b).size
 
     override fun infoMap(): Map<String?, String?>? {
-        return (0 until fb.mapLength).associate {
-            fb.map(it).let {
-                Pair(it?.key, it?.value)
+        val map = fb.map(b)
+        return (0 until map.size).associate {
+            map.get(b, it).let {
+                Pair(it.key(b), it.value(b))
             }
         }
     }
@@ -40,18 +44,18 @@ internal class MetadataFBWrapper private constructor(
             throwNotComparableRouteObjects()
         }
         if (other !is MetadataFBWrapper) return false
-        return fb.contentEquals(other.fb)
+        return fb.contentEquals(b, other.fb, other.b)
     }
 
-    override fun hashCode() = fb.hash.toHashCode()
+    override fun hashCode() = fb.hash(b).toHashCode()
 
     override fun toString(): String {
         return "Metadata(infoMap=${infoMap()})"
     }
 
     internal companion object {
-        internal fun wrap(fb: FBResponseMetadata?): Metadata? {
-            return fb?.let { MetadataFBWrapper(it) }
+        internal fun wrap(b: FbBuffer, fb: FbResponseMetadata): Metadata? {
+            return if (fb.isPresent) MetadataFBWrapper(b, fb) else null
         }
     }
 }

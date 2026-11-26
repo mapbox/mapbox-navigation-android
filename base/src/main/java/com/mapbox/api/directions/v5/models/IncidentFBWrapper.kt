@@ -5,23 +5,26 @@ import com.mapbox.api.directions.v5.models.utils.FlatbuffersListWrapper
 import com.mapbox.api.directions.v5.models.utils.throwNotComparableRouteObjects
 import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.auto.value.gson.SerializableJsonElement
+import com.mapbox.directions.accessors.FbBuffer
+import com.mapbox.directions.accessors.FbIncident
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
 internal class IncidentFBWrapper private constructor(
-    private val fb: FBIncident,
+    private val b: FbBuffer,
+    private val fb: FbIncident,
 ) : Incident(), BaseFBWrapper {
 
     override val unrecognized: ByteBuffer?
-        get() = fb.unrecognizedPropertiesAsByteBuffer
+        get() = fb.unrecognizedProperties(b).asByteBuffer(b)
 
     override val unrecognizedPropertiesLength: Int
-        get() = fb.unrecognizedPropertiesLength
+        get() = fb.unrecognizedProperties(b).size
 
-    override fun id(): String = fb.id
+    override fun id(): String = fb.id(b)
 
     override fun type(): String? {
-        return when (fb.type) {
+        return when (FBIncidentType.fromByteOrThrow(fb.type(b))) {
             FBIncidentType.Accident -> Incident.INCIDENT_ACCIDENT
             FBIncidentType.Congestion -> Incident.INCIDENT_CONGESTION
             FBIncidentType.Construction -> Incident.INCIDENT_CONSTRUCTION
@@ -38,18 +41,18 @@ internal class IncidentFBWrapper private constructor(
         }
     }
 
-    override fun closed(): Boolean? = fb.closed
+    override fun closed(): Boolean? = fb.closedOrNull(b)
 
     override fun congestion(): Congestion? {
-        return CongestionFBWrapper.wrap(fb.congestion)
+        return CongestionFBWrapper.wrap(b, fb.congestion(b))
     }
 
-    override fun description(): String? = fb.description
+    override fun description(): String? = fb.description(b)
 
-    override fun longDescription(): String? = fb.longDescription
+    override fun longDescription(): String? = fb.longDescription(b)
 
     override fun impact(): String? {
-        return when (FBIncidentImpact.fromByteOrThrow(fb.impact ?: return null)) {
+        return when (FBIncidentImpact.fromByteOrThrow(fb.impactOrNull(b) ?: return null)) {
             FBIncidentImpact.Critical -> Incident.IMPACT_CRITICAL
             FBIncidentImpact.Major -> Incident.IMPACT_MAJOR
             FBIncidentImpact.Minor -> Incident.IMPACT_MINOR
@@ -59,45 +62,48 @@ internal class IncidentFBWrapper private constructor(
         }
     }
 
-    override fun subType(): String? = fb.subType
+    override fun subType(): String? = fb.subType(b)
 
-    override fun subTypeDescription(): String? = fb.subTypeDescription
+    override fun subTypeDescription(): String? = fb.subTypeDescription(b)
 
     override fun alertcCodes(): List<Int>? {
-        return FlatbuffersListWrapper.get(fb.alertcCodesLength) {
-            fb.alertcCodes(it)
+        val alertcCodes = fb.alertcCodes(b)
+        return FlatbuffersListWrapper.get(alertcCodes.size) {
+            alertcCodes.get(b, it)
         }
     }
 
     override fun trafficCodes(): TrafficCodes? {
-        return TrafficCodesFBWrapper.wrap(fb.trafficCodes)
+        return TrafficCodesFBWrapper.wrap(b, fb.trafficCodes(b))
     }
 
-    override fun geometryIndexStart(): Int? = fb.geometryIndexStart
+    override fun geometryIndexStart(): Int? = fb.geometryIndexStartOrNull(b)
 
-    override fun geometryIndexEnd(): Int? = fb.geometryIndexEnd
+    override fun geometryIndexEnd(): Int? = fb.geometryIndexEndOrNull(b)
 
-    override fun creationTime(): String? = fb.creationTime
+    override fun creationTime(): String? = fb.creationTime(b)
 
-    override fun startTime(): String? = fb.startTime
+    override fun startTime(): String? = fb.startTime(b)
 
-    override fun endTime(): String? = fb.endTime
+    override fun endTime(): String? = fb.endTime(b)
 
-    override fun countryCodeAlpha2(): String? = fb.countryCodeAlpha2
+    override fun countryCodeAlpha2(): String? = fb.countryCodeAlpha2(b)
 
-    override fun countryCodeAlpha3(): String? = fb.countryCodeAlpha3
+    override fun countryCodeAlpha3(): String? = fb.countryCodeAlpha3(b)
 
     override fun lanesBlocked(): List<String>? {
-        return FlatbuffersListWrapper.get(fb.lanesBlockedLength) {
-            fb.lanesBlocked(it)
+        val lanesBlocked = fb.lanesBlocked(b)
+        return FlatbuffersListWrapper.get(lanesBlocked.size) {
+            lanesBlocked.get(b, it)
         }?.filterNotNull()
     }
 
-    override fun numLanesBlocked(): Int? = fb.numLanesBlocked
+    override fun numLanesBlocked(): Int? = fb.numLanesBlockedOrNull(b)
 
     override fun affectedRoadNames(): List<String>? {
-        return FlatbuffersListWrapper.get(fb.affectedRoadNamesLength) {
-            fb.affectedRoadNames(it)
+        val affectedRoadNames = fb.affectedRoadNames(b)
+        return FlatbuffersListWrapper.get(affectedRoadNames.size) {
+            affectedRoadNames.get(b, it)
         }?.filterNotNull()
     }
 
@@ -116,10 +122,10 @@ internal class IncidentFBWrapper private constructor(
             throwNotComparableRouteObjects()
         }
         if (other !is IncidentFBWrapper) return false
-        return fb.contentEquals(other.fb)
+        return fb.contentEquals(b, other.fb, other.b)
     }
 
-    override fun hashCode() = fb.hash.toHashCode()
+    override fun hashCode() = fb.hash(b).toHashCode()
 
     override fun toString(): String {
         return "Incident(" +
@@ -148,11 +154,11 @@ internal class IncidentFBWrapper private constructor(
     }
 
     internal companion object {
-        internal fun wrap(fb: FBIncident?): Incident? {
+        internal fun wrap(b: FbBuffer, fb: FbIncident): Incident? {
             return when {
-                fb == null -> null
-                fb.isNull -> null
-                else -> IncidentFBWrapper(fb)
+                !fb.isPresent -> null
+                fb.isNull(b) -> null
+                else -> IncidentFBWrapper(b, fb)
             }
         }
     }

@@ -7,36 +7,39 @@ import com.mapbox.api.directions.v5.models.utils.throwNotComparableRouteObjects
 import com.mapbox.api.directions.v5.models.utils.toDoubleArrayOrEmpty
 import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.auto.value.gson.SerializableJsonElement
+import com.mapbox.directions.accessors.FbBuffer
+import com.mapbox.directions.accessors.FbStepManeuver
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
 internal class StepManeuverFBWrapper private constructor(
-    private val fb: FBStepManeuver,
+    private val b: FbBuffer,
+    private val fb: FbStepManeuver,
 ) : StepManeuver(), BaseFBWrapper {
 
     override val unrecognized: ByteBuffer?
-        get() = fb.unrecognizedPropertiesAsByteBuffer
+        get() = fb.unrecognizedProperties(b).asByteBuffer(b)
 
     override val unrecognizedPropertiesLength: Int
-        get() = fb.unrecognizedPropertiesLength
+        get() = fb.unrecognizedProperties(b).size
 
     override fun rawLocation(): DoubleArray {
-        return fb.location.toDoubleArrayOrEmpty()
+        return fb.location(b).toDoubleArrayOrEmpty(b)
     }
 
-    override fun bearingBefore(): Double? = fb.bearingBefore
+    override fun bearingBefore(): Double? = fb.bearingBeforeOrNull(b)
 
-    override fun bearingAfter(): Double? = fb.bearingAfter
+    override fun bearingAfter(): Double? = fb.bearingAfterOrNull(b)
 
-    override fun instruction(): String? = fb.instruction
+    override fun instruction(): String? = fb.instruction(b)
 
-    override fun type(): String? = fb.type
+    override fun type(): String? = fb.typeOrNull(b)?.let { FBManeuverType.fromByteOrThrow(it) }
         .fbToStepManeuverType("type", unrecognizeFlexBufferMap)
 
-    override fun modifier(): String? = fb.modifier
+    override fun modifier(): String? = fb.modifierOrNull(b)
         ?.fbToManeuverModifierType("modifier", unrecognizeFlexBufferMap)
 
-    override fun exit(): Int? = fb.exit
+    override fun exit(): Int? = fb.exitOrNull(b)
 
     override fun toBuilder(): Builder? {
         NotSupportedForNativeRouteObject("StepManeuver#toBuilder()")
@@ -53,10 +56,10 @@ internal class StepManeuverFBWrapper private constructor(
             throwNotComparableRouteObjects()
         }
         if (other !is StepManeuverFBWrapper) return false
-        return fb.contentEquals(other.fb)
+        return fb.contentEquals(b, other.fb, other.b)
     }
 
-    override fun hashCode() = fb.hash.toHashCode()
+    override fun hashCode() = fb.hash(b).toHashCode()
 
     override fun toString(): String {
         return "StepManeuver(" +
@@ -71,8 +74,8 @@ internal class StepManeuverFBWrapper private constructor(
     }
 
     internal companion object {
-        internal fun wrap(fb: FBStepManeuver?): StepManeuver? {
-            return fb?.let { StepManeuverFBWrapper(it) }
+        internal fun wrap(b: FbBuffer, fb: FbStepManeuver): StepManeuver? {
+            return if (fb.isPresent) StepManeuverFBWrapper(b, fb) else null
         }
     }
 }

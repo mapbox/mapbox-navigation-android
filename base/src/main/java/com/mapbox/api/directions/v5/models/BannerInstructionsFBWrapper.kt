@@ -4,35 +4,38 @@ import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
 import com.mapbox.api.directions.v5.models.utils.throwNotComparableRouteObjects
 import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.auto.value.gson.SerializableJsonElement
+import com.mapbox.directions.accessors.FbBannerInstructions
+import com.mapbox.directions.accessors.FbBuffer
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
 internal class BannerInstructionsFBWrapper private constructor(
-    private val fb: FBBannerInstructions,
+    private val b: FbBuffer,
+    private val fb: FbBannerInstructions,
 ) : BannerInstructions(), BaseFBWrapper {
 
     override val unrecognized: ByteBuffer?
-        get() = fb.unrecognizedPropertiesAsByteBuffer
+        get() = fb.unrecognizedProperties(b).asByteBuffer(b)
 
     override val unrecognizedPropertiesLength: Int
-        get() = fb.unrecognizedPropertiesLength
+        get() = fb.unrecognizedProperties(b).size
 
-    override fun distanceAlongGeometry(): Double = fb.distanceAlongGeometry
+    override fun distanceAlongGeometry(): Double = fb.distanceAlongGeometry(b)
 
     override fun primary(): BannerText {
-        return BannerTextFBWrapper.wrap(fb.primary)!!
+        return BannerTextFBWrapper.wrap(b, fb.primary(b))!!
     }
 
     override fun secondary(): BannerText? {
-        return BannerTextFBWrapper.wrap(fb.secondary)
+        return BannerTextFBWrapper.wrap(b, fb.secondary(b))
     }
 
     override fun sub(): BannerText? {
-        return BannerTextFBWrapper.wrap(fb.sub)
+        return BannerTextFBWrapper.wrap(b, fb.sub(b))
     }
 
     override fun view(): BannerView? {
-        return BannerViewFBWrapper.wrap(fb.view)
+        return BannerViewFBWrapper.wrap(b, fb.view(b))
     }
 
     override fun toBuilder(): Builder? {
@@ -50,10 +53,10 @@ internal class BannerInstructionsFBWrapper private constructor(
             throwNotComparableRouteObjects()
         }
         if (other !is BannerInstructionsFBWrapper) return false
-        return fb.contentEquals(other.fb)
+        return fb.contentEquals(b, other.fb, other.b)
     }
 
-    override fun hashCode() = fb.hash.toHashCode()
+    override fun hashCode() = fb.hash(b).toHashCode()
 
     override fun toString(): String {
         return "BannerInstructions(" +
@@ -66,11 +69,11 @@ internal class BannerInstructionsFBWrapper private constructor(
     }
 
     internal companion object {
-        internal fun wrap(fb: FBBannerInstructions?): BannerInstructions? {
+        internal fun wrap(b: FbBuffer, fb: FbBannerInstructions): BannerInstructions? {
             return when {
-                fb == null -> null
-                fb.isNull -> null
-                else -> BannerInstructionsFBWrapper(fb)
+                !fb.isPresent -> null
+                fb.isNull(b) -> null
+                else -> BannerInstructionsFBWrapper(b, fb)
             }
         }
     }

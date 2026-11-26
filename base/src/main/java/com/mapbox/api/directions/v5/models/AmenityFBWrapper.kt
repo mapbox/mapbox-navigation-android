@@ -7,24 +7,30 @@ import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
 import com.mapbox.api.directions.v5.models.utils.throwNotComparableRouteObjects
 import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.auto.value.gson.SerializableJsonElement
+import com.mapbox.directions.accessors.FbAmenity
+import com.mapbox.directions.accessors.FbBuffer
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
 internal class AmenityFBWrapper private constructor(
-    private val fb: FBAmenity,
+    private val b: FbBuffer,
+    private val fb: FbAmenity,
 ) : Amenity(), BaseFBWrapper {
 
     override val unrecognized: ByteBuffer?
-        get() = fb.unrecognizedPropertiesAsByteBuffer
+        get() = fb.unrecognizedProperties(b).asByteBuffer(b)
 
     override val unrecognizedPropertiesLength: Int
-        get() = fb.unrecognizedPropertiesLength
+        get() = fb.unrecognizedProperties(b).size
 
-    override fun type(): String = fb.type.fbAmenityTypeCriteria("type", unrecognizeFlexBufferMap)
+    override fun type(): String = FBAmenityType.fromByteOrThrow(fb.type(b)).fbAmenityTypeCriteria(
+        "type",
+        unrecognizeFlexBufferMap,
+    )
 
-    override fun name(): String? = fb.name
+    override fun name(): String? = fb.name(b)
 
-    override fun brand(): String? = fb.brand
+    override fun brand(): String? = fb.brand(b)
 
     override fun unrecognized(): Map<String, SerializableJsonElement?>? {
         return super<BaseFBWrapper>.unrecognized()
@@ -37,10 +43,10 @@ internal class AmenityFBWrapper private constructor(
             throwNotComparableRouteObjects()
         }
         if (other !is AmenityFBWrapper) return false
-        return fb.contentEquals(other.fb)
+        return fb.contentEquals(b, other.fb, other.b)
     }
 
-    override fun hashCode() = fb.hash.toHashCode()
+    override fun hashCode() = fb.hash(b).toHashCode()
 
     override fun toBuilder(): Builder? {
         NotSupportedForNativeRouteObject("Amenity#toBuilder()")
@@ -48,11 +54,11 @@ internal class AmenityFBWrapper private constructor(
 
     internal companion object {
 
-        internal fun wrap(fb: FBAmenity?): Amenity? {
+        internal fun wrap(b: FbBuffer, fb: FbAmenity): Amenity? {
             return when {
-                fb == null -> null
-                fb.isNull -> null
-                else -> AmenityFBWrapper(fb)
+                !fb.isPresent -> null
+                fb.isNull(b) -> null
+                else -> AmenityFBWrapper(b, fb)
             }
         }
 

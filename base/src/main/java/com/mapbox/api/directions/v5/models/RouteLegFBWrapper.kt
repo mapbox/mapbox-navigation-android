@@ -5,63 +5,74 @@ import com.mapbox.api.directions.v5.models.utils.FlatbuffersListWrapper
 import com.mapbox.api.directions.v5.models.utils.throwNotComparableRouteObjects
 import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.auto.value.gson.SerializableJsonElement
+import com.mapbox.directions.accessors.FbBuffer
+import com.mapbox.directions.accessors.FbRouteLeg
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
 internal class RouteLegFBWrapper
-private constructor(private val fb: FBRouteLeg) : RouteLeg(), BaseFBWrapper {
+private constructor(
+    private val b: FbBuffer,
+    private val fb: FbRouteLeg,
+) : RouteLeg(), BaseFBWrapper {
 
     override val unrecognized: ByteBuffer?
-        get() = fb.unrecognizedPropertiesAsByteBuffer
+        get() = fb.unrecognizedProperties(b).asByteBuffer(b)
 
     override val unrecognizedPropertiesLength: Int
-        get() = fb.unrecognizedPropertiesLength
+        get() = fb.unrecognizedProperties(b).size
 
     override fun viaWaypoints(): List<SilentWaypoint?>? {
-        return FlatbuffersListWrapper.get(fb.viaWaypointsLength) {
-            SilentWaypointFBWrapper.wrap(fb.viaWaypoints(it))
+        val viaWaypoints = fb.viaWaypoints(b)
+        return FlatbuffersListWrapper.get(viaWaypoints.size) {
+            SilentWaypointFBWrapper.wrap(b, viaWaypoints.get(b, it))
         }
     }
 
-    override fun distance(): Double? = fb.distance
+    override fun distance(): Double? = fb.distanceOrNull(b)
 
-    override fun duration(): Double? = fb.duration
+    override fun duration(): Double? = fb.durationOrNull(b)
 
-    override fun durationTypical(): Double? = fb.durationTypical
+    override fun durationTypical(): Double? = fb.durationTypicalOrNull(b)
 
-    override fun summary(): String? = fb.summary
+    override fun summary(): String? = fb.summary(b)
 
     override fun admins(): List<Admin?>? {
-        return FlatbuffersListWrapper.get(fb.adminsLength) {
-            AdminFBWrapper.wrap(fb.admins(it))
+        val admins = fb.admins(b)
+        return FlatbuffersListWrapper.get(admins.size) {
+            AdminFBWrapper.wrap(b, admins.get(b, it))
         }
     }
 
     override fun steps(): List<LegStep?>? {
-        return FlatbuffersListWrapper.get(fb.stepsLength) {
-            LegStepFBWrapper.wrap(fb.steps(it))
+        val steps = fb.steps(b)
+        return FlatbuffersListWrapper.get(steps.size) {
+            LegStepFBWrapper.wrap(b, steps.get(b, it))
         }
     }
 
     override fun incidents(): List<Incident?>? {
-        return FlatbuffersListWrapper.get(fb.incidentsLength) {
-            IncidentFBWrapper.wrap(fb.incidents(it))
+        val incidents = fb.incidents(b)
+        return FlatbuffersListWrapper.get(incidents.size) {
+            IncidentFBWrapper.wrap(b, incidents.get(b, it))
         }
     }
 
     override fun annotation(): LegAnnotation? {
-        return LegAnnotationFBWrapper.wrap(fb.annotation)
+        return LegAnnotationFBWrapper.wrap(b, fb.annotation(b))
     }
 
     override fun closures(): List<Closure?>? {
-        return FlatbuffersListWrapper.get(fb.closuresLength) {
-            ClosureFBWrapper.wrap(fb.closures(it))
+        val closures = fb.closures(b)
+        return FlatbuffersListWrapper.get(closures.size) {
+            ClosureFBWrapper.wrap(b, closures.get(b, it))
         }
     }
 
     override fun notifications(): List<Notification?>? {
-        return FlatbuffersListWrapper.get(fb.notificationsLength) {
-            NotificationFBWrapper.wrap(fb.notifications(it))
+        val notifications = fb.notifications(b)
+        return FlatbuffersListWrapper.get(notifications.size) {
+            NotificationFBWrapper.wrap(b, notifications.get(b, it))
         }
     }
 
@@ -80,10 +91,10 @@ private constructor(private val fb: FBRouteLeg) : RouteLeg(), BaseFBWrapper {
             throwNotComparableRouteObjects()
         }
         if (other !is RouteLegFBWrapper) return false
-        return fb.contentEquals(other.fb)
+        return fb.contentEquals(b, other.fb, other.b)
     }
 
-    override fun hashCode() = fb.hash.toHashCode()
+    override fun hashCode() = fb.hash(b).toHashCode()
 
     override fun toString(): String {
         return "RouteLeg(" +
@@ -102,11 +113,11 @@ private constructor(private val fb: FBRouteLeg) : RouteLeg(), BaseFBWrapper {
     }
 
     internal companion object {
-        internal fun wrap(fb: FBRouteLeg?): RouteLeg? {
+        internal fun wrap(b: FbBuffer, fb: FbRouteLeg): RouteLeg? {
             return when {
-                fb == null -> null
-                fb.isNull -> null
-                else -> RouteLegFBWrapper(fb)
+                !fb.isPresent -> null
+                fb.isNull(b) -> null
+                else -> RouteLegFBWrapper(b, fb)
             }
         }
     }

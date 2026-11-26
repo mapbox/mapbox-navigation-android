@@ -4,26 +4,29 @@ import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
 import com.mapbox.api.directions.v5.models.utils.throwNotComparableRouteObjects
 import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.auto.value.gson.SerializableJsonElement
+import com.mapbox.directions.accessors.FbBuffer
+import com.mapbox.directions.accessors.FbMapboxShield
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
 internal class MapboxShieldFBWrapper private constructor(
-    private val fb: FBMapboxShield,
+    private val b: FbBuffer,
+    private val fb: FbMapboxShield,
 ) : MapboxShield(), BaseFBWrapper {
 
     override val unrecognized: ByteBuffer?
-        get() = fb.unrecognizedPropertiesAsByteBuffer
+        get() = fb.unrecognizedProperties(b).asByteBuffer(b)
 
     override val unrecognizedPropertiesLength: Int
-        get() = fb.unrecognizedPropertiesLength
+        get() = fb.unrecognizedProperties(b).size
 
-    override fun baseUrl(): String? = fb.baseUrl
+    override fun baseUrl(): String? = fb.baseUrl(b)
 
-    override fun displayRef(): String? = fb.displayRef
+    override fun displayRef(): String? = fb.displayRef(b)
 
-    override fun name(): String? = fb.name
+    override fun name(): String? = fb.name(b)
 
-    override fun textColor(): String? = fb.textColor
+    override fun textColor(): String? = fb.textColor(b)
 
     override fun toBuilder(): Builder? {
         NotSupportedForNativeRouteObject("MapboxShield#toBuilder()")
@@ -40,10 +43,10 @@ internal class MapboxShieldFBWrapper private constructor(
             throwNotComparableRouteObjects()
         }
         if (other !is MapboxShieldFBWrapper) return false
-        return fb.contentEquals(other.fb)
+        return fb.contentEquals(b, other.fb, other.b)
     }
 
-    override fun hashCode() = fb.hash.toHashCode()
+    override fun hashCode() = fb.hash(b).toHashCode()
 
     override fun toString(): String {
         return "MapboxShield(" +
@@ -55,8 +58,8 @@ internal class MapboxShieldFBWrapper private constructor(
     }
 
     internal companion object {
-        internal fun wrap(fb: FBMapboxShield?): MapboxShield? {
-            return fb?.let { MapboxShieldFBWrapper(it) }
+        internal fun wrap(b: FbBuffer, fb: FbMapboxShield): MapboxShield? {
+            return if (fb.isPresent) MapboxShieldFBWrapper(b, fb) else null
         }
     }
 }

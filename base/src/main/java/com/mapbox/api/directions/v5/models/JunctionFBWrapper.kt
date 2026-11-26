@@ -4,20 +4,23 @@ import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
 import com.mapbox.api.directions.v5.models.utils.throwNotComparableRouteObjects
 import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.auto.value.gson.SerializableJsonElement
+import com.mapbox.directions.accessors.FbBuffer
+import com.mapbox.directions.accessors.FbJunction
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
 internal class JunctionFBWrapper private constructor(
-    private val fb: FBJunction,
+    private val b: FbBuffer,
+    private val fb: FbJunction,
 ) : Junction(), BaseFBWrapper {
 
     override val unrecognized: ByteBuffer?
-        get() = fb.unrecognizedPropertiesAsByteBuffer
+        get() = fb.unrecognizedProperties(b).asByteBuffer(b)
 
     override val unrecognizedPropertiesLength: Int
-        get() = fb.unrecognizedPropertiesLength
+        get() = fb.unrecognizedProperties(b).size
 
-    override fun name(): String? = fb.name
+    override fun name(): String? = fb.name(b)
 
     override fun toBuilder(): Builder? {
         NotSupportedForNativeRouteObject("Junction#toBuilder()")
@@ -34,18 +37,18 @@ internal class JunctionFBWrapper private constructor(
             throwNotComparableRouteObjects()
         }
         if (other !is JunctionFBWrapper) return false
-        return fb.contentEquals(other.fb)
+        return fb.contentEquals(b, other.fb, other.b)
     }
 
-    override fun hashCode() = fb.hash.toHashCode()
+    override fun hashCode() = fb.hash(b).toHashCode()
 
     override fun toString(): String {
         return "Junction(name=${name()})"
     }
 
     internal companion object {
-        internal fun wrap(fb: FBJunction?): Junction? {
-            return fb?.let { JunctionFBWrapper(it) }
+        internal fun wrap(b: FbBuffer, fb: FbJunction): Junction? {
+            return if (fb.isPresent) JunctionFBWrapper(b, fb) else null
         }
     }
 }

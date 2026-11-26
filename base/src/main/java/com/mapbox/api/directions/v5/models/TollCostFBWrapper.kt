@@ -4,23 +4,26 @@ import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
 import com.mapbox.api.directions.v5.models.utils.throwNotComparableRouteObjects
 import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.auto.value.gson.SerializableJsonElement
+import com.mapbox.directions.accessors.FbBuffer
+import com.mapbox.directions.accessors.FbTollCost
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
 internal class TollCostFBWrapper private constructor(
-    private val fb: FBTollCost,
+    private val b: FbBuffer,
+    private val fb: FbTollCost,
 ) : TollCost(), BaseFBWrapper {
 
     override val unrecognized: ByteBuffer?
-        get() = fb.unrecognizedPropertiesAsByteBuffer
+        get() = fb.unrecognizedProperties(b).asByteBuffer(b)
 
     override val unrecognizedPropertiesLength: Int
-        get() = fb.unrecognizedPropertiesLength
+        get() = fb.unrecognizedProperties(b).size
 
-    override fun currency(): String? = fb.currency
+    override fun currency(): String? = fb.currency(b)
 
     override fun paymentMethods(): PaymentMethods? {
-        return PaymentMethodsFBWrapper.wrap(fb.paymentMethods)
+        return PaymentMethodsFBWrapper.wrap(b, fb.paymentMethods(b))
     }
 
     override fun toBuilder(): Builder? {
@@ -38,10 +41,10 @@ internal class TollCostFBWrapper private constructor(
             throwNotComparableRouteObjects()
         }
         if (other !is TollCostFBWrapper) return false
-        return fb.contentEquals(other.fb)
+        return fb.contentEquals(b, other.fb, other.b)
     }
 
-    override fun hashCode() = fb.hash.toHashCode()
+    override fun hashCode() = fb.hash(b).toHashCode()
 
     override fun toString(): String {
         return "TollCost(" +
@@ -51,11 +54,11 @@ internal class TollCostFBWrapper private constructor(
     }
 
     internal companion object {
-        internal fun wrap(fb: FBTollCost?): TollCost? {
+        internal fun wrap(b: FbBuffer, fb: FbTollCost): TollCost? {
             return when {
-                fb == null -> null
-                fb.isNull -> null
-                else -> TollCostFBWrapper(fb)
+                !fb.isPresent -> null
+                fb.isNull(b) -> null
+                else -> TollCostFBWrapper(b, fb)
             }
         }
     }

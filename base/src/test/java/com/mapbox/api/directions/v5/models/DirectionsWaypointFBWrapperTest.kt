@@ -3,14 +3,25 @@ package com.mapbox.api.directions.v5.models
 import com.google.flatbuffers.FlatBufferBuilder
 import com.google.flatbuffers.FlexBuffersBuilder
 import com.google.gson.JsonPrimitive
+import com.mapbox.directions.accessors.FbBuffer
+import com.mapbox.directions.accessors.FbDirectionsWaypoint
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.nio.ByteOrder
 
-@OptIn(ExperimentalUnsignedTypes::class)
 class DirectionsWaypointFBWrapperTest {
+
+    // ids of the DirectionsWaypoint fields in the schema
+    private companion object {
+        const val NAME_FIELD = 2
+        const val LOCATION_FIELD = 3
+        const val EXTERNAL_ID_FIELD = 5
+        const val UNRECOGNIZED_PROPERTIES_FIELD = 6
+        const val WAYPOINT_FIELDS_COUNT = 7
+    }
 
     @Test
     fun `external id is returned as unrecognized property`() {
@@ -89,24 +100,24 @@ class DirectionsWaypointFBWrapperTest {
         val nameOffset = builder.createString("9th Street")
         val externalIdOffset = externalId?.let { builder.createString(it) }
         val unrecognizedOffset = unrecognized.takeIf { it.isNotEmpty() }?.let {
-            FBDirectionsWaypoint.createUnrecognizedPropertiesVector(
-                builder,
-                flexMap(it).toUByteArray(),
-            )
+            builder.createByteVector(flexMap(it))
         }
 
-        FBDirectionsWaypoint.startDirectionsWaypoint(builder)
-        FBDirectionsWaypoint.addName(builder, nameOffset)
-        FBDirectionsWaypoint.addLocation(
-            builder,
-            FBCoordinate.createCoordinate(builder, -121.496066, 38.577764),
-        )
-        externalIdOffset?.let { FBDirectionsWaypoint.addExternalId(builder, it) }
-        unrecognizedOffset?.let { FBDirectionsWaypoint.addUnrecognizedProperties(builder, it) }
-        builder.finish(FBDirectionsWaypoint.endDirectionsWaypoint(builder))
+        builder.startTable(WAYPOINT_FIELDS_COUNT)
+        builder.addOffset(NAME_FIELD, nameOffset, 0)
+        // Coordinate struct: longitude, latitude
+        builder.prep(8, 16)
+        builder.putDouble(38.577764)
+        builder.putDouble(-121.496066)
+        builder.addStruct(LOCATION_FIELD, builder.offset(), 0)
+        externalIdOffset?.let { builder.addOffset(EXTERNAL_ID_FIELD, it, 0) }
+        unrecognizedOffset?.let { builder.addOffset(UNRECOGNIZED_PROPERTIES_FIELD, it, 0) }
+        builder.finish(builder.endTable())
 
-        val fb = FBDirectionsWaypoint.getRootAsDirectionsWaypoint(builder.dataBuffer())
-        val waypoint = DirectionsWaypointFBWrapper.wrap(fb)
+        val byteBuffer = builder.dataBuffer().order(ByteOrder.LITTLE_ENDIAN)
+        val b = FbBuffer(byteBuffer)
+        val fb = FbDirectionsWaypoint(b.indirect(byteBuffer.position()))
+        val waypoint = DirectionsWaypointFBWrapper.wrap(b, fb)
         assertNotNull(waypoint)
         return waypoint!!
     }

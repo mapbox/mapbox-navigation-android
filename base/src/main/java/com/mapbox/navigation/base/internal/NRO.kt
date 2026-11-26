@@ -14,7 +14,7 @@ import java.nio.ByteBuffer
 
 fun DirectionsRoute.directionsRouteContextOrNull(): ByteBuffer? {
     return if (this is DirectionsRouteFBWrapper) {
-        return this.fbContext.byteBuffer
+        return this.contextByteBuffer
     } else {
         null
     }

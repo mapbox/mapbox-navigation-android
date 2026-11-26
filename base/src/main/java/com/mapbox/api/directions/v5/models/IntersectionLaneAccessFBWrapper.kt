@@ -5,22 +5,27 @@ import com.mapbox.api.directions.v5.models.utils.FlatbuffersListWrapper
 import com.mapbox.api.directions.v5.models.utils.throwNotComparableRouteObjects
 import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.auto.value.gson.SerializableJsonElement
+import com.mapbox.directions.accessors.FbBuffer
+import com.mapbox.directions.accessors.FbIntersectionLaneAccess
+import com.mapbox.directions.accessors.FbLaneDesignatedVehicleTypeEnumWrapper
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
 internal class IntersectionLaneAccessFBWrapper private constructor(
-    private val fb: FBIntersectionLaneAccess,
+    private val b: FbBuffer,
+    private val fb: FbIntersectionLaneAccess,
 ) : IntersectionLaneAccess(), BaseFBWrapper {
 
     override val unrecognized: ByteBuffer?
-        get() = fb.unrecognizedPropertiesAsByteBuffer
+        get() = fb.unrecognizedProperties(b).asByteBuffer(b)
 
     override val unrecognizedPropertiesLength: Int
-        get() = fb.unrecognizedPropertiesLength
+        get() = fb.unrecognizedProperties(b).size
 
     override fun designated(): List<String?>? {
-        return FlatbuffersListWrapper.get(fb.designatedLength) {
-            fb.designated(it)?.toVehicleType()
+        val designated = fb.designated(b)
+        return FlatbuffersListWrapper.get(designated.size) {
+            designated.get(b, it).toVehicleType(b)
         }
     }
 
@@ -39,10 +44,10 @@ internal class IntersectionLaneAccessFBWrapper private constructor(
             throwNotComparableRouteObjects()
         }
         if (other !is IntersectionLaneAccessFBWrapper) return false
-        return fb.contentEquals(other.fb)
+        return fb.contentEquals(b, other.fb, other.b)
     }
 
-    override fun hashCode() = fb.hash.toHashCode()
+    override fun hashCode() = fb.hash(b).toHashCode()
 
     override fun toString(): String {
         return "IntersectionLaneAccess(designated=${designated()})"
@@ -50,16 +55,16 @@ internal class IntersectionLaneAccessFBWrapper private constructor(
 
     internal companion object {
 
-        internal fun wrap(fb: FBIntersectionLaneAccess?): IntersectionLaneAccess? {
-            return fb?.let { IntersectionLaneAccessFBWrapper(it) }
+        internal fun wrap(b: FbBuffer, fb: FbIntersectionLaneAccess): IntersectionLaneAccess? {
+            return if (fb.isPresent) IntersectionLaneAccessFBWrapper(b, fb) else null
         }
 
-        fun FBLaneDesignatedVehicleTypeEnumWrapper.toVehicleType(): String? {
-            return if (this.isNull) {
+        fun FbLaneDesignatedVehicleTypeEnumWrapper.toVehicleType(b: FbBuffer): String? {
+            return if (!isPresent || isNull(b)) {
                 null
             } else {
-                when (value) {
-                    FBLaneDesignatedVehicleType.Unknown -> this.unrecognizedValue
+                when (FBLaneDesignatedVehicleType.fromByteOrThrow(value(b))) {
+                    FBLaneDesignatedVehicleType.Unknown -> unrecognizedValue(b)
                     FBLaneDesignatedVehicleType.Bus -> IntersectionLaneAccess.BUS
                     FBLaneDesignatedVehicleType.Hov -> IntersectionLaneAccess.HOV
                     FBLaneDesignatedVehicleType.Taxi -> IntersectionLaneAccess.TAXI

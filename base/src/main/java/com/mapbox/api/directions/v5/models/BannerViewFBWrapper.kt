@@ -7,30 +7,37 @@ import com.mapbox.api.directions.v5.models.utils.fbToStepManeuverType
 import com.mapbox.api.directions.v5.models.utils.throwNotComparableRouteObjects
 import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.auto.value.gson.SerializableJsonElement
+import com.mapbox.directions.accessors.FbBannerView
+import com.mapbox.directions.accessors.FbBuffer
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
 internal class BannerViewFBWrapper private constructor(
-    private val fb: FBBannerView,
+    private val b: FbBuffer,
+    private val fb: FbBannerView,
 ) : BannerView(), BaseFBWrapper {
 
     override val unrecognized: ByteBuffer?
-        get() = fb.unrecognizedPropertiesAsByteBuffer
+        get() = fb.unrecognizedProperties(b).asByteBuffer(b)
 
     override val unrecognizedPropertiesLength: Int
-        get() = fb.unrecognizedPropertiesLength
+        get() = fb.unrecognizedProperties(b).size
 
-    override fun text(): String = fb.text
+    override fun text(): String = fb.text(b)
 
     override fun components(): List<BannerComponents?>? {
-        return FlatbuffersListWrapper.get(fb.componentsLength) {
-            BannerComponentsFBWrapper.wrap(fb.components(it))
+        val components = fb.components(b)
+        return FlatbuffersListWrapper.get(components.size) {
+            BannerComponentsFBWrapper.wrap(b, components.get(b, it))
         }
     }
 
-    override fun type(): String? = fb.type.fbToStepManeuverType("type", unrecognizeFlexBufferMap)
+    override fun type(): String? = fb.typeOrNull(b)?.let { FBManeuverType.fromByteOrThrow(it) }.fbToStepManeuverType(
+        "type",
+        unrecognizeFlexBufferMap,
+    )
 
-    override fun modifier(): String? = fb.modifier?.fbToManeuverModifierType(
+    override fun modifier(): String? = fb.modifierOrNull(b)?.fbToManeuverModifierType(
         "modifier",
         unrecognizeFlexBufferMap,
     )
@@ -50,10 +57,10 @@ internal class BannerViewFBWrapper private constructor(
             throwNotComparableRouteObjects()
         }
         if (other !is BannerViewFBWrapper) return false
-        return fb.contentEquals(other.fb)
+        return fb.contentEquals(b, other.fb, other.b)
     }
 
-    override fun hashCode() = fb.hash.toHashCode()
+    override fun hashCode() = fb.hash(b).toHashCode()
 
     override fun toString(): String {
         return "BannerView(" +
@@ -65,8 +72,8 @@ internal class BannerViewFBWrapper private constructor(
     }
 
     internal companion object {
-        internal fun wrap(fb: FBBannerView?): BannerView? {
-            return fb?.let { BannerViewFBWrapper(it) }
+        internal fun wrap(b: FbBuffer, fb: FbBannerView): BannerView? {
+            return if (fb.isPresent) BannerViewFBWrapper(b, fb) else null
         }
     }
 }

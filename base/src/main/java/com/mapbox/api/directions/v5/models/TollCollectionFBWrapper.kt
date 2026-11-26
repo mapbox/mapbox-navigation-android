@@ -4,28 +4,31 @@ import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
 import com.mapbox.api.directions.v5.models.utils.throwNotComparableRouteObjects
 import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.auto.value.gson.SerializableJsonElement
+import com.mapbox.directions.accessors.FbBuffer
+import com.mapbox.directions.accessors.FbTollCollection
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
 internal class TollCollectionFBWrapper private constructor(
-    private val fb: FBTollCollection,
+    private val b: FbBuffer,
+    private val fb: FbTollCollection,
 ) : TollCollection(), BaseFBWrapper {
 
     override val unrecognized: ByteBuffer?
-        get() = fb.unrecognizedPropertiesAsByteBuffer
+        get() = fb.unrecognizedProperties(b).asByteBuffer(b)
 
     override val unrecognizedPropertiesLength: Int
-        get() = fb.unrecognizedPropertiesLength
+        get() = fb.unrecognizedProperties(b).size
 
     override fun type(): String? {
-        return when (fb.type ?: return null) {
+        return when (fb.typeOrNull(b)?.let { FBTollCollectionType.fromByteOrThrow(it) } ?: return null) {
             FBTollCollectionType.TollBooth -> "toll_booth"
             FBTollCollectionType.TollGantry -> "toll_gantry"
             FBTollCollectionType.Unknown -> unrecognizeFlexBufferMap?.get("type")?.asString()
         }
     }
 
-    override fun name(): String? = fb.name
+    override fun name(): String? = fb.name(b)
 
     override fun toBuilder(): Builder? {
         NotSupportedForNativeRouteObject("TollCollection#toBuilder()")
@@ -42,10 +45,10 @@ internal class TollCollectionFBWrapper private constructor(
             throwNotComparableRouteObjects()
         }
         if (other !is TollCollectionFBWrapper) return false
-        return fb.contentEquals(other.fb)
+        return fb.contentEquals(b, other.fb, other.b)
     }
 
-    override fun hashCode() = fb.hash.toHashCode()
+    override fun hashCode() = fb.hash(b).toHashCode()
 
     override fun toString(): String {
         return "TollCollection(" +
@@ -55,8 +58,8 @@ internal class TollCollectionFBWrapper private constructor(
     }
 
     internal companion object {
-        internal fun wrap(fb: FBTollCollection?): TollCollection? {
-            return fb?.let { TollCollectionFBWrapper(it) }
+        internal fun wrap(b: FbBuffer, fb: FbTollCollection): TollCollection? {
+            return if (fb.isPresent) TollCollectionFBWrapper(b, fb) else null
         }
     }
 }

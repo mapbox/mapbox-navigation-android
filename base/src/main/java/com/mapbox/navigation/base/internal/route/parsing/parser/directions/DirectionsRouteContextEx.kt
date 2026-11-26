@@ -4,10 +4,7 @@ package com.mapbox.navigation.base.internal.route.parsing.parser.directions
 
 import com.mapbox.annotation.MapboxExperimental
 import com.mapbox.api.directions.v5.models.DirectionsRouteFBWrapper
-import com.mapbox.api.directions.v5.models.DirectionsWaypoint
-import com.mapbox.api.directions.v5.models.DirectionsWaypointFBWrapper
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.api.directions.v5.models.utils.FlatbuffersListWrapper
 import com.mapbox.directions.route.DirectionsRouteContext
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.base.internal.route.operations.NroRouteOperations
@@ -28,12 +25,11 @@ internal fun DirectionsRouteContext.toRouteModelsParsingResult(
     ) ?: throw IllegalStateException("route returned by getRootAsDirectionsRouteContext is null")
     val data = DirectionsParsedRouteData(
         route = route,
-        routesWaypoint = route.waypoints()?.filterNotNull() ?: getWaypointsFromResponse(
-            route.fbContext,
-        ),
-        requestUUID = route.fbContext.uuid,
+        routesWaypoint = route.waypoints()?.filterNotNull()
+            ?: route.contextWaypoints()?.filterNotNull(),
+        requestUUID = route.contextUuid,
         routeOptions = routeOptions,
-        routeIndex = route.fbContext.route.routeIndex.toInt(),
+        routeIndex = route.contextRouteIndex,
         routerOrigin = routerOrigin,
         responseOriginAPI = responseOriginApi,
     )
@@ -42,10 +38,3 @@ internal fun DirectionsRouteContext.toRouteModelsParsingResult(
         operations = NroRouteOperations(data),
     )
 }
-
-private fun getWaypointsFromResponse(
-    routeContext: com.mapbox.directions.generated.DirectionsRouteContext,
-): List<DirectionsWaypoint>? =
-    FlatbuffersListWrapper.get(routeContext.waypointsLength) {
-        DirectionsWaypointFBWrapper.wrap(routeContext.waypoints(it)) as? DirectionsWaypoint
-    }?.filterNotNull()

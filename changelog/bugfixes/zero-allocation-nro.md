@@ -1,0 +1,1 @@
+- Reduced memory allocations and read time of routes when the native route object is enabled (`NavigationOptions.Builder.nativeRouteObject(true)`).

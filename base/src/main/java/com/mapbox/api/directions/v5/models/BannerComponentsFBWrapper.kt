@@ -5,23 +5,26 @@ import com.mapbox.api.directions.v5.models.utils.FlatbuffersListWrapper
 import com.mapbox.api.directions.v5.models.utils.throwNotComparableRouteObjects
 import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.auto.value.gson.SerializableJsonElement
+import com.mapbox.directions.accessors.FbBannerComponents
+import com.mapbox.directions.accessors.FbBuffer
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
 internal class BannerComponentsFBWrapper private constructor(
-    private val fb: FBBannerComponents,
+    private val b: FbBuffer,
+    private val fb: FbBannerComponents,
 ) : BannerComponents(), BaseFBWrapper {
 
     override val unrecognized: ByteBuffer?
-        get() = fb.unrecognizedPropertiesAsByteBuffer
+        get() = fb.unrecognizedProperties(b).asByteBuffer(b)
 
     override val unrecognizedPropertiesLength: Int
-        get() = fb.unrecognizedPropertiesLength
+        get() = fb.unrecognizedProperties(b).size
 
-    override fun text(): String = fb.text
+    override fun text(): String = fb.text(b)
 
     override fun type(): String {
-        return when (fb.type) {
+        return when (FBBannerComponentType.fromByteOrThrow(fb.type(b))) {
             FBBannerComponentType.Text -> TEXT
             FBBannerComponentType.Icon -> ICON
             FBBannerComponentType.Delimiter -> DELIMITER
@@ -35,7 +38,7 @@ internal class BannerComponentsFBWrapper private constructor(
     }
 
     override fun subType(): String? {
-        val subType = fb.subType ?: return null
+        val subType = fb.subTypeOrNull(b)?.let { FBBannerComponentSubType.fromByteOrThrow(it) } ?: return null
         return when (subType) {
             FBBannerComponentSubType.Aftertoll -> AFTERTOLL
             FBBannerComponentSubType.Cityreal -> CITYREAL
@@ -51,27 +54,28 @@ internal class BannerComponentsFBWrapper private constructor(
         }
     }
 
-    override fun abbreviation(): String? = fb.abbreviation
+    override fun abbreviation(): String? = fb.abbreviation(b)
 
-    override fun abbreviationPriority(): Int? = fb.abbreviationPriority
+    override fun abbreviationPriority(): Int? = fb.abbreviationPriorityOrNull(b)
 
-    override fun imageBaseUrl(): String? = fb.imageBaseUrl
+    override fun imageBaseUrl(): String? = fb.imageBaseUrl(b)
 
     override fun mapboxShield(): MapboxShield? {
-        return MapboxShieldFBWrapper.wrap(fb.mapboxShield)
+        return MapboxShieldFBWrapper.wrap(b, fb.mapboxShield(b))
     }
 
-    override fun imageUrl(): String? = fb.imageUrl
+    override fun imageUrl(): String? = fb.imageUrl(b)
 
     override fun directions(): List<String?>? {
-        return FlatbuffersListWrapper.get(fb.directionsLength) {
-            fb.directions(it)
+        val directions = fb.directions(b)
+        return FlatbuffersListWrapper.get(directions.size) {
+            directions.get(b, it)
         }
     }
 
-    override fun active(): Boolean? = fb.active
+    override fun active(): Boolean? = fb.activeOrNull(b)
 
-    override fun activeDirection(): String? = fb.activeDirection
+    override fun activeDirection(): String? = fb.activeDirection(b)
 
     override fun toBuilder(): Builder? {
         NotSupportedForNativeRouteObject("BannerComponents#toBuilder()")
@@ -88,10 +92,10 @@ internal class BannerComponentsFBWrapper private constructor(
             throwNotComparableRouteObjects()
         }
         if (other !is BannerComponentsFBWrapper) return false
-        return fb.contentEquals(other.fb)
+        return fb.contentEquals(b, other.fb, other.b)
     }
 
-    override fun hashCode() = fb.hash.toHashCode()
+    override fun hashCode() = fb.hash(b).toHashCode()
 
     override fun toString(): String {
         return "BannerComponents(" +
@@ -110,11 +114,11 @@ internal class BannerComponentsFBWrapper private constructor(
     }
 
     internal companion object {
-        internal fun wrap(fb: FBBannerComponents?): BannerComponents? {
+        internal fun wrap(b: FbBuffer, fb: FbBannerComponents): BannerComponents? {
             return when {
-                fb == null -> null
-                fb.isNull -> null
-                else -> BannerComponentsFBWrapper(fb)
+                !fb.isPresent -> null
+                fb.isNull(b) -> null
+                else -> BannerComponentsFBWrapper(b, fb)
             }
         }
     }

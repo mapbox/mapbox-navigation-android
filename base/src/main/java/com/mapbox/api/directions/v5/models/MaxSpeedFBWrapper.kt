@@ -4,32 +4,35 @@ import com.mapbox.api.directions.v5.models.utils.BaseFBWrapper
 import com.mapbox.api.directions.v5.models.utils.throwNotComparableRouteObjects
 import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.auto.value.gson.SerializableJsonElement
+import com.mapbox.directions.accessors.FbBuffer
+import com.mapbox.directions.accessors.FbMaxSpeed
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
 internal class MaxSpeedFBWrapper private constructor(
-    private val fb: FBMaxSpeed,
+    private val b: FbBuffer,
+    private val fb: FbMaxSpeed,
 ) : MaxSpeed(), BaseFBWrapper {
 
     override val unrecognized: ByteBuffer?
-        get() = fb.unrecognizedPropertiesAsByteBuffer
+        get() = fb.unrecognizedProperties(b).asByteBuffer(b)
 
     override val unrecognizedPropertiesLength: Int
-        get() = fb.unrecognizedPropertiesLength
+        get() = fb.unrecognizedProperties(b).size
 
-    override fun speed(): Int? = fb.speed
+    override fun speed(): Int? = fb.speedOrNull(b)
 
     override fun unit(): String? {
-        return when (FBSpeedLimitUnit.fromByteOrThrow(fb.unit ?: return null)) {
+        return when (FBSpeedLimitUnit.fromByteOrThrow(fb.unitOrNull(b) ?: return null)) {
             FBSpeedLimitUnit.Kmph -> SpeedLimit.KMPH
             FBSpeedLimitUnit.Mph -> SpeedLimit.MPH
             FBSpeedLimitUnit.Unknown -> unrecognizeFlexBufferMap?.get("unit")?.asString()
         }
     }
 
-    override fun unknown(): Boolean? = fb.unknown
+    override fun unknown(): Boolean? = fb.unknownOrNull(b)
 
-    override fun none(): Boolean? = fb.none
+    override fun none(): Boolean? = fb.noneOrNull(b)
 
     override fun toBuilder(): Builder? {
         NotSupportedForNativeRouteObject("MaxSpeed#toBuilder()")
@@ -46,10 +49,10 @@ internal class MaxSpeedFBWrapper private constructor(
             throwNotComparableRouteObjects()
         }
         if (other !is MaxSpeedFBWrapper) return false
-        return fb.contentEquals(other.fb)
+        return fb.contentEquals(b, other.fb, other.b)
     }
 
-    override fun hashCode() = fb.hash.toHashCode()
+    override fun hashCode() = fb.hash(b).toHashCode()
 
     override fun toString(): String {
         return "MaxSpeed(" +
@@ -61,11 +64,11 @@ internal class MaxSpeedFBWrapper private constructor(
     }
 
     internal companion object {
-        internal fun wrap(fb: FBMaxSpeed?): MaxSpeed? {
+        internal fun wrap(b: FbBuffer, fb: FbMaxSpeed): MaxSpeed? {
             return when {
-                fb == null -> null
-                fb.isNull -> null
-                else -> MaxSpeedFBWrapper(fb)
+                !fb.isPresent -> null
+                fb.isNull(b) -> null
+                else -> MaxSpeedFBWrapper(b, fb)
             }
         }
     }

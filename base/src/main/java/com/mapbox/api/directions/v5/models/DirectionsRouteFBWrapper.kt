@@ -6,15 +6,20 @@ import com.mapbox.api.directions.v5.models.utils.FlatbuffersListWrapper
 import com.mapbox.api.directions.v5.models.utils.throwNotComparableRouteObjects
 import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.auto.value.gson.SerializableJsonElement
+import com.mapbox.directions.accessors.FbBuffer
+import com.mapbox.directions.accessors.FbDirectionsRoute
+import com.mapbox.directions.accessors.FbDirectionsRouteContext
 import com.mapbox.directions.route.DirectionsRouteContext
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 internal class DirectionsRouteFBWrapper private constructor(
-    private val fb: FBDirectionsRoute,
+    private val b: FbBuffer,
+    private val fb: FbDirectionsRoute,
     private val routeOptions: RouteOptions?,
-    val fbContext: FBDirectionsRouteContext,
+    private val fbContext: FbDirectionsRouteContext,
     val context: DirectionsRouteContext,
 ) : DirectionsRoute(), BaseFBWrapper {
 
@@ -25,7 +30,7 @@ internal class DirectionsRouteFBWrapper private constructor(
     }
 
     private val _geometry by lazy {
-        fb.geometry
+        fb.geometry(b)
     }
 
     init {
@@ -35,69 +40,89 @@ internal class DirectionsRouteFBWrapper private constructor(
         _geometry
     }
 
-    internal val refreshTtl: Int? get() = fb.refreshTtl
+    internal val refreshTtl: Int? get() = fb.refreshTtlOrNull(b)
 
-    internal val geometryNumeric
-        get(): List<Point>? =
-            FlatbuffersListWrapper.get(fb.geometryNumericLength) {
-                val coordinate = fb.geometryNumeric(it)!!
-                Point.fromLngLat(coordinate.longitude, coordinate.latitude)
+    /** Buffer holding the whole DirectionsRouteContext. */
+    internal val contextByteBuffer: ByteBuffer get() = b.byteBuffer
+
+    internal val contextUuid: String? get() = fbContext.uuid(b)
+
+    internal val contextRouteIndex: Int get() = fb.routeIndex(b).toInt()
+
+    /** Waypoints of the response this route belongs to. */
+    internal fun contextWaypoints(): List<DirectionsWaypoint?>? {
+        val waypoints = fbContext.waypoints(b)
+        return FlatbuffersListWrapper.get(waypoints.size) {
+            DirectionsWaypointFBWrapper.wrap(b, waypoints.get(b, it))
+        }
+    }
+
+    internal val geometryNumeric: List<Point>?
+        get() {
+            val geometry = fb.geometryNumeric(b)
+            return FlatbuffersListWrapper.get(geometry.size) {
+                val coordinate = geometry.get(b, it)
+                Point.fromLngLat(coordinate.longitude(b), coordinate.latitude(b))
             }
+        }
 
     /**
      * Content based 64 bit hash of the whole route. Native code computes it once, while building
      * the buffer, and stores it in the table, so this is a plain field read.
      */
-    internal val contentHash: Long = fb.hash.toLong()
+    internal val contentHash: Long = fb.hash(b).toLong()
 
     override val unrecognized: ByteBuffer?
-        get() = fb.unrecognizedPropertiesAsByteBuffer
+        get() = fb.unrecognizedProperties(b).asByteBuffer(b)
 
     override val unrecognizedPropertiesLength: Int
-        get() = fb.unrecognizedPropertiesLength
+        get() = fb.unrecognizedProperties(b).size
 
-    override fun routeIndex(): String? = fb.routeIndex.toString()
+    override fun routeIndex(): String? = fb.routeIndex(b).toString()
 
-    override fun distance(): Double = fb.distance
+    override fun distance(): Double = fb.distance(b)
 
-    override fun duration(): Double = fb.duration
+    override fun duration(): Double = fb.duration(b)
 
-    override fun durationTypical(): Double? = fb.durationTypical
+    override fun durationTypical(): Double? = fb.durationTypicalOrNull(b)
 
     override fun geometry(): String? = _geometry
 
-    override fun weight(): Double? = fb.weight
+    override fun weight(): Double? = fb.weightOrNull(b)
 
-    override fun weightTypical(): Double? = fb.weightTypical
+    override fun weightTypical(): Double? = fb.weightTypicalOrNull(b)
 
-    override fun weightName(): String? = fb.weightName
+    override fun weightName(): String? = fb.weightName(b)
 
     override fun legs(): List<RouteLeg?>? {
-        return FlatbuffersListWrapper.get(fb.legsLength) {
-            RouteLegFBWrapper.wrap(fb.legs(it))
+        val legs = fb.legs(b)
+        return FlatbuffersListWrapper.get(legs.size) {
+            RouteLegFBWrapper.wrap(b, legs.get(b, it))
         }
     }
 
     override fun waypoints(): List<DirectionsWaypoint?>? {
-        return FlatbuffersListWrapper.get(fb.waypointsLength) {
-            DirectionsWaypointFBWrapper.wrap(fb.waypoints(it))
+        val waypoints = fb.waypoints(b)
+        return FlatbuffersListWrapper.get(waypoints.size) {
+            DirectionsWaypointFBWrapper.wrap(b, waypoints.get(b, it))
         }
     }
 
     // TODO: https://mapbox.atlassian.net/browse/NAVAND-6590
     override fun routeOptions(): RouteOptions? = routeOptions
 
-    override fun voiceLanguage(): String? = fb.voiceLocale
+    override fun voiceLanguage(): String? = fb.voiceLocale(b)
 
-    override fun requestUuid(): String? = fb.requestUuid
+    override fun requestUuid(): String? = fb.requestUuid(b)
 
     override fun tollCosts(): List<TollCost?>? {
-        return FlatbuffersListWrapper.get(fb.tollCostsLength) {
-            TollCostFBWrapper.wrap(fb.tollCosts(it))
+        val tollCosts = fb.tollCosts(b)
+        return FlatbuffersListWrapper.get(tollCosts.size) {
+            TollCostFBWrapper.wrap(b, tollCosts.get(b, it))
         }
     }
 
-    fun mapMatchingConfidence(): Double? = fb.confidence
+    fun mapMatchingConfidence(): Double? = fb.confidenceOrNull(b)
 
     override fun toBuilder(): Builder? {
         NotSupportedForNativeRouteObject("DirectionsRoute#toBuilder()")
@@ -115,7 +140,7 @@ internal class DirectionsRouteFBWrapper private constructor(
                 it
             }
         }
-        val refreshTtlValue = fb.refreshTtl
+        val refreshTtlValue = fb.refreshTtlOrNull(b)
         return if (refreshTtlValue != null) {
             nroUnrecognizedProperties.orEmpty() +
                 mapOf(
@@ -139,8 +164,8 @@ internal class DirectionsRouteFBWrapper private constructor(
         // Index and UUID identify the route, so comparing them first is exact: routes from
         // different responses, or different routes of one response, can never be reported equal
         // by a hash collision.
-        if (fb.routeIndex != other.fb.routeIndex) return false
-        if (fb.requestUuid != other.fb.requestUuid) return false
+        if (fb.routeIndex(b) != other.fb.routeIndex(other.b)) return false
+        if (fb.requestUuid(b) != other.fb.requestUuid(other.b)) return false
         return contentHash == other.contentHash
     }
 
@@ -171,13 +196,14 @@ internal class DirectionsRouteFBWrapper private constructor(
             routeOptions: RouteOptions?,
             bindgenContext: DirectionsRouteContext,
         ): DirectionsRouteFBWrapper? {
-            val routeContext = FBDirectionsRouteContext.getRootAsDirectionsRouteContext(
-                bindgenContext.getData().buffer,
-            )
-            val fb = routeContext.route
+            val buffer = bindgenContext.getData().buffer.order(ByteOrder.LITTLE_ENDIAN)
+            val b = FbBuffer(buffer)
+            val routeContext = FbDirectionsRouteContext(b.indirect(buffer.position()))
+            val fb = routeContext.route(b)
             return when {
-                fb.isNull -> null
+                !fb.isPresent || fb.isNull(b) -> null
                 else -> DirectionsRouteFBWrapper(
+                    b,
                     fb,
                     routeOptions,
                     routeContext,

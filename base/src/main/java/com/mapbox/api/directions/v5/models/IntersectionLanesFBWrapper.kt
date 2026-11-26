@@ -7,51 +7,56 @@ import com.mapbox.api.directions.v5.models.utils.fbToLineIndication
 import com.mapbox.api.directions.v5.models.utils.throwNotComparableRouteObjects
 import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.auto.value.gson.SerializableJsonElement
+import com.mapbox.directions.accessors.FbBuffer
+import com.mapbox.directions.accessors.FbIntersectionLanes
+import com.mapbox.directions.accessors.FbLanePaymentMethodEnumWrapper
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
 internal class IntersectionLanesFBWrapper private constructor(
-    private val fb: FBIntersectionLanes,
+    private val b: FbBuffer,
+    private val fb: FbIntersectionLanes,
 ) : IntersectionLanes(), BaseFBWrapper {
 
     override val unrecognized: ByteBuffer?
-        get() = fb.unrecognizedPropertiesAsByteBuffer
+        get() = fb.unrecognizedProperties(b).asByteBuffer(b)
 
     override val unrecognizedPropertiesLength: Int
-        get() = fb.unrecognizedPropertiesLength
+        get() = fb.unrecognizedProperties(b).size
 
-    override fun valid(): Boolean? = fb.valid
+    override fun valid(): Boolean? = fb.validOrNull(b)
 
-    override fun active(): Boolean? = fb.active
+    override fun active(): Boolean? = fb.activeOrNull(b)
 
     override fun validIndication(): String? {
-        return fb.validIndication?.fbToLineIndication {
+        return fb.validIndicationOrNull(b)?.fbToLineIndication {
             unrecognizeFlexBufferMap?.get("valid_indication")?.asString()
         }
     }
 
     override fun indications(): List<String?>? {
-        return FlatbuffersListWrapper.get(fb.indicationsLength) { index ->
-            fb.indications(index)?.let { indication ->
-                if (indication.isNull) {
-                    null
-                } else {
-                    indication.value.fbToLineIndication {
-                        indication.unrecognizedValue
-                    }
+        val indications = fb.indications(b)
+        return FlatbuffersListWrapper.get(indications.size) { index ->
+            val indication = indications.get(b, index)
+            if (!indication.isPresent || indication.isNull(b)) {
+                null
+            } else {
+                indication.value(b).fbToLineIndication {
+                    indication.unrecognizedValue(b)
                 }
             }
         }
     }
 
     override fun paymentMethods(): List<String?>? {
-        return FlatbuffersListWrapper.get(fb.paymentMethodsLength) {
-            fb.paymentMethods(it)?.fbToPaymentMethodCriteria()
+        val paymentMethods = fb.paymentMethods(b)
+        return FlatbuffersListWrapper.get(paymentMethods.size) {
+            paymentMethods.get(b, it).fbToPaymentMethodCriteria(b)
         }
     }
 
     override fun access(): IntersectionLaneAccess? {
-        return IntersectionLaneAccessFBWrapper.wrap(fb.access)
+        return IntersectionLaneAccessFBWrapper.wrap(b, fb.access(b))
     }
 
     override fun toBuilder(): Builder? {
@@ -69,10 +74,10 @@ internal class IntersectionLanesFBWrapper private constructor(
             throwNotComparableRouteObjects()
         }
         if (other !is IntersectionLanesFBWrapper) return false
-        return fb.contentEquals(other.fb)
+        return fb.contentEquals(b, other.fb, other.b)
     }
 
-    override fun hashCode() = fb.hash.toHashCode()
+    override fun hashCode() = fb.hash(b).toHashCode()
 
     override fun toString(): String {
         return "IntersectionLanes(" +
@@ -87,20 +92,20 @@ internal class IntersectionLanesFBWrapper private constructor(
 
     internal companion object {
 
-        internal fun wrap(fb: FBIntersectionLanes?): IntersectionLanes? {
+        internal fun wrap(b: FbBuffer, fb: FbIntersectionLanes): IntersectionLanes? {
             return when {
-                fb == null -> null
-                fb.isNull -> null
-                else -> IntersectionLanesFBWrapper(fb)
+                !fb.isPresent -> null
+                fb.isNull(b) -> null
+                else -> IntersectionLanesFBWrapper(b, fb)
             }
         }
 
         @DirectionsCriteria.PaymentMethodsCriteria
-        fun FBLanePaymentMethodEnumWrapper.fbToPaymentMethodCriteria(): String? {
-            return if (this.isNull) {
+        fun FbLanePaymentMethodEnumWrapper.fbToPaymentMethodCriteria(b: FbBuffer): String? {
+            return if (!isPresent || isNull(b)) {
                 null
             } else {
-                when (FBLanePaymentMethod.fromByteOrThrow(this.value)) {
+                when (FBLanePaymentMethod.fromByteOrThrow(value(b))) {
                     FBLanePaymentMethod.General -> DirectionsCriteria.PAYMENT_METHOD_GENERAL
                     FBLanePaymentMethod.Etc -> DirectionsCriteria.PAYMENT_METHOD_ETC
                     FBLanePaymentMethod.Etcx -> DirectionsCriteria.PAYMENT_METHOD_ETCX
@@ -117,7 +122,7 @@ internal class IntersectionLanesFBWrapper private constructor(
                         DirectionsCriteria.PAYMENT_METHOD_CRYPTOCURRENCIES
                     FBLanePaymentMethod.App -> DirectionsCriteria.PAYMENT_METHOD_APP
                     FBLanePaymentMethod.Etc2 -> DirectionsCriteria.PAYMENT_METHOD_ETC2
-                    FBLanePaymentMethod.Unknown -> this.unrecognizedValue
+                    FBLanePaymentMethod.Unknown -> unrecognizedValue(b)
                 }
             }
         }

@@ -5,21 +5,24 @@ import com.mapbox.api.directions.v5.models.utils.FlatbuffersListWrapper
 import com.mapbox.api.directions.v5.models.utils.throwNotComparableRouteObjects
 import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.auto.value.gson.SerializableJsonElement
+import com.mapbox.directions.accessors.FbBuffer
+import com.mapbox.directions.accessors.FbRestStop
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
 internal class RestStopFBWrapper private constructor(
-    private val fb: FBRestStop,
+    private val b: FbBuffer,
+    private val fb: FbRestStop,
 ) : RestStop(), BaseFBWrapper {
 
     override val unrecognized: ByteBuffer?
-        get() = fb.unrecognizedPropertiesAsByteBuffer
+        get() = fb.unrecognizedProperties(b).asByteBuffer(b)
 
     override val unrecognizedPropertiesLength: Int
-        get() = fb.unrecognizedPropertiesLength
+        get() = fb.unrecognizedProperties(b).size
 
     override fun type(): String? {
-        return when (fb.type ?: return null) {
+        return when (fb.typeOrNull(b)?.let { FBRestStopType.fromByteOrThrow(it) } ?: return null) {
             FBRestStopType.RestArea -> "rest_area"
             FBRestStopType.ServiceArea -> "service_area"
             FBRestStopType.Unknown -> unrecognizeFlexBufferMap?.get("type")?.asString()
@@ -27,14 +30,15 @@ internal class RestStopFBWrapper private constructor(
     }
 
     override fun amenities(): List<Amenity?>? {
-        return FlatbuffersListWrapper.get(fb.amenitiesLength) {
-            AmenityFBWrapper.wrap(fb.amenities(it))
+        val amenities = fb.amenities(b)
+        return FlatbuffersListWrapper.get(amenities.size) {
+            AmenityFBWrapper.wrap(b, amenities.get(b, it))
         }
     }
 
-    override fun guideMap(): String? = fb.guidemap
+    override fun guideMap(): String? = fb.guidemap(b)
 
-    override fun name(): String? = fb.name
+    override fun name(): String? = fb.name(b)
 
     override fun toBuilder(): Builder? {
         NotSupportedForNativeRouteObject("RestStop#toBuilder()")
@@ -51,10 +55,10 @@ internal class RestStopFBWrapper private constructor(
             throwNotComparableRouteObjects()
         }
         if (other !is RestStopFBWrapper) return false
-        return fb.contentEquals(other.fb)
+        return fb.contentEquals(b, other.fb, other.b)
     }
 
-    override fun hashCode() = fb.hash.toHashCode()
+    override fun hashCode() = fb.hash(b).toHashCode()
 
     override fun toString(): String {
         return "RestStop(" +
@@ -66,8 +70,8 @@ internal class RestStopFBWrapper private constructor(
     }
 
     internal companion object {
-        internal fun wrap(fb: FBRestStop?): RestStop? {
-            return fb?.let { RestStopFBWrapper(it) }
+        internal fun wrap(b: FbBuffer, fb: FbRestStop): RestStop? {
+            return if (fb.isPresent) RestStopFBWrapper(b, fb) else null
         }
     }
 }

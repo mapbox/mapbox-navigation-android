@@ -7,38 +7,45 @@ import com.mapbox.api.directions.v5.models.utils.fbToStepManeuverType
 import com.mapbox.api.directions.v5.models.utils.throwNotComparableRouteObjects
 import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.auto.value.gson.SerializableJsonElement
+import com.mapbox.directions.accessors.FbBannerText
+import com.mapbox.directions.accessors.FbBuffer
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
 internal class BannerTextFBWrapper private constructor(
-    private val fb: FBBannerText,
+    private val b: FbBuffer,
+    private val fb: FbBannerText,
 ) : BannerText(), BaseFBWrapper {
 
     override val unrecognized: ByteBuffer?
-        get() = fb.unrecognizedPropertiesAsByteBuffer
+        get() = fb.unrecognizedProperties(b).asByteBuffer(b)
 
     override val unrecognizedPropertiesLength: Int
-        get() = fb.unrecognizedPropertiesLength
+        get() = fb.unrecognizedProperties(b).size
 
-    override fun text(): String = fb.text
+    override fun text(): String = fb.text(b)
 
     override fun components(): List<BannerComponents?>? {
-        return FlatbuffersListWrapper.get(fb.componentsLength) {
-            BannerComponentsFBWrapper.wrap(fb.components(it))
+        val components = fb.components(b)
+        return FlatbuffersListWrapper.get(components.size) {
+            BannerComponentsFBWrapper.wrap(b, components.get(b, it))
         }
     }
 
-    override fun type(): String? = fb.type.fbToStepManeuverType("type", unrecognizeFlexBufferMap)
+    override fun type(): String? = fb.typeOrNull(b)?.let { FBManeuverType.fromByteOrThrow(it) }.fbToStepManeuverType(
+        "type",
+        unrecognizeFlexBufferMap,
+    )
 
-    override fun modifier(): String? = fb.modifier?.fbToManeuverModifierType(
+    override fun modifier(): String? = fb.modifierOrNull(b)?.fbToManeuverModifierType(
         "modifier",
         unrecognizeFlexBufferMap,
     )
 
-    override fun degrees(): Double? = fb.degrees
+    override fun degrees(): Double? = fb.degreesOrNull(b)
 
     override fun drivingSide(): String? {
-        return when (FBDrivingSide.fromByteOrThrow(fb.drivingSide ?: return null)) {
+        return when (FBDrivingSide.fromByteOrThrow(fb.drivingSideOrNull(b) ?: return null)) {
             FBDrivingSide.Left -> "left"
             FBDrivingSide.Right -> "right"
             FBDrivingSide.Unknown -> unrecognizeFlexBufferMap?.get("driving_side")?.asString()
@@ -60,10 +67,10 @@ internal class BannerTextFBWrapper private constructor(
             throwNotComparableRouteObjects()
         }
         if (other !is BannerTextFBWrapper) return false
-        return fb.contentEquals(other.fb)
+        return fb.contentEquals(b, other.fb, other.b)
     }
 
-    override fun hashCode() = fb.hash.toHashCode()
+    override fun hashCode() = fb.hash(b).toHashCode()
 
     override fun toString(): String {
         return "BannerText(" +
@@ -77,8 +84,8 @@ internal class BannerTextFBWrapper private constructor(
     }
 
     internal companion object {
-        internal fun wrap(fb: FBBannerText?): BannerText? {
-            return fb?.let { BannerTextFBWrapper(it) }
+        internal fun wrap(b: FbBuffer, fb: FbBannerText): BannerText? {
+            return if (fb.isPresent) BannerTextFBWrapper(b, fb) else null
         }
     }
 }

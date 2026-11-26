@@ -5,35 +5,40 @@ import com.mapbox.api.directions.v5.models.utils.FlatbuffersListWrapper
 import com.mapbox.api.directions.v5.models.utils.throwNotComparableRouteObjects
 import com.mapbox.api.directions.v5.models.utils.toHashCode
 import com.mapbox.auto.value.gson.SerializableJsonElement
+import com.mapbox.directions.accessors.FbBuffer
+import com.mapbox.directions.accessors.FbLegStep
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.NotSupportedForNativeRouteObject
 import java.nio.ByteBuffer
 
 internal class LegStepFBWrapper private constructor(
-    private val fb: FBLegStep,
+    private val b: FbBuffer,
+    private val fb: FbLegStep,
 ) : LegStep(), BaseFBWrapper {
 
-    internal val geometryNumeric
-        get(): List<Point>? =
-            FlatbuffersListWrapper.get(fb.geometryNumericLength) {
-                val coordinate = fb.geometryNumeric(it)!!
-                Point.fromLngLat(coordinate.longitude, coordinate.latitude)
+    internal val geometryNumeric: List<Point>?
+        get() {
+            val geometry = fb.geometryNumeric(b)
+            return FlatbuffersListWrapper.get(geometry.size) {
+                val coordinate = geometry.get(b, it)
+                Point.fromLngLat(coordinate.longitude(b), coordinate.latitude(b))
             }
+        }
 
     override val unrecognized: ByteBuffer?
-        get() = fb.unrecognizedPropertiesAsByteBuffer
+        get() = fb.unrecognizedProperties(b).asByteBuffer(b)
 
     override val unrecognizedPropertiesLength: Int
-        get() = fb.unrecognizedPropertiesLength
+        get() = fb.unrecognizedProperties(b).size
 
-    override fun distance(): Double = fb.distance
+    override fun distance(): Double = fb.distance(b)
 
-    override fun duration(): Double = fb.duration
+    override fun duration(): Double = fb.duration(b)
 
-    override fun durationTypical(): Double? = fb.durationTypical
+    override fun durationTypical(): Double? = fb.durationTypicalOrNull(b)
 
     override fun speedLimitUnit(): String? {
-        return when (FBSpeedLimitUnit.fromByteOrThrow(fb.speedLimitUnit ?: return null)) {
+        return when (FBSpeedLimitUnit.fromByteOrThrow(fb.speedLimitUnitOrNull(b) ?: return null)) {
             FBSpeedLimitUnit.Kmph -> SpeedLimit.KMPH
             FBSpeedLimitUnit.Mph -> SpeedLimit.MPH
             FBSpeedLimitUnit.Unknown -> unrecognizeFlexBufferMap?.get("speedLimitUnit")?.asString()
@@ -41,23 +46,23 @@ internal class LegStepFBWrapper private constructor(
     }
 
     override fun speedLimitSign(): String? {
-        return when (FBSpeedLimitSign.fromByteOrThrow(fb.speedLimitSign ?: return null)) {
+        return when (FBSpeedLimitSign.fromByteOrThrow(fb.speedLimitSignOrNull(b) ?: return null)) {
             FBSpeedLimitSign.Mutcd -> LegStep.MUTCD
             FBSpeedLimitSign.Vienna -> LegStep.VIENNA
             FBSpeedLimitSign.Unknown -> unrecognizeFlexBufferMap?.get("speedLimitSign")?.asString()
         }
     }
 
-    override fun geometry(): String? = fb.geometry
+    override fun geometry(): String? = fb.geometry(b)
 
-    override fun name(): String? = fb.name
+    override fun name(): String? = fb.name(b)
 
-    override fun ref(): String? = fb.ref
+    override fun ref(): String? = fb.ref(b)
 
-    override fun destinations(): String? = fb.destinations
+    override fun destinations(): String? = fb.destinations(b)
 
     override fun mode(): String {
-        return when (FBTransportMode.fromByteOrThrow(fb.mode)) {
+        return when (FBTransportMode.fromByteOrThrow(fb.mode(b))) {
             FBTransportMode.Driving -> "driving"
             FBTransportMode.Walking -> "walking"
             FBTransportMode.Cycling -> "cycling"
@@ -71,45 +76,48 @@ internal class LegStepFBWrapper private constructor(
         }
     }
 
-    override fun pronunciation(): String? = fb.pronunciation
+    override fun pronunciation(): String? = fb.pronunciation(b)
 
-    override fun rotaryName(): String? = fb.rotaryName
+    override fun rotaryName(): String? = fb.rotaryName(b)
 
-    override fun rotaryPronunciation(): String? = fb.rotaryPronunciation
+    override fun rotaryPronunciation(): String? = fb.rotaryPronunciation(b)
 
     override fun maneuver(): StepManeuver {
-        return StepManeuverFBWrapper.wrap(fb.maneuver)!!
+        return StepManeuverFBWrapper.wrap(b, fb.maneuver(b))!!
     }
 
     override fun voiceInstructions(): List<VoiceInstructions?>? {
-        return FlatbuffersListWrapper.get(fb.voiceInstructionsLength) {
-            VoiceInstructionsFBWrapper.wrap(fb.voiceInstructions(it))
+        val voiceInstructions = fb.voiceInstructions(b)
+        return FlatbuffersListWrapper.get(voiceInstructions.size) {
+            VoiceInstructionsFBWrapper.wrap(b, voiceInstructions.get(b, it))
         }
     }
 
     override fun bannerInstructions(): List<BannerInstructions?>? {
-        return FlatbuffersListWrapper.get(fb.bannerInstructionsLength) {
-            BannerInstructionsFBWrapper.wrap(fb.bannerInstructions(it))
+        val bannerInstructions = fb.bannerInstructions(b)
+        return FlatbuffersListWrapper.get(bannerInstructions.size) {
+            BannerInstructionsFBWrapper.wrap(b, bannerInstructions.get(b, it))
         } ?: emptyList() // TODO: https://mapbox.atlassian.net/browse/NAVAND-6540
     }
 
     override fun drivingSide(): String? {
-        return when (FBDrivingSide.fromByteOrThrow(fb.drivingSide ?: return null)) {
+        return when (FBDrivingSide.fromByteOrThrow(fb.drivingSideOrNull(b) ?: return null)) {
             FBDrivingSide.Left -> "left"
             FBDrivingSide.Right -> "right"
             FBDrivingSide.Unknown -> unrecognizeFlexBufferMap?.get("driving_side")?.asString()
         }
     }
 
-    override fun weight(): Double = fb.weight
+    override fun weight(): Double = fb.weight(b)
 
     override fun intersections(): List<StepIntersection?>? {
-        return FlatbuffersListWrapper.get(fb.intersectionsLength) {
-            StepIntersectionFBWrapper.wrap(fb.intersections(it))
+        val intersections = fb.intersections(b)
+        return FlatbuffersListWrapper.get(intersections.size) {
+            StepIntersectionFBWrapper.wrap(b, intersections.get(b, it))
         }
     }
 
-    override fun exits(): String? = fb.exits
+    override fun exits(): String? = fb.exits(b)
 
     override fun toBuilder(): Builder? {
         NotSupportedForNativeRouteObject("LegStep#toBuilder()")
@@ -126,10 +134,10 @@ internal class LegStepFBWrapper private constructor(
             throwNotComparableRouteObjects()
         }
         if (other !is LegStepFBWrapper) return false
-        return fb.contentEquals(other.fb)
+        return fb.contentEquals(b, other.fb, other.b)
     }
 
-    override fun hashCode() = fb.hash.toHashCode()
+    override fun hashCode() = fb.hash(b).toHashCode()
 
     override fun toString(): String {
         return "LegStep(" +
@@ -157,11 +165,11 @@ internal class LegStepFBWrapper private constructor(
     }
 
     internal companion object {
-        internal fun wrap(fb: FBLegStep?): LegStep? {
+        internal fun wrap(b: FbBuffer, fb: FbLegStep): LegStep? {
             return when {
-                fb == null -> null
-                fb.isNull -> null
-                else -> LegStepFBWrapper(fb)
+                !fb.isPresent -> null
+                fb.isNull(b) -> null
+                else -> LegStepFBWrapper(b, fb)
             }
         }
     }
