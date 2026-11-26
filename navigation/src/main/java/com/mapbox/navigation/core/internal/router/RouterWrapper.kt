@@ -44,6 +44,7 @@ import com.mapbox.navigation.utils.internal.logD
 import com.mapbox.navigation.utils.internal.logI
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigator.GetRouteOptions
+import com.mapbox.navigator.RouteLatencyPlatformStageInfo
 import com.mapbox.navigator.RouteRefreshOptions
 import com.mapbox.navigator.RouterError
 import com.mapbox.navigator.RouterErrorType
@@ -51,6 +52,7 @@ import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.RouterOrigin
 import com.mapbox.navigator.RouterRefreshCallback
 import com.mapbox.navigator.RoutingProfile
+import com.mapbox.navigator.Telemetry
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -80,6 +82,7 @@ private class OngoingRequest(
 @MainThread // Router is not thread safe: in theory it doesn't have to be main thread
 internal class RouterWrapper(
     private val router: RouterInterface,
+    private val telemetry: Telemetry,
     private val threadController: ThreadController,
     private val navigationRoutesParser: NavigationRoutesParser,
     private val mapMatchedRoutesParser: MapMatchingMatchParser,
@@ -108,7 +111,10 @@ internal class RouterWrapper(
                 override fun onSuccess(
                     result: NavigationRouteParsingSuccessfulResult,
                     routerOrigin: String,
-                ) = callback.onRoutesReady(result.routes, routerOrigin)
+                ) {
+                    reportRoutesParsed(result.routes)
+                    callback.onRoutesReady(result.routes, routerOrigin)
+                }
                 override fun onFailure(failures: List<RouterFailure>, routeOptions: RouteOptions) =
                     callback.onFailure(failures, routeOptions)
                 override fun onCanceled(routeOptions: RouteOptions, routerOrigin: String) =
@@ -126,6 +132,29 @@ internal class RouterWrapper(
                 signature.toNativeSignature(),
                 routeCallback,
             )
+        }
+    }
+
+    // Navigation Native links the stage to its route request by the response uuid of the ids.
+    // Telemetry must not stop the routes from reaching the callback.
+    private fun reportRoutesParsed(routes: List<NavigationRoute>) {
+        val primary = routes.firstOrNull() ?: return
+        runCatching {
+            if (telemetry.isRouteLatencyTrackingEnabled) {
+                telemetry.postRouteLatencyPlatformStageInfo(
+                    RouteLatencyPlatformStageInfo(
+                        ROUTE_LATENCY_STAGE_PARSED,
+                        routes.map { it.id },
+                        null,
+                        null,
+                        null,
+                        null,
+                        primary.directionsRoute.distance(),
+                    ),
+                )
+            }
+        }.onFailure {
+            logW("Failed to report parsed routes: ${it.message}", LOG_CATEGORY)
         }
     }
 
@@ -636,6 +665,7 @@ internal class RouterWrapper(
     private companion object {
         private const val LOG_CATEGORY = "RouterWrapper"
         private const val REQUEST_FAILURE = -1L
+        private const val ROUTE_LATENCY_STAGE_PARSED = "DIRECTIONS_RESPONSE_PARSED"
 
         // The request uuid of a route built on the device.
         private const val ONBOARD_ROUTE_UUID_PREFIX = "local@"

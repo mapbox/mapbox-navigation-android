@@ -64,6 +64,7 @@ import com.mapbox.navigator.SetRoutesParams
 import com.mapbox.navigator.SetRoutesReason
 import com.mapbox.navigator.SetRoutesResult
 import com.mapbox.navigator.Telemetry
+import com.mapbox.navigator.TelemetrySettings
 import com.mapbox.navigator.TestingContext
 import com.mapbox.navigator.TilesConfig
 import com.mapbox.navigator.TilesManagerHandle
@@ -92,6 +93,7 @@ class MapboxNativeNavigatorImpl(
     private val roadObjectMatcherConfig: RoadObjectMatcherConfig,
     override val config: ConfigHandle,
     override val eventsMetadataProvider: EventsMetadataInterface,
+    private val telemetrySettings: TelemetrySettings,
 ) : MapboxNativeNavigator {
 
     override val navigator: NavigatorInterface
@@ -185,7 +187,8 @@ class MapboxNativeNavigatorImpl(
             navigator.routeAlternativesController
         }
         telemetry = PerformanceTracker.trackPerformanceSync("${sectionPrefix}telemetry") {
-            navigator.getTelemetry(eventsMetadataProvider)
+            navigator.configureTelemetry(eventsMetadataProvider, telemetrySettings)
+            navigator.getTelemetry()
         }
         prepareVoiceInstructionsRetriever()
 

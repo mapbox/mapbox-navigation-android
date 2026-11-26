@@ -31,6 +31,7 @@ import com.mapbox.navigator.RoadObjectMatcher
 import com.mapbox.navigator.RoadObjectMatcherConfig
 import com.mapbox.navigator.RoadObjectMatcherInterface
 import com.mapbox.navigator.RoadObjectsStoreInterface
+import com.mapbox.navigator.TelemetrySettings
 import com.mapbox.navigator.TilesConfig
 import com.mapbox.navigator.TilesManagerHandle
 import com.mapbox.navigator.TilesVersionChangeReason
@@ -66,6 +67,8 @@ import java.io.Closeable
 class MapboxNativeNavigatorImplTest {
 
     private val mockNavigator = mockk<NavigatorInterface>(relaxed = true)
+    private val eventsMetadataProvider = mockk<EventsMetadataInterface>(relaxed = true)
+    private val telemetrySettings = TelemetrySettings("sdk-name", "1.2.3")
     private val mockTilesManagerHandle = mockk<TilesManagerHandle>(relaxed = true)
     private val mockInputsService = mockk<InputsServiceHandle>(relaxed = true)
     private val mockAdasisFacade = mockk<AdasisFacadeHandleInterface>(relaxed = true)
@@ -120,7 +123,8 @@ class MapboxNativeNavigatorImplTest {
             offlineTilesConfig = null,
             roadObjectMatcherConfig = mockk<RoadObjectMatcherConfig>(relaxed = true),
             config = mockk<ConfigHandle>(relaxed = true),
-            eventsMetadataProvider = mockk<EventsMetadataInterface>(relaxed = true),
+            eventsMetadataProvider = eventsMetadataProvider,
+            telemetrySettings = telemetrySettings,
         )
     }
 
@@ -128,6 +132,14 @@ class MapboxNativeNavigatorImplTest {
     fun tearDown() {
         unmockkObject(NavigatorLoader)
         unmockkStatic("com.mapbox.navigation.base.internal.route.NavigationRouteEx")
+    }
+
+    @Test
+    fun `telemetry is configured with the sdk settings before it is taken`() {
+        verifyOrder {
+            mockNavigator.configureTelemetry(eventsMetadataProvider, telemetrySettings)
+            mockNavigator.getTelemetry()
+        }
     }
 
     @Test

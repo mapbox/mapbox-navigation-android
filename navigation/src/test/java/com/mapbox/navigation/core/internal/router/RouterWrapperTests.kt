@@ -45,6 +45,7 @@ import com.mapbox.navigation.testing.factories.createTestNavigationRoutesParsing
 import com.mapbox.navigation.testing.factories.toDataRef
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.GetRouteOptions
+import com.mapbox.navigator.RouteLatencyPlatformStageInfo
 import com.mapbox.navigator.RouteRefreshOptions
 import com.mapbox.navigator.RouterDataRefCallback
 import com.mapbox.navigator.RouterError
@@ -53,6 +54,7 @@ import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.RouterOrigin
 import com.mapbox.navigator.RouterRefreshCallback
 import com.mapbox.navigator.RoutingProfile
+import com.mapbox.navigator.Telemetry
 import io.mockk.CapturingSlot
 import io.mockk.clearMocks
 import io.mockk.every
@@ -105,6 +107,7 @@ class RouterWrapperTests {
 
     private lateinit var routerWrapper: RouterWrapper
     private val router: RouterInterface = mockk(relaxed = true)
+    private val telemetry: Telemetry = mockk(relaxed = true)
     private val onDeviceRouteRefresh: OnDeviceRouteRefresh = mockk()
     private val accessToken = "pk.123"
     private val route: DirectionsRoute = mockk(relaxed = true)
@@ -219,6 +222,7 @@ class RouterWrapperTests {
 
         routerWrapper = RouterWrapper(
             router,
+            telemetry,
             ThreadController(),
             createTestNavigationRoutesParsing(
                 parsingDispatcher = coroutineRule.testDispatcher,
@@ -403,6 +407,101 @@ class RouterWrapperTests {
 
             assertEquals("cjeacbr8s21bk47lggcvce7lv#0", routesCaptor.captured[0].id)
             assertEquals("cjeacbr8s21bk47lggcvce7lv#1", routesCaptor.captured[1].id)
+        }
+
+    @Test
+    fun `parsed routes are reported to route latency tracking`() =
+        coroutineRule.runBlockingTest {
+            every { telemetry.isRouteLatencyTrackingEnabled } returns true
+            routerWrapper.getRoute(routerOptions, signature, navigationRouterCallback)
+            getRouteSlot.captured.run(routerResultSuccess, nativeOriginOnline)
+
+            val routes = slot<List<NavigationRoute>>()
+            verify { navigationRouterCallback.onRoutesReady(capture(routes), any()) }
+            val stage = slot<RouteLatencyPlatformStageInfo>()
+            verify(exactly = 1) { telemetry.postRouteLatencyPlatformStageInfo(capture(stage)) }
+            assertEquals("DIRECTIONS_RESPONSE_PARSED", stage.captured.stage)
+            assertEquals(listOf("$UUID#0"), stage.captured.routeIds)
+            val expectedDistance: Double = routes.captured.first().directionsRoute.distance()
+            assertEquals(expectedDistance, stage.captured.estimatedDistance!!, 0.0)
+        }
+
+    @Test
+    fun `parsed routes are not reported when route latency tracking is disabled`() =
+        coroutineRule.runBlockingTest {
+            every { telemetry.isRouteLatencyTrackingEnabled } returns false
+            routerWrapper.getRoute(routerOptions, signature, navigationRouterCallback)
+            getRouteSlot.captured.run(routerResultSuccess, nativeOriginOnline)
+
+            verify(exactly = 1) { navigationRouterCallback.onRoutesReady(any(), any()) }
+            verify(exactly = 0) { telemetry.postRouteLatencyPlatformStageInfo(any()) }
+        }
+
+    @Test
+    fun `routes that fail to parse are not reported to route latency tracking`() =
+        coroutineRule.runBlockingTest {
+            every { telemetry.isRouteLatencyTrackingEnabled } returns true
+            routerWrapper.getRoute(routerOptions, signature, navigationRouterCallback)
+            getRouteSlot.captured.run(routerResultSuccessEmptyRoutes, nativeOriginOnline)
+
+            verify(exactly = 0) { telemetry.postRouteLatencyPlatformStageInfo(any()) }
+        }
+
+    @Test
+    fun `routes are delivered when reporting them to route latency tracking fails`() =
+        coroutineRule.runBlockingTest {
+            every { telemetry.isRouteLatencyTrackingEnabled } returns true
+            every { telemetry.postRouteLatencyPlatformStageInfo(any()) } throws
+                IllegalStateException()
+            routerWrapper.getRoute(routerOptions, signature, navigationRouterCallback)
+            getRouteSlot.captured.run(routerResultSuccess, nativeOriginOnline)
+
+            verify(exactly = 1) { navigationRouterCallback.onRoutesReady(any(), any()) }
+        }
+
+    @Test
+    fun `routes cancelled while parsing are not reported to route latency tracking`() =
+        coroutineRule.runBlockingTest {
+            every { telemetry.isRouteLatencyTrackingEnabled } returns true
+            val parsingDispatcher = pausedDispatcher()
+            val wrapper = RouterWrapper(
+                router,
+                telemetry,
+                ThreadController(),
+                createTestNavigationRoutesParsing(parsingDispatcher = parsingDispatcher),
+                createTestNavigationRoutesParsing(parsingDispatcher = coroutineRule.testDispatcher),
+            )
+
+            val requestId = wrapper.getRoute(routerOptions, signature, navigationRouterCallback)
+            getRouteSlot.captured.run(routerResultSuccess, nativeOriginOnline)
+            wrapper.cancelRouteRequest(requestId)
+            parsingDispatcher.resumeDispatcher()
+
+            verify(exactly = 0) { navigationRouterCallback.onRoutesReady(any(), any()) }
+            verify(exactly = 0) { telemetry.postRouteLatencyPlatformStageInfo(any()) }
+        }
+
+    @Test
+    fun `refreshed routes are not reported to route latency tracking`() = runBlockingTest {
+        every { telemetry.isRouteLatencyTrackingEnabled } returns true
+        val route = multiLegRouteForRefresh(ONLINE)
+
+        routerWrapper.getRouteRefresh(route, routeRefreshRequestData, routerRefreshCallback)
+        refreshRouteSlot.captured.run(routerRefreshSuccess, nativeOriginOnline, hashMapOf())
+
+        verify(exactly = 1) { routerRefreshCallback.onRefreshReady(any(), any(), false) }
+        verify(exactly = 0) { telemetry.postRouteLatencyPlatformStageInfo(any()) }
+    }
+
+    @Test
+    fun `map matched routes are not reported to route latency tracking`() =
+        coroutineRule.runBlockingTest {
+            every { telemetry.isRouteLatencyTrackingEnabled } returns true
+            routerWrapper.getRouteMapMatched(mapMatchingOptions, signature, mapMatchingCallback)
+            mapMatchedRouteSlot.captured.run(routerResultSuccessMapMatching, nativeOriginOnline)
+
+            verify(exactly = 1) { mapMatchingCallback.success(any()) }
+            verify(exactly = 0) { telemetry.postRouteLatencyPlatformStageInfo(any()) }
         }
 
     @Test
@@ -723,6 +822,7 @@ class RouterWrapperTests {
             every { router.getRoute(any(), any(), any(), capture(getRouteSlot)) } returns handle
             val wrapper = RouterWrapper(
                 router,
+                telemetry,
                 ThreadController(),
                 createTestNavigationRoutesParsing(parsingDispatcher = pausedDispatcher()),
                 createTestNavigationRoutesParsing(parsingDispatcher = coroutineRule.testDispatcher),

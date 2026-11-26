@@ -581,6 +581,7 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         ) {
             RouterWrapper(
                 navigator.getRouter(),
+                navigator.telemetry,
                 threadController,
                 parsing,
                 parsing,

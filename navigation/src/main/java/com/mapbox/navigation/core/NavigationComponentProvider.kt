@@ -18,6 +18,7 @@ import com.mapbox.navigation.core.directions.ForkPointPassedObserver
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.MapboxDirectionsSession
 import com.mapbox.navigation.core.ev.EVDynamicDataHolder
+import com.mapbox.navigation.core.internal.SdkInfoProvider
 import com.mapbox.navigation.core.internal.router.Router
 import com.mapbox.navigation.core.navigator.offline.DownloadedTilesetsFetcher
 import com.mapbox.navigation.core.navigator.offline.TilesetVersionManager
@@ -45,6 +46,7 @@ import com.mapbox.navigator.ConfigHandle
 import com.mapbox.navigator.EventsMetadataInterface
 import com.mapbox.navigator.HistoryRecorderHandle
 import com.mapbox.navigator.RoadObjectMatcherConfig
+import com.mapbox.navigator.TelemetrySettings
 import com.mapbox.navigator.TilesConfig
 import kotlinx.coroutines.CoroutineScope
 
@@ -83,6 +85,7 @@ internal object NavigationComponentProvider {
             roadObjectMatcherConfig,
             config,
             eventsMetadataProvider,
+            SdkInfoProvider.sdkInformation().let { TelemetrySettings(it.name, it.version) },
         )
     }
 
