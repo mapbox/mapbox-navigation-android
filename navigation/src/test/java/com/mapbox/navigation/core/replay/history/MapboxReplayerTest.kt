@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.replay.history
 import android.os.SystemClock
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.replay.MapboxReplayer
+import com.mapbox.navigation.core.replay.ReplayLocationProvider
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.coVerify
 import io.mockk.every
@@ -718,6 +719,65 @@ class MapboxReplayerTest {
         mapboxReplayer.finish()
     }
 
+    @Test
+    fun `eventRealtimeOffset of an event played on time is within one replay update`() =
+        coroutineRule.runBlockingTest {
+            val testEvents = List(20) { ReplayEventGetStatus(it * 0.5) }
+            mapboxReplayer.pushEvents(testEvents)
+            val realtimeOffsetsSeconds = mutableListOf<Double>()
+            mapboxReplayer.registerObserver { events ->
+                events.mapTo(realtimeOffsetsSeconds) {
+                    mapboxReplayer.eventRealtimeOffset(it.eventTimestamp)
+                }
+            }
+
+            mapboxReplayer.play()
+            repeat(120) { advanceTimeMillis(REPLAY_UPDATE_MILLIS) }
+            mapboxReplayer.finish()
+
+            assertEquals(testEvents.size, realtimeOffsetsSeconds.size)
+            realtimeOffsetsSeconds.forEach { offsetSeconds ->
+                assertEquals(0.0, offsetSeconds, MAX_REALTIME_OFFSET_SECONDS)
+            }
+        }
+
+    @Test
+    fun `location replayed on time is stamped within one replay update of the device clock`() =
+        coroutineRule.runBlockingTest {
+            val testEvents = List(20) { index ->
+                ReplayEventUpdateLocation(
+                    index * 0.5,
+                    ReplayEventLocation(
+                        lat = 49.2492411,
+                        lon = 8.8512315,
+                        provider = "fused",
+                        time = index * 0.5,
+                        altitude = 212.4732666015625,
+                        accuracyHorizontal = 4.288000106811523,
+                        bearing = 243.31265258789063,
+                        speed = 0.5585000514984131,
+                    ),
+                )
+            }
+            mapboxReplayer.pushEvents(testEvents)
+            val deviceClockOffsetsNanos = mutableListOf<Long>()
+            val replayLocationProvider = ReplayLocationProvider(mapboxReplayer)
+            replayLocationProvider.addLocationObserver { locations ->
+                locations.mapTo(deviceClockOffsetsNanos) {
+                    it.monotonicTimestamp!! - deviceElapsedTimeNanos
+                }
+            }
+
+            mapboxReplayer.play()
+            repeat(120) { advanceTimeMillis(REPLAY_UPDATE_MILLIS) }
+            mapboxReplayer.finish()
+
+            assertEquals(testEvents.size, deviceClockOffsetsNanos.size)
+            deviceClockOffsetsNanos.forEach { offsetNanos ->
+                assertEquals(0.0, offsetNanos / NANOS_PER_SECOND, MAX_REALTIME_OFFSET_SECONDS)
+            }
+        }
+
     /**
      * Helpers for moving the simulation clock
      */
@@ -738,5 +798,15 @@ class MapboxReplayerTest {
         deviceElapsedTimeNanos += TimeUnit.MILLISECONDS.toNanos(advanceMillis)
         every { SystemClock.elapsedRealtimeNanos() } returns deviceElapsedTimeNanos
         coroutineRule.testDispatcher.advanceTimeBy(advanceMillis)
+    }
+
+    private companion object {
+        // How often the replayer wakes up to play the events that have become due.
+        const val REPLAY_UPDATE_MILLIS = 100L
+        const val NANOS_PER_SECOND = 1e9
+
+        // An event is played at most one replay update late and its time may be moved by at most
+        // one replay update to compensate, so it stays within one update of the device clock.
+        const val MAX_REALTIME_OFFSET_SECONDS = 0.1 + 1e-6
     }
 }

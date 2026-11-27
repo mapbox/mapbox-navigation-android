@@ -1,5 +1,6 @@
 package com.mapbox.navigation.instrumentation_tests.core
 
+import android.os.SystemClock
 import com.mapbox.common.location.Location
 import com.mapbox.navigation.base.ExperimentalMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
@@ -15,14 +16,19 @@ import com.mapbox.navigation.testing.utils.location.toReplayEventUpdateLocation
 import com.mapbox.navigation.testing.utils.withMapboxNavigation
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
+import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMapboxNavigationAPI::class)
 class ReplayLocationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.java) {
 
     private val tolerance = 0.000001
+
+    // Covers the delay between a location being produced and being observed by the test.
+    private val maxDeviceClockOffsetMillis = 5_000.0
 
     @get:Rule
     val mapboxNavigationRule = MapboxNavigationRule()
@@ -109,6 +115,63 @@ class ReplayLocationTest : BaseTest<EmptyTestActivity>(EmptyTestActivity::class.
                 rawLocations,
             )
         }
+    }
+
+    @Test
+    fun replay_started_during_regular_session_keeps_locations_on_device_clock() = sdkTest {
+        withMapboxNavigation { mapboxNavigation ->
+            val replayApproximateLocation = ApproximateCoordinates(1.0, 1.0, tolerance)
+
+            mapboxNavigation.startTripSession()
+            loopRealUpdate(realLocation, 120)
+            val regularLocationClockOffsetMillis = mapboxNavigation.rawLocationUpdates()
+                .filter {
+                    ApproximateCoordinates(it.latitude, it.longitude, tolerance) == realLocation
+                }
+                .map { it.offsetFromDeviceClockMillis() }
+                .first()
+
+            // The regular session is not stopped: replay takes over a session that is running.
+            mapboxNavigation.startReplayTripSession()
+            updateReplayLocation(
+                mapboxNavigation,
+                mockLocationUpdatesRule.generateLocationUpdate {
+                    latitude = replayApproximateLocation.latitude
+                    longitude = replayApproximateLocation.longitude
+                },
+            )
+            val replayLocationClockOffsetMillis = mapboxNavigation.rawLocationUpdates()
+                .filter {
+                    ApproximateCoordinates(it.latitude, it.longitude, tolerance) ==
+                        replayApproximateLocation
+                }
+                .map { it.offsetFromDeviceClockMillis() }
+                .first()
+
+            assertEquals(
+                "a regular location should be stamped close to the device clock",
+                0.0,
+                regularLocationClockOffsetMillis.toDouble(),
+                maxDeviceClockOffsetMillis,
+            )
+            assertEquals(
+                "a replayed location should be stamped close to the device clock",
+                0.0,
+                replayLocationClockOffsetMillis.toDouble(),
+                maxDeviceClockOffsetMillis,
+            )
+        }
+    }
+
+    /**
+     * How far the location's monotonic timestamp is from the device clock at the moment
+     * the location is observed. Positive when the location is stamped in the future.
+     */
+    private fun Location.offsetFromDeviceClockMillis(): Long {
+        val locationTimeNanos = requireNotNull(monotonicTimestamp) {
+            "location is expected to have a monotonic timestamp"
+        }
+        return TimeUnit.NANOSECONDS.toMillis(locationTimeNanos - SystemClock.elapsedRealtimeNanos())
     }
 
     private fun updateReplayLocation(

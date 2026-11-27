@@ -10,6 +10,8 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.roundToLong
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.DurationUnit
 
 /**
  * This class keeps track of a forward playing replay. As time moves forward, it captures
@@ -56,7 +58,7 @@ internal class ReplayEventSimulator(
 
         val loopElapsedSeconds = timeSeconds() - loopStart
         val loopElapsedMillis = (loopElapsedSeconds * MILLIS_PER_SECOND).roundToLong()
-        val delayMillis = max(0L, REPLAY_UPDATE_SPEED_MILLIS - loopElapsedMillis)
+        val delayMillis = max(0L, REPLAY_UPDATE_SPEED.inWholeMilliseconds - loopElapsedMillis)
         delay(delayMillis)
     }
 
@@ -147,13 +149,13 @@ internal class ReplayEventSimulator(
     fun eventRealtimeOffset(eventTimestamp: Double): Double {
         val simulatorTime = timeSeconds() - simulatorTimeOffset
         val eventTime = eventTimestamp - historyTimeOffset
-        return REPLAY_UPDATE_SPEED_MILLIS + eventTime - simulatorTime
+        return REPLAY_UPDATE_SPEED.toDouble(DurationUnit.SECONDS) + eventTime - simulatorTime
     }
 
     private companion object {
 
         // The frequency that replay updates will be broad-casted
-        private const val REPLAY_UPDATE_SPEED_MILLIS = 100L
+        private val REPLAY_UPDATE_SPEED = 100.milliseconds
 
         // When there are no events to play, delay the coroutine
         private const val IS_DONE_PLAYING_EVENTS_DELAY_MILLIS = 1000L
