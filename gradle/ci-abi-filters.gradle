@@ -1,0 +1,14 @@
+// Packages only the ABIs passed as -PciAbiFilters=<abi>[,<abi>...], e.g. arm64-v8a for Firebase
+// Test Lab ARM devices. Without the property nothing changes.
+def ciAbiFilters = (findProperty("ciAbiFilters")?.toString() ?: "")
+        .split(",")
+        .collect { it.trim() }
+        .findAll { !it.isEmpty() }
+
+if (!ciAbiFilters.isEmpty()) {
+    ["com.android.application", "com.android.library"].each { pluginId ->
+        plugins.withId(pluginId) {
+            android.defaultConfig.ndk.abiFilters.addAll(ciAbiFilters)
+        }
+    }
+}
